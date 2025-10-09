@@ -1,0 +1,47 @@
+# .gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+
+# Data files (too large for git)
+*.csv
+*.parquet
+*.pkl
+data/raw/
+data/processed/
+
+# Models (store in S3)
+models/*.pkl
+models/*.h5
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb
+
+# Environment
+.env
+.env.local
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Outputs
+outputs/
+results/
+logs/
