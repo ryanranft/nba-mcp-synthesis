@@ -246,6 +246,69 @@ Be concise and focus on key differences."""
                 "available": True
             }
 
+    async def query(
+        self,
+        prompt: str,
+        temperature: float = 0.7,
+        max_tokens: int = 4000,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """
+        General query method for Ollama
+
+        Args:
+            prompt: The prompt to send
+            temperature: Temperature for generation
+            max_tokens: Maximum tokens to generate
+            **kwargs: Additional arguments
+
+        Returns:
+            Query result
+        """
+        if not self.available:
+            return {
+                "success": False,
+                "model": "ollama",
+                "error": "Ollama not available",
+                "available": False
+            }
+
+        start_time = datetime.now()
+
+        try:
+            response = self.client.chat(
+                model=self.model,
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                options={
+                    "temperature": temperature,
+                    "num_predict": max_tokens
+                }
+            )
+
+            execution_time = (datetime.now() - start_time).total_seconds()
+
+            return {
+                "success": True,
+                "model": "ollama",
+                "response": response['message']['content'],
+                "tokens_used": len(response['message']['content'].split()),  # Approximate
+                "execution_time": execution_time,
+                "cost": 0.0,  # Local model - no cost
+                "available": True
+            }
+
+        except Exception as e:
+            logger.error(f"Ollama query failed: {e}")
+            return {
+                "success": False,
+                "model": "ollama",
+                "error": str(e),
+                "execution_time": (datetime.now() - start_time).total_seconds(),
+                "available": True
+            }
+
     def is_available(self) -> bool:
         """Check if Ollama is available"""
         return self.available

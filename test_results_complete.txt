@@ -1,0 +1,38 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.13, pytest-8.4.2, pluggy-1.6.0 -- /Users/ryanranft/miniconda3/envs/mcp-synthesis/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/ryanranft/nba-mcp-synthesis
+plugins: mock-3.15.1, asyncio-1.2.0, anyio-4.11.0, cov-7.0.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 22 items
+
+tests/test_all_connectors.py::TestSlackIntegration::test_slack_notifier_available PASSED [  4%]
+tests/test_all_connectors.py::TestSlackIntegration::test_slack_notifier_initialization PASSED [  9%]
+tests/test_all_connectors.py::TestSlackIntegration::test_slack_notification_structure PASSED [ 13%]
+tests/test_all_connectors.py::TestSlackIntegration::test_synthesis_with_slack_integration PASSED [ 18%]
+tests/test_all_connectors.py::TestSlackIntegration::test_real_slack_notification PASSED [ 22%]
+tests/test_all_connectors.py::TestDataQualityValidation::test_data_validator_import PASSED [ 27%]
+tests/test_all_connectors.py::TestDataQualityValidation::test_data_validator_initialization PASSED [ 31%]
+tests/test_all_connectors.py::TestDataQualityValidation::test_validation_with_mock_data PASSED [ 36%]
+tests/test_all_connectors.py::TestDataQualityValidation::test_validation_detects_failures PASSED [ 40%]
+tests/test_all_connectors.py::TestJupyterNotebooks::test_notebooks_directory_exists PASSED [ 45%]
+tests/test_all_connectors.py::TestJupyterNotebooks::test_notebook_files_exist PASSED [ 50%]
+tests/test_all_connectors.py::TestJupyterNotebooks::test_notebook_structure_valid PASSED [ 54%]
+tests/test_all_connectors.py::TestJupyterNotebooks::test_notebook_imports_valid PASSED [ 59%]
+tests/test_all_connectors.py::TestDocumentedConnectors::test_streamlit_implementation_documented PASSED [ 63%]
+tests/test_all_connectors.py::TestDocumentedConnectors::test_basketball_reference_implementation_documented PASSED [ 68%]
+tests/test_all_connectors.py::TestDocumentedConnectors::test_notion_implementation_documented PASSED [ 72%]
+tests/test_all_connectors.py::TestDocumentedConnectors::test_google_sheets_implementation_documented PASSED [ 77%]
+tests/test_all_connectors.py::TestDocumentedConnectors::test_airflow_implementation_documented PASSED [ 81%]
+tests/test_all_connectors.py::TestRequirementsDependencies::test_requirements_file_exists PASSED [ 86%]
+tests/test_all_connectors.py::TestRequirementsDependencies::test_all_connector_dependencies_included PASSED [ 90%]
+tests/test_all_connectors.py::TestSystemIntegration::test_all_documentation_exists PASSED [ 95%]
+tests/test_all_connectors.py::TestSystemIntegration::test_env_example_has_all_variables PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/test_all_connectors.py::TestDataQualityValidation::test_data_validator_import
+  /Users/ryanranft/miniconda3/envs/mcp-synthesis/lib/python3.11/site-packages/great_expectations/data_context/types/base.py:1098: ChangedInMarshmallow4Warning: `Number` field should not be instantiated. Use `Integer`, `Float`, or `Decimal` instead.
+    config_version: fields.Number = fields.Number(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 22 passed, 1 warning in 3.11s =========================

@@ -29,16 +29,21 @@ from .connectors import (
     GlueConnector,
     SlackNotifier
 )
+from .security import SecurityManager, SecurityConfig
+from .logging_config import setup_logging, get_logger, RequestContext, PerformanceLogger
 
 # Load environment variables
 load_dotenv()
 
-# Setup logging
-logging.basicConfig(
-    level=os.getenv('MCP_LOG_LEVEL', 'INFO'),
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+# Setup structured logging
+setup_logging(
+    log_level=os.getenv('MCP_LOG_LEVEL', 'INFO'),
+    log_dir=os.getenv('MCP_LOG_DIR', 'logs'),
+    enable_json=os.getenv('MCP_LOG_JSON', 'true').lower() == 'true',
+    enable_console=True,
+    enable_file=True
 )
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class NBAMCPServer:
@@ -51,17 +56,24 @@ class NBAMCPServer:
         """Initialize MCP server with configuration"""
         self.config = config or MCPConfig.from_env()
         self.server = Server("nba-mcp-server")
-        
+
+        # Initialize security manager
+        security_config = SecurityConfig()
+        self.security_manager = SecurityManager(
+            security_config,
+            project_root=self.config.project_root
+        )
+
         # Initialize connectors
         self._init_connectors()
-        
+
         # Initialize tools
         self._init_tools()
-        
+
         # Setup MCP handlers
         self._setup_handlers()
-        
-        logger.info("NBA MCP Server initialized")
+
+        logger.info("NBA MCP Server initialized (with security enabled)")
     
     def _init_connectors(self):
         """Initialize data source connectors"""
@@ -145,42 +157,82 @@ class NBAMCPServer:
         @self.server.call_tool()
         async def call_tool(name: str, arguments: Dict[str, Any]) -> Any:
             """Execute requested tool with arguments"""
-            logger.info(f"Calling tool: {name}")
-            
-            try:
-                # Route to appropriate tool handler
-                if name.startswith("query_") or name.startswith("get_table"):
-                    result = await self.database_tools.execute(name, arguments)
-                elif name.startswith("fetch_s3") or name.startswith("list_s3"):
-                    result = await self.s3_tools.execute(name, arguments)
-                elif name.startswith("get_glue"):
-                    result = await self.glue_tools.execute(name, arguments)
-                elif name.startswith("read_") or name.startswith("search_"):
-                    result = await self.file_tools.execute(name, arguments)
-                elif name in ["save_to_project", "log_synthesis_result", "send_notification"]:
-                    result = await self.action_tools.execute(name, arguments)
-                else:
-                    raise ValueError(f"Unknown tool: {name}")
-                
-                # Log successful execution
-                if self.slack_notifier and self.config.notify_on_success:
-                    await self._notify_tool_execution(name, arguments, result, success=True)
-                
-                return result
-                
-            except Exception as e:
-                logger.error(f"Tool execution failed: {name} - {e}")
-                
-                # Notify on error
-                if self.slack_notifier:
-                    await self._notify_tool_execution(name, arguments, str(e), success=False)
-                
-                return {
-                    "success": False,
-                    "error": str(e),
-                    "tool": name,
-                    "timestamp": datetime.now().isoformat()
-                }
+            # Get client ID (in production, this would come from request context)
+            client_id = arguments.get("_client_id", "default_client")
+
+            # Use request context for tracking and performance measurement
+            with RequestContext(logger, f"tool_call:{name}", client_id=client_id) as ctx:
+                # Security validation
+                valid, error_message = await self.security_manager.validate_request(
+                    client_id=client_id,
+                    tool_name=name,
+                    arguments=arguments
+                )
+
+                if not valid:
+                    logger.warning(
+                        f"Security validation failed",
+                        extra={"tool": name, "reason": error_message}
+                    )
+                    return {
+                        "success": False,
+                        "error": f"Security validation failed: {error_message}",
+                        "tool": name,
+                        "timestamp": datetime.now().isoformat()
+                    }
+
+                try:
+                    # Route to appropriate tool handler
+                    if name.startswith("query_") or name.startswith("get_table"):
+                        result = await self.database_tools.execute(name, arguments)
+                    elif name.startswith("fetch_s3") or name.startswith("list_s3"):
+                        result = await self.s3_tools.execute(name, arguments)
+                    elif name.startswith("get_glue"):
+                        result = await self.glue_tools.execute(name, arguments)
+                    elif name.startswith("read_") or name.startswith("search_"):
+                        result = await self.file_tools.execute(name, arguments)
+                    elif name in ["save_to_project", "log_synthesis_result", "send_notification"]:
+                        result = await self.action_tools.execute(name, arguments)
+                    else:
+                        raise ValueError(f"Unknown tool: {name}")
+
+                    # Log successful execution with extra fields
+                    logger.info(
+                        f"Tool executed successfully",
+                        extra={
+                            "tool": name,
+                            "result_size": len(str(result)) if result else 0
+                        }
+                    )
+
+                    # Notify on success if configured
+                    if self.slack_notifier and self.config.notify_on_success:
+                        await self._notify_tool_execution(name, arguments, result, success=True)
+
+                    return result
+
+                except Exception as e:
+                    # Error logging with structured fields
+                    logger.error(
+                        f"Tool execution failed",
+                        extra={
+                            "tool": name,
+                            "error_type": type(e).__name__,
+                            "error_message": str(e)
+                        },
+                        exc_info=True
+                    )
+
+                    # Notify on error
+                    if self.slack_notifier:
+                        await self._notify_tool_execution(name, arguments, str(e), success=False)
+
+                    return {
+                        "success": False,
+                        "error": str(e),
+                        "tool": name,
+                        "timestamp": datetime.now().isoformat()
+                    }
         
         @self.server.list_resources()
         async def list_resources() -> List[Resource]:

@@ -58,3 +58,15 @@ secrets.yaml
 .env*
 !.env.example
 *.secret
+
+# Planning documents (large reference files)
+docs/planning/MCP_MULTI_MODEL_PROJECT_PLAN.md
+docs/planning/CONNECTOR_INTEGRATION_PLANS.md
+docs/planning/Progressive_Fidelity_NBA_Simulator_Complete_Guide_CORRECTED.md
+
+# Great Expectations (uncommitted files contain credentials)
+great_expectations/uncommitted/
+great_expectations/checkpoints/
+great_expectations/expectations/.ge_store_backend_id
+great_expectations/.ge_store_backend_id
+great_expectations/uncommitted/data_docs/

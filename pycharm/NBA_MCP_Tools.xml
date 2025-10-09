@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<toolSet name="NBA MCP Tools">
+  <tool name="MCP: Analyze Code" showInMainMenu="true" showInEditor="true" showInProject="false" showInSearchPopup="false" disabled="false" useConsole="true" showConsoleOnStdOut="true" showConsoleOnStdErr="true" synchronizeAfterRun="true">
+    <exec>
+      <option name="COMMAND" value="$PyInterpreterDirectory$/python3" />
+      <option name="PARAMETERS" value="$ProjectFileDir$/pycharm/mcp_external_tool.py analyze --code &quot;$SelectedText$&quot; --request &quot;$Prompt$&quot;" />
+      <option name="WORKING_DIRECTORY" value="$ProjectFileDir$" />
+    </exec>
+  </tool>
+
+  <tool name="MCP: Generate Scraper" showInMainMenu="true" showInEditor="true" showInProject="false" showInSearchPopup="false" disabled="false" useConsole="true" showConsoleOnStdOut="true" showConsoleOnStdErr="true" synchronizeAfterRun="true">
+    <exec>
+      <option name="COMMAND" value="$PyInterpreterDirectory$/python3" />
+      <option name="PARAMETERS" value="$ProjectFileDir$/pycharm/mcp_external_tool.py scraper --url &quot;$Prompt$&quot; --code &quot;$SelectedText$&quot;" />
+      <option name="WORKING_DIRECTORY" value="$ProjectFileDir$" />
+    </exec>
+  </tool>
+
+  <tool name="MCP: Generate SQL Query" showInMainMenu="true" showInEditor="true" showInProject="false" showInSearchPopup="false" disabled="false" useConsole="true" showConsoleOnStdOut="true" showConsoleOnStdErr="true" synchronizeAfterRun="true">
+    <exec>
+      <option name="COMMAND" value="$PyInterpreterDirectory$/python3" />
+      <option name="PARAMETERS" value="$ProjectFileDir$/pycharm/mcp_external_tool.py sql --request &quot;$Prompt$&quot;" />
+      <option name="WORKING_DIRECTORY" value="$ProjectFileDir$" />
+    </exec>
+  </tool>
+
+  <tool name="MCP: Execute Query with Explanation" showInMainMenu="true" showInEditor="true" showInProject="false" showInSearchPopup="false" disabled="false" useConsole="true" showConsoleOnStdOut="true" showConsoleOnStdErr="true" synchronizeAfterRun="true">
+    <exec>
+      <option name="COMMAND" value="$PyInterpreterDirectory$/python3" />
+      <option name="PARAMETERS" value="$ProjectFileDir$/pycharm/mcp_external_tool.py execute --query &quot;$SelectedText$&quot;" />
+      <option name="WORKING_DIRECTORY" value="$ProjectFileDir$" />
+    </exec>
+  </tool>
+
+  <tool name="MCP: Improve Selected Code" showInMainMenu="false" showInEditor="true" showInProject="false" showInSearchPopup="false" disabled="false" useConsole="true" showConsoleOnStdOut="true" showConsoleOnStdErr="true" synchronizeAfterRun="true">
+    <exec>
+      <option name="COMMAND" value="$PyInterpreterDirectory$/python3" />
+      <option name="PARAMETERS" value="$ProjectFileDir$/pycharm/mcp_external_tool.py analyze --code &quot;$SelectedText$&quot; --request &quot;Improve this code for performance, clarity, and best practices&quot;" />
+      <option name="WORKING_DIRECTORY" value="$ProjectFileDir$" />
+    </exec>
+  </tool>
+
+  <tool name="MCP: Generate Web Scraper (Custom)" showInMainMenu="true" showInEditor="false" showInProject="false" showInSearchPopup="false" disabled="false" useConsole="true" showConsoleOnStdOut="true" showConsoleOnStdErr="true" synchronizeAfterRun="true">
+    <exec>
+      <option name="COMMAND" value="$PyInterpreterDirectory$/python3" />
+      <option name="PARAMETERS" value="$ProjectFileDir$/pycharm/mcp_external_tool.py scraper --url &quot;$Prompt$URL?$&quot; --description &quot;$Prompt$What to extract?$&quot;" />
+      <option name="WORKING_DIRECTORY" value="$ProjectFileDir$" />
+    </exec>
+  </tool>
+
+  <tool name="MCP: Debug Error" showInMainMenu="false" showInEditor="true" showInProject="false" showInSearchPopup="false" disabled="false" useConsole="true" showConsoleOnStdOut="true" showConsoleOnStdErr="true" synchronizeAfterRun="true">
+    <exec>
+      <option name="COMMAND" value="$PyInterpreterDirectory$/python3" />
+      <option name="PARAMETERS" value="$ProjectFileDir$/pycharm/mcp_external_tool.py analyze --code &quot;$SelectedText$&quot; --request &quot;Debug this error and provide a fix&quot;" />
+      <option name="WORKING_DIRECTORY" value="$ProjectFileDir$" />
+    </exec>
+  </tool>
+
+  <tool name="MCP: Explain Code" showInMainMenu="false" showInEditor="true" showInProject="false" showInSearchPopup="false" disabled="false" useConsole="true" showConsoleOnStdOut="true" showConsoleOnStdErr="true" synchronizeAfterRun="true">
+    <exec>
+      <option name="COMMAND" value="$PyInterpreterDirectory$/python3" />
+      <option name="PARAMETERS" value="$ProjectFileDir$/pycharm/mcp_external_tool.py analyze --code &quot;$SelectedText$&quot; --request &quot;Explain what this code does in detail&quot;" />
+      <option name="WORKING_DIRECTORY" value="$ProjectFileDir$" />
+    </exec>
+  </tool>
+</toolSet>

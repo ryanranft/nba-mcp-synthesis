@@ -11,11 +11,30 @@ from pathlib import Path
 import json
 import re
 import os
+import sys
 
 from .mcp_client import MCPClient
 from .models import DeepSeekModel, ClaudeModel, OllamaModel
 
-logger = logging.getLogger(__name__)
+# Try to import structured logging
+try:
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from mcp_server.logging_config import get_logger, RequestContext, PerformanceLogger
+    STRUCTURED_LOGGING_AVAILABLE = True
+    logger = get_logger(__name__)
+except ImportError:
+    STRUCTURED_LOGGING_AVAILABLE = False
+    logger = logging.getLogger(__name__)
+
+# Import Slack notifier if available
+try:
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from mcp_server.connectors.slack_notifier import SlackNotifier
+    SLACK_AVAILABLE = True
+except ImportError:
+    SLACK_AVAILABLE = False
+    logger.debug("Slack notifier not available")
 
 
 async def synthesize_with_mcp_context(
@@ -222,6 +241,16 @@ async def synthesize_with_mcp_context(
         logger.info(f"Execution time: {result['execution_time_seconds']:.2f}s")
         logger.info("=" * 80 + "\n")
 
+        # Send Slack notification if configured
+        await _send_slack_notification(
+            operation=query_type or "general_analysis",
+            models_used=result['models_used'],
+            execution_time=result['execution_time_seconds'],
+            tokens_used=result['total_tokens'],
+            cost=result['total_cost'],
+            success=(result['status'] == "success")
+        )
+
         return result
 
     except Exception as e:
@@ -229,6 +258,23 @@ async def synthesize_with_mcp_context(
         result["status"] = "failed"
         result["error"] = str(e)
         result["end_time"] = datetime.now().isoformat()
+
+        # Calculate execution time even for failures
+        if "start_time" in result:
+            end_time = datetime.now()
+            result["execution_time_seconds"] = (end_time - datetime.fromisoformat(result["start_time"])).total_seconds()
+
+        # Send failure notification to Slack
+        await _send_slack_notification(
+            operation=query_type or "general_analysis",
+            models_used=result.get('models_used', []),
+            execution_time=result.get('execution_time_seconds', 0),
+            tokens_used=result.get('total_tokens', 0),
+            cost=result.get('total_cost', 0),
+            success=False,
+            error=str(e)
+        )
+
         return result
 
     finally:
@@ -578,3 +624,71 @@ async def quick_synthesis(
         return result.get("final_code") or result.get("final_explanation", "")
     else:
         raise RuntimeError(f"Synthesis failed: {result.get('error', 'Unknown error')}")
+
+
+async def _send_slack_notification(
+    operation: str,
+    models_used: List[str],
+    execution_time: float,
+    tokens_used: int,
+    cost: float,
+    success: bool = True,
+    error: Optional[str] = None
+):
+    """
+    Send Slack notification for synthesis completion
+
+    Args:
+        operation: Type of operation
+        models_used: List of models used
+        execution_time: Execution time in seconds
+        tokens_used: Total tokens used
+        cost: Total cost in dollars
+        success: Whether synthesis succeeded
+        error: Optional error message
+    """
+    if not SLACK_AVAILABLE:
+        return
+
+    # Check if Slack webhook is configured
+    webhook_url = os.getenv("SLACK_WEBHOOK_URL")
+    if not webhook_url:
+        logger.debug("Slack webhook not configured, skipping notification")
+        return
+
+    try:
+        # Initialize Slack notifier
+        slack = SlackNotifier(
+            webhook_url=webhook_url,
+            channel=os.getenv("SLACK_CHANNEL")  # Optional
+        )
+
+        # Send notification
+        await slack.notify_synthesis_complete(
+            operation=operation,
+            models_used=models_used,
+            execution_time=execution_time,
+            tokens_used=tokens_used,
+            success=success
+        )
+
+        # If there was an error, send additional error context
+        if not success and error:
+            await slack.send_notification({
+                "text": f"Error details: {error[:500]}",
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"```{error[:1000]}```"
+                        }
+                    }
+                ]
+            })
+
+        logger.debug(f"Slack notification sent: {operation} {'success' if success else 'failed'}")
+
+    except Exception as e:
+        # Don't let Slack failures break synthesis
+        logger.warning(f"Failed to send Slack notification: {e}")

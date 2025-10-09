@@ -1,3 +1,4 @@
+
 # NBA MCP Synthesis System
 
 Multi-Model AI Synthesis with Model Context Protocol (MCP) for NBA Game Simulator

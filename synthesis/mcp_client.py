@@ -11,6 +11,17 @@ import re
 import json
 from pathlib import Path
 
+try:
+    from .resilience import retry_with_backoff, get_circuit_breaker
+    RESILIENCE_AVAILABLE = True
+except ImportError:
+    RESILIENCE_AVAILABLE = False
+    # Fallback no-op decorator
+    def retry_with_backoff(**kwargs):
+        def decorator(func):
+            return func
+        return decorator
+
 logger = logging.getLogger(__name__)
 
 
@@ -38,9 +49,14 @@ class MCPClient:
         self.available_tools = []
         logger.info(f"MCP Client initialized for {server_url}")
 
+    @retry_with_backoff(
+        max_retries=3,
+        base_delay=1.0,
+        retry_on=(ConnectionError, TimeoutError, OSError)
+    )
     async def connect(self, server_url: Optional[str] = None) -> bool:
         """
-        Connect to MCP server
+        Connect to MCP server (with automatic retry)
 
         Args:
             server_url: Override server URL if provided
@@ -77,9 +93,14 @@ class MCPClient:
             self.connected = False
             return False
 
+    @retry_with_backoff(
+        max_retries=2,
+        base_delay=0.5,
+        retry_on=(ConnectionError, TimeoutError)
+    )
     async def call_tool(self, tool_name: str, params: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Call an MCP tool
+        Call an MCP tool (with automatic retry on network errors)
 
         Args:
             tool_name: Name of the tool to call
@@ -541,8 +562,39 @@ class MCPClient:
                 ]
             }
 
+        elif tool_name == "query_rds_database":
+            return {
+                "success": True,
+                "query": params.get("sql_query"),
+                "results": [
+                    {"team_id": 1, "team_name": "Lakers", "wins": 47},
+                    {"team_id": 2, "team_name": "Celtics", "wins": 45},
+                    {"team_id": 3, "team_name": "Warriors", "wins": 43}
+                ],
+                "row_count": 3,
+                "execution_time_ms": 25.5
+            }
+
         else:
             return {"message": "Tool executed successfully"}
+
+    async def list_tables(self) -> List[str]:
+        """List all available tables"""
+        # This is simulated - in production would query actual MCP server
+        return [
+            "players", "teams", "games", "box_score_players", "box_score_teams",
+            "play_by_play", "player_game_stats", "team_game_stats",
+            "advanced_stats", "tracking_stats", "shot_chart", "lineups",
+            "injuries", "transactions", "schedules", "standings"
+        ]
+
+    async def describe_table(self, table_name: str) -> Dict[str, Any]:
+        """Get table schema description"""
+        return await self.call_tool("get_table_schema", {"table_name": table_name})
+
+    async def execute_query(self, query: str) -> Dict[str, Any]:
+        """Execute SQL query and return results"""
+        return await self.call_tool("query_rds_database", {"sql_query": query})
 
     async def disconnect(self):
         """Disconnect from MCP server"""
