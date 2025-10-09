@@ -45,3 +45,16 @@ mlartifacts/
 outputs/
 results/
 logs/
+synthesis_output/
+cache/
+
+# Sensitive files
+*.key
+*.pem
+credentials.json
+secrets.yaml
+
+# API Keys and credentials (double check)
+.env*
+!.env.example
+*.secret
