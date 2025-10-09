@@ -1,0 +1,320 @@
+#!/usr/bin/env python3
+"""
+Quick Setup Script for NBA MCP Synthesis System
+Automates initial setup and configuration
+"""
+
+import os
+import sys
+import subprocess
+from pathlib import Path
+import shutil
+from rich.console import Console
+from rich.prompt import Prompt, Confirm
+import json
+
+console = Console()
+
+
+def print_header():
+    """Print setup header"""
+    console.print("\n[bold blue]🏀 NBA MCP Synthesis System Setup[/bold blue]")
+    console.print("[dim]This script will help you configure the MCP server and synthesis system[/dim]\n")
+
+
+def check_python_version():
+    """Check if Python version is 3.11+"""
+    version = sys.version_info
+    if version.major < 3 or (version.major == 3 and version.minor < 11):
+        console.print("[red]Error: Python 3.11+ required[/red]")
+        console.print(f"Current version: {sys.version}")
+        return False
+    console.print(f"[green]✓[/green] Python {version.major}.{version.minor} detected")
+    return True
+
+
+def create_virtual_environment():
+    """Create conda/venv environment"""
+    console.print("\n[yellow]Setting up virtual environment...[/yellow]")
+    
+    use_conda = Confirm.ask("Use conda (recommended)?", default=True)
+    
+    if use_conda:
+        # Check if conda is installed
+        if shutil.which("conda"):
+            env_name = Prompt.ask("Environment name", default="mcp-synthesis")
+            console.print(f"Creating conda environment: {env_name}")
+            
+            subprocess.run([
+                "conda", "create", "-n", env_name, 
+                "python=3.11", "-y"
+            ])
+            
+            console.print(f"[green]✓[/green] Created conda environment: {env_name}")
+            console.print(f"\n[cyan]Activate with:[/cyan] conda activate {env_name}")
+            return True
+        else:
+            console.print("[yellow]Conda not found, using venv instead[/yellow]")
+    
+    # Use venv
+    venv_path = Path("venv")
+    if not venv_path.exists():
+        subprocess.run([sys.executable, "-m", "venv", "venv"])
+        console.print("[green]✓[/green] Created virtual environment: venv")
+        console.print("\n[cyan]Activate with:[/cyan] source venv/bin/activate")
+    else:
+        console.print("[yellow]Virtual environment already exists[/yellow]")
+    
+    return True
+
+
+def install_dependencies():
+    """Install Python dependencies"""
+    console.print("\n[yellow]Installing dependencies...[/yellow]")
+    
+    if Path("requirements.txt").exists():
+        subprocess.run([
+            sys.executable, "-m", "pip", "install", "-r", "requirements.txt"
+        ])
+        console.print("[green]✓[/green] Dependencies installed")
+    else:
+        console.print("[red]requirements.txt not found![/red]")
+        return False
+    
+    return True
+
+
+def configure_environment():
+    """Create .env file from user input"""
+    console.print("\n[yellow]Configuring environment variables...[/yellow]")
+    
+    if Path(".env").exists():
+        overwrite = Confirm.ask(".env already exists. Overwrite?", default=False)
+        if not overwrite:
+            console.print("[yellow]Keeping existing .env file[/yellow]")
+            return True
+    
+    env_config = {}
+    
+    # AWS RDS Configuration
+    console.print("\n[cyan]AWS RDS PostgreSQL Configuration:[/cyan]")
+    env_config["RDS_HOST"] = Prompt.ask("RDS Host", default="nba-sim-db.xxxxx.us-east-1.rds.amazonaws.com")
+    env_config["RDS_DATABASE"] = Prompt.ask("Database name", default="nba_simulator")
+    env_config["RDS_USERNAME"] = Prompt.ask("Username", default="postgres")
+    env_config["RDS_PASSWORD"] = Prompt.ask("Password", password=True)
+    
+    # AWS S3 Configuration
+    console.print("\n[cyan]AWS S3 Configuration:[/cyan]")
+    env_config["S3_BUCKET"] = Prompt.ask("S3 Bucket", default="nba-sim-raw-data-lake")
+    env_config["AWS_ACCESS_KEY_ID"] = Prompt.ask("AWS Access Key ID")
+    env_config["AWS_SECRET_ACCESS_KEY"] = Prompt.ask("AWS Secret Key", password=True)
+    
+    # Project paths
+    console.print("\n[cyan]Project Configuration:[/cyan]")
+    default_project = "/Users/ryanranft/nba-simulator-aws"
+    env_config["PROJECT_ROOT"] = Prompt.ask("NBA project root", default=default_project)
+    
+    # API Keys
+    console.print("\n[cyan]AI Model API Keys:[/cyan]")
+    env_config["ANTHROPIC_API_KEY"] = Prompt.ask("Anthropic API Key (Claude)", password=True, default="")
+    env_config["OPENAI_API_KEY"] = Prompt.ask("OpenAI API Key (GPT-4o)", password=True, default="")
+    env_config["GOOGLE_API_KEY"] = Prompt.ask("Google API Key (Gemini)", password=True, default="")
+    
+    # Optional Slack
+    if Confirm.ask("\nConfigure Slack notifications?", default=False):
+        env_config["SLACK_WEBHOOK_URL"] = Prompt.ask("Slack Webhook URL")
+    
+    # Write .env file
+    with open(".env", "w") as f:
+        f.write("# NBA MCP Synthesis System Configuration\n")
+        f.write("# Generated by setup script\n\n")
+        
+        # MCP Server
+        f.write("# MCP Server\n")
+        f.write("MCP_SERVER_HOST=localhost\n")
+        f.write("MCP_SERVER_PORT=3000\n\n")
+        
+        # AWS RDS
+        f.write("# AWS RDS PostgreSQL\n")
+        f.write(f"RDS_HOST={env_config['RDS_HOST']}\n")
+        f.write("RDS_PORT=5432\n")
+        f.write(f"RDS_DATABASE={env_config['RDS_DATABASE']}\n")
+        f.write(f"RDS_USERNAME={env_config['RDS_USERNAME']}\n")
+        f.write(f"RDS_PASSWORD={env_config['RDS_PASSWORD']}\n\n")
+        
+        # AWS S3
+        f.write("# AWS S3\n")
+        f.write(f"S3_BUCKET={env_config['S3_BUCKET']}\n")
+        f.write("S3_REGION=us-east-1\n")
+        f.write(f"AWS_ACCESS_KEY_ID={env_config['AWS_ACCESS_KEY_ID']}\n")
+        f.write(f"AWS_SECRET_ACCESS_KEY={env_config['AWS_SECRET_ACCESS_KEY']}\n\n")
+        
+        # AWS Glue
+        f.write("# AWS Glue\n")
+        f.write("GLUE_DATABASE=nba_raw_data\n")
+        f.write("GLUE_REGION=us-east-1\n\n")
+        
+        # Project
+        f.write("# Project Paths\n")
+        f.write(f"PROJECT_ROOT={env_config['PROJECT_ROOT']}\n")
+        f.write(f"SYNTHESIS_OUTPUT_DIR={env_config['PROJECT_ROOT']}/synthesis_output\n\n")
+        
+        # API Keys
+        f.write("# AI Model API Keys\n")
+        if env_config.get("ANTHROPIC_API_KEY"):
+            f.write(f"ANTHROPIC_API_KEY={env_config['ANTHROPIC_API_KEY']}\n")
+        if env_config.get("OPENAI_API_KEY"):
+            f.write(f"OPENAI_API_KEY={env_config['OPENAI_API_KEY']}\n")
+        if env_config.get("GOOGLE_API_KEY"):
+            f.write(f"GOOGLE_API_KEY={env_config['GOOGLE_API_KEY']}\n")
+        f.write("OLLAMA_HOST=http://localhost:11434\n\n")
+        
+        # Slack
+        if env_config.get("SLACK_WEBHOOK_URL"):
+            f.write("# Slack Notifications\n")
+            f.write(f"SLACK_WEBHOOK_URL={env_config['SLACK_WEBHOOK_URL']}\n\n")
+        
+        # Limits
+        f.write("# Safety & Performance\n")
+        f.write("MAX_QUERY_ROWS=1000\n")
+        f.write("MAX_FILE_SIZE_MB=1\n")
+        f.write("QUERY_TIMEOUT_SECONDS=30\n")
+        f.write("CACHE_ENABLED=true\n")
+        f.write("CACHE_TTL_SECONDS=300\n\n")
+        
+        # Logging
+        f.write("# Logging\n")
+        f.write("LOG_FILE=logs/mcp_synthesis.log\n")
+        f.write("MCP_LOG_LEVEL=INFO\n")
+    
+    console.print("[green]✓[/green] Created .env file")
+    return True
+
+
+def create_directories():
+    """Create necessary project directories"""
+    console.print("\n[yellow]Creating project directories...[/yellow]")
+    
+    directories = [
+        "logs",
+        "cache",
+        "synthesis_output",
+        "mcp_server/tools",
+        "mcp_server/connectors",
+        "mcp_server/config",
+        "synthesis/models",
+        "synthesis/config",
+        "tests/fixtures",
+        "docs",
+        "examples"
+    ]
+    
+    for dir_path in directories:
+        Path(dir_path).mkdir(parents=True, exist_ok=True)
+        console.print(f"  [dim]Created:[/dim] {dir_path}")
+    
+    console.print("[green]✓[/green] Project directories created")
+    return True
+
+
+def setup_pycharm_tool():
+    """Generate PyCharm external tool configuration"""
+    console.print("\n[yellow]Generating PyCharm configuration...[/yellow]")
+    
+    python_path = sys.executable
+    project_path = Path.cwd()
+    wrapper_path = project_path / "pycharm_integration" / "external_tool_wrapper.py"
+    
+    config = {
+        "name": "Multi-Model Synthesis (MCP)",
+        "description": "Synthesize code using 4 AI models with NBA project context",
+        "program": str(python_path),
+        "arguments": f'"{wrapper_path}" "$FilePath$" "$SelectedText$" "$Prompt$"',
+        "workingDirectory": "$ProjectFileDir$"
+    }
+    
+    # Save configuration
+    config_file = Path("docs/pycharm_tool_config.json")
+    config_file.parent.mkdir(exist_ok=True)
+    
+    with open(config_file, "w") as f:
+        json.dump(config, f, indent=2)
+    
+    console.print("[green]✓[/green] PyCharm configuration saved to docs/pycharm_tool_config.json")
+    
+    console.print("\n[cyan]To add to PyCharm:[/cyan]")
+    console.print("1. Open PyCharm Settings → Tools → External Tools")
+    console.print("2. Click '+' to add new tool")
+    console.print("3. Enter the following:")
+    console.print(f"   Name: {config['name']}")
+    console.print(f"   Program: {config['program']}")
+    console.print(f"   Arguments: {config['arguments']}")
+    console.print(f"   Working directory: {config['workingDirectory']}")
+    
+    return True
+
+
+def test_connections():
+    """Run connection tests"""
+    console.print("\n[yellow]Testing connections...[/yellow]")
+    
+    test_script = Path("scripts/test_mcp_connection.py")
+    if test_script.exists():
+        result = subprocess.run([sys.executable, str(test_script)], capture_output=True)
+        if result.returncode == 0:
+            console.print("[green]✓[/green] Connection tests passed")
+        else:
+            console.print("[yellow]⚠[/yellow] Some connections failed (check configuration)")
+    else:
+        console.print("[yellow]Test script not found[/yellow]")
+    
+    return True
+
+
+def main():
+    """Run setup process"""
+    print_header()
+    
+    steps = [
+        ("Checking Python version", check_python_version),
+        ("Creating virtual environment", create_virtual_environment),
+        ("Installing dependencies", install_dependencies),
+        ("Configuring environment", configure_environment),
+        ("Creating directories", create_directories),
+        ("Setting up PyCharm tool", setup_pycharm_tool),
+        ("Testing connections", test_connections)
+    ]
+    
+    failed = False
+    for step_name, step_func in steps:
+        console.print(f"\n[bold]{step_name}...[/bold]")
+        try:
+            if not step_func():
+                console.print(f"[red]✗ {step_name} failed[/red]")
+                failed = True
+                if not Confirm.ask("Continue anyway?", default=False):
+                    break
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            failed = True
+            if not Confirm.ask("Continue anyway?", default=False):
+                break
+    
+    # Final summary
+    console.print("\n" + "="*50)
+    if not failed:
+        console.print("[bold green]✅ Setup Complete![/bold green]")
+        console.print("\n[cyan]Next steps:[/cyan]")
+        console.print("1. Activate your virtual environment")
+        console.print("2. Start MCP server: python -m mcp_server.server")
+        console.print("3. Configure PyCharm external tool")
+        console.print("4. Select code and run synthesis!")
+    else:
+        console.print("[yellow]⚠ Setup completed with warnings[/yellow]")
+        console.print("Review the errors above and check your configuration")
+    
+    console.print("\n[dim]For help, see docs/SETUP_GUIDE.md[/dim]")
+
+
+if __name__ == "__main__":
+    main()

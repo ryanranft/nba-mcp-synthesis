@@ -1,0 +1,7 @@
+{
+  "name": "Multi-Model Synthesis (MCP)",
+  "description": "Synthesize code using 4 AI models with NBA project context",
+  "program": "/Users/ryanranft/miniconda3/envs/mcp-synthesis/bin/python",
+  "arguments": "\"/Users/ryanranft/nba-mcp-synthesis/pycharm_integration/external_tool_wrapper.py\" \"$FilePath$\" \"$SelectedText$\" \"$Prompt$\"",
+  "workingDirectory": "$ProjectFileDir$"
+}
