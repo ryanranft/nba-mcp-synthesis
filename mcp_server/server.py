@@ -12,9 +12,8 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-from mcp import Server
+from mcp.server import Server
 from mcp.types import Tool, TextContent, ImageContent, Resource
-from mcp.server import Request, Response
 
 from .tools import (
     DatabaseTools,
