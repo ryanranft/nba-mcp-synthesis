@@ -1,0 +1,84 @@
+# Cross-Chat Coordination Workflow
+# Example of coordinating work across multiple chat sessions
+
+workflow_id: cross-chat-coordination
+name: "Cross-Chat Coordination Example"
+description: "Demonstrates workflow triggers from different sources (Claude Code, PyCharm, MCP, Web)"
+source: workflow_engine
+notify_slack: true
+save_state: true
+
+steps:
+  - name: "Initialize Workflow"
+    description: "Set up workflow context and notify all channels"
+    action: notify
+    params:
+      message: "🔄 Cross-chat workflow initiated. Ready to accept tasks from any source."
+      channels: ["#claude-code", "#pycharm-integration", "#mcp-server"]
+    timeout_seconds: 30
+
+  - name: "Wait for Claude Code Task"
+    description: "Wait for task completion from Claude Code session"
+    action: wait_for_event
+    params:
+      event_type: "process_complete"
+      source: "claude_code"
+      timeout_minutes: 60
+    requires_approval: false
+    timeout_seconds: 3600
+    continue_on_failure: true
+
+  - name: "Process Claude Code Results"
+    description: "Process results from Claude Code task"
+    action: process_results
+    params:
+      result_source: "claude_code"
+      transform: "normalize_format"
+    timeout_seconds: 60
+
+  - name: "Trigger PyCharm Analysis"
+    description: "Send task to PyCharm for code analysis"
+    action: trigger_external
+    params:
+      target: "pycharm"
+      task: "analyze_code"
+      context_from_previous: true
+    timeout_seconds: 300
+
+  - name: "Wait for PyCharm Results"
+    description: "Wait for PyCharm analysis to complete"
+    action: wait_for_event
+    params:
+      event_type: "process_complete"
+      source: "pycharm"
+      timeout_minutes: 30
+    timeout_seconds: 1800
+    continue_on_failure: true
+
+  - name: "MCP Data Gathering"
+    description: "Use MCP server to gather additional context"
+    action: mcp_gather_context
+    params:
+      query_type: "general_analysis"
+      context_from_previous: true
+    timeout_seconds: 120
+    retry_count: 1
+
+  - name: "Synthesize All Results"
+    description: "Combine results from all sources into final report"
+    action: claude_synthesis
+    params:
+      model: "claude-3-5-sonnet-20241022"
+      context_from_all_steps: true
+      task: "Synthesize insights from Claude Code, PyCharm, and MCP data"
+      max_tokens: 8000
+    timeout_seconds: 300
+
+  - name: "Notify All Channels"
+    description: "Send final results to all participating channels"
+    action: notify
+    params:
+      message: "✅ Cross-chat workflow complete! Results synthesized from all sources."
+      channels: ["#claude-code", "#pycharm-integration", "#mcp-server"]
+      attach_report: true
+    timeout_seconds: 30

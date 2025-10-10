@@ -1,0 +1,89 @@
+# NBA Data Synthesis Workflow
+# Multi-step NBA data analysis with automated synthesis
+
+workflow_id: nba-data-synthesis
+name: "NBA Data Analysis & Synthesis"
+description: "Extract data, run analysis, generate synthesis report"
+source: workflow_engine
+notify_slack: true
+save_state: true
+
+steps:
+  - name: "Extract Game Data"
+    description: "Extract recent game data from RDS"
+    action: mcp_query_database
+    params:
+      sql_query: "SELECT * FROM games WHERE season = '2023-24' ORDER BY game_date DESC LIMIT 100"
+      timeout: 30
+    timeout_seconds: 60
+    retry_count: 2
+    retry_delay_seconds: 5
+    continue_on_failure: false
+
+  - name: "Fetch Player Statistics"
+    description: "Get player stats for recent games"
+    action: mcp_query_database
+    params:
+      sql_query: "SELECT * FROM player_game_stats WHERE game_id IN (SELECT game_id FROM games WHERE season = '2023-24' ORDER BY game_date DESC LIMIT 100)"
+      timeout: 30
+    timeout_seconds: 120
+    retry_count: 2
+    retry_delay_seconds: 5
+    continue_on_failure: false
+
+  - name: "Load S3 Advanced Stats"
+    description: "Load advanced statistics from S3 data lake"
+    action: mcp_fetch_s3_data
+    params:
+      prefix: "advanced_stats/2023-24"
+      file_count: 10
+    timeout_seconds: 180
+    retry_count: 1
+    retry_delay_seconds: 10
+    continue_on_failure: true
+
+  - name: "Run DeepSeek Analysis"
+    description: "Analyze data with DeepSeek model"
+    action: deepseek_synthesis
+    params:
+      model: "deepseek-chat"
+      context_from_previous: true
+      task: "Analyze NBA game and player statistics"
+      max_tokens: 4000
+    timeout_seconds: 300
+    retry_count: 1
+    retry_delay_seconds: 15
+    continue_on_failure: false
+
+  - name: "Run Claude Synthesis"
+    description: "Synthesize final report with Claude"
+    action: claude_synthesis
+    params:
+      model: "claude-3-5-sonnet-20241022"
+      context_from_previous: true
+      task: "Generate comprehensive NBA analysis report"
+      max_tokens: 8000
+    timeout_seconds: 300
+    retry_count: 1
+    retry_delay_seconds: 15
+    continue_on_failure: false
+
+  - name: "Generate Markdown Report"
+    description: "Create formatted markdown report"
+    action: generate_report
+    params:
+      report_type: "synthesis"
+      output_format: "markdown"
+      include_charts: true
+      output_file: "reports/nba_analysis_{timestamp}.md"
+    timeout_seconds: 60
+    continue_on_failure: true
+
+  - name: "Send Report to Slack"
+    description: "Share report in Slack channel"
+    action: notify
+    params:
+      message: "📊 NBA Analysis Report Complete"
+      attach_report: true
+      channel: "#nba-analysis"
+    timeout_seconds: 30

@@ -1,0 +1,81 @@
+# Automated Testing Pipeline Workflow
+# Runs tests, waits for approval, then deploys if approved
+
+workflow_id: automated-testing-pipeline
+name: "Automated Testing Pipeline"
+description: "Run tests, get approval, deploy to production"
+source: workflow_engine
+notify_slack: true
+save_state: true
+
+steps:
+  - name: "Run Unit Tests"
+    description: "Execute unit test suite with pytest"
+    action: run_tests
+    params:
+      test_suite: "tests/"
+      test_type: "unit"
+      coverage: true
+    timeout_seconds: 300
+    retry_count: 1
+    retry_delay_seconds: 10
+    continue_on_failure: false
+
+  - name: "Run Integration Tests"
+    description: "Execute integration tests"
+    action: run_tests
+    params:
+      test_suite: "tests/integration/"
+      test_type: "integration"
+      coverage: false
+    timeout_seconds: 600
+    retry_count: 1
+    retry_delay_seconds: 10
+    continue_on_failure: false
+
+  - name: "Generate Test Report"
+    description: "Generate comprehensive test report"
+    action: generate_report
+    params:
+      report_type: "test"
+      output_format: "markdown"
+    timeout_seconds: 60
+    continue_on_failure: true
+
+  - name: "Deployment Approval"
+    description: "Wait for manual approval to deploy"
+    action: request_approval
+    params:
+      approval_message: "All tests passed! Deploy to production?"
+      timeout_minutes: 60
+    requires_approval: true
+    timeout_seconds: 3600
+
+  - name: "Deploy to Production"
+    description: "Deploy code to production environment"
+    action: deploy
+    params:
+      environment: "production"
+      rollback_enabled: true
+    timeout_seconds: 300
+    retry_count: 0
+    continue_on_failure: false
+
+  - name: "Verify Deployment"
+    description: "Run health checks on production deployment"
+    action: health_check
+    params:
+      environment: "production"
+      checks: ["server_status", "database_connection", "api_endpoints"]
+    timeout_seconds: 120
+    retry_count: 2
+    retry_delay_seconds: 30
+    continue_on_failure: false
+
+  - name: "Notify Deployment Success"
+    description: "Send success notification to Slack"
+    action: notify
+    params:
+      message: "🎉 Deployment to production successful!"
+      channel: "#deployments"
+    timeout_seconds: 30
