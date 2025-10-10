@@ -1,0 +1,240 @@
+{
+  "dashboard": {
+    "title": "Cost Analysis & Optimization",
+    "tags": ["cost", "optimization", "billing"],
+    "timezone": "browser",
+    "schemaVersion": 27,
+    "version": 1,
+    "refresh": "5m",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Total Cost (Last 30 Days)",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 8, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "sum(increase(synthesis_cost_total[30d]))",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "decimals": 2,
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 100, "color": "yellow"},
+                {"value": 500, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "graphMode": "area",
+          "textMode": "value_and_name"
+        }
+      },
+      {
+        "id": 2,
+        "title": "Cost per Day Trend",
+        "type": "graph",
+        "gridPos": {"h": 6, "w": 16, "x": 8, "y": 0},
+        "targets": [
+          {
+            "expr": "sum(increase(synthesis_cost_total[1d]))",
+            "legendFormat": "Total Daily Cost",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "currencyUSD", "label": "Cost"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Cost by Model",
+        "type": "piechart",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+        "targets": [
+          {
+            "expr": "sum by (model) (increase(synthesis_cost_total[7d]))",
+            "legendFormat": "{{model}}",
+            "refId": "A"
+          }
+        ],
+        "legend": {"show": true, "values": true},
+        "pieType": "donut"
+      },
+      {
+        "id": 4,
+        "title": "Cost per 1000 Requests",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+        "targets": [
+          {
+            "expr": "(sum(rate(synthesis_cost_total[1h])) / sum(rate(synthesis_requests_total[1h]))) * 1000",
+            "legendFormat": "Cost per 1K requests",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "currencyUSD", "label": "Cost"},
+          {"format": "short"}
+        ],
+        "alert": {
+          "name": "High Cost per Request",
+          "conditions": [
+            {
+              "evaluator": {"type": "gt", "params": [15]},
+              "query": {"params": ["A", "5m", "now"]},
+              "reducer": {"type": "avg"}
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "title": "Cache Savings (Est.)",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 14},
+        "targets": [
+          {
+            "expr": "(sum(rate(cache_hits_total[7d])) / sum(rate(synthesis_requests_total[7d]))) * sum(increase(synthesis_cost_total[7d]))",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "decimals": 2,
+            "color": {"mode": "fixed", "fixedColor": "green"}
+          }
+        },
+        "options": {
+          "graphMode": "area",
+          "textMode": "value_and_name"
+        }
+      },
+      {
+        "id": 6,
+        "title": "Projected Monthly Cost",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 14},
+        "targets": [
+          {
+            "expr": "sum(increase(synthesis_cost_total[7d])) * 4.3",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "decimals": 2,
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 1000, "color": "yellow"},
+                {"value": 3000, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Cost Savings vs GPT-4",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 14},
+        "targets": [
+          {
+            "expr": "(1 - (sum(increase(synthesis_cost_total[30d])) / (sum(increase(synthesis_cost_total[30d])) * 20))) * 100",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 1,
+            "color": {"mode": "fixed", "fixedColor": "green"}
+          }
+        },
+        "options": {
+          "textMode": "value_and_name"
+        }
+      },
+      {
+        "id": 8,
+        "title": "Tokens per Dollar",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 14},
+        "targets": [
+          {
+            "expr": "sum(increase(synthesis_tokens_total[7d])) / sum(increase(synthesis_cost_total[7d]))",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "decimals": 0
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Cost by Query Type",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 18},
+        "targets": [
+          {
+            "expr": "sum by (query_type) (increase(synthesis_cost_total[7d]))",
+            "format": "table",
+            "refId": "A"
+          },
+          {
+            "expr": "sum by (query_type) (increase(synthesis_requests_total[7d]))",
+            "format": "table",
+            "refId": "B"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "renameByName": {
+                "query_type": "Query Type",
+                "Value #A": "Total Cost",
+                "Value #B": "Request Count"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Hourly Cost Pattern",
+        "type": "heatmap",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 18},
+        "targets": [
+          {
+            "expr": "sum by (hour) (rate(synthesis_cost_total[1h]))",
+            "refId": "A"
+          }
+        ],
+        "dataFormat": "tsbuckets",
+        "yAxis": {"format": "short"}
+      }
+    ]
+  }
+}

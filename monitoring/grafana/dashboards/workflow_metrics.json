@@ -1,0 +1,174 @@
+{
+  "dashboard": {
+    "title": "Workflow Automation Metrics",
+    "tags": ["workflow", "automation"],
+    "timezone": "browser",
+    "schemaVersion": 27,
+    "version": 1,
+    "refresh": "1m",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Workflow Execution Timeline",
+        "type": "graph",
+        "gridPos": {"h": 10, "w": 24, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "sum by (workflow_name, status) (rate(workflow_executions_total[5m]))",
+            "legendFormat": "{{workflow_name}} - {{status}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Executions/sec"},
+          {"format": "short"}
+        ],
+        "legend": {"show": true, "values": true, "current": true}
+      },
+      {
+        "id": 2,
+        "title": "Workflow Duration (Avg)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 10},
+        "targets": [
+          {
+            "expr": "avg by (workflow_name) (workflow_duration_seconds)",
+            "legendFormat": "{{workflow_name}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Duration"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Step Failures by Workflow",
+        "type": "heatmap",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 10},
+        "targets": [
+          {
+            "expr": "sum by (workflow_name, step_name) (rate(workflow_step_failures_total[1h]))",
+            "refId": "A"
+          }
+        ],
+        "dataFormat": "tsbuckets"
+      },
+      {
+        "id": 4,
+        "title": "Active Workflows",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 18},
+        "targets": [
+          {
+            "expr": "sum(workflow_active_count)",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 10, "color": "yellow"},
+                {"value": 20, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Approval Pending",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 18},
+        "targets": [
+          {
+            "expr": "sum(workflow_approval_pending_count)",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 1, "color": "yellow"},
+                {"value": 5, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Cross-Chat Events",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 18},
+        "targets": [
+          {
+            "expr": "rate(workflow_events_total[5m])",
+            "refId": "A"
+          }
+        ],
+        "unit": "ops"
+      },
+      {
+        "id": 7,
+        "title": "Slack Notifications Sent",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 18},
+        "targets": [
+          {
+            "expr": "rate(slack_notifications_total[1h])",
+            "refId": "A"
+          }
+        ],
+        "unit": "short"
+      },
+      {
+        "id": 8,
+        "title": "Workflow Success Rate (24h)",
+        "type": "bargauge",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 22},
+        "targets": [
+          {
+            "expr": "sum by (workflow_name) (rate(workflow_completed_total[24h])) / (sum by (workflow_name) (rate(workflow_completed_total[24h])) + sum by (workflow_name) (rate(workflow_failed_total[24h]))) * 100",
+            "legendFormat": "{{workflow_name}}",
+            "refId": "A"
+          }
+        ],
+        "orientation": "horizontal",
+        "unit": "percent",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {"value": 0, "color": "red"},
+            {"value": 90, "color": "yellow"},
+            {"value": 98, "color": "green"}
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "Event Sources Distribution",
+        "type": "piechart",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 22},
+        "targets": [
+          {
+            "expr": "sum by (source) (rate(workflow_events_total[24h]))",
+            "legendFormat": "{{source}}",
+            "refId": "A"
+          }
+        ],
+        "legend": {"show": true, "values": true}
+      }
+    ]
+  }
+}

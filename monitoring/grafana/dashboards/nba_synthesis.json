@@ -1,0 +1,201 @@
+{
+  "dashboard": {
+    "title": "NBA MCP Synthesis - Overview",
+    "tags": ["nba", "synthesis", "overview"],
+    "timezone": "browser",
+    "schemaVersion": 27,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Synthesis Requests (Rate)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "rate(synthesis_requests_total[5m])",
+            "legendFormat": "{{model}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "reqps", "label": "Requests/sec"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Response Time (p95)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(synthesis_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{model}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Duration"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Cost per Hour",
+        "type": "singlestat",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(synthesis_cost_total[1h])",
+            "refId": "A"
+          }
+        ],
+        "format": "currencyUSD",
+        "prefix": "$",
+        "thresholds": "5,10"
+      },
+      {
+        "id": 4,
+        "title": "Error Rate",
+        "type": "singlestat",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(synthesis_errors_total[5m]) / rate(synthesis_requests_total[5m]) * 100",
+            "refId": "A"
+          }
+        ],
+        "format": "percent",
+        "suffix": "%",
+        "thresholds": "5,10",
+        "colors": ["#299c46", "#e0b400", "#bf1b00"]
+      },
+      {
+        "id": 5,
+        "title": "Cache Hit Rate",
+        "type": "gauge",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(cache_hits_total[5m]) / (rate(cache_hits_total[5m]) + rate(cache_misses_total[5m])) * 100",
+            "refId": "A"
+          }
+        ],
+        "unit": "percent",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {"value": 0, "color": "red"},
+            {"value": 50, "color": "yellow"},
+            {"value": 70, "color": "green"}
+          ]
+        }
+      },
+      {
+        "id": 6,
+        "title": "Workflow Success Rate",
+        "type": "gauge",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(workflow_completed_total[1h]) / (rate(workflow_completed_total[1h]) + rate(workflow_failed_total[1h])) * 100",
+            "refId": "A"
+          }
+        ],
+        "unit": "percent",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {"value": 0, "color": "red"},
+            {"value": 80, "color": "yellow"},
+            {"value": 95, "color": "green"}
+          ]
+        }
+      },
+      {
+        "id": 7,
+        "title": "Tokens Used by Model",
+        "type": "piechart",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+        "targets": [
+          {
+            "expr": "sum by (model) (rate(synthesis_tokens_total[1h]))",
+            "legendFormat": "{{model}}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "MCP Tool Usage",
+        "type": "bargauge",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+        "targets": [
+          {
+            "expr": "topk(10, sum by (tool) (rate(mcp_tool_calls_total[1h])))",
+            "legendFormat": "{{tool}}",
+            "refId": "A"
+          }
+        ],
+        "orientation": "horizontal"
+      },
+      {
+        "id": 9,
+        "title": "NBA Query Patterns (Top 10)",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
+        "targets": [
+          {
+            "expr": "topk(10, sum by (query_type) (rate(synthesis_requests_total[24h])))",
+            "format": "table",
+            "refId": "A"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {},
+              "indexByName": {},
+              "renameByName": {
+                "query_type": "Query Type",
+                "Value": "Requests/Day"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "System Health",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
+        "targets": [
+          {
+            "expr": "up{job=\"nba-mcp-synthesis\"}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          },
+          "mappings": [
+            {"type": "value", "value": "1", "text": "UP"},
+            {"type": "value", "value": "0", "text": "DOWN"}
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"value": 0, "color": "red"},
+              {"value": 1, "color": "green"}
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
