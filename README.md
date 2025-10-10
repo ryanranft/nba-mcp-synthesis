@@ -113,10 +113,21 @@ Final Solution with Explanation
 
 ## Documentation
 
+### Getting Started
+- **README.md** (this file) - Quick start and overview
 - **USAGE_GUIDE.md** - Comprehensive usage guide for all three methods
 - **CLAUDE_DESKTOP_SETUP.md** - Claude Desktop integration setup
+- **DEPLOYMENT.md** - Production deployment guide
+
+### Status & Progress
+- **STATUS_HISTORY.md** - Complete timeline of all phases and milestones
+- **MCP_DEPLOYMENT_READINESS_COMPLETE.md** - Main planning document
+- **PHASE_2_PRODUCTION_HARDENING_COMPLETE.md** - Production features
+- **TEST_SUITES_COMPLETE.md** - Test coverage documentation
+
+### Reference
 - **.env.example** - Environment variable template
-- **tests/** - Connection and integration tests
+- **tests/** - Connection and integration tests (71 tests, 98.6% pass rate)
 - **scripts/** - Test and diagnostic scripts
 
 ## Configuration

@@ -1,0 +1,23 @@
+# Archive Location
+
+**Gitignored files are automatically archived to:**
+
+`/Users/ryanranft/nba-mcp-archives/`
+
+**Archive system:**
+- Organized by git commit SHA
+- Auto-populated by post-commit hooks
+- Includes: status files, completion docs, test results, logs
+
+**To access archives:**
+1. Find commit SHA: `git log --oneline`
+2. Navigate to: `~/nba-mcp-archives/<commit-sha>/`
+3. Browse gitignored files from that commit
+
+**Example:**
+```bash
+cd ~/nba-mcp-archives/9e3c4e2/
+ls -la  # See all archived files from this commit
+```
+
+See `~/nba-mcp-archives/README.md` for complete documentation.

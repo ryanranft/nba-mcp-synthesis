@@ -59,10 +59,29 @@ secrets.yaml
 !.env.example
 *.secret
 
-# Planning documents (large reference files)
-docs/planning/MCP_MULTI_MODEL_PROJECT_PLAN.md
-docs/planning/CONNECTOR_INTEGRATION_PLANS.md
-docs/planning/Progressive_Fidelity_NBA_Simulator_Complete_Guide_CORRECTED.md
+# Planning documents (large reference files - archived)
+docs/planning/ARCHIVED/
+
+# Status/Completion files (archived after completion)
+IMPLEMENTATION_COMPLETE.md
+DEPLOYMENT_SUCCESS.md
+CONFIGURATION_COMPLETE_SUMMARY.md
+SETUP_COMPLETE_SUMMARY.md
+ALL_CONNECTORS_DEPLOYMENT_SUMMARY.md
+CONNECTORS_IMPLEMENTATION_COMPLETE.md
+FINAL_VERIFICATION_SUMMARY.md
+GREAT_EXPECTATIONS_VERIFICATION_COMPLETE.md
+LATEST_STATUS_UPDATE.md
+PYCHARM_INTEGRATION_SUMMARY.md
+TESTING_RESULTS.md
+QUICKSTART.md
+CLAUDE_DESKTOP_NEXT_STEPS.md
+OLLAMA_PRIMARY_WORKFLOW.md
+
+# Test result files (archived)
+test_results.txt
+test_results_complete.txt
+final_test_report.txt
 
 # Great Expectations (uncommitted files contain credentials)
 great_expectations/uncommitted/
