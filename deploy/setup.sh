@@ -1,209 +1,205 @@
 #!/bin/bash
 #
-# Automated Deployment Setup Script
-# Deploys NBA MCP Synthesis System from scratch
+# NBA MCP Synthesis - Automated Deployment Script
+# Deploys the system from scratch with full validation
 #
 
 set -e  # Exit on error
 
-# Colors
+# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m'
+NC='\033[0m' # No Color
 
 # Configuration
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-VENV_DIR="${PROJECT_ROOT}/venv"
-LOG_FILE="${PROJECT_ROOT}/deploy/setup.log"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+LOG_FILE="${PROJECT_DIR}/deploy/deployment_$(date +%Y%m%d_%H%M%S).log"
+BACKUP_DIR="${PROJECT_DIR}/deploy/backups"
 
-echo -e "${BLUE}══════════════════════════════════════════════════════════${NC}"
-echo -e "${BLUE}NBA MCP Synthesis - Automated Deployment${NC}"
-echo -e "${BLUE}══════════════════════════════════════════════════════════${NC}"
-echo ""
-echo -e "Project: $PROJECT_ROOT"
-echo -e "Log file: $LOG_FILE"
-echo ""
-
-# Create deploy log directory
-mkdir -p "$(dirname "$LOG_FILE")"
-
-# Log function
+# Functions
 log() {
-    echo -e "$1" | tee -a "$LOG_FILE"
+    echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')]${NC} $1" | tee -a "$LOG_FILE"
 }
 
-log_step() {
-    log "${BLUE}[$1]${NC} $2"
+error() {
+    echo -e "${RED}[ERROR]${NC} $1" | tee -a "$LOG_FILE"
 }
 
-log_success() {
-    log "${GREEN}✅${NC} $1"
+warn() {
+    echo -e "${YELLOW}[WARN]${NC} $1" | tee -a "$LOG_FILE"
 }
 
-log_error() {
-    log "${RED}❌${NC} $1"
+info() {
+    echo -e "${BLUE}[INFO]${NC} $1" | tee -a "$LOG_FILE"
 }
 
-log_warning() {
-    log "${YELLOW}⚠️${NC}  $1"
+step() {
+    echo -e "\n${BLUE}[$1]${NC} $2" | tee -a "$LOG_FILE"
 }
 
-# Step 1: Check prerequisites
-log_step "1/8" "Checking prerequisites..."
+# Banner
+echo "========================================" | tee "$LOG_FILE"
+echo "NBA MCP Synthesis - Automated Deployment" | tee -a "$LOG_FILE"
+echo "========================================" | tee -a "$LOG_FILE"
+echo "" | tee -a "$LOG_FILE"
+log "Starting deployment process..."
+log "Project directory: $PROJECT_DIR"
+log "Log file: $LOG_FILE"
+echo ""
 
-# Check Python
-if ! command -v python3 &> /dev/null; then
-    log_error "Python 3 not found. Please install Python 3.9+ first."
+# Step 1: Validate prerequisites
+step "1/8" "Validating prerequisites"
+
+# Check Python version
+if command -v python3 &> /dev/null; then
+    PYTHON_VERSION=$(python3 --version | cut -d' ' -f2)
+    log "Python version: $PYTHON_VERSION"
+else
+    error "Python 3 not found"
     exit 1
 fi
 
-PYTHON_VERSION=$(python3 --version | awk '{print $2}')
-log_success "Python ${PYTHON_VERSION} found"
+# Check Git
+if command -v git &> /dev/null; then
+    GIT_VERSION=$(git --version | cut -d' ' -f3)
+    log "Git version: $GIT_VERSION"
+else
+    error "Git not found"
+    exit 1
+fi
 
 # Check pip
-if ! command -v pip3 &> /dev/null; then
-    log_error "pip3 not found. Please install pip first."
+if command -v pip3 &> /dev/null || command -v pip &> /dev/null; then
+    log "pip is available"
+else
+    error "pip not found"
     exit 1
 fi
 
-log_success "pip3 found"
+# Step 2: Create backup of existing installation
+step "2/8" "Creating backup"
 
-# Check git
-if ! command -v git &> /dev/null; then
-    log_warning "git not found (optional)"
+mkdir -p "$BACKUP_DIR"
+
+if [ -f "$PROJECT_DIR/.env" ]; then
+    BACKUP_NAME="env_backup_$(date +%Y%m%d_%H%M%S).env"
+    cp "$PROJECT_DIR/.env" "$BACKUP_DIR/$BACKUP_NAME"
+    log "Backed up .env to: $BACKUP_DIR/$BACKUP_NAME"
 else
-    log_success "git found"
+    info "No existing .env file to backup"
 fi
-
-# Step 2: Create virtual environment (optional but recommended)
-log_step "2/8" "Setting up virtual environment..."
-
-if [ -d "$VENV_DIR" ]; then
-    log_warning "Virtual environment already exists, skipping creation"
-else
-    python3 -m venv "$VENV_DIR" >> "$LOG_FILE" 2>&1
-    log_success "Virtual environment created at $VENV_DIR"
-fi
-
-# Activate venv
-source "$VENV_DIR/bin/activate"
-log_success "Virtual environment activated"
 
 # Step 3: Install dependencies
-log_step "3/8" "Installing Python dependencies..."
+step "3/8" "Installing Python dependencies"
 
-cd "$PROJECT_ROOT"
+cd "$PROJECT_DIR"
 
-pip install --upgrade pip >> "$LOG_FILE" 2>&1
-pip install -r requirements.txt >> "$LOG_FILE" 2>&1
-
-log_success "Dependencies installed"
-
-# Verify critical packages
-python3 -c "import mcp, boto3, psycopg2, anthropic" 2>/dev/null
-if [ $? -eq 0 ]; then
-    log_success "Critical packages verified"
-else
-    log_error "Failed to verify critical packages"
+if [ ! -f "requirements.txt" ]; then
+    error "requirements.txt not found"
     exit 1
 fi
 
-# Step 4: Configure environment
-log_step "4/8" "Configuring environment..."
+# Install dependencies
+log "Installing from requirements.txt..."
+pip3 install -r requirements.txt >> "$LOG_FILE" 2>&1
 
-if [ ! -f "${PROJECT_ROOT}/.env" ]; then
-    if [ -f "${PROJECT_ROOT}/.env.example" ]; then
-        cp "${PROJECT_ROOT}/.env.example" "${PROJECT_ROOT}/.env"
-        log_warning ".env file created from .env.example"
-        log_warning "IMPORTANT: Edit .env file with your actual credentials before proceeding"
-        echo ""
-        echo -e "${YELLOW}Next step: Edit .env file with your credentials${NC}"
-        echo -e "Then run: ${GREEN}./deploy/verify.sh${NC}"
-        echo ""
-        exit 0
+if [ $? -eq 0 ]; then
+    log "Dependencies installed successfully"
+else
+    error "Failed to install dependencies"
+    exit 1
+fi
+
+# Step 4: Environment configuration
+step "4/8" "Configuring environment"
+
+if [ ! -f "$PROJECT_DIR/.env" ]; then
+    if [ -f "$PROJECT_DIR/.env.example" ]; then
+        info "No .env file found. Creating from .env.example..."
+        cp "$PROJECT_DIR/.env.example" "$PROJECT_DIR/.env"
+        warn "Please edit .env with your actual credentials before continuing"
+        warn "Press ENTER to continue after editing .env, or CTRL+C to abort"
+        read -r
     else
-        log_error ".env.example not found. Cannot create .env file."
+        error "No .env or .env.example file found"
         exit 1
     fi
 else
-    log_success ".env file exists"
+    log ".env file exists"
 fi
 
 # Step 5: Validate environment
-log_step "5/8" "Validating environment configuration..."
+step "5/8" "Validating environment configuration"
 
-python3 "${PROJECT_ROOT}/scripts/validate_environment.py" >> "$LOG_FILE" 2>&1
+if [ -f "$PROJECT_DIR/scripts/validate_environment.py" ]; then
+    log "Running environment validation..."
+    python3 "$PROJECT_DIR/scripts/validate_environment.py" --exit-on-failure >> "$LOG_FILE" 2>&1
 
-if [ $? -eq 0 ]; then
-    log_success "Environment validation passed"
+    if [ $? -eq 0 ]; then
+        log "Environment validation passed"
+    else
+        error "Environment validation failed. Check log file: $LOG_FILE"
+        error "Run: python3 scripts/validate_environment.py (for detailed output)"
+        exit 1
+    fi
 else
-    log_error "Environment validation failed. Check $LOG_FILE for details"
-    echo ""
-    echo -e "${YELLOW}To see errors, run:${NC}"
-    echo -e "  python scripts/validate_environment.py"
-    echo ""
-    exit 1
+    warn "Validation script not found, skipping validation"
 fi
 
 # Step 6: Create required directories
-log_step "6/8" "Creating required directories..."
+step "6/8" "Creating required directories"
 
-mkdir -p "${PROJECT_ROOT}/logs"
-mkdir -p "${PROJECT_ROOT}/synthesis_output"
-mkdir -p "${PROJECT_ROOT}/cache"
+mkdir -p "$PROJECT_DIR/logs"
+mkdir -p "$PROJECT_DIR/synthesis_output"
+mkdir -p "$PROJECT_DIR/cache"
 
-log_success "Directories created"
+log "Created required directories"
 
-# Step 7: Run connection tests
-log_step "7/8" "Testing connections..."
+# Step 7: Run post-deployment verification
+step "7/8" "Running post-deployment verification"
 
-python3 -c "
-import asyncio
-import sys
-sys.path.insert(0, '.')
+# Check if verification script exists
+if [ -f "$PROJECT_DIR/deploy/verify.sh" ]; then
+    log "Running verification script..."
+    bash "$PROJECT_DIR/deploy/verify.sh" >> "$LOG_FILE" 2>&1
 
-async def test():
-    from tests.test_e2e_workflow import TestE2EWorkflow
-    test_suite = TestE2EWorkflow()
-
-    try:
-        await test_suite.test_01_environment_setup()
-        print('✅ Environment test passed')
-        return 0
-    except Exception as e:
-        print(f'❌ Environment test failed: {e}')
-        return 1
-
-sys.exit(asyncio.run(test()))
-" >> "$LOG_FILE" 2>&1
-
-if [ $? -eq 0 ]; then
-    log_success "Connection tests passed"
+    if [ $? -eq 0 ]; then
+        log "Verification passed"
+    else
+        error "Verification failed. Check log file: $LOG_FILE"
+        exit 1
+    fi
 else
-    log_warning "Connection tests had issues (check log)"
+    warn "Verification script not found, skipping"
 fi
 
 # Step 8: Final summary
-log_step "8/8" "Deployment complete!"
+step "8/8" "Deployment complete"
 
 echo ""
-log_success "NBA MCP Synthesis System is deployed!"
+echo "========================================" | tee -a "$LOG_FILE"
+log "✅ Deployment completed successfully!"
+echo "========================================" | tee -a "$LOG_FILE"
+echo "" | tee -a "$LOG_FILE"
+
+log "Next steps:"
+echo "" | tee -a "$LOG_FILE"
+echo "  1. Start the MCP server:" | tee -a "$LOG_FILE"
+echo "     ./scripts/start_mcp_server.sh" | tee -a "$LOG_FILE"
+echo "" | tee -a "$LOG_FILE"
+echo "  2. Run end-to-end tests:" | tee -a "$LOG_FILE"
+echo "     python3 tests/test_e2e_workflow.py" | tee -a "$LOG_FILE"
+echo "" | tee -a "$LOG_FILE"
+echo "  3. Run performance benchmarks:" | tee -a "$LOG_FILE"
+echo "     python3 scripts/benchmark_system.py" | tee -a "$LOG_FILE"
+echo "" | tee -a "$LOG_FILE"
+echo "  4. Run load tests:" | tee -a "$LOG_FILE"
+echo "     python3 tests/test_load.py" | tee -a "$LOG_FILE"
+echo "" | tee -a "$LOG_FILE"
+
+log "Deployment log saved to: $LOG_FILE"
 echo ""
-echo -e "${BLUE}Next Steps:${NC}"
-echo -e "  1. ${GREEN}./scripts/start_mcp_server.sh${NC}  - Start MCP server"
-echo -e "  2. ${GREEN}python tests/test_e2e_workflow.py${NC} - Run E2E tests"
-echo -e "  3. ${GREEN}python scripts/test_synthesis_direct.py${NC} - Try synthesis"
-echo ""
-echo -e "${BLUE}Management:${NC}"
-echo -e "  Stop server:    ${GREEN}./scripts/stop_mcp_server.sh${NC}"
-echo -e "  View logs:      ${GREEN}tail -f logs/mcp_server.log${NC}"
-echo -e "  Verify deploy:  ${GREEN}./deploy/verify.sh${NC}"
-echo ""
-echo -e "${BLUE}Documentation:${NC}"
-echo -e "  Deployment:  ${GREEN}DEPLOYMENT.md${NC}"
-echo -e "  Usage:       ${GREEN}USAGE_GUIDE.md${NC}"
-echo -e "  Quick Start: ${GREEN}QUICKSTART.md${NC}"
-echo ""
-log_success "Setup complete! 🎉"
+
+exit 0

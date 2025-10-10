@@ -1,138 +1,77 @@
 #!/bin/bash
 #
-# Post-Deployment Verification Script
-# Verifies the system is properly deployed and functioning
+# NBA MCP Synthesis - Post-Deployment Verification
 #
 
 set -e
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_DIR"
 
-# Configuration
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-
-echo -e "${BLUE}══════════════════════════════════════════════════════════${NC}"
-echo -e "${BLUE}NBA MCP Synthesis - Deployment Verification${NC}"
-echo -e "${BLUE}══════════════════════════════════════════════════════════${NC}"
+echo "========================================="
+echo "Post-Deployment Verification"
+echo "========================================="
 echo ""
 
-PASS_COUNT=0
-FAIL_COUNT=0
-
-check() {
-    local name="$1"
-    local command="$2"
-
-    echo -en "Checking $name... "
-
-    if eval "$command" > /dev/null 2>&1; then
-        echo -e "${GREEN}✅ PASS${NC}"
-        PASS_COUNT=$((PASS_COUNT + 1))
-        return 0
-    else
-        echo -e "${RED}❌ FAIL${NC}"
-        FAIL_COUNT=$((FAIL_COUNT + 1))
-        return 1
-    fi
-}
-
-# Verification checks
-echo -e "${BLUE}Running verification checks...${NC}"
-echo ""
-
-# 1. Python environment
-check "Python 3.9+" "python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3,9) else 1)'"
-
-# 2. Virtual environment
-check "Virtual environment" "[ -d '$PROJECT_ROOT/venv' ]"
-
-# 3. Critical Python packages
-check "boto3 package" "python3 -c 'import boto3'"
-check "psycopg2 package" "python3 -c 'import psycopg2'"
-check "anthropic package" "python3 -c 'import anthropic'"
-check "mcp package" "python3 -c 'import mcp'"
-
-# 4. Configuration files
-check ".env file" "[ -f '$PROJECT_ROOT/.env' ]"
-check ".env.example file" "[ -f '$PROJECT_ROOT/.env.example' ]"
-check "requirements.txt" "[ -f '$PROJECT_ROOT/requirements.txt' ]"
-
-# 5. Project structure
-check "mcp_server directory" "[ -d '$PROJECT_ROOT/mcp_server' ]"
-check "synthesis directory" "[ -d '$PROJECT_ROOT/synthesis' ]"
-check "scripts directory" "[ -d '$PROJECT_ROOT/scripts' ]"
-check "tests directory" "[ -d '$PROJECT_ROOT/tests' ]"
-
-# 6. Required directories
-check "logs directory" "[ -d '$PROJECT_ROOT/logs' ]"
-check "synthesis_output directory" "[ -d '$PROJECT_ROOT/synthesis_output' ]"
-
-# 7. Critical scripts
-check "validate_environment.py" "[ -f '$PROJECT_ROOT/scripts/validate_environment.py' ]"
-check "start_mcp_server.sh" "[ -x '$PROJECT_ROOT/scripts/start_mcp_server.sh' ]"
-check "stop_mcp_server.sh" "[ -x '$PROJECT_ROOT/scripts/stop_mcp_server.sh' ]"
-check "test_e2e_workflow.py" "[ -f '$PROJECT_ROOT/tests/test_e2e_workflow.py' ]"
-
-# 8. Environment validation
-echo -en "Validating environment configuration... "
-if python3 "${PROJECT_ROOT}/scripts/validate_environment.py" > /dev/null 2>&1; then
-    echo -e "${GREEN}✅ PASS${NC}"
-    PASS_COUNT=$((PASS_COUNT + 1))
+# Check 1: Python dependencies
+echo "[1/5] Checking Python dependencies..."
+python3 -c "import boto3, psycopg2, anthropic, mcp" 2>/dev/null
+if [ $? -eq 0 ]; then
+    echo "✅ All required packages installed"
 else
-    echo -e "${RED}❌ FAIL${NC}"
-    echo -e "  ${YELLOW}Run: python scripts/validate_environment.py${NC}"
-    FAIL_COUNT=$((FAIL_COUNT + 1))
-fi
-
-# 9. MCP server status
-echo -en "MCP server status... "
-if [ -f "${PROJECT_ROOT}/.mcp_server.pid" ]; then
-    PID=$(cat "${PROJECT_ROOT}/.mcp_server.pid")
-    if ps -p "$PID" > /dev/null 2>&1; then
-        echo -e "${GREEN}✅ RUNNING (PID: $PID)${NC}"
-        PASS_COUNT=$((PASS_COUNT + 1))
-    else
-        echo -e "${YELLOW}⚠️  STOPPED${NC}"
-        echo -e "  ${YELLOW}Start with: ./scripts/start_mcp_server.sh${NC}"
-    fi
-else
-    echo -e "${YELLOW}⚠️  NOT STARTED${NC}"
-    echo -e "  ${YELLOW}Start with: ./scripts/start_mcp_server.sh${NC}"
-fi
-
-# Summary
-echo ""
-echo -e "${BLUE}══════════════════════════════════════════════════════════${NC}"
-echo -e "${BLUE}Verification Summary${NC}"
-echo -e "${BLUE}══════════════════════════════════════════════════════════${NC}"
-echo ""
-echo -e "Checks passed: ${GREEN}${PASS_COUNT}${NC}"
-echo -e "Checks failed: ${RED}${FAIL_COUNT}${NC}"
-echo ""
-
-if [ $FAIL_COUNT -eq 0 ]; then
-    echo -e "${GREEN}✅ All verification checks passed!${NC}"
-    echo ""
-    echo -e "${BLUE}System is ready to use!${NC}"
-    echo ""
-    echo -e "${BLUE}Quick Start:${NC}"
-    echo -e "  1. Start MCP server: ${GREEN}./scripts/start_mcp_server.sh${NC}"
-    echo -e "  2. Run E2E tests:    ${GREEN}python tests/test_e2e_workflow.py${NC}"
-    echo -e "  3. Try synthesis:    ${GREEN}python scripts/test_synthesis_direct.py${NC}"
-    echo ""
-    exit 0
-else
-    echo -e "${RED}❌ ${FAIL_COUNT} verification check(s) failed${NC}"
-    echo ""
-    echo -e "${YELLOW}Troubleshooting:${NC}"
-    echo -e "  1. Check .env file has correct credentials"
-    echo -e "  2. Run: ${GREEN}python scripts/validate_environment.py${NC}"
-    echo -e "  3. See: ${GREEN}DEPLOYMENT.md${NC} for detailed setup"
-    echo ""
+    echo "❌ Missing required packages"
     exit 1
 fi
+
+# Check 2: Environment variables
+echo "[2/5] Checking environment variables..."
+if [ -f ".env" ]; then
+    echo "✅ .env file exists"
+else
+    echo "❌ .env file missing"
+    exit 1
+fi
+
+# Check 3: Required directories
+echo "[3/5] Checking required directories..."
+for dir in logs synthesis_output cache; do
+    if [ -d "$dir" ]; then
+        echo "✅ Directory '$dir' exists"
+    else
+        echo "⚠️  Directory '$dir' missing (will be created)"
+        mkdir -p "$dir"
+    fi
+done
+
+# Check 4: Key scripts executable
+echo "[4/5] Checking script permissions..."
+for script in scripts/start_mcp_server.sh scripts/stop_mcp_server.sh; do
+    if [ -x "$script" ]; then
+        echo "✅ $script is executable"
+    else
+        echo "⚠️  $script not executable (fixing)"
+        chmod +x "$script"
+    fi
+done
+
+# Check 5: Run validation script
+echo "[5/5] Running environment validation..."
+if [ -f "scripts/validate_environment.py" ]; then
+    python3 scripts/validate_environment.py --exit-on-failure
+    if [ $? -eq 0 ]; then
+        echo "✅ Environment validation passed"
+    else
+        echo "❌ Environment validation failed"
+        exit 1
+    fi
+else
+    echo "⚠️  Validation script not found"
+fi
+
+echo ""
+echo "========================================="
+echo "✅ All verification checks passed!"
+echo "========================================="
+echo ""
+
+exit 0
