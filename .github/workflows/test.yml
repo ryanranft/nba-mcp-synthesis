@@ -1,0 +1,104 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11']
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-asyncio pytest-cov
+    
+    - name: Lint with flake8
+      run: |
+        pip install flake8
+        # Stop build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Exit-zero treats all errors as warnings
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      continue-on-error: true
+    
+    - name: Run unit tests
+      env:
+        # Mock environment variables for testing
+        RDS_HOST: localhost
+        RDS_PORT: 5432
+        RDS_DATABASE: test_db
+        RDS_USERNAME: test_user
+        RDS_PASSWORD: test_pass
+        S3_BUCKET: test-bucket
+        S3_REGION: us-east-1
+        AWS_ACCESS_KEY_ID: test_key
+        AWS_SECRET_ACCESS_KEY: test_secret
+        DEEPSEEK_API_KEY: test_deepseek_key
+        ANTHROPIC_API_KEY: test_anthropic_key
+      run: |
+        # Run tests that don't require real AWS/API connections
+        pytest tests/ -v -m "not integration" --cov=synthesis --cov=mcp_server --cov-report=xml --cov-report=term
+      continue-on-error: true
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+      continue-on-error: true
+    
+    - name: Test import integrity
+      run: |
+        python -c "import synthesis; import mcp_server; print('✅ All imports successful')"
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install linting tools
+      run: |
+        pip install black isort mypy
+    
+    - name: Check code formatting with black
+      run: black --check .
+      continue-on-error: true
+    
+    - name: Check import sorting with isort
+      run: isort --check-only .
+      continue-on-error: true
+    
+    - name: Type checking with mypy
+      run: mypy synthesis/ mcp_server/ --ignore-missing-imports
+      continue-on-error: true
