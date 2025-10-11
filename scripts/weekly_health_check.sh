@@ -162,7 +162,8 @@ echo "" >> "$REPORT_FILE"
 # Session start check
 if [[ -f "$PROJECT_ROOT/.ai/current-session.md" ]]; then
     LINES=$(wc -l < "$PROJECT_ROOT/.ai/current-session.md")
-    TOKENS=$((LINES * 20))
+    CHARS=$(wc -c < "$PROJECT_ROOT/.ai/current-session.md")
+    TOKENS=$((CHARS / 4))
     TARGET=300
 
     if [[ $TOKENS -le $TARGET ]]; then
@@ -179,7 +180,8 @@ fi
 # Status check
 if [[ -f "$PROJECT_ROOT/PROJECT_STATUS.md" ]]; then
     LINES=$(wc -l < "$PROJECT_ROOT/PROJECT_STATUS.md")
-    TOKENS=$((LINES * 20))
+    CHARS=$(wc -c < "$PROJECT_ROOT/PROJECT_STATUS.md")
+    TOKENS=$((CHARS / 4))
     TARGET=150
 
     if [[ $TOKENS -le $TARGET ]]; then
@@ -196,7 +198,8 @@ fi
 # Tool lookup check
 if [[ -f "$PROJECT_ROOT/.ai/permanent/tool-registry.md" ]]; then
     LINES=$(wc -l < "$PROJECT_ROOT/.ai/permanent/tool-registry.md")
-    TOKENS=$((LINES * 20))
+    CHARS=$(wc -c < "$PROJECT_ROOT/.ai/permanent/tool-registry.md")
+    TOKENS=$((CHARS / 4))
     TARGET=100
 
     if [[ $TOKENS -le $TARGET ]]; then

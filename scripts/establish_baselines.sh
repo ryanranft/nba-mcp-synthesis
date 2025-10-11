@@ -90,8 +90,14 @@ count_files_lines() {
 
 # Function to estimate tokens (1 line ≈ 20 tokens)
 estimate_tokens() {
-    local lines=$1
-    echo $((lines * 20))
+    local file=$1
+    if [ -f "$file" ]; then
+        # More accurate: count characters and divide by 4 (typical token/char ratio)
+        local chars=$(wc -c < "$file" 2>/dev/null || echo "0")
+        echo $((chars / 4))
+    else
+        echo "0"
+    fi
 }
 
 echo -e "${BLUE}Collecting baseline metrics...${NC}"
@@ -100,17 +106,17 @@ echo ""
 # 1. Session start metrics
 echo "  • Session start metrics..."
 SESSION_START_LINES=$(wc -l < "$PROJECT_ROOT/.ai/current-session.md" 2>/dev/null || echo "0")
-SESSION_START_TOKENS=$(estimate_tokens $SESSION_START_LINES)
+SESSION_START_TOKENS=$(estimate_tokens "$PROJECT_ROOT/.ai/current-session.md")
 
 # 2. Status check metrics
 echo "  • Status check metrics..."
 STATUS_CHECK_LINES=$(wc -l < "$PROJECT_ROOT/PROJECT_STATUS.md" 2>/dev/null || echo "0")
-STATUS_CHECK_TOKENS=$(estimate_tokens $STATUS_CHECK_LINES)
+STATUS_CHECK_TOKENS=$(estimate_tokens "$PROJECT_ROOT/PROJECT_STATUS.md")
 
 # 3. Tool lookup metrics
 echo "  • Tool lookup metrics..."
 TOOL_LOOKUP_LINES=$(wc -l < "$PROJECT_ROOT/.ai/permanent/tool-registry.md" 2>/dev/null || echo "0")
-TOOL_LOOKUP_TOKENS=$(estimate_tokens $TOOL_LOOKUP_LINES)
+TOOL_LOOKUP_TOKENS=$(estimate_tokens "$PROJECT_ROOT/.ai/permanent/tool-registry.md")
 
 # 4. File distribution metrics
 echo "  • File distribution..."
