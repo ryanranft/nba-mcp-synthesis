@@ -277,6 +277,96 @@ vim .ai/daily/2025-10-11-session-1.md  # Fill in specifics
 
 ---
 
+### Strategy 7: Proactive File Management
+
+**Problem**: Cluttered workspace with many large files (10-20K extra tokens per session)
+
+**Solution**: Regular archiving and proper file organization
+
+#### Impact Analysis
+
+| File Management Practice | Token Impact | Example |
+|-------------------------|--------------|---------|
+| **Completion docs in root** | +500-1,500 per file | `SPRINT_5_COMPLETE.md` (500 lines) |
+| **Reading append-only logs** | +1,500 per read | `progress.log` (unnecessary context) |
+| **Duplicate content** | +2,000-5,000 | Same info in 5 files instead of linking |
+| **No archiving (30 days)** | +10,000-20,000 | Accumulation of completed work |
+| **Editing auto-generated files** | +3,000 | Manual edits break optimization |
+
+#### Correct Approach
+
+**Do This** ✅:
+```bash
+# Archive completion documents immediately
+./scripts/auto_archive.sh --interactive
+
+# Check for archival candidates
+./scripts/session_start.sh --health-check
+
+# Use scripts for auto-generated files
+./scripts/session_start.sh  # Regenerates current-session.md
+
+# Follow decision tree before creating files
+# See: docs/guides/FILE_CREATION_DECISION_TREE.md
+
+# Weekly archive check
+./scripts/weekly_health_check.sh
+```
+
+**Don't Do This** ❌:
+```bash
+# Manually edit auto-generated files
+vim .ai/current-session.md  # WRONG - use script instead
+
+# Read append-only logs
+cat project/tracking/progress.log  # WRONG - just append
+
+# Create standalone status files
+vim STATUS_UPDATE_2025-10-11.md  # WRONG - use canonical location
+
+# Leave completion documents in root
+# (accumulates 5-10 files = 5,000-10,000 tokens)
+```
+
+#### Token Savings from Proper File Management
+
+| Practice | Before | After | Savings |
+|----------|--------|-------|---------|
+| Archive old docs (weekly) | 10,000 | 0 | 10,000 (100%) |
+| Use scripts for session start | 5,000 | 300 | 4,700 (94%) |
+| Never read append-only logs | 1,500 | 10 | 1,490 (99%) |
+| Cross-reference vs duplicate | 5,000 | 500 | 4,500 (90%) |
+| Follow decision tree | 2,000 | 200 | 1,800 (90%) |
+| **Total Session Impact** | **23,500** | **1,010** | **21,490 (91%)** |
+
+#### File Management Rules
+
+1. **Check decision tree first**: [FILE_CREATION_DECISION_TREE.md](FILE_CREATION_DECISION_TREE.md)
+2. **Use scripts when available**: `session_start.sh`, `auto_archive.sh`
+3. **Archive regularly**: Weekly or when >15 files in root
+4. **Never edit auto-generated**: Use regeneration scripts
+5. **Cross-reference, don't duplicate**: Link to canonical source
+
+#### Quick File Management Checks
+
+```bash
+# How many files in root?
+ls -1 *.md 2>/dev/null | wc -l
+# Target: <15, Warning: >15, Critical: >20
+
+# Any completion documents?
+ls -1 *_COMPLETE.md *_VERIFICATION*.md 2>/dev/null | wc -l
+# Target: 0 (all archived)
+
+# Run archive check
+./scripts/auto_archive.sh --dry-run
+# Shows what would be archived and token savings
+```
+
+**Savings**: 80-93% session token reduction
+
+---
+
 ## 📋 Budget Compliance Checklist
 
 ### Before Starting Session
