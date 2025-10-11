@@ -189,9 +189,11 @@ Final Solution with Explanation
 ## Documentation
 
 ### 📊 Project Management & Progress
-- **[PROJECT_MASTER_TRACKER.md](PROJECT_MASTER_TRACKER.md)** - **Single source of truth** for project progress (88/124 tools)
+- **[PROJECT_MASTER_TRACKER.md](PROJECT_MASTER_TRACKER.md)** - **Single source of truth** for project progress (90/104 tools)
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history following Keep a Changelog format
-- **[NBA_MCP_IMPROVEMENT_PLAN.md](NBA_MCP_IMPROVEMENT_PLAN.md)** - Master improvement plan with Phase 9 roadmap
+- **[Master Plan System](docs/plans/MASTER_PLAN.md)** - **Central index** for all project plans with management guidelines
+  - See [NBA MCP Improvement Plan](docs/plans/detailed/NBA_MCP_IMPROVEMENT_PLAN.md) for detailed roadmap (v3.0, 86% complete)
+  - See [Verification Report](docs/plans/VERIFICATION_REPORT_2025-10-11.md) for latest verification (Oct 11, 2025)
 - **[GitHub Issue Templates](.github/ISSUE_TEMPLATE/)** - Feature requests, bug reports, sprint tasks
 
 ### 🚀 Getting Started
