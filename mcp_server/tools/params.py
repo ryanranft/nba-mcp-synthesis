@@ -1518,6 +1518,44 @@ class BlockPercentageParams(BaseModel):
         }
 
 
+class WinSharesParams(BaseModel):
+    """Parameters for Win Shares calculation"""
+    marginal_offense: float = Field(..., description="Offensive contribution above average")
+    marginal_defense: float = Field(..., description="Defensive contribution above average")
+    marginal_points_per_win: float = Field(default=30.0, gt=0, description="Points needed for a win (default: 30)")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "marginal_offense": 120,
+                    "marginal_defense": 80,
+                    "marginal_points_per_win": 30
+                }
+            ]
+        }
+
+
+class BoxPlusMinusParams(BaseModel):
+    """Parameters for Box Plus/Minus calculation"""
+    per: float = Field(..., description="Player Efficiency Rating")
+    team_pace: float = Field(..., gt=0, description="Team's pace")
+    league_avg_per: float = Field(default=15.0, gt=0, description="League average PER (default: 15.0)")
+    league_avg_pace: float = Field(default=100.0, gt=0, description="League average pace (default: 100.0)")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "per": 20,
+                    "team_pace": 98,
+                    "league_avg_per": 15,
+                    "league_avg_pace": 100
+                }
+            ]
+        }
+
+
 # ============================================================================
 # Sprint 7: Machine Learning Parameters
 # ============================================================================

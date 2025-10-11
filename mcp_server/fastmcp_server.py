@@ -65,6 +65,8 @@ from .tools.params import (
     AssistPercentageParams,
     StealPercentageParams,
     BlockPercentageParams,
+    WinSharesParams,
+    BoxPlusMinusParams,
     # Sprint 7 parameters (ML)
     KMeansClusteringParams,
     EuclideanDistanceParams,
@@ -3451,6 +3453,97 @@ async def nba_block_percentage(
         await ctx.error(f"BLK% calculation failed: {str(e)}")
         return NbaMetricResult(
             metric="BLK%",
+            result=0.0,
+            inputs={},
+            success=False,
+            error=str(e)
+        )
+
+
+@mcp.tool()
+async def nba_win_shares(
+    params: WinSharesParams,
+    ctx: Context
+) -> NbaMetricResult:
+    """
+    Calculate Win Shares (WS).
+
+    Measures player contribution in wins. Combines offensive and defensive contributions.
+    Higher is better (league leaders typically ~12-15 WS per season).
+
+    Args:
+        params: Marginal offense, marginal defense, marginal points per win
+        ctx: FastMCP context
+
+    Returns:
+        NbaMetricResult with WS value
+    """
+    await ctx.info("Calculating Win Shares")
+
+    try:
+        result = nba_metrics_helper.calculate_win_shares(
+            params.marginal_offense,
+            params.marginal_defense,
+            params.marginal_points_per_win
+        )
+
+        return NbaMetricResult(
+            metric="WS",
+            result=result,
+            inputs=params.model_dump(),
+            interpretation=f"Win Shares: {result:.2f} (league leaders typically 12-15 WS per season)",
+            success=True
+        )
+    except Exception as e:
+        await ctx.error(f"Win Shares calculation failed: {str(e)}")
+        return NbaMetricResult(
+            metric="WS",
+            result=0.0,
+            inputs={},
+            success=False,
+            error=str(e)
+        )
+
+
+@mcp.tool()
+async def nba_box_plus_minus(
+    params: BoxPlusMinusParams,
+    ctx: Context
+) -> NbaMetricResult:
+    """
+    Calculate Box Plus/Minus (BPM).
+
+    Measures player contribution per 100 possessions relative to league average.
+    0.0 = league average, positive = above average, negative = below average.
+
+    Args:
+        params: Player Efficiency Rating, team pace, league averages
+        ctx: FastMCP context
+
+    Returns:
+        NbaMetricResult with BPM value
+    """
+    await ctx.info("Calculating Box Plus/Minus")
+
+    try:
+        result = nba_metrics_helper.calculate_box_plus_minus(
+            params.per,
+            params.team_pace,
+            params.league_avg_per,
+            params.league_avg_pace
+        )
+
+        return NbaMetricResult(
+            metric="BPM",
+            result=result,
+            inputs=params.model_dump(),
+            interpretation=f"Box Plus/Minus: {result:+.1f} ({'above' if result > 0 else 'below' if result < 0 else 'at'} league average)",
+            success=True
+        )
+    except Exception as e:
+        await ctx.error(f"Box Plus/Minus calculation failed: {str(e)}")
+        return NbaMetricResult(
+            metric="BPM",
             result=0.0,
             inputs={},
             success=False,

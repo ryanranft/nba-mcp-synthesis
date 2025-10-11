@@ -22,8 +22,8 @@ This master plan index serves as the **single source of truth** for all project 
 - **Scope**: Sprints 5-8 (completed) + Phase 9 (pending)
 
 **Current Progress**:
-- ✅ 88 MCP tools registered
-- ✅ 18/20 Sprint 5 tools registered (2 implemented but not registered)
+- ✅ 90 MCP tools registered (all implemented tools now registered)
+- ✅ 20/20 Sprint 5 NBA metrics tools registered (Phase 9A complete)
 - ❌ 0/3 Sprint 6 web scraping tools
 - ⚠️ 2/7 Sprint 7 prompts + 3 additional prompts (5 total)
 - ❌ 0/6 Sprint 7 resources (4 other resources exist)

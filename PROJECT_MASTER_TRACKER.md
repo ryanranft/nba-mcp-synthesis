@@ -1,14 +1,14 @@
 # NBA MCP Synthesis - Project Master Tracker
 
-**Last Updated**: 2025-10-10 (CORRECTED after audit - Round 3)
+**Last Updated**: 2025-10-11 (Updated - Phase 9A Complete)
 **System Version**: 1.0 (Production-Ready)
-**Total MCP Tools**: 88 (Registered) + 5 (Implemented, not registered) + 16 (Pending)
+**Total MCP Tools**: 90 (Registered) + 3 (Implemented, not registered) + 16 (Pending)
 **Target Total**: 109 tools/features
 
-⚠️ **AUDIT NOTE**: This tracker was corrected on 2025-10-10 after discovering:
-1. Math/Stats/NBA tools marked as "not started" were actually completed
-2. Initial correction overcounted by including ALL helper functions instead of just MCP-registered tools
-3. **ACTUAL COUNT**: 88 registered MCP tools (verified by counting @mcp.tool() decorators)
+⚠️ **UPDATE (2025-10-11)**: Phase 9A complete - registered 2 more NBA metrics tools:
+1. ✅ nba_win_shares - NOW REGISTERED (fastmcp_server.py:3463-3505)
+2. ✅ nba_box_plus_minus - NOW REGISTERED (fastmcp_server.py:3508-3551)
+3. **NEW COUNT**: 90 registered MCP tools (was 88)
 
 ---
 
@@ -16,21 +16,21 @@
 
 | Category | Registered | Not Registered | Pending | Total Target |
 |----------|-----------|----------------|---------|--------------|
-| **Core MCP Tools** | 88 | 5 | 16 | 109 |
+| **Core MCP Tools** | 90 | 3 | 16 | 109 |
 
-**Breakdown of 88 Registered Tools**:
+**Breakdown of 90 Registered Tools** (Updated Oct 11, 2025):
 - Infrastructure (Database, S3, File): ~25 tools
 - Book Tools (EPUB, PDF): ~10 tools
 - Math Tools: 7 tools
 - Stats Tools: ~15 tools
-- NBA Tools: ~11 tools
+- NBA Tools: ~13 tools (now includes Win Shares & Box Plus/Minus)
 - ML Tools (Core + Evaluation): 33 tools
 - AWS/Action Tools: ~10 tools
 - Pagination/Other: ~4 tools
 
-**Overall Progress**: 85% (93/109 total: 88 registered + 5 implemented but not registered)
+**Overall Progress**: 85% (93/109 total: 90 registered + 3 implemented but not registered)
 
-**Key Insight**: We have 88 MCP tools registered and working, NOT 144 as initially miscounted!
+**Phase 9A Update**: 2 NBA metrics registered on Oct 11, 2025 (nba_win_shares, nba_box_plus_minus)
 
 ---
 
@@ -209,8 +209,8 @@
 
 **Note**: Original plan had stats_min and stats_max as separate tools. Implemented as combined stats_min_max.
 
-#### NBA Basic Metrics (7 registered + 2 not registered) - 9 Tools ✅
-**Registered** (7 tools):
+#### NBA Basic Metrics - 9 Tools ✅ (ALL REGISTERED as of Oct 11, 2025)
+**All 9 tools registered**:
 - [x] nba_player_efficiency_rating - PER calculation (Line 2411)
 - [x] nba_true_shooting_percentage - TS% calculation (Line 2466)
 - [x] nba_usage_rate - Usage rate (Line 2559)
@@ -218,10 +218,8 @@
 - [x] nba_offensive_rating - Offensive rating (Line 2615)
 - [x] nba_defensive_rating - Defensive rating (Line 2660)
 - [x] nba_pace - Pace calculation (Line 2705)
-
-**Implemented but NOT registered** (2 tools):
-- [x] nba_win_shares - Win shares (nba_metrics_helper.py:324) ⚠️ NEEDS REGISTRATION
-- [x] nba_box_plus_minus - BPM calculation (nba_metrics_helper.py:354) ⚠️ NEEDS REGISTRATION
+- [x] nba_win_shares - Win shares (Line 3463) ✅ REGISTERED Oct 11, 2025
+- [x] nba_box_plus_minus - BPM calculation (Line 3508) ✅ REGISTERED Oct 11, 2025
 
 #### NBA Advanced Metrics (5 tools) - ALL REGISTERED ✅
 - [x] nba_four_factors - Four Factors analysis (Line 3193)
@@ -275,20 +273,18 @@ Already counted in NBA Advanced Metrics section above.
 
 ---
 
-## ⚠️ Implemented But Not Registered (5 tools)
+## ⚠️ Implemented But Not Registered (3 tools remaining)
 
-These tools exist in helper files but are NOT registered in fastmcp_server.py:
+✅ **UPDATE (Oct 11, 2025)**: nba_win_shares and nba_box_plus_minus NOW REGISTERED!
 
-### NBA Metrics (2 tools)
-- [x] nba_win_shares - helper file: nba_metrics_helper.py:324
-- [x] nba_box_plus_minus - helper file: nba_metrics_helper.py:354
+These 3 tools still exist in helper files but are NOT registered in fastmcp_server.py:
 
-### NBA Additional (3 tools)
+### NBA Additional Metrics (3 tools)
 - [x] nba_three_point_rate - helper file: nba_metrics_helper.py:718
 - [x] nba_free_throw_rate - helper file: nba_metrics_helper.py:749
 - [x] nba_estimate_possessions - helper file: nba_metrics_helper.py:783
 
-**Action Required**: Register these 5 tools in fastmcp_server.py to increase registered count from 144 to 149.
+**Action Required**: Register these 3 remaining tools in fastmcp_server.py to increase registered count from 90 to 93.
 
 ---
 
@@ -419,18 +415,21 @@ A feature is considered complete when ALL of the following are satisfied:
 
 ## 📋 Updated Action Plan
 
-### Phase 9A: Register Missing Tools (1-2 hours) ⚠️ HIGH PRIORITY
+### Phase 9A: Register Missing Tools ⚠️ IN PROGRESS (2/5 complete)
 **Effort**: Minimal
-**Impact**: +5 registered tools (144 → 149)
+**Impact**: +5 registered tools (88 → 93)
+**Status**: 40% complete (2 of 5 tools registered on Oct 11, 2025)
 
 **Tasks**:
-- [ ] Register nba_win_shares in fastmcp_server.py
-- [ ] Register nba_box_plus_minus in fastmcp_server.py
+- [x] Register nba_win_shares in fastmcp_server.py ✅ DONE Oct 11, 2025
+- [x] Register nba_box_plus_minus in fastmcp_server.py ✅ DONE Oct 11, 2025
 - [ ] Register nba_three_point_rate in fastmcp_server.py
 - [ ] Register nba_free_throw_rate in fastmcp_server.py
 - [ ] Register nba_estimate_possessions in fastmcp_server.py
-- [ ] Create parameter models for these 5 tools in params.py
-- [ ] Test all 5 tools
+- [x] Create parameter models for Win Shares & BPM in params.py ✅ DONE
+- [x] Test Win Shares & BPM tools ✅ DONE
+
+**Remaining**: 3 tools (nba_three_point_rate, nba_free_throw_rate, nba_estimate_possessions)
 
 ### Phase 9B: Web Scraping (3-5 days) - OPTIONAL
 **Effort**: Medium

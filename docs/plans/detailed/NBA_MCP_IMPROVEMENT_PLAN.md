@@ -40,14 +40,10 @@
 
 ⚠️ **IMPORTANT**: These were marked as "NOT DONE" in earlier versions, but comprehensive verification (Oct 11, 2025) confirmed they ARE DONE!
 
-✅ **Math/Stats/NBA Tools**: **37 tools REGISTERED** (NOT in Sprints 5-8 plan, but implemented!)
+✅ **Math/Stats/NBA Tools**: **39 tools REGISTERED** (NOT in Sprints 5-8 plan, but implemented!)
 - **7 Arithmetic tools** ✅ (math_add, math_subtract, math_multiply, math_divide, math_sum, math_round, math_modulo)
 - **17 Statistical tools** ✅ (stats_mean, stats_median, stats_mode, stats_min_max, stats_variance, stats_summary, PLUS 11 advanced: correlation, covariance, linear_regression, predict, correlation_matrix, moving_average, exponential_moving_average, trend_detection, percent_change, growth_rate, volatility)
-- **13 NBA metrics tools** ✅ (nba_player_efficiency_rating, nba_true_shooting_percentage, nba_effective_field_goal_percentage, nba_usage_rate, nba_offensive_rating, nba_defensive_rating, nba_pace, nba_four_factors, nba_turnover_percentage, nba_rebound_percentage, nba_assist_percentage, nba_steal_percentage, nba_block_percentage)
-
-⚠️ **2 NBA metrics IMPLEMENTED but NOT REGISTERED**:
-- nba_win_shares (nba_metrics_helper.py:324) - needs MCP registration
-- nba_box_plus_minus (nba_metrics_helper.py:354) - needs MCP registration
+- **15 NBA metrics tools** ✅ (nba_player_efficiency_rating, nba_true_shooting_percentage, nba_effective_field_goal_percentage, nba_usage_rate, nba_offensive_rating, nba_defensive_rating, nba_pace, nba_four_factors, nba_turnover_percentage, nba_rebound_percentage, nba_assist_percentage, nba_steal_percentage, nba_block_percentage, nba_win_shares, nba_box_plus_minus)
 
 ✅ **MCP Prompts**: **5 prompts REGISTERED** (partial implementation)
 - 2 from original plan: compare_players, analyze_team_performance (as team_analysis) ✅
@@ -71,18 +67,18 @@
 ❌ **MCP Resources**: 6 resources (NOT DONE)
 - nba://games/{date}, nba://standings/{conference}, nba://players/{player_id}, nba://teams/{team_id}, nba://injuries, nba://players/top-scorers
 
-### What's Next: Register & Complete
+### What's Next: Complete Original Plan
 
-**Phase 9A: Register Missing Tools** (1-2 hours) ⚠️ HIGH PRIORITY
-1. Register nba_win_shares in fastmcp_server.py
-2. Register nba_box_plus_minus in fastmcp_server.py
+✅ **Phase 9A: Register Missing Tools** - **COMPLETE** (October 11, 2025)
+1. ✅ Registered nba_win_shares in fastmcp_server.py (lines 3463-3505)
+2. ✅ Registered nba_box_plus_minus in fastmcp_server.py (lines 3508-3551)
 
 **Phase 9B: Complete Original Plan** (optional, 1-2 weeks)
 1. Web Scraping (3 tools) - 3-5 days
 2. Remaining MCP Prompts (5 prompts) - 1-2 days
 3. MCP Resources (6 resources) - 2-3 days
 
-**Current Total**: 88 registered + 2 unregistered = **90 tools/features implemented**
+**Current Total**: **90 tools/features registered** (all implemented tools now registered)
 **Remaining**: 3 web scraping + 5 prompts + 6 resources = **14 features**
 **Grand Total Target**: 90 + 14 = **104 tools/features**
 **Progress**: **86% complete** (90/104)
