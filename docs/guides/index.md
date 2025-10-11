@@ -1,7 +1,7 @@
 # Guides Index
 
 **Purpose**: Navigation hub for all operational guides
-**Total Guides**: 20 files
+**Total Guides**: 18 files (reduced from 20 via consolidation)
 **Last Updated**: 2025-10-11
 
 ---
@@ -39,8 +39,8 @@
 ### Production
 - **[Production Deployment Guide](PRODUCTION_DEPLOYMENT_GUIDE.md)** - Production deployment procedures
 
-### Optimization
-- **[Context Optimization Guide](CONTEXT_OPTIMIZATION_GUIDE.md)** - Context management best practices
+### Context Management
+- **[Context Management Complete](CONTEXT_MANAGEMENT_COMPLETE.md)** - Comprehensive guide: optimization, budget management, emergency procedures (consolidates 3 previous guides)
 
 ---
 
@@ -89,7 +89,7 @@ ls -la *INTEGRATION* *ANALYTICS*
 - **Math/Analytics**: 2 guides
 - **File Management**: 2 guides
 - **Deployment**: 1 guide
-- **Context Optimization**: 1 guide
+- **Context Management**: 1 guide (consolidated from 3)
 
 ---
 
@@ -99,10 +99,10 @@ ls -la *INTEGRATION* *ANALYTICS*
 1. **Quick Reference** - Daily operations
 2. **Claude Desktop Setup** - Initial configuration
 3. **Production Deployment Guide** - Deployment procedures
-4. **Context Optimization Guide** - Context management
+4. **Context Management Complete** - Context optimization & budget management
 
 ### Recently Updated
-- Context Optimization Guide (2025-10-11)
+- Context Management Complete (2025-10-11) - NEW: Consolidated from 3 guides
 - Claude Desktop guides (2025-10-10)
 - Production Deployment Guide (2025-10-09)
 

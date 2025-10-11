@@ -66,7 +66,7 @@ This map defines the single source of truth for each topic in the project docume
 | Topic | Canonical Location | Purpose |
 |-------|-------------------|---------|
 | **Quick Reference** | [docs/guides/QUICK_REFERENCE.md](guides/QUICK_REFERENCE.md) | Essential commands and workflows |
-| **Context Optimization Guide** | [docs/guides/CONTEXT_OPTIMIZATION_GUIDE.md](guides/CONTEXT_OPTIMIZATION_GUIDE.md) | Best practices for context management |
+| **Context Management Complete** | [docs/guides/CONTEXT_MANAGEMENT_COMPLETE.md](guides/CONTEXT_MANAGEMENT_COMPLETE.md) | Complete context guide (budget, optimization, emergencies) |
 | **Production Deployment Guide** | [docs/guides/PRODUCTION_DEPLOYMENT_GUIDE.md](guides/PRODUCTION_DEPLOYMENT_GUIDE.md) | Deployment procedures |
 | **Claude Desktop Setup** | [docs/guides/CLAUDE_DESKTOP_SETUP.md](guides/CLAUDE_DESKTOP_SETUP.md) | Claude Desktop configuration |
 | **Setup Guide** | [docs/SETUP_GUIDE.md](SETUP_GUIDE.md) | Detailed installation instructions |
@@ -138,10 +138,11 @@ Current status: [PROJECT_STATUS.md](../PROJECT_STATUS.md)
 - **Current**: [.ai/current-session.md](../.ai/current-session.md)
 - **Pattern**: "See [Session Management Guide](.ai/index.md) for details"
 
-#### Context Optimization
-- **Primary**: [docs/guides/CONTEXT_OPTIMIZATION_GUIDE.md](guides/CONTEXT_OPTIMIZATION_GUIDE.md)
+#### Context Management
+- **Primary**: [docs/guides/CONTEXT_MANAGEMENT_COMPLETE.md](guides/CONTEXT_MANAGEMENT_COMPLETE.md) - Comprehensive guide (consolidated from 3)
+- **Operations**: [CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md](../CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md) - Daily operations guide
 - **Plan**: [docs/plans/detailed/CONTEXT_OPTIMIZATION_PLAN.md](plans/detailed/CONTEXT_OPTIMIZATION_PLAN.md)
-- **Pattern**: "See [Context Optimization Guide](docs/guides/CONTEXT_OPTIMIZATION_GUIDE.md) for best practices"
+- **Pattern**: "See [Context Management Guide](docs/guides/CONTEXT_MANAGEMENT_COMPLETE.md) for complete guide"
 
 ---
 
@@ -160,9 +161,9 @@ Current status: [PROJECT_STATUS.md](../PROJECT_STATUS.md)
    - **Canonical**: [.ai/index.md](../.ai/index.md)
    - **Action**: Use brief references
 
-4. **Context Optimization** - Found in 3+ files
-   - **Canonical**: [docs/guides/CONTEXT_OPTIMIZATION_GUIDE.md](guides/CONTEXT_OPTIMIZATION_GUIDE.md)
-   - **Action**: Link to guide
+4. **Context Management** - Found in multiple files
+   - **Canonical**: [docs/guides/CONTEXT_MANAGEMENT_COMPLETE.md](guides/CONTEXT_MANAGEMENT_COMPLETE.md) (consolidated from 3 guides)
+   - **Action**: Link to comprehensive guide
 
 ### Refactoring Strategy
 1. **Identify Duplicates**: Use audit script
