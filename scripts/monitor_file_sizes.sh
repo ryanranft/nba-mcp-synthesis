@@ -191,6 +191,64 @@ for file in "$PROJECT_ROOT/PROJECT_STATUS.md" \
     fi
 done
 
+# File Count Monitoring
+echo ""
+echo "======================================"
+echo "File Count Monitoring"
+echo "======================================"
+echo ""
+
+# Count markdown files in root
+ROOT_MD_COUNT=$(ls -1 "$PROJECT_ROOT"/*.md 2>/dev/null | wc -l | tr -d ' ')
+if [[ $ROOT_MD_COUNT -le 15 ]]; then
+    echo -e "${GREEN}✓${NC} Root directory: $ROOT_MD_COUNT markdown files (target: <15)"
+elif [[ $ROOT_MD_COUNT -le 20 ]]; then
+    echo -e "${YELLOW}⚠${NC} Root directory: $ROOT_MD_COUNT markdown files (target: <15, max: 20)"
+    echo "  Suggestion: Consider archiving with ./scripts/auto_archive.sh"
+    WARNING_COUNT=$((WARNING_COUNT + 1))
+else
+    echo -e "${RED}✗${NC} Root directory: $ROOT_MD_COUNT markdown files (critical: >20)"
+    echo "  Action Required: Run ./scripts/auto_archive.sh --interactive"
+    ERROR_COUNT=$((ERROR_COUNT + 1))
+fi
+
+# Count completion documents in root
+COMPLETION_DOCS=$(find "$PROJECT_ROOT" -maxdepth 1 -type f \( -name "*_COMPLETE.md" -o -name "*_VERIFICATION*.md" -o -name "*_REPORT.md" -o -name "*_SUCCESS.md" \) 2>/dev/null | wc -l | tr -d ' ')
+if [[ $COMPLETION_DOCS -eq 0 ]]; then
+    echo -e "${GREEN}✓${NC} Completion documents: 0 in root (all archived)"
+else
+    echo -e "${YELLOW}⚠${NC} Completion documents: $COMPLETION_DOCS in root"
+    echo "  Suggestion: Archive with ./scripts/auto_archive.sh --interactive"
+    WARNING_COUNT=$((WARNING_COUNT + 1))
+fi
+
+# Count active docs (non-archived)
+DOCS_COUNT=$(find "$PROJECT_ROOT/docs" -type f -name "*.md" ! -path "*/archive/*" 2>/dev/null | wc -l | tr -d ' ')
+if [[ $DOCS_COUNT -le 100 ]]; then
+    echo -e "${GREEN}✓${NC} Active docs directory: $DOCS_COUNT files (target: <100)"
+elif [[ $DOCS_COUNT -le 150 ]]; then
+    echo -e "${YELLOW}⚠${NC} Active docs directory: $DOCS_COUNT files (approaching limit: 150)"
+else
+    echo -e "${RED}✗${NC} Active docs directory: $DOCS_COUNT files (exceeds limit: 150)"
+    echo "  Action Required: Review and archive old documentation"
+    ERROR_COUNT=$((ERROR_COUNT + 1))
+fi
+
+# Count daily sessions
+DAILY_SESSION_COUNT=$(find "$PROJECT_ROOT/.ai/daily" -type f -name "*.md" ! -name "template.md" 2>/dev/null | wc -l | tr -d ' ')
+if [[ $DAILY_SESSION_COUNT -le 7 ]]; then
+    echo -e "${GREEN}✓${NC} Daily sessions: $DAILY_SESSION_COUNT files (within weekly limit)"
+elif [[ $DAILY_SESSION_COUNT -le 14 ]]; then
+    echo -e "${YELLOW}⚠${NC} Daily sessions: $DAILY_SESSION_COUNT files (consider archiving)"
+    echo "  Suggestion: Run ./scripts/session_archive.sh"
+else
+    echo -e "${RED}✗${NC} Daily sessions: $DAILY_SESSION_COUNT files (archive needed)"
+    echo "  Action Required: Run ./scripts/session_archive.sh"
+    ERROR_COUNT=$((ERROR_COUNT + 1))
+fi
+
+echo ""
+
 # Summary
 echo "======================================"
 echo "Summary"

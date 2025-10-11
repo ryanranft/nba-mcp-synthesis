@@ -387,50 +387,123 @@ git commit -m "feat: Session summary - [brief description]"
 
 ### Weekly Tasks (Every 7 days)
 
+**Time required**: ~15-20 minutes
+
 ```bash
 # 1. Run comprehensive health check
-./scripts/weekly_health_check.sh  # Generates report in .ai/monitoring/reports/
+./scripts/weekly_health_check.sh
+# Output: .ai/monitoring/reports/weekly_YYYYMMDD.md
+# Includes: file sizes, context budget, archive status, recommendations
 
 # 2. Monitor file sizes
-./scripts/monitor_file_sizes.sh  # Check for files exceeding limits
+./scripts/monitor_file_sizes.sh
+# Checks: index files, status files, guides, sessions, plans
+# Alerts: files exceeding context budget limits
 
 # 3. Review context dashboard
-./scripts/context_dashboard.sh  # Visual overview of context usage
+./scripts/context_dashboard.sh
+# Shows: budget overview, file distribution, health indicators, archive metrics
 
-# 4. Archive old sessions
+# 4. Check archive opportunities
+./scripts/auto_archive.sh --dry-run
+# Preview: what would be archived, token savings, breakdown by reason
+# If candidates found:
+#   ./scripts/auto_archive.sh --interactive  # Review and archive
+
+# 5. Archive old sessions
 ./scripts/session_archive.sh --to-s3
+# Archives: daily sessions >7 days old to S3 (or local)
+# Frequency: weekly to prevent accumulation
 
-# 5. Update metrics
-vim project/metrics/tool_counts.md
-vim project/metrics/context_usage.md
+# 6. Check root directory
+ls -1 *.md | wc -l
+# Target: <15 files
+# Warning: 15-20 files
+# Critical: >20 files (run auto_archive.sh)
 
-# 6. Review and clean up
-./scripts/audit_cross_references.sh  # Check for duplicates
+# 7. Update metrics (optional)
+vim project/metrics/tool_counts.md  # If tools registered this week
+vim project/metrics/context_usage.md  # If significant changes
 ```
+
+**Checklist**:
+- [ ] Run weekly_health_check.sh
+- [ ] Review any errors/warnings
+- [ ] Run auto_archive.sh if >3 completion docs in root
+- [ ] Archive daily sessions if >7 files
+- [ ] Check dashboard for anomalies
+- [ ] Root directory has <15 markdown files
+- [ ] No completion documents in root
 
 ### Monthly Tasks (Every 30 days)
 
+**Time required**: ~30-45 minutes
+
 ```bash
 # 1. Update baseline metrics
-./scripts/establish_baselines.sh --force  # Update quarterly baselines
+./scripts/establish_baselines.sh --force
+# Updates: context usage baselines for comparison
+# Frequency: monthly or quarterly
 
 # 2. Create monthly summary
 vim .ai/monthly/$(date +%Y-%m)-summary.md
-# Summarize: key accomplishments, decisions, metrics
+# Summarize: key accomplishments, decisions, metrics, challenges
+# Include: sprint completions, tool registrations, major changes
 
 # 3. Review context dashboard trends
 ./scripts/context_dashboard.sh --export=monthly_metrics.json
+# Analyze: trends over time, improvements, areas needing attention
 
 # 4. Archive monthly summaries to S3
 ./scripts/session_archive.sh --to-s3 --monthly
+# Archives: monthly summaries >3 months old
+# Preserves: critical decisions in permanent references
 
-# 5. Review and update
-cat project/tracking/milestones.md  # Add major milestones
-vim docs/archive/$(date +%Y-%m)/index.md  # Update archive index
+# 5. Comprehensive archive review
+./scripts/auto_archive.sh --age=60
+# Archives: files not modified in 60 days
+# Review: docs/plans/, docs/analysis/, old completion docs
 
-# 6. Clean up monitoring logs
-find .ai/monitoring/ -name "*.txt" -mtime +90 -delete  # Remove logs >90 days
+# 6. Update archive indexes
+vim docs/archive/$(date +%Y-%m)/index.md
+# Add: newly archived files with descriptions
+# Organize: by category (completion, sessions, plans)
+
+# 7. Review file count targets
+ROOT_COUNT=$(ls -1 *.md 2>/dev/null | wc -l)
+DOCS_COUNT=$(find docs/ -name "*.md" ! -path "*/archive/*" | wc -l)
+echo "Root: $ROOT_COUNT (target: <15)"
+echo "Docs: $DOCS_COUNT (target: <100)"
+
+# 8. Clean up monitoring logs
+find .ai/monitoring/ -name "*.txt" -mtime +90 -delete
+find .ai/monitoring/reports/ -name "weekly_*.md" -mtime +90 -delete
+
+# 9. Audit cross-references
+./scripts/audit_cross_references.sh
+# Checks: broken links, duplicate content, outdated references
+
+# 10. Update DOCUMENTATION_MAP.md if needed
+vim docs/DOCUMENTATION_MAP.md
+# Add: new guides, permanent references
+# Update: canonical locations for new topics
 ```
+
+**Checklist**:
+- [ ] Establish new baselines
+- [ ] Create monthly summary
+- [ ] Export and review metrics
+- [ ] Archive monthly summaries to S3
+- [ ] Run comprehensive archive (60-day threshold)
+- [ ] Update archive indexes
+- [ ] Verify file count targets
+- [ ] Clean up old monitoring logs
+- [ ] Audit cross-references
+- [ ] Update documentation map
+- [ ] Review and archive old plans/analysis docs
+- [ ] Root directory: <15 files
+- [ ] Active docs: <100 files
+- [ ] No completion documents in root
 
 ---
 

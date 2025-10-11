@@ -292,7 +292,75 @@ fi
 echo ""
 
 # ============================================================================
-# Section 4: Recommendations
+# Section 4: Archive Metrics
+# ============================================================================
+echo -e "${BOLD}${BLUE}📦 Archive Metrics${NC}"
+echo "─────────────────────────────────────────────────────"
+echo ""
+
+# Count markdown files in root
+ROOT_MD_COUNT=$(ls -1 "$PROJECT_ROOT"/*.md 2>/dev/null | wc -l | tr -d ' ')
+ROOT_MD_TARGET=15
+if [[ $ROOT_MD_COUNT -le $ROOT_MD_TARGET ]]; then
+    echo -e "  Root Files:      ${GREEN}✓ ${ROOT_MD_COUNT} files (target: <$ROOT_MD_TARGET)${NC}"
+elif [[ $ROOT_MD_COUNT -le 20 ]]; then
+    echo -e "  Root Files:      ${YELLOW}⚠ ${ROOT_MD_COUNT} files (target: <$ROOT_MD_TARGET)${NC}"
+else
+    echo -e "  Root Files:      ${RED}✗ ${ROOT_MD_COUNT} files (max: 20)${NC}"
+fi
+
+# Count completion documents in root
+COMPLETION_DOCS=$(find "$PROJECT_ROOT" -maxdepth 1 -type f \( -name "*_COMPLETE.md" -o -name "*_VERIFICATION*.md" -o -name "*_REPORT.md" \) 2>/dev/null | wc -l | tr -d ' ')
+if [[ $COMPLETION_DOCS -eq 0 ]]; then
+    echo -e "  Completion Docs: ${GREEN}✓ 0 in root (all archived)${NC}"
+else
+    echo -e "  Completion Docs: ${YELLOW}⚠ ${COMPLETION_DOCS} in root (archive needed)${NC}"
+fi
+
+# Count archived files
+ARCHIVED_COUNT=$(find "$PROJECT_ROOT/docs/archive" -type f -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+echo -e "  Archived Files:  ${BLUE}📁 ${ARCHIVED_COUNT} files in archive${NC}"
+
+# Count daily sessions
+DAILY_SESSION_COUNT=$(find "$PROJECT_ROOT/.ai/daily" -type f -name "*.md" ! -name "template.md" 2>/dev/null | wc -l | tr -d ' ')
+if [[ $DAILY_SESSION_COUNT -le 7 ]]; then
+    echo -e "  Daily Sessions:  ${GREEN}✓ ${DAILY_SESSION_COUNT} files (within weekly limit)${NC}"
+elif [[ $DAILY_SESSION_COUNT -le 14 ]]; then
+    echo -e "  Daily Sessions:  ${YELLOW}⚠ ${DAILY_SESSION_COUNT} files (consider archiving)${NC}"
+else
+    echo -e "  Daily Sessions:  ${RED}✗ ${DAILY_SESSION_COUNT} files (archive needed)${NC}"
+fi
+
+# Estimate archivable content and token savings
+ARCHIVABLE_LINES=0
+if [[ $COMPLETION_DOCS -gt 0 || $DAILY_SESSION_COUNT -gt 7 ]]; then
+    # Count lines in completion docs
+    for file in $(find "$PROJECT_ROOT" -maxdepth 1 -type f \( -name "*_COMPLETE.md" -o -name "*_VERIFICATION*.md" -o -name "*_REPORT.md" \) 2>/dev/null); do
+        if [[ -f "$file" ]]; then
+            FILE_LINES=$(wc -l < "$file" 2>/dev/null || echo "0")
+            ARCHIVABLE_LINES=$((ARCHIVABLE_LINES + FILE_LINES))
+        fi
+    done
+    
+    # Count lines in old daily sessions (beyond 7 days)
+    if [[ $DAILY_SESSION_COUNT -gt 7 ]]; then
+        for file in $(find "$PROJECT_ROOT/.ai/daily" -type f -name "*.md" ! -name "template.md" -mtime +7 2>/dev/null); do
+            if [[ -f "$file" ]]; then
+                FILE_LINES=$(wc -l < "$file" 2>/dev/null || echo "0")
+                ARCHIVABLE_LINES=$((ARCHIVABLE_LINES + FILE_LINES))
+            fi
+        done
+    fi
+    
+    ESTIMATED_SAVINGS=$(estimate_tokens $ARCHIVABLE_LINES)
+    echo -e "  ${CYAN}💾 Potential savings: ~${ESTIMATED_SAVINGS} tokens (${ARCHIVABLE_LINES} lines)${NC}"
+    echo -e "  ${CYAN}   Run: ./scripts/auto_archive.sh --dry-run${NC}"
+fi
+
+echo ""
+
+# ============================================================================
+# Section 5: Recommendations
 # ============================================================================
 echo -e "${BOLD}${BLUE}💡 Recommendations${NC}"
 echo "─────────────────────────────────────────────────────"
@@ -324,6 +392,30 @@ if [[ $DAILY_COUNT -gt 7 ]]; then
     RECOMMENDATIONS+=("• Archive old daily sessions (${DAILY_COUNT} currently active)")
 fi
 
+# Check root directory file count
+if [[ $ROOT_MD_COUNT -gt 20 ]]; then
+    RECOMMENDATIONS+=("• CRITICAL: Root has ${ROOT_MD_COUNT} files - Run: ./scripts/auto_archive.sh")
+elif [[ $ROOT_MD_COUNT -gt 15 ]]; then
+    RECOMMENDATIONS+=("• Root directory has ${ROOT_MD_COUNT} files - Consider archiving")
+fi
+
+# Check for completion documents
+if [[ $COMPLETION_DOCS -gt 0 ]]; then
+    RECOMMENDATIONS+=("• Archive ${COMPLETION_DOCS} completion document(s) from root")
+fi
+
+# Check daily sessions for archiving
+if [[ $DAILY_SESSION_COUNT -gt 14 ]]; then
+    RECOMMENDATIONS+=("• ${DAILY_SESSION_COUNT} daily sessions - Run: ./scripts/session_archive.sh")
+elif [[ $DAILY_SESSION_COUNT -gt 7 ]]; then
+    RECOMMENDATIONS+=("• Consider archiving ${DAILY_SESSION_COUNT} daily sessions")
+fi
+
+# Show archiving opportunity if exists
+if [[ $ARCHIVABLE_LINES -gt 0 ]]; then
+    RECOMMENDATIONS+=("• Archive opportunity: ~${ESTIMATED_SAVINGS} token savings available")
+fi
+
 if [[ ${#RECOMMENDATIONS[@]} -eq 0 ]]; then
     echo -e "${GREEN}All systems operating within optimal parameters${NC}"
 else
@@ -341,8 +433,10 @@ echo -e "${BOLD}${BLUE}⚡ Quick Actions${NC}"
 echo "─────────────────────────────────────────────────────"
 echo ""
 echo "  Monitor files:    ./scripts/monitor_file_sizes.sh"
+echo "  Archive docs:     ./scripts/auto_archive.sh --dry-run"
 echo "  Archive sessions: ./scripts/session_archive.sh"
 echo "  Health check:     ./scripts/session_start.sh --health-check"
+echo "  Weekly check:     ./scripts/weekly_health_check.sh"
 echo "  Update status:    ./scripts/update_status.sh"
 echo ""
 
