@@ -90,3 +90,25 @@ great_expectations/checkpoints/
 great_expectations/expectations/.ge_store_backend_id
 great_expectations/.ge_store_backend_id
 great_expectations/uncommitted/data_docs/
+
+# AI Session Management (.ai/ directory)
+# Track: current-session.md (compact summary) and permanent/ (architectural decisions)
+# Ignore: daily/, monthly/, archive/ (detailed logs - optional S3 backup)
+.ai/daily/
+.ai/monthly/
+.ai/archive/
+!.ai/current-session.md
+!.ai/index.md
+!.ai/permanent/
+
+# Session archives (large context files)
+docs/sessions/archive/
+docs/completion/archive/
+
+# Temporary session files
+.session-*.tmp
+session-backup-*.md
+
+# Context optimization testing
+.context-measure/
+benchmark_results/context/
