@@ -108,6 +108,10 @@ great_expectations/uncommitted/data_docs/
 docs/sessions/archive/
 docs/completion/archive/
 
+# Archive patterns (from Phase 3)
+docs/archive/2025-*/
+docs/completion/  # Now deprecated - moved to archive
+
 # Temporary session files
 .session-*.tmp
 session-backup-*.md
@@ -115,3 +119,316 @@ session-backup-*.md
 # Context optimization testing
 .context-measure/
 benchmark_results/context/
+
+# Test artifacts (comprehensive patterns)
+test_results/
+test_results_*/
+test_results.txt
+test_results_*.txt
+test_results_*.log
+test_results_*.json
+test_results_*.html
+test_results_*.csv
+benchmark_results/
+benchmark_results.json
+benchmark_results_*.json
+benchmark_results_*.txt
+benchmark_results_*.log
+benchmark_results_dir/
+performance_*.log
+performance_*.json
+
+# Generated documentation
+*_GENERATED.md
+*_AUTO.md
+*_AUTO_GENERATED.md
+*_TEMP.md
+*_TEMP_*.md
+temp_*.md
+temp_*.txt
+
+# Temporary scripts and files
+scripts/temp_*.py
+scripts/test_*.tmp
+scripts/debug_*.py
+scripts/temp_*.sh
+temp_script.py
+temp_*.py
+*.tmp
+*.temp
+*.bak
+*.backup
+*.orig
+
+# Development artifacts
+debug_*.py
+debug_*.log
+debug_*.txt
+dev_*.py
+dev_*.log
+dev_*.txt
+scratch_*.py
+scratch_*.md
+scratch_*.txt
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+*.egg
+*.whl
+*.tar.gz
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+coverage.json
+.pytest_cache/
+
+# Profiling data
+*.prof
+*.profile
+*.cprofile
+*.lprof
+
+# Memory dumps
+*.hprof
+*.dump
+core.*
+
+# IDE specific
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries/
+.idea/shelf/
+
+# OS specific (comprehensive)
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Thumbs.db:encryptable
+desktop.ini
+
+# Logs (comprehensive)
+*.log
+logs/
+log/
+*.log.*
+*.out
+*.err
+*.trace
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# Cache directories
+.cache/
+cache/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.dylib
+*.dll
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+.env/
+
+# Package managers
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Security and credentials (comprehensive)
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+*.csr
+*.p7b
+*.p7s
+credentials.json
+secrets.yaml
+secrets.yml
+.secrets
+*.secret
+*.token
+*.auth
+auth.json
+tokens.json
+api_keys.json
+.secret
+.secrets
+.secret.*
+
+# Environment files (comprehensive)
+.env
+.env.*
+!.env.example
+!.env.template
+!.env.sample
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+config.local.json
+config.local.yaml
+config.local.yml
+
+# Monitoring and metrics
+metrics/
+monitoring/
+grafana/
+prometheus/
+*.metrics
+*.monitoring
+
+# Backup files
+*.backup
+*.bak
+*.old
+*.orig
+backup/
+backups/
+*.backup.*
+
+# Archive files (except intentional archives)
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+*.bz2
+*.xz
+*.gz
+!docs/archive/
+
+# Large data files
+*.csv
+*.parquet
+*.feather
+*.h5
+*.hdf5
+*.npy
+*.npz
+*.pickle
+*.pkl
+*.joblib
+data/raw/
+data/processed/
+data/external/
+data/interim/
+data/temp/
+datasets/
+*.dataset
+
+# Model files
+models/*.pkl
+models/*.h5
+models/*.hdf5
+models/*.joblib
+models/*.pth
+models/*.pt
+models/*.onnx
+models/*.tflite
+models/*.pb
+checkpoints/
+*.checkpoint
+*.ckpt
+
+# Jupyter and notebooks
+.ipynb_checkpoints/
+*.ipynb
+!notebooks/*.ipynb
+notebooks/.ipynb_checkpoints/
+
+# MLflow
+mlruns/
+mlartifacts/
+mlflow.db
+
+# Weights & Biases
+wandb/
+.wandb/
+
+# TensorBoard
+tensorboard/
+logs/tensorboard/
+
+# Output directories
+outputs/
+results/
+synthesis_output/
+generated/
+generated_*/
+output/
+outputs_*/
+
+# Temporary directories
+tmp/
+temp/
+temporary/
+.tmp/
+.temp/
+temp_dir/
+debug_dir/
+
+# Session and context files
+.session-*
+session-backup-*
+context-*
+.context-*
+session_*
+.ai/daily/*
+.ai/monthly/*
+.ai/archive/
+!.ai/daily/template.md
+!.ai/monthly/template.md
+!.ai/current-session.md
+!.ai/index.md
+!.ai/permanent/
+
+# Documentation artifacts
+docs/temp/
+docs/tmp/
+docs/generated/
+docs/archive/2025-*/
+docs/completion/
+docs/sessions/
+
+# Project specific
+workflow_state/
+synthesis_output/
+overnight.log
+*.overnight.log
+
+# Log files with sensitive information
+logs/
+*.log

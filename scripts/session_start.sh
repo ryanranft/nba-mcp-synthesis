@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # session_start.sh - Generate compact current-session.md for optimal context usage
-# Usage: ./scripts/session_start.sh [--new-session]
+# Usage: ./scripts/session_start.sh [--new-session] [--restore SESSION_ID] [--health-check]
 
 set -e
 
@@ -9,14 +9,206 @@ set -e
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 NC='\033[0m' # No Color
+
+# Parse arguments
+NEW_SESSION=false
+RESTORE_SESSION=""
+HEALTH_CHECK=false
+
+for arg in "$@"; do
+    case $arg in
+        --new-session)
+            NEW_SESSION=true
+            ;;
+        --restore=*)
+            RESTORE_SESSION="${arg#*=}"
+            ;;
+        --health-check)
+            HEALTH_CHECK=true
+            ;;
+        --help)
+            echo "Usage: $0 [--new-session] [--restore=SESSION_ID] [--health-check] [--help]"
+            echo ""
+            echo "Options:"
+            echo "  --new-session    Create a new daily session file"
+            echo "  --restore=ID     Restore session from S3 (requires S3 setup)"
+            echo "  --health-check   Run health checks and report issues"
+            echo "  --help          Show this help message"
+            exit 0
+            ;;
+    esac
+done
 
 # Detect project root (look for .ai directory)
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
+# Health check function
+run_health_check() {
+    echo -e "${BLUE}🔍 Running Health Checks${NC}"
+    echo "================================"
+
+    local issues=0
+
+    # Check git status
+    if ! git status >/dev/null 2>&1; then
+        echo -e "${RED}❌ Git repository not found${NC}"
+        issues=$((issues + 1))
+    else
+        echo -e "${GREEN}✅ Git repository OK${NC}"
+
+        # Check for uncommitted changes
+        local uncommitted=$(git status --porcelain | wc -l | tr -d ' ')
+        if [ "$uncommitted" -gt 0 ]; then
+            echo -e "${YELLOW}⚠️  $uncommitted uncommitted changes${NC}"
+            echo "   Run 'git status' to see details"
+        else
+            echo -e "${GREEN}✅ No uncommitted changes${NC}"
+        fi
+    fi
+
+    # Check .ai directory structure
+    if [ ! -d ".ai" ]; then
+        echo -e "${RED}❌ .ai directory not found${NC}"
+        issues=$((issues + 1))
+    else
+        echo -e "${GREEN}✅ .ai directory exists${NC}"
+
+        # Check subdirectories
+        for subdir in daily monthly permanent archive; do
+            if [ ! -d ".ai/$subdir" ]; then
+                echo -e "${YELLOW}⚠️  .ai/$subdir directory missing${NC}"
+                mkdir -p ".ai/$subdir"
+                echo -e "${GREEN}✅ Created .ai/$subdir${NC}"
+            fi
+        done
+    fi
+
+    # Check S3 availability (optional)
+    if command -v aws &> /dev/null; then
+        if aws sts get-caller-identity >/dev/null 2>&1; then
+            echo -e "${GREEN}✅ AWS CLI configured${NC}"
+        else
+            echo -e "${YELLOW}⚠️  AWS CLI not configured${NC}"
+        fi
+    else
+        echo -e "${YELLOW}⚠️  AWS CLI not installed (S3 features unavailable)${NC}"
+    fi
+
+    # Check session archive script
+    if [ -f "scripts/session_archive.sh" ]; then
+        echo -e "${GREEN}✅ Session archive script available${NC}"
+    else
+        echo -e "${RED}❌ Session archive script missing${NC}"
+        issues=$((issues + 1))
+    fi
+
+    # Check PROJECT_STATUS.md
+    if [ -f "PROJECT_STATUS.md" ]; then
+        echo -e "${GREEN}✅ PROJECT_STATUS.md exists${NC}"
+    else
+        echo -e "${RED}❌ PROJECT_STATUS.md missing${NC}"
+        issues=$((issues + 1))
+    fi
+
+    # Summary
+    echo ""
+    if [ $issues -eq 0 ]; then
+        echo -e "${GREEN}🎉 All health checks passed!${NC}"
+    else
+        echo -e "${RED}❌ $issues issues found${NC}"
+        echo "   Review the issues above before starting your session"
+    fi
+
+    return $issues
+}
+
+# Restore session function
+restore_session() {
+    local session_id="$1"
+    echo -e "${BLUE}📥 Restoring Session: $session_id${NC}"
+    echo "================================"
+
+    if ! command -v aws &> /dev/null; then
+        echo -e "${RED}❌ AWS CLI not found. Cannot restore from S3.${NC}"
+        echo "   Install AWS CLI: brew install awscli"
+        return 1
+    fi
+
+    # Check S3 bucket
+    local s3_bucket="${NBA_MCP_S3_BUCKET:-nba-mcp-sessions}"
+    if ! aws s3 ls "s3://$s3_bucket/" >/dev/null 2>&1; then
+        echo -e "${RED}❌ S3 bucket '$s3_bucket' not accessible${NC}"
+        echo "   Check your AWS credentials and bucket name"
+        return 1
+    fi
+
+    # Try to restore from different locations
+    local restored=false
+
+    # Try daily sessions
+    if aws s3 ls "s3://$s3_bucket/daily/$session_id" >/dev/null 2>&1; then
+        echo -e "${GREEN}📥 Found in daily sessions${NC}"
+        aws s3 cp "s3://$s3_bucket/daily/$session_id" ".ai/daily/"
+        restored=true
+    fi
+
+    # Try monthly sessions
+    if aws s3 ls "s3://$s3_bucket/monthly/$session_id" >/dev/null 2>&1; then
+        echo -e "${GREEN}📥 Found in monthly sessions${NC}"
+        aws s3 cp "s3://$s3_bucket/monthly/$session_id" ".ai/monthly/"
+        restored=true
+    fi
+
+    # Try archive
+    if aws s3 ls "s3://$s3_bucket/archive/$session_id" >/dev/null 2>&1; then
+        echo -e "${GREEN}📥 Found in archive${NC}"
+        aws s3 cp "s3://$s3_bucket/archive/$session_id" ".ai/archive/"
+        restored=true
+    fi
+
+    if [ "$restored" = true ]; then
+        echo -e "${GREEN}✅ Session restored successfully${NC}"
+    else
+        echo -e "${RED}❌ Session '$session_id' not found in S3${NC}"
+        echo "   Available sessions:"
+        aws s3 ls "s3://$s3_bucket/daily/" 2>/dev/null | head -10
+        aws s3 ls "s3://$s3_bucket/monthly/" 2>/dev/null | head -10
+        aws s3 ls "s3://$s3_bucket/archive/" 2>/dev/null | head -10
+        return 1
+    fi
+}
+
+# Handle different modes
+if [ "$HEALTH_CHECK" = true ]; then
+    run_health_check
+    exit $?
+fi
+
+if [ -n "$RESTORE_SESSION" ]; then
+    restore_session "$RESTORE_SESSION"
+    exit $?
+fi
+
 echo -e "${BLUE}🚀 Starting New Session${NC}"
 echo "================================"
+
+# Run quick health check
+echo -e "${BLUE}🔍 Quick Health Check${NC}"
+if ! git status >/dev/null 2>&1; then
+    echo -e "${RED}❌ Git repository not found${NC}"
+    echo "   Run with --health-check for detailed diagnostics"
+    exit 1
+fi
+
+# Check for uncommitted changes
+uncommitted=$(git status --porcelain | wc -l | tr -d ' ')
+if [ "$uncommitted" -gt 0 ]; then
+    echo -e "${YELLOW}⚠️  $uncommitted uncommitted changes${NC}"
+    echo "   Consider committing changes before starting new session"
+fi
 
 # Create .ai directory if it doesn't exist
 mkdir -p .ai/daily .ai/monthly .ai/permanent .ai/archive
@@ -30,7 +222,7 @@ SESSION_NUM=$(ls -1 .ai/daily/${TODAY}-session-*.md 2>/dev/null | wc -l | tr -d 
 SESSION_NUM=$((SESSION_NUM + 1))
 
 # Create new daily session file if --new-session flag
-if [ "$1" == "--new-session" ]; then
+if [ "$NEW_SESSION" = true ]; then
     DAILY_FILE=".ai/daily/${TODAY}-session-${SESSION_NUM}.md"
     echo -e "${GREEN}📝 Creating new daily session file: ${DAILY_FILE}${NC}"
 
