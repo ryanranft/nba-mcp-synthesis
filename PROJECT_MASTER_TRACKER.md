@@ -288,69 +288,19 @@ These 3 tools still exist in helper files but are NOT registered in fastmcp_serv
 
 ---
 
-## 🚧 Truly Remaining Work (16 Features)
+## 🚧 Remaining Work (16 Features)
 
 **Status**: NOT started (confirmed by audit)
-**Estimated Duration**: 1-2 weeks
 **Priority**: MEDIUM (nice-to-have, not critical)
 
-### Web Scraping - 3 Tools ❌
-**Status**: Confirmed NOT implemented
-**File Check**: `mcp_server/tools/web_scraper_helper.py` DOES NOT EXIST ❌
+For detailed breakdown of remaining work, see **[project/status/remaining-work.md](project/status/remaining-work.md)**
 
-- [ ] scrape_nba_webpage - Scrape NBA websites using Crawl4AI
-- [ ] search_webpage_for_text - Search for specific content in pages
-- [ ] extract_structured_data - LLM-powered data extraction
+### Summary
+- **Web Scraping**: 3 tools (Medium priority)
+- **MCP Prompts**: 7 templates (Low priority)
+- **MCP Resources**: 6 URIs (Low priority)
 
-**Implementation Files Needed**:
-- `mcp_server/tools/web_scraper_helper.py`
-
-**Dependencies**:
-- Crawl4AI library
-- Google Gemini API (for LLM extraction)
-- HTTP client library (httpx/aiohttp)
-
----
-
-### MCP Prompts - 7 Templates ❌
-**Status**: Confirmed NOT implemented
-**Directory Check**: `mcp_server/prompts/` DOES NOT EXIST ❌
-
-- [ ] analyze_player - Player analysis prompt template
-- [ ] compare_players - Player comparison prompt template
-- [ ] predict_game - Game prediction prompt template
-- [ ] team_analysis - Team analysis prompt template
-- [ ] injury_impact - Injury impact analysis prompt
-- [ ] draft_analysis - Draft prospect analysis prompt
-- [ ] trade_evaluation - Trade evaluation prompt template
-
-**Implementation Files Needed**:
-- `mcp_server/prompts/` directory with 7 prompt templates
-
-**Dependencies**:
-- FastMCP prompt registration
-- Template design for each use case
-
----
-
-### MCP Resources - 6 URIs ❌
-**Status**: Confirmed NOT implemented
-**Directory Check**: `mcp_server/resources/` DOES NOT EXIST ❌
-
-- [ ] nba://games/{date} - Games by date resource
-- [ ] nba://standings/{conference} - Conference standings
-- [ ] nba://players/{player_id} - Player profile resource
-- [ ] nba://teams/{team_id} - Team profile resource
-- [ ] nba://injuries - Current injuries resource
-- [ ] nba://players/top-scorers - Top scorers resource
-
-**Implementation Files Needed**:
-- `mcp_server/resources/` directory with 6 resource handlers
-
-**Dependencies**:
-- FastMCP resource registration
-- Database queries for dynamic data
-- NBA API integration (optional, for real-time data)
+**Estimated Duration**: 1-2 weeks total
 
 ---
 
@@ -385,31 +335,13 @@ These 3 tools still exist in helper files but are NOT registered in fastmcp_serv
 
 ### Definition of "Done"
 
-A feature is considered complete when ALL of the following are satisfied:
+For the complete definition of what "done" means for features in this project, see **[project/tracking/completion-criteria.md](project/tracking/completion-criteria.md)**
 
-1. **Implementation** ✅
-   - Helper module created with all functions
-   - Pydantic parameter models defined
-   - MCP tool registration in fastmcp_server.py ⭐ **MUST BE REGISTERED**
-   - Error handling and logging implemented
-
-2. **Testing** ✅
-   - Unit tests written (100% coverage target)
-   - All tests passing
-   - Edge cases covered
-   - NBA use cases tested
-
-3. **Documentation** ✅
-   - Tool documentation with parameters/returns
-   - NBA-specific examples provided
-   - Integration guide written
-   - Sprint completion document created
-
-4. **Integration** ✅
-   - Tool registered in MCP server
-   - Accessible via Claude Desktop/API
-   - Works with existing tools
-   - No breaking changes
+**Summary**: A feature is complete when it has:
+1. ✅ Implementation (helper module, registration, error handling)
+2. ✅ Testing (100% coverage, all tests passing)
+3. ✅ Documentation (tool docs, examples, guides)
+4. ✅ Integration (accessible via MCP, works with other tools)
 
 ---
 

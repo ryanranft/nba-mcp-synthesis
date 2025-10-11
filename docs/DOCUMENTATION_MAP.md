@@ -27,8 +27,10 @@ This map defines the single source of truth for each topic in the project docume
 | **Detailed Status** | [project/status/index.md](../project/status/index.md) | Comprehensive status tracking |
 | **Tool Registration** | [project/status/tools.md](../project/status/tools.md) | Tool registration details |
 | **Sprint Progress** | [project/status/sprints.md](../project/status/sprints.md) | Sprint completion status |
+| **Remaining Work** | [project/status/remaining-work.md](../project/status/remaining-work.md) | 16 pending features |
 | **Blockers & Issues** | [project/status/blockers.md](../project/status/blockers.md) | Current blockers |
 | **Daily Progress** | [project/tracking/progress.log](../project/tracking/progress.log) | Append-only log |
+| **Completion Criteria** | [project/tracking/completion-criteria.md](../project/tracking/completion-criteria.md) | Definition of "Done" |
 | **Key Decisions** | [project/tracking/decisions.md](../project/tracking/decisions.md) | Architecture decisions |
 | **Milestones** | [project/tracking/milestones.md](../project/tracking/milestones.md) | Major achievements |
 

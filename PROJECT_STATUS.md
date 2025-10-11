@@ -20,8 +20,9 @@
 
 - **Registered Tools**: 90 (96% complete)
 - **Implemented but Not Registered**: 3 NBA metrics
-- **Pending Features**: 16 (3 web scraping + 7 prompts + 6 resources)
+- **Pending Features**: 16 → [Details](project/status/remaining-work.md)
 - **Overall Progress**: 96% (90/93 tools/features)
+- **Completion Criteria**: [Definition of Done](project/tracking/completion-criteria.md)
 
 ---
 
