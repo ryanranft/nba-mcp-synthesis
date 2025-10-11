@@ -1,0 +1,152 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2025-10-11",
+  "description": "Context budget configuration for token management",
+  "budgets": {
+    "session_start": 300,
+    "status_check": 150,
+    "tool_lookup": 100,
+    "progress_update": 10,
+    "status_update": 50,
+    "decision_recording": 30,
+    "read_guide": 300,
+    "read_plan": 500,
+    "review_sprint": 200,
+    "check_analysis": 250,
+    "tool_implementation": 400
+  },
+  "session_targets": {
+    "quick_update": {
+      "min": 500,
+      "max": 1000,
+      "description": "Status update, simple fix"
+    },
+    "standard_session": {
+      "min": 3000,
+      "max": 5000,
+      "description": "Feature work, debugging"
+    },
+    "deep_work": {
+      "min": 5000,
+      "max": 10000,
+      "description": "Complex implementation, planning"
+    },
+    "planning_session": {
+      "min": 2000,
+      "max": 4000,
+      "description": "Strategy, architecture decisions"
+    },
+    "review_session": {
+      "min": 1000,
+      "max": 3000,
+      "description": "Code review, testing"
+    }
+  },
+  "thresholds": {
+    "green": {
+      "percentage": 80,
+      "description": "Normal operations, no action needed"
+    },
+    "yellow": {
+      "percentage": 100,
+      "description": "Approaching limit, consider optimization"
+    },
+    "red": {
+      "percentage": 101,
+      "description": "Exceeded budget, immediate action needed"
+    }
+  },
+  "file_size_targets": {
+    "index_files": {
+      "lines": 100,
+      "warning_at": 80,
+      "description": "Navigation index files"
+    },
+    "status_files": {
+      "lines": 200,
+      "warning_at": 160,
+      "description": "Project status files"
+    },
+    "guide_files": {
+      "lines": 300,
+      "warning_at": 240,
+      "description": "Documentation guides"
+    },
+    "daily_sessions": {
+      "lines": 500,
+      "warning_at": 400,
+      "description": "Daily session logs"
+    },
+    "plan_files": {
+      "lines": 3000,
+      "warning_at": 2400,
+      "description": "Planning documents"
+    }
+  },
+  "optimization_strategies": [
+    {
+      "name": "Index-Based Navigation",
+      "savings": "90-95%",
+      "description": "Use index files to locate content before reading"
+    },
+    {
+      "name": "Grep Before Read",
+      "savings": "90%",
+      "description": "Use grep to find specific content, then read only that section"
+    },
+    {
+      "name": "Append-Only Logs",
+      "savings": "99%",
+      "description": "Never read progress logs, only append to them"
+    },
+    {
+      "name": "Section-Based Editing",
+      "savings": "95%",
+      "description": "Edit only specific sections in status files"
+    },
+    {
+      "name": "Cross-Reference Canonical",
+      "savings": "90%",
+      "description": "Link to canonical source instead of duplicating content"
+    },
+    {
+      "name": "Template Usage",
+      "savings": "90%",
+      "description": "Use templates for repetitive file creation"
+    }
+  ],
+  "monitoring": {
+    "daily": {
+      "check_dashboard": true,
+      "track_budget": true
+    },
+    "weekly": {
+      "run_health_check": true,
+      "monitor_file_sizes": true,
+      "archive_old_sessions": true
+    },
+    "monthly": {
+      "update_baselines": true,
+      "generate_report": true,
+      "review_metrics": true
+    }
+  },
+  "alerts": [
+    {
+      "trigger": "session_start > 300 tokens",
+      "action": "Regenerate current-session.md with ./scripts/session_start.sh"
+    },
+    {
+      "trigger": "status_check > 150 tokens",
+      "action": "Split PROJECT_STATUS.md into focused files"
+    },
+    {
+      "trigger": "overall_session > 10000 tokens",
+      "action": "Archive session and start fresh"
+    },
+    {
+      "trigger": "daily_sessions > 7 files",
+      "action": "Run ./scripts/session_archive.sh"
+    }
+  ]
+}

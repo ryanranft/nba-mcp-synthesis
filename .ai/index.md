@@ -6,6 +6,20 @@
 
 ---
 
+## 🚀 IMPORTANT: Read This First
+
+**For Claude/AI Sessions**: Before starting any work, read:
+1. **This file** - Session management guide
+2. **[CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md](../CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md)** - Daily operations, decision tree, systematic approach
+
+**Quick Start**:
+```bash
+./scripts/session_start.sh  # Generate current-session.md
+cat .ai/current-session.md  # Read compact context (~300 tokens)
+```
+
+---
+
 ## 🎯 Overview
 
 The AI session management system provides structured, context-optimized session tracking to minimize token usage while maintaining full project accessibility.

@@ -35,6 +35,7 @@ This map defines the single source of truth for each topic in the project docume
 ### Session Management
 | Topic | Canonical Location | Purpose |
 |-------|-------------------|---------|
+| **Operations Guide** | [CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md](../CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md) | Daily operations, decision tree |
 | **Session Management Guide** | [.ai/index.md](../.ai/index.md) | Complete session management |
 | **Current Session** | [.ai/current-session.md](../.ai/current-session.md) | Active session state |
 | **Tool Registry** | [.ai/permanent/tool-registry.md](../.ai/permanent/tool-registry.md) | Searchable tool list |
@@ -46,6 +47,7 @@ This map defines the single source of truth for each topic in the project docume
 |-------|-------------------|---------|
 | **Master Plan** | [docs/plans/MASTER_PLAN.md](plans/MASTER_PLAN.md) | Overall project strategy |
 | **Context Optimization Plan** | [docs/plans/detailed/CONTEXT_OPTIMIZATION_PLAN.md](plans/detailed/CONTEXT_OPTIMIZATION_PLAN.md) | Current optimization effort |
+| **Context Requirements Verification** | [CONTEXT_OPTIMIZATION_REQUIREMENTS_VERIFICATION.md](../CONTEXT_OPTIMIZATION_REQUIREMENTS_VERIFICATION.md) | Requirements verification (all 10 met) |
 | **NBA MCP Improvement Plan** | [docs/plans/detailed/NBA_MCP_IMPROVEMENT_PLAN.md](plans/detailed/NBA_MCP_IMPROVEMENT_PLAN.md) | Improvement roadmap |
 | **Verification Report** | [docs/plans/VERIFICATION_REPORT_2025-10-11.md](plans/VERIFICATION_REPORT_2025-10-11.md) | Latest verification status |
 

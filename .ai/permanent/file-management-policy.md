@@ -1,0 +1,543 @@
+# File Management Policy
+
+**Purpose**: Comprehensive file organization, creation, and archiving policy
+**Audience**: Claude/AI sessions, developers, project maintainers
+**Last Updated**: 2025-10-11
+**Status**: Active policy
+
+---
+
+## 🎯 Overview
+
+This policy ensures consistent file management across the project by defining:
+1. **When and where to create files**
+2. **File naming conventions**
+3. **Archive triggers and retention policies**
+4. **Directory structure requirements**
+
+**Goal**: Maintain organized, searchable documentation with minimal context usage
+
+---
+
+## 📁 Directory Structure & Purpose
+
+### Active Documentation (Tracked in Git)
+
+```
+project-root/
+├── .ai/                           # AI session management (partial tracking)
+│   ├── current-session.md         # TRACKED: Compact session state (~80 lines)
+│   ├── index.md                   # TRACKED: Session management guide
+│   ├── daily/                     # GITIGNORED: Detailed daily logs
+│   │   └── template.md           # TRACKED: Session template
+│   ├── monthly/                   # GITIGNORED: Monthly summaries
+│   │   └── template.md           # TRACKED: Monthly template
+│   ├── permanent/                 # TRACKED: Permanent references
+│   │   ├── tool-registry.md      # Searchable tool list
+│   │   ├── context_budget.json   # Budget configuration
+│   │   └── file-management-policy.md  # This file
+│   └── archive/                   # GITIGNORED: Historical sessions
+│
+├── project/                       # Current project status
+│   ├── index.md                   # TRACKED: Project navigation (<200 lines)
+│   ├── status/                    # TRACKED: Current state
+│   │   ├── tools.md              # Tool registration status
+│   │   ├── sprints.md            # Sprint progress
+│   │   ├── features.md           # Feature status
+│   │   └── blockers.md           # Current blockers
+│   ├── tracking/                  # TRACKED: Progress tracking
+│   │   ├── progress.log          # APPEND-ONLY: Daily progress
+│   │   ├── decisions.md          # Key decisions log
+│   │   └── milestones.md         # Major achievements
+│   └── metrics/                   # TRACKED: Metrics & analytics
+│
+├── docs/                          # Documentation
+│   ├── index.md                   # TRACKED: Master documentation hub
+│   ├── DOCUMENTATION_MAP.md       # TRACKED: Canonical location map
+│   ├── guides/                    # TRACKED: User guides
+│   ├── plans/                     # TRACKED: Planning documents
+│   ├── sprints/                   # TRACKED: Sprint documentation
+│   ├── analysis/                  # TRACKED: Code analysis
+│   └── archive/                   # GITIGNORED: Historical docs
+│       └── YYYY-MM/              # Monthly archives
+│           ├── index.md          # TRACKED: Archive index
+│           ├── completion/       # Completion documents
+│           └── sessions/         # Session summaries
+│
+├── Root Documentation (Essential Only)
+│   ├── README.md                  # Project overview
+│   ├── PROJECT_STATUS.md          # Current status (<150 lines)
+│   ├── PROJECT_MASTER_TRACKER.md  # Master tracking
+│   ├── START_HERE_FOR_CLAUDE.md   # Claude entry point
+│   └── CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md  # Operations guide
+```
+
+---
+
+## 🔍 File Creation Decision Tree
+
+### Before Creating ANY New File, Ask:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ STEP 1: Does this information already have a location?  │
+└─────────────────────────────────────────────────────────┘
+                         │
+                         ├─ YES → Update existing file (don't create new)
+                         │         Check: docs/DOCUMENTATION_MAP.md
+                         │
+                         └─ NO → Continue to Step 2
+                                   │
+┌──────────────────────────────────────────────────────────┐
+│ STEP 2: Is this temporary/session-specific information? │
+└──────────────────────────────────────────────────────────┘
+                         │
+                         ├─ YES → Use: .ai/daily/YYYY-MM-DD-session-N.md
+                         │         (gitignored, detailed notes)
+                         │
+                         └─ NO → Continue to Step 3
+                                   │
+┌──────────────────────────────────────────────────────────┐
+│ STEP 3: Is this a progress update or log entry?         │
+└──────────────────────────────────────────────────────────┘
+                         │
+                         ├─ YES → Append to: project/tracking/progress.log
+                         │         Format: "YYYY-MM-DD: Action taken"
+                         │         NEVER READ THIS FILE - APPEND ONLY
+                         │
+                         └─ NO → Continue to Step 4
+                                   │
+┌──────────────────────────────────────────────────────────┐
+│ STEP 4: Is this current status information?             │
+└──────────────────────────────────────────────────────────┘
+                         │
+                         ├─ YES → Edit specific section in:
+                         │         project/status/tools.md
+                         │         project/status/sprints.md
+                         │         project/status/features.md
+                         │         project/status/blockers.md
+                         │
+                         └─ NO → Continue to Step 5
+                                   │
+┌──────────────────────────────────────────────────────────┐
+│ STEP 5: Is this permanent reference material?           │
+└──────────────────────────────────────────────────────────┘
+                         │
+                         ├─ YES → Add to: .ai/permanent/
+                         │         Examples: decisions, architecture, tools
+                         │         Update: .ai/permanent/index.md
+                         │
+                         └─ NO → Continue to Step 6
+                                   │
+┌──────────────────────────────────────────────────────────┐
+│ STEP 6: Is this a user guide or documentation?          │
+└──────────────────────────────────────────────────────────┘
+                         │
+                         ├─ YES → Create in: docs/guides/
+                         │         Name: DESCRIPTIVE_TOPIC_GUIDE.md
+                         │         Update: docs/guides/index.md
+                         │         Update: docs/DOCUMENTATION_MAP.md
+                         │
+                         └─ NO → Continue to Step 7
+                                   │
+┌──────────────────────────────────────────────────────────┐
+│ STEP 7: Is this historical/completed work?              │
+└──────────────────────────────────────────────────────────┘
+                         │
+                         ├─ YES → Archive to: docs/archive/YYYY-MM/
+                         │         Update: docs/archive/YYYY-MM/index.md
+                         │
+                         └─ NO → RECONSIDER IF FILE IS NECESSARY
+                                   Consult: docs/DOCUMENTATION_MAP.md
+                                   Or ask: "Can this be added to existing file?"
+```
+
+---
+
+## 📝 File Naming Conventions
+
+### DO Use ✅
+
+**Descriptive Names**:
+- `CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md` - Clear, searchable
+- `NBA_PLAYER_EFFICIENCY_RATING.md` - Specific, understandable
+- `SPRINT_5_COMPLETE.md` - Consistent pattern with number
+
+**Date Prefixes** (for time-sensitive docs):
+- `2025-10-11-session-1.md` - Daily sessions
+- `2025-10-summary.md` - Monthly summaries
+
+**Consistent Patterns**:
+- `SPRINT_X_COMPLETE.md` - Sprint completions
+- `PHASE_X_PLAN.md` - Phase planning
+- `TOOL_NAME_GUIDE.md` - Tool guides
+
+### DON'T Use ❌
+
+**Generic Names**:
+- `NOTES.md` - Not searchable
+- `TEMP.md` - Will be forgotten
+- `NEW_FILE.md` - Not descriptive
+- `TODO.md` - Use todo system instead
+
+**Inconsistent Patterns**:
+- `sprint5-done.md` vs `SPRINT_6_COMPLETE.md` - Be consistent
+- `guide_for_tools.md` vs `TOOLS_GUIDE.md` - Choose one pattern
+
+**Spaces in Filenames**:
+- `My Notes.md` - Use underscores or hyphens
+- `Sprint 5.md` - Should be `SPRINT_5.md`
+
+---
+
+## 🗄️ Archive Policy & Retention
+
+### Immediate Archive (0 days)
+
+**Trigger**: File pattern match
+**Action**: Archive immediately upon recognition
+
+**Patterns**:
+- `*_COMPLETE.md` - Completion documents
+- `*_SUCCESS.md` - Success reports
+- `*_DONE.md` - Done markers
+- `*_FINISHED.md` - Finished work
+- `*_VERIFICATION.md` - Verification complete (if >7 days old)
+- `*_REPORT.md` - One-time reports (if >7 days old)
+
+**Examples**:
+```bash
+SPRINT_5_COMPLETE.md → docs/archive/2025-10/completion/
+VERIFICATION_REPORT.md → docs/archive/2025-10/completion/ (if >7 days)
+```
+
+### 30-Day Archive
+
+**Trigger**: File not modified in 30 days + matches pattern
+**Action**: Archive after age threshold
+
+**Patterns**:
+- `SPRINT_*_PLAN.md` - Sprint planning (if sprint is complete)
+- Old documentation in `docs/sprints/`, `docs/plans/`, `docs/analysis/`
+- Superseded guides (check for newer versions)
+
+**Exceptions** (Never Auto-Archive):
+- Files in `docs/guides/` (permanent reference)
+- Files in `.ai/permanent/` (permanent reference)
+- `index.md` files (navigation)
+- `PROJECT_STATUS.md` (current state)
+- `DOCUMENTATION_MAP.md` (navigation)
+
+### 60-Day Archive
+
+**Trigger**: File not modified in 60 days + matches pattern
+**Action**: Archive for long-term storage
+
+**Patterns**:
+- `*_SESSION*.md` - Session summaries
+- `SESSION_*_SUMMARY.md` - Session documentation
+- Analysis documents (after work is complete)
+
+### Protected from Archive (Never)
+
+**Files That Should Never Be Archived**:
+- `.ai/permanent/*` - Permanent architectural references
+- `docs/guides/*` - User-facing guides
+- `PROJECT_STATUS.md` - Current project status
+- `PROJECT_MASTER_TRACKER.md` - Master tracking
+- `docs/DOCUMENTATION_MAP.md` - Canonical location map
+- All `index.md` files - Navigation
+- `README.md` - Project overview
+- Active development documentation
+
+---
+
+## 📋 File Lifecycle Examples
+
+### Example 1: Sprint Completion Document
+
+```
+Day 0: Create SPRINT_5_COMPLETE.md
+       Location: Root directory
+       Status: Active
+
+Day 1: Pattern match: *_COMPLETE.md
+       Trigger: Immediate archive
+       Action: Move to docs/archive/2025-10/completion/
+       Update: docs/archive/2025-10/index.md
+```
+
+### Example 2: Session Notes
+
+```
+Day 0: Create .ai/daily/2025-10-11-session-1.md
+       Location: .ai/daily/ (gitignored)
+       Status: Active, detailed notes
+
+Day 7: Session ends, information captured
+       Action: Keep in .ai/daily/ (local only)
+       
+Day 30: Optional S3 archive
+        Action: Upload to S3 if configured
+        Local: Delete from .ai/daily/
+```
+
+### Example 3: Progress Update
+
+```
+Action needed: Record daily progress
+
+Decision: Append to project/tracking/progress.log
+Format: "2025-10-11: Completed Sprint 5 tools registration"
+
+IMPORTANT: Never read this file, only append
+Context cost: 10 tokens (vs 1,500 if read)
+```
+
+### Example 4: Status Update
+
+```
+Action needed: Update tool registration status
+
+Decision: Edit specific section in project/status/tools.md
+Location: project/status/tools.md:45-67 (tool section)
+
+IMPORTANT: Edit only the specific section, don't read entire file
+Context cost: 50-100 tokens (vs 1,000+ for full file)
+```
+
+### Example 5: New Guide Creation
+
+```
+Action needed: Document new feature
+
+Decision: Create docs/guides/NEW_FEATURE_GUIDE.md
+Steps:
+  1. Create file with descriptive name
+  2. Update docs/guides/index.md
+  3. Add to docs/DOCUMENTATION_MAP.md
+  4. Link from related documents
+
+Result: Discoverable, indexed, canonical location
+```
+
+---
+
+## 🚨 Common Anti-Patterns to Avoid
+
+### Anti-Pattern 1: Creating Standalone Documents
+
+**BAD** ❌:
+```markdown
+# Create: TOOLS_STATUS_UPDATE.md
+Today I updated the following tools:
+- Tool A
+- Tool B
+...
+```
+
+**GOOD** ✅:
+```bash
+# Append to progress log (never read it)
+echo "2025-10-11: Updated tools A, B" >> project/tracking/progress.log
+
+# Edit specific section in status file
+vim project/status/tools.md +45  # Edit tool section only
+```
+
+### Anti-Pattern 2: Reading Append-Only Logs
+
+**BAD** ❌:
+```bash
+cat project/tracking/progress.log  # 1,500 tokens!
+echo "2025-10-11: New update" >> project/tracking/progress.log
+```
+
+**GOOD** ✅:
+```bash
+# Just append, never read
+echo "$(date +%Y-%m-%d): New update" >> project/tracking/progress.log  # 10 tokens
+```
+
+### Anti-Pattern 3: Duplicating Content
+
+**BAD** ❌:
+```markdown
+# In multiple files:
+## Tool Registration Process
+1. Create tool in mcp_server/tools/
+2. Register in fastmcp_server.py
+... (full process repeated in 5 files)
+```
+
+**GOOD** ✅:
+```markdown
+# In most files:
+## Tool Registration
+See [Tool Registration Guide](project/status/tools.md) for complete process.
+
+# In ONE canonical file (project/status/tools.md):
+## Tool Registration Process
+1. Create tool in mcp_server/tools/
+2. Register in fastmcp_server.py
+... (full details ONCE)
+```
+
+### Anti-Pattern 4: Creating Files Without Checking
+
+**BAD** ❌:
+```bash
+# Create random file without checking
+vim NEW_FEATURE_DOCS.md  # Where does this belong?
+```
+
+**GOOD** ✅:
+```bash
+# Check structure first
+cat docs/DOCUMENTATION_MAP.md  # Where should this go?
+cat docs/index.md              # What's the structure?
+
+# Create in appropriate location
+vim docs/guides/NEW_FEATURE_GUIDE.md
+vim docs/guides/index.md       # Add link
+```
+
+---
+
+## 🔧 Automation & Scripts
+
+### Archive Automation
+
+**Script**: `scripts/auto_archive.sh`
+**Purpose**: Automatically archive old/completed files
+**Usage**:
+```bash
+# Dry run (preview)
+./scripts/auto_archive.sh --dry-run
+
+# Interactive (confirm each)
+./scripts/auto_archive.sh --interactive
+
+# Automatic (age threshold)
+./scripts/auto_archive.sh --age=30
+
+# Production run
+./scripts/auto_archive.sh
+```
+
+**Schedule**: Run weekly via health check
+
+### Session Start Check
+
+**Script**: `scripts/session_start.sh`
+**Purpose**: Check for archival candidates at session start
+**Usage**:
+```bash
+./scripts/session_start.sh
+# Warns if >5 completion documents in root
+# Suggests running auto_archive.sh
+```
+
+### Weekly Health Check
+
+**Script**: `scripts/weekly_health_check.sh`
+**Purpose**: Comprehensive health check including archive status
+**Usage**:
+```bash
+./scripts/weekly_health_check.sh
+# Generates report: .ai/monitoring/reports/weekly_YYYYMMDD.md
+# Includes archive recommendations
+```
+
+---
+
+## 📊 File Count Targets
+
+### Root Directory
+
+**Target**: <20 markdown files
+**Warning**: 20-30 files
+**Critical**: >30 files
+
+**Action if exceeded**:
+```bash
+./scripts/auto_archive.sh --interactive
+```
+
+### Active Docs Directory
+
+**Target**: <100 markdown files (excluding archives)
+**Warning**: 100-150 files
+**Critical**: >150 files
+
+**Action if exceeded**:
+```bash
+# Review and archive old documentation
+./scripts/auto_archive.sh --age=30
+
+# Check what's active
+find docs/ -name "*.md" ! -path "*/archive/*" | wc -l
+```
+
+### Daily Sessions
+
+**Target**: <7 files in .ai/daily/
+**Warning**: 7-14 files
+**Critical**: >14 files
+
+**Action if exceeded**:
+```bash
+# Archive to S3 (if configured)
+./scripts/session_archive.sh --to-s3
+
+# Or delete old sessions (local only)
+find .ai/daily/ -name "*.md" -mtime +7 -delete
+```
+
+---
+
+## ✅ Checklist: Before Creating a File
+
+- [ ] Checked `docs/DOCUMENTATION_MAP.md` for canonical location
+- [ ] Followed decision tree (7 steps)
+- [ ] Chose appropriate directory based on purpose
+- [ ] Used descriptive, searchable filename
+- [ ] Followed naming conventions (no spaces, consistent pattern)
+- [ ] Will update relevant index file
+- [ ] Will add to `docs/DOCUMENTATION_MAP.md` (if new guide)
+- [ ] Confirmed file is necessary (can't use existing file)
+
+---
+
+## 🎯 Success Criteria
+
+### File Organization
+
+- ✅ Root directory: <20 markdown files
+- ✅ All files follow naming conventions
+- ✅ No duplicate content (cross-references used)
+- ✅ All files have index entries
+- ✅ Canonical locations documented
+
+### Archive Management
+
+- ✅ Completion documents archived immediately
+- ✅ Old files archived within 30-60 days
+- ✅ Archive index kept up-to-date
+- ✅ Weekly archive check runs automatically
+
+### Context Optimization
+
+- ✅ Session start: <300 tokens
+- ✅ Status checks: <150 tokens
+- ✅ Progress updates: <10 tokens (append-only)
+- ✅ Overall session: 3-10K tokens
+
+---
+
+**Last Updated**: 2025-10-11
+**Version**: 1.0
+**Status**: Active Policy
+
+**For Questions**: See `CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md` or `.ai/index.md`
+

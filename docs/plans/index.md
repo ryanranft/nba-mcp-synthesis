@@ -15,6 +15,7 @@
 ### Detailed Plans
 - **[Context Optimization Plan](detailed/CONTEXT_OPTIMIZATION_PLAN.md)** - Current optimization effort (Phases 3-10)
 - **[NBA MCP Improvement Plan](detailed/NBA_MCP_IMPROVEMENT_PLAN.md)** - Improvement roadmap
+- **[File Management Integration Plan](detailed/FILE_MANAGEMENT_INTEGRATION_PLAN.md)** - Proactive file management & archiving integration
 
 ---
 

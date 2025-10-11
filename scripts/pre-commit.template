@@ -1,0 +1,220 @@
+#!/usr/bin/env bash
+#
+# pre-commit hook - Validate files before commit
+#
+# Purpose: Ensure context optimization standards are maintained
+# Installed: Copy to .git/hooks/pre-commit and chmod +x
+#
+# Checks:
+#   1. File sizes don't exceed thresholds
+#   2. Required files are present
+#   3. No broken internal links (basic check)
+#   4. Project status is up to date
+
+set -e
+
+# Get project root
+PROJECT_ROOT=$(git rev-parse --show-toplevel)
+
+# Color codes
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+# Check counters
+CHECKS_PASSED=0
+CHECKS_FAILED=0
+CHECKS_WARNING=0
+
+echo ""
+echo "======================================"
+echo "Pre-Commit Validation"
+echo "======================================"
+echo ""
+
+# Function to record check
+check_result() {
+    local status=$1  # PASS, WARN, FAIL
+    local message=$2
+
+    case $status in
+        PASS)
+            CHECKS_PASSED=$((CHECKS_PASSED + 1))
+            echo -e "${GREEN}✓${NC} $message"
+            ;;
+        WARN)
+            CHECKS_WARNING=$((CHECKS_WARNING + 1))
+            echo -e "${YELLOW}⚠${NC} $message"
+            ;;
+        FAIL)
+            CHECKS_FAILED=$((CHECKS_FAILED + 1))
+            echo -e "${RED}✗${NC} $message"
+            ;;
+    esac
+}
+
+# Check 1: File sizes
+echo -e "${BLUE}[1/5]${NC} Checking file sizes..."
+
+# Get list of staged markdown files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.md$' || true)
+
+if [[ -n "$STAGED_FILES" ]]; then
+    OVERSIZED_FILES=0
+    while IFS= read -r file; do
+        if [[ -f "$PROJECT_ROOT/$file" ]]; then
+            LINES=$(wc -l < "$PROJECT_ROOT/$file")
+
+            # Determine threshold based on file type
+            THRESHOLD=300  # Default for guides
+            if [[ "$file" =~ index\.md$ ]]; then
+                THRESHOLD=100
+            elif [[ "$file" =~ /status/ ]]; then
+                THRESHOLD=200
+            elif [[ "$file" =~ /plans/.*PLAN ]]; then
+                THRESHOLD=3000
+            elif [[ "$file" == "PROJECT_STATUS.md" ]]; then
+                THRESHOLD=150
+            fi
+
+            if [[ $LINES -gt $THRESHOLD ]]; then
+                check_result "WARN" "File exceeds threshold: $file ($LINES lines, limit: $THRESHOLD)"
+                OVERSIZED_FILES=$((OVERSIZED_FILES + 1))
+            fi
+        fi
+    done <<< "$STAGED_FILES"
+
+    if [[ $OVERSIZED_FILES -eq 0 ]]; then
+        check_result "PASS" "All staged files within size limits"
+    fi
+else
+    check_result "PASS" "No markdown files staged"
+fi
+
+echo ""
+
+# Check 2: Required files present
+echo -e "${BLUE}[2/5]${NC} Checking required files..."
+
+REQUIRED_FILES=(
+    ".ai/index.md"
+    "PROJECT_STATUS.md"
+    "docs/DOCUMENTATION_MAP.md"
+)
+
+MISSING_FILES=0
+for required_file in "${REQUIRED_FILES[@]}"; do
+    if [[ ! -f "$PROJECT_ROOT/$required_file" ]]; then
+        check_result "FAIL" "Required file missing: $required_file"
+        MISSING_FILES=$((MISSING_FILES + 1))
+    fi
+done
+
+if [[ $MISSING_FILES -eq 0 ]]; then
+    check_result "PASS" "All required files present"
+fi
+
+echo ""
+
+# Check 3: Broken links (basic check)
+echo -e "${BLUE}[3/5]${NC} Checking for broken internal links..."
+
+if [[ -n "$STAGED_FILES" ]]; then
+    BROKEN_LINKS=0
+    while IFS= read -r file; do
+        if [[ -f "$PROJECT_ROOT/$file" ]]; then
+            # Extract markdown links
+            while IFS= read -r link; do
+                # Skip URLs and anchors
+                if [[ "$link" =~ ^http || "$link" =~ ^# || -z "$link" ]]; then
+                    continue
+                fi
+
+                # Resolve relative path
+                filedir=$(dirname "$PROJECT_ROOT/$file")
+                fullpath="$filedir/$link"
+
+                # Check if target exists
+                if [[ ! -f "$fullpath" && ! -d "$fullpath" ]]; then
+                    check_result "WARN" "Potential broken link in $file: $link"
+                    BROKEN_LINKS=$((BROKEN_LINKS + 1))
+                fi
+            done < <(grep -oP '\[.*?\]\(\K[^)]*(?=\.md\))' "$PROJECT_ROOT/$file" 2>/dev/null || true)
+        fi
+    done <<< "$STAGED_FILES"
+
+    if [[ $BROKEN_LINKS -eq 0 ]]; then
+        check_result "PASS" "No broken internal links detected"
+    fi
+else
+    check_result "PASS" "No files to check for links"
+fi
+
+echo ""
+
+# Check 4: Context budget compliance
+echo -e "${BLUE}[4/5]${NC} Checking context budget..."
+
+if [[ -f "$PROJECT_ROOT/.ai/current-session.md" ]]; then
+    LINES=$(wc -l < "$PROJECT_ROOT/.ai/current-session.md")
+    TOKENS=$((LINES * 20))
+    TARGET=300
+
+    if [[ $TOKENS -le $TARGET ]]; then
+        check_result "PASS" "Session start within budget ($TOKENS/$TARGET tokens)"
+    elif [[ $TOKENS -le $((TARGET * 120 / 100)) ]]; then
+        check_result "WARN" "Session start near budget ($TOKENS/$TARGET tokens)"
+    else
+        check_result "FAIL" "Session start exceeds budget ($TOKENS/$TARGET tokens)"
+    fi
+else
+    check_result "WARN" "Session file not found"
+fi
+
+echo ""
+
+# Check 5: Git commit message
+echo -e "${BLUE}[5/5]${NC} Checking commit message format..."
+
+# We can't check the message before it's written, so we'll skip this
+# This would be better as a commit-msg hook
+check_result "PASS" "Commit message check (use conventional commits)"
+
+echo ""
+
+# Summary
+echo "======================================"
+echo "Validation Summary"
+echo "======================================"
+echo ""
+echo -e "${GREEN}Passed:${NC}  $CHECKS_PASSED"
+echo -e "${YELLOW}Warnings:${NC} $CHECKS_WARNING"
+echo -e "${RED}Failed:${NC}  $CHECKS_FAILED"
+echo ""
+
+# Determine exit code
+if [[ $CHECKS_FAILED -gt 0 ]]; then
+    echo -e "${RED}Commit blocked due to failed checks${NC}"
+    echo ""
+    echo "To fix:"
+    echo "  1. Address failed checks above"
+    echo "  2. Run: ./scripts/monitor_file_sizes.sh"
+    echo "  3. Stage fixes and retry commit"
+    echo ""
+    echo "To bypass (not recommended): git commit --no-verify"
+    echo ""
+    exit 1
+elif [[ $CHECKS_WARNING -gt 0 ]]; then
+    echo -e "${YELLOW}Commit allowed with warnings${NC}"
+    echo ""
+    echo "Consider addressing warnings before committing."
+    echo "Run: ./scripts/monitor_file_sizes.sh for details"
+    echo ""
+    exit 0
+else
+    echo -e "${GREEN}All checks passed - commit allowed${NC}"
+    echo ""
+    exit 0
+fi

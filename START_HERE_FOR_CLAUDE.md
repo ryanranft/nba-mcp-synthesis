@@ -1,0 +1,224 @@
+# START HERE - For Claude/AI Sessions
+
+**READ THIS FIRST before starting any work**
+
+---
+
+## 🚀 New Session Checklist
+
+### 1. Run Session Start Script
+```bash
+./scripts/session_start.sh
+```
+
+### 2. Read Compact Context (~300 tokens)
+```bash
+cat .ai/current-session.md
+```
+
+### 3. Read These Core Documents (in order)
+
+**Essential Reading** (5-10 minutes):
+1. **[CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md](CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md)** - How to save information, decision tree, daily operations
+2. **[.ai/index.md](.ai/index.md)** - Session management guide
+3. **[PROJECT_STATUS.md](PROJECT_STATUS.md)** - Current project status
+
+**Reference Documents** (read as needed):
+4. **[docs/DOCUMENTATION_MAP.md](docs/DOCUMENTATION_MAP.md)** - Where to find everything
+5. **[.ai/permanent/tool-registry.md](.ai/permanent/tool-registry.md)** - Complete tool list
+
+---
+
+## 🎯 Key Principles
+
+### Information Storage Decision Tree
+
+**Ask yourself: Where should this information go?**
+
+```
+Is this about...
+
+├─ Today's session/work?
+│  └─> .ai/daily/YYYY-MM-DD-session-N.md (gitignored, detailed)
+│
+├─ Current status?
+│  └─> project/status/ (tracked, edit specific section)
+│
+├─ Progress update?
+│  └─> project/tracking/progress.log (tracked, APPEND ONLY - never read)
+│
+├─ Permanent reference?
+│  └─> .ai/permanent/ (tracked, long-term)
+│
+└─ Historical/completed?
+   └─> docs/archive/YYYY-MM/ (gitignored)
+```
+
+**See full decision tree in [CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md](CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md)**
+
+---
+
+## ⚠️ Critical Rules
+
+### DO ✅
+
+1. **Start each session** with `./scripts/session_start.sh`
+2. **Read current-session.md** for compact context (300 tokens)
+3. **Append to logs** without reading them (10 tokens)
+4. **Edit specific sections** in status files (50-100 tokens)
+5. **Use index files** to navigate efficiently
+6. **Cross-reference** to canonical sources (don't duplicate)
+
+### DON'T ❌
+
+1. ❌ **Read append-only logs** (progress.log - just append)
+2. ❌ **Read entire trackers** (use indexes to find specific sections)
+3. ❌ **Duplicate information** (link to canonical source instead)
+4. ❌ **Create files** without checking decision tree
+5. ❌ **Skip session scripts** (automation saves 94% context)
+
+---
+
+## 📊 Context Budget
+
+**Target**: 3-10K tokens per session (vs 30-50K before optimization)
+
+| Operation | Token Budget | How to Achieve |
+|-----------|--------------|----------------|
+| Session Start | ~300 tokens | Use `session_start.sh` |
+| Status Check | ~150 tokens | Read `PROJECT_STATUS.md` |
+| Tool Lookup | ~100 tokens | Search `.ai/permanent/tool-registry.md` |
+| Progress Update | ~10 tokens | Append to `progress.log` |
+| Status Update | ~50 tokens | Edit specific section only |
+
+---
+
+## 📚 Common Tasks
+
+### Record Progress
+```bash
+# Append to progress log (never read it)
+echo "$(date +%Y-%m-%d): Action taken" >> project/tracking/progress.log
+```
+
+### Update Status
+```bash
+# Edit specific section (not entire file)
+vim project/status/tools.md +45  # Jump to line 45
+```
+
+### Find Information
+```bash
+# Use indexes first
+cat project/index.md  # What's in project/?
+cat docs/index.md     # What's in docs/?
+
+# Use documentation map for canonical location
+grep -i "tool registration" docs/DOCUMENTATION_MAP.md
+```
+
+### End Session
+```bash
+# Refresh status file
+./scripts/update_status.sh
+
+# Commit changes
+git add . && git commit -m "feat: Session summary"
+```
+
+---
+
+## 🆘 If Something's Wrong
+
+### Context Usage Too High
+```bash
+# Check file sizes
+wc -l .ai/current-session.md  # Should be <80 lines
+wc -l PROJECT_STATUS.md       # Should be <150 lines
+
+# Review operations guide
+cat CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md
+```
+
+### Can't Find Information
+```bash
+# Check documentation map
+cat docs/DOCUMENTATION_MAP.md
+
+# Search for topic
+grep -ri "search term" docs/
+```
+
+### Health Check
+```bash
+# Run comprehensive diagnostics
+./scripts/session_start.sh --health-check
+```
+
+---
+
+## 📖 Complete Documentation
+
+### System Documentation
+1. **[CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md](CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md)** - Complete operations guide
+2. **[CONTEXT_OPTIMIZATION_REQUIREMENTS_VERIFICATION.md](CONTEXT_OPTIMIZATION_REQUIREMENTS_VERIFICATION.md)** - What was built and why
+3. **[TEST_REPORT_CONTEXT_OPTIMIZATION.md](TEST_REPORT_CONTEXT_OPTIMIZATION.md)** - System test results
+
+### Navigation
+- **[docs/index.md](docs/index.md)** - Master documentation index
+- **[docs/DOCUMENTATION_MAP.md](docs/DOCUMENTATION_MAP.md)** - Canonical locations
+- **[project/index.md](project/index.md)** - Project status & tracking
+
+### Automation
+- **[scripts/session_start.sh](scripts/session_start.sh)** - Start sessions
+- **[scripts/session_archive.sh](scripts/session_archive.sh)** - Archive to S3
+- **[scripts/update_status.sh](scripts/update_status.sh)** - Update status
+
+---
+
+## 🎓 Training Path
+
+**For new Claude sessions** (30-60 minutes):
+
+1. ✅ Read this file (5 min)
+2. ✅ Read [CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md](CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md) (15 min)
+3. ✅ Read [.ai/index.md](.ai/index.md) (10 min)
+4. ✅ Skim [docs/DOCUMENTATION_MAP.md](docs/DOCUMENTATION_MAP.md) (5 min)
+5. ✅ Review [PROJECT_STATUS.md](PROJECT_STATUS.md) (5 min)
+
+**Total time**: ~40 minutes
+**Context cost**: ~1,500 tokens (vs 30-50K before)
+
+---
+
+## ✅ Success Criteria
+
+You're doing it right if:
+
+- ✅ Session start <400 tokens
+- ✅ Status checks <200 tokens
+- ✅ Using append-only logs correctly (never reading them)
+- ✅ Following decision tree for file placement
+- ✅ Cross-referencing instead of duplicating
+- ✅ Using automation scripts
+
+---
+
+## 🎯 Remember
+
+**The Goal**: Maintain 3-10K tokens per session by:
+1. Reading only what you need
+2. Using indexes for navigation
+3. Appending to logs without reading them
+4. Editing specific sections, not entire files
+5. Following the established structure
+
+**When in doubt**: Check [CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md](CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md)
+
+---
+
+**Last Updated**: 2025-10-11
+**Status**: Production - Active Use
+**System Health**: ✅ 96% test pass rate, 80-93% context reduction achieved
+
+**Ready to start? Run**: `./scripts/session_start.sh`
