@@ -57,8 +57,7 @@ This map defines the single source of truth for each topic in the project docume
 | Topic | Canonical Location | Purpose |
 |-------|-------------------|---------|
 | **File Management Policy** | [.ai/permanent/file-management-policy.md](../.ai/permanent/file-management-policy.md) | Complete file organization policy |
-| **File Creation Decision Tree** | [docs/guides/FILE_CREATION_DECISION_TREE.md](guides/FILE_CREATION_DECISION_TREE.md) | 8-step guide for where to create files |
-| **File Management Anti-Patterns** | [docs/guides/FILE_MANAGEMENT_ANTI_PATTERNS.md](guides/FILE_MANAGEMENT_ANTI_PATTERNS.md) | Common mistakes and correct alternatives |
+|| **File Management Complete** | [docs/guides/FILE_MANAGEMENT_COMPLETE.md](guides/FILE_MANAGEMENT_COMPLETE.md) | Comprehensive guide (decision tree + anti-patterns) |
 | **Archive Automation** | [scripts/auto_archive.sh](../scripts/auto_archive.sh) | Automatic file archiving script |
 | **Pre-Commit Validation** | [scripts/pre-commit.template](../scripts/pre-commit.template) | File management validation hooks |
 

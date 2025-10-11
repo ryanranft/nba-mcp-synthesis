@@ -1,7 +1,7 @@
 # Guides Index
 
 **Purpose**: Navigation hub for all operational guides
-**Total Guides**: 18 files (reduced from 20 via consolidation)
+**Total Guides**: 16 files (reduced from 20 via consolidation)
 **Last Updated**: 2025-10-11
 
 ---
@@ -46,9 +46,8 @@
 
 ## 📁 File Management
 
-### Organization & Best Practices
-- **[File Creation Decision Tree](FILE_CREATION_DECISION_TREE.md)** - Where to create files (8-step guide)
-- **[File Management Anti-Patterns](FILE_MANAGEMENT_ANTI_PATTERNS.md)** - Common mistakes and correct alternatives
+### Complete Guide
+- **[File Management Complete](FILE_MANAGEMENT_COMPLETE.md)** - Comprehensive guide: decision tree, anti-patterns, best practices (consolidates 2 previous guides)
 
 ---
 
@@ -58,8 +57,8 @@
 - **Setup & Configuration**: 3 guides
 - **Testing & Quality**: 3 guides
 - **Integration & Features**: 4 guides
-- **Deployment & Operations**: 2 guides
-- **File Management**: 2 guides
+- **Deployment & Operations**: 2 guides (includes Context Management)
+- **File Management**: 1 guide (consolidated)
 - **Reference & Quick Access**: 2 guides
 
 ### By Complexity
@@ -87,9 +86,9 @@ ls -la *INTEGRATION* *ANALYTICS*
 - **Claude Desktop**: 4 guides
 - **Testing**: 3 guides
 - **Math/Analytics**: 2 guides
-- **File Management**: 2 guides
-- **Deployment**: 1 guide
+- **File Management**: 1 guide (consolidated from 2)
 - **Context Management**: 1 guide (consolidated from 3)
+- **Deployment**: 1 guide
 
 ---
 
