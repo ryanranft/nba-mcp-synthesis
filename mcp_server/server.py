@@ -57,6 +57,11 @@ class NBAMCPServer:
         self.config = config or MCPConfig.from_env()
         self.server = Server("nba-mcp-server")
 
+        # Initialize concurrency control
+        concurrency_limit = int(os.getenv("MCP_TOOL_CONCURRENCY", "5"))
+        self.tool_semaphore = asyncio.Semaphore(concurrency_limit)
+        logger.info(f"MCP tool concurrency limit set to: {concurrency_limit}")
+
         # Initialize security manager
         security_config = SecurityConfig()
         self.security_manager = SecurityManager(
@@ -117,15 +122,16 @@ class NBAMCPServer:
     
     def _init_tools(self):
         """Initialize MCP tools"""
-        self.database_tools = DatabaseTools(self.rds_connector, self.config)
-        self.s3_tools = S3Tools(self.s3_connector, self.config)
+        self.database_tools = DatabaseTools(self.rds_connector)
+        self.s3_tools = S3Tools(self.s3_connector)
         self.glue_tools = GlueTools(self.glue_connector, self.config)
-        self.file_tools = FileTools(self.config)
+        self.file_tools = FileTools(self.config.project_root)
         self.action_tools = ActionTools(
-            self.config,
+            project_root=self.config.project_root,
+            synthesis_output_dir=os.path.join(self.config.project_root, "synthesis_outputs"),
             slack_notifier=self.slack_notifier
         )
-        
+
         logger.info("MCP tools initialized")
     
     def _setup_handlers(self):
@@ -182,19 +188,21 @@ class NBAMCPServer:
                     }
 
                 try:
-                    # Route to appropriate tool handler
-                    if name.startswith("query_") or name.startswith("get_table"):
-                        result = await self.database_tools.execute(name, arguments)
-                    elif name.startswith("fetch_s3") or name.startswith("list_s3"):
-                        result = await self.s3_tools.execute(name, arguments)
-                    elif name.startswith("get_glue"):
-                        result = await self.glue_tools.execute(name, arguments)
-                    elif name.startswith("read_") or name.startswith("search_"):
-                        result = await self.file_tools.execute(name, arguments)
-                    elif name in ["save_to_project", "log_synthesis_result", "send_notification"]:
-                        result = await self.action_tools.execute(name, arguments)
-                    else:
-                        raise ValueError(f"Unknown tool: {name}")
+                    # Use semaphore to limit concurrent tool executions
+                    async with self.tool_semaphore:
+                        # Route to appropriate tool handler
+                        if name.startswith("query_") or name.startswith("get_table"):
+                            result = await self.database_tools.execute(name, arguments)
+                        elif name.startswith("fetch_s3") or name.startswith("list_s3"):
+                            result = await self.s3_tools.execute(name, arguments)
+                        elif name.startswith("get_glue"):
+                            result = await self.glue_tools.execute(name, arguments)
+                        elif name.startswith("read_") or name.startswith("search_"):
+                            result = await self.file_tools.execute(name, arguments)
+                        elif name in ["save_to_project", "log_synthesis_result", "send_notification"]:
+                            result = await self.action_tools.execute(name, arguments)
+                        else:
+                            raise ValueError(f"Unknown tool: {name}")
 
                     # Log successful execution with extra fields
                     logger.info(

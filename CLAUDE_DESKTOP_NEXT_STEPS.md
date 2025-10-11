@@ -1,190 +1,228 @@
-# Claude Desktop - Next Steps
+# Claude Desktop Integration - Next Steps
 
-## ✅ Configuration Complete!
+**Status:** ✅ MCP Server Ready | Configuration Files Created
 
-Your Claude Desktop has been configured with the NBA MCP Server.
+---
 
-### Configuration Details
+## Quick Setup (2 Minutes)
 
-**Location:** `~/Library/Application Support/Claude/config.json`
+### Option 1: Automatic Setup (Recommended)
 
-**MCP Server:** `nba-mcp-server`
-- Command: `python3`
-- Script: `/Users/ryanranft/nba-mcp-synthesis/mcp_server/server_simple.py`
-- Database: `nba_simulator` on AWS RDS
-- S3 Bucket: `nba-sim-raw-data-lake`
+```bash
+# Run the setup script
+./setup_claude_desktop.sh
 
-## Next Steps
-
-### 1. Restart Claude Desktop
-
-**IMPORTANT:** You must restart Claude Desktop for the changes to take effect.
-
-1. Quit Claude Desktop completely (Cmd+Q)
-2. Reopen Claude Desktop
-
-### 2. Verify Installation
-
-Once Claude Desktop restarts, try these commands in a new conversation:
-
-**Test 1: Check available tools**
-```
-What MCP tools are available?
+# Restart Claude Desktop
+# The MCP server will auto-start when you open Claude
 ```
 
-You should see:
-- `query_database` - Execute SQL queries
-- `list_tables` - List database tables
-- `get_table_schema` - Get table schemas
-- `list_s3_files` - List S3 files
+### Option 2: Manual Setup
 
-**Test 2: List tables**
-```
-Can you list all tables in the NBA database?
+```bash
+# Copy config to Claude Desktop
+cp claude_desktop_config.json ~/Library/Application\ Support/Claude/claude_desktop_config.json
+
+# Restart Claude Desktop
 ```
 
-**Test 3: Query database**
+---
+
+## What Was Configured
+
+The NBA MCP Server is now configured to run via stdio (standard input/output) protocol, which is how Claude Desktop communicates with MCP servers.
+
+**Configuration Details:**
+- **Server Name:** `nba-mcp-synthesis`
+- **Command:** `python -m mcp_server.server`
+- **Working Directory:** `/Users/ryanranft/nba-mcp-synthesis`
+- **Protocol:** stdio (no HTTP server needed)
+
+**Environment Variables:**
+Claude Desktop will inherit environment variables from your shell. Make sure these are set:
+- `RDS_HOST`, `RDS_DATABASE`, `RDS_USERNAME`, `RDS_PASSWORD`
+- `S3_BUCKET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
+- `GLUE_DATABASE`
+- `DEEPSEEK_API_KEY`, `ANTHROPIC_API_KEY` (optional)
+- `SLACK_WEBHOOK_URL` (optional)
+
+---
+
+## Testing the Integration
+
+### 1. Check MCP Server Availability
+
+After restarting Claude Desktop:
+1. Look for the MCP tools indicator (usually a 🔌 icon or tools panel)
+2. You should see "nba-mcp-synthesis" in the available servers
+3. The server should show as "Connected" or "Active"
+
+### 2. Test Queries
+
+Try these test queries in Claude Desktop:
+
+**Test 1: List Available Tools**
 ```
-What's the database version?
+What MCP tools do you have available?
 ```
 
-**Test 4: Get schema**
+Expected: Claude should list NBA MCP tools including database queries, S3 access, etc.
+
+**Test 2: Simple Database Query**
 ```
-What's the schema for the players table?
+Using the NBA MCP tools, query the database and tell me how many tables are available.
 ```
 
-**Test 5: Browse S3**
+Expected: Claude will call `list_tables` tool and return count.
+
+**Test 3: Data Retrieval**
 ```
-Show me 5 files from the S3 bucket
+Using the NBA MCP tools, query the database for the first 5 games in the database.
+SELECT * FROM games LIMIT 5;
 ```
 
-## Example Use Cases
+Expected: Claude will execute the query and show game data.
 
-### Player Analysis
+**Test 4: S3 Data Access**
 ```
-Can you query the database to find the top 10 players by total points scored in the player_game_stats table?
-```
-
-### Team Statistics
-```
-What teams are in the database? Show me the teams table schema first, then query for all teams.
+Using the NBA MCP tools, list some files in the S3 bucket. Show me what's available.
 ```
 
-### Game Data
-```
-How many games are in the database? Query the games table.
-```
+Expected: Claude will call `list_s3_files` and show file listings.
 
-### S3 Data Exploration
-```
-What basketball reference data files are available in S3? List files with prefix "basketball_reference/"
-```
+---
 
 ## Troubleshooting
 
-### Tools Not Showing Up
+### MCP Server Not Showing Up
 
-1. **Verify restart:** Make sure you completely quit and reopened Claude Desktop
-2. **Check logs:** Look for error messages in Claude Desktop
-3. **Verify config:** Check that `config.json` is valid JSON
-4. **Test manually:** Run `python scripts/test_mcp_client.py` to verify server works
-
-### Connection Errors
-
-1. **Test connections:**
-   ```bash
-   cd /Users/ryanranft/nba-mcp-synthesis
-   python tests/test_connections.py
-   ```
-
-2. **Check server manually:**
-   ```bash
-   python mcp_server/server_simple.py
-   ```
-
-3. **Verify environment:** Make sure `.env` file has correct credentials
-
-### Server Not Starting
-
-1. **Check Python:**
-   ```bash
-   which python3
-   # Should show: /Users/ryanranft/miniconda3/envs/mcp-synthesis/bin/python3
-   ```
-
-2. **Check dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Check file permissions:**
-   ```bash
-   chmod +x mcp_server/server_simple.py
-   ```
-
-## Advanced Usage
-
-### Custom Queries
-
-Once working, you can ask Claude to:
-- Write complex SQL queries
-- Analyze player performance trends
-- Compare team statistics
-- Find patterns in game data
-- Export data for visualization
-
-### Example Complex Request
-
-```
-I want to analyze which NBA teams have the best home court advantage.
-
-1. First, show me the relevant tables
-2. Then write a SQL query to calculate win percentage at home vs away
-3. Identify the top 5 teams
-4. Suggest visualizations for this data
+**Check 1: Config File Location**
+```bash
+cat ~/Library/Application\ Support/Claude/claude_desktop_config.json
 ```
 
-Claude will use the MCP tools to:
-1. List tables with `list_tables`
-2. Get schemas with `get_table_schema`
-3. Execute queries with `query_database`
-4. Provide analysis and recommendations
+Should show the NBA MCP server configuration.
 
-## Security Notes
+**Check 2: Restart Claude Desktop**
+- Completely quit Claude Desktop (Cmd+Q)
+- Reopen it
+- Wait 5-10 seconds for MCP servers to initialize
 
-**IMPORTANT:** The config file contains your database credentials and API keys.
+**Check 3: View Claude Desktop Logs**
+```bash
+tail -f ~/Library/Logs/Claude/mcp*.log
+```
 
-- Keep `config.json` secure
-- Don't share screenshots showing credentials
-- Rotate credentials periodically
-- Use environment variables in production
+Look for error messages about the MCP server startup.
 
-## Support
+### Environment Variables Not Available
 
-If you encounter issues:
+If Claude says "database connection failed" or similar:
 
-1. **Check documentation:**
-   - `CLAUDE_DESKTOP_SETUP.md` - Full setup guide
-   - `USAGE_GUIDE.md` - Complete usage guide
-   - `README.md` - Project overview
+**Solution:** Set environment variables system-wide
 
-2. **Run tests:**
-   ```bash
-   python scripts/test_mcp_client.py
-   python scripts/test_synthesis_direct.py
-   ```
+Create `~/.zshrc` (or `~/.bash_profile`) with:
+```bash
+# NBA MCP Environment
+export RDS_HOST="your-rds-host"
+export RDS_DATABASE="nba_simulator"
+export RDS_USERNAME="your-username"
+export RDS_PASSWORD="your-password"
+export S3_BUCKET="your-bucket"
+export AWS_ACCESS_KEY_ID="your-key"
+export AWS_SECRET_ACCESS_KEY="your-secret"
+export GLUE_DATABASE="nba_raw_data"
+```
 
-3. **Check logs:**
-   - Claude Desktop logs: `~/Library/Logs/Claude/`
-   - Server output: Visible in Claude Desktop when tools are called
+Then:
+```bash
+source ~/.zshrc  # Apply changes
+# Restart Claude Desktop
+```
 
-## What's Next?
+### MCP Server Crashes on Startup
 
-Now that Claude Desktop is configured, you can:
+**Check Server Logs:**
+```bash
+python -m mcp_server.server --test
+```
 
-1. **Explore your NBA data** - Ask Claude questions about your database
-2. **Run analyses** - Use Claude to write and execute SQL queries
-3. **Build workflows** - Create multi-step analysis workflows
-4. **Export results** - Save queries and results for documentation
+If this fails, check:
+- Python dependencies installed: `pip list | grep mcp`
+- Database connectivity: Run `scripts/validate_environment.py`
+- AWS credentials: `aws sts get-caller-identity`
 
-Have fun exploring your NBA database with Claude! 🏀
+---
+
+## Advanced Configuration
+
+### Enable Debug Logging
+
+Edit `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "nba-mcp-synthesis": {
+      "command": "python",
+      "args": ["-m", "mcp_server.server"],
+      "cwd": "/Users/ryanranft/nba-mcp-synthesis",
+      "env": {
+        "PYTHONPATH": "/Users/ryanranft/nba-mcp-synthesis",
+        "MCP_LOG_LEVEL": "DEBUG",
+        "MCP_LOG_JSON": "true"
+      }
+    }
+  }
+}
+```
+
+### Add Additional MCP Servers
+
+You can run multiple MCP servers. Edit the config:
+```json
+{
+  "mcpServers": {
+    "nba-mcp-synthesis": { ... },
+    "another-server": { ... }
+  }
+}
+```
+
+---
+
+## What You Can Do Now
+
+With the MCP server integrated into Claude Desktop, you can:
+
+1. **Natural Language Database Queries**
+   - "Show me the top 10 teams by wins"
+   - "What players scored over 30 points in their last game?"
+
+2. **S3 Data Exploration**
+   - "List game files for the Lakers from 2023"
+   - "Show me what data is available in the S3 bucket"
+
+3. **Schema Discovery**
+   - "What tables are in the database?"
+   - "Show me the schema for the games table"
+
+4. **Complex Analysis**
+   - "Analyze Stephen Curry's shooting performance this season"
+   - "Compare Warriors vs Lakers head-to-head stats"
+
+5. **Multi-Source Synthesis**
+   - Claude can combine database queries, S3 data, and Glue metadata
+   - Example: "Get player stats from the database and detailed game logs from S3"
+
+---
+
+## Next: Production Deployment
+
+Once Claude Desktop integration is working, you're ready for production!
+
+See: `PRODUCTION_DEPLOYMENT_GUIDE.md` for full deployment instructions.
+
+---
+
+**🎉 You're ready to use NBA data with Claude Desktop!**
+
+After I help you test this integration, you mentioned wanting to read MCP books and repos for additional recommendations. I'm ready to review those once this is working!

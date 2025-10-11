@@ -2212,6 +2212,595 @@ class FeatureImportanceParams(BaseModel):
 
 
 # ============================================================================
+# Sprint 8: Model Evaluation & Validation Parameters
+# ============================================================================
+
+# Classification Metrics Parameters
+
+class AccuracyScoreParams(BaseModel):
+    """Parameters for accuracy score calculation"""
+    y_true: List[Any] = Field(
+        ...,
+        min_length=1,
+        description="True labels"
+    )
+    y_pred: List[Any] = Field(
+        ...,
+        min_length=1,
+        description="Predicted labels"
+    )
+
+    @field_validator('y_pred')
+    @classmethod
+    def validate_same_length(cls, v, info):
+        if 'y_true' in info.data and len(v) != len(info.data['y_true']):
+            raise ValueError("y_true and y_pred must have same length")
+        return v
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "y_true": [1, 0, 1, 1, 0],
+                    "y_pred": [1, 0, 1, 0, 0]
+                }
+            ]
+        }
+
+
+class PrecisionRecallF1Params(BaseModel):
+    """Parameters for precision, recall, and F1-score calculation"""
+    y_true: List[Any] = Field(
+        ...,
+        min_length=1,
+        description="True labels"
+    )
+    y_pred: List[Any] = Field(
+        ...,
+        min_length=1,
+        description="Predicted labels"
+    )
+    average: Literal["binary", "macro", "micro", "weighted"] = Field(
+        default="binary",
+        description="Averaging strategy for multiclass"
+    )
+    pos_label: Any = Field(
+        default=1,
+        description="Positive class label (for binary classification)"
+    )
+
+    @field_validator('y_pred')
+    @classmethod
+    def validate_same_length(cls, v, info):
+        if 'y_true' in info.data and len(v) != len(info.data['y_true']):
+            raise ValueError("y_true and y_pred must have same length")
+        return v
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "y_true": [1, 0, 1, 1, 0, 1],
+                    "y_pred": [1, 0, 1, 0, 0, 1],
+                    "average": "binary"
+                }
+            ]
+        }
+
+
+class ConfusionMatrixParams(BaseModel):
+    """Parameters for confusion matrix calculation"""
+    y_true: List[Any] = Field(
+        ...,
+        min_length=1,
+        description="True labels"
+    )
+    y_pred: List[Any] = Field(
+        ...,
+        min_length=1,
+        description="Predicted labels"
+    )
+    pos_label: Any = Field(
+        default=1,
+        description="Positive class label (for binary classification)"
+    )
+
+    @field_validator('y_pred')
+    @classmethod
+    def validate_same_length(cls, v, info):
+        if 'y_true' in info.data and len(v) != len(info.data['y_true']):
+            raise ValueError("y_true and y_pred must have same length")
+        return v
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "y_true": [1, 0, 1, 1, 0],
+                    "y_pred": [1, 0, 1, 0, 1]
+                }
+            ]
+        }
+
+
+class RocAucScoreParams(BaseModel):
+    """Parameters for ROC-AUC calculation"""
+    y_true: List[int] = Field(
+        ...,
+        min_length=2,
+        description="True binary labels (0 or 1)"
+    )
+    y_scores: List[float] = Field(
+        ...,
+        min_length=2,
+        description="Predicted probabilities or scores"
+    )
+    num_thresholds: int = Field(
+        default=100,
+        ge=10,
+        le=1000,
+        description="Number of thresholds for ROC curve"
+    )
+
+    @field_validator('y_true')
+    @classmethod
+    def validate_binary_labels(cls, v):
+        unique_labels = set(v)
+        if not unique_labels.issubset({0, 1}):
+            raise ValueError(f"y_true must contain only 0 and 1. Found: {unique_labels}")
+        return v
+
+    @field_validator('y_scores')
+    @classmethod
+    def validate_same_length(cls, v, info):
+        if 'y_true' in info.data and len(v) != len(info.data['y_true']):
+            raise ValueError("y_true and y_scores must have same length")
+        return v
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "y_true": [0, 0, 1, 1],
+                    "y_scores": [0.1, 0.4, 0.35, 0.8],
+                    "num_thresholds": 100
+                }
+            ]
+        }
+
+
+class ClassificationReportParams(BaseModel):
+    """Parameters for classification report"""
+    y_true: List[Any] = Field(
+        ...,
+        min_length=1,
+        description="True labels"
+    )
+    y_pred: List[Any] = Field(
+        ...,
+        min_length=1,
+        description="Predicted labels"
+    )
+
+    @field_validator('y_pred')
+    @classmethod
+    def validate_same_length(cls, v, info):
+        if 'y_true' in info.data and len(v) != len(info.data['y_true']):
+            raise ValueError("y_true and y_pred must have same length")
+        return v
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "y_true": ["PG", "SG", "PG", "C", "PF"],
+                    "y_pred": ["PG", "SG", "SG", "C", "PF"]
+                }
+            ]
+        }
+
+
+class LogLossParams(BaseModel):
+    """Parameters for log loss (cross-entropy) calculation"""
+    y_true: List[int] = Field(
+        ...,
+        min_length=1,
+        description="True binary labels (0 or 1)"
+    )
+    y_pred_proba: List[float] = Field(
+        ...,
+        min_length=1,
+        description="Predicted probabilities"
+    )
+    eps: float = Field(
+        default=1e-15,
+        gt=0,
+        lt=1,
+        description="Small value to clip probabilities (avoid log(0))"
+    )
+
+    @field_validator('y_true')
+    @classmethod
+    def validate_binary_labels(cls, v):
+        unique_labels = set(v)
+        if not unique_labels.issubset({0, 1}):
+            raise ValueError(f"y_true must contain only 0 and 1. Found: {unique_labels}")
+        return v
+
+    @field_validator('y_pred_proba')
+    @classmethod
+    def validate_same_length(cls, v, info):
+        if 'y_true' in info.data and len(v) != len(info.data['y_true']):
+            raise ValueError("y_true and y_pred_proba must have same length")
+        return v
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "y_true": [1, 0, 1, 0],
+                    "y_pred_proba": [0.9, 0.1, 0.8, 0.2]
+                }
+            ]
+        }
+
+
+# Regression Metrics Parameters
+
+class MseRmseMaeParams(BaseModel):
+    """Parameters for MSE, RMSE, and MAE calculation"""
+    y_true: List[Union[int, float]] = Field(
+        ...,
+        min_length=1,
+        description="True values"
+    )
+    y_pred: List[Union[int, float]] = Field(
+        ...,
+        min_length=1,
+        description="Predicted values"
+    )
+
+    @field_validator('y_pred')
+    @classmethod
+    def validate_same_length(cls, v, info):
+        if 'y_true' in info.data and len(v) != len(info.data['y_true']):
+            raise ValueError("y_true and y_pred must have same length")
+        return v
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "y_true": [3.0, -0.5, 2.0, 7.0],
+                    "y_pred": [2.5, 0.0, 2.0, 8.0]
+                }
+            ]
+        }
+
+
+class R2ScoreParams(BaseModel):
+    """Parameters for R² (coefficient of determination) calculation"""
+    y_true: List[Union[int, float]] = Field(
+        ...,
+        min_length=2,
+        description="True values"
+    )
+    y_pred: List[Union[int, float]] = Field(
+        ...,
+        min_length=2,
+        description="Predicted values"
+    )
+
+    @field_validator('y_pred')
+    @classmethod
+    def validate_same_length(cls, v, info):
+        if 'y_true' in info.data and len(v) != len(info.data['y_true']):
+            raise ValueError("y_true and y_pred must have same length")
+        return v
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "y_true": [3.0, -0.5, 2.0, 7.0],
+                    "y_pred": [2.5, 0.0, 2.0, 8.0]
+                }
+            ]
+        }
+
+
+class MapeParams(BaseModel):
+    """Parameters for Mean Absolute Percentage Error calculation"""
+    y_true: List[Union[int, float]] = Field(
+        ...,
+        min_length=1,
+        description="True values"
+    )
+    y_pred: List[Union[int, float]] = Field(
+        ...,
+        min_length=1,
+        description="Predicted values"
+    )
+
+    @field_validator('y_true')
+    @classmethod
+    def validate_no_zeros(cls, v):
+        if any(val == 0 for val in v):
+            raise ValueError("y_true cannot contain zeros (would cause division by zero)")
+        return v
+
+    @field_validator('y_pred')
+    @classmethod
+    def validate_same_length(cls, v, info):
+        if 'y_true' in info.data and len(v) != len(info.data['y_true']):
+            raise ValueError("y_true and y_pred must have same length")
+        return v
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "y_true": [100.0, 50.0, 30.0, 20.0],
+                    "y_pred": [110.0, 45.0, 35.0, 22.0]
+                }
+            ]
+        }
+
+
+# Cross-Validation Parameters
+
+class KFoldSplitParams(BaseModel):
+    """Parameters for K-fold cross-validation splits"""
+    n_samples: int = Field(
+        ...,
+        ge=2,
+        description="Total number of samples"
+    )
+    n_folds: int = Field(
+        default=5,
+        ge=2,
+        le=20,
+        description="Number of folds"
+    )
+    shuffle: bool = Field(
+        default=True,
+        description="Whether to shuffle data before splitting"
+    )
+    random_seed: Optional[int] = Field(
+        default=None,
+        description="Random seed for reproducibility"
+    )
+
+    @field_validator('n_folds')
+    @classmethod
+    def validate_n_folds(cls, v, info):
+        if 'n_samples' in info.data and v > info.data['n_samples']:
+            raise ValueError(f"n_folds ({v}) cannot exceed n_samples ({info.data['n_samples']})")
+        return v
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "n_samples": 100,
+                    "n_folds": 5,
+                    "shuffle": True
+                }
+            ]
+        }
+
+
+class StratifiedKFoldSplitParams(BaseModel):
+    """Parameters for stratified K-fold cross-validation"""
+    y: List[Any] = Field(
+        ...,
+        min_length=2,
+        description="Labels for stratification"
+    )
+    n_folds: int = Field(
+        default=5,
+        ge=2,
+        le=20,
+        description="Number of folds"
+    )
+    shuffle: bool = Field(
+        default=True,
+        description="Whether to shuffle data before splitting"
+    )
+    random_seed: Optional[int] = Field(
+        default=None,
+        description="Random seed for reproducibility"
+    )
+
+    @field_validator('n_folds')
+    @classmethod
+    def validate_n_folds(cls, v, info):
+        if 'y' in info.data and v > len(info.data['y']):
+            raise ValueError(f"n_folds ({v}) cannot exceed number of samples ({len(info.data['y'])})")
+        return v
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "y": [0, 0, 1, 1, 0, 1, 1, 0],
+                    "n_folds": 4,
+                    "shuffle": True
+                }
+            ]
+        }
+
+
+class CrossValidateParams(BaseModel):
+    """Parameters for cross-validation helper"""
+    n_samples: int = Field(
+        ...,
+        ge=2,
+        description="Total number of samples"
+    )
+    n_folds: int = Field(
+        default=5,
+        ge=2,
+        le=20,
+        description="Number of folds"
+    )
+    stratify: bool = Field(
+        default=False,
+        description="Use stratified K-fold (requires y labels)"
+    )
+    y: Optional[List[Any]] = Field(
+        default=None,
+        description="Labels for stratification (required if stratify=True)"
+    )
+    shuffle: bool = Field(
+        default=True,
+        description="Whether to shuffle data"
+    )
+    random_seed: Optional[int] = Field(
+        default=None,
+        description="Random seed for reproducibility"
+    )
+
+    @model_validator(mode='after')
+    def validate_stratify_requirements(self):
+        if self.stratify and self.y is None:
+            raise ValueError("y labels required when stratify=True")
+        if self.y is not None and len(self.y) != self.n_samples:
+            raise ValueError(f"Length of y ({len(self.y)}) must equal n_samples ({self.n_samples})")
+        return self
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "n_samples": 100,
+                    "n_folds": 5,
+                    "stratify": False,
+                    "shuffle": True
+                }
+            ]
+        }
+
+
+# Model Comparison Parameters
+
+class CompareModelsParams(BaseModel):
+    """Parameters for comparing multiple models"""
+    models: List[Dict[str, Any]] = Field(
+        ...,
+        min_length=2,
+        description="List of models with names and predictions"
+    )
+    y_true: List[Any] = Field(
+        ...,
+        min_length=1,
+        description="True labels"
+    )
+    metrics: Optional[List[str]] = Field(
+        default=None,
+        description="Metrics to compare (defaults to accuracy, precision, recall, f1)"
+    )
+
+    @field_validator('models')
+    @classmethod
+    def validate_models(cls, v):
+        for model in v:
+            if 'name' not in model or 'predictions' not in model:
+                raise ValueError("Each model must have 'name' and 'predictions' keys")
+        return v
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "models": [
+                        {"name": "Model A", "predictions": [1, 0, 1, 0]},
+                        {"name": "Model B", "predictions": [1, 1, 1, 0]}
+                    ],
+                    "y_true": [1, 0, 1, 1],
+                    "metrics": ["accuracy", "f1"]
+                }
+            ]
+        }
+
+
+class PairedTTestParams(BaseModel):
+    """Parameters for paired t-test"""
+    scores_a: List[float] = Field(
+        ...,
+        min_length=2,
+        description="Scores from model A"
+    )
+    scores_b: List[float] = Field(
+        ...,
+        min_length=2,
+        description="Scores from model B"
+    )
+    alpha: float = Field(
+        default=0.05,
+        gt=0,
+        lt=1,
+        description="Significance level"
+    )
+
+    @field_validator('scores_b')
+    @classmethod
+    def validate_same_length(cls, v, info):
+        if 'scores_a' in info.data and len(v) != len(info.data['scores_a']):
+            raise ValueError("scores_a and scores_b must have same length")
+        return v
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "scores_a": [0.85, 0.87, 0.82, 0.90, 0.88],
+                    "scores_b": [0.80, 0.83, 0.79, 0.85, 0.82],
+                    "alpha": 0.05
+                }
+            ]
+        }
+
+
+# Hyperparameter Tuning Parameters
+
+class GridSearchParams(BaseModel):
+    """Parameters for grid search parameter generation"""
+    param_grid: Dict[str, List[Any]] = Field(
+        ...,
+        description="Dictionary mapping parameter names to lists of values to try"
+    )
+    n_combinations: Optional[int] = Field(
+        default=None,
+        ge=1,
+        description="Maximum number of combinations to generate (optional limit)"
+    )
+
+    @field_validator('param_grid')
+    @classmethod
+    def validate_param_grid(cls, v):
+        if not v:
+            raise ValueError("param_grid cannot be empty")
+        for param_name, param_values in v.items():
+            if not isinstance(param_values, list) or len(param_values) == 0:
+                raise ValueError(f"Parameter '{param_name}' must have at least one value")
+        return v
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "param_grid": {
+                        "learning_rate": [0.01, 0.1, 0.5],
+                        "max_depth": [3, 5, 7],
+                        "n_trees": [10, 50, 100]
+                    }
+                }
+            ]
+        }
+
+
+# ============================================================================
 # Helper Functions
 # ============================================================================
 

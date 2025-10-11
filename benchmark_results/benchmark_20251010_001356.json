@@ -1,0 +1,62 @@
+{
+  "timestamp": "2025-10-10T00:13:56.624654",
+  "total_benchmarks": 4,
+  "results": [
+    {
+      "name": "Simple SELECT",
+      "iterations": 100,
+      "total_time": 3.7840693320467835,
+      "avg_time": 0.037840693320467834,
+      "min_time": 0.02679020799405407,
+      "max_time": 0.33451445899845567,
+      "median_time": 0.035361729009309784,
+      "std_dev": 0.030266048224639443,
+      "operations_per_sec": 26.426577111870863,
+      "success_count": 100,
+      "failure_count": 0,
+      "timestamp": "2025-10-10T00:13:49.570016"
+    },
+    {
+      "name": "List Tables (LIMIT 10)",
+      "iterations": 50,
+      "total_time": 1.8123150010214886,
+      "avg_time": 0.03624630002042977,
+      "min_time": 0.02809724998951424,
+      "max_time": 0.04504549999546725,
+      "median_time": 0.03578716650372371,
+      "std_dev": 0.0025298156273161998,
+      "operations_per_sec": 27.589022864026468,
+      "success_count": 50,
+      "failure_count": 0,
+      "timestamp": "2025-10-10T00:13:51.382627"
+    },
+    {
+      "name": "Schema Query (LIMIT 20)",
+      "iterations": 50,
+      "total_time": 1.815190460998565,
+      "avg_time": 0.0363038092199713,
+      "min_time": 0.030822749991784804,
+      "max_time": 0.04619379198993556,
+      "median_time": 0.03593791700404836,
+      "std_dev": 0.002817288374592823,
+      "operations_per_sec": 27.54531883805417,
+      "success_count": 50,
+      "failure_count": 0,
+      "timestamp": "2025-10-10T00:13:53.198188"
+    },
+    {
+      "name": "Concurrent Queries (10x10)",
+      "iterations": 100,
+      "total_time": 3.4261375419882825,
+      "avg_time": 0.3426137541988282,
+      "min_time": 0.3237038749939529,
+      "max_time": 0.3554810829955386,
+      "median_time": 0.34612047949485714,
+      "std_dev": 0.010711367261824348,
+      "operations_per_sec": 29.187386313150533,
+      "success_count": 100,
+      "failure_count": 0,
+      "timestamp": "2025-10-10T00:13:56.624580"
+    }
+  ]
+}

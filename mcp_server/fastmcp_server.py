@@ -83,7 +83,23 @@ from .tools.params import (
     IsolationForestParams,
     LocalOutlierFactorParams,
     NormalizeFeaturesParams,
-    FeatureImportanceParams
+    FeatureImportanceParams,
+    # Sprint 8 parameters (Model Evaluation & Validation)
+    AccuracyScoreParams,
+    PrecisionRecallF1Params,
+    ConfusionMatrixParams,
+    RocAucScoreParams,
+    ClassificationReportParams,
+    LogLossParams,
+    MseRmseMaeParams,
+    R2ScoreParams,
+    MapeParams,
+    KFoldSplitParams,
+    StratifiedKFoldSplitParams,
+    CrossValidateParams,
+    CompareModelsParams,
+    PairedTTestParams,
+    GridSearchParams
 )
 
 # Import response models
@@ -1899,7 +1915,10 @@ from .tools import (
     ml_clustering_helper,
     ml_classification_helper,
     ml_anomaly_helper,
-    ml_feature_helper
+    ml_feature_helper,
+    # Sprint 8 ML Evaluation & Validation helpers
+    ml_evaluation_helper,
+    ml_validation_helper
 )
 
 
@@ -4252,6 +4271,773 @@ async def ml_feature_importance(
         await ctx.error(f"Feature importance calculation failed: {str(e)}")
         return StatsResult(
             operation="feature_importance",
+            result={},
+            inputs={},
+            success=False,
+            error=str(e)
+        )
+
+
+# =============================================================================
+# Sprint 8: ML Evaluation & Validation Tools
+# =============================================================================
+
+# Classification Metrics (6 tools)
+
+@mcp.tool()
+async def ml_accuracy_score(
+    params: AccuracyScoreParams,
+    ctx: Context
+) -> StatsResult:
+    """
+    Calculate classification accuracy score.
+
+    Accuracy measures the proportion of correct predictions.
+    Useful for balanced datasets where all classes are equally important.
+
+    NBA Use Cases:
+    - Evaluate All-Star prediction models
+    - Assess win/loss prediction accuracy
+    - Validate playoff qualification predictions
+
+    Returns:
+    - accuracy: Accuracy score (0-1)
+    - percentage: Accuracy as percentage
+    - correct_predictions: Number of correct predictions
+    - total_predictions: Total number of predictions
+    - interpretation: Quality rating (Excellent/Good/Fair/Poor)
+    """
+    await ctx.info(f"Calculating accuracy score for {len(params.y_true)} predictions")
+
+    try:
+        result = ml_evaluation_helper.accuracy_score(
+            y_true=params.y_true,
+            y_pred=params.y_pred
+        )
+
+        return StatsResult(
+            operation="accuracy_score",
+            result=result,
+            inputs={"n_predictions": len(params.y_true)},
+            interpretation=f"Accuracy: {result['percentage']:.2f}% - {result['interpretation']}",
+            success=True
+        )
+    except Exception as e:
+        await ctx.error(f"Accuracy score calculation failed: {str(e)}")
+        return StatsResult(
+            operation="accuracy_score",
+            result={},
+            inputs={},
+            success=False,
+            error=str(e)
+        )
+
+
+@mcp.tool()
+async def ml_precision_recall_f1(
+    params: PrecisionRecallF1Params,
+    ctx: Context
+) -> StatsResult:
+    """
+    Calculate precision, recall, and F1-score for classification.
+
+    - Precision: What proportion of positive predictions are correct?
+    - Recall: What proportion of actual positives are identified?
+    - F1-Score: Harmonic mean of precision and recall
+
+    NBA Use Cases:
+    - Evaluate injury risk prediction (high recall needed)
+    - Assess MVP candidate identification (balance precision/recall)
+    - Validate draft success prediction models
+
+    Returns:
+    - precision: Positive predictive value (0-1)
+    - recall: True positive rate (0-1)
+    - f1_score: Harmonic mean of precision and recall
+    - support: Number of samples per class
+    - interpretation: Quality assessment
+    """
+    await ctx.info(f"Calculating precision, recall, and F1-score (average={params.average})")
+
+    try:
+        result = ml_evaluation_helper.precision_recall_f1(
+            y_true=params.y_true,
+            y_pred=params.y_pred,
+            average=params.average,
+            pos_label=params.pos_label
+        )
+
+        return StatsResult(
+            operation="precision_recall_f1",
+            result=result,
+            inputs={"average": params.average, "n_predictions": len(params.y_true)},
+            interpretation=f"F1={result['f1_score']:.3f}, Precision={result['precision']:.3f}, Recall={result['recall']:.3f}",
+            success=True
+        )
+    except Exception as e:
+        await ctx.error(f"Precision/recall/F1 calculation failed: {str(e)}")
+        return StatsResult(
+            operation="precision_recall_f1",
+            result={},
+            inputs={},
+            success=False,
+            error=str(e)
+        )
+
+
+@mcp.tool()
+async def ml_confusion_matrix(
+    params: ConfusionMatrixParams,
+    ctx: Context
+) -> StatsResult:
+    """
+    Generate confusion matrix for binary classification.
+
+    Shows true positives, false positives, true negatives, false negatives.
+    Essential for understanding model error patterns.
+
+    NBA Use Cases:
+    - Analyze All-Star prediction errors (false positives vs false negatives)
+    - Evaluate playoff berth prediction mistakes
+    - Assess player position classification confusion
+
+    Returns:
+    - matrix: 2x2 confusion matrix [[TN, FP], [FN, TP]]
+    - true_positives: Correctly predicted positive cases
+    - false_positives: Incorrectly predicted positive cases
+    - true_negatives: Correctly predicted negative cases
+    - false_negatives: Incorrectly predicted negative cases
+    - accuracy: Overall accuracy
+    - sensitivity: True positive rate (recall)
+    - specificity: True negative rate
+    - interpretation: Analysis of error patterns
+    """
+    await ctx.info(f"Generating confusion matrix for {len(params.y_true)} predictions")
+
+    try:
+        result = ml_evaluation_helper.confusion_matrix(
+            y_true=params.y_true,
+            y_pred=params.y_pred,
+            pos_label=params.pos_label
+        )
+
+        return StatsResult(
+            operation="confusion_matrix",
+            result=result,
+            inputs={"pos_label": params.pos_label, "n_predictions": len(params.y_true)},
+            interpretation=f"TP={result['true_positives']}, FP={result['false_positives']}, TN={result['true_negatives']}, FN={result['false_negatives']}",
+            success=True
+        )
+    except Exception as e:
+        await ctx.error(f"Confusion matrix generation failed: {str(e)}")
+        return StatsResult(
+            operation="confusion_matrix",
+            result={},
+            inputs={},
+            success=False,
+            error=str(e)
+        )
+
+
+@mcp.tool()
+async def ml_roc_auc_score(
+    params: RocAucScoreParams,
+    ctx: Context
+) -> StatsResult:
+    """
+    Calculate ROC curve and AUC score for binary classification.
+
+    ROC (Receiver Operating Characteristic) shows classifier performance
+    across all thresholds. AUC (Area Under Curve) summarizes overall quality.
+
+    NBA Use Cases:
+    - Evaluate All-Star probability predictions
+    - Assess draft success likelihood models
+    - Validate playoff qualification probability models
+
+    Returns:
+    - auc: Area under ROC curve (0-1, higher is better)
+    - roc_curve: List of (fpr, tpr, threshold) points
+    - interpretation: AUC quality rating
+    - optimal_threshold: Threshold maximizing TPR - FPR
+    """
+    await ctx.info(f"Calculating ROC-AUC score with {params.num_thresholds} thresholds")
+
+    try:
+        result = ml_evaluation_helper.roc_auc_score(
+            y_true=params.y_true,
+            y_scores=params.y_scores,
+            num_thresholds=params.num_thresholds
+        )
+
+        return StatsResult(
+            operation="roc_auc_score",
+            result=result,
+            inputs={"num_thresholds": params.num_thresholds, "n_predictions": len(params.y_true)},
+            interpretation=f"AUC={result['auc']:.3f} - {result['interpretation']}",
+            success=True
+        )
+    except Exception as e:
+        await ctx.error(f"ROC-AUC calculation failed: {str(e)}")
+        return StatsResult(
+            operation="roc_auc_score",
+            result={},
+            inputs={},
+            success=False,
+            error=str(e)
+        )
+
+
+@mcp.tool()
+async def ml_classification_report(
+    params: ClassificationReportParams,
+    ctx: Context
+) -> StatsResult:
+    """
+    Generate comprehensive classification report with per-class metrics.
+
+    Provides precision, recall, F1-score, and support for each class,
+    plus macro/weighted averages.
+
+    NBA Use Cases:
+    - Evaluate multi-position classification (PG/SG/SF/PF/C)
+    - Assess player tier classification (All-Star/Starter/Rotation/Bench)
+    - Validate team performance classification (Elite/Playoff/Mediocre/Lottery)
+
+    Returns:
+    - per_class_metrics: Dict of metrics for each class
+    - macro_avg: Unweighted average across classes
+    - weighted_avg: Sample-weighted average
+    - overall_accuracy: Total accuracy
+    - interpretation: Summary of model performance
+    """
+    await ctx.info(f"Generating classification report for {len(params.y_true)} predictions")
+
+    try:
+        result = ml_evaluation_helper.classification_report(
+            y_true=params.y_true,
+            y_pred=params.y_pred
+        )
+
+        num_classes = len(result['per_class_metrics'])
+        return StatsResult(
+            operation="classification_report",
+            result=result,
+            inputs={"n_predictions": len(params.y_true), "n_classes": num_classes},
+            interpretation=f"{num_classes} classes - Macro F1={result['macro_avg']['f1_score']:.3f}, Accuracy={result['overall_accuracy']:.3f}",
+            success=True
+        )
+    except Exception as e:
+        await ctx.error(f"Classification report generation failed: {str(e)}")
+        return StatsResult(
+            operation="classification_report",
+            result={},
+            inputs={},
+            success=False,
+            error=str(e)
+        )
+
+
+@mcp.tool()
+async def ml_log_loss(
+    params: LogLossParams,
+    ctx: Context
+) -> StatsResult:
+    """
+    Calculate log loss (cross-entropy loss) for probabilistic predictions.
+
+    Measures prediction confidence calibration. Lower is better.
+    Penalizes confident wrong predictions heavily.
+
+    NBA Use Cases:
+    - Evaluate All-Star probability calibration
+    - Assess playoff qualification likelihood models
+    - Validate win probability predictions
+
+    Returns:
+    - log_loss: Cross-entropy loss (lower is better)
+    - mean_predicted_probability: Average probability assigned to true class
+    - interpretation: Loss quality rating
+    """
+    await ctx.info(f"Calculating log loss for {len(params.y_true)} probabilistic predictions")
+
+    try:
+        result = ml_evaluation_helper.log_loss(
+            y_true=params.y_true,
+            y_pred_proba=params.y_pred_proba,
+            eps=params.eps
+        )
+
+        return StatsResult(
+            operation="log_loss",
+            result=result,
+            inputs={"eps": params.eps, "n_predictions": len(params.y_true)},
+            interpretation=f"Log Loss={result['log_loss']:.4f} - {result['interpretation']}",
+            success=True
+        )
+    except Exception as e:
+        await ctx.error(f"Log loss calculation failed: {str(e)}")
+        return StatsResult(
+            operation="log_loss",
+            result={},
+            inputs={},
+            success=False,
+            error=str(e)
+        )
+
+
+# Regression Metrics (3 tools)
+
+@mcp.tool()
+async def ml_mse_rmse_mae(
+    params: MseRmseMaeParams,
+    ctx: Context
+) -> StatsResult:
+    """
+    Calculate MSE, RMSE, and MAE for regression predictions.
+
+    - MSE: Mean Squared Error (penalizes large errors)
+    - RMSE: Root Mean Squared Error (same units as target)
+    - MAE: Mean Absolute Error (robust to outliers)
+
+    NBA Use Cases:
+    - Evaluate points-per-game prediction accuracy
+    - Assess win total forecasting error
+    - Validate salary prediction models
+
+    Returns:
+    - mse: Mean squared error
+    - rmse: Root mean squared error
+    - mae: Mean absolute error
+    - interpretation: Error magnitude assessment
+    """
+    await ctx.info(f"Calculating MSE, RMSE, MAE for {len(params.y_true)} predictions")
+
+    try:
+        result = ml_evaluation_helper.mse_rmse_mae(
+            y_true=params.y_true,
+            y_pred=params.y_pred
+        )
+
+        return StatsResult(
+            operation="mse_rmse_mae",
+            result=result,
+            inputs={"n_predictions": len(params.y_true)},
+            interpretation=f"RMSE={result['rmse']:.3f}, MAE={result['mae']:.3f}",
+            success=True
+        )
+    except Exception as e:
+        await ctx.error(f"MSE/RMSE/MAE calculation failed: {str(e)}")
+        return StatsResult(
+            operation="mse_rmse_mae",
+            result={},
+            inputs={},
+            success=False,
+            error=str(e)
+        )
+
+
+@mcp.tool()
+async def ml_r2_score(
+    params: R2ScoreParams,
+    ctx: Context
+) -> StatsResult:
+    """
+    Calculate R² (coefficient of determination) for regression.
+
+    R² measures proportion of variance explained by the model.
+    - 1.0: Perfect prediction
+    - 0.0: Model no better than mean baseline
+    - Negative: Model worse than mean baseline
+
+    NBA Use Cases:
+    - Evaluate PPG prediction model fit
+    - Assess team win total regression quality
+    - Validate player valuation models
+
+    Returns:
+    - r2_score: Coefficient of determination
+    - interpretation: Model fit quality rating
+    """
+    await ctx.info(f"Calculating R² score for {len(params.y_true)} predictions")
+
+    try:
+        result = ml_evaluation_helper.r2_score(
+            y_true=params.y_true,
+            y_pred=params.y_pred
+        )
+
+        return StatsResult(
+            operation="r2_score",
+            result=result,
+            inputs={"n_predictions": len(params.y_true)},
+            interpretation=f"R²={result['r2_score']:.3f} - {result['interpretation']}",
+            success=True
+        )
+    except Exception as e:
+        await ctx.error(f"R² calculation failed: {str(e)}")
+        return StatsResult(
+            operation="r2_score",
+            result={},
+            inputs={},
+            success=False,
+            error=str(e)
+        )
+
+
+@mcp.tool()
+async def ml_mape(
+    params: MapeParams,
+    ctx: Context
+) -> StatsResult:
+    """
+    Calculate Mean Absolute Percentage Error (MAPE).
+
+    MAPE measures average prediction error as a percentage.
+    Scale-independent, useful for comparing across different ranges.
+
+    NBA Use Cases:
+    - Evaluate PPG prediction percentage error
+    - Assess salary prediction accuracy
+    - Validate revenue forecasting models
+
+    Returns:
+    - mape: Mean absolute percentage error (%)
+    - interpretation: Error magnitude rating
+
+    Note: y_true cannot contain zeros (division by zero)
+    """
+    await ctx.info(f"Calculating MAPE for {len(params.y_true)} predictions")
+
+    try:
+        result = ml_evaluation_helper.mean_absolute_percentage_error(
+            y_true=params.y_true,
+            y_pred=params.y_pred
+        )
+
+        return StatsResult(
+            operation="mape",
+            result=result,
+            inputs={"n_predictions": len(params.y_true)},
+            interpretation=f"MAPE={result['mape']:.2f}% - {result['interpretation']}",
+            success=True
+        )
+    except Exception as e:
+        await ctx.error(f"MAPE calculation failed: {str(e)}")
+        return StatsResult(
+            operation="mape",
+            result={},
+            inputs={},
+            success=False,
+            error=str(e)
+        )
+
+
+# Cross-Validation (3 tools)
+
+@mcp.tool()
+async def ml_k_fold_split(
+    params: KFoldSplitParams,
+    ctx: Context
+) -> StatsResult:
+    """
+    Generate K-fold cross-validation splits.
+
+    Divides data into K equal-sized folds for robust model evaluation.
+    Each fold serves as validation set once while others are training set.
+
+    NBA Use Cases:
+    - Validate All-Star prediction models across seasons
+    - Evaluate playoff models on different data subsets
+    - Test player performance models with cross-validation
+
+    Returns:
+    - n_folds: Number of folds
+    - n_samples: Total number of samples
+    - fold_sizes: List of samples per fold
+    - splits: List of (train_indices, val_indices) for each fold
+    - interpretation: Split configuration summary
+    """
+    await ctx.info(f"Generating {params.n_folds}-fold CV splits for {params.n_samples} samples")
+
+    try:
+        result = ml_validation_helper.k_fold_split(
+            n_samples=params.n_samples,
+            n_folds=params.n_folds,
+            shuffle=params.shuffle,
+            random_seed=params.random_seed
+        )
+
+        return StatsResult(
+            operation="k_fold_split",
+            result=result,
+            inputs={"n_folds": params.n_folds, "n_samples": params.n_samples},
+            interpretation=f"{params.n_folds} folds, fold sizes: {result['fold_sizes']}",
+            success=True
+        )
+    except Exception as e:
+        await ctx.error(f"K-fold split generation failed: {str(e)}")
+        return StatsResult(
+            operation="k_fold_split",
+            result={},
+            inputs={},
+            success=False,
+            error=str(e)
+        )
+
+
+@mcp.tool()
+async def ml_stratified_k_fold_split(
+    params: StratifiedKFoldSplitParams,
+    ctx: Context
+) -> StatsResult:
+    """
+    Generate stratified K-fold cross-validation splits.
+
+    Ensures each fold has same class distribution as full dataset.
+    Critical for imbalanced classification tasks.
+
+    NBA Use Cases:
+    - Validate All-Star models (imbalanced: few All-Stars, many non-All-Stars)
+    - Evaluate MVP prediction (highly imbalanced: 1 MVP, many non-MVPs)
+    - Test position classification (some positions rarer than others)
+
+    Returns:
+    - n_folds: Number of folds
+    - n_samples: Total number of samples
+    - class_distribution: Samples per class across folds
+    - splits: List of (train_indices, val_indices) for each fold
+    - interpretation: Stratification summary
+    """
+    await ctx.info(f"Generating stratified {params.n_folds}-fold CV splits for {len(params.y)} samples")
+
+    try:
+        result = ml_validation_helper.stratified_k_fold_split(
+            y=params.y,
+            n_folds=params.n_folds,
+            shuffle=params.shuffle,
+            random_seed=params.random_seed
+        )
+
+        return StatsResult(
+            operation="stratified_k_fold_split",
+            result=result,
+            inputs={"n_folds": params.n_folds, "n_samples": len(params.y)},
+            interpretation=f"{params.n_folds} stratified folds, class distribution: {result['class_distribution']}",
+            success=True
+        )
+    except Exception as e:
+        await ctx.error(f"Stratified K-fold split generation failed: {str(e)}")
+        return StatsResult(
+            operation="stratified_k_fold_split",
+            result={},
+            inputs={},
+            success=False,
+            error=str(e)
+        )
+
+
+@mcp.tool()
+async def ml_cross_validate(
+    params: CrossValidateParams,
+    ctx: Context
+) -> StatsResult:
+    """
+    Cross-validation helper that automatically chooses K-fold or stratified K-fold.
+
+    Simplifies cross-validation by handling both standard and stratified splits
+    with a single interface.
+
+    NBA Use Cases:
+    - Quick model validation setup
+    - Standardize CV across different prediction tasks
+    - Automate train/validation split generation
+
+    Returns:
+    - cv_type: Type of CV used (k-fold or stratified)
+    - n_folds: Number of folds
+    - n_samples: Total number of samples
+    - splits: List of (train_indices, val_indices)
+    - interpretation: CV configuration summary
+    """
+    cv_type = "stratified K-fold" if params.stratify else "K-fold"
+    await ctx.info(f"Setting up {cv_type} cross-validation ({params.n_folds} folds, {params.n_samples} samples)")
+
+    try:
+        result = ml_validation_helper.cross_validate(
+            n_samples=params.n_samples,
+            n_folds=params.n_folds,
+            stratify=params.stratify,
+            y=params.y,
+            shuffle=params.shuffle,
+            random_seed=params.random_seed
+        )
+
+        return StatsResult(
+            operation="cross_validate",
+            result=result,
+            inputs={"n_folds": params.n_folds, "stratify": params.stratify},
+            interpretation=f"{result['cv_type']}: {params.n_folds} folds, {params.n_samples} samples",
+            success=True
+        )
+    except Exception as e:
+        await ctx.error(f"Cross-validation setup failed: {str(e)}")
+        return StatsResult(
+            operation="cross_validate",
+            result={},
+            inputs={},
+            success=False,
+            error=str(e)
+        )
+
+
+# Model Comparison (2 tools)
+
+@mcp.tool()
+async def ml_compare_models(
+    params: CompareModelsParams,
+    ctx: Context
+) -> StatsResult:
+    """
+    Compare multiple models side-by-side with various metrics.
+
+    Evaluate multiple models on same data to identify best performer.
+    Supports custom metric selection.
+
+    NBA Use Cases:
+    - Compare All-Star prediction models (Logistic vs Naive Bayes vs Random Forest)
+    - Evaluate playoff qualification algorithms
+    - Benchmark player clustering methods
+
+    Returns:
+    - models: List of model names
+    - metrics_computed: Metrics calculated for comparison
+    - comparison_table: Dict of {metric: {model: score}}
+    - best_model_per_metric: Best model for each metric
+    - interpretation: Overall comparison summary
+    """
+    await ctx.info(f"Comparing {len(params.models)} models on {len(params.y_true)} samples")
+
+    try:
+        result = ml_validation_helper.compare_models(
+            models=params.models,
+            y_true=params.y_true,
+            metrics=params.metrics
+        )
+
+        return StatsResult(
+            operation="compare_models",
+            result=result,
+            inputs={"n_models": len(params.models), "n_samples": len(params.y_true)},
+            interpretation=f"Compared {len(params.models)} models on {len(result['metrics_computed'])} metrics",
+            success=True
+        )
+    except Exception as e:
+        await ctx.error(f"Model comparison failed: {str(e)}")
+        return StatsResult(
+            operation="compare_models",
+            result={},
+            inputs={},
+            success=False,
+            error=str(e)
+        )
+
+
+@mcp.tool()
+async def ml_paired_ttest(
+    params: PairedTTestParams,
+    ctx: Context
+) -> StatsResult:
+    """
+    Perform paired t-test to assess if two models are statistically different.
+
+    Tests null hypothesis that model performance difference is zero.
+    Use with cross-validation scores to determine if one model is
+    significantly better than another.
+
+    NBA Use Cases:
+    - Test if Random Forest significantly outperforms Logistic Regression
+    - Validate statistical significance of model improvements
+    - Compare clustering algorithms rigorously
+
+    Returns:
+    - t_statistic: Paired t-test statistic
+    - p_value: Probability of observing difference by chance
+    - degrees_of_freedom: Sample size - 1
+    - mean_difference: Average score difference (A - B)
+    - is_significant: Whether difference is significant at alpha level
+    - interpretation: Statistical conclusion
+    """
+    await ctx.info(f"Running paired t-test on {len(params.scores_a)} CV scores (alpha={params.alpha})")
+
+    try:
+        result = ml_validation_helper.paired_ttest(
+            scores_a=params.scores_a,
+            scores_b=params.scores_b,
+            alpha=params.alpha
+        )
+
+        return StatsResult(
+            operation="paired_ttest",
+            result=result,
+            inputs={"alpha": params.alpha, "n_folds": len(params.scores_a)},
+            interpretation=f"p={result['p_value']:.4f}, {'significant' if result['is_significant'] else 'not significant'} at α={params.alpha}",
+            success=True
+        )
+    except Exception as e:
+        await ctx.error(f"Paired t-test failed: {str(e)}")
+        return StatsResult(
+            operation="paired_ttest",
+            result={},
+            inputs={},
+            success=False,
+            error=str(e)
+        )
+
+
+# Hyperparameter Tuning (1 tool)
+
+@mcp.tool()
+async def ml_grid_search(
+    params: GridSearchParams,
+    ctx: Context
+) -> StatsResult:
+    """
+    Generate parameter combinations for grid search hyperparameter tuning.
+
+    Creates all possible combinations of parameters to test.
+    Essential for finding optimal model configurations.
+
+    NBA Use Cases:
+    - Tune K-means clustering (k, max_iterations, tolerance)
+    - Optimize Random Forest (n_trees, max_depth, min_samples_split)
+    - Configure Logistic Regression (learning_rate, max_iterations)
+
+    Returns:
+    - param_grid: Original parameter grid
+    - n_combinations: Total number of combinations
+    - combinations: List of parameter dictionaries to test
+    - interpretation: Grid search configuration summary
+    """
+    await ctx.info(f"Generating grid search combinations for {len(params.param_grid)} parameters")
+
+    try:
+        result = ml_validation_helper.grid_search(
+            param_grid=params.param_grid,
+            n_combinations=params.n_combinations
+        )
+
+        return StatsResult(
+            operation="grid_search",
+            result=result,
+            inputs={"n_parameters": len(params.param_grid)},
+            interpretation=f"Generated {result['n_combinations']} parameter combinations",
+            success=True
+        )
+    except Exception as e:
+        await ctx.error(f"Grid search generation failed: {str(e)}")
+        return StatsResult(
+            operation="grid_search",
             result={},
             inputs={},
             success=False,

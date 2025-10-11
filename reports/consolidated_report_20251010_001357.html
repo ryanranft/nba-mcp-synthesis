@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='UTF-8'>
+    <title>NBA MCP Test Report - Consolidated</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; margin-top: 30px; }
+        h3 { color: #7f8c8d; }
+        .summary { background: #ecf0f1; padding: 20px; border-radius: 5px; margin: 20px 0; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .metric { background: white; padding: 15px; border-radius: 5px; border-left: 4px solid #3498db; }
+        .metric-value { font-size: 24px; font-weight: bold; color: #2c3e50; }
+        .metric-label { font-size: 12px; color: #7f8c8d; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th { background: #34495e; color: white; padding: 12px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #ecf0f1; }
+        tr:hover { background: #f8f9fa; }
+        .pass { color: #27ae60; font-weight: bold; }
+        .fail { color: #e74c3c; font-weight: bold; }
+        .timestamp { color: #95a5a6; font-size: 14px; }
+        .chart { margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <h1>🧪 NBA MCP Consolidated Test Report</h1>
+        <p class='timestamp'>Generated: 2025-10-10 00:13:57</p>
+        <div class='summary'>
+            <h2>📊 Overall Summary</h2>
+            <div class='summary-grid'>
+                <div class='metric'>
+                    <div class='metric-value'>1</div>
+                    <div class='metric-label'>Test Runs</div>
+                </div>
+                <div class='metric'>
+                    <div class='metric-value'>0</div>
+                    <div class='metric-label'>Total Tests</div>
+                </div>
+                <div class='metric'>
+                    <div class='metric-value' style='color: #27ae60;'>0</div>
+                    <div class='metric-label'>Passed</div>
+                </div>
+                <div class='metric'>
+                    <div class='metric-value' style='color: #e74c3c;'>0</div>
+                    <div class='metric-label'>Failed</div>
+                </div>
+                <div class='metric'>
+                    <div class='metric-value'>0.0%</div>
+                    <div class='metric-label'>Pass Rate</div>
+                </div>
+            </div>
+        </div>
+        <h2>🧪 Test Runs</h2>
+        <h3>Run 1: test_report.json</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Test Name</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Duration</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <h2>⚡ Performance Benchmarks</h2>
+        <h3>Benchmark 1: benchmark_20251010_001356.json</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Benchmark</th>
+                    <th>Iterations</th>
+                    <th>Avg Time</th>
+                    <th>Ops/sec</th>
+                    <th>Success Rate</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Simple SELECT</td>
+                    <td>100</td>
+                    <td>0.0378s</td>
+                    <td>26.43</td>
+                    <td>100.0%</td>
+                </tr>
+                <tr>
+                    <td>List Tables (LIMIT 10)</td>
+                    <td>50</td>
+                    <td>0.0362s</td>
+                    <td>27.59</td>
+                    <td>100.0%</td>
+                </tr>
+                <tr>
+                    <td>Schema Query (LIMIT 20)</td>
+                    <td>50</td>
+                    <td>0.0363s</td>
+                    <td>27.55</td>
+                    <td>100.0%</td>
+                </tr>
+                <tr>
+                    <td>Concurrent Queries (10x10)</td>
+                    <td>100</td>
+                    <td>0.3426s</td>
+                    <td>29.19</td>
+                    <td>100.0%</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

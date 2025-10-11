@@ -209,3 +209,50 @@ class S3Connector:
             return True
         except:
             return False
+
+    def get_object(self, key: str) -> str:
+        """
+        Get object content from S3 (synchronous for fastmcp_server compatibility).
+
+        Args:
+            key: S3 object key
+
+        Returns:
+            String content of the object
+        """
+        try:
+            response = self.s3_client.get_object(
+                Bucket=self.bucket_name,
+                Key=key
+            )
+            content = response['Body'].read()
+            return content.decode('utf-8', errors='ignore')
+        except Exception as e:
+            logger.error(f"Failed to get S3 object {key}: {e}")
+            raise
+
+    def list_objects(self, prefix: str = "", max_keys: int = 100) -> List[str]:
+        """
+        List objects in S3 bucket (synchronous for fastmcp_server compatibility).
+
+        Args:
+            prefix: Filter objects by prefix
+            max_keys: Maximum number of keys to return
+
+        Returns:
+            List of object keys
+        """
+        try:
+            response = self.s3_client.list_objects_v2(
+                Bucket=self.bucket_name,
+                Prefix=prefix,
+                MaxKeys=max_keys
+            )
+
+            if 'Contents' not in response:
+                return []
+
+            return [obj['Key'] for obj in response['Contents']]
+        except Exception as e:
+            logger.error(f"Failed to list S3 objects with prefix {prefix}: {e}")
+            raise

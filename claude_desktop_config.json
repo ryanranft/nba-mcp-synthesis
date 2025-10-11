@@ -1,20 +1,14 @@
 {
   "mcpServers": {
-    "nba-mcp-server": {
-      "command": "python3",
+    "nba-mcp-synthesis": {
+      "command": "python",
       "args": [
-        "/Users/ryanranft/nba-mcp-synthesis/mcp_server/server_simple.py"
+        "-m",
+        "mcp_server.server"
       ],
+      "cwd": "/Users/ryanranft/nba-mcp-synthesis",
       "env": {
-        "RDS_HOST": "${RDS_HOST}",
-        "RDS_PORT": "${RDS_PORT}",
-        "RDS_DATABASE": "${RDS_DATABASE}",
-        "RDS_USERNAME": "${RDS_USERNAME}",
-        "RDS_PASSWORD": "${RDS_PASSWORD}",
-        "S3_BUCKET": "${S3_BUCKET}",
-        "S3_REGION": "${S3_REGION}",
-        "DEEPSEEK_API_KEY": "${DEEPSEEK_API_KEY}",
-        "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}"
+        "PYTHONPATH": "/Users/ryanranft/nba-mcp-synthesis"
       }
     }
   }

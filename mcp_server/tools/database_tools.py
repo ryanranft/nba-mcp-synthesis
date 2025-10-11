@@ -5,8 +5,21 @@ Provides tools for querying RDS PostgreSQL database
 
 import logging
 import re
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
+from pydantic import ValidationError
+from mcp.types import Tool
 from mcp_server.connectors.rds_connector import RDSConnector
+from mcp_server.responses import (
+    success_response,
+    error_response,
+    validation_error,
+    database_error
+)
+from mcp_server.tools.params import (
+    QueryDatabaseParams,
+    GetTableSchemaParams,
+    ListTablesParams
+)
 
 logger = logging.getLogger(__name__)
 
@@ -233,3 +246,135 @@ class DatabaseTools:
                 "success": False,
                 "error": str(e)
             }
+
+    def get_tool_definitions(self) -> List[Tool]:
+        """Return database tool definitions for MCP"""
+        return [
+            Tool(
+                name="query_database",
+                description="Execute SQL SELECT query against PostgreSQL database",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "sql_query": {
+                            "type": "string",
+                            "description": "SQL SELECT query to execute"
+                        },
+                        "max_rows": {
+                            "type": "integer",
+                            "description": "Maximum number of rows to return",
+                            "default": 1000
+                        }
+                    },
+                    "required": ["sql_query"]
+                }
+            ),
+            Tool(
+                name="get_table_schema",
+                description="Get schema information for a database table",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "table_name": {
+                            "type": "string",
+                            "description": "Name of the table"
+                        }
+                    },
+                    "required": ["table_name"]
+                }
+            ),
+            Tool(
+                name="list_tables",
+                description="List all tables in the database",
+                inputSchema={
+                    "type": "object",
+                    "properties": {}
+                }
+            )
+        ]
+
+    async def execute(self, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Execute a database tool with Pydantic validation and standardized responses.
+
+        Args:
+            tool_name: Name of the tool to execute
+            arguments: Tool arguments
+
+        Returns:
+            Standardized SuccessResponse or ErrorResponse
+        """
+        try:
+            if tool_name == "query_database":
+                # Validate parameters with Pydantic
+                try:
+                    params = QueryDatabaseParams(**arguments)
+                except ValidationError as e:
+                    return validation_error(
+                        f"Invalid parameters: {e}",
+                        details={"validation_errors": e.errors()}
+                    )
+
+                result = await self.query_rds_database(params.sql_query, params.max_rows)
+
+                if result.get("success"):
+                    return success_response(
+                        message=f"Query executed successfully: {result['row_count']} rows returned",
+                        data=result
+                    )
+                else:
+                    return database_error(
+                        result.get("error", "Unknown database error"),
+                        details={"query": params.sql_query[:100]}
+                    )
+
+            elif tool_name == "get_table_schema":
+                # Validate parameters with Pydantic
+                try:
+                    params = GetTableSchemaParams(**arguments)
+                except ValidationError as e:
+                    return validation_error(
+                        f"Invalid parameters: {e}",
+                        details={"validation_errors": e.errors()}
+                    )
+
+                result = await self.get_table_schema(params.table_name)
+
+                if result.get("success"):
+                    return success_response(
+                        message=f"Schema retrieved for table: {params.table_name}",
+                        data=result
+                    )
+                else:
+                    return database_error(
+                        result.get("error", "Unknown database error"),
+                        details={"table_name": params.table_name}
+                    )
+
+            elif tool_name == "list_tables":
+                # No parameters to validate
+                result = await self.list_tables()
+
+                if result.get("success"):
+                    return success_response(
+                        message=f"Found {result['table_count']} tables",
+                        data=result
+                    )
+                else:
+                    return database_error(
+                        result.get("error", "Unknown database error")
+                    )
+
+            else:
+                return error_response(
+                    f"Unknown database tool: {tool_name}",
+                    error_type="UnknownToolError"
+                )
+
+        except Exception as e:
+            logger.error(f"Error executing database tool {tool_name}: {e}", exc_info=True)
+            return error_response(
+                str(e),
+                error_type=type(e).__name__,
+                details={"tool": tool_name}
+            )

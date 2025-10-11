@@ -1,0 +1,158 @@
+{
+  "summary": {
+    "total": 10,
+    "passed": 10,
+    "failed": 0,
+    "warnings": 0,
+    "duration": 2.990541696548462
+  },
+  "results": [
+    {
+      "name": "Environment Setup",
+      "category": "Setup",
+      "passed": true,
+      "duration": 0.004200935363769531,
+      "error": null,
+      "details": {
+        "env_vars_found": 3,
+        "database": "nba_simulator",
+        "s3_bucket": "nba-sim-raw-data-lake"
+      },
+      "timestamp": "2025-10-10T12:47:47.746725"
+    },
+    {
+      "name": "FastMCP Import",
+      "category": "Setup",
+      "passed": true,
+      "duration": 0.4755370616912842,
+      "error": null,
+      "details": {
+        "server_name": "nba-mcp-fastmcp",
+        "tools_registered": 4
+      },
+      "timestamp": "2025-10-10T12:47:47.750930"
+    },
+    {
+      "name": "Pydantic Models",
+      "category": "Setup",
+      "passed": true,
+      "duration": 0.0001609325408935547,
+      "error": null,
+      "details": {
+        "validation_working": true,
+        "sql_injection_blocked": true,
+        "response_model_working": true
+      },
+      "timestamp": "2025-10-10T12:47:48.226474"
+    },
+    {
+      "name": "Lifespan Initialization",
+      "category": "Setup",
+      "passed": true,
+      "duration": 0.10422396659851074,
+      "error": null,
+      "details": {
+        "resources_initialized": 5,
+        "connectors": [
+          "rds_connector",
+          "s3_connector",
+          "glue_connector",
+          "slack_notifier",
+          "config"
+        ]
+      },
+      "timestamp": "2025-10-10T12:47:48.226643"
+    },
+    {
+      "name": "Database Connection",
+      "category": "Connectivity",
+      "passed": true,
+      "duration": 0.3990793228149414,
+      "error": null,
+      "details": {
+        "connection_successful": true,
+        "test_query_passed": true,
+        "tables_found": 23
+      },
+      "timestamp": "2025-10-10T12:47:48.330874"
+    },
+    {
+      "name": "S3 Connection",
+      "category": "Connectivity",
+      "passed": true,
+      "duration": 0.2154850959777832,
+      "error": null,
+      "details": {
+        "connection_successful": true,
+        "files_listed": 5,
+        "sample_files": [
+          "athena-results/457a45d6-c56b-4d85-8979-622bcb51ffd1.txt",
+          "athena-results/457a45d6-c56b-4d85-8979-622bcb51ffd1.txt.metadata",
+          "athena-results/d00aa5a9-a350-422f-a22e-467d195a4f78.txt"
+        ]
+      },
+      "timestamp": "2025-10-10T12:47:48.729964"
+    },
+    {
+      "name": "Query Database Tool",
+      "category": "Tools",
+      "passed": true,
+      "duration": 0.3573129177093506,
+      "error": null,
+      "details": {
+        "rows_returned": 1,
+        "columns": [
+          "test"
+        ],
+        "context_logging": 3
+      },
+      "timestamp": "2025-10-10T12:47:48.945466"
+    },
+    {
+      "name": "List Tables Tool",
+      "category": "Tools",
+      "passed": true,
+      "duration": 0.35938000679016113,
+      "error": null,
+      "details": {
+        "tables_found": 23,
+        "sample_tables": [
+          "public.box_score_players",
+          "public.box_score_teams",
+          "public.data_source_coverage",
+          "public.game_states",
+          "public.games"
+        ]
+      },
+      "timestamp": "2025-10-10T12:47:49.302788"
+    },
+    {
+      "name": "Query Performance",
+      "category": "Performance",
+      "passed": true,
+      "duration": 0.6812529563903809,
+      "error": null,
+      "details": {
+        "iterations": 10,
+        "avg_time_ms": 65.76354503631592,
+        "min_time_ms": 35.07685661315918,
+        "max_time_ms": 334.0270519256592
+      },
+      "timestamp": "2025-10-10T12:47:49.662182"
+    },
+    {
+      "name": "Concurrent Queries",
+      "category": "Performance",
+      "passed": true,
+      "duration": 0.3937668800354004,
+      "error": null,
+      "details": {
+        "concurrent_queries": 5,
+        "all_succeeded": true,
+        "total_duration_ms": 368.84284019470215
+      },
+      "timestamp": "2025-10-10T12:47:50.343448"
+    }
+  ],
+  "timestamp": "2025-10-10T12:47:50.737389"
+}
