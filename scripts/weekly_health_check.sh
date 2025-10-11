@@ -381,6 +381,52 @@ else
     record_check "WARN" "Archive directory not found"
 fi
 
+# Check for archival candidates in root directory
+ROOT_COMPLETION=$(find "$PROJECT_ROOT" -maxdepth 1 -type f \( -name "*_COMPLETE.md" -o -name "*_VERIFICATION*.md" -o -name "*_REPORT.md" -o -name "*_SUCCESS.md" \) 2>/dev/null | wc -l | tr -d ' ')
+if [[ $ROOT_COMPLETION -eq 0 ]]; then
+    record_check "PASS" "No completion documents in root (all archived)"
+elif [[ $ROOT_COMPLETION -le 2 ]]; then
+    record_check "WARN" "${ROOT_COMPLETION} completion document(s) in root (consider archiving)"
+else
+    record_check "FAIL" "${ROOT_COMPLETION} completion documents in root (archive recommended)"
+fi
+
+# Check root directory markdown file count
+ROOT_MD_COUNT=$(ls -1 "$PROJECT_ROOT"/*.md 2>/dev/null | wc -l | tr -d ' ')
+if [[ $ROOT_MD_COUNT -le 15 ]]; then
+    record_check "PASS" "Root has ${ROOT_MD_COUNT} markdown files (target: <15)"
+elif [[ $ROOT_MD_COUNT -le 20 ]]; then
+    record_check "WARN" "Root has ${ROOT_MD_COUNT} markdown files (target: <15)"
+else
+    record_check "FAIL" "Root has ${ROOT_MD_COUNT} markdown files (target: <20, critical)"
+fi
+
+# Calculate estimated token savings if archiving is done
+if [[ $ROOT_COMPLETION -gt 0 || $DAILY_COUNT -gt 7 ]]; then
+    ARCHIVABLE_LINES=0
+    # Estimate lines in root completion docs
+    for file in $(find "$PROJECT_ROOT" -maxdepth 1 -type f \( -name "*_COMPLETE.md" -o -name "*_VERIFICATION*.md" -o -name "*_REPORT.md" \) 2>/dev/null); do
+        if [[ -f "$file" ]]; then
+            FILE_LINES=$(wc -l < "$file" 2>/dev/null || echo "0")
+            ARCHIVABLE_LINES=$((ARCHIVABLE_LINES + FILE_LINES))
+        fi
+    done
+    
+    # Estimate lines in old daily sessions (beyond 7 days)
+    if [[ $DAILY_COUNT -gt 7 ]]; then
+        for file in $(find "$PROJECT_ROOT/.ai/daily" -type f -name "*.md" ! -name "template.md" -mtime +7 2>/dev/null); do
+            if [[ -f "$file" ]]; then
+                FILE_LINES=$(wc -l < "$file" 2>/dev/null || echo "0")
+                ARCHIVABLE_LINES=$((ARCHIVABLE_LINES + FILE_LINES))
+            fi
+        done
+    fi
+    
+    ESTIMATED_TOKEN_SAVINGS=$((ARCHIVABLE_LINES * 20))
+    echo "  💾 Potential savings: ~${ESTIMATED_TOKEN_SAVINGS} tokens (${ARCHIVABLE_LINES} lines)" | tee -a "$REPORT_FILE"
+    echo "  📦 Run: ./scripts/auto_archive.sh --dry-run" | tee -a "$REPORT_FILE"
+fi
+
 echo "" >> "$REPORT_FILE"
 
 # ============================================================================

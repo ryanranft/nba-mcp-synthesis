@@ -113,6 +113,31 @@ run_health_check() {
         issues=$((issues + 1))
     fi
 
+    echo ""
+    echo -e "${BLUE}📁 File Management Check${NC}"
+    echo "================================"
+
+    # Check for archival candidates in root
+    local completion_docs=$(find . -maxdepth 1 -name "*_COMPLETE.md" -o -name "*_VERIFICATION*.md" -o -name "*_REPORT.md" 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$completion_docs" -gt 0 ]; then
+        echo -e "${YELLOW}⚠️  Found $completion_docs completion document(s) in root${NC}"
+        echo "   Consider archiving: ./scripts/auto_archive.sh --interactive"
+    else
+        echo -e "${GREEN}✅ No completion documents in root${NC}"
+    fi
+
+    # Check root directory markdown file count
+    local root_md_count=$(ls -1 *.md 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$root_md_count" -gt 20 ]; then
+        echo -e "${RED}⚠️  Root has $root_md_count markdown files (target: <20)${NC}"
+        echo "   Run archive script: ./scripts/auto_archive.sh"
+    elif [ "$root_md_count" -gt 15 ]; then
+        echo -e "${YELLOW}⚠️  Root has $root_md_count markdown files (target: <15)${NC}"
+        echo "   Consider running: ./scripts/auto_archive.sh --dry-run"
+    else
+        echo -e "${GREEN}✅ Root file count OK: $root_md_count files${NC}"
+    fi
+
     # Summary
     echo ""
     if [ $issues -eq 0 ]; then

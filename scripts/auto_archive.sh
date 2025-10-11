@@ -34,6 +34,11 @@ NC='\033[0m'
 # Counters
 ARCHIVED_COUNT=0
 SKIPPED_COUNT=0
+TOTAL_LINES_ARCHIVED=0
+ARCHIVED_BY_REASON_COMPLETION=0
+ARCHIVED_BY_REASON_SESSION=0
+ARCHIVED_BY_REASON_VERIFICATION=0
+ARCHIVED_BY_REASON_AGE=0
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -174,11 +179,26 @@ archive_file() {
         fi
     fi
 
+    # Count lines in file
+    local line_count=0
+    if [[ -f "$file" ]]; then
+        line_count=$(wc -l < "$file" 2>/dev/null || echo "0")
+    fi
+
     if [[ $DRY_RUN -eq 1 ]]; then
-        echo -e "${CYAN}→${NC} Would archive: $relative_path"
+        echo -e "${CYAN}→${NC} Would archive: $relative_path ($line_count lines)"
         echo "  Destination: ${dest#$PROJECT_ROOT/}"
         echo "  Reason: $reason"
         ARCHIVED_COUNT=$((ARCHIVED_COUNT + 1))
+        TOTAL_LINES_ARCHIVED=$((TOTAL_LINES_ARCHIVED + line_count))
+        
+        # Track by reason
+        case "$reason" in
+            completion) ARCHIVED_BY_REASON_COMPLETION=$((ARCHIVED_BY_REASON_COMPLETION + 1)) ;;
+            session) ARCHIVED_BY_REASON_SESSION=$((ARCHIVED_BY_REASON_SESSION + 1)) ;;
+            verification) ARCHIVED_BY_REASON_VERIFICATION=$((ARCHIVED_BY_REASON_VERIFICATION + 1)) ;;
+            age) ARCHIVED_BY_REASON_AGE=$((ARCHIVED_BY_REASON_AGE + 1)) ;;
+        esac
         return
     fi
 
@@ -192,8 +212,17 @@ archive_file() {
         mv "$file" "$dest"
     fi
 
-    echo -e "${GREEN}✓${NC} Archived: $relative_path → ${dest#$PROJECT_ROOT/}"
+    echo -e "${GREEN}✓${NC} Archived: $relative_path → ${dest#$PROJECT_ROOT/} ($line_count lines)"
     ARCHIVED_COUNT=$((ARCHIVED_COUNT + 1))
+    TOTAL_LINES_ARCHIVED=$((TOTAL_LINES_ARCHIVED + line_count))
+    
+    # Track by reason
+    case "$reason" in
+        completion) ARCHIVED_BY_REASON_COMPLETION=$((ARCHIVED_BY_REASON_COMPLETION + 1)) ;;
+        session) ARCHIVED_BY_REASON_SESSION=$((ARCHIVED_BY_REASON_SESSION + 1)) ;;
+        verification) ARCHIVED_BY_REASON_VERIFICATION=$((ARCHIVED_BY_REASON_VERIFICATION + 1)) ;;
+        age) ARCHIVED_BY_REASON_AGE=$((ARCHIVED_BY_REASON_AGE + 1)) ;;
+    esac
 
     # Add to archive index
     local month=$(echo "$subdir" | cut -d'/' -f1)
@@ -259,7 +288,7 @@ ROOT_PATTERNS=(
 for pattern in "${ROOT_PATTERNS[@]}"; do
     while IFS= read -r file; do
         if [[ -f "$file" ]]; then
-            local reason=$(should_archive "$file" || true)
+            reason=$(should_archive "$file" || true)
             if [[ -n "$reason" && "$reason" != "1" ]]; then
                 archive_file "$file" "$reason"
             fi
@@ -275,8 +304,8 @@ for dir in "${SCAN_DIRS[@]}"; do
 
     while IFS= read -r -d '' file; do
         # Skip index files and templates
-        local basename=$(basename "$file")
-        if [[ "$basename" == "index.md" || "$basename" == "template.md" ]]; then
+        file_basename=$(basename "$file")
+        if [[ "$file_basename" == "index.md" || "$file_basename" == "template.md" ]]; then
             continue
         fi
 
@@ -285,7 +314,7 @@ for dir in "${SCAN_DIRS[@]}"; do
             continue
         fi
 
-        local reason=$(should_archive "$file" || true)
+        reason=$(should_archive "$file" || true)
         if [[ -n "$reason" && "$reason" != "1" ]]; then
             archive_file "$file" "$reason"
         fi
@@ -295,30 +324,60 @@ done
 # Summary
 echo ""
 echo "======================================"
-echo "Summary"
+echo "Archive Summary"
 echo "======================================"
 echo ""
 
+# Calculate token savings (assume ~20 tokens per line)
+TOKENS_SAVED=$((TOTAL_LINES_ARCHIVED * 20))
+
 if [[ $DRY_RUN -eq 1 ]]; then
-    echo "Would archive: $ARCHIVED_COUNT file(s)"
+    echo -e "${CYAN}DRY RUN MODE${NC} - No changes made"
     echo ""
+    echo "Files to archive: $ARCHIVED_COUNT"
+    echo "Total lines: $TOTAL_LINES_ARCHIVED"
+    echo "Est. token savings: ~${TOKENS_SAVED}"
+    echo ""
+    
+    if [[ $ARCHIVED_COUNT -gt 0 ]]; then
+        echo "Archive breakdown:"
+        [[ $ARCHIVED_BY_REASON_COMPLETION -gt 0 ]] && echo "  - Completion documents: $ARCHIVED_BY_REASON_COMPLETION"
+        [[ $ARCHIVED_BY_REASON_SESSION -gt 0 ]] && echo "  - Session summaries: $ARCHIVED_BY_REASON_SESSION"
+        [[ $ARCHIVED_BY_REASON_VERIFICATION -gt 0 ]] && echo "  - Verification reports: $ARCHIVED_BY_REASON_VERIFICATION"
+        [[ $ARCHIVED_BY_REASON_AGE -gt 0 ]] && echo "  - Old files (>${AGE_THRESHOLD} days): $ARCHIVED_BY_REASON_AGE"
+        echo ""
+    fi
+    
     echo "To apply changes, run without --dry-run:"
     echo "  $0"
 else
-    echo "Archived: $ARCHIVED_COUNT file(s)"
-    echo "Skipped: $SKIPPED_COUNT file(s)"
-    echo ""
-
     if [[ $ARCHIVED_COUNT -gt 0 ]]; then
+        echo -e "${GREEN}✅ Archive Complete${NC}"
+        echo ""
+        echo "Files archived: $ARCHIVED_COUNT"
+        echo "Files skipped: $SKIPPED_COUNT"
+        echo "Total lines archived: $TOTAL_LINES_ARCHIVED"
+        echo "Token savings: ~${TOKENS_SAVED}"
+        echo ""
+        
+        echo "Archive breakdown:"
+        [[ $ARCHIVED_BY_REASON_COMPLETION -gt 0 ]] && echo "  - Completion documents: $ARCHIVED_BY_REASON_COMPLETION"
+        [[ $ARCHIVED_BY_REASON_SESSION -gt 0 ]] && echo "  - Session summaries: $ARCHIVED_BY_REASON_SESSION"
+        [[ $ARCHIVED_BY_REASON_VERIFICATION -gt 0 ]] && echo "  - Verification reports: $ARCHIVED_BY_REASON_VERIFICATION"
+        [[ $ARCHIVED_BY_REASON_AGE -gt 0 ]] && echo "  - Old files (>${AGE_THRESHOLD} days): $ARCHIVED_BY_REASON_AGE"
+        echo ""
+        
         echo "Archive location: ${ARCHIVE_BASE#$PROJECT_ROOT/}"
         echo ""
         echo "Next steps:"
         echo "  1. Review archives: ls -la ${ARCHIVE_BASE#$PROJECT_ROOT/}"
-        echo "  2. Update .gitignore if needed"
-        echo "  3. Commit changes: git add . && git commit -m 'docs: Archive old documentation'"
-        echo "  4. Update documentation map: ./scripts/auto_update_doc_map.sh"
+        echo "  2. Commit changes: git add . && git commit -m 'docs: Archive old documentation'"
+        echo "  3. Check root file count: ls -1 *.md 2>/dev/null | wc -l"
     else
-        echo -e "${GREEN}No files needed archiving${NC}"
+        echo -e "${GREEN}✅ No files needed archiving${NC}"
+        echo ""
+        echo "All files are within retention policies."
+        echo "Root file count: $(ls -1 "$PROJECT_ROOT"/*.md 2>/dev/null | wc -l)"
     fi
 fi
 
