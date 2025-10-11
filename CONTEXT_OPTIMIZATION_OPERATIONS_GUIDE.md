@@ -68,6 +68,203 @@ Is this information...
 
 ---
 
+## 🤖 Automated File Management System
+
+### Understanding the Automation
+
+This project uses **script-based file creation** for consistency, optimization, and reliability. Many files are AUTO-GENERATED and should NEVER be edited manually.
+
+**Key Principle**: Scripts before manual edits. Always check if a script exists before creating or editing files.
+
+### Auto-Generated Files (NEVER Edit Manually)
+
+| File | Generator Script | Frequency | Purpose | Token Cost |
+|------|------------------|-----------|---------|------------|
+| `.ai/current-session.md` | `session_start.sh` | Every session | Compact session state | ~300 tokens |
+| `PROJECT_STATUS.md` | `update_status.sh` | On demand | Quick status overview | ~150 tokens |
+| Daily session files | `session_start.sh --new-session` | Optional | Detailed session log | Variable |
+| Session checkpoints | `checkpoint_session.sh` | On demand | Session snapshots | Variable |
+| Benchmark results | Test scripts | On test run | Performance metrics | N/A |
+| Test reports | Test scripts | On test run | Test results | N/A |
+
+**Why Scripts?**
+1. **Optimized for context** - Only includes necessary information
+2. **Consistent format** - Predictable structure reduces parsing tokens
+3. **No duplication** - Scripts pull from canonical sources
+4. **Automatic cleanup** - Archives old content automatically
+
+### Script-Based File Creation Patterns
+
+#### Pattern 1: Session Files
+
+```bash
+# Generate current-session.md (ALWAYS do this first)
+./scripts/session_start.sh
+
+# Create new daily session file (optional, for detailed notes)
+./scripts/session_start.sh --new-session
+
+# Create session checkpoint (save current state)
+./scripts/checkpoint_session.sh --name=before-major-change
+```
+
+**When to use**:
+- Start of every session: `session_start.sh`
+- Need detailed notes: `session_start.sh --new-session`
+- Before risky changes: `checkpoint_session.sh`
+
+**Token savings**: 94% (5,000 → 300 tokens for session start)
+
+#### Pattern 2: Archiving
+
+```bash
+# Check what would be archived (dry run)
+./scripts/auto_archive.sh --dry-run
+
+# Archive completion documents
+./scripts/auto_archive.sh
+
+# Archive interactively (confirm each file)
+./scripts/auto_archive.sh --interactive
+
+# Archive old sessions to S3
+./scripts/session_archive.sh --to-s3
+
+# Archive with age threshold
+./scripts/auto_archive.sh --age=30
+```
+
+**When to use**:
+- After completing major work (sprint, phase)
+- Root directory >15 markdown files
+- Weekly health check recommends it
+- Before starting new major work
+
+**Token savings**: ~1,500 tokens per archived completion document
+
+#### Pattern 3: Status Updates
+
+```bash
+# Regenerate PROJECT_STATUS.md from source data
+./scripts/update_status.sh
+
+# Update specific status file (manual editing OK)
+vim project/status/tools.md +45  # Jump to specific line
+```
+
+**When to use**:
+- After major changes to project state
+- Need refreshed overview
+- Status file becomes outdated
+
+**Token savings**: 50-100 tokens (edit specific section vs. reading full file)
+
+#### Pattern 4: Context Monitoring
+
+```bash
+# Check context budget
+./scripts/track_context_budget.sh --session
+
+# View dashboard
+./scripts/context_dashboard.sh
+
+# Monitor file sizes
+./scripts/monitor_file_sizes.sh
+
+# Run weekly health check
+./scripts/weekly_health_check.sh
+```
+
+**When to use**:
+- Daily: Quick dashboard check
+- Weekly: Full health check
+- Before commits: Monitor file sizes
+- Context feels high: Track budget
+
+### When Scripts Are NOT Available
+
+**Fallback to Manual Creation with Guidelines**:
+
+1. **Check DOCUMENTATION_MAP.md** for canonical location
+   ```bash
+   grep -i "topic name" docs/DOCUMENTATION_MAP.md
+   ```
+
+2. **Follow 7-step decision tree** (above)
+
+3. **Update relevant index files**
+   ```bash
+   vim docs/guides/index.md  # If creating guide
+   vim docs/DOCUMENTATION_MAP.md  # Add to map
+   ```
+
+4. **Cross-reference instead of duplicating**
+   ```markdown
+   See [Topic](canonical/location.md) for details.
+   ```
+
+### Example Workflows
+
+#### Example 1: Starting a New Session
+
+```bash
+# STEP 1: Generate session context (300 tokens)
+./scripts/session_start.sh
+
+# STEP 2: Read compact context
+cat .ai/current-session.md
+
+# STEP 3: (Optional) Create detailed session file
+./scripts/session_start.sh --new-session
+
+# Result: Optimized session start in <5 minutes
+```
+
+**Context cost**: 300 tokens (vs 5,000+ manual approach)
+
+#### Example 2: Completing a Sprint
+
+```bash
+# STEP 1: Update status files
+vim project/status/sprints.md  # Mark sprint complete
+
+# STEP 2: Archive completion document
+# (If you created SPRINT_X_COMPLETE.md)
+./scripts/auto_archive.sh --interactive
+
+# STEP 3: Refresh status overview
+./scripts/update_status.sh
+
+# STEP 4: Commit changes
+git add . && git commit -m "feat: Complete Sprint X"
+
+# Result: Clean workspace, archived completion docs
+```
+
+**Context savings**: ~1,500 tokens from archived docs
+
+#### Example 3: Creating New Guide
+
+```bash
+# STEP 1: Check if canonical location exists
+grep -i "feature name" docs/DOCUMENTATION_MAP.md
+
+# STEP 2: If not found, create guide
+vim docs/guides/NEW_FEATURE_GUIDE.md
+
+# STEP 3: Update index
+vim docs/guides/index.md
+
+# STEP 4: Add to documentation map
+vim docs/DOCUMENTATION_MAP.md
+
+# Result: Properly indexed, discoverable guide
+```
+
+**Best practice**: Link to this guide from related docs, don't duplicate content
+
+---
+
 ## 🔄 Daily Operations
 
 ### Session Start Procedure

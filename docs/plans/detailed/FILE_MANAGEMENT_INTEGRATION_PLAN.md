@@ -303,7 +303,7 @@ Archive Report
 ===============
 Would archive: 3 files
 - SPRINT_5_COMPLETE.md (reason: completion document)
-- VERIFICATION_REPORT.md (reason: 7+ days old)  
+- VERIFICATION_REPORT.md (reason: 7+ days old)
 - OLD_SESSION.md (reason: 60+ days old)
 
 Root directory: 15 → 12 files (-3)

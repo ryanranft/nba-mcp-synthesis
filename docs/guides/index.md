@@ -1,7 +1,7 @@
 # Guides Index
 
 **Purpose**: Navigation hub for all operational guides
-**Total Guides**: 14 files
+**Total Guides**: 18 files
 **Last Updated**: 2025-10-11
 
 ---
