@@ -175,8 +175,88 @@ fi
 
 echo ""
 
-# Check 5: Git commit message
-echo -e "${BLUE}[5/5]${NC} Checking commit message format..."
+# Check 5: File management compliance
+echo -e "${BLUE}[5/8]${NC} Checking file management compliance..."
+
+# Check for archival candidates in root directory
+ROOT_COMPLETION_DOCS=$(find "$PROJECT_ROOT" -maxdepth 1 -name "*_COMPLETE.md" -o -name "*_VERIFICATION*.md" -o -name "*_REPORT.md" 2>/dev/null | wc -l)
+if [[ $ROOT_COMPLETION_DOCS -gt 0 ]]; then
+    check_result "WARN" "Found $ROOT_COMPLETION_DOCS completion document(s) in root - consider archiving"
+    echo "         Run: ./scripts/auto_archive.sh --interactive"
+fi
+
+# Check root directory markdown file count
+ROOT_MD_COUNT=$(ls -1 "$PROJECT_ROOT"/*.md 2>/dev/null | wc -l)
+if [[ $ROOT_MD_COUNT -gt 20 ]]; then
+    check_result "FAIL" "Root directory has $ROOT_MD_COUNT markdown files (target: <20)"
+elif [[ $ROOT_MD_COUNT -gt 15 ]]; then
+    check_result "WARN" "Root directory has $ROOT_MD_COUNT markdown files (target: <15)"
+else
+    check_result "PASS" "Root directory file count: $ROOT_MD_COUNT (target: <15)"
+fi
+
+echo ""
+
+# Check 6: Auto-generated file protection
+echo -e "${BLUE}[6/8]${NC} Checking for edits to auto-generated files..."
+
+AUTO_GENERATED_FILES=(
+    ".ai/current-session.md"
+)
+
+if [[ -n "$STAGED_FILES" ]]; then
+    AUTO_GEN_EDITED=0
+    for auto_file in "${AUTO_GENERATED_FILES[@]}"; do
+        if echo "$STAGED_FILES" | grep -q "^$auto_file$"; then
+            check_result "WARN" "Auto-generated file edited: $auto_file (should use script instead)"
+            echo "         Regenerate with: ./scripts/session_start.sh"
+            AUTO_GEN_EDITED=$((AUTO_GEN_EDITED + 1))
+        fi
+    done
+    
+    if [[ $AUTO_GEN_EDITED -eq 0 ]]; then
+        check_result "PASS" "No auto-generated files edited"
+    fi
+else
+    check_result "PASS" "No auto-generated files to check"
+fi
+
+echo ""
+
+# Check 7: File naming conventions
+echo -e "${BLUE}[7/8]${NC} Checking file naming conventions..."
+
+if [[ -n "$STAGED_FILES" ]]; then
+    BAD_NAMES=0
+    while IFS= read -r file; do
+        filename=$(basename "$file")
+        
+        # Check for generic names (in root only)
+        if [[ "$file" =~ ^[^/]+\.md$ ]]; then
+            if [[ "$filename" =~ ^(NOTES|TEMP|NEW_FILE|TODO)\.md$ ]]; then
+                check_result "WARN" "Generic filename: $file (use descriptive name)"
+                BAD_NAMES=$((BAD_NAMES + 1))
+            fi
+        fi
+        
+        # Check for spaces in filename
+        if [[ "$filename" =~ \  ]]; then
+            check_result "WARN" "Filename contains spaces: $file (use underscores or hyphens)"
+            BAD_NAMES=$((BAD_NAMES + 1))
+        fi
+    done <<< "$STAGED_FILES"
+    
+    if [[ $BAD_NAMES -eq 0 ]]; then
+        check_result "PASS" "All filenames follow conventions"
+    fi
+else
+    check_result "PASS" "No files to check for naming"
+fi
+
+echo ""
+
+# Check 8: Git commit message
+echo -e "${BLUE}[8/8]${NC} Checking commit message format..."
 
 # We can't check the message before it's written, so we'll skip this
 # This would be better as a commit-msg hook
