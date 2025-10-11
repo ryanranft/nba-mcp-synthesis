@@ -321,7 +321,7 @@ $(echo "$RECENT_COMMITS" | head -3)
 ## 📚 Quick Links
 
 - **Full Status**: PROJECT_STATUS.md
-- **Operations**: CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md  
+- **Operations**: CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md
 - **Session Guide**: .ai/index.md
 
 ---
