@@ -341,7 +341,7 @@ if [[ $COMPLETION_DOCS -gt 0 || $DAILY_SESSION_COUNT -gt 7 ]]; then
             ARCHIVABLE_LINES=$((ARCHIVABLE_LINES + FILE_LINES))
         fi
     done
-    
+
     # Count lines in old daily sessions (beyond 7 days)
     if [[ $DAILY_SESSION_COUNT -gt 7 ]]; then
         for file in $(find "$PROJECT_ROOT/.ai/daily" -type f -name "*.md" ! -name "template.md" -mtime +7 2>/dev/null); do
@@ -351,7 +351,7 @@ if [[ $COMPLETION_DOCS -gt 0 || $DAILY_SESSION_COUNT -gt 7 ]]; then
             fi
         done
     fi
-    
+
     ESTIMATED_SAVINGS=$(estimate_tokens $ARCHIVABLE_LINES)
     echo -e "  ${CYAN}💾 Potential savings: ~${ESTIMATED_SAVINGS} tokens (${ARCHIVABLE_LINES} lines)${NC}"
     echo -e "  ${CYAN}   Run: ./scripts/auto_archive.sh --dry-run${NC}"

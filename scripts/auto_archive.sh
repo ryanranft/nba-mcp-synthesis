@@ -191,7 +191,7 @@ archive_file() {
         echo "  Reason: $reason"
         ARCHIVED_COUNT=$((ARCHIVED_COUNT + 1))
         TOTAL_LINES_ARCHIVED=$((TOTAL_LINES_ARCHIVED + line_count))
-        
+
         # Track by reason
         case "$reason" in
             completion) ARCHIVED_BY_REASON_COMPLETION=$((ARCHIVED_BY_REASON_COMPLETION + 1)) ;;
@@ -215,7 +215,7 @@ archive_file() {
     echo -e "${GREEN}✓${NC} Archived: $relative_path → ${dest#$PROJECT_ROOT/} ($line_count lines)"
     ARCHIVED_COUNT=$((ARCHIVED_COUNT + 1))
     TOTAL_LINES_ARCHIVED=$((TOTAL_LINES_ARCHIVED + line_count))
-    
+
     # Track by reason
     case "$reason" in
         completion) ARCHIVED_BY_REASON_COMPLETION=$((ARCHIVED_BY_REASON_COMPLETION + 1)) ;;
@@ -338,7 +338,7 @@ if [[ $DRY_RUN -eq 1 ]]; then
     echo "Total lines: $TOTAL_LINES_ARCHIVED"
     echo "Est. token savings: ~${TOKENS_SAVED}"
     echo ""
-    
+
     if [[ $ARCHIVED_COUNT -gt 0 ]]; then
         echo "Archive breakdown:"
         [[ $ARCHIVED_BY_REASON_COMPLETION -gt 0 ]] && echo "  - Completion documents: $ARCHIVED_BY_REASON_COMPLETION"
@@ -347,7 +347,7 @@ if [[ $DRY_RUN -eq 1 ]]; then
         [[ $ARCHIVED_BY_REASON_AGE -gt 0 ]] && echo "  - Old files (>${AGE_THRESHOLD} days): $ARCHIVED_BY_REASON_AGE"
         echo ""
     fi
-    
+
     echo "To apply changes, run without --dry-run:"
     echo "  $0"
 else
@@ -359,14 +359,14 @@ else
         echo "Total lines archived: $TOTAL_LINES_ARCHIVED"
         echo "Token savings: ~${TOKENS_SAVED}"
         echo ""
-        
+
         echo "Archive breakdown:"
         [[ $ARCHIVED_BY_REASON_COMPLETION -gt 0 ]] && echo "  - Completion documents: $ARCHIVED_BY_REASON_COMPLETION"
         [[ $ARCHIVED_BY_REASON_SESSION -gt 0 ]] && echo "  - Session summaries: $ARCHIVED_BY_REASON_SESSION"
         [[ $ARCHIVED_BY_REASON_VERIFICATION -gt 0 ]] && echo "  - Verification reports: $ARCHIVED_BY_REASON_VERIFICATION"
         [[ $ARCHIVED_BY_REASON_AGE -gt 0 ]] && echo "  - Old files (>${AGE_THRESHOLD} days): $ARCHIVED_BY_REASON_AGE"
         echo ""
-        
+
         echo "Archive location: ${ARCHIVE_BASE#$PROJECT_ROOT/}"
         echo ""
         echo "Next steps:"

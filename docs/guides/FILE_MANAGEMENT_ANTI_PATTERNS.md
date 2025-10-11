@@ -85,7 +85,7 @@ vim project/status/tools.md  # Edit tool registration section
 - Hard to find latest status
 - Breaks canonical location principle
 
-**Token impact**: 
+**Token impact**:
 - Wrong way: 100-500 tokens per standalone file × many files = thousands of tokens
 - Right way: 10 tokens (append) or 50-100 tokens (edit section)
 
@@ -442,7 +442,7 @@ sed -n '145,175p' project/status/tools.md  # Read 30 lines only = 600 tokens
 3. Read section only: `sed -n 'START,ENDp' file.md`
 4. Never read full file unless necessary
 
-**Token impact**: 
+**Token impact**:
 - Reading full 500-line file: ~10,000 tokens
 - Reading 30-line section: ~600 tokens
 - Savings: 94%

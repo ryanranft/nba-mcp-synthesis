@@ -213,7 +213,7 @@ if [[ -n "$STAGED_FILES" ]]; then
             AUTO_GEN_EDITED=$((AUTO_GEN_EDITED + 1))
         fi
     done
-    
+
     if [[ $AUTO_GEN_EDITED -eq 0 ]]; then
         check_result "PASS" "No auto-generated files edited"
     fi
@@ -230,7 +230,7 @@ if [[ -n "$STAGED_FILES" ]]; then
     BAD_NAMES=0
     while IFS= read -r file; do
         filename=$(basename "$file")
-        
+
         # Check for generic names (in root only)
         if [[ "$file" =~ ^[^/]+\.md$ ]]; then
             if [[ "$filename" =~ ^(NOTES|TEMP|NEW_FILE|TODO)\.md$ ]]; then
@@ -238,14 +238,14 @@ if [[ -n "$STAGED_FILES" ]]; then
                 BAD_NAMES=$((BAD_NAMES + 1))
             fi
         fi
-        
+
         # Check for spaces in filename
         if [[ "$filename" =~ \  ]]; then
             check_result "WARN" "Filename contains spaces: $file (use underscores or hyphens)"
             BAD_NAMES=$((BAD_NAMES + 1))
         fi
     done <<< "$STAGED_FILES"
-    
+
     if [[ $BAD_NAMES -eq 0 ]]; then
         check_result "PASS" "All filenames follow conventions"
     fi

@@ -31,7 +31,7 @@
                          │         • .ai/current-session.md → ./scripts/session_start.sh
                          │         • PROJECT_STATUS.md → ./scripts/update_status.sh
                          │         • Test results → Run test script
-                         │         
+                         │
                          │         ❌ NEVER manually edit these files
                          │         ✅ Regenerate with script instead
                          │
@@ -92,7 +92,7 @@
                          │
                          ├─ YES → Append to: project/tracking/progress.log
                          │         Format: "YYYY-MM-DD: Action taken"
-                         │         
+                         │
                          │         ❌ NEVER read this file
                          │         ✅ ONLY append to it
                          │
@@ -154,7 +154,7 @@
                          │
                          ├─ YES → Create in docs/guides/
                          │         Naming: DESCRIPTIVE_TOPIC_GUIDE.md
-                         │         
+                         │
                          │         Required steps:
                          │         1. Create file: vim docs/guides/NEW_TOPIC_GUIDE.md
                          │         2. Update index: vim docs/guides/index.md
@@ -174,7 +174,7 @@
                          │
                          ├─ YES → Archive to: docs/archive/YYYY-MM/
                          │         Method: Use ./scripts/auto_archive.sh
-                         │         
+                         │
                          │         Automatic triggers:
                          │         • Files matching *_COMPLETE.md
                          │         • Files matching *_VERIFICATION*.md

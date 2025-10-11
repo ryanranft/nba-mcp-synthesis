@@ -94,7 +94,7 @@ Is this about...
 **Before creating any file:**
 
 ```
-Step 0: Is this AUTO-GENERATED? 
+Step 0: Is this AUTO-GENERATED?
         YES → Use the script, don't edit manually
         NO  → Continue...
 
