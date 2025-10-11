@@ -97,8 +97,12 @@ great_expectations/uncommitted/data_docs/
 # Exception: Track template.md files for reference
 .ai/daily/*
 !.ai/daily/template.md
+!.ai/daily/index.md
 .ai/monthly/*
 !.ai/monthly/template.md
+!.ai/monthly/index.md
+.ai/monitoring/*
+!.ai/monitoring/README.md
 .ai/archive/
 !.ai/current-session.md
 !.ai/index.md
@@ -407,10 +411,14 @@ context-*
 .context-*
 session_*
 .ai/daily/*
-.ai/monthly/*
-.ai/archive/
 !.ai/daily/template.md
+!.ai/daily/index.md
+.ai/monthly/*
 !.ai/monthly/template.md
+!.ai/monthly/index.md
+.ai/monitoring/*
+!.ai/monitoring/README.md
+.ai/archive/
 !.ai/current-session.md
 !.ai/index.md
 !.ai/permanent/

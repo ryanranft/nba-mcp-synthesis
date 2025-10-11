@@ -54,8 +54,14 @@ project-root/
 │   │   └── template.md           # TRACKED: Monthly template
 │   ├── permanent/                 # TRACKED: Permanent references
 │   │   ├── tool-registry.md      # Searchable tool list
+│   │   ├── phases.md             # Implementation phases
+│   │   ├── file-management-policy.md  # This file
 │   │   ├── context_budget.json   # Budget configuration
-│   │   └── file-management-policy.md  # This file
+│   │   └── template.md           # ADR template
+│   ├── monitoring/                # GITIGNORED: Monitoring data
+│   │   ├── README.md             # TRACKED: Monitoring docs
+│   │   ├── baselines.json        # Context baselines
+│   │   └── file_size_log.txt     # Size tracking
 │   └── archive/                   # GITIGNORED: Historical sessions
 │
 ├── project/                       # Current project status
@@ -296,7 +302,7 @@ Day 0: Create .ai/daily/2025-10-11-session-1.md
 
 Day 7: Session ends, information captured
        Action: Keep in .ai/daily/ (local only)
-       
+
 Day 30: Optional S3 archive
         Action: Upload to S3 if configured
         Local: Delete from .ai/daily/

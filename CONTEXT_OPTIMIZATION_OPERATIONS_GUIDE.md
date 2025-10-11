@@ -35,8 +35,10 @@ Is this information...
 ├─ Permanent reference (tools, decisions, architecture)?
 │  └─> .ai/permanent/ (tracked, searchable)
 │      ├─ tool-registry.md (all MCP tools)
-│      ├─ decisions.md (architecture decisions)
-│      └─ patterns.md (reusable patterns)
+│      ├─ phases.md (implementation phases)
+│      ├─ file-management-policy.md (file policies)
+│      ├─ context_budget.json (budget config)
+│      └─ template.md (ADR template)
 │
 ├─ Current project status?
 │  └─> project/status/ (tracked, current state)

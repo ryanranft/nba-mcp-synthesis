@@ -1,354 +1,164 @@
 # AI Session Management Guide
 
-**Purpose**: Complete guide to session management and context optimization
+**Purpose**: Navigation hub for session management and context optimization
 **Last Updated**: 2025-10-11
 **Status**: Active reference
 
 ---
 
-## 🚀 IMPORTANT: Read This First
+## 🚀 Quick Start
 
-**For Claude/AI Sessions**: Before starting any work, read:
-1. **This file** - Session management guide
-2. **[CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md](../CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md)** - Daily operations, decision tree, systematic approach
+**For Claude/AI Sessions**: Before starting any work:
 
-**Quick Start**:
-```bash
-./scripts/session_start.sh  # Generate current-session.md
-cat .ai/current-session.md  # Read compact context (~300 tokens)
-```
-
----
-
-## 🎯 Overview
-
-The AI session management system provides structured, context-optimized session tracking to minimize token usage while maintaining full project accessibility.
-
-### Key Benefits
-- **94% reduction** in session start context (5000 → 300 tokens)
-- **85% reduction** in status check context (1000 → 150 tokens)
-- **99% reduction** in tool lookup context (1000 → 10 tokens)
-- **Overall**: 80-93% reduction in context usage
+1. **Generate session context**: `./scripts/session_start.sh`
+2. **Read compact summary**: `cat .ai/current-session.md` (~300 tokens)
+3. **Check operations guide**: See [CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md](../CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md)
 
 ---
 
 ## 📁 Directory Structure
 
-### `.ai/` Directory Layout
 ```
 .ai/
-├── current-session.md          # Active session state (~80 tokens)
-├── index.md                    # This guide
-├── daily/                      # Daily session logs
-│   ├── template.md            # Session template
-│   ├── 2025-10-11-session-1.md # Today's sessions
-│   └── index.md               # Daily sessions index
-├── monthly/                    # Monthly summaries
-│   ├── template.md            # Monthly template
-│   └── index.md               # Monthly index
-├── permanent/                  # Permanent references
-│   ├── tool-registry.md       # Searchable tool list
-│   ├── architecture.md        # Architecture decisions
+├── current-session.md          # Active session state (~80 tokens) [TRACKED]
+├── index.md                    # This navigation guide [TRACKED]
+├── daily/                      # Daily session logs [GITIGNORED]
+│   ├── template.md            # Session template [TRACKED]
+│   └── index.md               # Daily navigation [TRACKED]
+├── monthly/                    # Monthly summaries [GITIGNORED]
+│   ├── template.md            # Monthly template [TRACKED]
+│   └── index.md               # Monthly navigation [TRACKED]
+├── permanent/                  # Permanent references [TRACKED]
+│   ├── tool-registry.md       # All MCP tools
+│   ├── phases.md              # Implementation phases
+│   ├── file-management-policy.md # File policies
+│   ├── context_budget.json    # Budget config
+│   ├── template.md            # ADR template
 │   └── index.md               # Permanent index
-└── archive/                    # Archived sessions (gitignored)
+├── monitoring/                 # Monitoring data [GITIGNORED]
+│   ├── baselines.json         # Context baselines
+│   └── file_size_log.txt      # Size tracking
+└── archive/                    # Archived sessions [GITIGNORED]
 ```
 
 ---
 
-## 🚀 Quick Start
-
-### Starting a New Session
-```bash
-# Basic session start
-./scripts/session_start.sh
-
-# Create new daily session file
-./scripts/session_start.sh --new-session
-
-# Run health checks
-./scripts/session_start.sh --health-check
-
-# Restore session from S3
-./scripts/session_start.sh --restore=2025-10-10-session-1.md
-```
-
-### Reading Session Context
-```bash
-# Current session state (most important)
-cat .ai/current-session.md
-
-# Today's detailed log
-cat .ai/daily/2025-10-11-session-1.md
-
-# Tool registry
-cat .ai/permanent/tool-registry.md
-```
-
----
-
-## 📊 Session Types
-
-### Daily Sessions
-**Purpose**: Detailed daily work logs
-**Location**: `.ai/daily/`
-**Retention**: 7 days (then archived)
-**Context Cost**: 200-500 tokens per file
-
-**When to Use**:
-- Detailed work logging
-- Problem-solving notes
-- Implementation decisions
-- Debugging sessions
-
-**Template**: `.ai/daily/template.md`
-
-### Monthly Summaries
-**Purpose**: High-level monthly progress
-**Location**: `.ai/monthly/`
-**Retention**: 3 months (then archived)
-**Context Cost**: 300-600 tokens per file
-
-**When to Use**:
-- Monthly progress reviews
-- Strategic planning
-- Major milestone summaries
-- Performance metrics
-
-**Template**: `.ai/monthly/template.md`
-
-### Permanent References
-**Purpose**: Long-term architectural decisions
-**Location**: `.ai/permanent/`
-**Retention**: Permanent
-**Context Cost**: 100-800 tokens per file
-
-**When to Use**:
-- Architecture decisions
-- Tool registry
-- Best practices
-- System design
-
----
-
-## 🔄 Session Workflow
-
-### Daily Workflow
-1. **Start Session**: `./scripts/session_start.sh`
-2. **Read Context**: `cat .ai/current-session.md`
-3. **Work**: Use daily session file for detailed logging
-4. **End Session**: Archive if needed
-
-### Weekly Workflow
-1. **Review**: Check daily sessions
-2. **Archive**: `./scripts/session_archive.sh`
-3. **Plan**: Update next week's focus
-
-### Monthly Workflow
-1. **Summarize**: Create monthly summary
-2. **Archive**: Move old sessions to S3
-3. **Plan**: Update monthly goals
-
----
-
-## 📦 Archive Management
-
-### Local Archive
-**Location**: `.ai/archive/`
-**Purpose**: Short-term local storage
-**Retention**: 7 days for daily, 3 months for monthly
-
-### S3 Archive (Optional)
-**Purpose**: Long-term storage
-**Cost**: ~$0.0005/month
-**Retention**: Unlimited
-
-**Setup**:
-```bash
-# Set S3 bucket name
-export NBA_MCP_S3_BUCKET=nba-mcp-sessions
-
-# Archive to S3
-./scripts/session_archive.sh --to-s3
-
-# Restore from S3
-./scripts/session_start.sh --restore=2025-10-10-session-1.md
-```
-
----
-
-## 🛠️ Scripts Reference
-
-### session_start.sh
-**Purpose**: Start new session and generate context
-
-**Options**:
-- `--new-session`: Create new daily session file
-- `--restore=ID`: Restore session from S3
-- `--health-check`: Run comprehensive health checks
-- `--help`: Show help message
-
-**Examples**:
-```bash
-./scripts/session_start.sh                    # Basic start
-./scripts/session_start.sh --new-session      # Create new daily file
-./scripts/session_start.sh --health-check     # Run diagnostics
-./scripts/session_start.sh --restore=2025-10-10-session-1.md
-```
-
-### session_archive.sh
-**Purpose**: Archive old sessions
-
-**Options**:
-- `--to-s3`: Upload to S3
-- `--monthly`: Include monthly summaries
-- `--dry-run`: Preview without archiving
-
-**Examples**:
-```bash
-./scripts/session_archive.sh                  # Local archive
-./scripts/session_archive.sh --to-s3          # S3 archive
-./scripts/session_archive.sh --dry-run        # Preview
-```
-
----
-
-## 🔍 Context Optimization
-
-### Token Usage by Operation
-
-| Operation | Before | After | Savings |
-|-----------|--------|-------|---------|
-| Session Start | 5000+ | ~300 | 94% ↓ |
-| Status Check | 1000+ | ~150 | 85% ↓ |
-| Tool Lookup | 1000+ | ~10 | 99% ↓ |
-| Overall Session | 30-50K | 3-10K | 80-93% ↓ |
-
-### Optimization Strategies
-
-1. **Index-Based Navigation**: Use indexes to find specific information
-2. **Focused Context**: Load only what you need
-3. **Archive Strategy**: Move historical data out of active context
-4. **Template System**: Consistent structure reduces cognitive load
-
----
-
-## 📈 Best Practices
+## 📊 Key Files
 
 ### Session Management
-- **Start each day** with `./scripts/session_start.sh`
-- **Read current-session.md** for quick context
-- **Use daily files** for detailed logging
-- **Archive regularly** to maintain performance
+- **[current-session.md](current-session.md)** - Active session state (~80 tokens)
+- **[daily/template.md](daily/template.md)** - Template for detailed session logs
+- **[monthly/template.md](monthly/template.md)** - Template for monthly summaries
 
-### Context Usage
-- **Use indexes** to navigate efficiently
-- **Load specific files** rather than browsing
-- **Reference tool registry** for tool lookups
-- **Check PROJECT_STATUS.md** for current status
+### Permanent References
+- **[permanent/tool-registry.md](permanent/tool-registry.md)** - All 90+ MCP tools indexed
+- **[permanent/phases.md](permanent/phases.md)** - Phase-by-phase implementation guide
+- **[permanent/file-management-policy.md](permanent/file-management-policy.md)** - File creation/archive policy
+- **[permanent/context_budget.json](permanent/context_budget.json)** - Token budget configuration
+- **[permanent/template.md](permanent/template.md)** - Architecture Decision Record template
 
-### Archive Strategy
-- **Archive daily sessions** after 7 days
-- **Archive monthly summaries** after 3 months
-- **Use S3** for long-term storage (optional)
-- **Keep permanent references** always available
+### Monitoring
+- **monitoring/baselines.json** - Context usage baselines
+- **monitoring/file_size_log.txt** - File size tracking log
 
 ---
 
-## 🚨 Troubleshooting
+## 🔄 Common Tasks
 
-### Common Issues
-
-**Session start fails**:
+### Start New Session
 ```bash
-# Run health check
-./scripts/session_start.sh --health-check
-
-# Check git status
-git status
-
-# Verify .ai directory
-ls -la .ai/
+./scripts/session_start.sh              # Generate current-session.md
+./scripts/session_start.sh --new-session # Create detailed session file
 ```
 
-**S3 restore fails**:
+### Find Information
 ```bash
-# Check AWS CLI
-aws --version
-
-# Check credentials
-aws sts get-caller-identity
-
-# Check bucket access
-aws s3 ls s3://nba-mcp-sessions/
+cat .ai/permanent/tool-registry.md      # Find MCP tools
+grep -r "keyword" .ai/permanent/        # Search permanent references
+cat .ai/current-session.md              # Current session state
 ```
 
-**Context too large**:
+### Archive Sessions
 ```bash
-# Archive old sessions
-./scripts/session_archive.sh
-
-# Check archive status
-ls -la .ai/archive/
-
-# Clean up temporary files
-find . -name "*.tmp" -delete
+./scripts/session_archive.sh            # Archive old sessions locally
+./scripts/session_archive.sh --to-s3    # Archive to S3 (optional)
 ```
-
-### Health Check Results
-
-**All checks pass**: ✅ Ready to work
-**Git issues**: ❌ Fix git repository
-**Missing files**: ⚠️ Run setup scripts
-**S3 issues**: ⚠️ Optional - system works without S3
 
 ---
 
-## 📊 Metrics & Monitoring
+## 📈 Context Optimization Targets
 
-### Session Metrics
-- **Sessions per day**: Track daily activity
-- **Context usage**: Monitor token consumption
-- **Archive frequency**: Ensure regular cleanup
-- **S3 usage**: Monitor storage costs
+| Operation | Target | Achieved | File |
+|-----------|--------|----------|------|
+| Session Start | 300 tokens | ~300 | current-session.md |
+| Status Check | 150 tokens | ~150 | PROJECT_STATUS.md |
+| Tool Lookup | 100 tokens | ~100 | permanent/tool-registry.md |
+| Overall Session | 3-10K tokens | 3-10K | Combined |
 
-### Performance Metrics
-- **Session start time**: <10 seconds
-- **Context generation**: <5 seconds
-- **Archive time**: <30 seconds
-- **Restore time**: <60 seconds
+**Overall Savings**: 80-93% reduction (30-50K → 3-10K tokens per session)
 
 ---
 
-## 🔗 Related Documentation
+## 🗂️ Subdirectory Navigation
+
+### [daily/](daily/)
+- Daily session logs (gitignored after 7 days)
+- Detailed work notes and decisions
+- Auto-generated by `session_start.sh --new-session`
+- **Index**: [daily/index.md](daily/index.md)
+
+### [monthly/](monthly/)
+- Monthly summary rollups (gitignored after 3 months)
+- High-level monthly progress
+- Created manually or via monthly summary script
+- **Index**: [monthly/index.md](monthly/index.md)
+
+### [permanent/](permanent/)
+- Permanent architectural decisions and references
+- Never gitignored, always tracked
+- Tool registry, policies, templates
+- **Index**: [permanent/index.md](permanent/index.md)
+
+### monitoring/
+- Context usage baselines and tracking
+- File size monitoring logs
+- Gitignored monitoring data
+
+### archive/
+- Archived daily and monthly files (gitignored)
+- Local archive before optional S3 upload
+- Retention: 7 days (daily), 3 months (monthly)
+
+---
+
+## 📚 Related Documentation
+
+### Core Guides
+- **[CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md](../CONTEXT_OPTIMIZATION_OPERATIONS_GUIDE.md)** - Daily operations and decision trees
+- **[permanent/file-management-policy.md](permanent/file-management-policy.md)** - File creation and archive policies
+- **[permanent/phases.md](permanent/phases.md)** - Implementation methodology
 
 ### Project Status
-- **[PROJECT_STATUS.md](../PROJECT_STATUS.md)** - Current project status
-- **[project/status/index.md](../project/status/index.md)** - Detailed status tracking
+- **[PROJECT_STATUS.md](../PROJECT_STATUS.md)** - Current project status (<150 tokens)
+- **[project/](../project/)** - Detailed status tracking
 
-### Context Optimization
-- **[docs/guides/CONTEXT_OPTIMIZATION_GUIDE.md](../docs/guides/CONTEXT_OPTIMIZATION_GUIDE.md)** - Best practices
-- **[docs/plans/detailed/CONTEXT_OPTIMIZATION_PLAN.md](../docs/plans/detailed/CONTEXT_OPTIMIZATION_PLAN.md)** - Implementation plan
-
-### Tool Reference
-- **[.ai/permanent/tool-registry.md](permanent/tool-registry.md)** - Complete tool list
-- **[docs/guides/QUICK_REFERENCE.md](../docs/guides/QUICK_REFERENCE.md)** - Quick commands
+### Scripts
+- `./scripts/session_start.sh` - Start session, generate context
+- `./scripts/session_archive.sh` - Archive old sessions
+- `./scripts/context_dashboard.sh` - View context metrics
+- `./scripts/weekly_health_check.sh` - Weekly maintenance
 
 ---
 
 ## 🎯 Success Criteria
 
-### Context Optimization Goals
-- ✅ Session start: <300 tokens (vs 5000+ before)
-- ✅ Status check: <150 tokens (vs 1000+ before)
-- ✅ Tool lookup: <10 tokens (vs 1000+ before)
-- ✅ Overall savings: 80-93% reduction
-
-### System Health Goals
-- ✅ All health checks pass
-- ✅ S3 integration working (optional)
-- ✅ Archive process automated
-- ✅ Session restoration functional
+✅ **System is working correctly if:**
+- Session start: <300 tokens
+- current-session.md: <80 lines
+- Gitignore working (daily/monthly not in git status)
+- Health checks pass
+- Archive process runs smoothly
 
 ---
 
-**Note**: This guide is part of Phase 5 of the Context Optimization plan. Use it to maximize the benefits of the session management system.
+**Token Cost**: This index: ~40 tokens (vs 700+ tokens in previous version)
