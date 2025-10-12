@@ -1,364 +1,457 @@
-"""Feature Store - BOOK RECOMMENDATION 4"""
-import pandas as pd
-from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
-import logging
-from mcp_server.database import get_database_engine
+"""
+Feature Store Module
+Centralized repository for reusable ML features with versioning.
+"""
 
+import logging
+from typing import Dict, Optional, Any, List
+from datetime import datetime
+from dataclasses import dataclass, field
+import json
+from pathlib import Path
+import hashlib
+
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+@dataclass
+class FeatureDefinition:
+    """Definition of a feature"""
+    feature_id: str
+    name: str
+    description: str
+    data_type: str  # "int", "float", "string", "boolean", "array"
+    source_table: Optional[str] = None
+    transformation: Optional[str] = None
+    created_at: datetime = field(default_factory=datetime.utcnow)
+    created_by: str = "system"
+    version: str = "1.0.0"
+    tags: Dict[str, str] = field(default_factory=dict)
+
+
+@dataclass
+class FeatureSet:
+    """Collection of related features"""
+    feature_set_id: str
+    name: str
+    description: str
+    features: List[str]  # Feature IDs
+    created_at: datetime
+    created_by: str
+    version: str
+    tags: Dict[str, str] = field(default_factory=dict)
+
+
 class FeatureStore:
-    """Centralized feature storage and serving"""
-
-    def __init__(self):
-        """Initialize feature store"""
-        self.engine = None
-        self.feature_registry = {}
-
-    def init_engine(self):
-        """Initialize database engine"""
-        if not self.engine:
-            self.engine = get_database_engine()
-
+    """Centralized feature store"""
+    
+    def __init__(self, store_path: str = "./feature_store"):
+        """
+        Initialize feature store.
+        
+        Args:
+            store_path: Path to feature store storage
+        """
+        self.store_path = Path(store_path)
+        self.store_path.mkdir(parents=True, exist_ok=True)
+        
+        self.features: Dict[str, FeatureDefinition] = {}
+        self.feature_sets: Dict[str, FeatureSet] = {}
+        self.feature_values: Dict[str, Dict[str, Any]] = {}  # {entity_id: {feature_id: value}}
+        
+        self._load_store()
+    
+    def _load_store(self):
+        """Load feature store from disk"""
+        features_file = self.store_path / "features.json"
+        if features_file.exists():
+            with open(features_file, 'r') as f:
+                data = json.load(f)
+                for feat_id, feat_data in data.items():
+                    self.features[feat_id] = FeatureDefinition(
+                        feature_id=feat_data["feature_id"],
+                        name=feat_data["name"],
+                        description=feat_data["description"],
+                        data_type=feat_data["data_type"],
+                        source_table=feat_data.get("source_table"),
+                        transformation=feat_data.get("transformation"),
+                        created_at=datetime.fromisoformat(feat_data["created_at"]),
+                        created_by=feat_data["created_by"],
+                        version=feat_data["version"],
+                        tags=feat_data.get("tags", {})
+                    )
+            logger.info(f"Loaded {len(self.features)} features from store")
+    
+    def _save_store(self):
+        """Save feature store to disk"""
+        features_file = self.store_path / "features.json"
+        data = {}
+        for feat_id, feat in self.features.items():
+            data[feat_id] = {
+                "feature_id": feat.feature_id,
+                "name": feat.name,
+                "description": feat.description,
+                "data_type": feat.data_type,
+                "source_table": feat.source_table,
+                "transformation": feat.transformation,
+                "created_at": feat.created_at.isoformat(),
+                "created_by": feat.created_by,
+                "version": feat.version,
+                "tags": feat.tags
+            }
+        
+        with open(features_file, 'w') as f:
+            json.dump(data, f, indent=2)
+        
+        logger.debug(f"Saved {len(self.features)} features to store")
+    
     def register_feature(
         self,
+        feature_id: str,
         name: str,
         description: str,
-        entity_type: str,
-        value_type: str,
-        tags: Optional[List[str]] = None
-    ):
+        data_type: str,
+        source_table: Optional[str] = None,
+        transformation: Optional[str] = None,
+        created_by: str = "system",
+        tags: Optional[Dict[str, str]] = None
+    ) -> FeatureDefinition:
         """
-        Register a feature in the feature store
-
+        Register a new feature.
+        
         Args:
+            feature_id: Unique feature identifier
             name: Feature name
             description: Feature description
-            entity_type: Entity type (player, team, game)
-            value_type: Value type (float, int, string)
-            tags: Optional tags for categorization
+            data_type: Data type
+            source_table: Source table
+            transformation: Transformation logic
+            created_by: Creator
+            tags: Custom tags
+            
+        Returns:
+            FeatureDefinition object
         """
-        self.feature_registry[name] = {
-            "name": name,
-            "description": description,
-            "entity_type": entity_type,
-            "value_type": value_type,
-            "tags": tags or [],
-            "created_at": datetime.utcnow().isoformat()
+        feature = FeatureDefinition(
+            feature_id=feature_id,
+            name=name,
+            description=description,
+            data_type=data_type,
+            source_table=source_table,
+            transformation=transformation,
+            created_by=created_by,
+            tags=tags or {}
+        )
+        
+        self.features[feature_id] = feature
+        self._save_store()
+        
+        logger.info(f"Registered feature: {feature_id} ({name})")
+        
+        return feature
+    
+    def create_feature_set(
+        self,
+        feature_set_id: str,
+        name: str,
+        description: str,
+        feature_ids: List[str],
+        created_by: str = "system",
+        tags: Optional[Dict[str, str]] = None
+    ) -> FeatureSet:
+        """
+        Create a feature set.
+        
+        Args:
+            feature_set_id: Feature set identifier
+            name: Feature set name
+            description: Description
+            feature_ids: List of feature IDs
+            created_by: Creator
+            tags: Custom tags
+            
+        Returns:
+            FeatureSet object
+        """
+        # Validate features exist
+        for feat_id in feature_ids:
+            if feat_id not in self.features:
+                raise ValueError(f"Feature {feat_id} not found")
+        
+        feature_set = FeatureSet(
+            feature_set_id=feature_set_id,
+            name=name,
+            description=description,
+            features=feature_ids,
+            created_at=datetime.utcnow(),
+            created_by=created_by,
+            version="1.0.0",
+            tags=tags or {}
+        )
+        
+        self.feature_sets[feature_set_id] = feature_set
+        
+        logger.info(
+            f"Created feature set: {feature_set_id} with {len(feature_ids)} features"
+        )
+        
+        return feature_set
+    
+    def write_features(
+        self,
+        entity_id: str,
+        features: Dict[str, Any]
+    ):
+        """
+        Write feature values for an entity.
+        
+        Args:
+            entity_id: Entity identifier (e.g., player_id, game_id)
+            features: Dictionary of {feature_id: value}
+        """
+        # Validate features
+        for feat_id in features:
+            if feat_id not in self.features:
+                logger.warning(f"Feature {feat_id} not registered, skipping")
+                continue
+        
+        if entity_id not in self.feature_values:
+            self.feature_values[entity_id] = {}
+        
+        self.feature_values[entity_id].update(features)
+        
+        logger.debug(f"Wrote {len(features)} features for entity {entity_id}")
+    
+    def read_features(
+        self,
+        entity_ids: List[str],
+        feature_ids: Optional[List[str]] = None
+    ) -> Dict[str, Dict[str, Any]]:
+        """
+        Read features for entities.
+        
+        Args:
+            entity_ids: List of entity identifiers
+            feature_ids: Optional list of specific features (None for all)
+            
+        Returns:
+            Dictionary of {entity_id: {feature_id: value}}
+        """
+        result = {}
+        
+        for entity_id in entity_ids:
+            if entity_id not in self.feature_values:
+                result[entity_id] = {}
+                continue
+            
+            entity_features = self.feature_values[entity_id]
+            
+            if feature_ids:
+                # Filter to requested features
+                result[entity_id] = {
+                    feat_id: entity_features.get(feat_id)
+                    for feat_id in feature_ids
+                    if feat_id in entity_features
+                }
+            else:
+                # Return all features
+                result[entity_id] = entity_features.copy()
+        
+        return result
+    
+    def read_feature_set(
+        self,
+        entity_ids: List[str],
+        feature_set_id: str
+    ) -> Dict[str, Dict[str, Any]]:
+        """
+        Read a feature set for entities.
+        
+        Args:
+            entity_ids: List of entity identifiers
+            feature_set_id: Feature set identifier
+            
+        Returns:
+            Dictionary of {entity_id: {feature_id: value}}
+        """
+        feature_set = self.feature_sets.get(feature_set_id)
+        if not feature_set:
+            raise ValueError(f"Feature set {feature_set_id} not found")
+        
+        return self.read_features(entity_ids, feature_set.features)
+    
+    def search_features(
+        self,
+        name_pattern: Optional[str] = None,
+        data_type: Optional[str] = None,
+        tags: Optional[Dict[str, str]] = None
+    ) -> List[FeatureDefinition]:
+        """
+        Search for features.
+        
+        Args:
+            name_pattern: Name pattern to match
+            data_type: Filter by data type
+            tags: Filter by tags
+            
+        Returns:
+            List of matching FeatureDefinition objects
+        """
+        results = []
+        
+        for feat in self.features.values():
+            # Apply filters
+            if name_pattern and name_pattern.lower() not in feat.name.lower():
+                continue
+            if data_type and feat.data_type != data_type:
+                continue
+            if tags:
+                if not all(feat.tags.get(k) == v for k, v in tags.items()):
+                    continue
+            
+            results.append(feat)
+        
+        return results
+    
+    def get_feature_stats(self) -> Dict[str, Any]:
+        """Get feature store statistics"""
+        type_counts = {}
+        for feat in self.features.values():
+            type_counts[feat.data_type] = type_counts.get(feat.data_type, 0) + 1
+        
+        return {
+            "total_features": len(self.features),
+            "total_feature_sets": len(self.feature_sets),
+            "total_entities": len(self.feature_values),
+            "by_data_type": type_counts
         }
-
-        logger.info(f"✅ Registered feature: {name} ({entity_type})")
-
-    def store_features(
-        self,
-        entity_id: str,
-        entity_type: str,
-        features: Dict[str, Any],
-        timestamp: Optional[datetime] = None
-    ):
-        """
-        Store features for an entity
-
-        Args:
-            entity_id: Entity identifier
-            entity_type: Entity type
-            features: Dictionary of feature name -> value
-            timestamp: Optional timestamp (defaults to now)
-        """
-        self.init_engine()
-
-        timestamp = timestamp or datetime.utcnow()
-
-        # Store in database
-        from sqlalchemy import text
-
-        with self.engine.begin() as conn:
-            for feature_name, value in features.items():
-                query = text("""
-                    INSERT INTO feature_store (
-                        entity_id, entity_type, feature_name, feature_value, timestamp
-                    ) VALUES (
-                        :entity_id, :entity_type, :feature_name, :feature_value, :timestamp
-                    )
-                    ON CONFLICT (entity_id, entity_type, feature_name, timestamp)
-                    DO UPDATE SET feature_value = EXCLUDED.feature_value
-                """)
-
-                conn.execute(query, {
-                    "entity_id": entity_id,
-                    "entity_type": entity_type,
-                    "feature_name": feature_name,
-                    "feature_value": str(value),
-                    "timestamp": timestamp
-                })
-
-        logger.debug(f"✅ Stored {len(features)} features for {entity_type} {entity_id}")
-
-    def get_features(
-        self,
-        entity_id: str,
-        entity_type: str,
-        feature_names: Optional[List[str]] = None,
-        as_of: Optional[datetime] = None
-    ) -> Dict[str, Any]:
-        """
-        Retrieve features for an entity
-
-        Args:
-            entity_id: Entity identifier
-            entity_type: Entity type
-            feature_names: Optional list of specific features
-            as_of: Optional point-in-time lookup
-
-        Returns:
-            Dictionary of feature name -> value
-        """
-        self.init_engine()
-
-        as_of = as_of or datetime.utcnow()
-
-        from sqlalchemy import text
-
-        query = text("""
-            WITH latest_features AS (
-                SELECT
-                    feature_name,
-                    feature_value,
-                    timestamp,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY feature_name
-                        ORDER BY timestamp DESC
-                    ) as rn
-                FROM feature_store
-                WHERE entity_id = :entity_id
-                  AND entity_type = :entity_type
-                  AND timestamp <= :as_of
-                  AND (:feature_names IS NULL OR feature_name = ANY(:feature_names))
-            )
-            SELECT feature_name, feature_value
-            FROM latest_features
-            WHERE rn = 1
-        """)
-
-        with self.engine.connect() as conn:
-            result = conn.execute(query, {
-                "entity_id": entity_id,
-                "entity_type": entity_type,
-                "as_of": as_of,
-                "feature_names": feature_names
-            })
-
-            features = {row["feature_name"]: row["feature_value"] for row in result}
-
-        logger.debug(f"✅ Retrieved {len(features)} features for {entity_type} {entity_id}")
-        return features
-
-    def get_feature_history(
-        self,
-        entity_id: str,
-        entity_type: str,
-        feature_name: str,
-        start_date: datetime,
-        end_date: Optional[datetime] = None
-    ) -> pd.DataFrame:
-        """
-        Get historical values for a feature
-
-        Args:
-            entity_id: Entity identifier
-            entity_type: Entity type
-            feature_name: Feature name
-            start_date: Start date
-            end_date: End date (defaults to now)
-
-        Returns:
-            DataFrame with timestamp and feature_value columns
-        """
-        self.init_engine()
-
-        end_date = end_date or datetime.utcnow()
-
-        from sqlalchemy import text
-
-        query = text("""
-            SELECT timestamp, feature_value
-            FROM feature_store
-            WHERE entity_id = :entity_id
-              AND entity_type = :entity_type
-              AND feature_name = :feature_name
-              AND timestamp BETWEEN :start_date AND :end_date
-            ORDER BY timestamp
-        """)
-
-        df = pd.read_sql(query, self.engine, params={
-            "entity_id": entity_id,
-            "entity_type": entity_type,
-            "feature_name": feature_name,
-            "start_date": start_date,
-            "end_date": end_date
-        })
-
-        logger.debug(f"✅ Retrieved {len(df)} historical values for {feature_name}")
-        return df
-
-    def compute_and_store_feature(
-        self,
-        entity_id: str,
-        entity_type: str,
-        feature_name: str,
-        compute_func: callable
-    ):
-        """
-        Compute a feature on-demand and store it
-
-        Args:
-            entity_id: Entity identifier
-            entity_type: Entity type
-            feature_name: Feature name
-            compute_func: Function to compute feature value
-        """
-        # Compute feature value
-        value = compute_func(entity_id, entity_type)
-
-        # Store in feature store
-        self.store_features(entity_id, entity_type, {feature_name: value})
-
-        logger.info(f"✅ Computed and stored {feature_name} for {entity_type} {entity_id}")
-        return value
-
-    def list_features(self, entity_type: Optional[str] = None) -> List[Dict]:
-        """
-        List all registered features
-
-        Args:
-            entity_type: Optional filter by entity type
-
-        Returns:
-            List of feature metadata
-        """
-        features = list(self.feature_registry.values())
-
-        if entity_type:
-            features = [f for f in features if f["entity_type"] == entity_type]
-
-        return features
-
-    def search_features(self, query: str) -> List[Dict]:
-        """
-        Search features by name or description
-
-        Args:
-            query: Search query
-
-        Returns:
-            Matching features
-        """
-        query_lower = query.lower()
-
-        matches = []
-        for feature in self.feature_registry.values():
-            if (query_lower in feature["name"].lower() or
-                query_lower in feature["description"].lower() or
-                any(query_lower in tag.lower() for tag in feature["tags"])):
-                matches.append(feature)
-
-        return matches
-
-
-# Global feature store
-_feature_store = None
-
-
-def get_feature_store() -> FeatureStore:
-    """Get global feature store"""
-    global _feature_store
-    if _feature_store is None:
-        _feature_store = FeatureStore()
-    return _feature_store
-
-
-# Register common NBA features
-def register_nba_features():
-    """Register common NBA features"""
-    store = get_feature_store()
-
-    # Player features
-    store.register_feature(
-        "points_per_game",
-        "Average points per game over last 10 games",
-        "player",
-        "float",
-        ["offense", "scoring"]
-    )
-
-    store.register_feature(
-        "assists_per_game",
-        "Average assists per game over last 10 games",
-        "player",
-        "float",
-        ["offense", "playmaking"]
-    )
-
-    store.register_feature(
-        "rebounds_per_game",
-        "Average rebounds per game over last 10 games",
-        "player",
-        "float",
-        ["defense", "rebounding"]
-    )
-
-    store.register_feature(
-        "player_efficiency_rating",
-        "PER calculated over season",
-        "player",
-        "float",
-        ["advanced", "efficiency"]
-    )
-
-    # Team features
-    store.register_feature(
-        "win_percentage",
-        "Team win percentage over season",
-        "team",
-        "float",
-        ["team", "performance"]
-    )
-
-    store.register_feature(
-        "offensive_rating",
-        "Points per 100 possessions",
-        "team",
-        "float",
-        ["team", "offense"]
-    )
-
-    logger.info("✅ Registered standard NBA features")
 
 
 # Example usage
 if __name__ == "__main__":
-    # Initialize and register features
-    register_nba_features()
-
-    store = get_feature_store()
-
-    # Store features
-    store.store_features(
+    print("=" * 80)
+    print("FEATURE STORE DEMO")
+    print("=" * 80)
+    
+    store = FeatureStore(store_path="./demo_feature_store")
+    
+    # Register features
+    print("\n" + "=" * 80)
+    print("REGISTERING FEATURES")
+    print("=" * 80)
+    
+    store.register_feature(
+        feature_id="player_ppg",
+        name="Points Per Game",
+        description="Average points scored per game",
+        data_type="float",
+        source_table="player_stats",
+        transformation="AVG(points)",
+        tags={"category": "scoring"}
+    )
+    
+    store.register_feature(
+        feature_id="player_apg",
+        name="Assists Per Game",
+        description="Average assists per game",
+        data_type="float",
+        source_table="player_stats",
+        transformation="AVG(assists)",
+        tags={"category": "playmaking"}
+    )
+    
+    store.register_feature(
+        feature_id="player_rpg",
+        name="Rebounds Per Game",
+        description="Average rebounds per game",
+        data_type="float",
+        source_table="player_stats",
+        transformation="AVG(rebounds)",
+        tags={"category": "rebounding"}
+    )
+    
+    print("✅ Registered 3 features")
+    
+    # Create feature set
+    print("\n" + "=" * 80)
+    print("CREATING FEATURE SET")
+    print("=" * 80)
+    
+    store.create_feature_set(
+        feature_set_id="player_basic_stats",
+        name="Player Basic Stats",
+        description="Basic player performance statistics",
+        feature_ids=["player_ppg", "player_apg", "player_rpg"],
+        tags={"category": "basic_stats"}
+    )
+    
+    print("✅ Created feature set with 3 features")
+    
+    # Write feature values
+    print("\n" + "=" * 80)
+    print("WRITING FEATURE VALUES")
+    print("=" * 80)
+    
+    store.write_features(
         entity_id="player_123",
-        entity_type="player",
         features={
-            "points_per_game": 25.3,
-            "assists_per_game": 7.2,
-            "rebounds_per_game": 8.1
+            "player_ppg": 25.3,
+            "player_apg": 8.1,
+            "player_rpg": 7.4
         }
     )
-
-    # Retrieve features
-    features = store.get_features("player_123", "player")
-    print(f"Features: {features}")
-
+    
+    store.write_features(
+        entity_id="player_456",
+        features={
+            "player_ppg": 18.7,
+            "player_apg": 3.2,
+            "player_rpg": 9.5
+        }
+    )
+    
+    print("✅ Wrote features for 2 players")
+    
+    # Read features
+    print("\n" + "=" * 80)
+    print("READING FEATURES")
+    print("=" * 80)
+    
+    features = store.read_feature_set(
+        entity_ids=["player_123", "player_456"],
+        feature_set_id="player_basic_stats"
+    )
+    
+    for entity_id, feats in features.items():
+        print(f"\n{entity_id}:")
+        for feat_id, value in feats.items():
+            feat_def = store.features[feat_id]
+            print(f"  - {feat_def.name}: {value}")
+    
     # Search features
-    results = store.search_features("points")
-    print(f"Found {len(results)} features matching 'points'")
-
+    print("\n" + "=" * 80)
+    print("SEARCHING FEATURES")
+    print("=" * 80)
+    
+    results = store.search_features(name_pattern="per game", data_type="float")
+    print(f"\nFound {len(results)} features (name contains 'per game', type=float):")
+    for feat in results:
+        print(f"  - {feat.name} ({feat.feature_id})")
+    
+    # Feature stats
+    print("\n" + "=" * 80)
+    print("FEATURE STORE STATISTICS")
+    print("=" * 80)
+    
+    stats = store.get_feature_stats()
+    print(f"\nTotal Features: {stats['total_features']}")
+    print(f"Total Feature Sets: {stats['total_feature_sets']}")
+    print(f"Total Entities: {stats['total_entities']}")
+    print(f"\nBy Data Type:")
+    for dtype, count in stats['by_data_type'].items():
+        print(f"  - {dtype}: {count}")
+    
+    print("\n" + "=" * 80)
+    print("Feature Store Demo Complete!")
+    print("=" * 80)
