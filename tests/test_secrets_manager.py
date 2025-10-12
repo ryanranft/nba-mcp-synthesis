@@ -185,12 +185,10 @@ class TestHelperFunctions:
 
     def test_get_s3_bucket_secrets_manager_mode(self):
         """Test get_s3_bucket with Secrets Manager"""
-        mock_client = MagicMock()
-        mock_client.get_secret_value.return_value = {
-            'SecretString': '{"bucket": "aws-bucket"}'
-        }
+        mock_sm = MagicMock()
+        mock_sm.get_s3_config.return_value = {'bucket': 'aws-bucket'}
 
-        with patch('boto3.client', return_value=mock_client):
+        with patch('mcp_server.secrets_manager.get_secrets_manager', return_value=mock_sm):
             with patch.dict(os.environ, {'USE_LOCAL_CREDENTIALS': 'false'}):
                 bucket = get_s3_bucket()
                 assert bucket == 'aws-bucket'
