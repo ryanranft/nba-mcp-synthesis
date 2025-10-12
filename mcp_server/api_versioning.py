@@ -55,7 +55,7 @@ class APIVersion:
     changelog: List[str] = field(default_factory=list)
     breaking_changes: List[str] = field(default_factory=list)
     migration_guide_url: Optional[str] = None
-    
+
     def is_active(self) -> bool:
         """Check if version is active"""
         if self.status == VersionStatus.SUNSET:
@@ -63,7 +63,7 @@ class APIVersion:
         if self.sunset_date and datetime.now() >= self.sunset_date:
             return False
         return True
-    
+
     def is_deprecated(self) -> bool:
         """Check if version is deprecated"""
         if self.status == VersionStatus.DEPRECATED:
@@ -71,14 +71,14 @@ class APIVersion:
         if self.deprecation_date and datetime.now() >= self.deprecation_date:
             return True
         return False
-    
+
     def days_until_sunset(self) -> Optional[int]:
         """Get days until sunset"""
         if not self.sunset_date:
             return None
         delta = self.sunset_date - datetime.now()
         return max(0, delta.days)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
@@ -98,23 +98,23 @@ class APIVersion:
 
 class VersionRouter:
     """Route requests to appropriate API version"""
-    
+
     def __init__(self):
         self.versions: Dict[str, APIVersion] = {}
         self.handlers: Dict[str, Dict[str, Callable]] = {}  # {version: {endpoint: handler}}
         self.default_version: Optional[str] = None
-    
+
     def register_version(self, version: APIVersion) -> None:
         """Register an API version"""
         self.versions[version.version] = version
         self.handlers[version.version] = {}
-        
+
         # Set as default if it's the first stable version
         if version.status == VersionStatus.STABLE and not self.default_version:
             self.default_version = version.version
-        
+
         logger.info(f"Registered API version: {version.version} ({version.status.value})")
-    
+
     def register_endpoint(
         self,
         version: str,
@@ -124,28 +124,28 @@ class VersionRouter:
         """Register endpoint handler for specific version"""
         if version not in self.versions:
             raise ValueError(f"Version {version} not registered")
-        
+
         self.handlers[version][endpoint] = handler
         logger.debug(f"Registered endpoint {endpoint} for version {version}")
-    
+
     def get_version(self, version_string: str) -> Optional[APIVersion]:
         """Get API version by string"""
         return self.versions.get(version_string)
-    
+
     def get_latest_stable_version(self) -> Optional[str]:
         """Get latest stable version"""
         stable_versions = [
             v for v in self.versions.values()
             if v.status == VersionStatus.STABLE and v.is_active()
         ]
-        
+
         if not stable_versions:
             return None
-        
+
         # Sort by release date, get latest
         latest = max(stable_versions, key=lambda v: v.release_date)
         return latest.version
-    
+
     def route(
         self,
         endpoint: str,
@@ -156,29 +156,29 @@ class VersionRouter:
         # Determine version
         if not version:
             version = self.default_version or self.get_latest_stable_version()
-        
+
         if not version:
             raise ValueError("No API version specified and no default available")
-        
+
         # Check version exists and is active
         api_version = self.get_version(version)
         if not api_version:
             raise ValueError(f"Unknown API version: {version}")
-        
+
         if not api_version.is_active():
             raise ValueError(f"API version {version} is no longer active")
-        
+
         # Get handler
         version_handlers = self.handlers.get(version, {})
         handler = version_handlers.get(endpoint)
-        
+
         if not handler:
             raise ValueError(f"Endpoint {endpoint} not found in version {version}")
-        
+
         # Execute handler
         logger.debug(f"Routing {endpoint} to version {version}")
         return handler(**kwargs)
-    
+
     def list_versions(self, include_inactive: bool = False) -> List[Dict[str, Any]]:
         """List all API versions"""
         versions = [
@@ -208,16 +208,16 @@ def deprecated(sunset_date: Optional[datetime] = None, message: Optional[str] = 
                 warning += f" and will be removed in {days_left} days"
             if message:
                 warning += f": {message}"
-            
+
             logger.warning(warning)
-            
+
             # Add deprecation header to response (if response object exists)
             result = func(*args, **kwargs)
             if hasattr(result, 'headers'):
                 result.headers['X-API-Deprecated'] = 'true'
                 if sunset_date:
                     result.headers['X-API-Sunset-Date'] = sunset_date.isoformat()
-            
+
             return result
         return wrapper
     return decorator
@@ -225,10 +225,10 @@ def deprecated(sunset_date: Optional[datetime] = None, message: Optional[str] = 
 
 class VersionNegotiator:
     """Negotiate API version with client"""
-    
+
     def __init__(self, router: VersionRouter):
         self.router = router
-    
+
     def negotiate_from_url(self, url: str) -> Optional[str]:
         """Extract version from URL path (e.g., /api/v2/players)"""
         parts = url.split('/')
@@ -238,11 +238,11 @@ class VersionNegotiator:
                 if self.router.get_version(version):
                     return version
         return None
-    
+
     def negotiate_from_header(self, headers: Dict[str, str]) -> Optional[str]:
         """Extract version from headers (e.g., Accept: application/vnd.nba.v2+json)"""
         accept_header = headers.get('Accept', '')
-        
+
         # Look for version in accept header
         if 'vnd.nba.' in accept_header:
             parts = accept_header.split('vnd.nba.')
@@ -252,14 +252,14 @@ class VersionNegotiator:
                     version = version_part[1:]
                     if self.router.get_version(version):
                         return version
-        
+
         # Check X-API-Version header
         version_header = headers.get('X-API-Version')
         if version_header and self.router.get_version(version_header):
             return version_header
-        
+
         return None
-    
+
     def negotiate(
         self,
         url: Optional[str] = None,
@@ -272,17 +272,17 @@ class VersionNegotiator:
             version = self.negotiate_from_url(url)
             if version:
                 return version
-        
+
         # Try headers
         if headers:
             version = self.negotiate_from_header(headers)
             if version:
                 return version
-        
+
         # Use default or latest stable
         if default:
             return default
-        
+
         return self.router.get_latest_stable_version() or self.router.default_version or '1.0'
 
 
@@ -290,7 +290,7 @@ class VersionNegotiator:
 def create_nba_api_versions() -> VersionRouter:
     """Create NBA MCP API version definitions"""
     router = VersionRouter()
-    
+
     # Version 1.0 - Initial release
     v1 = APIVersion(
         version="1.0",
@@ -307,7 +307,7 @@ def create_nba_api_versions() -> VersionRouter:
         migration_guide_url="https://docs.nba-mcp.com/migration/v1-to-v2"
     )
     router.register_version(v1)
-    
+
     # Version 2.0 - ML features
     v2 = APIVersion(
         version="2.0",
@@ -329,7 +329,7 @@ def create_nba_api_versions() -> VersionRouter:
         migration_guide_url="https://docs.nba-mcp.com/migration/v1-to-v2"
     )
     router.register_version(v2)
-    
+
     # Version 3.0 - Beta features
     v3 = APIVersion(
         version="3.0",
@@ -351,18 +351,18 @@ def create_nba_api_versions() -> VersionRouter:
         migration_guide_url="https://docs.nba-mcp.com/migration/v2-to-v3"
     )
     router.register_version(v3)
-    
+
     return router
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    
+
     print("=== API Versioning Demo ===\n")
-    
+
     # Create router with NBA versions
     router = create_nba_api_versions()
-    
+
     # Register v1 endpoints
     @version("1.0")
     def get_player_v1(player_id: int):
@@ -371,9 +371,9 @@ if __name__ == "__main__":
             'name': 'LeBron James',
             'ppg': 25.0  # Simple format
         }
-    
+
     router.register_endpoint("1.0", "get_player", get_player_v1)
-    
+
     # Register v2 endpoints
     @version("2.0")
     def get_player_v2(player_id: int):
@@ -392,19 +392,19 @@ if __name__ == "__main__":
                 'next_game_performance': 'excellent'
             }
         }
-    
+
     router.register_endpoint("2.0", "get_player", get_player_v2)
-    
+
     # Test routing
     print("--- Version Routing ---")
     print("\nVersion 1.0 response:")
     result_v1 = router.route("get_player", version="1.0", player_id=23)
     print(result_v1)
-    
+
     print("\nVersion 2.0 response:")
     result_v2 = router.route("get_player", version="2.0", player_id=23)
     print(result_v2)
-    
+
     # List versions
     print("\n--- Available Versions ---")
     for version_info in router.list_versions(include_inactive=False):
@@ -414,37 +414,37 @@ if __name__ == "__main__":
         if version_info['days_until_sunset']:
             print(f"  Days until sunset: {version_info['days_until_sunset']}")
         print(f"  Changelog: {', '.join(version_info['changelog'][:2])}")
-    
+
     # Version negotiation
     print("\n--- Version Negotiation ---")
     negotiator = VersionNegotiator(router)
-    
+
     # From URL
     url = "/api/v2/players/23"
     negotiated_version = negotiator.negotiate(url=url)
     print(f"Version from URL '{url}': {negotiated_version}")
-    
+
     # From headers
     headers = {'Accept': 'application/vnd.nba.v2+json'}
     negotiated_version = negotiator.negotiate(headers=headers)
     print(f"Version from headers: {negotiated_version}")
-    
+
     # Default
     negotiated_version = negotiator.negotiate()
     print(f"Default version: {negotiated_version}")
-    
+
     # Deprecation warning
     print("\n--- Deprecation Warning ---")
-    
+
     @deprecated(
         sunset_date=datetime(2025, 12, 31),
         message="Use /v2/players/{id} instead"
     )
     def old_endpoint():
         return {"data": "old format"}
-    
+
     result = old_endpoint()
     print(f"Old endpoint result: {result}")
-    
+
     print("\n=== Demo Complete ===")
 

@@ -85,7 +85,7 @@ class Task:
     timeout_seconds: Optional[int] = None
     scheduled_at: Optional[datetime] = None
     dependencies: List[str] = field(default_factory=list)
-    
+
     # Runtime state
     status: TaskStatus = TaskStatus.PENDING
     created_at: datetime = field(default_factory=datetime.now)
@@ -93,7 +93,7 @@ class Task:
     completed_at: Optional[datetime] = None
     attempts: int = 0
     result: Optional[TaskResult] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary (excluding func)"""
         data = asdict(self)
@@ -111,7 +111,7 @@ class Task:
                 'attempts': self.result.attempts
             }
         return data
-    
+
     def is_ready(self) -> bool:
         """Check if task is ready to execute"""
         if self.scheduled_at and datetime.now() < self.scheduled_at:
@@ -121,7 +121,7 @@ class Task:
 
 class TaskQueue:
     """Priority-based task queue"""
-    
+
     def __init__(self, max_size: int = 1000):
         self._queues: Dict[TaskPriority, queue.PriorityQueue] = {
             priority: queue.PriorityQueue(maxsize=max_size)
@@ -130,14 +130,14 @@ class TaskQueue:
         self._pending_tasks: Dict[str, Task] = {}
         self._completed_tasks: Dict[str, Task] = {}
         self._lock = threading.RLock()
-    
+
     def enqueue(self, task: Task) -> bool:
         """Add task to queue"""
         with self._lock:
             if task.task_id in self._pending_tasks:
                 logger.warning(f"Task {task.task_id} already queued")
                 return False
-            
+
             try:
                 # Add to priority queue (priority, timestamp, task_id)
                 self._queues[task.priority].put_nowait((
@@ -145,24 +145,24 @@ class TaskQueue:
                     task.created_at.timestamp(),
                     task.task_id
                 ))
-                
+
                 self._pending_tasks[task.task_id] = task
                 task.status = TaskStatus.QUEUED
-                
+
                 logger.info(f"Enqueued task {task.task_id} with priority {task.priority.name}")
                 return True
-                
+
             except queue.Full:
                 logger.error(f"Task queue full for priority {task.priority.name}")
                 return False
-    
+
     def dequeue(self, timeout: float = 1.0) -> Optional[Task]:
         """Get next task from queue (respects priority)"""
         # Check each priority level in order
         for priority in TaskPriority:
             try:
                 _, _, task_id = self._queues[priority].get_nowait()
-                
+
                 with self._lock:
                     task = self._pending_tasks.get(task_id)
                     if task and task.is_ready():
@@ -175,12 +175,12 @@ class TaskQueue:
                                 task.created_at.timestamp(),
                                 task_id
                             ))
-                        
+
             except queue.Empty:
                 continue
-        
+
         return None
-    
+
     def get_task(self, task_id: str) -> Optional[Task]:
         """Get task by ID"""
         with self._lock:
@@ -189,7 +189,7 @@ class TaskQueue:
             if task_id in self._completed_tasks:
                 return self._completed_tasks[task_id]
             return None
-    
+
     def cancel_task(self, task_id: str) -> bool:
         """Cancel a pending task"""
         with self._lock:
@@ -202,21 +202,21 @@ class TaskQueue:
                 logger.info(f"Cancelled task {task_id}")
                 return True
             return False
-    
+
     def complete_task(self, task: Task) -> None:
         """Mark task as complete"""
         with self._lock:
             if task.task_id in self._pending_tasks:
                 self._completed_tasks[task.task_id] = task
                 del self._pending_tasks[task.task_id]
-    
+
     def get_queue_size(self) -> Dict[str, int]:
         """Get size of each priority queue"""
         return {
             priority.name: self._queues[priority].qsize()
             for priority in TaskPriority
         }
-    
+
     def get_pending_tasks(self) -> List[Task]:
         """Get all pending tasks"""
         with self._lock:
@@ -225,32 +225,32 @@ class TaskQueue:
 
 class TaskWorker:
     """Task execution worker"""
-    
+
     def __init__(self, worker_id: str, task_queue: TaskQueue):
         self.worker_id = worker_id
         self.task_queue = task_queue
         self._running = False
         self._thread: Optional[threading.Thread] = None
         self._current_task: Optional[Task] = None
-    
+
     def _execute_task(self, task: Task) -> TaskResult:
         """Execute a single task"""
         start_time = time.time()
         task.status = TaskStatus.RUNNING
         task.started_at = datetime.now()
         task.attempts += 1
-        
+
         logger.info(f"Worker {self.worker_id} executing task {task.task_id} (attempt {task.attempts})")
-        
+
         try:
             # Execute task function
             if task.func:
                 result_value = task.func(*task.args, **task.kwargs)
             else:
                 result_value = None
-            
+
             execution_time = time.time() - start_time
-            
+
             result = TaskResult(
                 task_id=task.task_id,
                 status=TaskStatus.SUCCESS,
@@ -259,27 +259,27 @@ class TaskWorker:
                 attempts=task.attempts,
                 completed_at=datetime.now()
             )
-            
+
             task.status = TaskStatus.SUCCESS
             task.completed_at = datetime.now()
             task.result = result
-            
+
             logger.info(f"Task {task.task_id} completed successfully in {execution_time:.2f}s")
             return result
-            
+
         except Exception as e:
             execution_time = time.time() - start_time
             error_msg = f"{type(e).__name__}: {str(e)}\n{traceback.format_exc()}"
-            
+
             # Check if we should retry
             if task.attempts < task.max_retries:
                 task.status = TaskStatus.RETRYING
                 logger.warning(f"Task {task.task_id} failed (attempt {task.attempts}/{task.max_retries}): {e}")
-                
+
                 # Re-enqueue with delay
                 task.scheduled_at = datetime.now() + timedelta(seconds=task.retry_delay_seconds)
                 self.task_queue.enqueue(task)
-                
+
                 result = TaskResult(
                     task_id=task.task_id,
                     status=TaskStatus.RETRYING,
@@ -291,7 +291,7 @@ class TaskWorker:
                 task.status = TaskStatus.FAILED
                 task.completed_at = datetime.now()
                 logger.error(f"Task {task.task_id} failed permanently after {task.attempts} attempts: {e}")
-                
+
                 result = TaskResult(
                     task_id=task.task_id,
                     status=TaskStatus.FAILED,
@@ -300,53 +300,53 @@ class TaskWorker:
                     attempts=task.attempts,
                     completed_at=datetime.now()
                 )
-            
+
             task.result = result
             return result
-    
+
     def _worker_loop(self) -> None:
         """Main worker loop"""
         logger.info(f"Worker {self.worker_id} started")
-        
+
         while self._running:
             try:
                 # Get next task
                 task = self.task_queue.dequeue(timeout=1.0)
-                
+
                 if task:
                     self._current_task = task
                     self._execute_task(task)
-                    
+
                     # Move to completed
                     if task.status in [TaskStatus.SUCCESS, TaskStatus.FAILED, TaskStatus.CANCELLED]:
                         self.task_queue.complete_task(task)
-                    
+
                     self._current_task = None
                 else:
                     time.sleep(0.1)
-                    
+
             except Exception as e:
                 logger.error(f"Worker {self.worker_id} error: {e}")
                 time.sleep(1)
-        
+
         logger.info(f"Worker {self.worker_id} stopped")
-    
+
     def start(self) -> None:
         """Start worker"""
         if self._running:
             logger.warning(f"Worker {self.worker_id} already running")
             return
-        
+
         self._running = True
         self._thread = threading.Thread(target=self._worker_loop, daemon=True)
         self._thread.start()
-    
+
     def stop(self) -> None:
         """Stop worker"""
         self._running = False
         if self._thread:
             self._thread.join(timeout=5)
-    
+
     def get_status(self) -> Dict[str, Any]:
         """Get worker status"""
         return {
@@ -358,27 +358,27 @@ class TaskWorker:
 
 class TaskManager:
     """Manage task queue and workers"""
-    
+
     def __init__(self, num_workers: int = 4):
         self.task_queue = TaskQueue()
         self.workers: List[TaskWorker] = []
         self.num_workers = num_workers
         self._lock = threading.Lock()
-    
+
     def start(self) -> None:
         """Start all workers"""
         with self._lock:
             if self.workers:
                 logger.warning("Workers already started")
                 return
-            
+
             for i in range(self.num_workers):
                 worker = TaskWorker(f"worker-{i}", self.task_queue)
                 worker.start()
                 self.workers.append(worker)
-            
+
             logger.info(f"Started {self.num_workers} workers")
-    
+
     def stop(self) -> None:
         """Stop all workers"""
         with self._lock:
@@ -386,7 +386,7 @@ class TaskManager:
                 worker.stop()
             self.workers = []
             logger.info("Stopped all workers")
-    
+
     def submit(self, func: Callable, *args, **kwargs) -> str:
         """Submit a task for execution"""
         task = Task(
@@ -395,27 +395,27 @@ class TaskManager:
             args=args,
             kwargs=kwargs
         )
-        
+
         if self.task_queue.enqueue(task):
             return task.task_id
         else:
             raise RuntimeError("Failed to enqueue task")
-    
+
     def submit_task(self, task: Task) -> bool:
         """Submit a pre-configured task"""
         return self.task_queue.enqueue(task)
-    
+
     def get_task_status(self, task_id: str) -> Optional[Dict[str, Any]]:
         """Get task status"""
         task = self.task_queue.get_task(task_id)
         if task:
             return task.to_dict()
         return None
-    
+
     def cancel_task(self, task_id: str) -> bool:
         """Cancel a task"""
         return self.task_queue.cancel_task(task_id)
-    
+
     def get_stats(self) -> Dict[str, Any]:
         """Get queue statistics"""
         return {
@@ -443,9 +443,9 @@ def get_task_manager() -> TaskManager:
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    
+
     print("=== Task Queue Demo ===\n")
-    
+
     # Example tasks
     def calculate_player_stats(player_name: str, games: int):
         """Simulate stats calculation"""
@@ -456,24 +456,24 @@ if __name__ == "__main__":
             'games': games,
             'ppg': ppg
         }
-    
+
     def failing_task():
         """Task that fails"""
         raise ValueError("Intentional failure for testing")
-    
+
     # Create manager
     manager = TaskManager(num_workers=2)
     manager.start()
-    
+
     # Submit tasks
     print("--- Submitting Tasks ---")
     task_ids = []
-    
+
     # Normal priority task
     task_id1 = manager.submit(calculate_player_stats, "LeBron James", 82)
     task_ids.append(task_id1)
     print(f"Submitted task 1: {task_id1}")
-    
+
     # High priority task
     high_priority_task = Task(
         name="urgent_calculation",
@@ -484,7 +484,7 @@ if __name__ == "__main__":
     manager.submit_task(high_priority_task)
     task_ids.append(high_priority_task.task_id)
     print(f"Submitted high priority task: {high_priority_task.task_id}")
-    
+
     # Failing task with retries
     failing_task_obj = Task(
         name="failing_task",
@@ -494,11 +494,11 @@ if __name__ == "__main__":
     manager.submit_task(failing_task_obj)
     task_ids.append(failing_task_obj.task_id)
     print(f"Submitted failing task: {failing_task_obj.task_id}")
-    
+
     # Wait for tasks to complete
     print("\n--- Waiting for Tasks ---")
     time.sleep(10)
-    
+
     # Check results
     print("\n--- Task Results ---")
     for task_id in task_ids:
@@ -509,16 +509,16 @@ if __name__ == "__main__":
             print(f"  Attempts: {status.get('attempts', 0)}")
             if status.get('result'):
                 print(f"  Execution Time: {status['result'].get('execution_time_seconds', 0):.2f}s")
-    
+
     # Stats
     print("\n--- Queue Statistics ---")
     stats = manager.get_stats()
     print(f"Workers: {stats['num_workers']}")
     print(f"Pending Tasks: {stats['pending_tasks']}")
     print(f"Queue Sizes: {stats['queue_sizes']}")
-    
+
     # Cleanup
     manager.stop()
-    
+
     print("\n=== Demo Complete ===")
 
