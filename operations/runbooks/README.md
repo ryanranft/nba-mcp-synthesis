@@ -1,6 +1,6 @@
 # 📚 Operational Runbooks - IMPORTANT 19
 
-**Last Updated:** October 12, 2025  
+**Last Updated:** October 12, 2025
 **Owner:** Operations Team
 
 ---
@@ -15,8 +15,8 @@ Operational runbooks for common NBA MCP system tasks and incidents.
 
 ### **[RB-001] Deploy New Model to Production**
 
-**Frequency:** Weekly  
-**Duration:** 30 minutes  
+**Frequency:** Weekly
+**Duration:** 30 minutes
 **Risk Level:** MEDIUM
 
 **Prerequisites:**
@@ -82,8 +82,8 @@ curl https://api.nba-mcp.com/models/current
 
 ### **[RB-002] Scale Application
 
-**Frequency:** As needed  
-**Duration:** 15 minutes  
+**Frequency:** As needed
+**Duration:** 15 minutes
 **Risk Level:** LOW
 
 **Procedure:**
@@ -120,7 +120,7 @@ python scripts/check_performance.py --duration 15m
 
 ### **[RB-101] High Error Rate Alert**
 
-**Severity:** HIGH  
+**Severity:** HIGH
 **Expected Duration:** 30-60 minutes
 
 **Symptoms:**
@@ -206,7 +206,7 @@ kubectl set env deployment/nba-mcp USE_CACHE_FALLBACK=true
 
 ### **[RB-102] Database Performance Degradation**
 
-**Severity:** HIGH  
+**Severity:** HIGH
 **Expected Duration:** 45-90 minutes
 
 **Symptoms:**
@@ -272,7 +272,7 @@ kubectl set env deployment/nba-mcp USE_READ_REPLICA=true
 
 ### **[RB-103] Data Drift Detected**
 
-**Severity:** MEDIUM  
+**Severity:** MEDIUM
 **Expected Duration:** 2-4 hours
 
 **Symptoms:**
@@ -331,8 +331,8 @@ echo "*/6 * * * * python scripts/monitor_drift.py" | crontab -
 
 ### **[RB-201] Weekly Maintenance**
 
-**Schedule:** Every Sunday 02:00-04:00 UTC  
-**Duration:** 2 hours  
+**Schedule:** Every Sunday 02:00-04:00 UTC
+**Duration:** 2 hours
 **Risk Level:** LOW
 
 **Tasks:**
@@ -369,8 +369,8 @@ python scripts/generate_weekly_report.py --output weekly-report.html
 
 ### **[RB-202] Monthly Capacity Planning**
 
-**Schedule:** First Monday of month  
-**Duration:** 4 hours  
+**Schedule:** First Monday of month
+**Duration:** 4 hours
 **Risk Level:** LOW
 
 ```bash

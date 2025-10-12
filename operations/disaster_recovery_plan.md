@@ -1,8 +1,8 @@
 # 🚨 Disaster Recovery Plan - IMPORTANT 18
 
-**Document Version:** 1.0  
-**Last Updated:** October 12, 2025  
-**Review Schedule:** Quarterly  
+**Document Version:** 1.0
+**Last Updated:** October 12, 2025
+**Review Schedule:** Quarterly
 **Owner:** Operations Team
 
 ---
@@ -51,9 +51,9 @@ This Disaster Recovery (DR) Plan outlines procedures to recover the NBA MCP syst
 
 ### **Scenario 1: Database Failure (RDS)**
 
-**Impact:** HIGH - Total service outage  
-**Probability:** LOW  
-**RTO:** 2 hours  
+**Impact:** HIGH - Total service outage
+**Probability:** LOW
+**RTO:** 2 hours
 **RPO:** 15 minutes
 
 **Recovery Steps:**
@@ -71,31 +71,31 @@ This Disaster Recovery (DR) Plan outlines procedures to recover the NBA MCP syst
    - Identify failure type (hardware, software, corruption)
 
 3. **Recover**
-   
+
    **Option A: Restore from Automated Backup**
    ```bash
    # List available backups
    aws rds describe-db-snapshots \
      --db-instance-identifier nba-mcp-prod \
      --query 'DBSnapshots[*].[DBSnapshotIdentifier,SnapshotCreateTime]'
-   
+
    # Restore from latest backup
    aws rds restore-db-instance-from-db-snapshot \
      --db-instance-identifier nba-mcp-prod-restored \
      --db-snapshot-identifier rds:nba-mcp-prod-2025-10-12-04-00
-   
+
    # Update DNS/connection string
    aws route53 change-resource-record-sets \
      --hosted-zone-id Z1234567890ABC \
      --change-batch file://dns-update.json
    ```
-   
+
    **Option B: Failover to Read Replica**
    ```bash
    # Promote read replica to primary
    aws rds promote-read-replica \
      --db-instance-identifier nba-mcp-prod-replica
-   
+
    # Update connection strings
    kubectl set env deployment/nba-mcp \
      DB_HOST=nba-mcp-prod-replica.xxxxx.us-east-1.rds.amazonaws.com
@@ -105,7 +105,7 @@ This Disaster Recovery (DR) Plan outlines procedures to recover the NBA MCP syst
    ```bash
    # Test database connectivity
    psql -h <new-endpoint> -U postgres -d nba_stats -c "SELECT 1"
-   
+
    # Run health checks
    curl https://api.nba-mcp.com/health | jq '.database'
    ```
@@ -121,9 +121,9 @@ This Disaster Recovery (DR) Plan outlines procedures to recover the NBA MCP syst
 
 ### **Scenario 2: Complete AWS Region Failure**
 
-**Impact:** CRITICAL - Total outage  
-**Probability:** VERY LOW  
-**RTO:** 4 hours  
+**Impact:** CRITICAL - Total outage
+**Probability:** VERY LOW
+**RTO:** 4 hours
 **RPO:** 15 minutes
 
 **Recovery Steps:**
@@ -134,30 +134,30 @@ This Disaster Recovery (DR) Plan outlines procedures to recover the NBA MCP syst
    - Notify stakeholders
 
 2. **Activate DR Region** (us-west-2)
-   
+
    ```bash
    # Set DR region
    export AWS_REGION=us-west-2
-   
+
    # Restore latest RDS snapshot to DR region
    aws rds restore-db-instance-from-db-snapshot \
      --db-instance-identifier nba-mcp-dr \
      --db-snapshot-identifier <latest-cross-region-snapshot> \
      --region us-west-2
-   
+
    # Deploy application stack
    cd /infrastructure/terraform
    terraform workspace select dr
    terraform apply -auto-approve
-   
+
    # Sync S3 data
    aws s3 sync s3://nba-mcp-data-us-east-1 \
                 s3://nba-mcp-data-us-west-2 \
                 --region us-west-2
-   
+
    # Deploy ML models
    ./deploy_models_to_dr.sh
-   
+
    # Update DNS to DR region
    aws route53 change-resource-record-sets \
      --hosted-zone-id Z1234567890ABC \
@@ -168,10 +168,10 @@ This Disaster Recovery (DR) Plan outlines procedures to recover the NBA MCP syst
    ```bash
    # Run smoke tests
    ./tests/smoke_tests.sh --env dr --region us-west-2
-   
+
    # Verify data integrity
    ./scripts/verify_data_integrity.sh
-   
+
    # Check model availability
    curl https://dr.nba-mcp.com/models/list
    ```
@@ -187,9 +187,9 @@ This Disaster Recovery (DR) Plan outlines procedures to recover the NBA MCP syst
 
 ### **Scenario 3: Data Corruption**
 
-**Impact:** HIGH - Potential data loss  
-**Probability:** LOW  
-**RTO:** 3 hours  
+**Impact:** HIGH - Potential data loss
+**Probability:** LOW
+**RTO:** 3 hours
 **RPO:** 15 minutes (last backup)
 
 **Recovery Steps:**
@@ -200,7 +200,7 @@ This Disaster Recovery (DR) Plan outlines procedures to recover the NBA MCP syst
    psql -h <endpoint> -U postgres -d nba_stats -c "\
      SELECT schemaname, tablename, pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) \
      FROM pg_tables WHERE schemaname = 'public' ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;"
-   
+
    # Run data integrity checks
    python scripts/check_data_integrity.py --table games --date 2025-10-12
    ```
@@ -215,7 +215,7 @@ This Disaster Recovery (DR) Plan outlines procedures to recover the NBA MCP syst
    # Restore specific table from backup
    pg_restore --host=<endpoint> --username=postgres --dbname=nba_stats \
      --table=games --clean backup_2025-10-12.dump
-   
+
    # Or use point-in-time recovery
    aws rds restore-db-instance-to-point-in-time \
      --source-db-instance-identifier nba-mcp-prod \
@@ -227,7 +227,7 @@ This Disaster Recovery (DR) Plan outlines procedures to recover the NBA MCP syst
    ```bash
    # Run validation queries
    python scripts/validate_restored_data.py
-   
+
    # Compare record counts
    ./scripts/compare_table_counts.sh
    ```
@@ -238,9 +238,9 @@ This Disaster Recovery (DR) Plan outlines procedures to recover the NBA MCP syst
 
 ### **Scenario 4: Model Registry Failure**
 
-**Impact:** MEDIUM - ML operations impacted  
-**Probability:** LOW  
-**RTO:** 2 hours  
+**Impact:** MEDIUM - ML operations impacted
+**Probability:** LOW
+**RTO:** 2 hours
 **RPO:** 1 hour
 
 **Recovery Steps:**
@@ -249,7 +249,7 @@ This Disaster Recovery (DR) Plan outlines procedures to recover the NBA MCP syst
    ```bash
    # Restore MLflow SQLite/Postgres
    aws s3 cp s3://nba-mcp-backups/mlflow/mlflow-db-latest.backup .
-   
+
    # Restore to MLflow server
    pg_restore --host=mlflow-db --username=mlflow mlflow-db-latest.backup
    ```
@@ -258,7 +258,7 @@ This Disaster Recovery (DR) Plan outlines procedures to recover the NBA MCP syst
    ```bash
    # Sync from S3 backup
    aws s3 sync s3://nba-mcp-mlflow-backup/artifacts/ /mlflow/artifacts/
-   
+
    # Restart MLflow server
    kubectl rollout restart deployment/mlflow
    ```
@@ -267,7 +267,7 @@ This Disaster Recovery (DR) Plan outlines procedures to recover the NBA MCP syst
    ```bash
    # List registered models
    curl http://mlflow:5000/api/2.0/mlflow/registered-models/list
-   
+
    # Test model loading
    python -c "import mlflow; model = mlflow.pyfunc.load_model('models:/nba_win_predictor/Production'); print('✅ Model loaded')"
    ```

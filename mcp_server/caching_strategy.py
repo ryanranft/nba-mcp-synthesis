@@ -12,11 +12,11 @@ logger = logging.getLogger(__name__)
 
 class RedisCache:
     """Redis-based caching layer"""
-    
+
     def __init__(self, host: str = "localhost", port: int = 6379, db: int = 0):
         """
         Initialize Redis cache
-        
+
         Args:
             host: Redis host
             port: Redis port
@@ -29,7 +29,7 @@ class RedisCache:
             decode_responses=True
         )
         logger.info(f"✅ Connected to Redis: {host}:{port}/{db}")
-    
+
     def get(self, key: str) -> Optional[Any]:
         """Get value from cache"""
         try:
@@ -42,7 +42,7 @@ class RedisCache:
         except Exception as e:
             logger.error(f"❌ Cache get error: {e}")
             return None
-    
+
     def set(
         self,
         key: str,
@@ -51,12 +51,12 @@ class RedisCache:
     ) -> bool:
         """
         Set value in cache
-        
+
         Args:
             key: Cache key
             value: Value to cache
             ttl: Time to live in seconds
-            
+
         Returns:
             Success status
         """
@@ -71,7 +71,7 @@ class RedisCache:
         except Exception as e:
             logger.error(f"❌ Cache set error: {e}")
             return False
-    
+
     def delete(self, key: str) -> bool:
         """Delete key from cache"""
         try:
@@ -81,14 +81,14 @@ class RedisCache:
         except Exception as e:
             logger.error(f"❌ Cache delete error: {e}")
             return False
-    
+
     def clear(self, pattern: Optional[str] = None) -> int:
         """
         Clear cache keys
-        
+
         Args:
             pattern: Optional pattern to match keys (e.g., "user:*")
-            
+
         Returns:
             Number of keys deleted
         """
@@ -102,7 +102,7 @@ class RedisCache:
         except Exception as e:
             logger.error(f"❌ Cache clear error: {e}")
             return 0
-    
+
     def exists(self, key: str) -> bool:
         """Check if key exists in cache"""
         try:
@@ -110,7 +110,7 @@ class RedisCache:
         except Exception as e:
             logger.error(f"❌ Cache exists error: {e}")
             return False
-    
+
     def ttl(self, key: str) -> int:
         """Get remaining TTL for key (in seconds)"""
         try:
@@ -133,12 +133,12 @@ def cached(
 ):
     """
     Decorator to cache function results
-    
+
     Args:
         ttl: Cache TTL in seconds
         key_prefix: Prefix for cache key
         use_kwargs: Include kwargs in cache key
-        
+
     Usage:
         @cached(ttl=600, key_prefix="player_stats")
         def get_player_stats(player_id: int):
@@ -148,28 +148,28 @@ def cached(
         @wraps(func)
         def wrapper(*args, **kwargs):
             cache = get_cache()
-            
+
             # Generate cache key
             if use_kwargs:
                 key_suffix = cache_key(*args, **kwargs)
             else:
                 key_suffix = cache_key(*args)
-            
+
             key = f"{key_prefix}:{func.__name__}:{key_suffix}"
-            
+
             # Try to get from cache
             cached_value = cache.get(key)
             if cached_value is not None:
                 return cached_value
-            
+
             # Execute function
             result = func(*args, **kwargs)
-            
+
             # Cache result
             cache.set(key, result, ttl)
-            
+
             return result
-        
+
         return wrapper
     return decorator
 
@@ -177,7 +177,7 @@ def cached(
 def cache_invalidate(key_pattern: str):
     """
     Decorator to invalidate cache on function execution
-    
+
     Usage:
         @cache_invalidate("player_stats:*")
         def update_player_stats(player_id: int, stats: dict):
@@ -187,24 +187,24 @@ def cache_invalidate(key_pattern: str):
         @wraps(func)
         def wrapper(*args, **kwargs):
             result = func(*args, **kwargs)
-            
+
             # Invalidate cache
             cache = get_cache()
             deleted = cache.clear(key_pattern)
             logger.info(f"🗑️  Invalidated {deleted} cache keys matching: {key_pattern}")
-            
+
             return result
-        
+
         return wrapper
     return decorator
 
 
 class CacheManager:
     """Advanced cache management"""
-    
+
     def __init__(self, cache: RedisCache):
         self.cache = cache
-    
+
     def get_or_set(
         self,
         key: str,
@@ -213,69 +213,69 @@ class CacheManager:
     ) -> Any:
         """
         Get from cache or execute factory function
-        
+
         Args:
             key: Cache key
             factory: Function to execute if cache miss
             ttl: Cache TTL
-            
+
         Returns:
             Cached or computed value
         """
         value = self.cache.get(key)
-        
+
         if value is not None:
             return value
-        
+
         # Cache miss - execute factory
         value = factory()
         self.cache.set(key, value, ttl)
-        
+
         return value
-    
+
     def mget(self, keys: list) -> dict:
         """
         Get multiple keys from cache
-        
+
         Args:
             keys: List of cache keys
-            
+
         Returns:
             Dict of key -> value
         """
         result = {}
-        
+
         for key in keys:
             value = self.cache.get(key)
             if value is not None:
                 result[key] = value
-        
+
         return result
-    
+
     def mset(self, data: dict, ttl: Optional[int] = None) -> bool:
         """
         Set multiple keys in cache
-        
+
         Args:
             data: Dict of key -> value
             ttl: Cache TTL
-            
+
         Returns:
             Success status
         """
         success = True
-        
+
         for key, value in data.items():
             if not self.cache.set(key, value, ttl):
                 success = False
-        
+
         return success
-    
+
     def get_stats(self) -> dict:
         """Get cache statistics"""
         try:
             info = self.cache.client.info("stats")
-            
+
             return {
                 "hits": int(info.get("keyspace_hits", 0)),
                 "misses": int(info.get("keyspace_misses", 0)),
@@ -286,16 +286,16 @@ class CacheManager:
         except Exception as e:
             logger.error(f"❌ Error getting cache stats: {e}")
             return {}
-    
+
     def _calculate_hit_rate(self, info: dict) -> float:
         """Calculate cache hit rate"""
         hits = int(info.get("keyspace_hits", 0))
         misses = int(info.get("keyspace_misses", 0))
         total = hits + misses
-        
+
         if total == 0:
             return 0.0
-        
+
         return hits / total
 
 
@@ -329,11 +329,11 @@ def get_cache_manager() -> CacheManager:
 if __name__ == "__main__":
     # Simple caching
     cache = get_cache()
-    
+
     cache.set("user:123", {"name": "John", "age": 30}, ttl=300)
     user = cache.get("user:123")
     print(f"User: {user}")
-    
+
     # Decorator-based caching
     @cached(ttl=600, key_prefix="player_stats")
     def get_player_stats(player_id: int):
@@ -341,18 +341,18 @@ if __name__ == "__main__":
         import time
         time.sleep(0.5)
         return {"player_id": player_id, "points": 25, "assists": 7}
-    
+
     # First call - cache miss (slow)
     import time
     start = time.time()
     stats = get_player_stats(123)
     print(f"First call: {time.time() - start:.2f}s - {stats}")
-    
+
     # Second call - cache hit (fast)
     start = time.time()
     stats = get_player_stats(123)
     print(f"Second call: {time.time() - start:.2f}s - {stats}")
-    
+
     # Cache stats
     manager = get_cache_manager()
     stats = manager.get_stats()
