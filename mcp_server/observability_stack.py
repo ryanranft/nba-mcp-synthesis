@@ -59,7 +59,7 @@ class AlertRule:
 
 class ObservabilityConfigGenerator:
     """Generate observability stack configuration"""
-    
+
     @staticmethod
     def generate_prometheus_config(targets: List[str]) -> Dict[str, Any]:
         """Generate Prometheus configuration"""
@@ -86,7 +86,7 @@ class ObservabilityConfigGenerator:
                 ]
             }
         }
-    
+
     @staticmethod
     def generate_grafana_dashboard() -> Dict[str, Any]:
         """Generate Grafana dashboard for NBA MCP"""
@@ -164,7 +164,7 @@ class ObservabilityConfigGenerator:
                 ]
             }
         }
-    
+
     @staticmethod
     def generate_alert_rules() -> List[Dict[str, Any]]:
         """Generate Prometheus alert rules"""
@@ -215,7 +215,7 @@ class ObservabilityConfigGenerator:
 def create_observability_stack() -> Dict[str, Any]:
     """Create complete observability stack configuration"""
     generator = ObservabilityConfigGenerator()
-    
+
     return {
         'prometheus': generator.generate_prometheus_config(
             targets=['nba-mcp-service:8000', 'nba-mcp-service:8001', 'nba-mcp-service:8002']
@@ -228,33 +228,33 @@ def create_observability_stack() -> Dict[str, Any]:
 if __name__ == "__main__":
     import os
     logging.basicConfig(level=logging.INFO)
-    
+
     # Generate observability configuration
     config = create_observability_stack()
-    
+
     os.makedirs("config/observability", exist_ok=True)
-    
+
     # Save Prometheus config
     with open("config/observability/prometheus.yml", 'w') as f:
         yaml.dump(config['prometheus'], f, default_flow_style=False)
-    
+
     # Save Grafana dashboard
     with open("config/observability/grafana-dashboard.json", 'w') as f:
         json.dump(config['grafana_dashboard'], f, indent=2)
-    
+
     # Save alert rules
     with open("config/observability/alert-rules.yml", 'w') as f:
         yaml.dump({'groups': [{'name': 'nba_mcp', 'rules': config['alert_rules']}]}, f)
-    
+
     print("=== Observability Stack Configuration ===\n")
     print("1. Prometheus Config:")
     print(yaml.dump(config['prometheus'], default_flow_style=False)[:300] + "...\n")
-    
+
     print("2. Grafana Dashboard:")
     print(json.dumps(config['grafana_dashboard'], indent=2)[:300] + "...\n")
-    
+
     print("3. Alert Rules:")
     print(f"   - {len(config['alert_rules'])} alert rules configured\n")
-    
+
     print("\nConfigurations saved to config/observability/")
 

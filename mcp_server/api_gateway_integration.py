@@ -123,7 +123,7 @@ class APIGatewayConfig:
 
 class KongConfigGenerator:
     """Generate Kong API Gateway configuration"""
-    
+
     @staticmethod
     def generate_service(service: Service) -> Dict[str, Any]:
         """Generate Kong service configuration"""
@@ -138,7 +138,7 @@ class KongConfigGenerator:
             'write_timeout': service.write_timeout,
             'read_timeout': service.read_timeout
         }
-    
+
     @staticmethod
     def generate_route(route: Route, service_name: str) -> Dict[str, Any]:
         """Generate Kong route configuration"""
@@ -150,17 +150,17 @@ class KongConfigGenerator:
             'preserve_host': route.preserve_host,
             'service': {'name': service_name}
         }
-        
+
         if route.tags:
             config['tags'] = route.tags
-        
+
         return config
-    
+
     @staticmethod
     def generate_plugins(route: Route) -> List[Dict[str, Any]]:
         """Generate Kong plugins for route"""
         plugins = []
-        
+
         # Rate limiting plugin
         if route.rate_limit:
             plugins.append({
@@ -171,7 +171,7 @@ class KongConfigGenerator:
                     'limit_by': route.rate_limit.limit_by
                 }
             })
-        
+
         # Response caching plugin
         if route.cache and route.cache.enabled:
             plugins.append({
@@ -182,7 +182,7 @@ class KongConfigGenerator:
                     'cache_control': True
                 }
             })
-        
+
         # Authentication plugin
         if route.auth != AuthType.NONE:
             if route.auth == AuthType.JWT:
@@ -202,7 +202,7 @@ class KongConfigGenerator:
                         'mandatory_scope': True
                     }
                 })
-        
+
         # Circuit breaker plugin
         if route.circuit_breaker and route.circuit_breaker.enabled:
             plugins.append({
@@ -213,9 +213,9 @@ class KongConfigGenerator:
                     'timeout': route.circuit_breaker.timeout_seconds
                 }
             })
-        
+
         return plugins
-    
+
     @staticmethod
     def generate_complete_config(config: APIGatewayConfig) -> Dict[str, Any]:
         """Generate complete Kong configuration"""
@@ -225,25 +225,25 @@ class KongConfigGenerator:
             'routes': [],
             'plugins': []
         }
-        
+
         # Generate services
         for service in config.services:
             kong_config['services'].append(
                 KongConfigGenerator.generate_service(service)
             )
-        
+
         # Generate routes and plugins
         for service in config.services:
             for route in config.routes:
                 kong_route = KongConfigGenerator.generate_route(route, service.name)
                 kong_config['routes'].append(kong_route)
-                
+
                 # Add route-specific plugins
                 route_plugins = KongConfigGenerator.generate_plugins(route)
                 for plugin in route_plugins:
                     plugin['route'] = kong_route['name']
                     kong_config['plugins'].append(plugin)
-        
+
         # Global plugins
         if config.global_rate_limit:
             kong_config['plugins'].append({
@@ -254,7 +254,7 @@ class KongConfigGenerator:
                     'limit_by': config.global_rate_limit.limit_by
                 }
             })
-        
+
         if config.cors_enabled:
             kong_config['plugins'].append({
                 'name': 'cors',
@@ -265,7 +265,7 @@ class KongConfigGenerator:
                     'credentials': True
                 }
             })
-        
+
         if config.logging_enabled:
             kong_config['plugins'].append({
                 'name': 'file-log',
@@ -273,13 +273,13 @@ class KongConfigGenerator:
                     'path': '/var/log/kong/access.log'
                 }
             })
-        
+
         return kong_config
 
 
 class AWSAPIGatewayConfigGenerator:
     """Generate AWS API Gateway configuration"""
-    
+
     @staticmethod
     def generate_openapi_spec(config: APIGatewayConfig) -> Dict[str, Any]:
         """Generate OpenAPI 3.0 spec for AWS API Gateway"""
@@ -301,7 +301,7 @@ class AWSAPIGatewayConfigGenerator:
                 'securitySchemes': {}
             }
         }
-        
+
         # Add authentication schemes
         if config.global_auth == AuthType.JWT:
             spec['components']['securitySchemes']['jwt'] = {
@@ -315,12 +315,12 @@ class AWSAPIGatewayConfigGenerator:
                 'name': 'x-api-key',
                 'in': 'header'
             }
-        
+
         # Add paths
         for route in config.routes:
             if route.path not in spec['paths']:
                 spec['paths'][route.path] = {}
-            
+
             for method in route.methods:
                 method_lower = method.lower()
                 spec['paths'][route.path][method_lower] = {
@@ -337,43 +337,43 @@ class AWSAPIGatewayConfigGenerator:
                         'connectionType': 'INTERNET'
                     }
                 }
-                
+
                 # Add security requirement
                 if route.auth != AuthType.NONE:
                     if route.auth == AuthType.JWT:
                         spec['paths'][route.path][method_lower]['security'] = [{'jwt': []}]
                     elif route.auth == AuthType.API_KEY:
                         spec['paths'][route.path][method_lower]['security'] = [{'apiKey': []}]
-        
+
         return spec
 
 
 class APIGatewayManager:
     """Manage API gateway configurations"""
-    
+
     def __init__(self, gateway_type: GatewayType):
         self.gateway_type = gateway_type
         self.configs: Dict[str, APIGatewayConfig] = {}
-    
+
     def create_config(self, name: str, **kwargs) -> APIGatewayConfig:
         """Create new gateway configuration"""
         config = APIGatewayConfig(name=name, **kwargs)
         self.configs[name] = config
         return config
-    
+
     def generate_config(self, config: APIGatewayConfig) -> str:
         """Generate configuration for specified gateway type"""
         if self.gateway_type == GatewayType.KONG:
             kong_config = KongConfigGenerator.generate_complete_config(config)
             return yaml.dump(kong_config, default_flow_style=False)
-        
+
         elif self.gateway_type == GatewayType.AWS_API_GATEWAY:
             aws_config = AWSAPIGatewayConfigGenerator.generate_openapi_spec(config)
             return json.dumps(aws_config, indent=2)
-        
+
         else:
             raise ValueError(f"Unsupported gateway type: {self.gateway_type}")
-    
+
     def save_config(self, config: APIGatewayConfig, output_file: str) -> None:
         """Generate and save configuration to file"""
         config_content = self.generate_config(config)
@@ -394,7 +394,7 @@ def create_nba_mcp_gateway() -> APIGatewayConfig:
         path="/",
         retries=3
     )
-    
+
     # Define routes
     routes = [
         Route(
@@ -437,7 +437,7 @@ def create_nba_mcp_gateway() -> APIGatewayConfig:
             tags=["stats"]
         )
     ]
-    
+
     return APIGatewayConfig(
         name="nba-mcp-gateway",
         services=[nba_service],
@@ -454,25 +454,25 @@ def create_nba_mcp_gateway() -> APIGatewayConfig:
 if __name__ == "__main__":
     import os
     logging.basicConfig(level=logging.INFO)
-    
+
     # Create NBA MCP gateway configuration
     config = create_nba_mcp_gateway()
-    
+
     os.makedirs("config/api_gateway", exist_ok=True)
-    
+
     # Generate Kong configuration
     print("=== Generating Kong Configuration ===\n")
     kong_manager = APIGatewayManager(GatewayType.KONG)
     kong_config = kong_manager.generate_config(config)
     kong_manager.save_config(config, "config/api_gateway/kong.yaml")
     print(kong_config[:500] + "...\n")
-    
+
     # Generate AWS API Gateway configuration
     print("\n=== Generating AWS API Gateway Configuration ===\n")
     aws_manager = APIGatewayManager(GatewayType.AWS_API_GATEWAY)
     aws_config = aws_manager.generate_config(config)
     aws_manager.save_config(config, "config/api_gateway/aws_api_gateway.json")
     print(aws_config[:500] + "...\n")
-    
+
     print("\nConfigurations saved to config/api_gateway/")
 

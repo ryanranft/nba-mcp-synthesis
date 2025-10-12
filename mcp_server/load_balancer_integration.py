@@ -3,7 +3,7 @@ Load Balancer Integration
 
 Provides integration with common load balancers:
 - HAProxy configuration generation
-- Nginx upstream configuration  
+- Nginx upstream configuration
 - AWS ALB/ELB integration
 - Health check endpoints
 - Weighted routing
@@ -63,7 +63,7 @@ class Backend:
     max_connections: int = 1000
     backup: bool = False
     enabled: bool = True
-    
+
     @property
     def address(self) -> str:
         return f"{self.host}:{self.port}"
@@ -100,12 +100,12 @@ class LoadBalancerConfig:
 
 class HAProxyConfigGenerator:
     """Generate HAProxy configuration"""
-    
+
     @staticmethod
     def generate(config: LoadBalancerConfig) -> str:
         """Generate HAProxy config file"""
         cfg = []
-        
+
         # Global settings
         cfg.append("global")
         cfg.append("    log /dev/log local0")
@@ -115,7 +115,7 @@ class HAProxyConfigGenerator:
         cfg.append("    group haproxy")
         cfg.append("    daemon")
         cfg.append("")
-        
+
         # Defaults
         cfg.append("defaults")
         cfg.append("    log global")
@@ -126,10 +126,10 @@ class HAProxyConfigGenerator:
         cfg.append("    timeout client {}s".format(config.connection_timeout_seconds))
         cfg.append("    timeout server {}s".format(config.connection_timeout_seconds))
         cfg.append("")
-        
+
         # Frontend
         cfg.append("frontend {}_frontend".format(config.name))
-        
+
         if config.ssl_enabled and config.ssl_cert_path:
             cfg.append("    bind *:{} ssl crt {}".format(
                 config.listen_port,
@@ -137,9 +137,9 @@ class HAProxyConfigGenerator:
             ))
         else:
             cfg.append("    bind *:{}".format(config.listen_port))
-        
+
         cfg.append("    default_backend {}_backend".format(config.name))
-        
+
         # Rate limiting
         if config.rate_limit_requests_per_second:
             cfg.append("    stick-table type ip size 100k expire 30s store http_req_rate(10s)")
@@ -147,12 +147,12 @@ class HAProxyConfigGenerator:
             cfg.append("    http-request deny deny_status 429 if {{ sc_http_req_rate(0) gt {} }}".format(
                 config.rate_limit_requests_per_second
             ))
-        
+
         cfg.append("")
-        
+
         # Backend
         cfg.append("backend {}_backend".format(config.name))
-        
+
         # Algorithm
         algo_map = {
             RoutingAlgorithm.ROUND_ROBIN: "roundrobin",
@@ -161,54 +161,54 @@ class HAProxyConfigGenerator:
             RoutingAlgorithm.WEIGHTED_ROUND_ROBIN: "roundrobin"
         }
         cfg.append("    balance {}".format(algo_map.get(config.algorithm, "roundrobin")))
-        
+
         # Session affinity
         if config.session_affinity:
             cfg.append("    cookie SERVERID insert indirect nocache")
-        
+
         # Health check
         if config.health_check:
             hc = config.health_check
             cfg.append("    option httpchk GET {}".format(hc.path))
             cfg.append("    http-check expect status {}".format(hc.expected_status))
-        
+
         # Servers
         for i, backend in enumerate(config.backends):
             if not backend.enabled:
                 continue
-            
+
             server_line = "    server server{} {} weight {} maxconn {}".format(
                 i + 1,
                 backend.address,
                 backend.weight,
                 backend.max_connections
             )
-            
+
             if config.health_check:
                 server_line += " check inter {}s".format(config.health_check.interval_seconds)
-            
+
             if backend.backup:
                 server_line += " backup"
-            
+
             if config.session_affinity:
                 server_line += " cookie server{}".format(i + 1)
-            
+
             cfg.append(server_line)
-        
+
         return "\n".join(cfg)
 
 
 class NginxConfigGenerator:
     """Generate Nginx configuration"""
-    
+
     @staticmethod
     def generate(config: LoadBalancerConfig) -> str:
         """Generate Nginx config file"""
         cfg = []
-        
+
         # Upstream block
         cfg.append("upstream {}_upstream {{".format(config.name))
-        
+
         # Algorithm
         algo_map = {
             RoutingAlgorithm.LEAST_CONNECTIONS: "least_conn;",
@@ -218,32 +218,32 @@ class NginxConfigGenerator:
         algo_directive = algo_map.get(config.algorithm, "")
         if algo_directive:
             cfg.append("    " + algo_directive)
-        
+
         # Servers
         for backend in config.backends:
             if not backend.enabled:
                 continue
-            
+
             server_line = "    server {}".format(backend.address)
-            
+
             if backend.weight != 100:
                 server_line += " weight={}".format(backend.weight)
-            
+
             if backend.max_connections:
                 server_line += " max_conns={}".format(backend.max_connections)
-            
+
             if backend.backup:
                 server_line += " backup"
-            
+
             server_line += ";"
             cfg.append(server_line)
-        
+
         cfg.append("}")
         cfg.append("")
-        
+
         # Server block
         cfg.append("server {")
-        
+
         if config.ssl_enabled:
             cfg.append("    listen {} ssl http2;".format(config.listen_port))
             if config.ssl_cert_path:
@@ -252,10 +252,10 @@ class NginxConfigGenerator:
                 cfg.append("    ssl_certificate_key {};".format(config.ssl_key_path))
         else:
             cfg.append("    listen {};".format(config.listen_port))
-        
+
         cfg.append("    server_name _;")
         cfg.append("")
-        
+
         # Health check location
         if config.health_check:
             cfg.append("    location {} {{".format(config.health_check.path))
@@ -264,7 +264,7 @@ class NginxConfigGenerator:
             cfg.append("        add_header Content-Type text/plain;")
             cfg.append("    }")
             cfg.append("")
-        
+
         # Proxy settings
         cfg.append("    location / {")
         cfg.append("        proxy_pass http://{}_upstream;".format(config.name))
@@ -275,7 +275,7 @@ class NginxConfigGenerator:
         cfg.append("        proxy_connect_timeout {}s;".format(config.connection_timeout_seconds))
         cfg.append("        proxy_send_timeout {}s;".format(config.connection_timeout_seconds))
         cfg.append("        proxy_read_timeout {}s;".format(config.connection_timeout_seconds))
-        
+
         # Rate limiting
         if config.rate_limit_requests_per_second:
             cfg.append("        limit_req_zone $binary_remote_addr zone={}:10m rate={}r/s;".format(
@@ -283,20 +283,20 @@ class NginxConfigGenerator:
                 config.rate_limit_requests_per_second
             ))
             cfg.append("        limit_req zone={} burst=20 nodelay;".format(config.name))
-        
+
         cfg.append("    }")
         cfg.append("}")
-        
+
         return "\n".join(cfg)
 
 
 class LoadBalancerManager:
     """Manage load balancer configurations"""
-    
+
     def __init__(self, lb_type: LoadBalancerType):
         self.lb_type = lb_type
         self.configs: Dict[str, LoadBalancerConfig] = {}
-    
+
     def add_backend(self, config_name: str, backend: Backend) -> None:
         """Add backend to existing configuration"""
         if config_name in self.configs:
@@ -304,7 +304,7 @@ class LoadBalancerManager:
             logger.info(f"Added backend {backend.address} to {config_name}")
         else:
             logger.warning(f"Configuration {config_name} not found")
-    
+
     def remove_backend(self, config_name: str, backend_address: str) -> bool:
         """Remove backend from configuration"""
         if config_name in self.configs:
@@ -316,15 +316,15 @@ class LoadBalancerManager:
                 logger.info(f"Removed backend {backend_address} from {config_name}")
             return removed
         return False
-    
+
     def enable_backend(self, config_name: str, backend_address: str) -> bool:
         """Enable a backend"""
         return self._toggle_backend(config_name, backend_address, True)
-    
+
     def disable_backend(self, config_name: str, backend_address: str) -> bool:
         """Disable a backend"""
         return self._toggle_backend(config_name, backend_address, False)
-    
+
     def _toggle_backend(self, config_name: str, backend_address: str, enabled: bool) -> bool:
         """Toggle backend enabled status"""
         if config_name in self.configs:
@@ -334,30 +334,30 @@ class LoadBalancerManager:
                     logger.info(f"{'Enabled' if enabled else 'Disabled'} backend {backend_address}")
                     return True
         return False
-    
+
     def generate_config(self, config: LoadBalancerConfig) -> str:
         """Generate configuration file"""
         self.configs[config.name] = config
-        
+
         if self.lb_type == LoadBalancerType.HAPROXY:
             return HAProxyConfigGenerator.generate(config)
         elif self.lb_type == LoadBalancerType.NGINX:
             return NginxConfigGenerator.generate(config)
         else:
             raise ValueError(f"Unsupported load balancer type: {self.lb_type}")
-    
+
     def save_config(self, config: LoadBalancerConfig, output_path: str) -> None:
         """Generate and save configuration to file"""
         cfg_content = self.generate_config(config)
         with open(output_path, 'w') as f:
             f.write(cfg_content)
         logger.info(f"Configuration saved to {output_path}")
-    
+
     def get_backend_status(self, config_name: str) -> List[Dict[str, Any]]:
         """Get status of all backends"""
         if config_name not in self.configs:
             return []
-        
+
         config = self.configs[config_name]
         return [
             {
@@ -380,7 +380,7 @@ def create_nba_mcp_load_balancer(port: int = 8000) -> LoadBalancerConfig:
         Backend(host="10.0.1.12", port=8000, weight=50),
         Backend(host="10.0.1.13", port=8000, weight=100, backup=True),
     ]
-    
+
     health_check = HealthCheck(
         protocol=HealthCheckProtocol.HTTP,
         path="/health",
@@ -389,7 +389,7 @@ def create_nba_mcp_load_balancer(port: int = 8000) -> LoadBalancerConfig:
         healthy_threshold=2,
         unhealthy_threshold=3
     )
-    
+
     return LoadBalancerConfig(
         name="nba_mcp",
         listen_port=port,
@@ -408,27 +408,27 @@ def create_nba_mcp_load_balancer(port: int = 8000) -> LoadBalancerConfig:
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    
+
     # Create NBA MCP load balancer configuration
     config = create_nba_mcp_load_balancer()
-    
+
     # Generate HAProxy configuration
     print("=== HAProxy Configuration ===\n")
     haproxy_manager = LoadBalancerManager(LoadBalancerType.HAPROXY)
     haproxy_config = haproxy_manager.generate_config(config)
     print(haproxy_config)
-    
+
     print("\n\n=== Nginx Configuration ===\n")
     # Generate Nginx configuration
     nginx_manager = LoadBalancerManager(LoadBalancerType.NGINX)
     nginx_config = nginx_manager.generate_config(config)
     print(nginx_config)
-    
+
     # Save configurations
     os.makedirs("config/load_balancers", exist_ok=True)
     haproxy_manager.save_config(config, "config/load_balancers/haproxy.cfg")
     nginx_manager.save_config(config, "config/load_balancers/nginx.conf")
-    
+
     print("\n\n=== Backend Status ===\n")
     # Get backend status
     status = haproxy_manager.get_backend_status("nba_mcp")

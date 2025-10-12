@@ -63,7 +63,7 @@ class Message:
     retry_count: int = 0
     max_retries: int = 3
     delay_seconds: int = 0
-    
+
     def to_json(self) -> str:
         """Serialize message to JSON"""
         return json.dumps({
@@ -75,7 +75,7 @@ class Message:
             'max_retries': self.max_retries,
             'delay_seconds': self.delay_seconds
         })
-    
+
     @classmethod
     def from_json(cls, json_str: str) -> 'Message':
         """Deserialize message from JSON"""
@@ -93,32 +93,32 @@ class Message:
 
 class MessageQueueBase(ABC):
     """Base class for message queue implementations"""
-    
+
     @abstractmethod
     def connect(self) -> bool:
         """Connect to message broker"""
         pass
-    
+
     @abstractmethod
     def disconnect(self) -> None:
         """Disconnect from message broker"""
         pass
-    
+
     @abstractmethod
     def send(self, queue_name: str, message: Message) -> bool:
         """Send message to queue"""
         pass
-    
+
     @abstractmethod
     def receive(self, queue_name: str, timeout_seconds: int = 30) -> Optional[Message]:
         """Receive message from queue"""
         pass
-    
+
     @abstractmethod
     def acknowledge(self, queue_name: str, message_id: str) -> bool:
         """Acknowledge message processing"""
         pass
-    
+
     @abstractmethod
     def reject(self, queue_name: str, message_id: str, requeue: bool = True) -> bool:
         """Reject message"""
@@ -127,7 +127,7 @@ class MessageQueueBase(ABC):
 
 class RabbitMQAdapter(MessageQueueBase):
     """RabbitMQ message queue adapter"""
-    
+
     def __init__(self, host: str = 'localhost', port: int = 5672,
                  username: str = 'guest', password: str = 'guest',
                  virtual_host: str = '/'):
@@ -138,7 +138,7 @@ class RabbitMQAdapter(MessageQueueBase):
         self.virtual_host = virtual_host
         self.connection = None
         self.channel = None
-    
+
     def connect(self) -> bool:
         """Connect to RabbitMQ"""
         try:
@@ -160,19 +160,19 @@ class RabbitMQAdapter(MessageQueueBase):
         except Exception as e:
             logger.error(f"Failed to connect to RabbitMQ: {e}")
             return False
-    
+
     def disconnect(self) -> None:
         """Disconnect from RabbitMQ"""
         if self.connection and not self.connection.is_closed:
             self.connection.close()
             logger.info("Disconnected from RabbitMQ")
-    
+
     def send(self, queue_name: str, message: Message) -> bool:
         """Send message to RabbitMQ queue"""
         if not self.channel:
             logger.error("Not connected to RabbitMQ")
             return False
-        
+
         try:
             # Declare queue
             self.channel.queue_declare(
@@ -180,7 +180,7 @@ class RabbitMQAdapter(MessageQueueBase):
                 durable=True,
                 arguments={'x-max-priority': 15}
             )
-            
+
             # Publish message
             import pika
             self.channel.basic_publish(
@@ -197,13 +197,13 @@ class RabbitMQAdapter(MessageQueueBase):
         except Exception as e:
             logger.error(f"Failed to send message: {e}")
             return False
-    
+
     def receive(self, queue_name: str, timeout_seconds: int = 30) -> Optional[Message]:
         """Receive message from RabbitMQ queue"""
         if not self.channel:
             logger.error("Not connected to RabbitMQ")
             return None
-        
+
         try:
             method_frame, header_frame, body = self.channel.basic_get(queue_name)
             if method_frame:
@@ -214,7 +214,7 @@ class RabbitMQAdapter(MessageQueueBase):
         except Exception as e:
             logger.error(f"Failed to receive message: {e}")
             return None
-    
+
     def acknowledge(self, queue_name: str, message_id: str) -> bool:
         """Acknowledge message processing"""
         try:
@@ -223,7 +223,7 @@ class RabbitMQAdapter(MessageQueueBase):
         except Exception as e:
             logger.error(f"Failed to acknowledge message: {e}")
             return False
-    
+
     def reject(self, queue_name: str, message_id: str, requeue: bool = True) -> bool:
         """Reject message"""
         try:
@@ -236,12 +236,12 @@ class RabbitMQAdapter(MessageQueueBase):
 
 class KafkaAdapter(MessageQueueBase):
     """Apache Kafka message queue adapter"""
-    
+
     def __init__(self, bootstrap_servers: List[str] = None):
         self.bootstrap_servers = bootstrap_servers or ['localhost:9092']
         self.producer = None
         self.consumer = None
-    
+
     def connect(self) -> bool:
         """Connect to Kafka"""
         try:
@@ -258,7 +258,7 @@ class KafkaAdapter(MessageQueueBase):
         except Exception as e:
             logger.error(f"Failed to connect to Kafka: {e}")
             return False
-    
+
     def disconnect(self) -> None:
         """Disconnect from Kafka"""
         if self.producer:
@@ -266,13 +266,13 @@ class KafkaAdapter(MessageQueueBase):
         if self.consumer:
             self.consumer.close()
         logger.info("Disconnected from Kafka")
-    
+
     def send(self, queue_name: str, message: Message) -> bool:
         """Send message to Kafka topic"""
         if not self.producer:
             logger.error("Not connected to Kafka")
             return False
-        
+
         try:
             future = self.producer.send(queue_name, message.to_json())
             future.get(timeout=10)  # Wait for send confirmation
@@ -281,7 +281,7 @@ class KafkaAdapter(MessageQueueBase):
         except Exception as e:
             logger.error(f"Failed to send message: {e}")
             return False
-    
+
     def receive(self, queue_name: str, timeout_seconds: int = 30) -> Optional[Message]:
         """Receive message from Kafka topic"""
         if not self.consumer:
@@ -293,7 +293,7 @@ class KafkaAdapter(MessageQueueBase):
                 enable_auto_commit=False,
                 value_deserializer=lambda m: m.decode('utf-8')
             )
-        
+
         try:
             messages = self.consumer.poll(timeout_ms=timeout_seconds * 1000)
             for topic_partition, records in messages.items():
@@ -304,7 +304,7 @@ class KafkaAdapter(MessageQueueBase):
         except Exception as e:
             logger.error(f"Failed to receive message: {e}")
             return None
-    
+
     def acknowledge(self, queue_name: str, message_id: str) -> bool:
         """Acknowledge message processing (commit offset)"""
         try:
@@ -314,7 +314,7 @@ class KafkaAdapter(MessageQueueBase):
         except Exception as e:
             logger.error(f"Failed to acknowledge message: {e}")
             return False
-    
+
     def reject(self, queue_name: str, message_id: str, requeue: bool = True) -> bool:
         """Reject message (Kafka doesn't support traditional nack)"""
         # In Kafka, we don't commit the offset to "reject" a message
@@ -324,13 +324,13 @@ class KafkaAdapter(MessageQueueBase):
 
 class MessageQueueManager:
     """High-level message queue manager"""
-    
+
     def __init__(self, queue_type: QueueType, **kwargs):
         self.queue_type = queue_type
         self.adapter = self._create_adapter(queue_type, **kwargs)
         self.workers: Dict[str, threading.Thread] = {}
         self.stop_flags: Dict[str, threading.Event] = {}
-    
+
     def _create_adapter(self, queue_type: QueueType, **kwargs) -> MessageQueueBase:
         """Create appropriate adapter based on queue type"""
         if queue_type == QueueType.RABBITMQ:
@@ -339,18 +339,18 @@ class MessageQueueManager:
             return KafkaAdapter(**kwargs)
         else:
             raise ValueError(f"Unsupported queue type: {queue_type}")
-    
+
     def connect(self) -> bool:
         """Connect to message broker"""
         return self.adapter.connect()
-    
+
     def disconnect(self) -> None:
         """Disconnect from message broker"""
         # Stop all workers
         for queue_name in list(self.workers.keys()):
             self.stop_worker(queue_name)
         self.adapter.disconnect()
-    
+
     def send_message(self, queue_name: str, body: Dict[str, Any],
                      priority: MessagePriority = MessagePriority.NORMAL,
                      delay_seconds: int = 0) -> bool:
@@ -362,17 +362,17 @@ class MessageQueueManager:
             delay_seconds=delay_seconds
         )
         return self.adapter.send(queue_name, message)
-    
+
     def start_worker(self, queue_name: str, handler: Callable[[Message], bool],
                      max_workers: int = 1) -> None:
         """Start worker thread(s) to process messages"""
         if queue_name in self.workers:
             logger.warning(f"Worker for {queue_name} already running")
             return
-        
+
         stop_flag = threading.Event()
         self.stop_flags[queue_name] = stop_flag
-        
+
         def worker_loop():
             logger.info(f"Worker started for queue: {queue_name}")
             while not stop_flag.is_set():
@@ -381,7 +381,7 @@ class MessageQueueManager:
                     try:
                         # Process message
                         success = handler(message)
-                        
+
                         if success:
                             self.adapter.acknowledge(queue_name, message.id)
                             logger.debug(f"Processed message {message.id}")
@@ -398,11 +398,11 @@ class MessageQueueManager:
                         logger.error(f"Error processing message: {e}")
                         self.adapter.reject(queue_name, message.id, requeue=True)
             logger.info(f"Worker stopped for queue: {queue_name}")
-        
+
         worker_thread = threading.Thread(target=worker_loop, daemon=True)
         worker_thread.start()
         self.workers[queue_name] = worker_thread
-    
+
     def stop_worker(self, queue_name: str) -> None:
         """Stop worker thread"""
         if queue_name in self.stop_flags:
@@ -446,7 +446,7 @@ def ml_training_handler(message: Message) -> bool:
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    
+
     # Create message queue manager (RabbitMQ example)
     manager = MessageQueueManager(
         queue_type=QueueType.RABBITMQ,
@@ -455,7 +455,7 @@ if __name__ == "__main__":
         username='guest',
         password='guest'
     )
-    
+
     # Connect to broker
     if manager.connect():
         # Send some messages
@@ -464,23 +464,23 @@ if __name__ == "__main__":
             {'game_id': 12345, 'season': 2024},
             priority=MessagePriority.HIGH
         )
-        
+
         manager.send_message(
             'ml_training',
             {'model_type': 'player_prediction', 'dataset': 'games_2024'},
             priority=MessagePriority.NORMAL
         )
-        
+
         # Start workers
         manager.start_worker('nba_data_ingestion', nba_data_ingestion_handler)
         manager.start_worker('ml_training', ml_training_handler)
-        
+
         # Let workers process messages
         try:
             time.sleep(10)
         except KeyboardInterrupt:
             pass
-        
+
         # Cleanup
         manager.disconnect()
         print("Done!")

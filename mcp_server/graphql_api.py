@@ -175,14 +175,14 @@ type Query {
         position: String
         orderBy: PlayerOrderBy
     ): PlayerConnection!
-    
+
     # Team queries
     team(id: ID!): Team
     teams(
         conference: String
         division: String
     ): [Team!]!
-    
+
     # Game queries
     game(id: ID!): Game
     games(
@@ -192,7 +192,7 @@ type Query {
         team: String
         season: Int
     ): GameConnection!
-    
+
     # Search
     search(query: String!): SearchResult!
 }
@@ -241,19 +241,19 @@ type PlayerEdge {
 
 class GraphQLResolvers:
     """GraphQL resolvers for NBA data"""
-    
+
     def __init__(self, db_connection=None):
         self.db = db_connection
         self.data_loaders = {}
-    
+
     # Query Resolvers
-    
+
     async def resolve_player(self, info, id: str) -> Optional[Player]:
         """Resolve single player by ID"""
         # Use DataLoader to batch queries
         player_loader = self._get_player_loader()
         return await player_loader.load(int(id))
-    
+
     async def resolve_players(
         self,
         info,
@@ -267,15 +267,15 @@ class GraphQLResolvers:
         # Build query
         query = "SELECT * FROM players WHERE 1=1"
         params = []
-        
+
         if team:
             query += " AND team = ?"
             params.append(team)
-        
+
         if position:
             query += " AND position = ?"
             params.append(position)
-        
+
         # Ordering
         order_map = {
             'PPG_DESC': 'ppg DESC',
@@ -285,21 +285,21 @@ class GraphQLResolvers:
         }
         if order_by and order_by in order_map:
             query += f" ORDER BY {order_map[order_by]}"
-        
+
         # Cursor-based pagination
         if after:
             query += " AND id > ?"
             params.append(after)
-        
+
         query += f" LIMIT {first + 1}"  # +1 to check hasNextPage
-        
+
         # Execute query (mock implementation)
         players = await self._execute_query(query, params)
-        
+
         has_next_page = len(players) > first
         if has_next_page:
             players = players[:first]
-        
+
         edges = [
             {
                 'cursor': str(player.id),
@@ -307,7 +307,7 @@ class GraphQLResolvers:
             }
             for player in players
         ]
-        
+
         return {
             'edges': edges,
             'pageInfo': {
@@ -318,12 +318,12 @@ class GraphQLResolvers:
             },
             'totalCount': await self._count_players(team, position)
         }
-    
+
     async def resolve_team(self, info, id: str) -> Optional[Team]:
         """Resolve single team by ID"""
         team_loader = self._get_team_loader()
         return await team_loader.load(int(id))
-    
+
     async def resolve_teams(
         self,
         info,
@@ -333,22 +333,22 @@ class GraphQLResolvers:
         """Resolve teams with filtering"""
         query = "SELECT * FROM teams WHERE 1=1"
         params = []
-        
+
         if conference:
             query += " AND conference = ?"
             params.append(conference)
-        
+
         if division:
             query += " AND division = ?"
             params.append(division)
-        
+
         return await self._execute_query(query, params)
-    
+
     async def resolve_game(self, info, id: str) -> Optional[Game]:
         """Resolve single game by ID"""
         game_loader = self._get_game_loader()
         return await game_loader.load(int(id))
-    
+
     async def resolve_search(self, info, query: str) -> Dict[str, Any]:
         """Search across players, teams, and games"""
         results = {
@@ -357,14 +357,14 @@ class GraphQLResolvers:
             'games': await self._search_games(query)
         }
         return results
-    
+
     # Field Resolvers
-    
+
     async def resolve_player_team(self, player: Player, info) -> Team:
         """Resolve team for a player"""
         team_loader = self._get_team_loader()
         return await team_loader.load_by_name(player.team)
-    
+
     async def resolve_player_stats(
         self,
         player: Player,
@@ -374,9 +374,9 @@ class GraphQLResolvers:
         """Resolve player stats for a season"""
         if not season:
             season = datetime.now().year
-        
+
         return await self._get_player_stats(player.id, season)
-    
+
     async def resolve_team_players(
         self,
         team: Team,
@@ -386,15 +386,15 @@ class GraphQLResolvers:
         """Resolve players for a team"""
         query = "SELECT * FROM players WHERE team = ?"
         params = [team.name]
-        
+
         if position:
             query += " AND position = ?"
             params.append(position)
-        
+
         return await self._execute_query(query, params)
-    
+
     # Mutation Resolvers
-    
+
     async def resolve_update_player_stats(
         self,
         info,
@@ -406,7 +406,7 @@ class GraphQLResolvers:
         player_loader = self._get_player_loader()
         player_loader.clear(int(player_id))  # Clear cache
         return await player_loader.load(int(player_id))
-    
+
     async def resolve_update_game_score(
         self,
         info,
@@ -420,66 +420,66 @@ class GraphQLResolvers:
             home_score,
             away_score
         )
-        
+
         # Notify subscribers
         await self._publish_game_update(int(game_id))
-        
+
         game_loader = self._get_game_loader()
         game_loader.clear(int(game_id))
         return await game_loader.load(int(game_id))
-    
+
     # DataLoader implementations
-    
+
     def _get_player_loader(self):
         """Get or create player DataLoader"""
         if 'player' not in self.data_loaders:
             from dataloader import DataLoader
             self.data_loaders['player'] = DataLoader(self._batch_load_players)
         return self.data_loaders['player']
-    
+
     def _get_team_loader(self):
         """Get or create team DataLoader"""
         if 'team' not in self.data_loaders:
             from dataloader import DataLoader
             self.data_loaders['team'] = DataLoader(self._batch_load_teams)
         return self.data_loaders['team']
-    
+
     def _get_game_loader(self):
         """Get or create game DataLoader"""
         if 'game' not in self.data_loaders:
             from dataloader import DataLoader
             self.data_loaders['game'] = DataLoader(self._batch_load_games)
         return self.data_loaders['game']
-    
+
     async def _batch_load_players(self, ids: List[int]) -> List[Optional[Player]]:
         """Batch load players by IDs"""
         query = f"SELECT * FROM players WHERE id IN ({','.join('?' * len(ids))})"
         players = await self._execute_query(query, ids)
         player_map = {p.id: p for p in players}
         return [player_map.get(id) for id in ids]
-    
+
     async def _batch_load_teams(self, ids: List[int]) -> List[Optional[Team]]:
         """Batch load teams by IDs"""
         query = f"SELECT * FROM teams WHERE id IN ({','.join('?' * len(ids))})"
         teams = await self._execute_query(query, ids)
         team_map = {t.id: t for t in teams}
         return [team_map.get(id) for id in ids]
-    
+
     async def _batch_load_games(self, ids: List[int]) -> List[Optional[Game]]:
         """Batch load games by IDs"""
         query = f"SELECT * FROM games WHERE id IN ({','.join('?' * len(ids))})"
         games = await self._execute_query(query, ids)
         game_map = {g.id: g for g in games}
         return [game_map.get(id) for id in ids]
-    
+
     # Mock database operations
-    
+
     async def _execute_query(self, query: str, params: List[Any]) -> List[Any]:
         """Execute database query (mock)"""
         logger.info(f"Executing query: {query} with params: {params}")
         # In real implementation, use actual database
         return []
-    
+
     async def _count_players(
         self,
         team: Optional[str] = None,
@@ -488,7 +488,7 @@ class GraphQLResolvers:
         """Count players with filters"""
         # Mock implementation
         return 450
-    
+
     async def _get_player_stats(self, player_id: int, season: int) -> Dict[str, Any]:
         """Get player stats for season"""
         # Mock implementation
@@ -499,11 +499,11 @@ class GraphQLResolvers:
             'rebounds': 650,
             'assists': 450
         }
-    
+
     async def _update_player_stats(self, player_id: int, stats: Dict[str, int]) -> None:
         """Update player stats"""
         logger.info(f"Updating stats for player {player_id}: {stats}")
-    
+
     async def _update_game_score(
         self,
         game_id: int,
@@ -512,19 +512,19 @@ class GraphQLResolvers:
     ) -> None:
         """Update game score"""
         logger.info(f"Updating game {game_id}: {home_score}-{away_score}")
-    
+
     async def _publish_game_update(self, game_id: int) -> None:
         """Publish game update to subscribers"""
         logger.info(f"Publishing update for game {game_id}")
-    
+
     async def _search_players(self, query: str) -> List[Player]:
         """Search players"""
         return []
-    
+
     async def _search_teams(self, query: str) -> List[Team]:
         """Search teams"""
         return []
-    
+
     async def _search_games(self, query: str) -> List[Game]:
         """Search games"""
         return []
@@ -532,20 +532,20 @@ class GraphQLResolvers:
 
 class GraphQLServer:
     """GraphQL server setup"""
-    
+
     def __init__(self, resolvers: GraphQLResolvers):
         self.resolvers = resolvers
         self.schema = SCHEMA
-    
+
     def create_app(self):
         """Create GraphQL application"""
         try:
             from graphene import Schema
             from flask import Flask
             from flask_graphql import GraphQLView
-            
+
             app = Flask(__name__)
-            
+
             # Create GraphQL endpoint
             app.add_url_rule(
                 '/graphql',
@@ -555,7 +555,7 @@ class GraphQLServer:
                     graphiql=True  # Enable GraphiQL interface
                 )
             )
-            
+
             return app
         except ImportError:
             logger.error("graphene or flask-graphql not installed")
@@ -564,11 +564,11 @@ class GraphQLServer:
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    
+
     # Example GraphQL queries
     print("=== GraphQL Schema ===\n")
     print(SCHEMA[:500] + "...\n")
-    
+
     print("=== Example Query ===\n")
     example_query = """
     query {
@@ -589,7 +589,7 @@ if __name__ == "__main__":
     }
     """
     print(example_query)
-    
+
     print("\n=== Example Mutation ===\n")
     example_mutation = """
     mutation {

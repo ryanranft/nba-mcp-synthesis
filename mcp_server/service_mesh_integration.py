@@ -68,7 +68,7 @@ class DestinationRule:
 
 class IstioConfigGenerator:
     """Generate Istio configuration"""
-    
+
     @staticmethod
     def generate_virtual_service(vs: VirtualService) -> Dict[str, Any]:
         """Generate Istio VirtualService"""
@@ -83,7 +83,7 @@ class IstioConfigGenerator:
                 'http': vs.routes
             }
         }
-    
+
     @staticmethod
     def generate_destination_rule(dr: DestinationRule) -> Dict[str, Any]:
         """Generate Istio DestinationRule"""
@@ -91,13 +91,13 @@ class IstioConfigGenerator:
             'host': dr.host,
             'subsets': dr.subsets
         }
-        
+
         if dr.connection_pool:
             spec['trafficPolicy'] = {'connectionPool': dr.connection_pool}
-        
+
         if dr.outlier_detection:
             spec.setdefault('trafficPolicy', {})['outlierDetection'] = dr.outlier_detection
-        
+
         return {
             'apiVersion': 'networking.istio.io/v1beta1',
             'kind': 'DestinationRule',
@@ -111,7 +111,7 @@ class IstioConfigGenerator:
 # NBA MCP service mesh example
 def create_nba_mcp_service_mesh() -> List[Dict[str, Any]]:
     """Create service mesh config for NBA MCP"""
-    
+
     # Virtual Service for canary deployment
     vs = VirtualService(
         name="nba-mcp-virtual-service",
@@ -129,7 +129,7 @@ def create_nba_mcp_service_mesh() -> List[Dict[str, Any]]:
             }
         ]
     )
-    
+
     # Destination Rule with circuit breaker
     dr = DestinationRule(
         name="nba-mcp-destination-rule",
@@ -149,7 +149,7 @@ def create_nba_mcp_service_mesh() -> List[Dict[str, Any]]:
             'maxEjectionPercent': 50
         }
     )
-    
+
     return [
         IstioConfigGenerator.generate_virtual_service(vs),
         IstioConfigGenerator.generate_destination_rule(dr)
@@ -159,21 +159,21 @@ def create_nba_mcp_service_mesh() -> List[Dict[str, Any]]:
 if __name__ == "__main__":
     import os
     logging.basicConfig(level=logging.INFO)
-    
+
     # Generate Istio configuration
     configs = create_nba_mcp_service_mesh()
-    
+
     os.makedirs("k8s/istio", exist_ok=True)
-    
+
     output = []
     for config in configs:
         output.append(yaml.dump(config, default_flow_style=False))
-    
+
     yaml_content = "---\n".join(output)
-    
+
     with open("k8s/istio/nba-mcp-service-mesh.yaml", 'w') as f:
         f.write(yaml_content)
-    
+
     print("=== Istio Configuration ===\n")
     print(yaml_content[:800] + "...\n")
     print("\nConfiguration saved to k8s/istio/nba-mcp-service-mesh.yaml")

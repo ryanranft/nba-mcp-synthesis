@@ -65,7 +65,7 @@ class WebSocketMessage:
     channel: str
     data: Dict[str, Any]
     timestamp: datetime = field(default_factory=datetime.now)
-    
+
     def to_json(self) -> str:
         """Serialize to JSON"""
         return json.dumps({
@@ -74,7 +74,7 @@ class WebSocketMessage:
             'data': self.data,
             'timestamp': self.timestamp.isoformat()
         })
-    
+
     @classmethod
     def from_json(cls, json_str: str) -> 'WebSocketMessage':
         """Deserialize from JSON"""
@@ -98,7 +98,7 @@ class WebSocketClient:
     connected_at: datetime = field(default_factory=datetime.now)
     last_ping: datetime = field(default_factory=datetime.now)
     message_count: int = 0
-    
+
     def is_subscribed(self, channel: str) -> bool:
         """Check if client is subscribed to channel"""
         return channel in self.subscriptions
@@ -106,7 +106,7 @@ class WebSocketClient:
 
 class WebSocketManager:
     """Manage WebSocket connections and broadcasting"""
-    
+
     def __init__(self, ping_interval: int = 30, max_message_rate: int = 100):
         self.clients: Dict[str, WebSocketClient] = {}
         self.channels: Dict[str, Set[str]] = {}  # channel -> set of client_ids
@@ -114,14 +114,14 @@ class WebSocketManager:
         self.max_message_rate = max_message_rate
         self.message_handlers: Dict[str, Callable] = {}
         self._running = False
-    
+
     async def register_client(self, client_id: str, websocket: Any) -> WebSocketClient:
         """Register new WebSocket client"""
         client = WebSocketClient(id=client_id, websocket=websocket)
         self.clients[client_id] = client
-        
+
         logger.info(f"Client {client_id} connected")
-        
+
         # Send welcome message
         await self.send_to_client(
             client_id,
@@ -135,35 +135,35 @@ class WebSocketManager:
                 }
             )
         )
-        
+
         return client
-    
+
     async def unregister_client(self, client_id: str) -> None:
         """Unregister WebSocket client"""
         if client_id in self.clients:
             client = self.clients[client_id]
-            
+
             # Unsubscribe from all channels
             for channel in client.subscriptions.copy():
                 await self.unsubscribe_client(client_id, channel)
-            
+
             del self.clients[client_id]
             logger.info(f"Client {client_id} disconnected")
-    
+
     async def subscribe_client(self, client_id: str, channel: str) -> bool:
         """Subscribe client to channel"""
         if client_id not in self.clients:
             return False
-        
+
         client = self.clients[client_id]
         client.subscriptions.add(channel)
-        
+
         if channel not in self.channels:
             self.channels[channel] = set()
         self.channels[channel].add(client_id)
-        
+
         logger.info(f"Client {client_id} subscribed to {channel}")
-        
+
         # Send confirmation
         await self.send_to_client(
             client_id,
@@ -173,30 +173,30 @@ class WebSocketManager:
                 data={'status': 'subscribed', 'channel': channel}
             )
         )
-        
+
         return True
-    
+
     async def unsubscribe_client(self, client_id: str, channel: str) -> bool:
         """Unsubscribe client from channel"""
         if client_id not in self.clients:
             return False
-        
+
         client = self.clients[client_id]
         client.subscriptions.discard(channel)
-        
+
         if channel in self.channels:
             self.channels[channel].discard(client_id)
             if not self.channels[channel]:
                 del self.channels[channel]
-        
+
         logger.info(f"Client {client_id} unsubscribed from {channel}")
         return True
-    
+
     async def send_to_client(self, client_id: str, message: WebSocketMessage) -> bool:
         """Send message to specific client"""
         if client_id not in self.clients:
             return False
-        
+
         client = self.clients[client_id]
         try:
             await client.websocket.send(message.to_json())
@@ -206,20 +206,20 @@ class WebSocketManager:
             logger.error(f"Failed to send message to {client_id}: {e}")
             await self.unregister_client(client_id)
             return False
-    
+
     async def broadcast_to_channel(self, channel: str, message: WebSocketMessage) -> int:
         """Broadcast message to all clients in channel"""
         if channel not in self.channels:
             return 0
-        
+
         sent_count = 0
         for client_id in self.channels[channel].copy():
             if await self.send_to_client(client_id, message):
                 sent_count += 1
-        
+
         logger.debug(f"Broadcasted to {sent_count} clients in {channel}")
         return sent_count
-    
+
     async def broadcast_to_all(self, message: WebSocketMessage) -> int:
         """Broadcast message to all connected clients"""
         sent_count = 0
@@ -227,12 +227,12 @@ class WebSocketManager:
             if await self.send_to_client(client_id, message):
                 sent_count += 1
         return sent_count
-    
+
     async def handle_message(self, client_id: str, raw_message: str) -> None:
         """Handle incoming WebSocket message"""
         try:
             message = WebSocketMessage.from_json(raw_message)
-            
+
             # Rate limiting
             if not await self._check_rate_limit(client_id):
                 await self.send_to_client(
@@ -244,14 +244,14 @@ class WebSocketManager:
                     )
                 )
                 return
-            
+
             # Handle different message types
             if message.type == MessageType.SUBSCRIBE:
                 await self.subscribe_client(client_id, message.channel)
-            
+
             elif message.type == MessageType.UNSUBSCRIBE:
                 await self.unsubscribe_client(client_id, message.channel)
-            
+
             elif message.type == MessageType.PING:
                 await self.send_to_client(
                     client_id,
@@ -261,7 +261,7 @@ class WebSocketManager:
                         data={'timestamp': datetime.now().isoformat()}
                     )
                 )
-            
+
             elif message.type == MessageType.MESSAGE:
                 # Call custom handler if registered
                 if message.channel in self.message_handlers:
@@ -269,7 +269,7 @@ class WebSocketManager:
                         client_id,
                         message
                     )
-            
+
         except Exception as e:
             logger.error(f"Error handling message from {client_id}: {e}")
             await self.send_to_client(
@@ -280,17 +280,17 @@ class WebSocketManager:
                     data={'error': str(e)}
                 )
             )
-    
+
     def register_handler(self, channel: str, handler: Callable) -> None:
         """Register custom message handler for channel"""
         self.message_handlers[channel] = handler
         logger.info(f"Registered handler for channel: {channel}")
-    
+
     async def _check_rate_limit(self, client_id: str) -> bool:
         """Check if client exceeds rate limit"""
         if client_id not in self.clients:
             return False
-        
+
         client = self.clients[client_id]
         # Simple rate limiting: max_message_rate per minute
         # In production, use a more sophisticated sliding window
@@ -301,23 +301,23 @@ class WebSocketManager:
                 return True
             return False
         return True
-    
+
     async def start_heartbeat(self) -> None:
         """Start heartbeat/ping-pong mechanism"""
         self._running = True
         while self._running:
             await asyncio.sleep(self.ping_interval)
-            
+
             # Send ping to all clients
             for client_id in list(self.clients.keys()):
                 client = self.clients[client_id]
-                
+
                 # Check if client is still responsive
                 if (datetime.now() - client.last_ping).seconds > self.ping_interval * 2:
                     logger.warning(f"Client {client_id} not responding, disconnecting")
                     await self.unregister_client(client_id)
                     continue
-                
+
                 # Send ping
                 await self.send_to_client(
                     client_id,
@@ -327,11 +327,11 @@ class WebSocketManager:
                         data={}
                     )
                 )
-    
+
     def stop_heartbeat(self) -> None:
         """Stop heartbeat"""
         self._running = False
-    
+
     def get_stats(self) -> Dict[str, Any]:
         """Get WebSocket server statistics"""
         return {
@@ -372,11 +372,11 @@ async def handle_player_subscription(client_id: str, message: WebSocketMessage) 
 
 class NBAWebSocketServer:
     """NBA-specific WebSocket server"""
-    
+
     def __init__(self):
         self.manager = WebSocketManager(ping_interval=30, max_message_rate=100)
         self._setup_handlers()
-    
+
     def _setup_handlers(self) -> None:
         """Set up NBA-specific message handlers"""
         self.manager.register_handler(
@@ -387,7 +387,7 @@ class NBAWebSocketServer:
             ChannelType.PLAYER_STATS.value,
             handle_player_subscription
         )
-    
+
     async def broadcast_game_update(
         self,
         game_id: int,
@@ -412,7 +412,7 @@ class NBAWebSocketServer:
             ChannelType.GAME_UPDATES.value,
             message
         )
-    
+
     async def broadcast_player_stat_update(
         self,
         player_id: int,
@@ -437,7 +437,7 @@ class NBAWebSocketServer:
             ChannelType.PLAYER_STATS.value,
             message
         )
-    
+
     async def broadcast_play_by_play(
         self,
         game_id: int,
@@ -468,14 +468,14 @@ class NBAWebSocketServer:
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    
+
     print("=== NBA WebSocket Server Example ===\n")
-    
+
     # Example usage
     print("1. Client connects:")
     print("   ws://localhost:8000/ws")
     print()
-    
+
     print("2. Subscribe to live game updates:")
     print(json.dumps({
         'type': 'subscribe',
@@ -483,7 +483,7 @@ if __name__ == "__main__":
         'data': {'game_id': 12345}
     }, indent=2))
     print()
-    
+
     print("3. Receive real-time updates:")
     print(json.dumps({
         'type': 'message',
@@ -498,7 +498,7 @@ if __name__ == "__main__":
         'timestamp': '2025-10-12T20:30:00'
     }, indent=2))
     print()
-    
+
     print("4. Subscribe to player stats:")
     print(json.dumps({
         'type': 'subscribe',
@@ -506,7 +506,7 @@ if __name__ == "__main__":
         'data': {'player_id': 23}
     }, indent=2))
     print()
-    
+
     print("5. Subscribe to play-by-play:")
     print(json.dumps({
         'type': 'subscribe',
