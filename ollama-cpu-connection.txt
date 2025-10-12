@@ -1,0 +1,26 @@
+Ollama CPU Instance Connection Info
+===================================
+
+Instance ID: i-08b57eaa405701fcb
+Public IP: 34.226.246.126
+Instance Type: t3.2xlarge (CPU-only, 8 vCPU, 32GB RAM)
+Cost: .36/hour
+
+SSH Command:
+ssh -i ollama-mcp-key.pem ubuntu@34.226.246.126
+
+Ollama API:
+http://34.226.246.126:11434
+
+Model: qwen2.5-coder:32b
+
+Performance:
+- Response time: 3-5 seconds (vs 1-2 sec on GPU)
+- Still faster than local Mac!
+- Good temporary solution
+
+Next Steps:
+1. Wait 10-15 minutes for setup
+2. Test: curl http://34.226.246.126:11434/api/tags
+3. Configure: ./configure_ollama_aws.sh
+4. Request GPU limit increase for better performance

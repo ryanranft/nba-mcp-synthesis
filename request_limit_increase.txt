@@ -1,0 +1,26 @@
+AWS Service Quota Increase Request
+===================================
+
+Follow these steps:
+
+1. Open this URL:
+   https://console.aws.amazon.com/servicequotas/home/services/ec2/quotas/L-DB2E81BA
+
+2. Click "Request quota increase"
+
+3. Fill in:
+   - Quota name: Running On-Demand G and VT instances
+   - Current quota: 0 vCPUs
+   - Desired quota: 32 vCPUs (for g5.xlarge)
+   - Reason: "Running Ollama AI models for NBA data analysis"
+
+4. Submit request
+
+Expected approval time: 24-48 hours
+
+You'll receive an email when approved.
+
+Alternative while waiting:
+- Use local Ollama (free, slower)
+- Deploy CPU-only version (see deploy_ollama_cpu.sh)
+- Try different AWS region (us-west-2, eu-west-1)
