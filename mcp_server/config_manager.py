@@ -33,7 +33,7 @@ class DatabaseConfig:
     password: str
     max_connections: int = 10
     ssl_mode: str = "require"
-    
+
     def get_connection_string(self) -> str:
         """Get PostgreSQL connection string"""
         return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
@@ -69,7 +69,7 @@ class SecurityConfig:
     api_rate_limit: int = 100  # requests per minute
     enable_cors: bool = False
     allowed_origins: list = None
-    
+
     def __post_init__(self):
         if self.allowed_origins is None:
             self.allowed_origins = []
@@ -99,11 +99,11 @@ class MonitoringConfig:
 
 class ConfigManager:
     """Manages environment-specific configurations"""
-    
+
     def __init__(self, env: Optional[str] = None):
         """
         Initialize configuration manager.
-        
+
         Args:
             env: Environment name (development, staging, production)
                  If None, uses NBA_MCP_ENV environment variable
@@ -112,10 +112,10 @@ class ConfigManager:
         self.environment = Environment(env_str.lower())
         self.config_dir = Path(__file__).parent.parent / "config"
         self.config: Dict[str, Any] = {}
-        
+
         self._load_config()
         logger.info(f"Configuration loaded for environment: {self.environment.value}")
-    
+
     def _load_config(self):
         """Load configuration from files and environment variables"""
         # Load base config
@@ -123,7 +123,7 @@ class ConfigManager:
         if base_config_path.exists():
             with open(base_config_path) as f:
                 self.config = json.load(f)
-        
+
         # Load environment-specific config
         env_config_path = self.config_dir / f"{self.environment.value}.json"
         if env_config_path.exists():
@@ -131,10 +131,10 @@ class ConfigManager:
                 env_config = json.load(f)
                 # Merge with base config (env config overrides base)
                 self._deep_merge(self.config, env_config)
-        
+
         # Override with environment variables
         self._load_env_variables()
-    
+
     def _deep_merge(self, base: Dict, override: Dict):
         """Deep merge two dictionaries"""
         for key, value in override.items():
@@ -142,7 +142,7 @@ class ConfigManager:
                 self._deep_merge(base[key], value)
             else:
                 base[key] = value
-    
+
     def _load_env_variables(self):
         """Load configuration from environment variables"""
         # Database
@@ -157,89 +157,89 @@ class ConfigManager:
             self.config["database"]["user"] = os.getenv("DB_USER")
         if os.getenv("DB_PASSWORD"):
             self.config["database"]["password"] = os.getenv("DB_PASSWORD")
-        
+
         # Cache
         if os.getenv("REDIS_HOST"):
             self.config.setdefault("cache", {})
             self.config["cache"]["host"] = os.getenv("REDIS_HOST")
         if os.getenv("REDIS_PORT"):
             self.config["cache"]["port"] = int(os.getenv("REDIS_PORT"))
-        
+
         # Security
         if os.getenv("JWT_SECRET"):
             self.config.setdefault("security", {})
             self.config["security"]["jwt_secret_key"] = os.getenv("JWT_SECRET")
-        
+
         # ML
         if os.getenv("MLFLOW_TRACKING_URI"):
             self.config.setdefault("ml", {})
             self.config["ml"]["mlflow_tracking_uri"] = os.getenv("MLFLOW_TRACKING_URI")
-    
+
     def get_database_config(self) -> DatabaseConfig:
         """Get database configuration"""
         db_config = self.config.get("database", {})
         return DatabaseConfig(**db_config)
-    
+
     def get_cache_config(self) -> CacheConfig:
         """Get cache configuration"""
         cache_config = self.config.get("cache", {})
         return CacheConfig(**cache_config)
-    
+
     def get_logging_config(self) -> LoggingConfig:
         """Get logging configuration"""
         log_config = self.config.get("logging", {})
         return LoggingConfig(**log_config)
-    
+
     def get_security_config(self) -> SecurityConfig:
         """Get security configuration"""
         security_config = self.config.get("security", {})
         return SecurityConfig(**security_config)
-    
+
     def get_ml_config(self) -> MLConfig:
         """Get ML configuration"""
         ml_config = self.config.get("ml", {})
         return MLConfig(**ml_config)
-    
+
     def get_monitoring_config(self) -> MonitoringConfig:
         """Get monitoring configuration"""
         monitoring_config = self.config.get("monitoring", {})
         return MonitoringConfig(**monitoring_config)
-    
+
     def get(self, key: str, default: Any = None) -> Any:
         """Get configuration value by key (supports dot notation)"""
         keys = key.split('.')
         value = self.config
-        
+
         for k in keys:
             if isinstance(value, dict) and k in value:
                 value = value[k]
             else:
                 return default
-        
+
         return value
-    
+
     def is_development(self) -> bool:
         """Check if running in development environment"""
         return self.environment == Environment.DEVELOPMENT
-    
+
     def is_staging(self) -> bool:
         """Check if running in staging environment"""
         return self.environment == Environment.STAGING
-    
+
     def is_production(self) -> bool:
         """Check if running in production environment"""
         return self.environment == Environment.PRODUCTION
-    
+
     def is_test(self) -> bool:
         """Check if running in test environment"""
         return self.environment == Environment.TEST
-    
+
     def export_config(self, path: str):
         """Export current configuration to file"""
         with open(path, 'w') as f:
             json.dump(self.config, f, indent=2)
         logger.info(f"Configuration exported to {path}")
-    
+
     def validate_config(self) -> bool:
         """Validate that all required configuration is present"""
         required_keys = [
@@ -249,16 +249,16 @@ class ConfigManager:
             "security.jwt_secret_key",
             "ml.model_registry_path"
         ]
-        
+
         missing_keys = []
         for key in required_keys:
             if self.get(key) is None:
                 missing_keys.append(key)
-        
+
         if missing_keys:
             logger.error(f"Missing required configuration keys: {missing_keys}")
             return False
-        
+
         logger.info("Configuration validation passed")
         return True
 
@@ -280,11 +280,11 @@ if __name__ == "__main__":
     print("=" * 70)
     print("Environment-Specific Configuration Manager Demo")
     print("=" * 70)
-    
+
     # Create config directory and sample configs
     config_dir = Path(__file__).parent.parent / "config"
     config_dir.mkdir(exist_ok=True)
-    
+
     # Base configuration (shared across all environments)
     base_config = {
         "database": {
@@ -306,10 +306,10 @@ if __name__ == "__main__":
             "drift_threshold": 0.05
         }
     }
-    
+
     with open(config_dir / "base.json", 'w') as f:
         json.dump(base_config, f, indent=2)
-    
+
     # Development configuration
     dev_config = {
         "database": {
@@ -345,10 +345,10 @@ if __name__ == "__main__":
             "enable_profiling": True
         }
     }
-    
+
     with open(config_dir / "development.json", 'w') as f:
         json.dump(dev_config, f, indent=2)
-    
+
     # Production configuration
     prod_config = {
         "database": {
@@ -389,20 +389,20 @@ if __name__ == "__main__":
             "enable_profiling": False
         }
     }
-    
+
     with open(config_dir / "production.json", 'w') as f:
         json.dump(prod_config, f, indent=2)
-    
+
     print("\n✅ Sample config files created in config/ directory\n")
-    
+
     # Demo: Load configurations for different environments
     for env_name in ["development", "production"]:
         print(f"\n{'=' * 70}")
         print(f"Loading {env_name.upper()} configuration")
         print('=' * 70)
-        
+
         config_mgr = ConfigManager(env=env_name)
-        
+
         # Get typed configurations
         db_config = config_mgr.get_database_config()
         print(f"\n📦 Database Configuration:")
@@ -411,37 +411,37 @@ if __name__ == "__main__":
         print(f"  Database: {db_config.database}")
         print(f"  SSL Mode: {db_config.ssl_mode}")
         print(f"  Max Connections: {db_config.max_connections}")
-        
+
         cache_config = config_mgr.get_cache_config()
         print(f"\n💾 Cache Configuration:")
         print(f"  Enabled: {cache_config.enabled}")
         print(f"  Backend: {cache_config.backend}")
         print(f"  Host: {cache_config.host}")
         print(f"  TTL: {cache_config.ttl_seconds}s")
-        
+
         security_config = config_mgr.get_security_config()
         print(f"\n🔒 Security Configuration:")
         print(f"  JWT Expiry: {security_config.jwt_expiry_minutes} minutes")
         print(f"  API Rate Limit: {security_config.api_rate_limit}/min")
         print(f"  CORS Enabled: {security_config.enable_cors}")
         print(f"  Allowed Origins: {security_config.allowed_origins}")
-        
+
         ml_config = config_mgr.get_ml_config()
         print(f"\n🤖 ML Configuration:")
         print(f"  Model Registry: {ml_config.model_registry_path}")
         print(f"  MLflow URI: {ml_config.mlflow_tracking_uri}")
         print(f"  Drift Detection: {ml_config.enable_drift_detection}")
         print(f"  A/B Testing: {ml_config.enable_ab_testing}")
-        
+
         monitoring_config = config_mgr.get_monitoring_config()
         print(f"\n📊 Monitoring Configuration:")
         print(f"  Metrics Enabled: {monitoring_config.enable_metrics}")
         print(f"  Tracing Enabled: {monitoring_config.enable_tracing}")
         print(f"  Profiling Enabled: {monitoring_config.enable_profiling}")
-        
+
         # Validate configuration
         print(f"\n✓ Configuration Validation: {'PASSED' if config_mgr.validate_config() else 'FAILED'}")
-    
+
     print("\n" + "=" * 70)
     print("Configuration Manager Demo Complete!")
     print("=" * 70)

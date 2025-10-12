@@ -44,20 +44,20 @@ class ModelVersion:
 
 class ModelRegistry:
     """Central registry for ML models"""
-    
+
     def __init__(self, registry_path: str = "./model_registry"):
         """
         Initialize model registry.
-        
+
         Args:
             registry_path: Path to registry storage
         """
         self.registry_path = Path(registry_path)
         self.registry_path.mkdir(parents=True, exist_ok=True)
-        
+
         self.models: Dict[str, List[ModelVersion]] = {}
         self._load_registry()
-    
+
     def _load_registry(self):
         """Load registry from disk"""
         registry_file = self.registry_path / "registry.json"
@@ -86,7 +86,7 @@ class ModelRegistry:
                         for v in versions
                     ]
             logger.info(f"Loaded {len(self.models)} models from registry")
-    
+
     def _save_registry(self):
         """Save registry to disk"""
         registry_file = self.registry_path / "registry.json"
@@ -111,12 +111,12 @@ class ModelRegistry:
                 }
                 for v in versions
             ]
-        
+
         with open(registry_file, 'w') as f:
             json.dump(data, f, indent=2)
-        
+
         logger.debug(f"Saved registry to {registry_file}")
-    
+
     def register_model(
         self,
         model_id: str,
@@ -135,7 +135,7 @@ class ModelRegistry:
     ) -> ModelVersion:
         """
         Register a new model version.
-        
+
         Args:
             model_id: Model identifier
             version: Model version
@@ -150,7 +150,7 @@ class ModelRegistry:
             tags: Custom tags
             parent_version: Parent version for lineage
             stage: Initial stage
-            
+
         Returns:
             ModelVersion object
         """
@@ -170,20 +170,20 @@ class ModelRegistry:
             tags=tags or {},
             parent_version=parent_version
         )
-        
+
         if model_id not in self.models:
             self.models[model_id] = []
-        
+
         self.models[model_id].append(model_version)
         self._save_registry()
-        
+
         logger.info(
             f"Registered {model_id} v{version} "
             f"(stage: {stage.value}, framework: {framework})"
         )
-        
+
         return model_version
-    
+
     def get_model_version(
         self,
         model_id: str,
@@ -191,21 +191,21 @@ class ModelRegistry:
     ) -> Optional[ModelVersion]:
         """
         Get specific model version or latest.
-        
+
         Args:
             model_id: Model identifier
             version: Specific version (None for latest)
-            
+
         Returns:
             ModelVersion or None
         """
         if model_id not in self.models:
             return None
-        
+
         versions = self.models[model_id]
         if not versions:
             return None
-        
+
         if version:
             for v in versions:
                 if v.version == version:
@@ -214,23 +214,23 @@ class ModelRegistry:
         else:
             # Return latest
             return sorted(versions, key=lambda v: v.created_at, reverse=True)[0]
-    
+
     def get_production_model(self, model_id: str) -> Optional[ModelVersion]:
         """Get production version of a model"""
         if model_id not in self.models:
             return None
-        
+
         prod_versions = [
             v for v in self.models[model_id]
             if v.stage == ModelStage.PRODUCTION
         ]
-        
+
         if not prod_versions:
             return None
-        
+
         # Return latest production version
         return sorted(prod_versions, key=lambda v: v.created_at, reverse=True)[0]
-    
+
     def promote_model(
         self,
         model_id: str,
@@ -239,7 +239,7 @@ class ModelRegistry:
     ):
         """
         Promote model to a new stage.
-        
+
         Args:
             model_id: Model identifier
             version: Model version
@@ -248,16 +248,16 @@ class ModelRegistry:
         model_version = self.get_model_version(model_id, version)
         if not model_version:
             raise ValueError(f"Model {model_id} v{version} not found")
-        
+
         old_stage = model_version.stage
         model_version.stage = to_stage
-        
+
         self._save_registry()
-        
+
         logger.info(
             f"Promoted {model_id} v{version} from {old_stage.value} to {to_stage.value}"
         )
-    
+
     def search_models(
         self,
         framework: Optional[str] = None,
@@ -267,18 +267,18 @@ class ModelRegistry:
     ) -> List[ModelVersion]:
         """
         Search for models by criteria.
-        
+
         Args:
             framework: Filter by framework
             stage: Filter by stage
             tags: Filter by tags
             min_accuracy: Filter by minimum accuracy
-            
+
         Returns:
             List of matching ModelVersion objects
         """
         results = []
-        
+
         for model_id, versions in self.models.items():
             for version in versions:
                 # Apply filters
@@ -292,25 +292,25 @@ class ModelRegistry:
                 if min_accuracy:
                     if version.metrics.get("accuracy", 0) < min_accuracy:
                         continue
-                
+
                 results.append(version)
-        
+
         return sorted(results, key=lambda v: v.created_at, reverse=True)
-    
+
     def get_model_lineage(self, model_id: str, version: str) -> List[ModelVersion]:
         """
         Get model lineage (parent versions).
-        
+
         Args:
             model_id: Model identifier
             version: Model version
-            
+
         Returns:
             List of ModelVersion objects in lineage
         """
         lineage = []
         current_version = self.get_model_version(model_id, version)
-        
+
         while current_version:
             lineage.append(current_version)
             if current_version.parent_version:
@@ -319,23 +319,23 @@ class ModelRegistry:
                 )
             else:
                 break
-        
+
         return lineage
-    
+
     def get_registry_stats(self) -> Dict[str, Any]:
         """Get registry statistics"""
         total_models = len(self.models)
         total_versions = sum(len(versions) for versions in self.models.values())
-        
+
         stage_counts = {stage.value: 0 for stage in ModelStage}
         framework_counts = {}
-        
+
         for versions in self.models.values():
             for version in versions:
                 stage_counts[version.stage.value] += 1
                 framework_counts[version.framework] = \
                     framework_counts.get(version.framework, 0) + 1
-        
+
         return {
             "total_models": total_models,
             "total_versions": total_versions,
@@ -349,14 +349,14 @@ if __name__ == "__main__":
     print("=" * 80)
     print("MODEL REGISTRY DEMO")
     print("=" * 80)
-    
+
     registry = ModelRegistry(registry_path="./demo_registry")
-    
+
     # Register models
     print("\n" + "=" * 80)
     print("REGISTERING MODELS")
     print("=" * 80)
-    
+
     registry.register_model(
         model_id="nba_win_predictor",
         version="1.0.0",
@@ -368,7 +368,7 @@ if __name__ == "__main__":
         description="Initial win prediction model",
         stage=ModelStage.PRODUCTION
     )
-    
+
     registry.register_model(
         model_id="nba_win_predictor",
         version="1.1.0",
@@ -381,32 +381,32 @@ if __name__ == "__main__":
         parent_version="1.0.0",
         stage=ModelStage.STAGING
     )
-    
+
     print("✅ Registered 2 model versions")
-    
+
     # Get production model
     print("\n" + "=" * 80)
     print("PRODUCTION MODEL")
     print("=" * 80)
-    
+
     prod_model = registry.get_production_model("nba_win_predictor")
     print(f"\nModel: {prod_model.model_id} v{prod_model.version}")
     print(f"Algorithm: {prod_model.algorithm}")
     print(f"Metrics: {prod_model.metrics}")
-    
+
     # Promote to production
     print("\n" + "=" * 80)
     print("PROMOTING MODEL")
     print("=" * 80)
-    
+
     registry.promote_model("nba_win_predictor", "1.1.0", ModelStage.PRODUCTION)
     print("✅ Promoted v1.1.0 to production")
-    
+
     # Search models
     print("\n" + "=" * 80)
     print("SEARCHING MODELS")
     print("=" * 80)
-    
+
     results = registry.search_models(
         framework="sklearn",
         min_accuracy=0.85
@@ -415,12 +415,12 @@ if __name__ == "__main__":
     for model in results:
         print(f"  - {model.model_id} v{model.version}: "
               f"accuracy={model.metrics.get('accuracy', 0):.2f}")
-    
+
     # Registry stats
     print("\n" + "=" * 80)
     print("REGISTRY STATISTICS")
     print("=" * 80)
-    
+
     stats = registry.get_registry_stats()
     print(f"\nTotal Models: {stats['total_models']}")
     print(f"Total Versions: {stats['total_versions']}")
@@ -431,7 +431,7 @@ if __name__ == "__main__":
     print(f"\nBy Framework:")
     for framework, count in stats['by_framework'].items():
         print(f"  - {framework}: {count}")
-    
+
     print("\n" + "=" * 80)
     print("Model Registry Demo Complete!")
     print("=" * 80)

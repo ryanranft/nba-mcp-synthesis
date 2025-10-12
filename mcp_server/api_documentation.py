@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class APIDocumentationGenerator:
     """Generate API documentation automatically"""
-    
+
     def __init__(
         self,
         title: str = "NBA MCP API",
@@ -23,7 +23,7 @@ class APIDocumentationGenerator:
     ):
         """
         Initialize API documentation generator.
-        
+
         Args:
             title: API title
             version: API version
@@ -34,7 +34,7 @@ class APIDocumentationGenerator:
         self.description = description
         self.endpoints: List[Dict] = []
         self.schemas: Dict[str, Dict] = {}
-    
+
     def add_endpoint(
         self,
         path: str,
@@ -48,7 +48,7 @@ class APIDocumentationGenerator:
     ):
         """
         Add an API endpoint.
-        
+
         Args:
             path: Endpoint path (e.g., "/api/predictions")
             method: HTTP method (GET, POST, etc.)
@@ -73,10 +73,10 @@ class APIDocumentationGenerator:
             },
             "tags": tags or ["General"]
         }
-        
+
         self.endpoints.append(endpoint)
         logger.info(f"Added endpoint: {method.upper()} {path}")
-    
+
     def add_schema(
         self,
         name: str,
@@ -86,7 +86,7 @@ class APIDocumentationGenerator:
     ):
         """
         Add a data schema.
-        
+
         Args:
             name: Schema name
             properties: Schema properties
@@ -99,25 +99,25 @@ class APIDocumentationGenerator:
             "required": required or [],
             "description": description
         }
-        
+
         logger.info(f"Added schema: {name}")
-    
+
     def generate_openapi_spec(self) -> Dict[str, Any]:
         """
         Generate OpenAPI 3.0 specification.
-        
+
         Returns:
             OpenAPI spec dictionary
         """
         paths = {}
-        
+
         for endpoint in self.endpoints:
             path = endpoint["path"]
             method = endpoint["method"].lower()
-            
+
             if path not in paths:
                 paths[path] = {}
-            
+
             paths[path][method] = {
                 "summary": endpoint["summary"],
                 "description": endpoint["description"],
@@ -125,10 +125,10 @@ class APIDocumentationGenerator:
                 "parameters": endpoint["parameters"],
                 "responses": endpoint["responses"]
             }
-            
+
             if endpoint["request_body"]:
                 paths[path][method]["requestBody"] = endpoint["request_body"]
-        
+
         spec = {
             "openapi": "3.0.0",
             "info": {
@@ -141,13 +141,13 @@ class APIDocumentationGenerator:
                 "schemas": self.schemas
             }
         }
-        
+
         return spec
-    
+
     def generate_markdown_docs(self) -> str:
         """
         Generate Markdown documentation.
-        
+
         Returns:
             Markdown string
         """
@@ -155,7 +155,7 @@ class APIDocumentationGenerator:
         md += f"**Version:** {self.version}\n\n"
         md += f"{self.description}\n\n"
         md += "---\n\n"
-        
+
         # Group by tags
         by_tags = {}
         for endpoint in self.endpoints:
@@ -163,34 +163,34 @@ class APIDocumentationGenerator:
                 if tag not in by_tags:
                     by_tags[tag] = []
                 by_tags[tag].append(endpoint)
-        
+
         # Document each tag
         for tag, endpoints in sorted(by_tags.items()):
             md += f"## {tag}\n\n"
-            
+
             for endpoint in endpoints:
                 md += f"### `{endpoint['method']} {endpoint['path']}`\n\n"
                 md += f"{endpoint['description']}\n\n"
-                
+
                 if endpoint["parameters"]:
                     md += "**Parameters:**\n\n"
                     for param in endpoint["parameters"]:
                         required = " (required)" if param.get("required") else ""
                         md += f"- `{param['name']}`{required}: {param.get('description', 'No description')}\n"
                     md += "\n"
-                
+
                 if endpoint["request_body"]:
                     md += "**Request Body:**\n\n"
                     md += "```json\n"
                     md += json.dumps(endpoint["request_body"], indent=2)
                     md += "\n```\n\n"
-                
+
                 md += "**Responses:**\n\n"
                 for code, response in endpoint["responses"].items():
                     md += f"- `{code}`: {response['description']}\n"
                 md += "\n"
                 md += "---\n\n"
-        
+
         # Schemas
         if self.schemas:
             md += "## Data Schemas\n\n"
@@ -203,9 +203,9 @@ class APIDocumentationGenerator:
                     required = " (required)" if prop_name in schema.get("required", []) else ""
                     md += f"- `{prop_name}`{required}: {prop_def.get('type', 'unknown')} - {prop_def.get('description', '')}\n"
                 md += "\n"
-        
+
         return md
-    
+
     def save_documentation(
         self,
         format: str = "both",
@@ -213,21 +213,21 @@ class APIDocumentationGenerator:
     ):
         """
         Save documentation to files.
-        
+
         Args:
             format: "openapi", "markdown", or "both"
             output_dir: Output directory
         """
         from pathlib import Path
         Path(output_dir).mkdir(parents=True, exist_ok=True)
-        
+
         if format in ["openapi", "both"]:
             spec = self.generate_openapi_spec()
             spec_file = Path(output_dir) / "openapi.json"
             with open(spec_file, 'w') as f:
                 json.dump(spec, f, indent=2)
             logger.info(f"Saved OpenAPI spec to {spec_file}")
-        
+
         if format in ["markdown", "both"]:
             md = self.generate_markdown_docs()
             md_file = Path(output_dir) / "API.md"
@@ -241,18 +241,18 @@ if __name__ == "__main__":
     print("=" * 80)
     print("API DOCUMENTATION GENERATOR DEMO")
     print("=" * 80)
-    
+
     doc_gen = APIDocumentationGenerator(
         title="NBA MCP API",
         version="1.0.0",
         description="Machine Learning and Analytics API for NBA data"
     )
-    
+
     # Add schemas
     print("\n" + "=" * 80)
     print("ADDING DATA SCHEMAS")
     print("=" * 80)
-    
+
     doc_gen.add_schema(
         name="PredictionRequest",
         properties={
@@ -263,7 +263,7 @@ if __name__ == "__main__":
         required=["player_id", "season"],
         description="Request for player performance prediction"
     )
-    
+
     doc_gen.add_schema(
         name="PredictionResponse",
         properties={
@@ -274,14 +274,14 @@ if __name__ == "__main__":
         },
         description="Prediction response"
     )
-    
+
     print("✅ Added 2 schemas")
-    
+
     # Add endpoints
     print("\n" + "=" * 80)
     print("ADDING API ENDPOINTS")
     print("=" * 80)
-    
+
     doc_gen.add_endpoint(
         path="/api/predictions",
         method="POST",
@@ -308,7 +308,7 @@ if __name__ == "__main__":
         },
         tags=["Predictions"]
     )
-    
+
     doc_gen.add_endpoint(
         path="/api/models",
         method="GET",
@@ -325,7 +325,7 @@ if __name__ == "__main__":
         ],
         tags=["Models"]
     )
-    
+
     doc_gen.add_endpoint(
         path="/api/health",
         method="GET",
@@ -337,37 +337,37 @@ if __name__ == "__main__":
         },
         tags=["System"]
     )
-    
+
     print("✅ Added 3 endpoints")
-    
+
     # Generate OpenAPI spec
     print("\n" + "=" * 80)
     print("GENERATING OPENAPI SPECIFICATION")
     print("=" * 80)
-    
+
     spec = doc_gen.generate_openapi_spec()
     print(f"\nOpenAPI Version: {spec['openapi']}")
     print(f"Endpoints: {len(spec['paths'])}")
     print(f"Schemas: {len(spec['components']['schemas'])}")
-    
+
     # Generate Markdown
     print("\n" + "=" * 80)
     print("GENERATING MARKDOWN DOCUMENTATION")
     print("=" * 80)
-    
+
     md = doc_gen.generate_markdown_docs()
     print(f"\nMarkdown length: {len(md)} characters")
     print("\nPreview:")
     print(md[:500] + "...")
-    
+
     # Save documentation
     print("\n" + "=" * 80)
     print("SAVING DOCUMENTATION")
     print("=" * 80)
-    
+
     doc_gen.save_documentation(format="both", output_dir="./demo_api_docs")
     print("\n✅ Documentation saved to ./demo_api_docs/")
-    
+
     print("\n" + "=" * 80)
     print("API Documentation Demo Complete!")
     print("=" * 80)
