@@ -1,0 +1,1545 @@
+{
+  "total_validated": 77,
+  "validation_results": {
+    "python_implementations": [
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_consolidated_rec_17.py",
+        "file_name": "implement_consolidated_rec_17.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_9.py",
+        "file_name": "implement_ml_systems_9.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_22.py",
+        "file_name": "implement_rec_22.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_26.py",
+        "file_name": "implement_rec_26.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_8.py",
+        "file_name": "implement_ml_systems_8.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_23.py",
+        "file_name": "implement_rec_23.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_3.py",
+        "file_name": "implement_ml_systems_3.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_consolidated_consolidated_rec_13.py",
+        "file_name": "implement_consolidated_consolidated_rec_13.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_10.py",
+        "file_name": "implement_ml_systems_10.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_7.py",
+        "file_name": "implement_ml_systems_7.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_18.py",
+        "file_name": "implement_rec_18.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_6.py",
+        "file_name": "implement_ml_systems_6.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_19.py",
+        "file_name": "implement_rec_19.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_2.py",
+        "file_name": "implement_ml_systems_2.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_5.py",
+        "file_name": "implement_ml_systems_5.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_consolidated_consolidated_rec_15.py",
+        "file_name": "implement_consolidated_consolidated_rec_15.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_1.py",
+        "file_name": "implement_ml_systems_1.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_consolidated_consolidated_rec_11.py",
+        "file_name": "implement_consolidated_consolidated_rec_11.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_4.py",
+        "file_name": "implement_ml_systems_4.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_24.py",
+        "file_name": "implement_rec_24.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_consolidated_rec_21.py",
+        "file_name": "implement_consolidated_rec_21.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_20.py",
+        "file_name": "implement_rec_20.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_21.py",
+        "file_name": "implement_rec_21.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_25.py",
+        "file_name": "implement_rec_25.py",
+        "file_type": "python_implementations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_shebang",
+          "has_docstring",
+          "has_imports",
+          "has_class_definition",
+          "has_setup_method",
+          "has_execute_method",
+          "has_cleanup_method",
+          "has_logging",
+          "has_error_handling",
+          "has_type_hints"
+        ],
+        "checks_failed": []
+      }
+    ],
+    "test_files": [
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_ml_systems_1.py",
+        "file_name": "test_ml_systems_1.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_rec_18.py",
+        "file_name": "test_rec_18.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_ml_systems_5.py",
+        "file_name": "test_ml_systems_5.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_rec_19.py",
+        "file_name": "test_rec_19.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_consolidated_rec_17.py",
+        "file_name": "test_consolidated_rec_17.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_ml_systems_4.py",
+        "file_name": "test_ml_systems_4.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_consolidated_consolidated_rec_13.py",
+        "file_name": "test_consolidated_consolidated_rec_13.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_rec_22.py",
+        "file_name": "test_rec_22.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_rec_26.py",
+        "file_name": "test_rec_26.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_rec_23.py",
+        "file_name": "test_rec_23.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_rec_24.py",
+        "file_name": "test_rec_24.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_rec_20.py",
+        "file_name": "test_rec_20.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_ml_systems_10.py",
+        "file_name": "test_ml_systems_10.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_ml_systems_9.py",
+        "file_name": "test_ml_systems_9.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_rec_21.py",
+        "file_name": "test_rec_21.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_ml_systems_8.py",
+        "file_name": "test_ml_systems_8.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_rec_25.py",
+        "file_name": "test_rec_25.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_ml_systems_7.py",
+        "file_name": "test_ml_systems_7.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_ml_systems_3.py",
+        "file_name": "test_ml_systems_3.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_ml_systems_2.py",
+        "file_name": "test_ml_systems_2.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_consolidated_consolidated_rec_15.py",
+        "file_name": "test_consolidated_consolidated_rec_15.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_consolidated_rec_21.py",
+        "file_name": "test_consolidated_rec_21.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_consolidated_consolidated_rec_11.py",
+        "file_name": "test_consolidated_consolidated_rec_11.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_ml_systems_6.py",
+        "file_name": "test_ml_systems_6.py",
+        "file_type": "test_files",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_test_imports",
+          "has_test_class",
+          "has_test_methods",
+          "has_assertions",
+          "has_fixtures",
+          "has_mock_usage"
+        ],
+        "checks_failed": []
+      }
+    ],
+    "sql_migrations": [
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/ml_systems_2_migration.sql",
+        "file_name": "ml_systems_2_migration.sql",
+        "file_type": "sql_migrations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_up_migration",
+          "has_down_migration",
+          "has_rollback",
+          "has_comments"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/rec_22_migration.sql",
+        "file_name": "rec_22_migration.sql",
+        "file_type": "sql_migrations",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_up_migration",
+          "has_down_migration",
+          "has_rollback",
+          "has_comments"
+        ],
+        "checks_failed": []
+      }
+    ],
+    "cloudformation": [
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/consolidated_rec_21_infrastructure.yaml",
+        "file_name": "consolidated_rec_21_infrastructure.yaml",
+        "file_type": "cloudformation",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_resources",
+          "has_parameters",
+          "has_outputs",
+          "has_description"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/ml_systems_7_infrastructure.yaml",
+        "file_name": "ml_systems_7_infrastructure.yaml",
+        "file_type": "cloudformation",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_resources",
+          "has_parameters",
+          "has_outputs",
+          "has_description"
+        ],
+        "checks_failed": []
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/ml_systems_3_infrastructure.yaml",
+        "file_name": "ml_systems_3_infrastructure.yaml",
+        "file_type": "cloudformation",
+        "phase": "phase_0",
+        "valid": true,
+        "issues": [],
+        "checks_passed": [
+          "has_resources",
+          "has_parameters",
+          "has_outputs",
+          "has_description"
+        ],
+        "checks_failed": []
+      }
+    ],
+    "implementation_guides": [
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/ml_systems_5_IMPLEMENTATION_GUIDE.md",
+        "file_name": "ml_systems_5_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has validation",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_validation",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/consolidated_rec_17_IMPLEMENTATION_GUIDE.md",
+        "file_name": "consolidated_rec_17_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites",
+          "has_validation"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/rec_23_IMPLEMENTATION_GUIDE.md",
+        "file_name": "rec_23_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites",
+          "has_validation"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/ml_systems_10_IMPLEMENTATION_GUIDE.md",
+        "file_name": "ml_systems_10_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has validation",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_validation",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/ml_systems_1_IMPLEMENTATION_GUIDE.md",
+        "file_name": "ml_systems_1_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has validation",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_validation",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/rec_19_IMPLEMENTATION_GUIDE.md",
+        "file_name": "rec_19_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites",
+          "has_validation"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/consolidated_consolidated_rec_11_IMPLEMENTATION_GUIDE.md",
+        "file_name": "consolidated_consolidated_rec_11_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has validation",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_validation",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/consolidated_rec_21_IMPLEMENTATION_GUIDE.md",
+        "file_name": "consolidated_rec_21_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has validation",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_validation",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/rec_24_IMPLEMENTATION_GUIDE.md",
+        "file_name": "rec_24_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites",
+          "has_validation"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/ml_systems_2_IMPLEMENTATION_GUIDE.md",
+        "file_name": "ml_systems_2_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has validation",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_validation",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/rec_20_IMPLEMENTATION_GUIDE.md",
+        "file_name": "rec_20_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has validation",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_validation",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/consolidated_consolidated_rec_15_IMPLEMENTATION_GUIDE.md",
+        "file_name": "consolidated_consolidated_rec_15_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has validation",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_validation",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/ml_systems_6_IMPLEMENTATION_GUIDE.md",
+        "file_name": "ml_systems_6_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites",
+          "has_validation"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/ml_systems_9_IMPLEMENTATION_GUIDE.md",
+        "file_name": "ml_systems_9_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has validation",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_validation",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/rec_18_IMPLEMENTATION_GUIDE.md",
+        "file_name": "rec_18_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has validation",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_validation",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/rec_26_IMPLEMENTATION_GUIDE.md",
+        "file_name": "rec_26_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has validation",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_validation",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/consolidated_consolidated_rec_13_IMPLEMENTATION_GUIDE.md",
+        "file_name": "consolidated_consolidated_rec_13_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has validation",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_validation",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/rec_22_IMPLEMENTATION_GUIDE.md",
+        "file_name": "rec_22_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has validation",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_validation",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/ml_systems_4_IMPLEMENTATION_GUIDE.md",
+        "file_name": "ml_systems_4_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has validation",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_validation",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/ml_systems_8_IMPLEMENTATION_GUIDE.md",
+        "file_name": "ml_systems_8_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has validation",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_validation",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/ml_systems_7_IMPLEMENTATION_GUIDE.md",
+        "file_name": "ml_systems_7_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has validation",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_validation",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/rec_21_IMPLEMENTATION_GUIDE.md",
+        "file_name": "rec_21_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has validation",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_validation",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/ml_systems_3_IMPLEMENTATION_GUIDE.md",
+        "file_name": "ml_systems_3_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has validation",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_validation",
+          "has_troubleshooting"
+        ]
+      },
+      {
+        "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/rec_25_IMPLEMENTATION_GUIDE.md",
+        "file_name": "rec_25_IMPLEMENTATION_GUIDE.md",
+        "file_type": "implementation_guides",
+        "phase": "phase_0",
+        "valid": false,
+        "issues": [
+          "Missing has steps",
+          "Missing has validation",
+          "Missing has troubleshooting"
+        ],
+        "checks_passed": [
+          "has_title",
+          "has_prerequisites"
+        ],
+        "checks_failed": [
+          "has_steps",
+          "has_validation",
+          "has_troubleshooting"
+        ]
+      }
+    ]
+  },
+  "errors": [],
+  "warnings": [],
+  "summary": {
+    "total_files": 77,
+    "valid_files": 53,
+    "invalid_files": 24,
+    "by_file_type": {
+      "python_implementations": {
+        "total": 24,
+        "valid": 24,
+        "invalid": 0,
+        "success_rate": 100.0
+      },
+      "test_files": {
+        "total": 24,
+        "valid": 24,
+        "invalid": 0,
+        "success_rate": 100.0
+      },
+      "sql_migrations": {
+        "total": 2,
+        "valid": 2,
+        "invalid": 0,
+        "success_rate": 100.0
+      },
+      "cloudformation": {
+        "total": 3,
+        "valid": 3,
+        "invalid": 0,
+        "success_rate": 100.0
+      },
+      "implementation_guides": {
+        "total": 24,
+        "valid": 0,
+        "invalid": 24,
+        "success_rate": 0.0
+      }
+    },
+    "common_issues": {
+      "Missing has steps": 24,
+      "Missing has validation": 19,
+      "Missing has troubleshooting": 24
+    }
+  }
+}

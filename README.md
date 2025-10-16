@@ -229,8 +229,57 @@ Located in `docs/tracking/`:
 - **.env.example** - Environment variable template
 - **tests/** - Connection and integration tests (100% pass rate for ML)
 - **scripts/** - Test and diagnostic scripts
+- **SECRETS_MANAGEMENT_GUIDE.md** - Complete secrets management documentation
+- **TEAM_MIGRATION_GUIDE.md** - Migration guide for team members
 
 ## Configuration
+
+### 🔐 Secrets Management System
+
+This project uses a **hierarchical secrets management system** for secure, organized credential storage:
+
+**Directory Structure:**
+```
+/Users/ryanranft/Desktop/++/big_cat_bets_assets/
+├── sports_assets/
+│   └── big_cat_bets_simulators/
+│       └── NBA/
+│           ├── nba-mcp-synthesis/
+│           │   ├── .env.nba_mcp_synthesis.production/
+│           │   ├── .env.nba_mcp_synthesis.development/
+│           │   └── .env.nba_mcp_synthesis.test/
+│           ├── nba-simulator-aws/
+│           │   ├── .env.nba_simulator_aws.production/
+│           │   ├── .env.nba_simulator_aws.development/
+│           │   └── .env.nba_simulator_aws.test/
+│           └── nba_mcp_synthesis_global/
+│               ├── .env.nba_mcp_synthesis_global.production/
+│               ├── .env.nba_mcp_synthesis_global.development/
+│               └── .env.nba_mcp_synthesis_global.test/
+```
+
+**Key Features:**
+- **Context-Aware Loading**: Automatically loads secrets based on project, sport, and environment
+- **Secure Permissions**: All secret files have 600 permissions, directories have 700
+- **Naming Convention**: `SERVICE_RESOURCE_TYPE_PROJECT_CONTEXT` (e.g., `GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW`)
+- **Health Monitoring**: Continuous validation and API connectivity checks
+- **Docker Integration**: Seamless container deployment with secret injection
+
+**Quick Setup:**
+```bash
+# 1. Load secrets for current project
+source /Users/ryanranft/load_env_hierarchical.py
+
+# 2. Or use the unified loader directly
+python3 /Users/ryanranft/load_env_hierarchical.py
+
+# 3. Verify secrets are loaded
+python3 mcp_server/secrets_health_monitor.py --once
+```
+
+**See [SECRETS_MANAGEMENT_GUIDE.md](SECRETS_MANAGEMENT_GUIDE.md) for complete documentation.**
+
+### Environment Variables
 
 Required environment variables (see `.env.example`):
 

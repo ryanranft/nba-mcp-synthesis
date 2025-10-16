@@ -10,7 +10,7 @@ from openai import OpenAI
 
 # Connect to Ollama's OpenAI-compatible endpoint
 ollama = OpenAI(
-    base_url="http://localhost:11434/v1",
+    base_url="http://34.226.246.126:11434/v1",
     api_key="ollama"  # Ollama doesn't need a real key
 )
 

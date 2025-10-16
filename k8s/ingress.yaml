@@ -1,0 +1,160 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nba-mcp-synthesis-ingress
+  namespace: nba-mcp-synthesis
+  labels:
+    app: nba-mcp-synthesis
+    environment: production
+    project: nba-mcp-synthesis
+    sport: nba
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:ACCOUNT_ID:certificate/CERT_ID
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-2017-01
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/load-balancer-attributes: routing.http2.enabled=true
+    alb.ingress.kubernetes.io/target-group-attributes: stickiness.enabled=true,stickiness.lb_cookie.duration_seconds=3600
+spec:
+  tls:
+    - hosts:
+        - nba-mcp-synthesis.example.com
+      secretName: nba-mcp-synthesis-tls
+  rules:
+    - host: nba-mcp-synthesis.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nba-mcp-synthesis-service
+                port:
+                  number: 80
+          - path: /metrics
+            pathType: Prefix
+            backend:
+              service:
+                name: nba-mcp-synthesis-service
+                port:
+                  number: 9090
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: nba-mcp-synthesis-network-policy
+  namespace: nba-mcp-synthesis
+  labels:
+    app: nba-mcp-synthesis
+    environment: production
+    project: nba-mcp-synthesis
+    sport: nba
+spec:
+  podSelector:
+    matchLabels:
+      app: nba-mcp-synthesis
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: nba-mcp-synthesis
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8000
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: nba-mcp-synthesis
+      ports:
+        - protocol: TCP
+          port: 5432
+        - protocol: TCP
+          port: 6379
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: nba-mcp-postgres-network-policy
+  namespace: nba-mcp-synthesis
+  labels:
+    app: nba-mcp-postgres
+    environment: production
+    project: nba-mcp-synthesis
+    sport: nba
+    component: database
+spec:
+  podSelector:
+    matchLabels:
+      app: nba-mcp-postgres
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: nba-mcp-synthesis
+      ports:
+        - protocol: TCP
+          port: 5432
+  egress:
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: nba-mcp-redis-network-policy
+  namespace: nba-mcp-synthesis
+  labels:
+    app: nba-mcp-redis
+    environment: production
+    project: nba-mcp-synthesis
+    sport: nba
+    component: redis
+spec:
+  podSelector:
+    matchLabels:
+      app: nba-mcp-redis
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: nba-mcp-synthesis
+      ports:
+        - protocol: TCP
+          port: 6379
+  egress:
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

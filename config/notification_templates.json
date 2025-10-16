@@ -1,0 +1,167 @@
+{
+    "workflow_start": {
+        "emoji": "🚀",
+        "title": "NBA Book Analysis Workflow Started",
+        "description": "Automated book analysis workflow has begun",
+        "fields": [
+            "books_count",
+            "budget",
+            "estimated_time"
+        ],
+        "color": "#36a64f"
+    },
+    "pre_flight_start": {
+        "emoji": "🔍",
+        "title": "Pre-flight Checks Started",
+        "description": "Validating environment and configuration",
+        "fields": [
+            "api_keys",
+            "budget_check",
+            "output_dir"
+        ],
+        "color": "#ff9500"
+    },
+    "pre_flight_complete": {
+        "emoji": "✅",
+        "title": "Pre-flight Checks Complete",
+        "description": "All systems validated and ready",
+        "fields": [
+            "checks_passed",
+            "books_count",
+            "estimated_cost"
+        ],
+        "color": "#36a64f"
+    },
+    "book_analysis_start": {
+        "emoji": "📚",
+        "title": "Book Analysis Started",
+        "description": "Beginning analysis of all books",
+        "fields": [
+            "books_count",
+            "budget",
+            "estimated_duration"
+        ],
+        "color": "#ff9500"
+    },
+    "book_complete": {
+        "emoji": "📖",
+        "title": "Book Analysis Complete",
+        "description": "Single book analysis finished",
+        "fields": [
+            "book_title",
+            "recommendations",
+            "cost",
+            "time"
+        ],
+        "color": "#36a64f"
+    },
+    "book_analysis_complete": {
+        "emoji": "📚",
+        "title": "All Books Analyzed",
+        "description": "Book analysis phase complete",
+        "fields": [
+            "books_analyzed",
+            "total_recommendations",
+            "total_cost"
+        ],
+        "color": "#36a64f"
+    },
+    "integration_start": {
+        "emoji": "🔗",
+        "title": "Integration Started",
+        "description": "Organizing recommendations by phase",
+        "fields": [
+            "recommendations_count"
+        ],
+        "color": "#ff9500"
+    },
+    "integration_complete": {
+        "emoji": "🔗",
+        "title": "Integration Complete",
+        "description": "Recommendations organized by phase",
+        "fields": [
+            "phases_updated",
+            "files_generated"
+        ],
+        "color": "#36a64f"
+    },
+    "linear_issues_start": {
+        "emoji": "📋",
+        "title": "Creating Linear Issues",
+        "description": "Generating Linear issues for all recommendations",
+        "fields": [
+            "recommendations_count"
+        ],
+        "color": "#ff9500"
+    },
+    "linear_issues_complete": {
+        "emoji": "📋",
+        "title": "Linear Issues Created",
+        "description": "All recommendations converted to Linear issues",
+        "fields": [
+            "issues_created"
+        ],
+        "color": "#36a64f"
+    },
+    "workflow_complete": {
+        "emoji": "🎉",
+        "title": "Workflow Complete - Ready for Implementation",
+        "description": "NBA Book Analysis Workflow completed successfully",
+        "fields": [
+            "total_books",
+            "total_recommendations",
+            "total_cost",
+            "files_generated",
+            "linear_issues_created",
+            "duration"
+        ],
+        "color": "#36a64f",
+        "footer": "Next Steps: Open /Users/ryanranft/nba-simulator-aws/docs/phases/ in Cursor"
+    },
+    "error": {
+        "emoji": "❌",
+        "title": "Workflow Error",
+        "description": "An error occurred during workflow execution",
+        "fields": [
+            "stage",
+            "error_message"
+        ],
+        "color": "#ff0000"
+    },
+    "budget_warning": {
+        "emoji": "⚠️",
+        "title": "Budget Warning",
+        "description": "Approaching budget limit",
+        "fields": [
+            "current_cost",
+            "budget_limit",
+            "percentage_used"
+        ],
+        "color": "#ff9500"
+    },
+    "budget_exceeded": {
+        "emoji": "🚨",
+        "title": "Budget Exceeded",
+        "description": "Workflow stopped due to budget limit",
+        "fields": [
+            "current_cost",
+            "budget_limit"
+        ],
+        "color": "#ff0000"
+    },
+    "progress_update": {
+        "emoji": "📊",
+        "title": "Progress Update",
+        "description": "Workflow progress status",
+        "fields": [
+            "current_stage",
+            "books_analyzed",
+            "total_books",
+            "percentage_complete"
+        ],
+        "color": "#36a64f"
+    }
+}
+
+
+

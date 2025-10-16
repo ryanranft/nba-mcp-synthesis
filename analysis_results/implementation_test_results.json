@@ -1,0 +1,594 @@
+{
+  "summary_stats": {
+    "total_tests": 24,
+    "passed": 0,
+    "failed": 24,
+    "skipped": 0,
+    "errors": 0
+  },
+  "test_results": [
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_consolidated_rec_17.py",
+      "file_name": "implement_consolidated_rec_17.py",
+      "phase": "phase_0",
+      "recommendation_id": "consolidated_rec_17",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.482518",
+      "end_time": "2025-10-15T21:14:19.483037",
+      "duration_seconds": 6.723403930664062e-05,
+      "setup_result": {
+        "status": "passed",
+        "errors": [],
+        "warnings": [],
+        "setup_returned": true
+      },
+      "execute_result": {
+        "status": "failed",
+        "errors": [
+          "Execute method failed: Setup must be completed before execution"
+        ],
+        "warnings": []
+      },
+      "cleanup_result": null,
+      "errors": [
+        "Execute method failed: Setup must be completed before execution"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_9.py",
+      "file_name": "implement_ml_systems_9.py",
+      "phase": "phase_0",
+      "recommendation_id": "ml_systems_9",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.483058",
+      "end_time": "2025-10-15T21:14:19.483453",
+      "duration_seconds": 1.4066696166992188e-05,
+      "setup_result": {
+        "status": "failed",
+        "errors": [
+          "Failed to instantiate class: Any cannot be instantiated"
+        ],
+        "warnings": []
+      },
+      "execute_result": null,
+      "cleanup_result": null,
+      "errors": [
+        "Failed to instantiate class: Any cannot be instantiated"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_22.py",
+      "file_name": "implement_rec_22.py",
+      "phase": "phase_0",
+      "recommendation_id": "rec_22",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.483492",
+      "end_time": "2025-10-15T21:14:19.483906",
+      "duration_seconds": 8.7738037109375e-05,
+      "setup_result": {
+        "status": "passed",
+        "errors": [],
+        "warnings": [],
+        "setup_returned": true
+      },
+      "execute_result": {
+        "status": "failed",
+        "errors": [
+          "Execute method failed: Setup must be completed before execution"
+        ],
+        "warnings": []
+      },
+      "cleanup_result": null,
+      "errors": [
+        "Execute method failed: Setup must be completed before execution"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_26.py",
+      "file_name": "implement_rec_26.py",
+      "phase": "phase_0",
+      "recommendation_id": "rec_26",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.483932",
+      "end_time": "2025-10-15T21:14:19.484172",
+      "duration_seconds": 5.0067901611328125e-06,
+      "setup_result": {
+        "status": "failed",
+        "errors": [
+          "Failed to instantiate class: Any cannot be instantiated"
+        ],
+        "warnings": []
+      },
+      "execute_result": null,
+      "cleanup_result": null,
+      "errors": [
+        "Failed to instantiate class: Any cannot be instantiated"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_8.py",
+      "file_name": "implement_ml_systems_8.py",
+      "phase": "phase_0",
+      "recommendation_id": "ml_systems_8",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.484189",
+      "end_time": "2025-10-15T21:14:19.484444",
+      "duration_seconds": 6.9141387939453125e-06,
+      "setup_result": {
+        "status": "failed",
+        "errors": [
+          "Failed to instantiate class: Any cannot be instantiated"
+        ],
+        "warnings": []
+      },
+      "execute_result": null,
+      "cleanup_result": null,
+      "errors": [
+        "Failed to instantiate class: Any cannot be instantiated"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_23.py",
+      "file_name": "implement_rec_23.py",
+      "phase": "phase_0",
+      "recommendation_id": "rec_23",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.484465",
+      "end_time": "2025-10-15T21:14:19.484717",
+      "duration_seconds": 4.0531158447265625e-06,
+      "setup_result": {
+        "status": "failed",
+        "errors": [
+          "Failed to instantiate class: Any cannot be instantiated"
+        ],
+        "warnings": []
+      },
+      "execute_result": null,
+      "cleanup_result": null,
+      "errors": [
+        "Failed to instantiate class: Any cannot be instantiated"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_3.py",
+      "file_name": "implement_ml_systems_3.py",
+      "phase": "phase_0",
+      "recommendation_id": "ml_systems_3",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.484732",
+      "end_time": "2025-10-15T21:14:19.484868",
+      "duration_seconds": 2.86102294921875e-06,
+      "setup_result": {
+        "status": "failed",
+        "errors": [
+          "Failed to instantiate class: Any cannot be instantiated"
+        ],
+        "warnings": []
+      },
+      "execute_result": null,
+      "cleanup_result": null,
+      "errors": [
+        "Failed to instantiate class: Any cannot be instantiated"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_consolidated_consolidated_rec_13.py",
+      "file_name": "implement_consolidated_consolidated_rec_13.py",
+      "phase": "phase_0",
+      "recommendation_id": "consolidated_consolidated_rec_13",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.484881",
+      "end_time": "2025-10-15T21:14:19.485027",
+      "duration_seconds": 5.9604644775390625e-06,
+      "setup_result": {
+        "status": "failed",
+        "errors": [
+          "Failed to instantiate class: Any cannot be instantiated"
+        ],
+        "warnings": []
+      },
+      "execute_result": null,
+      "cleanup_result": null,
+      "errors": [
+        "Failed to instantiate class: Any cannot be instantiated"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_10.py",
+      "file_name": "implement_ml_systems_10.py",
+      "phase": "phase_0",
+      "recommendation_id": "ml_systems_10",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.485047",
+      "end_time": "2025-10-15T21:14:19.485290",
+      "duration_seconds": 4.0531158447265625e-06,
+      "setup_result": {
+        "status": "failed",
+        "errors": [
+          "Failed to instantiate class: Any cannot be instantiated"
+        ],
+        "warnings": []
+      },
+      "execute_result": null,
+      "cleanup_result": null,
+      "errors": [
+        "Failed to instantiate class: Any cannot be instantiated"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_7.py",
+      "file_name": "implement_ml_systems_7.py",
+      "phase": "phase_0",
+      "recommendation_id": "ml_systems_7",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.485304",
+      "end_time": "2025-10-15T21:14:19.485459",
+      "duration_seconds": 4.0531158447265625e-06,
+      "setup_result": {
+        "status": "failed",
+        "errors": [
+          "Failed to instantiate class: Any cannot be instantiated"
+        ],
+        "warnings": []
+      },
+      "execute_result": null,
+      "cleanup_result": null,
+      "errors": [
+        "Failed to instantiate class: Any cannot be instantiated"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_18.py",
+      "file_name": "implement_rec_18.py",
+      "phase": "phase_0",
+      "recommendation_id": "rec_18",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.485476",
+      "end_time": "2025-10-15T21:14:19.485748",
+      "duration_seconds": 3.0994415283203125e-06,
+      "setup_result": {
+        "status": "failed",
+        "errors": [
+          "Failed to instantiate class: Any cannot be instantiated"
+        ],
+        "warnings": []
+      },
+      "execute_result": null,
+      "cleanup_result": null,
+      "errors": [
+        "Failed to instantiate class: Any cannot be instantiated"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_6.py",
+      "file_name": "implement_ml_systems_6.py",
+      "phase": "phase_0",
+      "recommendation_id": "ml_systems_6",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.485760",
+      "end_time": "2025-10-15T21:14:19.485929",
+      "duration_seconds": 5.2928924560546875e-05,
+      "setup_result": {
+        "status": "passed",
+        "errors": [],
+        "warnings": [],
+        "setup_returned": true
+      },
+      "execute_result": {
+        "status": "failed",
+        "errors": [
+          "Execute method failed: Setup must be completed before execution"
+        ],
+        "warnings": []
+      },
+      "cleanup_result": null,
+      "errors": [
+        "Execute method failed: Setup must be completed before execution"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_19.py",
+      "file_name": "implement_rec_19.py",
+      "phase": "phase_0",
+      "recommendation_id": "rec_19",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.485942",
+      "end_time": "2025-10-15T21:14:19.486122",
+      "duration_seconds": 3.790855407714844e-05,
+      "setup_result": {
+        "status": "passed",
+        "errors": [],
+        "warnings": [],
+        "setup_returned": true
+      },
+      "execute_result": {
+        "status": "failed",
+        "errors": [
+          "Execute method failed: Setup must be completed before execution"
+        ],
+        "warnings": []
+      },
+      "cleanup_result": null,
+      "errors": [
+        "Execute method failed: Setup must be completed before execution"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_2.py",
+      "file_name": "implement_ml_systems_2.py",
+      "phase": "phase_0",
+      "recommendation_id": "ml_systems_2",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.486134",
+      "end_time": "2025-10-15T21:14:19.486263",
+      "duration_seconds": 4.291534423828125e-06,
+      "setup_result": {
+        "status": "failed",
+        "errors": [
+          "Failed to instantiate class: Any cannot be instantiated"
+        ],
+        "warnings": []
+      },
+      "execute_result": null,
+      "cleanup_result": null,
+      "errors": [
+        "Failed to instantiate class: Any cannot be instantiated"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_5.py",
+      "file_name": "implement_ml_systems_5.py",
+      "phase": "phase_0",
+      "recommendation_id": "ml_systems_5",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.486351",
+      "end_time": "2025-10-15T21:14:19.486598",
+      "duration_seconds": 3.814697265625e-06,
+      "setup_result": {
+        "status": "failed",
+        "errors": [
+          "Failed to instantiate class: Any cannot be instantiated"
+        ],
+        "warnings": []
+      },
+      "execute_result": null,
+      "cleanup_result": null,
+      "errors": [
+        "Failed to instantiate class: Any cannot be instantiated"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_consolidated_consolidated_rec_15.py",
+      "file_name": "implement_consolidated_consolidated_rec_15.py",
+      "phase": "phase_0",
+      "recommendation_id": "consolidated_consolidated_rec_15",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.486615",
+      "end_time": "2025-10-15T21:14:19.486931",
+      "duration_seconds": 3.0994415283203125e-06,
+      "setup_result": {
+        "status": "failed",
+        "errors": [
+          "Failed to instantiate class: Any cannot be instantiated"
+        ],
+        "warnings": []
+      },
+      "execute_result": null,
+      "cleanup_result": null,
+      "errors": [
+        "Failed to instantiate class: Any cannot be instantiated"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_1.py",
+      "file_name": "implement_ml_systems_1.py",
+      "phase": "phase_0",
+      "recommendation_id": "ml_systems_1",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.486947",
+      "end_time": "2025-10-15T21:14:19.487121",
+      "duration_seconds": 3.814697265625e-06,
+      "setup_result": {
+        "status": "failed",
+        "errors": [
+          "Failed to instantiate class: Any cannot be instantiated"
+        ],
+        "warnings": []
+      },
+      "execute_result": null,
+      "cleanup_result": null,
+      "errors": [
+        "Failed to instantiate class: Any cannot be instantiated"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_consolidated_consolidated_rec_11.py",
+      "file_name": "implement_consolidated_consolidated_rec_11.py",
+      "phase": "phase_0",
+      "recommendation_id": "consolidated_consolidated_rec_11",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.487135",
+      "end_time": "2025-10-15T21:14:19.487384",
+      "duration_seconds": 4.1961669921875e-05,
+      "setup_result": {
+        "status": "passed",
+        "errors": [],
+        "warnings": [],
+        "setup_returned": true
+      },
+      "execute_result": {
+        "status": "failed",
+        "errors": [
+          "Execute method failed: Setup must be completed before execution"
+        ],
+        "warnings": []
+      },
+      "cleanup_result": null,
+      "errors": [
+        "Execute method failed: Setup must be completed before execution"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_4.py",
+      "file_name": "implement_ml_systems_4.py",
+      "phase": "phase_0",
+      "recommendation_id": "ml_systems_4",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.487395",
+      "end_time": "2025-10-15T21:14:19.487505",
+      "duration_seconds": 4.291534423828125e-06,
+      "setup_result": {
+        "status": "failed",
+        "errors": [
+          "Failed to instantiate class: Any cannot be instantiated"
+        ],
+        "warnings": []
+      },
+      "execute_result": null,
+      "cleanup_result": null,
+      "errors": [
+        "Failed to instantiate class: Any cannot be instantiated"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_24.py",
+      "file_name": "implement_rec_24.py",
+      "phase": "phase_0",
+      "recommendation_id": "rec_24",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.487520",
+      "end_time": "2025-10-15T21:14:19.487701",
+      "duration_seconds": 3.0994415283203125e-06,
+      "setup_result": {
+        "status": "failed",
+        "errors": [
+          "Failed to instantiate class: Any cannot be instantiated"
+        ],
+        "warnings": []
+      },
+      "execute_result": null,
+      "cleanup_result": null,
+      "errors": [
+        "Failed to instantiate class: Any cannot be instantiated"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_consolidated_rec_21.py",
+      "file_name": "implement_consolidated_rec_21.py",
+      "phase": "phase_0",
+      "recommendation_id": "consolidated_rec_21",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.487716",
+      "end_time": "2025-10-15T21:14:19.487835",
+      "duration_seconds": 2.86102294921875e-06,
+      "setup_result": {
+        "status": "failed",
+        "errors": [
+          "Failed to instantiate class: Any cannot be instantiated"
+        ],
+        "warnings": []
+      },
+      "execute_result": null,
+      "cleanup_result": null,
+      "errors": [
+        "Failed to instantiate class: Any cannot be instantiated"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_20.py",
+      "file_name": "implement_rec_20.py",
+      "phase": "phase_0",
+      "recommendation_id": "rec_20",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.487848",
+      "end_time": "2025-10-15T21:14:19.488035",
+      "duration_seconds": 3.0994415283203125e-06,
+      "setup_result": {
+        "status": "failed",
+        "errors": [
+          "Failed to instantiate class: Any cannot be instantiated"
+        ],
+        "warnings": []
+      },
+      "execute_result": null,
+      "cleanup_result": null,
+      "errors": [
+        "Failed to instantiate class: Any cannot be instantiated"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_21.py",
+      "file_name": "implement_rec_21.py",
+      "phase": "phase_0",
+      "recommendation_id": "rec_21",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.488047",
+      "end_time": "2025-10-15T21:14:19.488197",
+      "duration_seconds": 4.291534423828125e-05,
+      "setup_result": {
+        "status": "passed",
+        "errors": [],
+        "warnings": [],
+        "setup_returned": true
+      },
+      "execute_result": {
+        "status": "failed",
+        "errors": [
+          "Execute method failed: Setup must be completed before execution"
+        ],
+        "warnings": []
+      },
+      "cleanup_result": null,
+      "errors": [
+        "Execute method failed: Setup must be completed before execution"
+      ],
+      "warnings": []
+    },
+    {
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_25.py",
+      "file_name": "implement_rec_25.py",
+      "phase": "phase_0",
+      "recommendation_id": "rec_25",
+      "status": "failed",
+      "start_time": "2025-10-15T21:14:19.488212",
+      "end_time": "2025-10-15T21:14:19.488353",
+      "duration_seconds": 2.0265579223632812e-05,
+      "setup_result": {
+        "status": "failed",
+        "errors": [
+          "Failed to instantiate class: Any cannot be instantiated"
+        ],
+        "warnings": []
+      },
+      "execute_result": null,
+      "cleanup_result": null,
+      "errors": [
+        "Failed to instantiate class: Any cannot be instantiated"
+      ],
+      "warnings": []
+    }
+  ],
+  "success_rate": 0.0
+}

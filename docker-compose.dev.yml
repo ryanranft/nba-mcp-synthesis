@@ -1,200 +1,121 @@
-# Docker Compose for NBA MCP Local Development
-# NICE-TO-HAVE 33: Local Development Environment
-
 version: "3.8"
 
 services:
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15-alpine
-    container_name: nba-mcp-postgres
+  nba-mcp-synthesis:
+    build: .
+    container_name: nba-mcp-synthesis-dev
     environment:
-      POSTGRES_DB: nba_stats
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: local_dev_password
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=en_US.utf8 --lc-ctype=en_US.utf8"
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # Redis for Caching & Rate Limiting
-  redis:
-    image: redis:7-alpine
-    container_name: nba-mcp-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-
-  # MLflow Tracking Server
-  mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.8.0
-    container_name: nba-mcp-mlflow
-    ports:
-      - "5000:5000"
-    volumes:
-      - mlflow_data:/mlflow
-    command: >
-      mlflow server
-      --backend-store-uri sqlite:///mlflow/mlflow.db
-      --default-artifact-root file:///mlflow/artifacts
-      --host 0.0.0.0
-      --port 5000
-    environment:
-      - MLFLOW_TRACKING_URI=http://mlflow:5000
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # Jaeger for Distributed Tracing
-  jaeger:
-    image: jaegertracing/all-in-one:1.50
-    container_name: nba-mcp-jaeger
-    ports:
-      - "5775:5775/udp" # Zipkin compact thrift
-      - "6831:6831/udp" # Jaeger compact thrift
-      - "6832:6832/udp" # Jaeger binary thrift
-      - "5778:5778" # Config server
-      - "16686:16686" # UI
-      - "14268:14268" # Jaeger collector
-      - "14250:14250" # gRPC
-      - "9411:9411" # Zipkin collector
-    environment:
-      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
-      - COLLECTOR_OTLP_ENABLED=true
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "http://localhost:16686"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # Prometheus for Metrics
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: nba-mcp-prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-      - "--storage.tsdb.path=/prometheus"
-      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
-      - "--web.console.templates=/usr/share/prometheus/consoles"
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "http://localhost:9090/-/healthy"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # Grafana for Dashboards
-  grafana:
-    image: grafana/grafana:latest
-    container_name: nba-mcp-grafana
-    ports:
-      - "3000:3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
-      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_SERVER_ROOT_URL=http://localhost:3000
-    depends_on:
-      - prometheus
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # NBA MCP Application
-  nba-mcp:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    container_name: nba-mcp-app
+      - PROJECT_NAME=nba-mcp-synthesis
+      - SPORT_NAME=NBA
+      - NBA_MCP_CONTEXT=development
+      - PYTHONUNBUFFERED=1
     ports:
       - "8000:8000"
     volumes:
       - .:/app
-      - /app/__pycache__
-      - /app/venv
-    environment:
-      - USE_LOCAL_CREDENTIALS=true
-      - DB_HOST=postgres
-      - DB_USER=postgres
-      - DB_PASSWORD=local_dev_password
-      - DB_NAME=nba_stats
-      - DB_PORT=5432
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - MLFLOW_TRACKING_URI=http://mlflow:5000
-      - JAEGER_AGENT_HOST=jaeger
-      - JAEGER_AGENT_PORT=6831
-      - NBA_MCP_DEBUG=true
-      - NBA_MCP_LOG_LEVEL=DEBUG
+      - /app/node_modules
+    secrets:
+      - google_api_key
+      - anthropic_api_key
+      - deepseek_api_key
+      - openai_api_key
+      - db_password
+      - db_host
+      - db_port
+      - slack_webhook_url
+      - linear_api_key
+      - linear_team_id
+      - linear_project_id
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      mlflow:
-        condition: service_healthy
-      jaeger:
-        condition: service_healthy
-    command: >
-      sh -c "
-        pip install -r requirements.txt &&
-        python -m mcp_server.fastmcp_server
-      "
+      - postgres
+      - redis
+    networks:
+      - nba-mcp-network
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  postgres:
+    image: postgres:15
+    container_name: nba-mcp-postgres
+    environment:
+      - POSTGRES_DB=nba_mcp_synthesis
+      - POSTGRES_USER=nba_mcp_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    secrets:
+      - db_password
+    networks:
+      - nba-mcp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nba_mcp_user -d nba_mcp_synthesis"]
+      interval: 10s
+      timeout: 5s
       retries: 5
 
-  # PgAdmin for Database Management
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: nba-mcp-pgadmin
-    ports:
-      - "5050:80"
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@nba-mcp.com
-      - PGADMIN_DEFAULT_PASSWORD=admin
-      - PGADMIN_CONFIG_SERVER_MODE=False
+  redis:
+    image: redis:7
+    container_name: nba-mcp-redis
     volumes:
-      - pgadmin_data:/var/lib/pgadmin
+      - redis_data:/data
+    networks:
+      - nba-mcp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nginx:
+    image: nginx:alpine
+    container_name: nba-mcp-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
     depends_on:
-      - postgres
+      - nba-mcp-synthesis
+    networks:
+      - nba-mcp-network
+    restart: unless-stopped
+
+secrets:
+  google_api_key:
+    file: ./secrets/GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW.env
+  anthropic_api_key:
+    file: ./secrets/ANTHROPIC_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW.env
+  deepseek_api_key:
+    file: ./secrets/DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW.env
+  openai_api_key:
+    file: ./secrets/OPENAI_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW.env
+  db_password:
+    file: ./secrets/DB_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW.env
+  db_host:
+    file: ./secrets/DB_HOST_NBA_MCP_SYNTHESIS_WORKFLOW.env
+  db_port:
+    file: ./secrets/DB_PORT_NBA_MCP_SYNTHESIS_WORKFLOW.env
+  slack_webhook_url:
+    file: ./secrets/SLACK_WEBHOOK_URL_BIG_CAT_BETS_GLOBAL_WORKFLOW.env
+  linear_api_key:
+    file: ./secrets/LINEAR_API_KEY_BIG_CAT_BETS_GLOBAL_WORKFLOW.env
+  linear_team_id:
+    file: ./secrets/LINEAR_TEAM_ID_BIG_CAT_BETS_GLOBAL_WORKFLOW.env
+  linear_project_id:
+    file: ./secrets/LINEAR_PROJECT_ID_BIG_CAT_BETS_GLOBAL_WORKFLOW.env
 
 volumes:
   postgres_data:
   redis_data:
-  mlflow_data:
-  prometheus_data:
-  grafana_data:
-  pgadmin_data:
 
 networks:
-  default:
-    name: nba-mcp-network
+  nba-mcp-network:
     driver: bridge

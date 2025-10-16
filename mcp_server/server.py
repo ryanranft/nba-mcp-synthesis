@@ -1,11 +1,15 @@
 """
 NBA MCP Server - Main Server Implementation
 Provides context from NBA project to AI models via MCP protocol
+
+Updated to use the new unified secrets and configuration management system.
 """
 
 import asyncio
 import json
 import logging
+import subprocess
+import sys
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 from pathlib import Path
@@ -15,24 +19,45 @@ from dotenv import load_dotenv
 from mcp.server import Server
 from mcp.types import Tool, TextContent, ImageContent, Resource
 
-from .tools import (
-    DatabaseTools,
-    S3Tools,
-    GlueTools,
-    FileTools,
-    ActionTools
-)
-from .config import MCPConfig
-from .connectors import (
-    RDSConnector,
-    S3Connector,
-    GlueConnector,
-    SlackNotifier
-)
-from .security import SecurityManager, SecurityConfig
-from .logging_config import setup_logging, get_logger, RequestContext, PerformanceLogger
+try:
+    from .tools import (
+        DatabaseTools,
+        S3Tools,
+        GlueTools,
+        FileTools,
+        ActionTools
+    )
+    from .config import MCPConfig
+    from .connectors import (
+        RDSConnector,
+        S3Connector,
+        GlueConnector,
+        SlackNotifier
+    )
+    from .security import SecurityManager, SecurityConfig
+    from .logging_config import setup_logging, get_logger, RequestContext, PerformanceLogger
+    from .unified_configuration_manager import UnifiedConfigurationManager
+except ImportError:
+    # Fallback for when running as standalone script
+    from tools import (
+        DatabaseTools,
+        S3Tools,
+        GlueTools,
+        FileTools,
+        ActionTools
+    )
+    from config import MCPConfig
+    from connectors import (
+        RDSConnector,
+        S3Connector,
+        GlueConnector,
+        SlackNotifier
+    )
+    from security import SecurityManager, SecurityConfig
+    from logging_config import setup_logging, get_logger, RequestContext, PerformanceLogger
+    from unified_configuration_manager import UnifiedConfigurationManager
 
-# Load environment variables
+# Load environment variables (for backward compatibility)
 load_dotenv()
 
 # Setup structured logging
@@ -51,9 +76,35 @@ class NBAMCPServer:
     MCP Server for NBA Simulator Project
     Provides tools to access RDS, S3, Glue, and project files
     """
-    
-    def __init__(self, config: Optional[MCPConfig] = None):
-        """Initialize MCP server with configuration"""
+
+    def __init__(self, config: Optional[MCPConfig] = None, project: str = 'nba-mcp-synthesis', context: str = 'production'):
+        """Initialize MCP server with unified configuration system"""
+        # Load secrets using hierarchical loader
+        logger.info(f"Loading secrets for project={project}, context={context}")
+        try:
+            result = subprocess.run([
+                sys.executable,
+                "/Users/ryanranft/load_env_hierarchical.py",
+                project, "NBA", context
+            ], capture_output=True, text=True, check=True)
+
+            logger.info("✅ Secrets loaded successfully")
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Failed to load secrets: {e.stderr}")
+            raise RuntimeError(f"Failed to load secrets: {e.stderr}")
+        except Exception as e:
+            logger.error(f"Error loading secrets: {e}")
+            raise RuntimeError(f"Error loading secrets: {e}")
+
+        # Initialize unified configuration manager
+        try:
+            self.unified_config = UnifiedConfigurationManager(project, context)
+            logger.info("✅ Unified configuration loaded successfully")
+        except Exception as e:
+            logger.error(f"Failed to load unified configuration: {e}")
+            raise RuntimeError(f"Failed to load unified configuration: {e}")
+
+        # Use unified config or fallback to old config
         self.config = config or MCPConfig.from_env()
         self.server = Server("nba-mcp-server")
 
@@ -79,7 +130,7 @@ class NBAMCPServer:
         self._setup_handlers()
 
         logger.info("NBA MCP Server initialized (with security enabled)")
-    
+
     def _init_connectors(self):
         """Initialize data source connectors"""
         try:
@@ -92,21 +143,21 @@ class NBAMCPServer:
                 password=self.config.rds_password
             )
             logger.info("RDS connector initialized")
-            
+
             # S3
             self.s3_connector = S3Connector(
                 bucket_name=self.config.s3_bucket,
                 region=self.config.s3_region
             )
             logger.info("S3 connector initialized")
-            
+
             # AWS Glue
             self.glue_connector = GlueConnector(
                 database=self.config.glue_database,
                 region=self.config.glue_region
             )
             logger.info("Glue connector initialized")
-            
+
             # Slack (optional)
             if self.config.slack_webhook_url:
                 self.slack_notifier = SlackNotifier(
@@ -115,11 +166,11 @@ class NBAMCPServer:
                 logger.info("Slack notifier initialized")
             else:
                 self.slack_notifier = None
-                
+
         except Exception as e:
             logger.error(f"Failed to initialize connectors: {e}")
             raise
-    
+
     def _init_tools(self):
         """Initialize MCP tools"""
         self.database_tools = DatabaseTools(self.rds_connector)
@@ -133,33 +184,33 @@ class NBAMCPServer:
         )
 
         logger.info("MCP tools initialized")
-    
+
     def _setup_handlers(self):
         """Setup MCP protocol handlers"""
-        
+
         @self.server.list_tools()
         async def list_tools() -> List[Tool]:
             """Return list of available MCP tools"""
             tools = []
-            
+
             # Database tools
             tools.extend(self.database_tools.get_tool_definitions())
-            
-            # S3 tools  
+
+            # S3 tools
             tools.extend(self.s3_tools.get_tool_definitions())
-            
+
             # Glue tools
             tools.extend(self.glue_tools.get_tool_definitions())
-            
+
             # File tools
             tools.extend(self.file_tools.get_tool_definitions())
-            
+
             # Action tools
             tools.extend(self.action_tools.get_tool_definitions())
-            
+
             logger.info(f"Listing {len(tools)} available tools")
             return tools
-        
+
         @self.server.call_tool()
         async def call_tool(name: str, arguments: Dict[str, Any]) -> Any:
             """Execute requested tool with arguments"""
@@ -241,42 +292,42 @@ class NBAMCPServer:
                         "tool": name,
                         "timestamp": datetime.now().isoformat()
                     }
-        
+
         @self.server.list_resources()
         async def list_resources() -> List[Resource]:
             """List available resources (databases, files, etc.)"""
             resources = []
-            
+
             # Add database resource
             resources.append(Resource(
                 uri=f"postgresql://{self.config.rds_host}/{self.config.rds_database}",
                 name="NBA Simulator Database",
                 description="PostgreSQL database with game data, player stats, and more"
             ))
-            
+
             # Add S3 resource
             resources.append(Resource(
                 uri=f"s3://{self.config.s3_bucket}",
                 name="NBA Data Lake",
                 description="S3 bucket with 146K+ game JSON files and raw data"
             ))
-            
+
             # Add Glue catalog
             resources.append(Resource(
                 uri=f"glue://{self.config.glue_database}",
                 name="NBA Data Catalog",
                 description="AWS Glue catalog with table schemas and metadata"
             ))
-            
+
             # Add project directory
             resources.append(Resource(
                 uri=f"file://{self.config.project_root}",
                 name="NBA Simulator Project",
                 description="Local project files and code"
             ))
-            
+
             return resources
-    
+
     async def _notify_tool_execution(
         self,
         tool_name: str,
@@ -287,11 +338,11 @@ class NBAMCPServer:
         """Send Slack notification for tool execution"""
         if not self.slack_notifier:
             return
-        
+
         try:
             emoji = "✅" if success else "❌"
             status = "succeeded" if success else "failed"
-            
+
             message = {
                 "text": f"{emoji} MCP Tool {status}: {tool_name}",
                 "blocks": [
@@ -317,7 +368,7 @@ class NBAMCPServer:
                     }
                 ]
             }
-            
+
             if not success:
                 message["blocks"].append({
                     "type": "section",
@@ -326,29 +377,34 @@ class NBAMCPServer:
                         "text": f"*Error:*\n```{result}```"
                     }
                 })
-            
+
             await self.slack_notifier.send_notification(message)
-            
+
         except Exception as e:
             logger.warning(f"Failed to send Slack notification: {e}")
-    
+
     async def start(self):
         """Start the MCP server"""
-        logger.info(f"Starting NBA MCP Server on {self.config.host}:{self.config.port}")
-        
+        logger.info(f"Starting NBA MCP Server")
+
         # Test connections
         await self._test_connections()
-        
-        # Start server
-        await self.server.run(
-            host=self.config.host,
-            port=self.config.port
-        )
-    
+
+        # Start server using stdio transport (standard MCP pattern)
+        import sys
+        from mcp.server.stdio import stdio_server
+
+        async with stdio_server() as (read_stream, write_stream):
+            await self.server.run(
+                read_stream,
+                write_stream,
+                self.server.create_initialization_options()
+            )
+
     async def _test_connections(self):
         """Test all data source connections"""
         logger.info("Testing data source connections...")
-        
+
         # Test RDS
         try:
             await self.database_tools.execute("query_rds_database", {
@@ -357,7 +413,7 @@ class NBAMCPServer:
             logger.info("✅ RDS connection successful")
         except Exception as e:
             logger.error(f"❌ RDS connection failed: {e}")
-        
+
         # Test S3
         try:
             await self.s3_tools.execute("list_s3_files", {
@@ -367,7 +423,7 @@ class NBAMCPServer:
             logger.info("✅ S3 connection successful")
         except Exception as e:
             logger.error(f"❌ S3 connection failed: {e}")
-        
+
         # Test Glue
         try:
             tables = await self.glue_connector.list_tables()

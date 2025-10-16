@@ -1,6 +1,26 @@
 """
 Environment-Specific Configuration Manager
 Manages configuration for dev, staging, and production environments.
+
+⚠️  DEPRECATION NOTICE ⚠️
+This module is deprecated and will be removed in a future version.
+Please migrate to the new unified configuration system:
+
+1. Use mcp_server.unified_configuration_manager.UnifiedConfigurationManager
+2. Use mcp_server.unified_secrets_manager.UnifiedSecretsManager
+3. Use /Users/ryanranft/load_env_hierarchical.py for loading secrets
+
+Migration Guide:
+- Replace ConfigManager with UnifiedConfigurationManager
+- Use context-rich naming convention (e.g., GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW)
+- Load secrets using the hierarchical loader before initializing config
+
+For more details, see:
+- /centralized-secrets-management.plan.md
+- mcp_server/unified_configuration_manager.py
+- mcp_server/unified_secrets_manager.py
+
+This file will be removed in version 2.0.0
 """
 
 import os
@@ -108,13 +128,23 @@ class ConfigManager:
             env: Environment name (development, staging, production)
                  If None, uses NBA_MCP_ENV environment variable
         """
+        # Deprecation warning
+        import warnings
+        warnings.warn(
+            "ConfigManager is deprecated. Use UnifiedConfigurationManager instead. "
+            "See mcp_server/unified_configuration_manager.py for migration guide.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+
         env_str = env or os.getenv("NBA_MCP_ENV", "development")
         self.environment = Environment(env_str.lower())
         self.config_dir = Path(__file__).parent.parent / "config"
         self.config: Dict[str, Any] = {}
 
         self._load_config()
-        logger.info(f"Configuration loaded for environment: {self.environment.value}")
+        logger.warning(f"⚠️  DEPRECATED: ConfigManager loaded for environment: {self.environment.value}")
+        logger.warning("⚠️  Please migrate to UnifiedConfigurationManager")
 
     def _load_config(self):
         """Load configuration from files and environment variables"""

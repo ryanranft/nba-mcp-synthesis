@@ -1,0 +1,414 @@
+{
+  "validation_summary": {
+    "project": "nba-mcp-synthesis",
+    "timestamp": "2025-10-15T19:01:24.101760",
+    "total_duration_seconds": 16.704772,
+    "total_tests": 19,
+    "passed_tests": 16,
+    "failed_tests": 0,
+    "warning_tests": 3,
+    "skipped_tests": 0,
+    "success_rate_percent": 84.21052631578947
+  },
+  "test_results": [
+    {
+      "test_name": "directory_structure",
+      "status": "pass",
+      "message": "All required directories exist",
+      "duration": 4.267692565917969e-05,
+      "details": {},
+      "timestamp": "2025-10-15T19:01:07.398355"
+    },
+    {
+      "test_name": "naming_convention",
+      "status": "pass",
+      "message": "Naming convention validation passed",
+      "duration": 0.046980857849121094,
+      "details": {
+        "output": "\ud83d\udd0d Validating naming convention compliance...\n\ud83d\udcc4 Report saved to: migration_report.txt\n\n\u26a0\ufe0f  Found 4 violations. Consider fixing for better compliance.\n"
+      },
+      "timestamp": "2025-10-15T19:01:07.445493"
+    },
+    {
+      "test_name": "hierarchical_loader",
+      "status": "pass",
+      "message": "Hierarchical loader validation passed",
+      "duration": 0.18383002281188965,
+      "details": {
+        "output": "\n\u2705 Environment loaded successfully!\n"
+      },
+      "timestamp": "2025-10-15T19:01:07.629626"
+    },
+    {
+      "test_name": "unified_secrets_manager",
+      "status": "pass",
+      "message": "Unified secrets manager validation passed",
+      "duration": 0.12819910049438477,
+      "details": {
+        "output": "UnifiedSecretsManager initialized successfully\nUnifiedSecretsManager basic functionality test passed\nAll tests passed\n"
+      },
+      "timestamp": "2025-10-15T19:01:07.758154"
+    },
+    {
+      "test_name": "unified_configuration_manager",
+      "status": "pass",
+      "message": "Unified configuration manager validation passed",
+      "duration": 0.05876803398132324,
+      "details": {
+        "output": "UnifiedConfigurationManager initialized successfully\nAPI config loaded: <class 'mcp_server.unified_configuration_manager.APIConfig'>\nContext key: WORKFLOW\nAll tests passed\n"
+      },
+      "timestamp": "2025-10-15T19:01:07.817631"
+    },
+    {
+      "test_name": "entry_point_scripts_automated_workflow_py",
+      "status": "pass",
+      "message": "Entry point scripts/automated_workflow.py is functional",
+      "duration": 0.2923552989959717,
+      "details": {
+        "output": "usage: automated_workflow.py [-h] [--config CONFIG] [--budget BUDGET]\n                             [--output OUTPUT] [--project PROJECT]\n                             [--sport SPORT] [--context CONTEXT]\n                             [--slack-webhook SLACK_WEBHOOK]\n                             [--linear-api-key LINEAR_API_KEY]\n                             [--linear-team-id LINEAR_TEAM_ID]\n                             [--linear-project-id LINEAR_PROJECT_ID]\n\nRun automated book analysis workflow\n\noptions:\n  -h, --help            show this help message and exit\n  --config CONFIG       Path to books configuration file\n  --budget BUDGET       Maximum budget in USD\n  --output OUTPUT       Output directory for results\n  --project PROJECT     Project name for secrets loading\n  --sport SPORT         Sport name for secrets loading\n  --context CONTEXT     Context for secrets loading (production, development,\n                        test)\n  --slack-webhook SLACK_WEBHOOK\n                        Slack webhook URL (overrides secrets)\n  --linear-api-key LINEAR_API_KEY\n                        Linear API key (overrides secrets)\n  --linear-team-id LINEAR_TEAM_ID\n                        Linear team ID (overrides secrets)\n  --linear-project-id LINEAR_PROJECT_ID\n                        Linear project ID (overrides secrets)\n"
+      },
+      "timestamp": "2025-10-15T19:01:08.110330"
+    },
+    {
+      "test_name": "entry_point_scripts_resilient_book_analyzer_py",
+      "status": "pass",
+      "message": "Entry point scripts/resilient_book_analyzer.py is functional",
+      "duration": 1.0067191123962402,
+      "details": {
+        "output": ""
+      },
+      "timestamp": "2025-10-15T19:01:09.117444"
+    },
+    {
+      "test_name": "entry_point_mcp_server_server_py",
+      "status": "warning",
+      "message": "Entry point mcp_server/server.py may have issues: Traceback (most recent call last):\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/server.py\", line 23, in <module>\n    from .tools import (\nImportError: attempted relative import with no known parent package\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/server.py\", line 42, in <module>\n    from tools import (\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/tools/__init__.py\", line 6, in <module>\n    from mcp_server.tools.database_tools import DatabaseTools\nModuleNotFoundError: No module named 'mcp_server'\n",
+      "duration": 0.350024938583374,
+      "details": {
+        "output": "",
+        "error": "Traceback (most recent call last):\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/server.py\", line 23, in <module>\n    from .tools import (\nImportError: attempted relative import with no known parent package\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/server.py\", line 42, in <module>\n    from tools import (\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/tools/__init__.py\", line 6, in <module>\n    from mcp_server.tools.database_tools import DatabaseTools\nModuleNotFoundError: No module named 'mcp_server'\n"
+      },
+      "timestamp": "2025-10-15T19:01:09.467772"
+    },
+    {
+      "test_name": "entry_point_scripts_test_all_credentials_py",
+      "status": "warning",
+      "message": "Entry point scripts/test_all_credentials.py may have issues: Command timed out",
+      "duration": 10.01229476928711,
+      "details": {
+        "output": "",
+        "error": "Command timed out"
+      },
+      "timestamp": "2025-10-15T19:01:19.480385"
+    },
+    {
+      "test_name": "entry_point_test_mcp_tools_py",
+      "status": "pass",
+      "message": "Entry point test_mcp_tools.py is functional",
+      "duration": 3.220423936843872,
+      "details": {
+        "output": "NBA MCP Server - Tool Verification\n========================================\nUsing unified secrets management system\n\nLoading secrets...\n\u2705 Secrets loaded successfully\n\u2713 MCP Server: nba-mcp-fastmcp\n\u2713 Total MCP Tools: 247\n\n\u2713 Available NBA MCP Tools:\n  1. query_database\n  2. list_tables\n  3. get_table_schema\n  4. list_games\n  5. list_players\n  6. list_s3_files\n  7. list_books\n  8. read_book\n  9. search_books\n  10. get_epub_metadata\n  ... and 237 more tools\n\n\ud83c\udf89 MCP Server is ready!\n"
+      },
+      "timestamp": "2025-10-15T19:01:22.701283"
+    },
+    {
+      "test_name": "environment_production",
+      "status": "pass",
+      "message": "Environment production validation passed",
+      "duration": 0.12528514862060547,
+      "details": {
+        "output": "\n\u2705 Environment loaded successfully!\n"
+      },
+      "timestamp": "2025-10-15T19:01:22.826870"
+    },
+    {
+      "test_name": "environment_development",
+      "status": "pass",
+      "message": "Environment development validation passed",
+      "duration": 0.12280702590942383,
+      "details": {
+        "output": "\n\u2705 Environment loaded successfully!\n"
+      },
+      "timestamp": "2025-10-15T19:01:22.950191"
+    },
+    {
+      "test_name": "environment_test",
+      "status": "pass",
+      "message": "Environment test validation passed",
+      "duration": 0.12331604957580566,
+      "details": {
+        "output": "\n\u2705 Environment loaded successfully!\n"
+      },
+      "timestamp": "2025-10-15T19:01:23.073795"
+    },
+    {
+      "test_name": "integration",
+      "status": "warning",
+      "message": "Integration issues found: 2025-10-15 19:01:23,565 - mcp_server.secrets_health_monitor - ERROR - Failed to load secrets: usage: load_env_hierarchical.py [-h] [--base-path BASE_PATH] [--no-validate]\n                                [--export EXPORT] [--list] [--health]\n                                [--verbose]\n                                [project] [sport] [context]\nload_env_hierarchical.py: error: unrecognized arguments: --project --context production\n\n2025-10-15 19:01:23,690 - mcp_server.secrets_alerting_system - ERROR - Failed to load secrets: usage: load_env_hierarchical.py [-h] [--base-path BASE_PATH] [--no-validate]\n                                [--export EXPORT] [--list] [--health]\n                                [--verbose]\n                                [project] [sport] [context]\nload_env_hierarchical.py: error: unrecognized arguments: --project --context production\n\n2025-10-15 19:01:23,691 - __main__ - INFO - Secrets Health Integration initialized for nba-mcp-synthesis (production)\n2025-10-15 19:01:23,691 - __main__ - INFO - Running comprehensive health check...\n2025-10-15 19:01:23,691 - mcp_server.secrets_metrics_dashboard - ERROR - Failed to save metrics: Object of type datetime is not JSON serializable\n2025-10-15 19:01:23,692 - mcp_server.secrets_metrics_dashboard - ERROR - Failed to save history: Object of type datetime is not JSON serializable\nTraceback (most recent call last):\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/secrets_health_integration.py\", line 483, in <module>\n    main()\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/secrets_health_integration.py\", line 445, in main\n    report = integration.run_health_check()\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/secrets_health_integration.py\", line 187, in run_health_check\n    alerts = self.alert_manager.process_metrics(asdict(metrics))\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/secrets_alerting_system.py\", line 571, in process_metrics\n    if self.deduplicator.should_send_alert(alert, alert.throttle_minutes):\n                                                  ^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'Alert' object has no attribute 'throttle_minutes'\n",
+      "duration": 0.6719529628753662,
+      "details": {
+        "output": "\ud83d\udd0d Running comprehensive health check...\n",
+        "error": "2025-10-15 19:01:23,565 - mcp_server.secrets_health_monitor - ERROR - Failed to load secrets: usage: load_env_hierarchical.py [-h] [--base-path BASE_PATH] [--no-validate]\n                                [--export EXPORT] [--list] [--health]\n                                [--verbose]\n                                [project] [sport] [context]\nload_env_hierarchical.py: error: unrecognized arguments: --project --context production\n\n2025-10-15 19:01:23,690 - mcp_server.secrets_alerting_system - ERROR - Failed to load secrets: usage: load_env_hierarchical.py [-h] [--base-path BASE_PATH] [--no-validate]\n                                [--export EXPORT] [--list] [--health]\n                                [--verbose]\n                                [project] [sport] [context]\nload_env_hierarchical.py: error: unrecognized arguments: --project --context production\n\n2025-10-15 19:01:23,691 - __main__ - INFO - Secrets Health Integration initialized for nba-mcp-synthesis (production)\n2025-10-15 19:01:23,691 - __main__ - INFO - Running comprehensive health check...\n2025-10-15 19:01:23,691 - mcp_server.secrets_metrics_dashboard - ERROR - Failed to save metrics: Object of type datetime is not JSON serializable\n2025-10-15 19:01:23,692 - mcp_server.secrets_metrics_dashboard - ERROR - Failed to save history: Object of type datetime is not JSON serializable\nTraceback (most recent call last):\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/secrets_health_integration.py\", line 483, in <module>\n    main()\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/secrets_health_integration.py\", line 445, in main\n    report = integration.run_health_check()\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/secrets_health_integration.py\", line 187, in run_health_check\n    alerts = self.alert_manager.process_metrics(asdict(metrics))\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/secrets_alerting_system.py\", line 571, in process_metrics\n    if self.deduplicator.should_send_alert(alert, alert.throttle_minutes):\n                                                  ^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'Alert' object has no attribute 'throttle_minutes'\n"
+      },
+      "timestamp": "2025-10-15T19:01:23.746198"
+    },
+    {
+      "test_name": "health_monitoring",
+      "status": "pass",
+      "message": "Health monitoring validation passed",
+      "duration": 0.22981929779052734,
+      "details": {
+        "output": "\ud83d\udd0d Running one-time health checks...\n\n\ud83d\udcca Health Check Results:\n\n\ud83d\udd10 Secret Validation Results:\n\n\ud83d\udcc8 Overall Health Score: 0.0%\n\ud83c\udf10 API Connectivity Score: 0.0%\n\u23f1\ufe0f  Average Response Time: 0.0ms\n"
+      },
+      "timestamp": "2025-10-15T19:01:23.976406"
+    },
+    {
+      "test_name": "docker_integration",
+      "status": "pass",
+      "message": "All Docker files present",
+      "duration": 3.409385681152344e-05,
+      "details": {},
+      "timestamp": "2025-10-15T19:01:23.976697"
+    },
+    {
+      "test_name": "security",
+      "status": "pass",
+      "message": "Security validation passed",
+      "duration": 2.288818359375e-05,
+      "details": {},
+      "timestamp": "2025-10-15T19:01:23.976781"
+    },
+    {
+      "test_name": "performance",
+      "status": "pass",
+      "message": "Performance validation passed (load time: 0.12s)",
+      "duration": 0.12384510040283203,
+      "details": {
+        "load_time": 0.12384510040283203
+      },
+      "timestamp": "2025-10-15T19:01:24.100815"
+    },
+    {
+      "test_name": "documentation",
+      "status": "pass",
+      "message": "All documentation files present",
+      "duration": 6.198883056640625e-05,
+      "details": {},
+      "timestamp": "2025-10-15T19:01:24.101164"
+    }
+  ],
+  "categories": {
+    "directory": [
+      {
+        "test_name": "directory_structure",
+        "status": "pass",
+        "message": "All required directories exist",
+        "duration": 4.267692565917969e-05,
+        "details": {},
+        "timestamp": "2025-10-15T19:01:07.398355"
+      }
+    ],
+    "naming": [
+      {
+        "test_name": "naming_convention",
+        "status": "pass",
+        "message": "Naming convention validation passed",
+        "duration": 0.046980857849121094,
+        "details": {
+          "output": "\ud83d\udd0d Validating naming convention compliance...\n\ud83d\udcc4 Report saved to: migration_report.txt\n\n\u26a0\ufe0f  Found 4 violations. Consider fixing for better compliance.\n"
+        },
+        "timestamp": "2025-10-15T19:01:07.445493"
+      }
+    ],
+    "hierarchical": [
+      {
+        "test_name": "hierarchical_loader",
+        "status": "pass",
+        "message": "Hierarchical loader validation passed",
+        "duration": 0.18383002281188965,
+        "details": {
+          "output": "\n\u2705 Environment loaded successfully!\n"
+        },
+        "timestamp": "2025-10-15T19:01:07.629626"
+      }
+    ],
+    "unified": [
+      {
+        "test_name": "unified_secrets_manager",
+        "status": "pass",
+        "message": "Unified secrets manager validation passed",
+        "duration": 0.12819910049438477,
+        "details": {
+          "output": "UnifiedSecretsManager initialized successfully\nUnifiedSecretsManager basic functionality test passed\nAll tests passed\n"
+        },
+        "timestamp": "2025-10-15T19:01:07.758154"
+      },
+      {
+        "test_name": "unified_configuration_manager",
+        "status": "pass",
+        "message": "Unified configuration manager validation passed",
+        "duration": 0.05876803398132324,
+        "details": {
+          "output": "UnifiedConfigurationManager initialized successfully\nAPI config loaded: <class 'mcp_server.unified_configuration_manager.APIConfig'>\nContext key: WORKFLOW\nAll tests passed\n"
+        },
+        "timestamp": "2025-10-15T19:01:07.817631"
+      }
+    ],
+    "entry": [
+      {
+        "test_name": "entry_point_scripts_automated_workflow_py",
+        "status": "pass",
+        "message": "Entry point scripts/automated_workflow.py is functional",
+        "duration": 0.2923552989959717,
+        "details": {
+          "output": "usage: automated_workflow.py [-h] [--config CONFIG] [--budget BUDGET]\n                             [--output OUTPUT] [--project PROJECT]\n                             [--sport SPORT] [--context CONTEXT]\n                             [--slack-webhook SLACK_WEBHOOK]\n                             [--linear-api-key LINEAR_API_KEY]\n                             [--linear-team-id LINEAR_TEAM_ID]\n                             [--linear-project-id LINEAR_PROJECT_ID]\n\nRun automated book analysis workflow\n\noptions:\n  -h, --help            show this help message and exit\n  --config CONFIG       Path to books configuration file\n  --budget BUDGET       Maximum budget in USD\n  --output OUTPUT       Output directory for results\n  --project PROJECT     Project name for secrets loading\n  --sport SPORT         Sport name for secrets loading\n  --context CONTEXT     Context for secrets loading (production, development,\n                        test)\n  --slack-webhook SLACK_WEBHOOK\n                        Slack webhook URL (overrides secrets)\n  --linear-api-key LINEAR_API_KEY\n                        Linear API key (overrides secrets)\n  --linear-team-id LINEAR_TEAM_ID\n                        Linear team ID (overrides secrets)\n  --linear-project-id LINEAR_PROJECT_ID\n                        Linear project ID (overrides secrets)\n"
+        },
+        "timestamp": "2025-10-15T19:01:08.110330"
+      },
+      {
+        "test_name": "entry_point_scripts_resilient_book_analyzer_py",
+        "status": "pass",
+        "message": "Entry point scripts/resilient_book_analyzer.py is functional",
+        "duration": 1.0067191123962402,
+        "details": {
+          "output": ""
+        },
+        "timestamp": "2025-10-15T19:01:09.117444"
+      },
+      {
+        "test_name": "entry_point_mcp_server_server_py",
+        "status": "warning",
+        "message": "Entry point mcp_server/server.py may have issues: Traceback (most recent call last):\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/server.py\", line 23, in <module>\n    from .tools import (\nImportError: attempted relative import with no known parent package\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/server.py\", line 42, in <module>\n    from tools import (\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/tools/__init__.py\", line 6, in <module>\n    from mcp_server.tools.database_tools import DatabaseTools\nModuleNotFoundError: No module named 'mcp_server'\n",
+        "duration": 0.350024938583374,
+        "details": {
+          "output": "",
+          "error": "Traceback (most recent call last):\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/server.py\", line 23, in <module>\n    from .tools import (\nImportError: attempted relative import with no known parent package\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/server.py\", line 42, in <module>\n    from tools import (\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/tools/__init__.py\", line 6, in <module>\n    from mcp_server.tools.database_tools import DatabaseTools\nModuleNotFoundError: No module named 'mcp_server'\n"
+        },
+        "timestamp": "2025-10-15T19:01:09.467772"
+      },
+      {
+        "test_name": "entry_point_scripts_test_all_credentials_py",
+        "status": "warning",
+        "message": "Entry point scripts/test_all_credentials.py may have issues: Command timed out",
+        "duration": 10.01229476928711,
+        "details": {
+          "output": "",
+          "error": "Command timed out"
+        },
+        "timestamp": "2025-10-15T19:01:19.480385"
+      },
+      {
+        "test_name": "entry_point_test_mcp_tools_py",
+        "status": "pass",
+        "message": "Entry point test_mcp_tools.py is functional",
+        "duration": 3.220423936843872,
+        "details": {
+          "output": "NBA MCP Server - Tool Verification\n========================================\nUsing unified secrets management system\n\nLoading secrets...\n\u2705 Secrets loaded successfully\n\u2713 MCP Server: nba-mcp-fastmcp\n\u2713 Total MCP Tools: 247\n\n\u2713 Available NBA MCP Tools:\n  1. query_database\n  2. list_tables\n  3. get_table_schema\n  4. list_games\n  5. list_players\n  6. list_s3_files\n  7. list_books\n  8. read_book\n  9. search_books\n  10. get_epub_metadata\n  ... and 237 more tools\n\n\ud83c\udf89 MCP Server is ready!\n"
+        },
+        "timestamp": "2025-10-15T19:01:22.701283"
+      }
+    ],
+    "environment": [
+      {
+        "test_name": "environment_production",
+        "status": "pass",
+        "message": "Environment production validation passed",
+        "duration": 0.12528514862060547,
+        "details": {
+          "output": "\n\u2705 Environment loaded successfully!\n"
+        },
+        "timestamp": "2025-10-15T19:01:22.826870"
+      },
+      {
+        "test_name": "environment_development",
+        "status": "pass",
+        "message": "Environment development validation passed",
+        "duration": 0.12280702590942383,
+        "details": {
+          "output": "\n\u2705 Environment loaded successfully!\n"
+        },
+        "timestamp": "2025-10-15T19:01:22.950191"
+      },
+      {
+        "test_name": "environment_test",
+        "status": "pass",
+        "message": "Environment test validation passed",
+        "duration": 0.12331604957580566,
+        "details": {
+          "output": "\n\u2705 Environment loaded successfully!\n"
+        },
+        "timestamp": "2025-10-15T19:01:23.073795"
+      }
+    ],
+    "integration": [
+      {
+        "test_name": "integration",
+        "status": "warning",
+        "message": "Integration issues found: 2025-10-15 19:01:23,565 - mcp_server.secrets_health_monitor - ERROR - Failed to load secrets: usage: load_env_hierarchical.py [-h] [--base-path BASE_PATH] [--no-validate]\n                                [--export EXPORT] [--list] [--health]\n                                [--verbose]\n                                [project] [sport] [context]\nload_env_hierarchical.py: error: unrecognized arguments: --project --context production\n\n2025-10-15 19:01:23,690 - mcp_server.secrets_alerting_system - ERROR - Failed to load secrets: usage: load_env_hierarchical.py [-h] [--base-path BASE_PATH] [--no-validate]\n                                [--export EXPORT] [--list] [--health]\n                                [--verbose]\n                                [project] [sport] [context]\nload_env_hierarchical.py: error: unrecognized arguments: --project --context production\n\n2025-10-15 19:01:23,691 - __main__ - INFO - Secrets Health Integration initialized for nba-mcp-synthesis (production)\n2025-10-15 19:01:23,691 - __main__ - INFO - Running comprehensive health check...\n2025-10-15 19:01:23,691 - mcp_server.secrets_metrics_dashboard - ERROR - Failed to save metrics: Object of type datetime is not JSON serializable\n2025-10-15 19:01:23,692 - mcp_server.secrets_metrics_dashboard - ERROR - Failed to save history: Object of type datetime is not JSON serializable\nTraceback (most recent call last):\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/secrets_health_integration.py\", line 483, in <module>\n    main()\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/secrets_health_integration.py\", line 445, in main\n    report = integration.run_health_check()\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/secrets_health_integration.py\", line 187, in run_health_check\n    alerts = self.alert_manager.process_metrics(asdict(metrics))\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/secrets_alerting_system.py\", line 571, in process_metrics\n    if self.deduplicator.should_send_alert(alert, alert.throttle_minutes):\n                                                  ^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'Alert' object has no attribute 'throttle_minutes'\n",
+        "duration": 0.6719529628753662,
+        "details": {
+          "output": "\ud83d\udd0d Running comprehensive health check...\n",
+          "error": "2025-10-15 19:01:23,565 - mcp_server.secrets_health_monitor - ERROR - Failed to load secrets: usage: load_env_hierarchical.py [-h] [--base-path BASE_PATH] [--no-validate]\n                                [--export EXPORT] [--list] [--health]\n                                [--verbose]\n                                [project] [sport] [context]\nload_env_hierarchical.py: error: unrecognized arguments: --project --context production\n\n2025-10-15 19:01:23,690 - mcp_server.secrets_alerting_system - ERROR - Failed to load secrets: usage: load_env_hierarchical.py [-h] [--base-path BASE_PATH] [--no-validate]\n                                [--export EXPORT] [--list] [--health]\n                                [--verbose]\n                                [project] [sport] [context]\nload_env_hierarchical.py: error: unrecognized arguments: --project --context production\n\n2025-10-15 19:01:23,691 - __main__ - INFO - Secrets Health Integration initialized for nba-mcp-synthesis (production)\n2025-10-15 19:01:23,691 - __main__ - INFO - Running comprehensive health check...\n2025-10-15 19:01:23,691 - mcp_server.secrets_metrics_dashboard - ERROR - Failed to save metrics: Object of type datetime is not JSON serializable\n2025-10-15 19:01:23,692 - mcp_server.secrets_metrics_dashboard - ERROR - Failed to save history: Object of type datetime is not JSON serializable\nTraceback (most recent call last):\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/secrets_health_integration.py\", line 483, in <module>\n    main()\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/secrets_health_integration.py\", line 445, in main\n    report = integration.run_health_check()\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/secrets_health_integration.py\", line 187, in run_health_check\n    alerts = self.alert_manager.process_metrics(asdict(metrics))\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ryanranft/nba-mcp-synthesis/mcp_server/secrets_alerting_system.py\", line 571, in process_metrics\n    if self.deduplicator.should_send_alert(alert, alert.throttle_minutes):\n                                                  ^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'Alert' object has no attribute 'throttle_minutes'\n"
+        },
+        "timestamp": "2025-10-15T19:01:23.746198"
+      }
+    ],
+    "health": [
+      {
+        "test_name": "health_monitoring",
+        "status": "pass",
+        "message": "Health monitoring validation passed",
+        "duration": 0.22981929779052734,
+        "details": {
+          "output": "\ud83d\udd0d Running one-time health checks...\n\n\ud83d\udcca Health Check Results:\n\n\ud83d\udd10 Secret Validation Results:\n\n\ud83d\udcc8 Overall Health Score: 0.0%\n\ud83c\udf10 API Connectivity Score: 0.0%\n\u23f1\ufe0f  Average Response Time: 0.0ms\n"
+        },
+        "timestamp": "2025-10-15T19:01:23.976406"
+      }
+    ],
+    "docker": [
+      {
+        "test_name": "docker_integration",
+        "status": "pass",
+        "message": "All Docker files present",
+        "duration": 3.409385681152344e-05,
+        "details": {},
+        "timestamp": "2025-10-15T19:01:23.976697"
+      }
+    ],
+    "security": [
+      {
+        "test_name": "security",
+        "status": "pass",
+        "message": "Security validation passed",
+        "duration": 2.288818359375e-05,
+        "details": {},
+        "timestamp": "2025-10-15T19:01:23.976781"
+      }
+    ],
+    "performance": [
+      {
+        "test_name": "performance",
+        "status": "pass",
+        "message": "Performance validation passed (load time: 0.12s)",
+        "duration": 0.12384510040283203,
+        "details": {
+          "load_time": 0.12384510040283203
+        },
+        "timestamp": "2025-10-15T19:01:24.100815"
+      }
+    ],
+    "documentation": [
+      {
+        "test_name": "documentation",
+        "status": "pass",
+        "message": "All documentation files present",
+        "duration": 6.198883056640625e-05,
+        "details": {},
+        "timestamp": "2025-10-15T19:01:24.101164"
+      }
+    ]
+  },
+  "recommendations": [
+    "Review 3 warning tests for potential improvements"
+  ]
+}

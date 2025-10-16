@@ -15,7 +15,7 @@ console = Console()
 
 # Connect to Ollama
 ollama = OpenAI(
-    base_url="http://localhost:11434/v1",
+    base_url="http://34.226.246.126:11434/v1",
     api_key="ollama"
 )
 

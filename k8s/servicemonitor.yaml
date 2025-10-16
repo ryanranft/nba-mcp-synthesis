@@ -1,0 +1,22 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: nba-mcp-synthesis-metrics
+  namespace: nba-mcp-synthesis
+  labels:
+    app: nba-mcp-synthesis
+    environment: production
+    project: nba-mcp-synthesis
+spec:
+  selector:
+    matchLabels:
+      app: nba-mcp-synthesis
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+  namespaceSelector:
+    matchNames:
+      - nba-mcp-synthesis
+

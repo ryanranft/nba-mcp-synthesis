@@ -8,18 +8,37 @@ import re
 from typing import Dict, Any, Optional, List
 from pydantic import ValidationError
 from mcp.types import Tool
-from mcp_server.connectors.rds_connector import RDSConnector
-from mcp_server.responses import (
-    success_response,
-    error_response,
-    validation_error,
-    database_error
-)
-from mcp_server.tools.params import (
-    QueryDatabaseParams,
-    GetTableSchemaParams,
-    ListTablesParams
-)
+
+try:
+    from mcp_server.connectors.rds_connector import RDSConnector
+    from mcp_server.responses import (
+        success_response,
+        error_response,
+        validation_error,
+        database_error
+    )
+    from mcp_server.tools.params import (
+        QueryDatabaseParams,
+        GetTableSchemaParams,
+        ListTablesParams
+    )
+except ImportError:
+    # Fallback for when running as standalone script
+    import sys
+    import os
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    from mcp_server.connectors.rds_connector import RDSConnector
+    from mcp_server.responses import (
+        success_response,
+        error_response,
+        validation_error,
+        database_error
+    )
+    from mcp_server.tools.params import (
+        QueryDatabaseParams,
+        GetTableSchemaParams,
+        ListTablesParams
+    )
 
 logger = logging.getLogger(__name__)
 

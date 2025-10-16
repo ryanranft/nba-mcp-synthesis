@@ -3,7 +3,7 @@ Standardized Response Types for MCP Server
 Based on best practices from Graphiti MCP implementation
 """
 
-from typing import TypedDict, Literal, Any, Optional
+from typing import TypedDict, Literal, Any, Optional, Dict, List
 from datetime import datetime
 import uuid
 
@@ -34,15 +34,15 @@ def success_response(
 ) -> SuccessResponse:
     """
     Create a standardized success response.
-    
+
     Args:
         message: Human-readable success message
         data: Response data payload
         request_id: Optional request identifier
-        
+
     Returns:
         SuccessResponse with standard format
-        
+
     Example:
         >>> success_response("Query executed", {"rows": 10, "results": [...]})
         {
@@ -70,16 +70,16 @@ def error_response(
 ) -> ErrorResponse:
     """
     Create a standardized error response.
-    
+
     Args:
         error: Human-readable error message
         error_type: Error classification (e.g., ValueError, DatabaseError)
         request_id: Optional request identifier
         details: Optional additional error context
-        
+
     Returns:
         ErrorResponse with standard format
-        
+
     Example:
         >>> error_response("Invalid query", "ValidationError", details={"field": "sql_query"})
         {
@@ -424,3 +424,336 @@ class NbaMetricResult(BaseModel):
     interpretation: Optional[str] = Field(default=None, description="What the metric means")
     success: bool = Field(default=True, description="Success status")
     error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class FormulaAnalysisResult(BaseModel):
+    """Response for formula analysis operations"""
+    operation: str = Field(description="Operation performed")
+    result: dict = Field(description="Analysis results")
+    inputs: dict = Field(description="Input parameters")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class FormulaExtractionResult(BaseModel):
+    """Response for formula extraction operations"""
+    operation: str = Field(description="Operation performed")
+    extracted_formulas: List[dict] = Field(description="List of extracted formulas with metadata")
+    total_formulas: int = Field(description="Total number of formulas extracted")
+    pdf_path: str = Field(description="Path to the PDF file processed")
+    pages_processed: List[int] = Field(description="Pages that were processed")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class LaTeXConversionResult(BaseModel):
+    """Response for LaTeX to SymPy conversion"""
+    operation: str = Field(description="Operation performed")
+    latex_input: str = Field(description="Original LaTeX formula")
+    sympy_output: Optional[str] = Field(description="Converted SymPy expression")
+    conversion_successful: bool = Field(description="Whether conversion was successful")
+    error_message: Optional[str] = Field(default=None, description="Error message if conversion failed")
+    success: bool = Field(default=True, description="Success status")
+
+
+class FormulaStructureResult(BaseModel):
+    """Response for formula structure analysis"""
+    operation: str = Field(description="Operation performed")
+    formula: str = Field(description="Analyzed formula")
+    structure_analysis: dict = Field(description="Detailed structure analysis")
+    suggested_tool: str = Field(description="Recommended algebraic tool")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+# ============================================================================
+# Phase 2.3: Interactive Formula Builder Responses
+# ============================================================================
+
+class FormulaBuilderValidationResult(BaseModel):
+    """Response for formula builder validation"""
+    operation: str = Field(description="Operation performed")
+    formula: str = Field(description="Validated formula")
+    validation_level: str = Field(description="Validation level used")
+    is_valid: bool = Field(description="Whether formula is valid")
+    errors: List[str] = Field(description="List of validation errors")
+    warnings: List[str] = Field(description="List of validation warnings")
+    suggestions: List[str] = Field(description="List of improvement suggestions")
+    confidence: float = Field(description="Validation confidence score")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class FormulaBuilderSuggestionResult(BaseModel):
+    """Response for formula completion suggestions"""
+    operation: str = Field(description="Operation performed")
+    partial_formula: str = Field(description="Partial formula provided")
+    context: str = Field(description="Context for suggestions")
+    suggestions: List[str] = Field(description="List of completion suggestions")
+    suggestion_count: int = Field(description="Number of suggestions provided")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class FormulaBuilderPreviewResult(BaseModel):
+    """Response for formula preview generation"""
+    operation: str = Field(description="Operation performed")
+    formula: str = Field(description="Formula string")
+    latex: Optional[str] = Field(description="LaTeX representation")
+    simplified: Optional[str] = Field(description="Simplified LaTeX")
+    calculated_value: Optional[float] = Field(description="Calculated result")
+    variables: List[str] = Field(description="Variables in formula")
+    error: Optional[str] = Field(description="Error message if preview failed")
+    success: bool = Field(default=True, description="Success status")
+
+
+class FormulaBuilderTemplateResult(BaseModel):
+    """Response for formula template operations"""
+    operation: str = Field(description="Operation performed")
+    templates: List[dict] = Field(description="List of available templates")
+    template_count: int = Field(description="Number of templates returned")
+    category: Optional[str] = Field(description="Category filter applied")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class FormulaBuilderCreateResult(BaseModel):
+    """Response for creating formula from template"""
+    operation: str = Field(description="Operation performed")
+    template_name: str = Field(description="Template used")
+    formula: str = Field(description="Original template formula")
+    substituted_formula: str = Field(description="Formula with substituted values")
+    result: float = Field(description="Calculated result")
+    variables_used: Dict[str, float] = Field(description="Variable values used")
+    description: str = Field(description="Template description")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class FormulaBuilderExportResult(BaseModel):
+    """Response for formula export"""
+    operation: str = Field(description="Operation performed")
+    formula: str = Field(description="Original formula")
+    format_type: str = Field(description="Export format used")
+    exported_content: str = Field(description="Exported formula content")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+# Phase 3.1: Interactive Formula Playground Responses
+class PlaygroundSessionResult(BaseModel):
+    """Response for playground session operations"""
+    success: bool
+    session_id: Optional[str] = None
+    session: Optional[Dict[str, Any]] = None
+    error: Optional[str] = None
+
+class PlaygroundFormulaResult(BaseModel):
+    """Response for playground formula operations"""
+    success: bool
+    formula_entry: Optional[Dict[str, Any]] = None
+    session_updated: bool = False
+    error: Optional[str] = None
+    warnings: Optional[List[str]] = None
+    suggestions: Optional[List[str]] = None
+
+class PlaygroundVariablesResult(BaseModel):
+    """Response for playground variable operations"""
+    success: bool
+    updated_variables: Optional[Dict[str, float]] = None
+    session_updated: bool = False
+    errors: Optional[Dict[str, str]] = None
+    message: Optional[str] = None
+
+class PlaygroundResultsResult(BaseModel):
+    """Response for playground calculation results"""
+    success: bool
+    results: Optional[Dict[str, Any]] = None
+    variables_used: Optional[Dict[str, float]] = None
+    error: Optional[str] = None
+
+class PlaygroundVisualizationsResult(BaseModel):
+    """Response for playground visualizations"""
+    success: bool
+    visualizations: Optional[Dict[str, Any]] = None
+    session_id: Optional[str] = None
+    error: Optional[str] = None
+
+class PlaygroundRecommendationsResult(BaseModel):
+    """Response for playground recommendations"""
+    success: bool
+    recommendations: Optional[List[Dict[str, Any]]] = None
+    error: Optional[str] = None
+
+class PlaygroundShareResult(BaseModel):
+    """Response for playground sharing"""
+    success: bool
+    share_token: Optional[str] = None
+    share_url: Optional[str] = None
+    session_id: Optional[str] = None
+    error: Optional[str] = None
+
+class PlaygroundExperimentResult(BaseModel):
+    """Response for playground experiment creation"""
+    success: bool
+    experiment: Optional[Dict[str, Any]] = None
+    experiment_id: Optional[str] = None
+    error: Optional[str] = None
+
+
+# ============================================================================
+# Phase 3.2: Advanced Visualization Engine Response Models
+# ============================================================================
+
+class VisualizationGenerateResult(BaseModel):
+    """Response for visualization generation"""
+    success: bool
+    visualization_type: Optional[str] = None
+    data: Optional[Dict[str, Any]] = None
+    config: Optional[Dict[str, Any]] = None
+    metadata: Optional[Dict[str, Any]] = None
+    error: Optional[str] = None
+
+class VisualizationExportResult(BaseModel):
+    """Response for visualization export"""
+    success: bool
+    format: Optional[str] = None
+    filename: Optional[str] = None
+    file_path: Optional[str] = None
+    file_size: Optional[int] = None
+    download_url: Optional[str] = None
+    error: Optional[str] = None
+
+class VisualizationTemplateResult(BaseModel):
+    """Response for visualization templates"""
+    success: bool
+    templates: Optional[List[Dict[str, Any]]] = None
+    template: Optional[Dict[str, Any]] = None
+    error: Optional[str] = None
+
+class VisualizationConfigResult(BaseModel):
+    """Response for visualization configuration"""
+    success: bool
+    config: Optional[Dict[str, Any]] = None
+    default_config: Optional[Dict[str, Any]] = None
+    error: Optional[str] = None
+
+class DataPointResult(BaseModel):
+    """Response for data point creation"""
+    success: bool
+    data_point: Optional[Dict[str, Any]] = None
+    data_point_id: Optional[str] = None
+    error: Optional[str] = None
+
+class DatasetResult(BaseModel):
+    """Response for dataset creation"""
+    success: bool
+    dataset: Optional[Dict[str, Any]] = None
+    dataset_id: Optional[str] = None
+    data_points_count: Optional[int] = None
+    error: Optional[str] = None
+
+
+# ============================================================================
+# Phase 3.3: Formula Validation System Response Models
+# ============================================================================
+
+class FormulaValidationResult(BaseModel):
+    """Response for formula validation"""
+    success: bool
+    report: Optional[Dict[str, Any]] = None
+    report_id: Optional[str] = None
+    overall_status: Optional[str] = None
+    overall_score: Optional[float] = None
+    validations: Optional[List[Dict[str, Any]]] = None
+    summary: Optional[str] = None
+    recommendations: Optional[List[str]] = None
+    error: Optional[str] = None
+
+class FormulaReferenceResult(BaseModel):
+    """Response for formula reference operations"""
+    success: bool
+    reference: Optional[Dict[str, Any]] = None
+    formula_id: Optional[str] = None
+    references: Optional[List[Dict[str, Any]]] = None
+    error: Optional[str] = None
+
+class ValidationReportResult(BaseModel):
+    """Response for validation report retrieval"""
+    success: bool
+    report: Optional[Dict[str, Any]] = None
+    reports: Optional[List[Dict[str, Any]]] = None
+    report_id: Optional[str] = None
+    error: Optional[str] = None
+
+class ValidationComparisonResult(BaseModel):
+    """Response for validation comparison"""
+    success: bool
+    comparison: Optional[Dict[str, Any]] = None
+    formula_ids: Optional[List[str]] = None
+    comparison_type: Optional[str] = None
+    results: Optional[List[Dict[str, Any]]] = None
+    error: Optional[str] = None
+
+class ValidationRulesResult(BaseModel):
+    """Response for validation rules management"""
+    success: bool
+    rules: Optional[Dict[str, Any]] = None
+    updated_rules: Optional[Dict[str, Any]] = None
+    error: Optional[str] = None
+
+
+# ============================================================================
+# Phase 3.4: Multi-Book Formula Comparison Response Models
+# ============================================================================
+
+class FormulaComparisonResult(BaseModel):
+    """Response for formula comparison"""
+    success: bool
+    comparison: Optional[Dict[str, Any]] = None
+    comparison_id: Optional[str] = None
+    formula_id: Optional[str] = None
+    versions: Optional[List[Dict[str, Any]]] = None
+    variations: Optional[List[Dict[str, Any]]] = None
+    overall_similarity: Optional[float] = None
+    primary_version: Optional[Dict[str, Any]] = None
+    recommended_version: Optional[Dict[str, Any]] = None
+    summary: Optional[str] = None
+    error: Optional[str] = None
+
+class FormulaVersionResult(BaseModel):
+    """Response for formula version operations"""
+    success: bool
+    version: Optional[Dict[str, Any]] = None
+    version_id: Optional[str] = None
+    versions: Optional[List[Dict[str, Any]]] = None
+    error: Optional[str] = None
+
+class FormulaSourceResult(BaseModel):
+    """Response for formula source operations"""
+    success: bool
+    source: Optional[Dict[str, Any]] = None
+    source_id: Optional[str] = None
+    sources: Optional[List[Dict[str, Any]]] = None
+    error: Optional[str] = None
+
+class FormulaEvolutionResult(BaseModel):
+    """Response for formula evolution analysis"""
+    success: bool
+    evolution: Optional[Dict[str, Any]] = None
+    formula_id: Optional[str] = None
+    timeline: Optional[List[Dict[str, Any]]] = None
+    key_changes: Optional[List[str]] = None
+    current_consensus: Optional[Dict[str, Any]] = None
+    evolution_summary: Optional[str] = None
+    error: Optional[str] = None
+
+class FormulaRecommendationResult(BaseModel):
+    """Response for formula recommendations"""
+    success: bool
+    recommendations: Optional[List[Dict[str, Any]]] = None
+    formula_id: Optional[str] = None
+    recommended_version: Optional[Dict[str, Any]] = None
+    criteria: Optional[List[str]] = None
+    context: Optional[str] = None
+    error: Optional[str] = None

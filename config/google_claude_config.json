@@ -1,0 +1,112 @@
+{
+    "google_claude_config": {
+        "version": "1.0.0",
+        "description": "Google Gemini + Claude synthesis configuration for cost-optimized book analysis",
+        "models": {
+            "google_gemini": {
+                "enabled": true,
+                "model_name": "gemini-2.5-flash",
+                "model_env": "GOOGLE_MODEL",
+                "api_key_env": "GOOGLE_API_KEY",
+                "max_tokens": 8192,
+                "temperature": 0.1,
+                "safety_settings": {
+                    "hate_speech": "BLOCK_NONE",
+                    "dangerous_content": "BLOCK_NONE",
+                    "sexually_explicit": "BLOCK_NONE",
+                    "harassment": "BLOCK_NONE"
+                },
+                "cost_per_1m_input": 0.0035,
+                "cost_per_1m_output": 0.0105,
+                "role": "book_reading_and_analysis"
+            },
+            "claude": {
+                "enabled": true,
+                "model_name": "claude-3-7-sonnet-20250219",
+                "model_env": "CLAUDE_MODEL",
+                "api_key_env": "ANTHROPIC_API_KEY",
+                "max_tokens": 4000,
+                "temperature": 0.3,
+                "cost_per_1m_input": 3.0,
+                "cost_per_1m_output": 15.0,
+                "role": "implementation_synthesis"
+            }
+        },
+        "analysis_flow": {
+            "step_1": "Google Gemini reads and analyzes book content",
+            "step_2": "Google extracts raw recommendations",
+            "step_3": "Claude synthesizes implementation recommendations",
+            "step_4": "Claude maps to NBA project phases",
+            "step_5": "Final recommendations with AWS integration details"
+        },
+        "cost_optimization": {
+            "strategy": "Google for heavy lifting, Claude for synthesis",
+            "estimated_cost_per_book": "2.50-4.00",
+            "estimated_cost_17_books": "42.50-68.00",
+            "cost_reduction_vs_claude_only": "85-90%",
+            "cost_reduction_vs_deepseek_claude_ollama": "70-80%"
+        },
+        "quality_standards": {
+            "min_recommendations_per_book": 5,
+            "max_recommendations_per_book": 15,
+            "required_fields": [
+                "title",
+                "description",
+                "priority",
+                "time_estimate",
+                "mapped_phase",
+                "aws_services",
+                "implementation_notes"
+            ],
+            "priority_distribution": {
+                "critical": "20-30%",
+                "important": "40-50%",
+                "nice_to_have": "20-30%"
+            }
+        },
+        "nba_project_integration": {
+            "phases": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                8,
+                9
+            ],
+            "aws_services": [
+                "S3",
+                "Lambda",
+                "Glue",
+                "RDS",
+                "Redshift",
+                "SageMaker",
+                "CloudWatch",
+                "IAM",
+                "VPC"
+            ],
+            "technologies": [
+                "Python",
+                "SQL",
+                "Pandas",
+                "Scikit-learn",
+                "TensorFlow",
+                "PyTorch",
+                "MLflow",
+                "Docker"
+            ]
+        },
+        "testing": {
+            "test_books": [
+                "Designing Machine Learning Systems",
+                "Statistics 601 Advanced Statistical Methods"
+            ],
+            "success_criteria": {
+                "max_cost_per_book": 5.0,
+                "min_recommendations": 10,
+                "min_completion_rate": 0.8
+            }
+        }
+    }
+}

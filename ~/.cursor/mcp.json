@@ -1,0 +1,24 @@
+{
+    "mcpServers": {
+        "nba-mcp-server": {
+            "command": "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+            "args": [
+                "-m",
+                "mcp_server.fastmcp_server"
+            ],
+            "cwd": "/Users/ryanranft/nba-mcp-synthesis",
+            "env": {
+                "PYTHONPATH": "/Users/ryanranft/nba-mcp-synthesis",
+                "NBA_MCP_DEBUG": "false",
+                "NBA_MCP_LOG_LEVEL": "INFO",
+                "GOOGLE_API_KEY": "$(cat ~/.cursor/secrets/google_api_key.txt | cut -d'=' -f2)",
+                "DEEPSEEK_API_KEY": "$(cat ~/.cursor/secrets/deepseek_api_key.txt | cut -d'=' -f2)",
+                "ANTHROPIC_API_KEY": "$(cat ~/.cursor/secrets/anthropic_api_key.txt | cut -d'=' -f2)",
+                "OPENAI_API_KEY": "$(cat ~/.cursor/secrets/openai_api_key.txt | cut -d'=' -f2)"
+            }
+        }
+    }
+}
+
+
+

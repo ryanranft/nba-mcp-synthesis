@@ -440,3 +440,5 @@ overnight.log
 # Log files with sensitive information
 logs/
 *.log
+
+.cursorignore
