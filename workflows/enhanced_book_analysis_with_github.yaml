@@ -1,0 +1,141 @@
+name: Enhanced Book Analysis with GitHub Integration
+description: |
+  Enhanced book analysis workflow that integrates 32 textbook companion GitHub repositories
+  with book analysis to provide theory-to-code cross-referencing and better implementation recommendations.
+
+stages:
+  initialize:
+    description: Initialize MCP client and GitHub repository mappings
+    steps:
+      - name: init_mcp_client
+        action: mcp_client_init
+        config:
+          server_url: "http://localhost:8000"
+          timeout: 300
+      - name: load_github_mappings
+        action: load_config
+        config:
+          file: "config/github_repo_mappings.json"
+          type: "github_repositories"
+
+  analyze_books:
+    description: Enhanced book analysis with GitHub repository integration
+    steps:
+      - name: enhanced_book_analysis
+        action: run_script
+        config:
+          script: "scripts/enhanced_book_analyzer_with_github.py"
+          args:
+            - "--config"
+            - "config/books_to_analyze.json"
+            - "--github-integration"
+            - "true"
+            - "--output-dir"
+            - "analysis_results/enhanced"
+        timeout: 3600
+      - name: generate_code_examples
+        action: run_script
+        config:
+          script: "scripts/generate_code_examples.py"
+          args:
+            - "--analysis-results"
+            - "analysis_results/enhanced"
+            - "--output-dir"
+            - "code_examples"
+
+  integrate_recommendations:
+    description: Integrate enhanced recommendations with existing codebase
+    steps:
+      - name: integrate_enhanced_recommendations
+        action: run_script
+        config:
+          script: "scripts/integrate_enhanced_recommendations.py"
+          args:
+            - "--synthesis-path"
+            - "/Users/ryanranft/nba-mcp-synthesis"
+            - "--simulator-path"
+            - "/Users/ryanranft/nba-simulator-aws"
+            - "--enhanced-analysis"
+            - "analysis_results/enhanced"
+            - "--github-repos"
+            - "analysis_results/github_integration"
+
+  generate_implementation_scripts:
+    description: Generate implementation scripts with code examples
+    steps:
+      - name: generate_enhanced_scripts
+        action: mcp_generate_code
+        config:
+          context:
+            - "analysis_results/enhanced"
+            - "code_examples"
+            - "github_repo_mappings"
+          output_dir: "implementation_scripts/enhanced"
+          include_code_examples: true
+          cross_reference_repos: true
+
+  create_book_directories:
+    description: Create enhanced book directories with GitHub integration
+    steps:
+      - name: create_enhanced_directories
+        action: run_script
+        config:
+          script: "scripts/create_enhanced_book_directories.py"
+          args:
+            - "--analysis-results"
+            - "analysis_results/enhanced"
+            - "--github-integration"
+            - "true"
+            - "--output-dir"
+            - "book_directories/enhanced"
+
+  generate_reports:
+    description: Generate comprehensive reports with GitHub integration
+    steps:
+      - name: generate_enhanced_reports
+        action: run_script
+        config:
+          script: "scripts/generate_enhanced_reports.py"
+          args:
+            - "--analysis-results"
+            - "analysis_results/enhanced"
+            - "--github-integration"
+            - "true"
+            - "--output-dir"
+            - "reports/enhanced"
+            - "--include-code-examples"
+            - "true"
+
+metadata:
+  version: "2.0.0"
+  created: "2025-01-11"
+  enhanced_features:
+    - "GitHub repository integration"
+    - "Theory-to-code cross-referencing"
+    - "Code example extraction"
+    - "Implementation pattern learning"
+    - "Enhanced recommendation generation"
+  github_repositories:
+    total: 32
+    categories:
+      - "machine-learning"
+      - "deep-learning"
+      - "generative-ai"
+      - "mlops-production"
+      - "reinforcement-learning"
+      - "econometrics"
+      - "causal-inference"
+      - "computer-vision"
+      - "classic-ml"
+      - "mathematical-foundations"
+      - "graph-neural-networks"
+      - "interactive-deep-learning"
+      - "practical-deep-learning"
+      - "data-science-fundamentals"
+      - "bayesian-methods"
+      - "system-design"
+      - "geographic-analysis"
+      - "python-automation"
+
+
+

@@ -1,0 +1,92 @@
+-- Migration: {{ rec_title }}
+-- Recommendation ID: {{ rec_id }}
+-- Generated: {{ generated_date }}
+-- Priority: {{ priority }}
+--
+-- Description:
+-- {{ description }}
+--
+-- Expected Impact: {{ expected_impact }}
+
+-- ============================================================================
+-- MIGRATION UP
+-- ============================================================================
+
+BEGIN;
+
+-- TODO: Add migration logic
+{{ migration_up_logic }}
+
+-- Example: Create new table
+-- CREATE TABLE IF NOT EXISTS {{ table_name }} (
+--     id SERIAL PRIMARY KEY,
+--     name VARCHAR(255) NOT NULL,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
+
+-- Example: Add indexes
+-- CREATE INDEX IF NOT EXISTS idx_{{ table_name }}_name
+-- ON {{ table_name }}(name);
+
+-- Example: Add constraints
+-- ALTER TABLE {{ table_name }}
+-- ADD CONSTRAINT {{ constraint_name }}
+-- CHECK ({{ constraint_condition }});
+
+-- Update migration tracking
+INSERT INTO schema_migrations (version, name, applied_at)
+VALUES ('{{ migration_version }}', '{{ rec_id }}', CURRENT_TIMESTAMP);
+
+COMMIT;
+
+-- ============================================================================
+-- MIGRATION DOWN (Rollback)
+-- ============================================================================
+
+BEGIN;
+
+-- TODO: Add rollback logic
+{{ migration_down_logic }}
+
+-- Example: Drop table
+-- DROP TABLE IF EXISTS {{ table_name }} CASCADE;
+
+-- Remove from migration tracking
+DELETE FROM schema_migrations
+WHERE version = '{{ migration_version }}';
+
+COMMIT;
+
+-- ============================================================================
+-- VERIFICATION QUERIES
+-- ============================================================================
+
+-- Verify migration applied successfully
+-- SELECT * FROM {{ table_name }} LIMIT 5;
+
+-- Check table structure
+-- \d {{ table_name }}
+
+-- Verify indexes
+-- SELECT indexname, indexdef
+-- FROM pg_indexes
+-- WHERE tablename = '{{ table_name }}';
+
+-- ============================================================================
+-- NOTES
+-- ============================================================================
+
+-- Prerequisites:
+{{ prerequisites }}
+
+-- Post-migration steps:
+{{ post_migration_steps }}
+
+-- Rollback instructions:
+-- psql -d nba_simulator -f {{ migration_file }}_down.sql
+
+
+
+
+

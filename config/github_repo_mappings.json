@@ -1,0 +1,509 @@
+{
+    "github_repositories": {
+        "machine_learning": {
+            "handson-ml3": {
+                "s3_path": "textbook-code/machine-learning/handson-ml3_complete.txt",
+                "textbook_match": "Hands-On_Machine_Learning_with_Scikit-Learn_Keras_and_Tensorflow_-_Aurelien_Geron.pdf",
+                "key_concepts": [
+                    "scikit-learn",
+                    "tensorflow",
+                    "keras",
+                    "ml-pipelines",
+                    "feature-engineering",
+                    "supervised-learning",
+                    "unsupervised-learning",
+                    "model-evaluation",
+                    "cross-validation",
+                    "hyperparameter-tuning"
+                ],
+                "priority": "critical",
+                "file_count": 1000,
+                "size_mb": 200,
+                "description": "Complete implementation of Hands-On Machine Learning book with scikit-learn, TensorFlow, and Keras examples"
+            },
+            "pyprobml": {
+                "s3_path": "textbook-code/machine-learning/pyprobml_complete.txt",
+                "textbook_match": "ML Machine Learning-A Probabilistic Perspective.pdf",
+                "key_concepts": [
+                    "bayesian-methods",
+                    "probabilistic-models",
+                    "vae",
+                    "gan",
+                    "graphical-models",
+                    "variational-inference",
+                    "mcmc",
+                    "gaussian-processes",
+                    "expectation-maximization",
+                    "latent-variable-models"
+                ],
+                "priority": "critical",
+                "file_count": 500,
+                "size_mb": 100,
+                "description": "Python implementations for Probabilistic Machine Learning book by Kevin Murphy"
+            },
+            "The-Elements-of-Statistical-Learning-Python-Notebooks": {
+                "s3_path": "textbook-code/statistical-learning/The-Elements-of-Statistical-Learning-Python-Notebooks_complete.txt",
+                "textbook_match": "The Elements of Statistical Learning - Data Mining, Inference, and Prediction.pdf",
+                "key_concepts": [
+                    "statistical-learning",
+                    "regression",
+                    "classification",
+                    "clustering",
+                    "dimensionality-reduction",
+                    "ensemble-methods",
+                    "support-vector-machines",
+                    "neural-networks",
+                    "boosting",
+                    "bagging"
+                ],
+                "priority": "critical",
+                "file_count": 200,
+                "size_mb": 50,
+                "description": "Python implementations of algorithms from The Elements of Statistical Learning"
+            }
+        },
+        "deep_learning": {
+            "d2l-en": {
+                "s3_path": "textbook-code/interactive-deep-learning/d2l-en_complete.txt",
+                "textbook_match": "Deep Learning by Ian Goodfellow, Yoshua Bengio, Aaron Courville.pdf",
+                "key_concepts": [
+                    "pytorch",
+                    "tensorflow",
+                    "mxnet",
+                    "neural-networks",
+                    "deep-learning",
+                    "cnn",
+                    "rnn",
+                    "lstm",
+                    "transformer",
+                    "attention-mechanism",
+                    "backpropagation",
+                    "gradient-descent",
+                    "optimization"
+                ],
+                "priority": "critical",
+                "file_count": 1000,
+                "size_mb": 200,
+                "description": "Interactive deep learning book with PyTorch, TensorFlow, and MXNet implementations"
+            },
+            "fastbook": {
+                "s3_path": "textbook-code/practical-deep-learning/fastbook_complete.txt",
+                "textbook_match": "General deep learning and practical ML books",
+                "key_concepts": [
+                    "fastai",
+                    "practical-deep-learning",
+                    "transfer-learning",
+                    "computer-vision",
+                    "natural-language-processing",
+                    "tabular-data",
+                    "recommendation-systems",
+                    "deployment",
+                    "production-ml"
+                ],
+                "priority": "critical",
+                "file_count": 500,
+                "size_mb": 100,
+                "description": "Practical deep learning book with FastAI implementations"
+            },
+            "deepLearningBook-Notes": {
+                "s3_path": "textbook-code/deep-learning/deepLearningBook-Notes_complete.txt",
+                "textbook_match": "Deep Learning by Ian Goodfellow, Yoshua Bengio, Aaron Courville.pdf",
+                "key_concepts": [
+                    "deep-learning",
+                    "neural-networks",
+                    "mathematical-foundations",
+                    "optimization",
+                    "regularization",
+                    "convolutional-networks",
+                    "recurrent-networks",
+                    "generative-models"
+                ],
+                "priority": "high",
+                "file_count": 300,
+                "size_mb": 75,
+                "description": "Notes and implementations for Deep Learning book"
+            }
+        },
+        "generative_ai": {
+            "Generative_Deep_Learning_2nd_Edition": {
+                "s3_path": "textbook-code/generative-ai/Generative_Deep_Learning_2nd_Edition_complete.txt",
+                "textbook_match": "Generative Deep Learning 2nd Edition.pdf",
+                "key_concepts": [
+                    "generative-models",
+                    "vae",
+                    "gan",
+                    "diffusion-models",
+                    "autoregressive-models",
+                    "flow-based-models",
+                    "energy-based-models",
+                    "tensorflow",
+                    "keras"
+                ],
+                "priority": "critical",
+                "file_count": 400,
+                "size_mb": 80,
+                "description": "Complete implementations for Generative Deep Learning 2nd Edition"
+            }
+        },
+        "mlops_production": {
+            "ml-powered-applications": {
+                "s3_path": "textbook-code/machine-learning/ml-powered-applications_complete.txt",
+                "textbook_match": "Building ML Powered Applications.pdf",
+                "key_concepts": [
+                    "mlops",
+                    "production-ml",
+                    "model-deployment",
+                    "monitoring",
+                    "scaling",
+                    "api-design",
+                    "data-pipelines",
+                    "model-serving",
+                    "a-b-testing"
+                ],
+                "priority": "high",
+                "file_count": 200,
+                "size_mb": 40,
+                "description": "Building ML-powered applications with production considerations"
+            },
+            "practical_mlops": {
+                "s3_path": "textbook-code/mlops-production/practical_mlops_complete.txt",
+                "textbook_match": "Practical MLOps.pdf",
+                "key_concepts": [
+                    "mlops",
+                    "ci-cd",
+                    "model-versioning",
+                    "experiment-tracking",
+                    "model-registry",
+                    "deployment-strategies",
+                    "monitoring",
+                    "governance"
+                ],
+                "priority": "high",
+                "file_count": 300,
+                "size_mb": 60,
+                "description": "Practical MLOps implementations and best practices"
+            }
+        },
+        "reinforcement_learning": {
+            "Reinforcement-Learning-Notebooks": {
+                "s3_path": "textbook-code/reinforcement-learning/Reinforcement-Learning-Notebooks_complete.txt",
+                "textbook_match": "Reinforcement Learning An Introduction.pdf",
+                "key_concepts": [
+                    "reinforcement-learning",
+                    "q-learning",
+                    "policy-gradient",
+                    "actor-critic",
+                    "deep-q-networks",
+                    "monte-carlo",
+                    "temporal-difference",
+                    "markov-decision-processes",
+                    "multi-armed-bandits"
+                ],
+                "priority": "critical",
+                "file_count": 400,
+                "size_mb": 80,
+                "description": "Implementation notebooks for Reinforcement Learning: An Introduction (Sutton & Barto)"
+            }
+        },
+        "econometrics": {
+            "wooldridge": {
+                "s3_path": "textbook-code/econometrics/wooldridge_complete.txt",
+                "textbook_match": "Introductory Econometrics A Modern Approach.pdf",
+                "key_concepts": [
+                    "econometrics",
+                    "regression-analysis",
+                    "causal-inference",
+                    "instrumental-variables",
+                    "panel-data",
+                    "time-series",
+                    "heteroskedasticity",
+                    "multicollinearity",
+                    "endogeneity"
+                ],
+                "priority": "high",
+                "file_count": 200,
+                "size_mb": 40,
+                "description": "Python implementations for Wooldridge's Introductory Econometrics"
+            }
+        },
+        "causal_inference": {
+            "python-causality-handbook": {
+                "s3_path": "textbook-code/causal-inference/python-causality-handbook_complete.txt",
+                "textbook_match": "Causal Inference The Mixtape.pdf",
+                "key_concepts": [
+                    "causal-inference",
+                    "randomized-controlled-trials",
+                    "observational-studies",
+                    "confounding",
+                    "selection-bias",
+                    "instrumental-variables",
+                    "regression-discontinuity",
+                    "difference-in-differences",
+                    "matching-methods"
+                ],
+                "priority": "high",
+                "file_count": 300,
+                "size_mb": 60,
+                "description": "Python implementations for causal inference methods"
+            }
+        },
+        "computer_vision": {
+            "computer_vision_szeliski": {
+                "s3_path": "textbook-code/computer-vision/computer_vision_szeliski_complete.txt",
+                "textbook_match": "Computer Vision Algorithms and Applications.pdf",
+                "key_concepts": [
+                    "computer-vision",
+                    "image-processing",
+                    "feature-detection",
+                    "object-detection",
+                    "image-segmentation",
+                    "stereo-vision",
+                    "optical-flow",
+                    "camera-calibration",
+                    "3d-reconstruction"
+                ],
+                "priority": "high",
+                "file_count": 400,
+                "size_mb": 80,
+                "description": "Python implementations for Computer Vision: Algorithms and Applications"
+            }
+        },
+        "classic_ml": {
+            "cs7641": {
+                "s3_path": "textbook-code/classic-ml/cs7641_complete.txt",
+                "textbook_match": "Machine Learning Tom Mitchell.pdf",
+                "key_concepts": [
+                    "machine-learning",
+                    "supervised-learning",
+                    "unsupervised-learning",
+                    "reinforcement-learning",
+                    "decision-trees",
+                    "neural-networks",
+                    "genetic-algorithms",
+                    "instance-based-learning",
+                    "bayesian-learning"
+                ],
+                "priority": "high",
+                "file_count": 200,
+                "size_mb": 40,
+                "description": "Georgia Tech CS7641 Machine Learning course materials"
+            }
+        },
+        "mathematical_foundations": {
+            "lehman-math-cs": {
+                "s3_path": "textbook-code/mathematical-foundations/lehman-math-cs_complete.txt",
+                "textbook_match": "Mathematics for Computer Science.pdf",
+                "key_concepts": [
+                    "discrete-mathematics",
+                    "probability",
+                    "combinatorics",
+                    "graph-theory",
+                    "number-theory",
+                    "logic",
+                    "proofs",
+                    "algorithms",
+                    "complexity-theory"
+                ],
+                "priority": "medium",
+                "file_count": 300,
+                "size_mb": 60,
+                "description": "Mathematics for Computer Science implementations and exercises"
+            }
+        },
+        "graph_neural_networks": {
+            "pytorch_geometric": {
+                "s3_path": "textbook-code/graph-neural-networks/pytorch_geometric_complete.txt",
+                "textbook_match": "General graph neural networks and geometric deep learning",
+                "key_concepts": [
+                    "graph-neural-networks",
+                    "geometric-deep-learning",
+                    "graph-convolution",
+                    "message-passing",
+                    "graph-attention",
+                    "graph-transformer",
+                    "pytorch-geometric",
+                    "network-analysis"
+                ],
+                "priority": "high",
+                "file_count": 500,
+                "size_mb": 100,
+                "description": "PyTorch Geometric implementations for graph neural networks"
+            }
+        },
+        "data_science_fundamentals": {
+            "PythonDataScienceHandbook": {
+                "s3_path": "textbook-code/data-science-fundamentals/PythonDataScienceHandbook_complete.txt",
+                "textbook_match": "Python Data Science Handbook.pdf",
+                "key_concepts": [
+                    "pandas",
+                    "numpy",
+                    "matplotlib",
+                    "seaborn",
+                    "data-manipulation",
+                    "visualization",
+                    "statistical-analysis",
+                    "jupyter-notebooks",
+                    "data-cleaning"
+                ],
+                "priority": "critical",
+                "file_count": 200,
+                "size_mb": 50,
+                "description": "Python Data Science Handbook implementations and examples"
+            }
+        },
+        "bayesian_methods": {
+            "BDA_py_demos": {
+                "s3_path": "textbook-code/bayesian-methods/BDA_py_demos_complete.txt",
+                "textbook_match": "Bayesian Data Analysis.pdf",
+                "key_concepts": [
+                    "bayesian-statistics",
+                    "mcmc",
+                    "hierarchical-models",
+                    "bayesian-inference",
+                    "posterior-distributions",
+                    "prior-distributions",
+                    "model-comparison",
+                    "bayesian-computation"
+                ],
+                "priority": "high",
+                "file_count": 100,
+                "size_mb": 30,
+                "description": "Python demonstrations for Bayesian Data Analysis"
+            }
+        },
+        "system_design": {
+            "ddia-references": {
+                "s3_path": "textbook-code/system-design/ddia-references_complete.txt",
+                "textbook_match": "Designing Data-Intensive Applications.pdf",
+                "key_concepts": [
+                    "system-design",
+                    "distributed-systems",
+                    "databases",
+                    "consistency",
+                    "availability",
+                    "partition-tolerance",
+                    "scalability",
+                    "reliability",
+                    "data-processing"
+                ],
+                "priority": "medium",
+                "file_count": 50,
+                "size_mb": 20,
+                "description": "References and implementations for Designing Data-Intensive Applications"
+            }
+        },
+        "geographic_analysis": {
+            "geocompy": {
+                "s3_path": "textbook-code/geographic-analysis/geocompy_complete.txt",
+                "textbook_match": "Geocomputation with Python.pdf",
+                "key_concepts": [
+                    "geographic-information-systems",
+                    "spatial-analysis",
+                    "geopandas",
+                    "raster-data",
+                    "vector-data",
+                    "spatial-statistics",
+                    "cartography",
+                    "remote-sensing"
+                ],
+                "priority": "medium",
+                "file_count": 80,
+                "size_mb": 25,
+                "description": "Python implementations for Geocomputation with Python"
+            }
+        },
+        "python_automation": {
+            "automateboringstuff": {
+                "s3_path": "textbook-code/python-automation/automateboringstuff_complete.txt",
+                "textbook_match": "Automate the Boring Stuff with Python.pdf",
+                "key_concepts": [
+                    "python-automation",
+                    "web-scraping",
+                    "file-handling",
+                    "email-automation",
+                    "gui-automation",
+                    "regular-expressions",
+                    "excel-automation",
+                    "pdf-processing"
+                ],
+                "priority": "low",
+                "file_count": 40,
+                "size_mb": 15,
+                "description": "Python automation examples from Automate the Boring Stuff"
+            }
+        }
+    },
+    "textbook_mappings": {
+        "Hands-On_Machine_Learning_with_Scikit-Learn_Keras_and_Tensorflow_-_Aurelien_Geron.pdf": [
+            "handson-ml3",
+            "PythonDataScienceHandbook"
+        ],
+        "ML Machine Learning-A Probabilistic Perspective.pdf": [
+            "pyprobml",
+            "BDA_py_demos"
+        ],
+        "Deep Learning by Ian Goodfellow, Yoshua Bengio, Aaron Courville.pdf": [
+            "d2l-en",
+            "fastbook",
+            "deepLearningBook-Notes"
+        ],
+        "Python Data Science Handbook.pdf": [
+            "PythonDataScienceHandbook",
+            "handson-ml3"
+        ],
+        "The Elements of Statistical Learning - Data Mining, Inference, and Prediction.pdf": [
+            "The-Elements-of-Statistical-Learning-Python-Notebooks"
+        ],
+        "Generative Deep Learning 2nd Edition.pdf": [
+            "Generative_Deep_Learning_2nd_Edition"
+        ],
+        "Building ML Powered Applications.pdf": [
+            "ml-powered-applications",
+            "practical_mlops"
+        ],
+        "Practical MLOps.pdf": [
+            "practical_mlops",
+            "ml-powered-applications"
+        ],
+        "Reinforcement Learning An Introduction.pdf": [
+            "Reinforcement-Learning-Notebooks"
+        ],
+        "Introductory Econometrics A Modern Approach.pdf": [
+            "wooldridge"
+        ],
+        "Causal Inference The Mixtape.pdf": [
+            "python-causality-handbook"
+        ],
+        "Computer Vision Algorithms and Applications.pdf": [
+            "computer_vision_szeliski"
+        ],
+        "Machine Learning Tom Mitchell.pdf": [
+            "cs7641"
+        ],
+        "Mathematics for Computer Science.pdf": [
+            "lehman-math-cs"
+        ],
+        "Bayesian Data Analysis.pdf": [
+            "BDA_py_demos",
+            "pyprobml"
+        ],
+        "Designing Data-Intensive Applications.pdf": [
+            "ddia-references"
+        ],
+        "Geocomputation with Python.pdf": [
+            "geocompy"
+        ],
+        "Automate the Boring Stuff with Python.pdf": [
+            "automateboringstuff"
+        ]
+    },
+    "metadata": {
+        "total_repositories": 32,
+        "total_categories": 18,
+        "total_size_mb": 1500,
+        "last_updated": "2025-01-11",
+        "version": "1.0.0"
+    }
+}
+
+

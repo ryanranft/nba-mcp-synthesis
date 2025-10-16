@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nba-mcp-synthesis
+  labels:
+    name: nba-mcp-synthesis
+    environment: production
+    project: nba-mcp-synthesis
+    sport: nba
+    managed-by: terraform
+  annotations:
+    description: "NBA MCP Synthesis production namespace"
+    contact: "nba-mcp-synthesis-team"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    name: monitoring
+    environment: production
+    project: nba-mcp-synthesis
+    managed-by: terraform
+  annotations:
+    description: "Monitoring namespace for Prometheus, Grafana, and Alertmanager"
+    contact: "nba-mcp-synthesis-team"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: external-secrets-system
+  labels:
+    name: external-secrets-system
+    environment: production
+    project: nba-mcp-synthesis
+    managed-by: terraform
+  annotations:
+    description: "External Secrets Operator namespace"
+    contact: "nba-mcp-synthesis-team"

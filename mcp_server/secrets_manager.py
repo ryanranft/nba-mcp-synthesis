@@ -1,6 +1,27 @@
 """
 AWS Secrets Manager integration for NBA MCP
 Provides secure credential retrieval
+
+⚠️  DEPRECATION NOTICE ⚠️
+This module is deprecated and will be removed in a future version.
+Please migrate to the new unified secrets management system:
+
+1. Use mcp_server.unified_secrets_manager.UnifiedSecretsManager
+2. Use /Users/ryanranft/load_env_hierarchical.py for loading secrets
+3. Use context-rich naming convention (e.g., GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW)
+
+Migration Guide:
+- Replace SecretsManager with UnifiedSecretsManager
+- Use hierarchical secret loading with context detection
+- Store secrets in /Users/ryanranft/Desktop/++/big_cat_bets_assets/ structure
+- Load secrets using the hierarchical loader before initializing other components
+
+For more details, see:
+- /centralized-secrets-management.plan.md
+- mcp_server/unified_secrets_manager.py
+- /Users/ryanranft/load_env_hierarchical.py
+
+This file will be removed in version 2.0.0
 """
 import boto3
 import json
@@ -21,9 +42,20 @@ class SecretsManager:
         Args:
             region_name: AWS region for Secrets Manager
         """
+        # Deprecation warning
+        import warnings
+        warnings.warn(
+            "SecretsManager is deprecated. Use UnifiedSecretsManager instead. "
+            "See mcp_server/unified_secrets_manager.py for migration guide.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+
         self.region_name = region_name
         self.client = None
         self._initialize_client()
+        logger.warning(f"⚠️  DEPRECATED: SecretsManager initialized for region: {region_name}")
+        logger.warning("⚠️  Please migrate to UnifiedSecretsManager")
 
     def _initialize_client(self):
         """Initialize boto3 Secrets Manager client"""

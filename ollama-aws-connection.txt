@@ -1,5 +1,5 @@
-Public IP: 34.226.246.126
-Instance ID: i-06ec10b8f8fbe0ee4
+Public IP: 54.210.129.114
+Instance ID: i-01b0c302dd9c2c4d1
 Region: us-east-1
 Model: qwen2.5-coder:32b
 SSH Key: ollama-mcp-key.pem

@@ -16,6 +16,9 @@ from rich import print as rprint
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+# Import env helper
+from mcp_server.env_helper import get_hierarchical_env
+
 from synthesis import synthesize_with_mcp_context
 from synthesis.models import DeepSeekModel, ClaudeModel, OllamaModel
 
@@ -193,9 +196,9 @@ async def main():
 
     # Check for required API keys
     missing_keys = []
-    if not os.getenv("DEEPSEEK_API_KEY"):
+    if not get_hierarchical_env("DEEPSEEK_API_KEY", "NBA_MCP_SYNTHESIS", "WORKFLOW"):
         missing_keys.append("DEEPSEEK_API_KEY")
-    if not os.getenv("ANTHROPIC_API_KEY"):
+    if not get_hierarchical_env("ANTHROPIC_API_KEY", "NBA_MCP_SYNTHESIS", "WORKFLOW"):
         missing_keys.append("ANTHROPIC_API_KEY")
 
     if missing_keys:

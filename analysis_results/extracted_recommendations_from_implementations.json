@@ -1,0 +1,2424 @@
+{
+  "metadata": {
+    "total_recommendations": 161,
+    "extraction_timestamp": "2025-01-15T00:00:00Z",
+    "source": "implementation_files"
+  },
+  "recommendations": [
+    {
+      "id": "variation_53_837274e4",
+      "title": "Performance Optimization - Variation 53",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 35 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 34"
+      ],
+      "phase": 3,
+      "category": "ML",
+      "time_estimate": "35 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.322008",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_3/implement_variation_53_837274e4.py"
+    },
+    {
+      "id": "variation_130_25c75252",
+      "title": "A/B Testing Framework - Variation 130",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 35 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 23"
+      ],
+      "phase": 3,
+      "category": "ML",
+      "time_estimate": "35 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.383595",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_3/implement_variation_130_25c75252.py"
+    },
+    {
+      "id": "variation_88_2f145a76",
+      "title": "Model Performance Tracking - Variation 88",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 24 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 36"
+      ],
+      "phase": 3,
+      "category": "ML",
+      "time_estimate": "24 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.347372",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_3/implement_variation_88_2f145a76.py"
+    },
+    {
+      "id": "variation_109_b68868b1",
+      "title": "Advanced Machine Learning Pipeline - Variation 109",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 16 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 10"
+      ],
+      "phase": 3,
+      "category": "ML",
+      "time_estimate": "16 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.365904",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_3/implement_variation_109_b68868b1.py"
+    },
+    {
+      "id": "variation_5_1d89fa20",
+      "title": "Advanced Machine Learning Pipeline - Variation 5",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 8 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 1"
+      ],
+      "phase": 3,
+      "category": "ML",
+      "time_estimate": "8 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.286009",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_3/implement_variation_5_1d89fa20.py"
+    },
+    {
+      "id": "variation_83_a9a2da27",
+      "title": "A/B Testing Framework - Variation 83",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 24 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 42"
+      ],
+      "phase": 3,
+      "category": "ML",
+      "time_estimate": "24 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.343295",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_3/implement_variation_83_a9a2da27.py"
+    },
+    {
+      "id": "variation_76_208cf46f",
+      "title": "Model Versioning System - Variation 76",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 35 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 41"
+      ],
+      "phase": 3,
+      "category": "ML",
+      "time_estimate": "35 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.339148",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_3/implement_variation_76_208cf46f.py"
+    },
+    {
+      "id": "variation_75_6513a095",
+      "title": "Automated Feature Engineering - Variation 75",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 34 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 32"
+      ],
+      "phase": 3,
+      "category": "ML",
+      "time_estimate": "34 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.338557",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_3/implement_variation_75_6513a095.py"
+    },
+    {
+      "id": "variation_25_5ca1f1cf",
+      "title": "Model Performance Tracking - Variation 25",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 13 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 6"
+      ],
+      "phase": 3,
+      "category": "ML",
+      "time_estimate": "13 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.301445",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_3/implement_variation_25_5ca1f1cf.py"
+    },
+    {
+      "id": "variation_119_d93cd6a2",
+      "title": "Real-time Prediction Engine - Variation 119",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 8 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 38"
+      ],
+      "phase": 3,
+      "category": "ML",
+      "time_estimate": "8 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.371993",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_3/implement_variation_119_d93cd6a2.py"
+    },
+    {
+      "id": "variation_20_b25dc7f3",
+      "title": "Model Versioning System - Variation 20",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 27 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 32"
+      ],
+      "phase": 3,
+      "category": "ML",
+      "time_estimate": "27 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.298515",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_3/implement_variation_20_b25dc7f3.py"
+    },
+    {
+      "id": "variation_57_e53ca947",
+      "title": "Security Implementation - Variation 57",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 26 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 21"
+      ],
+      "phase": 3,
+      "category": "ML",
+      "time_estimate": "26 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.324312",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_3/implement_variation_57_e53ca947.py"
+    },
+    {
+      "id": "variation_103_8896b22d",
+      "title": "Automated Feature Engineering - Variation 103",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 37 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 10"
+      ],
+      "phase": 3,
+      "category": "ML",
+      "time_estimate": "37 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.362374",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_3/implement_variation_103_8896b22d.py"
+    },
+    {
+      "id": "variation_46_2ef5c78c",
+      "title": "Real-time Prediction Engine - Variation 46",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 37 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 4"
+      ],
+      "phase": 3,
+      "category": "ML",
+      "time_estimate": "37 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.317260",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_3/implement_variation_46_2ef5c78c.py"
+    },
+    {
+      "id": "variation_66_e75090b4",
+      "title": "Model Versioning System - Variation 66",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 14 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 35"
+      ],
+      "phase": 4,
+      "category": "ML",
+      "time_estimate": "14 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.331945",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_4/implement_variation_66_e75090b4.py"
+    },
+    {
+      "id": "variation_110_0f09711c",
+      "title": "Data Validation Pipeline - Variation 110",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 19 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 9"
+      ],
+      "phase": 4,
+      "category": "ML",
+      "time_estimate": "19 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.366470",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_4/implement_variation_110_0f09711c.py"
+    },
+    {
+      "id": "variation_35_f7bfcaae",
+      "title": "Automated Feature Engineering - Variation 35",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 29 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 19"
+      ],
+      "phase": 4,
+      "category": "ML",
+      "time_estimate": "29 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.310350",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_4/implement_variation_35_f7bfcaae.py"
+    },
+    {
+      "id": "variation_141_fe92df0a",
+      "title": "Data Validation Pipeline - Variation 141",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 31 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 1"
+      ],
+      "phase": 4,
+      "category": "ML",
+      "time_estimate": "31 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.391593",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_4/implement_variation_141_fe92df0a.py"
+    },
+    {
+      "id": "variation_148_481fd184",
+      "title": "Automated Feature Engineering - Variation 148",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 30 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 32"
+      ],
+      "phase": 4,
+      "category": "ML",
+      "time_estimate": "30 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.399081",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_4/implement_variation_148_481fd184.py"
+    },
+    {
+      "id": "variation_111_c71cebe3",
+      "title": "Security Implementation - Variation 111",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 39 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 7"
+      ],
+      "phase": 4,
+      "category": "ML",
+      "time_estimate": "39 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.367186",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_4/implement_variation_111_c71cebe3.py"
+    },
+    {
+      "id": "variation_144_841b0eac",
+      "title": "Automated Feature Engineering - Variation 144",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 11 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 2"
+      ],
+      "phase": 4,
+      "category": "ML",
+      "time_estimate": "11 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.396261",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_4/implement_variation_144_841b0eac.py"
+    },
+    {
+      "id": "variation_132_457b5dad",
+      "title": "A/B Testing Framework - Variation 132",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 38 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 29"
+      ],
+      "phase": 4,
+      "category": "ML",
+      "time_estimate": "38 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.385170",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_4/implement_variation_132_457b5dad.py"
+    },
+    {
+      "id": "variation_64_c8133f41",
+      "title": "Model Performance Tracking - Variation 64",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 13 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 12"
+      ],
+      "phase": 4,
+      "category": "ML",
+      "time_estimate": "13 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.330512",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_4/implement_variation_64_c8133f41.py"
+    },
+    {
+      "id": "variation_56_441d8196",
+      "title": "Performance Optimization - Variation 56",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 24 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 32"
+      ],
+      "phase": 4,
+      "category": "ML",
+      "time_estimate": "24 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.323756",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_4/implement_variation_56_441d8196.py"
+    },
+    {
+      "id": "variation_121_99ec657c",
+      "title": "Data Quality Monitoring System - Variation 121",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 20 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 44"
+      ],
+      "phase": 4,
+      "category": "ML",
+      "time_estimate": "20 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.373548",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_4/implement_variation_121_99ec657c.py"
+    },
+    {
+      "id": "variation_47_579df380",
+      "title": "Performance Optimization - Variation 47",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 22 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 43"
+      ],
+      "phase": 4,
+      "category": "ML",
+      "time_estimate": "22 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.317822",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_4/implement_variation_47_579df380.py"
+    },
+    {
+      "id": "variation_55_b24c4bb0",
+      "title": "Performance Optimization - Variation 55",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 36 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 39"
+      ],
+      "phase": 4,
+      "category": "ML",
+      "time_estimate": "36 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.323180",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_4/implement_variation_55_b24c4bb0.py"
+    },
+    {
+      "id": "variation_108_ce64103b",
+      "title": "Security Implementation - Variation 108",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 24 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 39"
+      ],
+      "phase": 4,
+      "category": "ML",
+      "time_estimate": "24 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.365340",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_4/implement_variation_108_ce64103b.py"
+    },
+    {
+      "id": "variation_6_623db90d",
+      "title": "Model Performance Tracking - Variation 6",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 40 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 34"
+      ],
+      "phase": 4,
+      "category": "ML",
+      "time_estimate": "40 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.286575",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_4/implement_variation_6_623db90d.py"
+    },
+    {
+      "id": "variation_26_c6dd0296",
+      "title": "Model Performance Tracking - Variation 26",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 17 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 6"
+      ],
+      "phase": 4,
+      "category": "ML",
+      "time_estimate": "17 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.302191",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_4/implement_variation_26_c6dd0296.py"
+    },
+    {
+      "id": "variation_140_5c4ca2fd",
+      "title": "A/B Testing Framework - Variation 140",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 30 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 11"
+      ],
+      "phase": 4,
+      "category": "ML",
+      "time_estimate": "30 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.390991",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_4/implement_variation_140_5c4ca2fd.py"
+    },
+    {
+      "id": "variation_128_62d4104a",
+      "title": "Automated Feature Engineering - Variation 128",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 31 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 5"
+      ],
+      "phase": 4,
+      "category": "ML",
+      "time_estimate": "31 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.381445",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_4/implement_variation_128_62d4104a.py"
+    },
+    {
+      "id": "variation_122_4a18982e",
+      "title": "Security Implementation - Variation 122",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 39 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 17"
+      ],
+      "phase": 4,
+      "category": "ML",
+      "time_estimate": "39 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.375496",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_4/implement_variation_122_4a18982e.py"
+    },
+    {
+      "id": "ml_systems_9",
+      "title": "Feedback Loop",
+      "description": "From ML Systems book: Ch 9\n\nExpected Impact: MEDIUM - Continuous improvement\nTime Estimate: 2 weeks",
+      "priority": "NICE_TO_HAVE",
+      "source_books": [
+        "Designing Machine Learning Systems"
+      ],
+      "phase": 5,
+      "category": "ML",
+      "time_estimate": "2 weeks",
+      "expected_impact": "MEDIUM - Continuous improvement",
+      "generated": "2025-10-15T23:49:50.268290",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/implement_ml_systems_9.py"
+    },
+    {
+      "id": "rec_99_5279",
+      "title": "Utilize statistical methods (Kolmogorov-Smirnov test and Chi-squared test)",
+      "description": "No description available\n\nExpected Impact: MEDIUM\nTime Estimate: 16 hours",
+      "priority": "STATISTICS",
+      "source_books": [
+        "Unknown"
+      ],
+      "phase": 5,
+      "category": "ML",
+      "time_estimate": "16 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.279272",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/implement_rec_99_5279.py"
+    },
+    {
+      "id": "variation_72_097e7647",
+      "title": "Real-time Prediction Engine - Variation 72",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 20 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 35"
+      ],
+      "phase": 5,
+      "category": "ML",
+      "time_estimate": "20 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.336773",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/implement_variation_72_097e7647.py"
+    },
+    {
+      "id": "variation_147_a5b280fc",
+      "title": "Advanced Machine Learning Pipeline - Variation 147",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 29 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 38"
+      ],
+      "phase": 5,
+      "category": "ML",
+      "time_estimate": "29 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.398506",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/implement_variation_147_a5b280fc.py"
+    },
+    {
+      "id": "variation_96_e240f9a8",
+      "title": "Advanced Machine Learning Pipeline - Variation 96",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 13 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 12"
+      ],
+      "phase": 5,
+      "category": "ML",
+      "time_estimate": "13 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.352823",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/implement_variation_96_e240f9a8.py"
+    },
+    {
+      "id": "consolidated_consolidated_rec_101_3020",
+      "title": "Employ Grid Search for Hyperparameter Tuning",
+      "description": "Expected Impact: MEDIUM\nTime Estimate: 16 hours",
+      "priority": "ML",
+      "source_books": [
+        "Generated: 2025-10-15T23:49:50.235504"
+      ],
+      "phase": 5,
+      "category": "ML",
+      "time_estimate": "16 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.235504",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/implement_consolidated_consolidated_rec_101_3020.py"
+    },
+    {
+      "id": "variation_60_d7369c40",
+      "title": "Advanced Machine Learning Pipeline - Variation 60",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 35 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 1"
+      ],
+      "phase": 5,
+      "category": "ML",
+      "time_estimate": "35 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.326029",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/implement_variation_60_d7369c40.py"
+    },
+    {
+      "id": "consolidated_rec_66_610",
+      "title": "Implement Retrieval-Augmented Generation (RAG) for Enhanced Context",
+      "description": "Expected Impact: MEDIUM\nTime Estimate: 80 hours",
+      "priority": "ARCHITECTURE",
+      "source_books": [
+        "Generated: 2025-10-15T23:49:50.255579"
+      ],
+      "phase": 5,
+      "category": "ML",
+      "time_estimate": "80 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.255579",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/implement_consolidated_rec_66_610.py"
+    },
+    {
+      "id": "rec_70_6158",
+      "title": "Implement Content Safety Measures for LLM Outputs",
+      "description": "No description available\n\nExpected Impact: MEDIUM\nTime Estimate: 20 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Unknown"
+      ],
+      "phase": 5,
+      "category": "ML",
+      "time_estimate": "20 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.274005",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/implement_rec_70_6158.py"
+    },
+    {
+      "id": "consolidated_rec_38_6781",
+      "title": "Utilize Logistic Regression for Win Probability Prediction",
+      "description": "Expected Impact: MEDIUM\nTime Estimate: 60 hours",
+      "priority": "ML",
+      "source_books": [
+        "Generated: 2025-10-15T23:49:50.250212"
+      ],
+      "phase": 5,
+      "category": "ML",
+      "time_estimate": "60 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.250212",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/implement_consolidated_rec_38_6781.py"
+    },
+    {
+      "id": "rec_84_4636",
+      "title": "Translate Business Objectives to ML Metrics",
+      "description": "No description available\n\nExpected Impact: MEDIUM\nTime Estimate: 16 hours",
+      "priority": "ML",
+      "source_books": [
+        "Unknown"
+      ],
+      "phase": 5,
+      "category": "ML",
+      "time_estimate": "16 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.274559",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/implement_rec_84_4636.py"
+    },
+    {
+      "id": "variation_41_2a530ba8",
+      "title": "Data Validation Pipeline - Variation 41",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 29 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 27"
+      ],
+      "phase": 5,
+      "category": "ML",
+      "time_estimate": "29 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.314183",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/implement_variation_41_2a530ba8.py"
+    },
+    {
+      "id": "variation_145_26265f06",
+      "title": "Real-time Prediction Engine - Variation 145",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 28 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 8"
+      ],
+      "phase": 5,
+      "category": "ML",
+      "time_estimate": "28 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.397221",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/implement_variation_145_26265f06.py"
+    },
+    {
+      "id": "consolidated_rec_67_7933",
+      "title": "Fine-Tune LLMs on NBA-Specific Datasets",
+      "description": "Expected Impact: MEDIUM\nTime Estimate: 60 hours",
+      "priority": "ML",
+      "source_books": [
+        "Generated: 2025-10-15T23:49:50.256908"
+      ],
+      "phase": 5,
+      "category": "ML",
+      "time_estimate": "60 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.256908",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/implement_consolidated_rec_67_7933.py"
+    },
+    {
+      "id": "rec_89_2623",
+      "title": "Categorize ML Tasks for Clarity",
+      "description": "No description available\n\nExpected Impact: MEDIUM\nTime Estimate: 8 hours",
+      "priority": "ML",
+      "source_books": [
+        "Unknown"
+      ],
+      "phase": 5,
+      "category": "ML",
+      "time_estimate": "8 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.276133",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/implement_rec_89_2623.py"
+    },
+    {
+      "id": "rec_164_4969",
+      "title": "Optimize Batch Size",
+      "description": "No description available\n\nExpected Impact: MEDIUM\nTime Estimate: 8 hours",
+      "priority": "PERFORMANCE",
+      "source_books": [
+        "Unknown"
+      ],
+      "phase": 5,
+      "category": "ML",
+      "time_estimate": "8 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.280572",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/implement_rec_164_4969.py"
+    },
+    {
+      "id": "variation_98_00257e2f",
+      "title": "Advanced Machine Learning Pipeline - Variation 98",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 28 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 31"
+      ],
+      "phase": 5,
+      "category": "ML",
+      "time_estimate": "28 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.355926",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/implement_variation_98_00257e2f.py"
+    },
+    {
+      "id": "variation_73_c07a745c",
+      "title": "Real-time Prediction Engine - Variation 73",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 30 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 9"
+      ],
+      "phase": 5,
+      "category": "ML",
+      "time_estimate": "30 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.337383",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/implement_variation_73_c07a745c.py"
+    },
+    {
+      "id": "variation_101_80e74aa1",
+      "title": "Real-time Prediction Engine - Variation 101",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 28 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 23"
+      ],
+      "phase": 2,
+      "category": "ML",
+      "time_estimate": "28 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.358848",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_2/implement_variation_101_80e74aa1.py"
+    },
+    {
+      "id": "variation_117_5906639a",
+      "title": "Security Implementation - Variation 117",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 18 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 43"
+      ],
+      "phase": 2,
+      "category": "ML",
+      "time_estimate": "18 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.370666",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_2/implement_variation_117_5906639a.py"
+    },
+    {
+      "id": "variation_42_3d7ce931",
+      "title": "Model Performance Tracking - Variation 42",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 16 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 8"
+      ],
+      "phase": 2,
+      "category": "ML",
+      "time_estimate": "16 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.314942",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_2/implement_variation_42_3d7ce931.py"
+    },
+    {
+      "id": "variation_39_267153f1",
+      "title": "Performance Optimization - Variation 39",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 19 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 1"
+      ],
+      "phase": 2,
+      "category": "ML",
+      "time_estimate": "19 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.313012",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_2/implement_variation_39_267153f1.py"
+    },
+    {
+      "id": "variation_29_d9866cef",
+      "title": "Security Implementation - Variation 29",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 37 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 37"
+      ],
+      "phase": 2,
+      "category": "ML",
+      "time_estimate": "37 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.303970",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_2/implement_variation_29_d9866cef.py"
+    },
+    {
+      "id": "variation_133_84c4afd8",
+      "title": "Real-time Prediction Engine - Variation 133",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 10 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 24"
+      ],
+      "phase": 2,
+      "category": "ML",
+      "time_estimate": "10 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.386153",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_2/implement_variation_133_84c4afd8.py"
+    },
+    {
+      "id": "variation_126_1a605e02",
+      "title": "Model Performance Tracking - Variation 126",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 34 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 44"
+      ],
+      "phase": 2,
+      "category": "ML",
+      "time_estimate": "34 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.379993",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_2/implement_variation_126_1a605e02.py"
+    },
+    {
+      "id": "variation_124_ea2b7e05",
+      "title": "A/B Testing Framework - Variation 124",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 23 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 40"
+      ],
+      "phase": 2,
+      "category": "ML",
+      "time_estimate": "23 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.377047",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_2/implement_variation_124_ea2b7e05.py"
+    },
+    {
+      "id": "variation_44_480e71d6",
+      "title": "Security Implementation - Variation 44",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 27 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 21"
+      ],
+      "phase": 2,
+      "category": "ML",
+      "time_estimate": "27 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.316114",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_2/implement_variation_44_480e71d6.py"
+    },
+    {
+      "id": "variation_15_a311b847",
+      "title": "A/B Testing Framework - Variation 15",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 10 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 34"
+      ],
+      "phase": 7,
+      "category": "ML",
+      "time_estimate": "10 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.292429",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_7/implement_variation_15_a311b847.py"
+    },
+    {
+      "id": "variation_63_2bfcb0dd",
+      "title": "Performance Optimization - Variation 63",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 39 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 38"
+      ],
+      "phase": 7,
+      "category": "ML",
+      "time_estimate": "39 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.329618",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_7/implement_variation_63_2bfcb0dd.py"
+    },
+    {
+      "id": "variation_33_4012ed49",
+      "title": "Data Validation Pipeline - Variation 33",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 18 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 4"
+      ],
+      "phase": 7,
+      "category": "ML",
+      "time_estimate": "18 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.306450",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_7/implement_variation_33_4012ed49.py"
+    },
+    {
+      "id": "variation_45_7296d378",
+      "title": "Advanced Machine Learning Pipeline - Variation 45",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 10 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 42"
+      ],
+      "phase": 7,
+      "category": "ML",
+      "time_estimate": "10 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.316696",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_7/implement_variation_45_7296d378.py"
+    },
+    {
+      "id": "variation_51_6cb53417",
+      "title": "Model Performance Tracking - Variation 51",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 22 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 38"
+      ],
+      "phase": 7,
+      "category": "ML",
+      "time_estimate": "22 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.320786",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_7/implement_variation_51_6cb53417.py"
+    },
+    {
+      "id": "variation_99_46cc9794",
+      "title": "Performance Optimization - Variation 99",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 13 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 1"
+      ],
+      "phase": 7,
+      "category": "ML",
+      "time_estimate": "13 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.357151",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_7/implement_variation_99_46cc9794.py"
+    },
+    {
+      "id": "variation_8_ffaa2a8d",
+      "title": "Model Versioning System - Variation 8",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 29 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 18"
+      ],
+      "phase": 7,
+      "category": "ML",
+      "time_estimate": "29 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.287867",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_7/implement_variation_8_ffaa2a8d.py"
+    },
+    {
+      "id": "variation_102_5c1c45bd",
+      "title": "Model Performance Tracking - Variation 102",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 12 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 11"
+      ],
+      "phase": 7,
+      "category": "ML",
+      "time_estimate": "12 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.361261",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_7/implement_variation_102_5c1c45bd.py"
+    },
+    {
+      "id": "variation_21_47096093",
+      "title": "A/B Testing Framework - Variation 21",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 34 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 26"
+      ],
+      "phase": 7,
+      "category": "ML",
+      "time_estimate": "34 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.299110",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_7/implement_variation_21_47096093.py"
+    },
+    {
+      "id": "variation_12_072b485c",
+      "title": "Data Validation Pipeline - Variation 12",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 37 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 5"
+      ],
+      "phase": 7,
+      "category": "ML",
+      "time_estimate": "37 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.290391",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_7/implement_variation_12_072b485c.py"
+    },
+    {
+      "id": "variation_93_27321843",
+      "title": "Model Versioning System - Variation 93",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 17 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 18"
+      ],
+      "phase": 7,
+      "category": "ML",
+      "time_estimate": "17 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.350423",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_7/implement_variation_93_27321843.py"
+    },
+    {
+      "id": "variation_71_57bb189c",
+      "title": "Security Implementation - Variation 71",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 34 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 41"
+      ],
+      "phase": 7,
+      "category": "ML",
+      "time_estimate": "34 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.336160",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_7/implement_variation_71_57bb189c.py"
+    },
+    {
+      "id": "variation_112_97e9d8b6",
+      "title": "Data Quality Monitoring System - Variation 112",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 22 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 2"
+      ],
+      "phase": 7,
+      "category": "ML",
+      "time_estimate": "22 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.367716",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_7/implement_variation_112_97e9d8b6.py"
+    },
+    {
+      "id": "variation_131_7444d0e5",
+      "title": "Automated Feature Engineering - Variation 131",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 9 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 25"
+      ],
+      "phase": 7,
+      "category": "ML",
+      "time_estimate": "9 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.384503",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_7/implement_variation_131_7444d0e5.py"
+    },
+    {
+      "id": "consolidated_rec_17",
+      "title": "Advanced Statistical Testing Framework",
+      "description": "Context-aware analysis from The Elements of Statistical Learning\n\nExpected Impact: MEDIUM\nTime Estimate: 1 week",
+      "priority": "CRITICAL",
+      "source_books": [
+        "The Elements of Statistical Learning"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "1 week",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T21:01:26.111530",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_consolidated_rec_17.py"
+    },
+    {
+      "id": "ml_systems_9",
+      "title": "Feedback Loop",
+      "description": "From ML Systems book: Ch 9\n\nExpected Impact: MEDIUM - Continuous improvement\nTime Estimate: 2 weeks",
+      "priority": "NICE_TO_HAVE",
+      "source_books": [
+        "Designing Machine Learning Systems"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "2 weeks",
+      "expected_impact": "MEDIUM - Continuous improvement",
+      "generated": "2025-10-15T21:01:26.118425",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_9.py"
+    },
+    {
+      "id": "rec_22",
+      "title": "Panel Data Processing System",
+      "description": "Context-aware analysis from Econometric Analysis\n\nExpected Impact: MEDIUM\nTime Estimate: 1 week",
+      "priority": "CRITICAL",
+      "source_books": [
+        "Econometric Analysis"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "1 week",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T21:01:26.124153",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_22.py"
+    },
+    {
+      "id": "variation_74_cf568da7",
+      "title": "Model Versioning System - Variation 74",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 21 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 36"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "21 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.337977",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_variation_74_cf568da7.py"
+    },
+    {
+      "id": "variation_107_083f85b0",
+      "title": "Model Performance Tracking - Variation 107",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 8 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 3"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "8 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.364779",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_variation_107_083f85b0.py"
+    },
+    {
+      "id": "variation_106_2eaa1182",
+      "title": "A/B Testing Framework - Variation 106",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 8 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 36"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "8 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.364202",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_variation_106_2eaa1182.py"
+    },
+    {
+      "id": "rec_26",
+      "title": "Causal Inference Pipeline",
+      "description": "Context-aware analysis from Introductory Econometrics: A Modern Approach\n\nExpected Impact: MEDIUM\nTime Estimate: 1 week",
+      "priority": "CRITICAL",
+      "source_books": [
+        "Introductory Econometrics: A Modern Approach"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "1 week",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T21:01:26.126741",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_26.py"
+    },
+    {
+      "id": "variation_104_c1fdaf41",
+      "title": "Performance Optimization - Variation 104",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 37 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 39"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "37 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.362996",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_variation_104_c1fdaf41.py"
+    },
+    {
+      "id": "variation_113_16b54999",
+      "title": "Model Versioning System - Variation 113",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 18 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 5"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "18 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.368435",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_variation_113_16b54999.py"
+    },
+    {
+      "id": "variation_80_a41ff5dd",
+      "title": "Real-time Prediction Engine - Variation 80",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 12 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 19"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "12 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.341423",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_variation_80_a41ff5dd.py"
+    },
+    {
+      "id": "variation_58_6c7548a5",
+      "title": "Model Performance Tracking - Variation 58",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 12 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 32"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "12 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.324910",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_variation_58_6c7548a5.py"
+    },
+    {
+      "id": "ml_systems_8",
+      "title": "Model Explainability (SHAP)",
+      "description": "From ML Systems book: Ch 6, Ch 11\n\nExpected Impact: MEDIUM - Trust & debugging\nTime Estimate: 2 weeks",
+      "priority": "NICE_TO_HAVE",
+      "source_books": [
+        "Designing Machine Learning Systems"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "2 weeks",
+      "expected_impact": "MEDIUM - Trust & debugging",
+      "generated": "2025-10-15T21:01:26.117830",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_8.py"
+    },
+    {
+      "id": "rec_23",
+      "title": "Econometric Model Validation",
+      "description": "Context-aware analysis from Econometric Analysis\n\nExpected Impact: MEDIUM\nTime Estimate: 1 week",
+      "priority": "IMPORTANT",
+      "source_books": [
+        "Econometric Analysis"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "1 week",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T21:01:26.124957",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_23.py"
+    },
+    {
+      "id": "ml_systems_3",
+      "title": "Monitoring Dashboards",
+      "description": "From ML Systems book: Ch 8, Ch 9\n\nExpected Impact: MEDIUM - Real-time visibility\nTime Estimate: 3 days",
+      "priority": "CRITICAL",
+      "source_books": [
+        "Designing Machine Learning Systems"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "3 days",
+      "expected_impact": "MEDIUM - Real-time visibility",
+      "generated": "2025-10-15T21:01:26.114540",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_3.py"
+    },
+    {
+      "id": "consolidated_consolidated_rec_13",
+      "title": "Model Interpretability Tools",
+      "description": "Context-aware analysis from Hands-On Machine Learning with Scikit-Learn and TensorFlow\n\nExpected Impact: MEDIUM\nTime Estimate: 1 week",
+      "priority": "IMPORTANT",
+      "source_books": [
+        "Hands-On Machine Learning with Scikit-Learn and TensorFlow"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "1 week",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T21:01:26.110278",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_consolidated_consolidated_rec_13.py"
+    },
+    {
+      "id": "ml_systems_10",
+      "title": "Model Registry",
+      "description": "From ML Systems book: Ch 5, Ch 10\n\nExpected Impact: MEDIUM - Central catalog\nTime Estimate: 3 days",
+      "priority": "NICE_TO_HAVE",
+      "source_books": [
+        "Designing Machine Learning Systems"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "3 days",
+      "expected_impact": "MEDIUM - Central catalog",
+      "generated": "2025-10-15T21:01:26.119004",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_10.py"
+    },
+    {
+      "id": "ml_systems_7",
+      "title": "Shadow Deployment",
+      "description": "From ML Systems book: Ch 7\n\nExpected Impact: LOW - Risk-free testing\nTime Estimate: 2 weeks",
+      "priority": "NICE_TO_HAVE",
+      "source_books": [
+        "Designing Machine Learning Systems"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "2 weeks",
+      "expected_impact": "LOW - Risk-free testing",
+      "generated": "2025-10-15T21:01:26.117087",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_7.py"
+    },
+    {
+      "id": "rec_18",
+      "title": "Bayesian Analysis Pipeline",
+      "description": "Context-aware analysis from STATISTICS 601 Advanced Statistical Methods\n\nExpected Impact: MEDIUM\nTime Estimate: 1 week",
+      "priority": "CRITICAL",
+      "source_books": [
+        "STATISTICS 601 Advanced Statistical Methods"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "1 week",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T21:01:26.121263",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_18.py"
+    },
+    {
+      "id": "ml_systems_6",
+      "title": "A/B Testing Framework",
+      "description": "From ML Systems book: Ch 7\n\nExpected Impact: MEDIUM - Compare models\nTime Estimate: 1 week",
+      "priority": "IMPORTANT",
+      "source_books": [
+        "Designing Machine Learning Systems"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "1 week",
+      "expected_impact": "MEDIUM - Compare models",
+      "generated": "2025-10-15T21:01:26.116475",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_6.py"
+    },
+    {
+      "id": "rec_19",
+      "title": "Statistical Model Validation System",
+      "description": "Context-aware analysis from STATISTICS 601 Advanced Statistical Methods\n\nExpected Impact: MEDIUM\nTime Estimate: 1 week",
+      "priority": "CRITICAL",
+      "source_books": [
+        "STATISTICS 601 Advanced Statistical Methods"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "1 week",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T21:01:26.122173",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_19.py"
+    },
+    {
+      "id": "ml_systems_2",
+      "title": "Data Drift Detection",
+      "description": "From ML Systems book: Ch 8\n- Detect distribution shifts in input features\n- Alert when data drift exceeds thresholds\n- Multiple statistical tests (KS, Chi-squared, PSI)\n- Distance metrics (KL divergence, Wasserstein)\n- Integration with MLflow for tracking\n\nExpected Impact: HIGH - Detect distribution shifts, prevent model degradation\nTime Estimate: 2 days",
+      "priority": "CRITICAL",
+      "source_books": [
+        "Designing Machine Learning Systems, Econometric Analysis"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "2 days",
+      "expected_impact": "HIGH - Detect distribution shifts, prevent model degradation",
+      "generated": "2025-10-15T21:01:26.113762",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_2.py"
+    },
+    {
+      "id": "test_rec_1",
+      "title": "Test Implementation",
+      "description": "No description available\n\nExpected Impact: MEDIUM\nTime Estimate: 1 week",
+      "priority": "ML",
+      "source_books": [
+        "Unknown"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "1 week",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:41.893832",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_test_rec_1.py"
+    },
+    {
+      "id": "ml_systems_5",
+      "title": "Feature Store",
+      "description": "From ML Systems book: Ch 5\n\nExpected Impact: MEDIUM - Centralize features\nTime Estimate: 2 weeks",
+      "priority": "IMPORTANT",
+      "source_books": [
+        "Designing Machine Learning Systems"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "2 weeks",
+      "expected_impact": "MEDIUM - Centralize features",
+      "generated": "2025-10-15T21:01:26.115879",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_5.py"
+    },
+    {
+      "id": "variation_87_83da3bda",
+      "title": "Advanced Machine Learning Pipeline - Variation 87",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 12 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 18"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "12 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.346727",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_variation_87_83da3bda.py"
+    },
+    {
+      "id": "variation_34_7a4fb622",
+      "title": "Advanced Machine Learning Pipeline - Variation 34",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 33 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 18"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "33 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.309195",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_variation_34_7a4fb622.py"
+    },
+    {
+      "id": "consolidated_consolidated_rec_15",
+      "title": "ML Experiment Tracking Dashboard",
+      "description": "Context-aware analysis from Hands-On Machine Learning with Scikit-Learn and TensorFlow\n\nExpected Impact: MEDIUM\nTime Estimate: 1 week",
+      "priority": "NICE_TO_HAVE",
+      "source_books": [
+        "Hands-On Machine Learning with Scikit-Learn and TensorFlow"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "1 week",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T21:01:26.110910",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_consolidated_consolidated_rec_15.py"
+    },
+    {
+      "id": "ml_systems_1",
+      "title": "Model Versioning with MLflow",
+      "description": "From ML Systems book: Ch 5, Ch 10\n- Implement model registry with MLflow\n- Enable model versioning and lineage tracking\n- Support model promotion across stages (staging, production)\n- Track model metadata (parameters, metrics, artifacts)\n\nExpected Impact: HIGH - Track models, enable rollback\nTime Estimate: 1 day",
+      "priority": "CRITICAL",
+      "source_books": [
+        "Designing Machine Learning Systems"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "1 day",
+      "expected_impact": "HIGH - Track models, enable rollback",
+      "generated": "2025-10-15T21:01:26.113136",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_1.py"
+    },
+    {
+      "id": "consolidated_consolidated_rec_11",
+      "title": "Advanced Feature Engineering Pipeline",
+      "description": "Context-aware analysis from Hands-On Machine Learning with Scikit-Learn and TensorFlow\n\nExpected Impact: MEDIUM\nTime Estimate: 1 week",
+      "priority": "CRITICAL",
+      "source_books": [
+        "Hands-On Machine Learning with Scikit-Learn and TensorFlow"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "1 week",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T21:01:26.109374",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_consolidated_consolidated_rec_11.py"
+    },
+    {
+      "id": "ml_systems_4",
+      "title": "Automated Retraining Pipeline",
+      "description": "From ML Systems book: Ch 9, Ch 10\n\nExpected Impact: HIGH - Self-improving system\nTime Estimate: 1 week",
+      "priority": "CRITICAL",
+      "source_books": [
+        "Designing Machine Learning Systems"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "1 week",
+      "expected_impact": "HIGH - Self-improving system",
+      "generated": "2025-10-15T21:01:26.115283",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_4.py"
+    },
+    {
+      "id": "rec_24",
+      "title": "Statistical Significance Testing",
+      "description": "Context-aware analysis from Econometric Analysis\n\nExpected Impact: MEDIUM\nTime Estimate: 1 week",
+      "priority": "IMPORTANT",
+      "source_books": [
+        "Econometric Analysis"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "1 week",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T21:01:26.125565",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_24.py"
+    },
+    {
+      "id": "variation_16_d1d2a99a",
+      "title": "Data Validation Pipeline - Variation 16",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 36 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 1"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "36 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.294245",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_variation_16_d1d2a99a.py"
+    },
+    {
+      "id": "variation_52_9a596b37",
+      "title": "Automated Feature Engineering - Variation 52",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 18 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 35"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "18 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.321379",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_variation_52_9a596b37.py"
+    },
+    {
+      "id": "consolidated_rec_21",
+      "title": "Interactive Statistical Dashboards",
+      "description": "Context-aware analysis from The Elements of Statistical Learning\n\nExpected Impact: MEDIUM\nTime Estimate: 1 week",
+      "priority": "NICE_TO_HAVE",
+      "source_books": [
+        "The Elements of Statistical Learning"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "1 week",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T21:01:26.112212",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_consolidated_rec_21.py"
+    },
+    {
+      "id": "rec_20",
+      "title": "Statistical Report Generation",
+      "description": "Context-aware analysis from STATISTICS 601 Advanced Statistical Methods\n\nExpected Impact: MEDIUM\nTime Estimate: 1 week",
+      "priority": "NICE_TO_HAVE",
+      "source_books": [
+        "STATISTICS 601 Advanced Statistical Methods"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "1 week",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T21:01:26.122913",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_20.py"
+    },
+    {
+      "id": "variation_118_7cbde7be",
+      "title": "Performance Optimization - Variation 118",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 38 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 32"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "38 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.371371",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_variation_118_7cbde7be.py"
+    },
+    {
+      "id": "rec_21",
+      "title": "Time Series Analysis Framework",
+      "description": "Context-aware analysis from Econometric Analysis\n\nExpected Impact: MEDIUM\nTime Estimate: 1 week",
+      "priority": "CRITICAL",
+      "source_books": [
+        "Econometric Analysis"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "1 week",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T21:01:26.123546",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_21.py"
+    },
+    {
+      "id": "consolidated_rec_64_1595",
+      "title": "Evaluate Structured Output Techniques for Reliable Data Extraction",
+      "description": "Expected Impact: MEDIUM\nTime Estimate: 30 hours",
+      "priority": "DATA PROCESSING",
+      "source_books": [
+        "Generated: 2025-10-15T23:49:50.254735"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "30 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.254735",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_consolidated_rec_64_1595.py"
+    },
+    {
+      "id": "rec_25",
+      "title": "Research Paper Generation",
+      "description": "Context-aware analysis from Econometric Analysis\n\nExpected Impact: MEDIUM\nTime Estimate: 1 week",
+      "priority": "NICE_TO_HAVE",
+      "source_books": [
+        "Econometric Analysis"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "1 week",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T21:01:26.126165",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_rec_25.py"
+    },
+    {
+      "id": "variation_48_9a6efd51",
+      "title": "Real-time Prediction Engine - Variation 48",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 19 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 21"
+      ],
+      "phase": 0,
+      "category": "ML",
+      "time_estimate": "19 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.318378",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_variation_48_9a6efd51.py"
+    },
+    {
+      "id": "variation_7_547ea636",
+      "title": "Model Performance Tracking - Variation 7",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 32 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 18"
+      ],
+      "phase": 9,
+      "category": "ML",
+      "time_estimate": "32 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.287266",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_9/implement_variation_7_547ea636.py"
+    },
+    {
+      "id": "variation_94_f9ed109f",
+      "title": "Performance Optimization - Variation 94",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 38 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 29"
+      ],
+      "phase": 9,
+      "category": "ML",
+      "time_estimate": "38 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.350997",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_9/implement_variation_94_f9ed109f.py"
+    },
+    {
+      "id": "variation_54_7bf3cc9f",
+      "title": "A/B Testing Framework - Variation 54",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 35 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 35"
+      ],
+      "phase": 9,
+      "category": "ML",
+      "time_estimate": "35 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.322598",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_9/implement_variation_54_7bf3cc9f.py"
+    },
+    {
+      "id": "variation_81_1a4fed9b",
+      "title": "Data Validation Pipeline - Variation 81",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 28 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 14"
+      ],
+      "phase": 9,
+      "category": "ML",
+      "time_estimate": "28 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.341994",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_9/implement_variation_81_1a4fed9b.py"
+    },
+    {
+      "id": "variation_82_215db232",
+      "title": "Advanced Machine Learning Pipeline - Variation 82",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 16 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 19"
+      ],
+      "phase": 9,
+      "category": "ML",
+      "time_estimate": "16 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.342727",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_9/implement_variation_82_215db232.py"
+    },
+    {
+      "id": "variation_137_9dbbb2c6",
+      "title": "Performance Optimization - Variation 137",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 24 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 31"
+      ],
+      "phase": 9,
+      "category": "ML",
+      "time_estimate": "24 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.389222",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_9/implement_variation_137_9dbbb2c6.py"
+    },
+    {
+      "id": "variation_9_63aaebab",
+      "title": "Security Implementation - Variation 9",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 25 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 36"
+      ],
+      "phase": 9,
+      "category": "ML",
+      "time_estimate": "25 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.288455",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_9/implement_variation_9_63aaebab.py"
+    },
+    {
+      "id": "variation_146_4d9a6f0f",
+      "title": "Automated Feature Engineering - Variation 146",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 13 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 5"
+      ],
+      "phase": 9,
+      "category": "ML",
+      "time_estimate": "13 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.397910",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_9/implement_variation_146_4d9a6f0f.py"
+    },
+    {
+      "id": "variation_129_a8451784",
+      "title": "Model Performance Tracking - Variation 129",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 24 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 23"
+      ],
+      "phase": 9,
+      "category": "ML",
+      "time_estimate": "24 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.382687",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_9/implement_variation_129_a8451784.py"
+    },
+    {
+      "id": "variation_11_1b438a4b",
+      "title": "A/B Testing Framework - Variation 11",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 26 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 9"
+      ],
+      "phase": 9,
+      "category": "ML",
+      "time_estimate": "26 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.289822",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_9/implement_variation_11_1b438a4b.py"
+    },
+    {
+      "id": "variation_2_5656b4aa",
+      "title": "A/B Testing Framework - Variation 2",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 16 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 41"
+      ],
+      "phase": 9,
+      "category": "ML",
+      "time_estimate": "16 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.282894",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_9/implement_variation_2_5656b4aa.py"
+    },
+    {
+      "id": "variation_100_50a9790c",
+      "title": "Advanced Machine Learning Pipeline - Variation 100",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 37 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 8"
+      ],
+      "phase": 9,
+      "category": "ML",
+      "time_estimate": "37 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.358141",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_9/implement_variation_100_50a9790c.py"
+    },
+    {
+      "id": "variation_86_cb4c9933",
+      "title": "Model Versioning System - Variation 86",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 27 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 39"
+      ],
+      "phase": 8,
+      "category": "ML",
+      "time_estimate": "27 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.345517",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_8/implement_variation_86_cb4c9933.py"
+    },
+    {
+      "id": "variation_92_7d441856",
+      "title": "Model Versioning System - Variation 92",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 28 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 23"
+      ],
+      "phase": 8,
+      "category": "ML",
+      "time_estimate": "28 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.349853",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_8/implement_variation_92_7d441856.py"
+    },
+    {
+      "id": "variation_136_3ccd4009",
+      "title": "Model Performance Tracking - Variation 136",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 19 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 38"
+      ],
+      "phase": 8,
+      "category": "ML",
+      "time_estimate": "19 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.387994",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_8/implement_variation_136_3ccd4009.py"
+    },
+    {
+      "id": "variation_38_8f57916d",
+      "title": "Advanced Machine Learning Pipeline - Variation 38",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 27 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 10"
+      ],
+      "phase": 8,
+      "category": "ML",
+      "time_estimate": "27 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.312397",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_8/implement_variation_38_8f57916d.py"
+    },
+    {
+      "id": "variation_85_7f67256e",
+      "title": "Model Versioning System - Variation 85",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 23 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 30"
+      ],
+      "phase": 8,
+      "category": "ML",
+      "time_estimate": "23 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.344374",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_8/implement_variation_85_7f67256e.py"
+    },
+    {
+      "id": "variation_59_c2273710",
+      "title": "Model Performance Tracking - Variation 59",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 32 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 12"
+      ],
+      "phase": 8,
+      "category": "ML",
+      "time_estimate": "32 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.325472",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_8/implement_variation_59_c2273710.py"
+    },
+    {
+      "id": "variation_43_139bb1f7",
+      "title": "Security Implementation - Variation 43",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 23 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 6"
+      ],
+      "phase": 8,
+      "category": "ML",
+      "time_estimate": "23 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.315538",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_8/implement_variation_43_139bb1f7.py"
+    },
+    {
+      "id": "variation_84_12743c6e",
+      "title": "Performance Optimization - Variation 84",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 11 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 33"
+      ],
+      "phase": 8,
+      "category": "ML",
+      "time_estimate": "11 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.343828",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_8/implement_variation_84_12743c6e.py"
+    },
+    {
+      "id": "variation_91_60c1b976",
+      "title": "Security Implementation - Variation 91",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 8 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 26"
+      ],
+      "phase": 8,
+      "category": "ML",
+      "time_estimate": "8 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.349243",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_8/implement_variation_91_60c1b976.py"
+    },
+    {
+      "id": "variation_105_2d9de4d8",
+      "title": "Real-time Prediction Engine - Variation 105",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 27 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 25"
+      ],
+      "phase": 1,
+      "category": "ML",
+      "time_estimate": "27 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.363612",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_1/implement_variation_105_2d9de4d8.py"
+    },
+    {
+      "id": "variation_78_8a1cc959",
+      "title": "Model Versioning System - Variation 78",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 36 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 12"
+      ],
+      "phase": 1,
+      "category": "ML",
+      "time_estimate": "36 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.340280",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_1/implement_variation_78_8a1cc959.py"
+    },
+    {
+      "id": "variation_138_d62b3d30",
+      "title": "Automated Feature Engineering - Variation 138",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 15 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 25"
+      ],
+      "phase": 1,
+      "category": "ML",
+      "time_estimate": "15 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.389848",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_1/implement_variation_138_d62b3d30.py"
+    },
+    {
+      "id": "variation_115_c362dd1e",
+      "title": "A/B Testing Framework - Variation 115",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 31 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 5"
+      ],
+      "phase": 1,
+      "category": "ML",
+      "time_estimate": "31 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.369549",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_1/implement_variation_115_c362dd1e.py"
+    },
+    {
+      "id": "variation_4_af134df3",
+      "title": "Performance Optimization - Variation 4",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 23 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 26"
+      ],
+      "phase": 1,
+      "category": "ML",
+      "time_estimate": "23 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.285445",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_1/implement_variation_4_af134df3.py"
+    },
+    {
+      "id": "variation_22_010acfe5",
+      "title": "Model Performance Tracking - Variation 22",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 17 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 7"
+      ],
+      "phase": 1,
+      "category": "ML",
+      "time_estimate": "17 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.299698",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_1/implement_variation_22_010acfe5.py"
+    },
+    {
+      "id": "variation_114_a6b33421",
+      "title": "Performance Optimization - Variation 114",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 23 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 28"
+      ],
+      "phase": 1,
+      "category": "ML",
+      "time_estimate": "23 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.368978",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_1/implement_variation_114_a6b33421.py"
+    },
+    {
+      "id": "variation_13_f7cbd6d3",
+      "title": "Model Performance Tracking - Variation 13",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 10 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 37"
+      ],
+      "phase": 1,
+      "category": "ML",
+      "time_estimate": "10 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.291129",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_1/implement_variation_13_f7cbd6d3.py"
+    },
+    {
+      "id": "variation_32_5c7efa7b",
+      "title": "Advanced Machine Learning Pipeline - Variation 32",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 24 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 11"
+      ],
+      "phase": 1,
+      "category": "ML",
+      "time_estimate": "24 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.305902",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_1/implement_variation_32_5c7efa7b.py"
+    },
+    {
+      "id": "variation_97_1997e60d",
+      "title": "Automated Feature Engineering - Variation 97",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 12 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 35"
+      ],
+      "phase": 1,
+      "category": "ML",
+      "time_estimate": "12 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.354376",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_1/implement_variation_97_1997e60d.py"
+    },
+    {
+      "id": "variation_65_758ae10b",
+      "title": "Performance Optimization - Variation 65",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 8 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 29"
+      ],
+      "phase": 6,
+      "category": "ML",
+      "time_estimate": "8 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.331131",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_6/implement_variation_65_758ae10b.py"
+    },
+    {
+      "id": "variation_77_e9af0457",
+      "title": "A/B Testing Framework - Variation 77",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 9 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 41"
+      ],
+      "phase": 6,
+      "category": "ML",
+      "time_estimate": "9 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.339713",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_6/implement_variation_77_e9af0457.py"
+    },
+    {
+      "id": "variation_50_5b0bb074",
+      "title": "Automated Feature Engineering - Variation 50",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 23 hours",
+      "priority": "ML",
+      "source_books": [
+        "Book 8"
+      ],
+      "phase": 6,
+      "category": "ML",
+      "time_estimate": "23 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.320059",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_6/implement_variation_50_5b0bb074.py"
+    },
+    {
+      "id": "variation_40_288de1e9",
+      "title": "Model Versioning System - Variation 40",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 23 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 19"
+      ],
+      "phase": 6,
+      "category": "ML",
+      "time_estimate": "23 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.313611",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_6/implement_variation_40_288de1e9.py"
+    },
+    {
+      "id": "variation_79_63df36c2",
+      "title": "Advanced Machine Learning Pipeline - Variation 79",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 11 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 24"
+      ],
+      "phase": 6,
+      "category": "ML",
+      "time_estimate": "11 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.340861",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_6/implement_variation_79_63df36c2.py"
+    },
+    {
+      "id": "variation_125_f33dee7f",
+      "title": "Automated Feature Engineering - Variation 125",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 17 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 3"
+      ],
+      "phase": 6,
+      "category": "ML",
+      "time_estimate": "17 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.379320",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_6/implement_variation_125_f33dee7f.py"
+    },
+    {
+      "id": "variation_89_c3c2c5d5",
+      "title": "Performance Optimization - Variation 89",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 32 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 20"
+      ],
+      "phase": 6,
+      "category": "ML",
+      "time_estimate": "32 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.348010",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_6/implement_variation_89_c3c2c5d5.py"
+    },
+    {
+      "id": "rec_28_9488",
+      "title": "Tie ML Model Performance to Business Metrics",
+      "description": "No description available\n\nExpected Impact: MEDIUM\nTime Estimate: 16 hours",
+      "priority": "BUSINESS",
+      "source_books": [
+        "Unknown"
+      ],
+      "phase": 6,
+      "category": "ML",
+      "time_estimate": "16 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.272853",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_6/implement_rec_28_9488.py"
+    },
+    {
+      "id": "consolidated_rec_27_3444",
+      "title": "Monitor Model Performance with Percentiles",
+      "description": "Expected Impact: MEDIUM\nTime Estimate: 24 hours",
+      "priority": "MONITORING",
+      "source_books": [
+        "Generated: 2025-10-15T23:49:50.243744"
+      ],
+      "phase": 6,
+      "category": "ML",
+      "time_estimate": "24 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.243744",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_6/implement_consolidated_rec_27_3444.py"
+    },
+    {
+      "id": "variation_134_1bc5febf",
+      "title": "Security Implementation - Variation 134",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 37 hours",
+      "priority": "SECURITY",
+      "source_books": [
+        "Book 33"
+      ],
+      "phase": 6,
+      "category": "ML",
+      "time_estimate": "37 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.386784",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_6/implement_variation_134_1bc5febf.py"
+    },
+    {
+      "id": "variation_27_7fd5938c",
+      "title": "Advanced Machine Learning Pipeline - Variation 27",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 29 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 34"
+      ],
+      "phase": 6,
+      "category": "ML",
+      "time_estimate": "29 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.302785",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_6/implement_variation_27_7fd5938c.py"
+    },
+    {
+      "id": "variation_69_b944be4d",
+      "title": "Model Versioning System - Variation 69",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 19 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 20"
+      ],
+      "phase": 6,
+      "category": "ML",
+      "time_estimate": "19 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.333678",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_6/implement_variation_69_b944be4d.py"
+    },
+    {
+      "id": "variation_31_56808c09",
+      "title": "Security Implementation - Variation 31",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 23 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 38"
+      ],
+      "phase": 6,
+      "category": "ML",
+      "time_estimate": "23 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.305336",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_6/implement_variation_31_56808c09.py"
+    },
+    {
+      "id": "consolidated_rec_73_5364",
+      "title": "Develop a Supervised Learning Model to Predict Player Performance",
+      "description": "Expected Impact: MEDIUM\nTime Estimate: 40 hours",
+      "priority": "ML",
+      "source_books": [
+        "Generated: 2025-10-15T23:49:50.258838"
+      ],
+      "phase": 6,
+      "category": "ML",
+      "time_estimate": "40 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.258838",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_6/implement_consolidated_rec_73_5364.py"
+    },
+    {
+      "id": "variation_49_e1ae33e4",
+      "title": "Advanced Machine Learning Pipeline - Variation 49",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 22 hours",
+      "priority": "DATA",
+      "source_books": [
+        "Book 40"
+      ],
+      "phase": 6,
+      "category": "ML",
+      "time_estimate": "22 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.318942",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_6/implement_variation_49_e1ae33e4.py"
+    },
+    {
+      "id": "consolidated_rec_40_8018",
+      "title": "Apply Feature Scaling to Improve Model Performance",
+      "description": "Expected Impact: MEDIUM\nTime Estimate: 12 hours",
+      "priority": "DATA PROCESSING",
+      "source_books": [
+        "Generated: 2025-10-15T23:49:50.251479"
+      ],
+      "phase": 6,
+      "category": "ML",
+      "time_estimate": "12 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.251479",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_6/implement_consolidated_rec_40_8018.py"
+    },
+    {
+      "id": "variation_24_95bca3ba",
+      "title": "Real-time Prediction Engine - Variation 24",
+      "description": "Generated variation to increase recommendation count\n\nExpected Impact: MEDIUM\nTime Estimate: 26 hours",
+      "priority": "INFRASTRUCTURE",
+      "source_books": [
+        "Book 14"
+      ],
+      "phase": 6,
+      "category": "ML",
+      "time_estimate": "26 hours",
+      "expected_impact": "MEDIUM",
+      "generated": "2025-10-15T23:49:50.300878",
+      "file_path": "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_6/implement_variation_24_95bca3ba.py"
+    }
+  ]
+}

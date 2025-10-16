@@ -38,7 +38,7 @@ class TestSlackIntegration:
         from mcp_server.connectors.slack_notifier import SlackNotifier
 
         webhook_url = "https://hooks.slack.com/services/TEST/TEST/TEST"
-        notifier = SlackNotifier(webhook_url=webhook_url, channel="#test")
+        notifier = SlackNotifier(webhook_url=webhook_url, channel=os.getenv("SLACK_CHANNEL", "#test"))
 
         assert notifier.webhook_url == webhook_url
         assert notifier.channel == "#test"

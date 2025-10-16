@@ -7,6 +7,7 @@ import os
 import logging
 from typing import Dict, Any, Optional
 from datetime import datetime
+from mcp_server.env_helper import get_hierarchical_env
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +28,14 @@ class OllamaModel:
 
     def __init__(self):
         """Initialize Ollama client"""
-        self.host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-        self.model = os.getenv("OLLAMA_MODEL", "qwen2.5-coder:32b")
+        # Try new naming convention first, then fallback to old
+        self.host = (get_hierarchical_env("OLLAMA_HOST", "NBA_MCP_SYNTHESIS", "WORKFLOW") or
+                    "http://localhost:11434")  # Fallback to default
+        
+        # Try new naming convention first, then fallback to old
+        self.model = (get_hierarchical_env("OLLAMA_MODEL", "NBA_MCP_SYNTHESIS", "WORKFLOW") or
+                     "qwen2.5-coder:32b")  # Fallback to default
+
         self.available = False
 
         try:

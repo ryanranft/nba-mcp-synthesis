@@ -15,7 +15,7 @@ import re
 
 class QueryDatabaseParams(BaseModel):
     """Parameters for database query execution"""
-    
+
     sql_query: str = Field(
         ...,
         min_length=1,
@@ -28,7 +28,7 @@ class QueryDatabaseParams(BaseModel):
         le=10000,
         description="Maximum number of rows to return"
     )
-    
+
     @validator('sql_query')
     def validate_sql_query(cls, v):
         """Validate SQL query is safe"""
@@ -36,16 +36,16 @@ class QueryDatabaseParams(BaseModel):
         query_upper = v.strip().upper()
         if not query_upper.startswith(('SELECT', 'WITH')):
             raise ValueError("Only SELECT queries allowed. Use WITH...SELECT for CTEs.")
-        
+
         # Check for forbidden keywords
-        forbidden = ['DROP', 'DELETE', 'UPDATE', 'INSERT', 'TRUNCATE', 
+        forbidden = ['DROP', 'DELETE', 'UPDATE', 'INSERT', 'TRUNCATE',
                     'ALTER', 'CREATE', 'GRANT', 'REVOKE', 'EXECUTE']
         for keyword in forbidden:
             if re.search(rf'\b{keyword}\b', query_upper):
                 raise ValueError(f"Forbidden SQL operation: {keyword}. Only SELECT queries are allowed.")
-        
+
         return v
-    
+
     class Config:
         json_schema_extra = {
             "examples": [
@@ -59,7 +59,7 @@ class QueryDatabaseParams(BaseModel):
 
 class GetTableSchemaParams(BaseModel):
     """Parameters for getting table schema"""
-    
+
     table_name: str = Field(
         ...,
         min_length=1,
@@ -67,14 +67,14 @@ class GetTableSchemaParams(BaseModel):
         pattern=r'^[a-zA-Z0-9_]+$',
         description="Table name (alphanumeric and underscore only)"
     )
-    
+
     @validator('table_name')
     def validate_table_name(cls, v):
         """Additional validation for table name"""
         if not re.match(r'^[a-zA-Z0-9_]+$', v):
             raise ValueError("Table name can only contain alphanumeric characters and underscores")
         return v
-    
+
     class Config:
         json_schema_extra = {
             "examples": [
@@ -118,7 +118,7 @@ class ListTablesParams(BaseModel):
 
 class ListS3FilesParams(BaseModel):
     """Parameters for listing S3 files"""
-    
+
     prefix: str = Field(
         default="",
         max_length=500,
@@ -130,7 +130,7 @@ class ListS3FilesParams(BaseModel):
         le=1000,
         description="Maximum number of files to return"
     )
-    
+
     @validator('prefix')
     def validate_prefix(cls, v):
         """Validate S3 prefix is safe"""
@@ -138,7 +138,7 @@ class ListS3FilesParams(BaseModel):
         if '..' in v:
             raise ValueError("Path traversal not allowed in prefix")
         return v
-    
+
     class Config:
         json_schema_extra = {
             "examples": [
@@ -150,14 +150,14 @@ class ListS3FilesParams(BaseModel):
 
 class GetS3FileParams(BaseModel):
     """Parameters for getting S3 file content"""
-    
+
     file_key: str = Field(
         ...,
         min_length=1,
         max_length=1000,
         description="S3 object key"
     )
-    
+
     @validator('file_key')
     def validate_file_key(cls, v):
         """Validate S3 file key is safe"""
@@ -166,7 +166,7 @@ class GetS3FileParams(BaseModel):
         if v.startswith('/'):
             raise ValueError("File key should not start with /")
         return v
-    
+
     class Config:
         json_schema_extra = {
             "examples": [
@@ -181,7 +181,7 @@ class GetS3FileParams(BaseModel):
 
 class GetGlueTableMetadataParams(BaseModel):
     """Parameters for getting Glue table metadata"""
-    
+
     table_name: str = Field(
         ...,
         min_length=1,
@@ -189,7 +189,7 @@ class GetGlueTableMetadataParams(BaseModel):
         pattern=r'^[a-zA-Z0-9_]+$',
         description="Glue table name"
     )
-    
+
     class Config:
         json_schema_extra = {
             "examples": [
@@ -720,14 +720,14 @@ class SearchPdfParams(BaseModel):
 
 class ReadProjectFileParams(BaseModel):
     """Parameters for reading project files"""
-    
+
     file_path: str = Field(
         ...,
         min_length=1,
         max_length=500,
         description="Relative path to file within project"
     )
-    
+
     @validator('file_path')
     def validate_file_path(cls, v):
         """Validate file path is safe"""
@@ -737,7 +737,7 @@ class ReadProjectFileParams(BaseModel):
         if v.startswith('/'):
             raise ValueError("Use relative paths only")
         return v
-    
+
     class Config:
         json_schema_extra = {
             "examples": [
@@ -748,7 +748,7 @@ class ReadProjectFileParams(BaseModel):
 
 class SearchProjectFilesParams(BaseModel):
     """Parameters for searching project files"""
-    
+
     pattern: str = Field(
         ...,
         min_length=1,
@@ -765,7 +765,7 @@ class SearchProjectFilesParams(BaseModel):
         le=500,
         description="Maximum number of results"
     )
-    
+
     class Config:
         json_schema_extra = {
             "examples": [
@@ -784,7 +784,7 @@ class SearchProjectFilesParams(BaseModel):
 
 class SaveToProjectParams(BaseModel):
     """Parameters for saving synthesis results"""
-    
+
     filename: str = Field(
         ...,
         min_length=1,
@@ -796,7 +796,7 @@ class SaveToProjectParams(BaseModel):
         min_length=1,
         description="Content to save"
     )
-    
+
     @validator('filename')
     def validate_filename(cls, v):
         """Validate filename is safe"""
@@ -806,7 +806,7 @@ class SaveToProjectParams(BaseModel):
         if not re.match(r'^[a-zA-Z0-9_\-\.]+$', v):
             raise ValueError("Filename can only contain alphanumeric, underscore, dash, and dot")
         return v
-    
+
     class Config:
         json_schema_extra = {
             "examples": [
@@ -820,11 +820,11 @@ class SaveToProjectParams(BaseModel):
 
 class LogSynthesisResultParams(BaseModel):
     """Parameters for logging synthesis results"""
-    
+
     query: str = Field(..., min_length=1, description="Original query")
     result: Dict[str, Any] = Field(..., description="Synthesis result")
     model_used: str = Field(..., description="Model used for synthesis")
-    
+
     class Config:
         json_schema_extra = {
             "examples": [
@@ -839,7 +839,7 @@ class LogSynthesisResultParams(BaseModel):
 
 class SendNotificationParams(BaseModel):
     """Parameters for sending Slack notifications"""
-    
+
     message: str = Field(
         ...,
         min_length=1,
@@ -850,7 +850,7 @@ class SendNotificationParams(BaseModel):
         default="info",
         description="Notification level"
     )
-    
+
     class Config:
         json_schema_extra = {
             "examples": [
@@ -1552,6 +1552,674 @@ class BoxPlusMinusParams(BaseModel):
                     "league_avg_per": 15,
                     "league_avg_pace": 100
                 }
+            ]
+        }
+
+
+# ============================================================================
+# Sprint 9: Algebraic Equation Tool Parameters
+# ============================================================================
+
+class AlgebraSolveParams(BaseModel):
+    """Parameters for solving algebraic equations"""
+
+    equation: str = Field(
+        ...,
+        min_length=1,
+        max_length=500,
+        description="Algebraic equation to solve (e.g., 'x**2 + 2*x - 3 = 0')"
+    )
+    variable: Optional[str] = Field(
+        default=None,
+        max_length=10,
+        description="Variable to solve for (auto-detected if not specified)"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"equation": "x**2 + 2*x - 3 = 0"},
+                {"equation": "2*y + 5 = 13", "variable": "y"},
+                {"equation": "x**3 - 8 = 0"}
+            ]
+        }
+
+
+class AlgebraSimplifyParams(BaseModel):
+    """Parameters for simplifying algebraic expressions"""
+
+    expression: str = Field(
+        ...,
+        min_length=1,
+        max_length=500,
+        description="Algebraic expression to simplify"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"expression": "x**2 + 2*x + 1"},
+                {"expression": "(x + 1)**2 - 1"},
+                {"expression": "x**3 + 3*x**2 + 3*x + 1"}
+            ]
+        }
+
+
+class AlgebraDifferentiateParams(BaseModel):
+    """Parameters for differentiating expressions"""
+
+    expression: str = Field(
+        ...,
+        min_length=1,
+        max_length=500,
+        description="Expression to differentiate"
+    )
+    variable: str = Field(
+        ...,
+        min_length=1,
+        max_length=10,
+        description="Variable to differentiate with respect to"
+    )
+    order: int = Field(
+        default=1,
+        ge=1,
+        le=10,
+        description="Order of differentiation (1st, 2nd, etc.)"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"expression": "x**3 + 2*x**2 + x", "variable": "x"},
+                {"expression": "sin(x)", "variable": "x", "order": 2},
+                {"expression": "x**2 + y**2", "variable": "x"}
+            ]
+        }
+
+
+class AlgebraIntegrateParams(BaseModel):
+    """Parameters for integrating expressions"""
+
+    expression: str = Field(
+        ...,
+        min_length=1,
+        max_length=500,
+        description="Expression to integrate"
+    )
+    variable: str = Field(
+        ...,
+        min_length=1,
+        max_length=10,
+        description="Variable to integrate with respect to"
+    )
+    lower_limit: Optional[Union[int, float]] = Field(
+        default=None,
+        description="Lower limit for definite integral"
+    )
+    upper_limit: Optional[Union[int, float]] = Field(
+        default=None,
+        description="Upper limit for definite integral"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"expression": "x**2", "variable": "x"},
+                {"expression": "x**2", "variable": "x", "lower_limit": 0, "upper_limit": 2},
+                {"expression": "sin(x)", "variable": "x"}
+            ]
+        }
+
+
+class AlgebraSportsFormulaParams(BaseModel):
+    """Parameters for sports analytics formulas"""
+
+    formula_name: str = Field(
+        ...,
+        min_length=1,
+        max_length=50,
+        description="Name of the sports formula to use"
+    )
+    variables: Dict[str, Union[int, float]] = Field(
+        default={},
+        description="Variable values for formula substitution"
+    )
+
+    @field_validator('formula_name')
+    def validate_formula_name(cls, v):
+        """Validate formula name"""
+        valid_formulas = [
+            # Original formulas
+            "per", "true_shooting", "usage_rate", "four_factors_shooting",
+            "four_factors_turnovers", "pace",
+            # Advanced Player Metrics
+            "vorp", "ws_per_48", "game_score", "pie",
+            # Shooting Analytics
+            "corner_3pt_pct", "rim_fg_pct", "midrange_efficiency", "catch_and_shoot_pct",
+            # Defensive Metrics
+            "defensive_win_shares", "steal_percentage", "block_percentage", "defensive_rating",
+            # Team Metrics
+            "net_rating", "offensive_efficiency", "defensive_efficiency", "pace_factor",
+            # Situational Metrics
+            "clutch_performance", "on_off_differential", "plus_minus_per_100"
+        ]
+        if v not in valid_formulas:
+            raise ValueError(f"Invalid formula name. Available: {valid_formulas}")
+        return v
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"formula_name": "per", "variables": {"FGM": 8, "STL": 2, "3PM": 3, "FTM": 4, "BLK": 1, "OREB": 2, "AST": 5, "DREB": 6, "PF": 3, "FTA": 5, "FGA": 15, "TOV": 2, "MP": 35}},
+                {"formula_name": "true_shooting", "variables": {"PTS": 25, "FGA": 15, "FTA": 5}},
+                {"formula_name": "usage_rate", "variables": {"FGA": 15, "FTA": 5, "TOV": 2, "TM_MP": 240, "MP": 35, "TM_FGA": 80, "TM_FTA": 20, "TM_TOV": 12}},
+                {"formula_name": "vorp", "variables": {"BPM": 8.5, "POSS_PCT": 85, "TEAM_GAMES": 82}},
+                {"formula_name": "game_score", "variables": {"PTS": 30, "FGM": 12, "FGA": 20, "FTA": 8, "FTM": 6, "OREB": 2, "DREB": 8, "STL": 2, "AST": 7, "BLK": 1, "PF": 3, "TOV": 4}},
+                {"formula_name": "net_rating", "variables": {"ORtg": 115.5, "DRtg": 108.2}}
+            ]
+        }
+
+
+class AlgebraLatexParams(BaseModel):
+    """Parameters for LaTeX rendering"""
+
+    expression: str = Field(
+        ...,
+        min_length=1,
+        max_length=500,
+        description="Mathematical expression to convert to LaTeX"
+    )
+    display_mode: bool = Field(
+        default=False,
+        description="Use display math mode ($$) instead of inline ($)"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"expression": "x**2 + 2*x + 1"},
+                {"expression": "x**2 + 2*x + 1", "display_mode": True},
+                {"expression": "sin(x) + cos(x)"}
+            ]
+        }
+
+
+class AlgebraMatrixParams(BaseModel):
+    """Parameters for matrix operations"""
+
+    matrix_data: List[List[Union[int, float]]] = Field(
+        ...,
+        min_items=1,
+        description="2D list representing the matrix"
+    )
+    operation: str = Field(
+        ...,
+        min_length=1,
+        max_length=20,
+        description="Matrix operation to perform"
+    )
+    matrix2: Optional[List[List[Union[int, float]]]] = Field(
+        default=None,
+        description="Second matrix for multiplication operations"
+    )
+
+    @field_validator('operation')
+    def validate_operation(cls, v):
+        """Validate matrix operation"""
+        valid_operations = ["determinant", "inverse", "eigenvalues", "multiply", "transpose"]
+        if v not in valid_operations:
+            raise ValueError(f"Invalid operation. Available: {valid_operations}")
+        return v
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"matrix_data": [[1, 2], [3, 4]], "operation": "determinant"},
+                {"matrix_data": [[1, 2], [3, 4]], "operation": "multiply", "matrix2": [[5, 6], [7, 8]]},
+                {"matrix_data": [[2, 0], [0, 3]], "operation": "eigenvalues"}
+            ]
+        }
+
+
+class AlgebraSystemSolveParams(BaseModel):
+    """Parameters for solving equation systems"""
+
+    equations: List[str] = Field(
+        ...,
+        min_items=1,
+        max_items=10,
+        description="List of equation strings"
+    )
+    variables: List[str] = Field(
+        ...,
+        min_items=1,
+        max_items=10,
+        description="List of variable names"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"equations": ["x + y = 5", "x - y = 1"], "variables": ["x", "y"]},
+                {"equations": ["2*x + 3*y = 13", "x - y = 1"], "variables": ["x", "y"]},
+                {"equations": ["x**2 + y**2 = 25", "x + y = 7"], "variables": ["x", "y"]}
+            ]
+        }
+
+
+# ============================================================================
+# Phase 2: Formula Intelligence Parameters
+# ============================================================================
+
+class FormulaAnalysisParams(BaseModel):
+    """Parameters for formula analysis operations"""
+
+    formula: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Formula string to analyze"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"formula": "PER = (FGM * 85.910 + STL * 53.897 + 3PM * 51.757 + FTM * 46.845 + BLK * 39.190 + OREB * 39.190 + AST * 34.677 + DREB * 14.707 - PF * 17.174 - (FTA - FTM) * 20.091 - (FGA - FGM) * 39.190 - TOV * 53.897) * (1 / MP)"},
+                {"formula": "TS% = PTS / (2 * (FGA + 0.44 * FTA))"},
+                {"formula": "USG% = ((FGA + 0.44 * FTA + TOV) * (TM_MP / 5)) / (MP * (TM_FGA + 0.44 * TM_FTA + TM_TOV)) * 100"}
+            ]
+        }
+
+
+class FormulaValidationParams(BaseModel):
+    """Parameters for formula validation operations"""
+
+    formula: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Formula string to validate"
+    )
+    variables: Dict[str, Union[int, float]] = Field(
+        default={},
+        description="Variable values for validation"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"formula": "PER = (FGM * 85.910 + ...) / MP", "variables": {"FGM": 8, "STL": 2, "MP": 35}},
+                {"formula": "TS% = PTS / (2 * (FGA + 0.44 * FTA))", "variables": {"PTS": 25, "FGA": 15, "FTA": 5}}
+            ]
+        }
+
+
+class FormulaUsageRecommendationParams(BaseModel):
+    """Parameters for formula usage recommendation operations"""
+
+    formula: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Formula string to analyze"
+    )
+    context: Optional[str] = Field(
+        default=None,
+        max_length=200,
+        description="Optional context for recommendations (e.g., 'player analysis', 'team comparison')"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"formula": "PER = (FGM * 85.910 + ...) / MP", "context": "player analysis"},
+                {"formula": "Net Rating = ORtg - DRtg", "context": "team comparison"},
+                {"formula": "TS% = PTS / (2 * (FGA + 0.44 * FTA))", "context": "optimization"}
+            ]
+        }
+
+
+# ============================================================================
+# Phase 2.2: Formula Extraction Parameters
+# ============================================================================
+
+class FormulaExtractionParams(BaseModel):
+    """Parameters for formula extraction from PDFs"""
+
+    pdf_path: str = Field(
+        ...,
+        min_length=1,
+        max_length=500,
+        description="Path to PDF file (S3 or local)"
+    )
+    pages: Optional[List[int]] = Field(
+        default=None,
+        description="Specific pages to extract from (if None, extracts from all pages)"
+    )
+    min_confidence: float = Field(
+        default=0.5,
+        ge=0.0,
+        le=1.0,
+        description="Minimum confidence threshold for extracted formulas"
+    )
+    max_formulas: int = Field(
+        default=50,
+        ge=1,
+        le=200,
+        description="Maximum number of formulas to extract"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"pdf_path": "books/Basketball_on_Paper_Dean_Oliver.pdf", "min_confidence": 0.7},
+                {"pdf_path": "books/Sports_Analytics_A_Guide_for_Coaches_Managers_and_Other_Decision_Makers.pdf", "pages": [50, 51, 52]},
+                {"pdf_path": "books/Basketball_Beyond_Paper_Quants_Stats_and_the_New_Frontier_of_the_NBA.pdf", "max_formulas": 20}
+            ]
+        }
+
+
+class LaTeXConversionParams(BaseModel):
+    """Parameters for LaTeX to SymPy conversion"""
+
+    latex_formula: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="LaTeX formula string to convert"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"latex_formula": "\\frac{PTS}{2 \\cdot (FGA + 0.44 \\cdot FTA)}"},
+                {"latex_formula": "PER = \\frac{FGM \\cdot 85.910 + STL \\cdot 53.897}{MP}"},
+                {"latex_formula": "\\sum_{i=1}^{n} x_i"}
+            ]
+        }
+
+
+class FormulaStructureAnalysisParams(BaseModel):
+    """Parameters for formula structure analysis"""
+
+    formula: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Formula string to analyze"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"formula": "PER = (FGM * 85.910 + STL * 53.897) / MP"},
+                {"formula": "TS% = PTS / (2 * (FGA + 0.44 * FTA))"},
+                {"formula": "Net Rating = ORtg - DRtg"}
+            ]
+        }
+
+
+# ============================================================================
+# Phase 2.3: Interactive Formula Builder Parameters
+# ============================================================================
+
+class FormulaBuilderValidationParams(BaseModel):
+    """Parameters for formula builder validation"""
+
+    formula: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Formula string to validate"
+    )
+    validation_level: str = Field(
+        default="semantic",
+        description="Validation level: syntax, semantic, sports_context, units"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"formula": "PER = (FGM * 85.910 + STL * 53.897) / MP", "validation_level": "semantic"},
+                {"formula": "TS% = PTS / (2 * (FGA + 0.44 * FTA))", "validation_level": "sports_context"},
+                {"formula": "x + y = z", "validation_level": "syntax"}
+            ]
+        }
+
+
+class FormulaBuilderSuggestionParams(BaseModel):
+    """Parameters for formula completion suggestions"""
+
+    partial_formula: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Partial formula string for completion suggestions"
+    )
+    context: Optional[str] = Field(
+        default="",
+        max_length=200,
+        description="Optional context for suggestions (e.g., 'shooting', 'defensive')"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"partial_formula": "PTS / (2 * (FGA +", "context": "shooting"},
+                {"partial_formula": "PER = (FGM *", "context": "advanced"},
+                {"partial_formula": "ORtg -", "context": "team"}
+            ]
+        }
+
+
+class FormulaBuilderPreviewParams(BaseModel):
+    """Parameters for formula preview generation"""
+
+    formula: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Formula string to preview"
+    )
+    variable_values: Optional[Dict[str, float]] = Field(
+        default={},
+        description="Optional variable values for calculation preview"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"formula": "PTS / (2 * (FGA + 0.44 * FTA))", "variable_values": {"PTS": 25, "FGA": 15, "FTA": 5}},
+                {"formula": "PER = (FGM * 85.910 + STL * 53.897) / MP", "variable_values": {"FGM": 8, "STL": 2, "MP": 38}},
+                {"formula": "ORtg - DRtg", "variable_values": {"ORtg": 115, "DRtg": 108}}
+            ]
+        }
+
+
+class FormulaBuilderTemplateParams(BaseModel):
+    """Parameters for formula template operations"""
+
+    template_name: Optional[str] = Field(
+        default=None,
+        description="Specific template name to retrieve"
+    )
+    category: Optional[str] = Field(
+        default=None,
+        description="Template category filter (shooting, defensive, team, advanced)"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"template_name": "True Shooting Percentage"},
+                {"category": "shooting"},
+                {"category": "advanced"}
+            ]
+        }
+
+
+class FormulaBuilderCreateParams(BaseModel):
+    """Parameters for creating formula from template"""
+
+    template_name: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="Name of the template to use"
+    )
+    variable_values: Dict[str, float] = Field(
+        ...,
+        description="Values for template variables"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"template_name": "True Shooting Percentage", "variable_values": {"PTS": 25, "FGA": 15, "FTA": 5}},
+                {"template_name": "Net Rating", "variable_values": {"ORtg": 115, "DRtg": 108}},
+                {"template_name": "Player Efficiency Rating", "variable_values": {"FGM": 8, "STL": 2, "3PM": 2, "FTM": 5, "BLK": 1, "OREB": 1, "AST": 8, "DREB": 7, "PF": 2, "FTA": 6, "FGA": 18, "TOV": 3, "MP": 38}}
+            ]
+        }
+
+
+class FormulaBuilderExportParams(BaseModel):
+    """Parameters for formula export"""
+
+    formula: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Formula string to export"
+    )
+    format_type: str = Field(
+        default="latex",
+        description="Export format: latex, python, sympy, json"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"formula": "PTS / (2 * (FGA + 0.44 * FTA))", "format_type": "latex"},
+                {"formula": "PER = (FGM * 85.910 + STL * 53.897) / MP", "format_type": "python"},
+                {"formula": "ORtg - DRtg", "format_type": "json"}
+            ]
+        }
+
+
+# ============================================================================
+# Phase 3.1: Interactive Formula Playground Parameters
+# ============================================================================
+
+class PlaygroundCreateSessionParams(BaseModel):
+    """Parameters for creating a playground session"""
+    user_id: str = Field(..., description="User ID for the session")
+    mode: str = Field(default="explore", description="Playground mode (explore, learn, build, compare, collaborate)")
+    template_name: Optional[str] = Field(default=None, description="Template name to use for the session")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"user_id": "user123", "mode": "explore", "template_name": "Shooting Efficiency Lab"},
+                {"user_id": "user456", "mode": "learn", "template_name": "Advanced Metrics Workshop"},
+                {"user_id": "user789", "mode": "build", "template_name": None}
+            ]
+        }
+
+class PlaygroundAddFormulaParams(BaseModel):
+    """Parameters for adding a formula to a playground session"""
+    session_id: str = Field(..., description="Session ID")
+    formula: str = Field(..., description="Formula string to add")
+    description: str = Field(default="", description="Description of the formula")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"session_id": "session123", "formula": "PTS / (2 * (FGA + 0.44 * FTA))", "description": "True Shooting Percentage"},
+                {"session_id": "session456", "formula": "(FGM + 0.5 * 3PM) / FGA", "description": "Effective Field Goal Percentage"}
+            ]
+        }
+
+class PlaygroundUpdateVariablesParams(BaseModel):
+    """Parameters for updating variables in a playground session"""
+    session_id: str = Field(..., description="Session ID")
+    variables: Dict[str, float] = Field(..., description="Dictionary of variable names and values")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"session_id": "session123", "variables": {"PTS": 25.0, "FGA": 20.0, "FTA": 5.0}},
+                {"session_id": "session456", "variables": {"FGM": 10.0, "3PM": 3.0, "FGA": 18.0}}
+            ]
+        }
+
+class PlaygroundCalculateResultsParams(BaseModel):
+    """Parameters for calculating formula results in a playground session"""
+    session_id: str = Field(..., description="Session ID")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"session_id": "session123"}
+            ]
+        }
+
+class PlaygroundGenerateVisualizationsParams(BaseModel):
+    """Parameters for generating visualizations in a playground session"""
+    session_id: str = Field(..., description="Session ID")
+    visualization_types: List[str] = Field(default=["latex", "table"], description="List of visualization types to generate")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"session_id": "session123", "visualization_types": ["latex", "table"]},
+                {"session_id": "session456", "visualization_types": ["chart", "graph"]}
+            ]
+        }
+
+class PlaygroundGetRecommendationsParams(BaseModel):
+    """Parameters for getting playground recommendations"""
+    session_id: str = Field(..., description="Session ID")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"session_id": "session123"}
+            ]
+        }
+
+class PlaygroundShareSessionParams(BaseModel):
+    """Parameters for sharing a playground session"""
+    session_id: str = Field(..., description="Session ID")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"session_id": "session123"}
+            ]
+        }
+
+class PlaygroundGetSharedSessionParams(BaseModel):
+    """Parameters for getting a shared playground session"""
+    share_token: str = Field(..., description="Share token for the session")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"share_token": "abc123def456"}
+            ]
+        }
+
+class PlaygroundCreateExperimentParams(BaseModel):
+    """Parameters for creating an experiment from a playground session"""
+    session_id: str = Field(..., description="Session ID")
+    experiment_name: str = Field(..., description="Name for the experiment")
+    description: str = Field(default="", description="Description of the experiment")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"session_id": "session123", "experiment_name": "Shooting Efficiency Analysis", "description": "Analysis of player shooting efficiency"},
+                {"session_id": "session456", "experiment_name": "Advanced Metrics Comparison", "description": "Comparison of advanced basketball metrics"}
             ]
         }
 
@@ -2864,3 +3532,4470 @@ def validate_params(params_class: type[BaseModel], arguments: Dict[str, Any]) ->
         1000
     """
     return params_class(**arguments)
+
+
+# ============================================================================
+# Phase 3.2: Advanced Visualization Engine Parameters
+# ============================================================================
+
+class VisualizationGenerateParams(BaseModel):
+    """Parameters for generating visualizations"""
+    visualization_type: str = Field(..., description="Type of visualization to generate")
+    data: Dict[str, Any] = Field(..., description="Data to visualize")
+    config: Optional[Dict[str, Any]] = Field(default=None, description="Visualization configuration")
+    chart_type: Optional[str] = Field(default=None, description="Specific chart type for chart visualizations")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "visualization_type": "scatter",
+                    "data": {"x": [1, 2, 3, 4], "y": [2, 4, 6, 8], "labels": ["A", "B", "C", "D"]},
+                    "config": {"title": "Sample Scatter Plot", "width": 800, "height": 600}
+                },
+                {
+                    "visualization_type": "heatmap",
+                    "data": {"x": [1, 2, 3], "y": [1, 2, 3], "z": [0.5, 0.8, 0.3]},
+                    "config": {"title": "Performance Heatmap"}
+                }
+            ]
+        }
+
+class VisualizationExportParams(BaseModel):
+    """Parameters for exporting visualizations"""
+    visualization_data: Dict[str, Any] = Field(..., description="Visualization data to export")
+    format: str = Field(..., description="Export format (png, svg, pdf, html, json)")
+    filename: Optional[str] = Field(default=None, description="Optional filename for export")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "visualization_data": {"type": "scatter", "data": [{"x": 1, "y": 2}]},
+                    "format": "png",
+                    "filename": "my_chart.png"
+                },
+                {
+                    "visualization_data": {"type": "table", "data": [["A", "B"], [1, 2]]},
+                    "format": "html"
+                }
+            ]
+        }
+
+class VisualizationTemplateParams(BaseModel):
+    """Parameters for getting visualization templates"""
+    template_name: Optional[str] = Field(default=None, description="Specific template name to retrieve")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"template_name": "player_comparison"},
+                {"template_name": "team_metrics"},
+                {}
+            ]
+        }
+
+class VisualizationConfigParams(BaseModel):
+    """Parameters for visualization configuration"""
+    width: int = Field(default=800, description="Visualization width in pixels")
+    height: int = Field(default=600, description="Visualization height in pixels")
+    title: str = Field(default="", description="Visualization title")
+    x_label: str = Field(default="", description="X-axis label")
+    y_label: str = Field(default="", description="Y-axis label")
+    z_label: str = Field(default="", description="Z-axis label (for 3D plots)")
+    color_scheme: str = Field(default="default", description="Color scheme to use")
+    theme: str = Field(default="light", description="Visualization theme")
+    show_grid: bool = Field(default=True, description="Show grid lines")
+    show_legend: bool = Field(default=True, description="Show legend")
+    interactive: bool = Field(default=True, description="Make visualization interactive")
+    animation: bool = Field(default=False, description="Enable animations")
+    export_format: str = Field(default="png", description="Default export format")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "width": 1000,
+                    "height": 800,
+                    "title": "Player Performance Analysis",
+                    "x_label": "Offensive Rating",
+                    "y_label": "Defensive Rating",
+                    "color_scheme": "sports",
+                    "interactive": True
+                },
+                {
+                    "width": 600,
+                    "height": 400,
+                    "title": "Simple Chart",
+                    "theme": "dark",
+                    "show_grid": False
+                }
+            ]
+        }
+
+class DataPointParams(BaseModel):
+    """Parameters for creating data points"""
+    x: float = Field(..., description="X coordinate")
+    y: float = Field(..., description="Y coordinate")
+    z: Optional[float] = Field(default=None, description="Z coordinate (for 3D)")
+    label: Optional[str] = Field(default=None, description="Data point label")
+    color: Optional[str] = Field(default=None, description="Data point color")
+    size: Optional[float] = Field(default=None, description="Data point size")
+    metadata: Optional[Dict[str, Any]] = Field(default=None, description="Additional metadata")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"x": 25.0, "y": 15.0, "label": "Player A", "color": "#FF6B6B"},
+                {"x": 1.0, "y": 2.0, "z": 3.0, "label": "3D Point"},
+                {"x": 10.0, "y": 20.0, "size": 5.0, "metadata": {"team": "Lakers"}}
+            ]
+        }
+
+class DatasetParams(BaseModel):
+    """Parameters for creating datasets"""
+    name: str = Field(..., description="Dataset name")
+    data_points: List[Dict[str, Any]] = Field(..., description="List of data points")
+    x_column: str = Field(default="x", description="X column name")
+    y_column: str = Field(default="y", description="Y column name")
+    z_column: Optional[str] = Field(default=None, description="Z column name")
+    color_column: Optional[str] = Field(default=None, description="Color column name")
+    size_column: Optional[str] = Field(default=None, description="Size column name")
+    metadata: Optional[Dict[str, Any]] = Field(default=None, description="Dataset metadata")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "name": "Player Stats",
+                    "data_points": [
+                        {"x": 25.0, "y": 15.0, "label": "Player A"},
+                        {"x": 20.0, "y": 18.0, "label": "Player B"}
+                    ],
+                    "x_column": "points",
+                    "y_column": "rebounds"
+                },
+                {
+                    "name": "3D Data",
+                    "data_points": [
+                        {"x": 1.0, "y": 2.0, "z": 3.0},
+                        {"x": 4.0, "y": 5.0, "z": 6.0}
+                    ],
+                    "z_column": "z_value"
+                }
+            ]
+        }
+
+
+# ============================================================================
+# Phase 3.3: Formula Validation System Parameters
+# ============================================================================
+
+class FormulaValidationParams(BaseModel):
+    """Parameters for formula validation"""
+    formula: str = Field(..., description="Formula string to validate")
+    formula_id: Optional[str] = Field(default=None, description="Optional identifier for the formula")
+    test_data: Optional[Dict[str, float]] = Field(default=None, description="Test data for validation")
+    validation_types: Optional[List[str]] = Field(default=None, description="Types of validation to perform")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "formula": "PTS / (2 * (FGA + 0.44 * FTA))",
+                    "formula_id": "true_shooting",
+                    "test_data": {"PTS": 25, "FGA": 20, "FTA": 5},
+                    "validation_types": ["mathematical", "accuracy", "consistency"]
+                },
+                {
+                    "formula": "(FGM * 85.910 + STL * 53.897) / MP",
+                    "formula_id": "per_simplified",
+                    "validation_types": ["mathematical", "domain_specific"]
+                }
+            ]
+        }
+
+class FormulaReferenceParams(BaseModel):
+    """Parameters for adding formula references"""
+    formula_id: str = Field(..., description="Unique identifier for the formula")
+    name: str = Field(..., description="Human-readable name of the formula")
+    formula: str = Field(..., description="Formula string")
+    source: str = Field(..., description="Source of the formula (book, paper, etc.)")
+    page: Optional[str] = Field(default=None, description="Page number or section")
+    expected_result: Optional[float] = Field(default=None, description="Expected result for validation")
+    test_data: Optional[Dict[str, float]] = Field(default=None, description="Test data for validation")
+    description: Optional[str] = Field(default=None, description="Description of the formula")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "formula_id": "usage_rate",
+                    "name": "Usage Rate",
+                    "formula": "((FGA + 0.44 * FTA + TOV) * (TM_MP / 5)) / (MP * (TM_FGA + 0.44 * TM_FTA + TM_TOV)) * 100",
+                    "source": "Basketball on Paper",
+                    "page": "Chapter 5",
+                    "expected_result": 28.5,
+                    "test_data": {"FGA": 18, "FTA": 6, "TOV": 3, "MP": 35, "TM_MP": 240, "TM_FGA": 90, "TM_FTA": 25, "TM_TOV": 12},
+                    "description": "Usage rate calculation"
+                }
+            ]
+        }
+
+class ValidationReportParams(BaseModel):
+    """Parameters for retrieving validation reports"""
+    report_id: Optional[str] = Field(default=None, description="Specific report ID to retrieve")
+    formula_id: Optional[str] = Field(default=None, description="Formula ID to get reports for")
+    status_filter: Optional[str] = Field(default=None, description="Filter by validation status")
+    date_range: Optional[Dict[str, str]] = Field(default=None, description="Date range filter")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {"report_id": "report_123"},
+                {"formula_id": "per", "status_filter": "valid"},
+                {"date_range": {"start": "2025-01-01", "end": "2025-01-31"}}
+            ]
+        }
+
+class ValidationComparisonParams(BaseModel):
+    """Parameters for comparing formula validations"""
+    formula_ids: List[str] = Field(..., description="List of formula IDs to compare")
+    comparison_type: str = Field(default="accuracy", description="Type of comparison to perform")
+    test_data: Optional[Dict[str, float]] = Field(default=None, description="Test data for comparison")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "formula_ids": ["per", "true_shooting", "usage_rate"],
+                    "comparison_type": "accuracy",
+                    "test_data": {"PTS": 25, "FGA": 20, "FTA": 5, "MP": 35}
+                }
+            ]
+        }
+
+class ValidationRulesParams(BaseModel):
+    """Parameters for updating validation rules"""
+    accuracy_threshold: Optional[float] = Field(default=None, description="Accuracy threshold (0.0-1.0)")
+    consistency_threshold: Optional[float] = Field(default=None, description="Consistency threshold (0.0-1.0)")
+    mathematical_tolerance: Optional[float] = Field(default=None, description="Mathematical tolerance")
+    domain_tolerance: Optional[float] = Field(default=None, description="Domain-specific tolerance")
+    performance_threshold: Optional[float] = Field(default=None, description="Performance threshold in seconds")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "accuracy_threshold": 0.95,
+                    "consistency_threshold": 0.90,
+                    "mathematical_tolerance": 0.01,
+                    "performance_threshold": 1.0
+                }
+            ]
+        }
+
+
+# ============================================================================
+# Phase 3.4: Multi-Book Formula Comparison Parameters
+# ============================================================================
+
+class FormulaComparisonParams(BaseModel):
+    """Parameters for comparing formula versions"""
+    formula_id: str = Field(..., description="ID of the formula to compare")
+    comparison_types: Optional[List[str]] = Field(default=None, description="Types of comparison to perform")
+    include_historical: bool = Field(default=True, description="Include historical evolution analysis")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "formula_id": "per",
+                    "comparison_types": ["structural", "mathematical", "accuracy"],
+                    "include_historical": True
+                },
+                {
+                    "formula_id": "true_shooting",
+                    "comparison_types": ["accuracy", "source_reliability"],
+                    "include_historical": False
+                }
+            ]
+        }
+
+class FormulaVersionParams(BaseModel):
+    """Parameters for adding a formula version"""
+    version_id: str = Field(..., description="Unique identifier for this version")
+    formula_id: str = Field(..., description="ID of the formula this version belongs to")
+    formula: str = Field(..., description="Formula string")
+    source_id: str = Field(..., description="ID of the source")
+    description: Optional[str] = Field(default=None, description="Description of this version")
+    test_data: Optional[Dict[str, float]] = Field(default=None, description="Test data for validation")
+    expected_result: Optional[float] = Field(default=None, description="Expected result for validation")
+    created_date: Optional[str] = Field(default=None, description="Date this version was created")
+    is_primary: bool = Field(default=False, description="Whether this is the primary version")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "version_id": "per_modern_2023",
+                    "formula_id": "per",
+                    "formula": "(FGM * 85.91 + STL * 53.9) / MP",
+                    "source_id": "basketball_analytics",
+                    "description": "Modern simplified PER formula",
+                    "test_data": {"FGM": 10, "STL": 2, "MP": 35},
+                    "expected_result": 25.0,
+                    "created_date": "2023",
+                    "is_primary": False
+                }
+            ]
+        }
+
+class FormulaSourceParams(BaseModel):
+    """Parameters for adding a formula source"""
+    source_id: str = Field(..., description="Unique identifier for the source")
+    name: str = Field(..., description="Name of the source")
+    source_type: str = Field(..., description="Type of source (book, paper, website, database)")
+    author: Optional[str] = Field(default=None, description="Author of the source")
+    publication_date: Optional[str] = Field(default=None, description="Publication date")
+    page: Optional[str] = Field(default=None, description="Page number or section")
+    url: Optional[str] = Field(default=None, description="URL if applicable")
+    reliability_score: float = Field(default=1.0, description="Reliability score (0.0-1.0)")
+    description: Optional[str] = Field(default=None, description="Description of the source")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "source_id": "new_analytics_book",
+                    "name": "Advanced Basketball Analytics",
+                    "source_type": "book",
+                    "author": "Dr. Analytics Expert",
+                    "publication_date": "2024",
+                    "reliability_score": 0.92,
+                    "description": "Latest book on basketball analytics"
+                }
+            ]
+        }
+
+class FormulaEvolutionParams(BaseModel):
+    """Parameters for retrieving formula evolution"""
+    formula_id: str = Field(..., description="ID of the formula to analyze")
+    include_timeline: bool = Field(default=True, description="Include detailed timeline")
+    include_changes: bool = Field(default=True, description="Include key changes analysis")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "formula_id": "per",
+                    "include_timeline": True,
+                    "include_changes": True
+                }
+            ]
+        }
+
+class FormulaRecommendationParams(BaseModel):
+    """Parameters for getting formula recommendations"""
+    formula_id: str = Field(..., description="ID of the formula to get recommendations for")
+    criteria: Optional[List[str]] = Field(default=None, description="Recommendation criteria")
+    context: Optional[str] = Field(default=None, description="Use context for recommendations")
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "formula_id": "per",
+                    "criteria": ["reliability", "recency", "accuracy"],
+                    "context": "academic research"
+                }
+            ]
+        }
+
+
+# ============================================================================
+# Phase 5: Symbolic Regression Parameters
+# ============================================================================
+
+class SymbolicRegressionParams(BaseModel):
+    """Parameters for symbolic regression formula discovery"""
+
+    data: Dict[str, List[float]] = Field(
+        ...,
+        description="Dictionary mapping variable names to lists of values"
+    )
+    target_variable: str = Field(
+        ...,
+        min_length=1,
+        max_length=50,
+        description="Variable to predict"
+    )
+    input_variables: List[str] = Field(
+        ...,
+        min_items=1,
+        max_items=10,
+        description="Variables to use as inputs"
+    )
+    regression_type: Literal["linear", "polynomial", "rational", "exponential", "logarithmic", "power", "custom"] = Field(
+        default="linear",
+        description="Type of regression to perform"
+    )
+    optimization_method: Literal["gradient_descent", "genetic_algorithm", "simulated_annealing", "particle_swarm", "bayesian"] = Field(
+        default="gradient_descent",
+        description="Method for parameter optimization"
+    )
+    max_complexity: int = Field(
+        default=5,
+        ge=1,
+        le=10,
+        description="Maximum complexity of discovered formulas"
+    )
+    min_r_squared: float = Field(
+        default=0.7,
+        ge=0.0,
+        le=1.0,
+        description="Minimum R-squared threshold"
+    )
+
+    @field_validator('data')
+    def validate_data(cls, v):
+        """Validate data structure"""
+        if not v:
+            raise ValueError("Data cannot be empty")
+
+        # Check all lists have same length
+        lengths = [len(values) for values in v.values()]
+        if len(set(lengths)) > 1:
+            raise ValueError("All variables must have the same number of data points")
+
+        if lengths[0] < 10:
+            raise ValueError("Need at least 10 data points for regression")
+
+        return v
+
+    @field_validator('input_variables')
+    def validate_input_variables(cls, v, values):
+        """Validate input variables exist in data"""
+        if 'data' in values.data:
+            data_keys = set(values.data['data'].keys())
+            for var in v:
+                if var not in data_keys:
+                    raise ValueError(f"Input variable '{var}' not found in data")
+        return v
+
+    @field_validator('target_variable')
+    def validate_target_variable(cls, v, values):
+        """Validate target variable exists in data"""
+        if 'data' in values.data:
+            data_keys = set(values.data['data'].keys())
+            if v not in data_keys:
+                raise ValueError(f"Target variable '{v}' not found in data")
+        return v
+
+
+class FormulaValidationParams(BaseModel):
+    """Parameters for validating discovered formulas"""
+
+    formula: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Formula to validate"
+    )
+    test_data: Dict[str, List[float]] = Field(
+        ...,
+        description="Test dataset for validation"
+    )
+    target_variable: str = Field(
+        ...,
+        min_length=1,
+        max_length=50,
+        description="Variable to predict"
+    )
+    threshold_r_squared: float = Field(
+        default=0.7,
+        ge=0.0,
+        le=1.0,
+        description="Minimum R-squared threshold for validation"
+    )
+
+    @field_validator('test_data')
+    def validate_test_data(cls, v):
+        """Validate test data structure"""
+        if not v:
+            raise ValueError("Test data cannot be empty")
+
+        lengths = [len(values) for values in v.values()]
+        if len(set(lengths)) > 1:
+            raise ValueError("All variables must have the same number of data points")
+
+        return v
+
+
+class CustomMetricParams(BaseModel):
+    """Parameters for generating custom analytics metrics"""
+
+    formula: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="The discovered formula"
+    )
+    metric_name: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="Name for the custom metric"
+    )
+    description: str = Field(
+        ...,
+        min_length=1,
+        max_length=500,
+        description="Description of the metric"
+    )
+    variables: List[str] = Field(
+        ...,
+        min_items=1,
+        max_items=10,
+        description="Variables used in the formula"
+    )
+    parameters: Dict[str, float] = Field(
+        ...,
+        description="Optimized parameters for the formula"
+    )
+
+    @field_validator('metric_name')
+    def validate_metric_name(cls, v):
+        """Validate metric name format"""
+        if not re.match(r'^[a-zA-Z][a-zA-Z0-9_]*$', v):
+            raise ValueError("Metric name must start with letter and contain only letters, numbers, and underscores")
+        return v
+
+
+class FormulaDiscoveryParams(BaseModel):
+    """Parameters for discovering formulas from data patterns"""
+
+    data: Dict[str, List[float]] = Field(
+        ...,
+        description="Dataset for formula discovery"
+    )
+    target_variable: str = Field(
+        ...,
+        min_length=1,
+        max_length=50,
+        description="Variable to predict"
+    )
+    discovery_method: Literal["correlation", "mutual_information", "feature_importance", "genetic_programming"] = Field(
+        default="correlation",
+        description="Method for discovering variable relationships"
+    )
+    max_formulas: int = Field(
+        default=10,
+        ge=1,
+        le=50,
+        description="Maximum number of formulas to discover"
+    )
+    complexity_range: Tuple[int, int] = Field(
+        default=(1, 5),
+        description="Range of formula complexity to explore"
+    )
+
+    @field_validator('complexity_range')
+    def validate_complexity_range(cls, v):
+        """Validate complexity range"""
+        if v[0] >= v[1]:
+            raise ValueError("Minimum complexity must be less than maximum complexity")
+        if v[0] < 1 or v[1] > 10:
+            raise ValueError("Complexity range must be between 1 and 10")
+        return v
+
+
+# ============================================================================
+# Phase 5.2: Natural Language to Formula Parameters
+# ============================================================================
+
+class NaturalLanguageFormulaParams(BaseModel):
+    """Parameters for natural language to formula conversion"""
+
+    description: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Natural language description of the formula"
+    )
+    context: Optional[str] = Field(
+        default=None,
+        max_length=200,
+        description="Optional context for parsing (e.g., 'basketball', 'player_stats')"
+    )
+    validate_formula: bool = Field(
+        default=True,
+        description="Whether to validate the parsed formula"
+    )
+
+    @field_validator('description')
+    def validate_description(cls, v):
+        """Validate description is not empty and contains meaningful content"""
+        if not v.strip():
+            raise ValueError("Description cannot be empty")
+
+        # Check for minimum meaningful content
+        words = v.split()
+        if len(words) < 2:
+            raise ValueError("Description must contain at least 2 words")
+
+        return v.strip()
+
+
+class FormulaSuggestionParams(BaseModel):
+    """Parameters for formula suggestions based on description"""
+
+    description: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Natural language description to suggest formulas for"
+    )
+    context: Optional[str] = Field(
+        default=None,
+        max_length=200,
+        description="Optional context for suggestions (e.g., 'basketball', 'team_stats')"
+    )
+    max_suggestions: int = Field(
+        default=5,
+        ge=1,
+        le=20,
+        description="Maximum number of suggestions to return"
+    )
+
+    @field_validator('description')
+    def validate_description(cls, v):
+        """Validate description is meaningful"""
+        if not v.strip():
+            raise ValueError("Description cannot be empty")
+
+        words = v.split()
+        if len(words) < 2:
+            raise ValueError("Description must contain at least 2 words")
+
+        return v.strip()
+
+
+class NLFormulaValidationParams(BaseModel):
+    """Parameters for validating natural language formula descriptions"""
+
+    description: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Natural language description to validate"
+    )
+    expected_formula: Optional[str] = Field(
+        default=None,
+        max_length=500,
+        description="Optional expected formula for comparison"
+    )
+    strict_validation: bool = Field(
+        default=False,
+        description="Whether to use strict validation rules"
+    )
+
+    @field_validator('description')
+    def validate_description(cls, v):
+        """Validate description is meaningful"""
+        if not v.strip():
+            raise ValueError("Description cannot be empty")
+
+        words = v.split()
+        if len(words) < 2:
+            raise ValueError("Description must contain at least 2 words")
+
+        return v.strip()
+
+    @field_validator('expected_formula')
+    def validate_expected_formula(cls, v):
+        """Validate expected formula if provided"""
+        if v is not None:
+            if not v.strip():
+                raise ValueError("Expected formula cannot be empty")
+
+            # Basic syntax check
+            try:
+                import sympy as sp
+                sp.parse_expr(v)
+            except Exception as e:
+                raise ValueError(f"Invalid expected formula syntax: {e}")
+
+        return v
+
+
+# ============================================================================
+# Phase 5.3: Formula Dependency Graph Parameters
+# ============================================================================
+
+class FormulaDependencyGraphParams(BaseModel):
+    """Parameters for creating formula dependency graphs"""
+
+    analyze_dependencies: bool = Field(
+        default=True,
+        description="Whether to analyze dependencies between formulas"
+    )
+    include_custom_formulas: bool = Field(
+        default=True,
+        description="Whether to include custom formulas in analysis"
+    )
+    min_dependency_strength: float = Field(
+        default=0.1,
+        ge=0.0,
+        le=1.0,
+        description="Minimum dependency strength to include in graph"
+    )
+
+
+class FormulaDependencyVisualizationParams(BaseModel):
+    """Parameters for visualizing formula dependency graphs"""
+
+    layout: Literal["spring", "circular", "hierarchical"] = Field(
+        default="spring",
+        description="Layout algorithm for the graph visualization"
+    )
+    show_labels: bool = Field(
+        default=True,
+        description="Whether to show node labels in the visualization"
+    )
+    node_size: int = Field(
+        default=1000,
+        ge=100,
+        le=5000,
+        description="Size of nodes in the visualization"
+    )
+    edge_width: float = Field(
+        default=1.0,
+        ge=0.1,
+        le=5.0,
+        description="Width of edges in the visualization"
+    )
+    save_path: Optional[str] = Field(
+        default=None,
+        max_length=500,
+        description="Optional path to save the visualization image"
+    )
+
+
+class FormulaDependencyPathParams(BaseModel):
+    """Parameters for finding dependency paths between formulas"""
+
+    source_formula: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="Starting formula ID"
+    )
+    target_formula: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="Target formula ID"
+    )
+    max_depth: int = Field(
+        default=5,
+        ge=1,
+        le=10,
+        description="Maximum path depth to search"
+    )
+
+    @field_validator('source_formula')
+    def validate_source_formula(cls, v):
+        """Validate source formula ID"""
+        if not v.strip():
+            raise ValueError("Source formula ID cannot be empty")
+        return v.strip()
+
+    @field_validator('target_formula')
+    def validate_target_formula(cls, v):
+        """Validate target formula ID"""
+        if not v.strip():
+            raise ValueError("Target formula ID cannot be empty")
+        return v.strip()
+
+
+class FormulaComplexityAnalysisParams(BaseModel):
+    """Parameters for analyzing formula complexity"""
+
+    formula_id: Optional[str] = Field(
+        default=None,
+        max_length=100,
+        description="Optional specific formula ID to analyze (if None, analyzes all formulas)"
+    )
+    include_statistics: bool = Field(
+        default=True,
+        description="Whether to include statistical analysis"
+    )
+    include_centrality: bool = Field(
+        default=True,
+        description="Whether to include centrality measures"
+    )
+
+    @field_validator('formula_id')
+    def validate_formula_id(cls, v):
+        """Validate formula ID if provided"""
+        if v is not None and not v.strip():
+            raise ValueError("Formula ID cannot be empty")
+        return v.strip() if v else None
+
+
+class FormulaDependencyExportParams(BaseModel):
+    """Parameters for exporting formula dependency graphs"""
+
+    format: Literal["json", "graphml", "gexf"] = Field(
+        default="json",
+        description="Export format for the dependency graph"
+    )
+    include_visualization: bool = Field(
+        default=False,
+        description="Whether to include visualization data in export"
+    )
+    include_metadata: bool = Field(
+        default=True,
+        description="Whether to include metadata in export"
+    )
+    export_path: Optional[str] = Field(
+        default=None,
+        max_length=500,
+        description="Optional path to save the exported file"
+    )
+
+
+# ============================================================================
+# Phase 6.1: Automated Book Analysis Pipeline Parameters
+# ============================================================================
+
+class AutomatedBookAnalysisParams(BaseModel):
+    """Parameters for automated book analysis"""
+
+    book_path: str = Field(
+        ...,
+        min_length=1,
+        max_length=500,
+        description="Path to the PDF book file to analyze"
+    )
+    book_title: Optional[str] = Field(
+        default=None,
+        max_length=200,
+        description="Optional title of the book (auto-detected if not provided)"
+    )
+    book_author: Optional[str] = Field(
+        default=None,
+        max_length=200,
+        description="Optional author of the book"
+    )
+    max_pages: Optional[int] = Field(
+        default=None,
+        ge=1,
+        le=1000,
+        description="Maximum number of pages to analyze (None for all pages)"
+    )
+    confidence_threshold: float = Field(
+        default=0.5,
+        ge=0.0,
+        le=1.0,
+        description="Minimum confidence score for formula inclusion (0.0-1.0)"
+    )
+
+    @field_validator('book_path')
+    def validate_book_path(cls, v):
+        """Validate book path"""
+        if not v.strip():
+            raise ValueError("Book path cannot be empty")
+        if not v.lower().endswith('.pdf'):
+            raise ValueError("Book path must be a PDF file")
+        return v.strip()
+
+
+class FormulaCategorizationParams(BaseModel):
+    """Parameters for categorizing extracted formulas"""
+
+    formulas: List[Dict[str, Any]] = Field(
+        ...,
+        min_length=1,
+        description="List of extracted formula dictionaries to categorize"
+    )
+    custom_categories: Optional[Dict[str, List[str]]] = Field(
+        default=None,
+        description="Optional custom category definitions with keywords"
+    )
+
+    @field_validator('formulas')
+    def validate_formulas(cls, v):
+        """Validate formulas list"""
+        if not v:
+            raise ValueError("Formulas list cannot be empty")
+        return v
+
+
+class FormulaValidationParams(BaseModel):
+    """Parameters for validating extracted formulas"""
+
+    formulas: List[Dict[str, Any]] = Field(
+        ...,
+        min_length=1,
+        description="List of extracted formula dictionaries to validate"
+    )
+    validation_rules: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Optional custom validation rules"
+    )
+
+    @field_validator('formulas')
+    def validate_formulas(cls, v):
+        """Validate formulas list"""
+        if not v:
+            raise ValueError("Formulas list cannot be empty")
+        return v
+
+
+class FormulaDatabaseParams(BaseModel):
+    """Parameters for building searchable formula database"""
+
+    analysis_results: List[Dict[str, Any]] = Field(
+        ...,
+        min_length=1,
+        description="List of book analysis results to include in database"
+    )
+    include_metadata: bool = Field(
+        default=True,
+        description="Whether to include metadata in database entries"
+    )
+    include_relationships: bool = Field(
+        default=True,
+        description="Whether to include formula relationships in database"
+    )
+    export_format: Literal["json", "sqlite", "csv"] = Field(
+        default="json",
+        description="Export format for the formula database"
+    )
+    export_path: Optional[str] = Field(
+        default=None,
+        max_length=500,
+        description="Optional path to save the database file"
+    )
+
+    @field_validator('analysis_results')
+    def validate_analysis_results(cls, v):
+        """Validate analysis results"""
+        if not v:
+            raise ValueError("Analysis results list cannot be empty")
+        return v
+
+
+class FormulaSearchParams(BaseModel):
+    """Parameters for searching the formula database"""
+
+    query: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        description="Search query for formulas"
+    )
+    search_type: Literal["text", "category", "complexity", "variables"] = Field(
+        default="text",
+        description="Type of search to perform"
+    )
+    category_filter: Optional[str] = Field(
+        default=None,
+        max_length=50,
+        description="Optional category filter for search results"
+    )
+    complexity_filter: Optional[str] = Field(
+        default=None,
+        max_length=20,
+        description="Optional complexity filter for search results"
+    )
+    max_results: int = Field(
+        default=50,
+        ge=1,
+        le=200,
+        description="Maximum number of results to return"
+    )
+
+    @field_validator('query')
+    def validate_query(cls, v):
+        """Validate search query"""
+        if not v.strip():
+            raise ValueError("Search query cannot be empty")
+        return v.strip()
+
+
+# ============================================================================
+# Phase 6.2: Cross-Reference System Parameters
+# ============================================================================
+
+class CitationParams(BaseModel):
+    """Parameters for adding citations to formulas"""
+
+    formula_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="ID of the formula being cited"
+    )
+    source_type: Literal["book", "journal", "website", "database", "conference", "thesis", "report", "unknown"] = Field(
+        ...,
+        description="Type of citation source"
+    )
+    title: str = Field(
+        ...,
+        min_length=1,
+        max_length=500,
+        description="Title of the source"
+    )
+    author: Optional[str] = Field(
+        default=None,
+        max_length=200,
+        description="Author(s) of the source"
+    )
+    publication_date: Optional[str] = Field(
+        default=None,
+        max_length=50,
+        description="Publication date"
+    )
+    publisher: Optional[str] = Field(
+        default=None,
+        max_length=200,
+        description="Publisher information"
+    )
+    page_number: Optional[int] = Field(
+        default=None,
+        ge=1,
+        le=10000,
+        description="Page number where formula appears"
+    )
+    url: Optional[str] = Field(
+        default=None,
+        max_length=500,
+        description="URL for web sources"
+    )
+    doi: Optional[str] = Field(
+        default=None,
+        max_length=100,
+        description="Digital Object Identifier"
+    )
+    isbn: Optional[str] = Field(
+        default=None,
+        max_length=20,
+        description="ISBN for books"
+    )
+    volume: Optional[str] = Field(
+        default=None,
+        max_length=50,
+        description="Volume number"
+    )
+    issue: Optional[str] = Field(
+        default=None,
+        max_length=50,
+        description="Issue number"
+    )
+    chapter: Optional[str] = Field(
+        default=None,
+        max_length=100,
+        description="Chapter title or number"
+    )
+    section: Optional[str] = Field(
+        default=None,
+        max_length=100,
+        description="Section title or number"
+    )
+    reliability_score: float = Field(
+        default=1.0,
+        ge=0.0,
+        le=1.0,
+        description="Reliability score for the citation (0.0-1.0)"
+    )
+
+    @field_validator('formula_id')
+    def validate_formula_id(cls, v):
+        """Validate formula ID"""
+        if not v.strip():
+            raise ValueError("Formula ID cannot be empty")
+        return v.strip()
+
+    @field_validator('title')
+    def validate_title(cls, v):
+        """Validate title"""
+        if not v.strip():
+            raise ValueError("Title cannot be empty")
+        return v.strip()
+
+
+class PageMappingParams(BaseModel):
+    """Parameters for adding page mappings to formulas"""
+
+    formula_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="ID of the formula"
+    )
+    book_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="ID of the book"
+    )
+    page_number: int = Field(
+        ...,
+        ge=1,
+        le=10000,
+        description="Page number where formula appears"
+    )
+    context_before: Optional[str] = Field(
+        default=None,
+        max_length=1000,
+        description="Text context before the formula"
+    )
+    context_after: Optional[str] = Field(
+        default=None,
+        max_length=1000,
+        description="Text context after the formula"
+    )
+    figure_references: Optional[List[str]] = Field(
+        default=None,
+        description="List of figure references"
+    )
+    table_references: Optional[List[str]] = Field(
+        default=None,
+        description="List of table references"
+    )
+    equation_number: Optional[str] = Field(
+        default=None,
+        max_length=50,
+        description="Equation number in the book"
+    )
+    section_title: Optional[str] = Field(
+        default=None,
+        max_length=200,
+        description="Title of the section"
+    )
+    chapter_title: Optional[str] = Field(
+        default=None,
+        max_length=200,
+        description="Title of the chapter"
+    )
+    confidence_score: float = Field(
+        default=1.0,
+        ge=0.0,
+        le=1.0,
+        description="Confidence score for the mapping (0.0-1.0)"
+    )
+
+    @field_validator('formula_id')
+    def validate_formula_id(cls, v):
+        """Validate formula ID"""
+        if not v.strip():
+            raise ValueError("Formula ID cannot be empty")
+        return v.strip()
+
+    @field_validator('book_id')
+    def validate_book_id(cls, v):
+        """Validate book ID"""
+        if not v.strip():
+            raise ValueError("Book ID cannot be empty")
+        return v.strip()
+
+
+class NBAConnectionParams(BaseModel):
+    """Parameters for adding NBA API connections to formulas"""
+
+    formula_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="ID of the formula"
+    )
+    nba_endpoint: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        description="NBA API endpoint"
+    )
+    data_type: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="Type of NBA data"
+    )
+    season: Optional[str] = Field(
+        default=None,
+        max_length=20,
+        description="NBA season"
+    )
+    team_id: Optional[str] = Field(
+        default=None,
+        max_length=20,
+        description="NBA team ID"
+    )
+    player_id: Optional[str] = Field(
+        default=None,
+        max_length=20,
+        description="NBA player ID"
+    )
+    game_id: Optional[str] = Field(
+        default=None,
+        max_length=20,
+        description="NBA game ID"
+    )
+    parameters: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Additional API parameters"
+    )
+    sync_frequency: Literal["daily", "weekly", "monthly", "on_demand"] = Field(
+        default="daily",
+        description="How often to sync data"
+    )
+
+    @field_validator('formula_id')
+    def validate_formula_id(cls, v):
+        """Validate formula ID"""
+        if not v.strip():
+            raise ValueError("Formula ID cannot be empty")
+        return v.strip()
+
+    @field_validator('nba_endpoint')
+    def validate_nba_endpoint(cls, v):
+        """Validate NBA endpoint"""
+        if not v.strip():
+            raise ValueError("NBA endpoint cannot be empty")
+        return v.strip()
+
+
+class FormulaUsageParams(BaseModel):
+    """Parameters for tracking formula usage"""
+
+    formula_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="ID of the formula being used"
+    )
+    usage_type: Literal["calculation", "analysis", "research", "education", "comparison", "validation", "unknown"] = Field(
+        ...,
+        description="Type of usage"
+    )
+    user_id: Optional[str] = Field(
+        default=None,
+        max_length=100,
+        description="ID of the user"
+    )
+    session_id: Optional[str] = Field(
+        default=None,
+        max_length=100,
+        description="Session ID"
+    )
+    input_parameters: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Parameters used in calculation"
+    )
+    calculation_result: Optional[Any] = Field(
+        default=None,
+        description="Result of the calculation"
+    )
+    execution_time_ms: Optional[int] = Field(
+        default=None,
+        ge=0,
+        le=300000,
+        description="Execution time in milliseconds"
+    )
+    success: bool = Field(
+        default=True,
+        description="Whether the calculation was successful"
+    )
+    error_message: Optional[str] = Field(
+        default=None,
+        max_length=1000,
+        description="Error message if failed"
+    )
+    ip_address: Optional[str] = Field(
+        default=None,
+        max_length=45,
+        description="IP address of the user"
+    )
+    user_agent: Optional[str] = Field(
+        default=None,
+        max_length=500,
+        description="User agent string"
+    )
+
+    @field_validator('formula_id')
+    def validate_formula_id(cls, v):
+        """Validate formula ID"""
+        if not v.strip():
+            raise ValueError("Formula ID cannot be empty")
+        return v.strip()
+
+
+class CrossReferenceSearchParams(BaseModel):
+    """Parameters for searching formulas by cross-references"""
+
+    search_query: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        description="Search query"
+    )
+    search_type: Literal["all", "citations", "pages", "nba", "usage"] = Field(
+        default="all",
+        description="Type of search to perform"
+    )
+    max_results: int = Field(
+        default=50,
+        ge=1,
+        le=200,
+        description="Maximum number of results to return"
+    )
+
+    @field_validator('search_query')
+    def validate_search_query(cls, v):
+        """Validate search query"""
+        if not v.strip():
+            raise ValueError("Search query cannot be empty")
+        return v.strip()
+
+
+class NBAConnectionSyncParams(BaseModel):
+    """Parameters for syncing NBA data"""
+
+    connection_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="ID of the NBA connection to sync"
+    )
+
+    @field_validator('connection_id')
+    def validate_connection_id(cls, v):
+        """Validate connection ID"""
+        if not v.strip():
+            raise ValueError("Connection ID cannot be empty")
+        return v.strip()
+
+
+class FormulaReferenceParams(BaseModel):
+    """Parameters for getting formula cross-references"""
+
+    formula_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="ID of the formula to get references for"
+    )
+
+    @field_validator('formula_id')
+    def validate_formula_id(cls, v):
+        """Validate formula ID"""
+        if not v.strip():
+            raise ValueError("Formula ID cannot be empty")
+        return v.strip()
+
+
+# ============================================================================
+# Phase 7.1: Intelligent Formula Recommendations Parameters
+# ============================================================================
+
+class IntelligentRecommendationParams(BaseModel):
+    """Parameters for intelligent formula recommendations"""
+
+    context: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Context description for formula recommendations"
+    )
+    user_preferences: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="User preferences and settings"
+    )
+    current_formulas: Optional[List[str]] = Field(
+        default=None,
+        description="List of formulas currently being used"
+    )
+    analysis_type: Literal["efficiency", "shooting", "defensive", "team", "player", "advanced", "all"] = Field(
+        default="all",
+        description="Type of analysis being performed"
+    )
+    max_recommendations: int = Field(
+        default=5,
+        ge=1,
+        le=20,
+        description="Maximum number of recommendations to return"
+    )
+    include_explanations: bool = Field(
+        default=True,
+        description="Whether to include explanations for recommendations"
+    )
+    confidence_threshold: float = Field(
+        default=0.7,
+        ge=0.0,
+        le=1.0,
+        description="Minimum confidence threshold for recommendations"
+    )
+
+    @field_validator('context')
+    def validate_context(cls, v):
+        """Validate context description"""
+        if not v.strip():
+            raise ValueError("Context cannot be empty")
+        return v.strip()
+
+
+class FormulaSuggestionParams(BaseModel):
+    """Parameters for formula suggestions based on data patterns"""
+
+    data_description: str = Field(
+        ...,
+        min_length=1,
+        max_length=500,
+        description="Description of the data being analyzed"
+    )
+    available_variables: List[str] = Field(
+        ...,
+        min_items=1,
+        description="List of available variables for formula construction"
+    )
+    target_metric: Optional[str] = Field(
+        default=None,
+        max_length=100,
+        description="Target metric or outcome to predict"
+    )
+    formula_complexity: Literal["simple", "moderate", "complex", "any"] = Field(
+        default="any",
+        description="Desired complexity level of suggested formulas"
+    )
+    include_interactions: bool = Field(
+        default=True,
+        description="Whether to include interaction terms in suggestions"
+    )
+    max_suggestions: int = Field(
+        default=3,
+        ge=1,
+        le=10,
+        description="Maximum number of formula suggestions"
+    )
+
+    @field_validator('data_description')
+    def validate_data_description(cls, v):
+        """Validate data description"""
+        if not v.strip():
+            raise ValueError("Data description cannot be empty")
+        return v.strip()
+
+    @field_validator('available_variables')
+    def validate_available_variables(cls, v):
+        """Validate available variables"""
+        if not v:
+            raise ValueError("At least one variable must be provided")
+
+        # Check for valid variable names
+        for var in v:
+            if not var.strip():
+                raise ValueError("Variable names cannot be empty")
+            if not var.replace('_', '').replace('-', '').isalnum():
+                raise ValueError(f"Invalid variable name: {var}")
+
+        return [var.strip() for var in v]
+
+
+class ContextAnalysisParams(BaseModel):
+    """Parameters for analyzing user context for better recommendations"""
+
+    user_query: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="User query or request"
+    )
+    session_history: Optional[List[Dict[str, Any]]] = Field(
+        default=None,
+        description="Previous session history for context"
+    )
+    current_analysis: Optional[str] = Field(
+        default=None,
+        max_length=500,
+        description="Current analysis being performed"
+    )
+    user_expertise_level: Literal["beginner", "intermediate", "advanced", "expert"] = Field(
+        default="intermediate",
+        description="User's expertise level in sports analytics"
+    )
+    preferred_formula_types: Optional[List[str]] = Field(
+        default=None,
+        description="User's preferred formula types"
+    )
+    analysis_depth: Literal["basic", "detailed", "comprehensive"] = Field(
+        default="detailed",
+        description="Desired depth of analysis"
+    )
+
+    @field_validator('user_query')
+    def validate_user_query(cls, v):
+        """Validate user query"""
+        if not v.strip():
+            raise ValueError("User query cannot be empty")
+        return v.strip()
+
+
+class PredictiveAnalysisParams(BaseModel):
+    """Parameters for predictive analytics recommendations"""
+
+    prediction_target: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        description="Target variable for prediction"
+    )
+    historical_data_description: str = Field(
+        ...,
+        min_length=1,
+        max_length=500,
+        description="Description of available historical data"
+    )
+    prediction_horizon: Literal["short_term", "medium_term", "long_term"] = Field(
+        default="medium_term",
+        description="Time horizon for predictions"
+    )
+    confidence_level: float = Field(
+        default=0.95,
+        ge=0.5,
+        le=0.99,
+        description="Desired confidence level for predictions"
+    )
+    include_uncertainty: bool = Field(
+        default=True,
+        description="Whether to include uncertainty estimates"
+    )
+    model_complexity: Literal["simple", "moderate", "complex"] = Field(
+        default="moderate",
+        description="Desired model complexity"
+    )
+
+    @field_validator('prediction_target')
+    def validate_prediction_target(cls, v):
+        """Validate prediction target"""
+        if not v.strip():
+            raise ValueError("Prediction target cannot be empty")
+        return v.strip()
+
+    @field_validator('historical_data_description')
+    def validate_historical_data_description(cls, v):
+        """Validate historical data description"""
+        if not v.strip():
+            raise ValueError("Historical data description cannot be empty")
+        return v.strip()
+
+
+class ErrorCorrectionParams(BaseModel):
+    """Parameters for intelligent error correction"""
+
+    formula_expression: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Formula expression to analyze for errors"
+    )
+    expected_result: Optional[float] = Field(
+        default=None,
+        description="Expected result if known"
+    )
+    input_values: Optional[Dict[str, float]] = Field(
+        default=None,
+        description="Input values for testing the formula"
+    )
+    error_tolerance: float = Field(
+        default=0.01,
+        ge=0.0,
+        le=1.0,
+        description="Tolerance for error detection"
+    )
+    correction_suggestions: bool = Field(
+        default=True,
+        description="Whether to provide correction suggestions"
+    )
+    validation_level: Literal["basic", "comprehensive", "expert"] = Field(
+        default="comprehensive",
+        description="Level of validation to perform"
+    )
+
+    @field_validator('formula_expression')
+    def validate_formula_expression(cls, v):
+        """Validate formula expression"""
+        if not v.strip():
+            raise ValueError("Formula expression cannot be empty")
+        return v.strip()
+
+
+# ============================================================================
+# Phase 7.2: Automated Formula Discovery Parameters
+# ============================================================================
+
+class FormulaDiscoveryParams(BaseModel):
+    """Parameters for automated formula discovery from data patterns"""
+
+    data_description: str = Field(
+        ...,
+        min_length=1,
+        max_length=500,
+        description="Description of the dataset being analyzed"
+    )
+    available_variables: List[str] = Field(
+        ...,
+        min_items=2,
+        description="List of available variables for formula construction"
+    )
+    target_variable: Optional[str] = Field(
+        default=None,
+        max_length=100,
+        description="Target variable to predict or analyze"
+    )
+    discovery_method: Literal["genetic", "symbolic_regression", "pattern_matching", "hybrid"] = Field(
+        default="hybrid",
+        description="Method for formula discovery"
+    )
+    complexity_limit: Literal["simple", "moderate", "complex", "unlimited"] = Field(
+        default="moderate",
+        description="Maximum complexity level for discovered formulas"
+    )
+    max_formulas: int = Field(
+        default=5,
+        ge=1,
+        le=20,
+        description="Maximum number of formulas to discover"
+    )
+    confidence_threshold: float = Field(
+        default=0.7,
+        ge=0.0,
+        le=1.0,
+        description="Minimum confidence threshold for discovered formulas"
+    )
+    include_interactions: bool = Field(
+        default=True,
+        description="Whether to include interaction terms in discovered formulas"
+    )
+    validation_method: Literal["cross_validation", "holdout", "bootstrap"] = Field(
+        default="cross_validation",
+        description="Method for validating discovered formulas"
+    )
+
+    @field_validator('data_description')
+    def validate_data_description(cls, v):
+        """Validate data description"""
+        if not v.strip():
+            raise ValueError("Data description cannot be empty")
+        return v.strip()
+
+    @field_validator('available_variables')
+    def validate_available_variables(cls, v):
+        """Validate available variables"""
+        if len(v) < 2:
+            raise ValueError("At least 2 variables must be provided for formula discovery")
+
+        for var in v:
+            if not var.strip():
+                raise ValueError("Variable names cannot be empty")
+            if not var.replace('_', '').replace('-', '').isalnum():
+                raise ValueError(f"Invalid variable name: {var}")
+
+        return [var.strip() for var in v]
+
+
+class PatternAnalysisParams(BaseModel):
+    """Parameters for pattern analysis in formula discovery"""
+
+    data_patterns: List[Dict[str, Any]] = Field(
+        ...,
+        min_items=1,
+        description="List of data patterns to analyze"
+    )
+    pattern_types: List[Literal["linear", "polynomial", "exponential", "logarithmic", "trigonometric", "custom"]] = Field(
+        default=["linear", "polynomial"],
+        description="Types of patterns to look for"
+    )
+    correlation_threshold: float = Field(
+        default=0.5,
+        ge=0.0,
+        le=1.0,
+        description="Minimum correlation threshold for pattern detection"
+    )
+    significance_level: float = Field(
+        default=0.05,
+        ge=0.01,
+        le=0.1,
+        description="Statistical significance level for pattern validation"
+    )
+    max_pattern_depth: int = Field(
+        default=3,
+        ge=1,
+        le=5,
+        description="Maximum depth for pattern analysis"
+    )
+
+    @field_validator('data_patterns')
+    def validate_data_patterns(cls, v):
+        """Validate data patterns"""
+        if not v:
+            raise ValueError("At least one data pattern must be provided")
+        return v
+
+
+class FormulaValidationParams(BaseModel):
+    """Parameters for validating discovered formulas"""
+
+    formula_expressions: List[str] = Field(
+        ...,
+        min_items=1,
+        description="List of formula expressions to validate"
+    )
+    test_data: Optional[Dict[str, List[float]]] = Field(
+        default=None,
+        description="Test data for formula validation"
+    )
+    validation_metrics: List[Literal["r_squared", "mae", "rmse", "mape", "correlation"]] = Field(
+        default=["r_squared", "mae"],
+        description="Metrics to use for validation"
+    )
+    cross_validation_folds: int = Field(
+        default=5,
+        ge=2,
+        le=10,
+        description="Number of folds for cross-validation"
+    )
+    minimum_performance: float = Field(
+        default=0.6,
+        ge=0.0,
+        le=1.0,
+        description="Minimum performance threshold for formula acceptance"
+    )
+
+    @field_validator('formula_expressions')
+    def validate_formula_expressions(cls, v):
+        """Validate formula expressions"""
+        if not v:
+            raise ValueError("At least one formula expression must be provided")
+
+        for expr in v:
+            if not expr.strip():
+                raise ValueError("Formula expressions cannot be empty")
+
+        return [expr.strip() for expr in v]
+
+
+class FormulaOptimizationParams(BaseModel):
+    """Parameters for optimizing discovered formulas"""
+
+    base_formula: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Base formula to optimize"
+    )
+    optimization_objective: Literal["accuracy", "simplicity", "robustness", "balanced"] = Field(
+        default="balanced",
+        description="Objective for formula optimization"
+    )
+    optimization_method: Literal["genetic_algorithm", "gradient_descent", "simulated_annealing", "particle_swarm"] = Field(
+        default="genetic_algorithm",
+        description="Method for formula optimization"
+    )
+    max_iterations: int = Field(
+        default=100,
+        ge=10,
+        le=1000,
+        description="Maximum number of optimization iterations"
+    )
+    population_size: int = Field(
+        default=50,
+        ge=10,
+        le=200,
+        description="Population size for genetic algorithm"
+    )
+    mutation_rate: float = Field(
+        default=0.1,
+        ge=0.01,
+        le=0.5,
+        description="Mutation rate for genetic algorithm"
+    )
+    crossover_rate: float = Field(
+        default=0.8,
+        ge=0.1,
+        le=1.0,
+        description="Crossover rate for genetic algorithm"
+    )
+
+    @field_validator('base_formula')
+    def validate_base_formula(cls, v):
+        """Validate base formula"""
+        if not v.strip():
+            raise ValueError("Base formula cannot be empty")
+        return v.strip()
+
+
+class FormulaRankingParams(BaseModel):
+    """Parameters for ranking discovered formulas"""
+
+    discovered_formulas: List[Dict[str, Any]] = Field(
+        ...,
+        min_items=1,
+        description="List of discovered formulas with metadata"
+    )
+    ranking_criteria: List[Literal["accuracy", "simplicity", "novelty", "interpretability", "robustness"]] = Field(
+        default=["accuracy", "simplicity"],
+        description="Criteria for ranking formulas"
+    )
+    weights: Optional[Dict[str, float]] = Field(
+        default=None,
+        description="Weights for ranking criteria"
+    )
+    reference_formulas: Optional[List[str]] = Field(
+        default=None,
+        description="Reference formulas for novelty assessment"
+    )
+    domain_knowledge: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Domain-specific knowledge for ranking"
+    )
+
+    @field_validator('discovered_formulas')
+    def validate_discovered_formulas(cls, v):
+        """Validate discovered formulas"""
+        if not v:
+            raise ValueError("At least one discovered formula must be provided")
+        return v
+
+
+# ============================================================================
+# Phase 7.3: Smart Context Analysis Parameters
+# ============================================================================
+
+class ContextAnalysisParams(BaseModel):
+    """Parameters for intelligent context analysis"""
+
+    user_query: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="User's query or request for analysis"
+    )
+    session_history: Optional[List[Dict[str, Any]]] = Field(
+        default=None,
+        description="Previous session interactions and context"
+    )
+    available_data: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Available data sources and variables"
+    )
+    analysis_goals: Optional[List[str]] = Field(
+        default=None,
+        description="User's stated or inferred analysis goals"
+    )
+    expertise_level: Literal["beginner", "intermediate", "advanced", "expert"] = Field(
+        default="intermediate",
+        description="User's expertise level in sports analytics"
+    )
+    preferred_formulas: Optional[List[str]] = Field(
+        default=None,
+        description="User's preferred or frequently used formulas"
+    )
+    context_depth: Literal["shallow", "moderate", "deep"] = Field(
+        default="moderate",
+        description="Depth of context analysis to perform"
+    )
+    include_recommendations: bool = Field(
+        default=True,
+        description="Whether to include formula recommendations"
+    )
+    include_explanations: bool = Field(
+        default=True,
+        description="Whether to include detailed explanations"
+    )
+
+    @field_validator('user_query')
+    def validate_user_query(cls, v):
+        """Validate user query"""
+        if not v.strip():
+            raise ValueError("User query cannot be empty")
+        return v.strip()
+
+
+class UserBehaviorAnalysisParams(BaseModel):
+    """Parameters for analyzing user behavior patterns"""
+
+    user_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="Unique identifier for the user"
+    )
+    time_period: Literal["session", "day", "week", "month", "year"] = Field(
+        default="session",
+        description="Time period for behavior analysis"
+    )
+    behavior_types: List[Literal["formula_usage", "query_patterns", "preferences", "errors", "successes"]] = Field(
+        default=["formula_usage", "query_patterns"],
+        description="Types of behavior to analyze"
+    )
+    include_patterns: bool = Field(
+        default=True,
+        description="Whether to identify behavioral patterns"
+    )
+    include_predictions: bool = Field(
+        default=True,
+        description="Whether to predict future behavior"
+    )
+    privacy_level: Literal["basic", "detailed", "comprehensive"] = Field(
+        default="basic",
+        description="Level of detail in behavior analysis"
+    )
+
+    @field_validator('user_id')
+    def validate_user_id(cls, v):
+        """Validate user ID"""
+        if not v.strip():
+            raise ValueError("User ID cannot be empty")
+        return v.strip()
+
+
+class ContextualRecommendationParams(BaseModel):
+    """Parameters for contextual formula recommendations"""
+
+    context_analysis: Dict[str, Any] = Field(
+        ...,
+        description="Results from context analysis"
+    )
+    recommendation_count: int = Field(
+        default=5,
+        ge=1,
+        le=20,
+        description="Number of recommendations to generate"
+    )
+    recommendation_types: List[Literal["formula", "workflow", "insight", "optimization"]] = Field(
+        default=["formula"],
+        description="Types of recommendations to include"
+    )
+    personalization_level: Literal["none", "basic", "advanced", "full"] = Field(
+        default="basic",
+        description="Level of personalization to apply"
+    )
+    include_alternatives: bool = Field(
+        default=True,
+        description="Whether to include alternative recommendations"
+    )
+    explanation_depth: Literal["brief", "detailed", "comprehensive"] = Field(
+        default="detailed",
+        description="Depth of explanations for recommendations"
+    )
+    confidence_threshold: float = Field(
+        default=0.6,
+        ge=0.0,
+        le=1.0,
+        description="Minimum confidence threshold for recommendations"
+    )
+
+    @field_validator('context_analysis')
+    def validate_context_analysis(cls, v):
+        """Validate context analysis"""
+        if not v:
+            raise ValueError("Context analysis cannot be empty")
+        return v
+
+
+class SessionContextParams(BaseModel):
+    """Parameters for session context management"""
+
+    session_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="Unique session identifier"
+    )
+    context_data: Dict[str, Any] = Field(
+        ...,
+        description="Session context data to store or retrieve"
+    )
+    context_type: Literal["user_preferences", "analysis_state", "formula_history", "data_context"] = Field(
+        default="analysis_state",
+        description="Type of context data"
+    )
+    operation: Literal["store", "retrieve", "update", "clear"] = Field(
+        default="store",
+        description="Operation to perform on context data"
+    )
+    expiration_time: Optional[int] = Field(
+        default=None,
+        ge=60,
+        le=86400,
+        description="Context expiration time in seconds"
+    )
+    include_metadata: bool = Field(
+        default=True,
+        description="Whether to include metadata with context"
+    )
+
+    @field_validator('session_id')
+    def validate_session_id(cls, v):
+        """Validate session ID"""
+        if not v.strip():
+            raise ValueError("Session ID cannot be empty")
+        return v.strip()
+
+
+class IntelligentInsightParams(BaseModel):
+    """Parameters for generating intelligent insights"""
+
+    analysis_context: Dict[str, Any] = Field(
+        ...,
+        description="Context from analysis results"
+    )
+    insight_types: List[Literal["pattern", "anomaly", "trend", "correlation", "prediction", "optimization"]] = Field(
+        default=["pattern", "trend"],
+        description="Types of insights to generate"
+    )
+    insight_depth: Literal["surface", "moderate", "deep"] = Field(
+        default="moderate",
+        description="Depth of insight analysis"
+    )
+    include_visualizations: bool = Field(
+        default=True,
+        description="Whether to include visualization suggestions"
+    )
+    include_actionable_recommendations: bool = Field(
+        default=True,
+        description="Whether to include actionable recommendations"
+    )
+    confidence_threshold: float = Field(
+        default=0.7,
+        ge=0.0,
+        le=1.0,
+        description="Minimum confidence for insights"
+    )
+    max_insights: int = Field(
+        default=10,
+        ge=1,
+        le=50,
+        description="Maximum number of insights to generate"
+    )
+
+    @field_validator('analysis_context')
+    def validate_analysis_context(cls, v):
+        """Validate analysis context"""
+        if not v:
+            raise ValueError("Analysis context cannot be empty")
+        return v
+
+
+# ============================================================================
+# Phase 7.4: Predictive Analytics Engine Parameters
+# ============================================================================
+
+class PredictiveModelParams(BaseModel):
+    """Parameters for predictive model training and evaluation"""
+
+    model_type: Literal["regression", "classification", "time_series", "ensemble"] = Field(
+        default="regression",
+        description="Type of predictive model to train"
+    )
+    target_variable: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="Target variable to predict"
+    )
+    feature_variables: List[str] = Field(
+        ...,
+        min_items=1,
+        description="List of feature variables for prediction"
+    )
+    training_data: Dict[str, List[float]] = Field(
+        ...,
+        description="Training data with variable names as keys and values as lists"
+    )
+    test_data: Optional[Dict[str, List[float]]] = Field(
+        default=None,
+        description="Test data for model evaluation"
+    )
+    validation_split: float = Field(
+        default=0.2,
+        ge=0.1,
+        le=0.5,
+        description="Fraction of data to use for validation"
+    )
+    model_parameters: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Model-specific parameters"
+    )
+    cross_validation_folds: int = Field(
+        default=5,
+        ge=2,
+        le=10,
+        description="Number of folds for cross-validation"
+    )
+    performance_metrics: List[Literal["mse", "rmse", "mae", "r2", "accuracy", "precision", "recall", "f1"]] = Field(
+        default=["mse", "r2"],
+        description="Performance metrics to calculate"
+    )
+
+    @field_validator('target_variable')
+    def validate_target_variable(cls, v):
+        """Validate target variable"""
+        if not v.strip():
+            raise ValueError("Target variable cannot be empty")
+        return v.strip()
+
+    @field_validator('feature_variables')
+    def validate_feature_variables(cls, v):
+        """Validate feature variables"""
+        if not v:
+            raise ValueError("At least one feature variable must be provided")
+
+        for var in v:
+            if not var.strip():
+                raise ValueError("Feature variable names cannot be empty")
+
+        return [var.strip() for var in v]
+
+    @field_validator('training_data')
+    def validate_training_data(cls, v):
+        """Validate training data"""
+        if not v:
+            raise ValueError("Training data cannot be empty")
+
+        # Check that all values are lists of numbers
+        for key, values in v.items():
+            if not isinstance(values, list):
+                raise ValueError(f"Training data values must be lists, got {type(values)} for {key}")
+            if not values:
+                raise ValueError(f"Training data list cannot be empty for {key}")
+            if not all(isinstance(x, (int, float)) for x in values):
+                raise ValueError(f"Training data must contain only numbers for {key}")
+
+        return v
+
+
+class PredictionParams(BaseModel):
+    """Parameters for making predictions with trained models"""
+
+    model_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="Identifier of the trained model to use"
+    )
+    input_features: Dict[str, float] = Field(
+        ...,
+        description="Input feature values for prediction"
+    )
+    prediction_type: Literal["single", "batch", "probability"] = Field(
+        default="single",
+        description="Type of prediction to make"
+    )
+    confidence_interval: Optional[float] = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="Confidence interval for prediction (e.g., 0.95 for 95%)"
+    )
+    include_feature_importance: bool = Field(
+        default=False,
+        description="Whether to include feature importance in results"
+    )
+    include_prediction_explanation: bool = Field(
+        default=False,
+        description="Whether to include explanation of the prediction"
+    )
+
+    @field_validator('model_id')
+    def validate_model_id(cls, v):
+        """Validate model ID"""
+        if not v.strip():
+            raise ValueError("Model ID cannot be empty")
+        return v.strip()
+
+    @field_validator('input_features')
+    def validate_input_features(cls, v):
+        """Validate input features"""
+        if not v:
+            raise ValueError("Input features cannot be empty")
+
+        for key, value in v.items():
+            if not isinstance(value, (int, float)):
+                raise ValueError(f"Feature value must be a number, got {type(value)} for {key}")
+
+        return v
+
+
+class ModelEvaluationParams(BaseModel):
+    """Parameters for model evaluation and validation"""
+
+    model_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="Identifier of the model to evaluate"
+    )
+    evaluation_data: Dict[str, List[float]] = Field(
+        ...,
+        description="Data to use for evaluation"
+    )
+    evaluation_metrics: List[Literal["mse", "rmse", "mae", "r2", "accuracy", "precision", "recall", "f1", "auc"]] = Field(
+        default=["mse", "r2"],
+        description="Metrics to calculate during evaluation"
+    )
+    include_cross_validation: bool = Field(
+        default=True,
+        description="Whether to perform cross-validation"
+    )
+    include_feature_importance: bool = Field(
+        default=True,
+        description="Whether to calculate feature importance"
+    )
+    include_residual_analysis: bool = Field(
+        default=False,
+        description="Whether to perform residual analysis"
+    )
+    confidence_level: float = Field(
+        default=0.95,
+        ge=0.8,
+        le=0.99,
+        description="Confidence level for statistical tests"
+    )
+
+    @field_validator('model_id')
+    def validate_model_id(cls, v):
+        """Validate model ID"""
+        if not v.strip():
+            raise ValueError("Model ID cannot be empty")
+        return v.strip()
+
+
+class TimeSeriesPredictionParams(BaseModel):
+    """Parameters for time series prediction models"""
+
+    time_series_data: Dict[str, List[float]] = Field(
+        ...,
+        description="Time series data with timestamps and values"
+    )
+    target_variable: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="Target variable for time series prediction"
+    )
+    prediction_horizon: int = Field(
+        default=5,
+        ge=1,
+        le=100,
+        description="Number of time steps to predict ahead"
+    )
+    model_type: Literal["arima", "exponential_smoothing", "lstm", "prophet"] = Field(
+        default="arima",
+        description="Type of time series model to use"
+    )
+    seasonal_period: Optional[int] = Field(
+        default=None,
+        ge=2,
+        le=365,
+        description="Seasonal period for seasonal models"
+    )
+    trend_type: Literal["linear", "exponential", "logistic", "none"] = Field(
+        default="linear",
+        description="Type of trend to model"
+    )
+    include_confidence_intervals: bool = Field(
+        default=True,
+        description="Whether to include confidence intervals"
+    )
+    confidence_level: float = Field(
+        default=0.95,
+        ge=0.8,
+        le=0.99,
+        description="Confidence level for prediction intervals"
+    )
+
+    @field_validator('target_variable')
+    def validate_target_variable(cls, v):
+        """Validate target variable"""
+        if not v.strip():
+            raise ValueError("Target variable cannot be empty")
+        return v.strip()
+
+
+class EnsembleModelParams(BaseModel):
+    """Parameters for ensemble model creation"""
+
+    base_models: List[str] = Field(
+        ...,
+        min_items=2,
+        max_items=10,
+        description="List of base model IDs to combine"
+    )
+    ensemble_method: Literal["voting", "bagging", "boosting", "stacking"] = Field(
+        default="voting",
+        description="Method for combining base models"
+    )
+    voting_type: Literal["hard", "soft"] = Field(
+        default="hard",
+        description="Type of voting for voting ensemble"
+    )
+    weights: Optional[List[float]] = Field(
+        default=None,
+        description="Weights for weighted voting (must sum to 1.0)"
+    )
+    meta_model_type: Optional[Literal["linear", "tree", "neural"]] = Field(
+        default=None,
+        description="Meta model type for stacking ensemble"
+    )
+    cross_validation_folds: int = Field(
+        default=5,
+        ge=2,
+        le=10,
+        description="Number of folds for meta model training"
+    )
+    include_model_performance: bool = Field(
+        default=True,
+        description="Whether to include individual model performance"
+    )
+
+    @field_validator('base_models')
+    def validate_base_models(cls, v):
+        """Validate base models"""
+        if len(v) < 2:
+            raise ValueError("At least 2 base models must be provided")
+
+        for model_id in v:
+            if not model_id.strip():
+                raise ValueError("Model ID cannot be empty")
+
+        return [model_id.strip() for model_id in v]
+
+    @field_validator('weights')
+    def validate_weights(cls, v):
+        """Validate weights"""
+        if v is not None:
+            if not all(w >= 0 for w in v):
+                raise ValueError("All weights must be non-negative")
+            if abs(sum(v) - 1.0) > 1e-6:
+                raise ValueError("Weights must sum to 1.0")
+        return v
+
+
+class ModelOptimizationParams(BaseModel):
+    """Parameters for model hyperparameter optimization"""
+
+    model_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="Identifier of the model to optimize"
+    )
+    optimization_method: Literal["grid_search", "random_search", "bayesian", "genetic"] = Field(
+        default="grid_search",
+        description="Method for hyperparameter optimization"
+    )
+    parameter_grid: Dict[str, List[Any]] = Field(
+        ...,
+        description="Parameter grid for optimization"
+    )
+    optimization_metric: str = Field(
+        default="r2",
+        description="Metric to optimize"
+    )
+    max_iterations: int = Field(
+        default=100,
+        ge=10,
+        le=1000,
+        description="Maximum number of optimization iterations"
+    )
+    cv_folds: int = Field(
+        default=5,
+        ge=2,
+        le=10,
+        description="Number of cross-validation folds"
+    )
+    n_jobs: int = Field(
+        default=1,
+        ge=1,
+        le=16,
+        description="Number of parallel jobs for optimization"
+    )
+    random_seed: Optional[int] = Field(
+        default=None,
+        description="Random seed for reproducible optimization"
+    )
+
+    @field_validator('model_id')
+    def validate_model_id(cls, v):
+        """Validate model ID"""
+        if not v.strip():
+            raise ValueError("Model ID cannot be empty")
+        return v.strip()
+
+        @field_validator('parameter_grid')
+        def validate_parameter_grid(cls, v):
+            """Validate parameter grid"""
+            if not v:
+                raise ValueError("Parameter grid cannot be empty")
+            return v
+
+
+# ============================================================================
+# Phase 7.6: Intelligent Error Correction Parameters
+# ============================================================================
+
+class ErrorDetectionParams(BaseModel):
+    """Parameters for intelligent error detection in formulas and analysis"""
+
+    input_formula: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Formula or expression to analyze for errors"
+    )
+    context_type: Literal["formula", "calculation", "analysis", "comparison"] = Field(
+        default="formula",
+        description="Type of context for error detection"
+    )
+    error_types: List[Literal["syntax", "semantic", "logical", "mathematical", "domain", "unit"]] = Field(
+        default=["syntax", "semantic", "logical"],
+        description="Types of errors to detect"
+    )
+    include_suggestions: bool = Field(
+        default=True,
+        description="Whether to include correction suggestions"
+    )
+    confidence_threshold: float = Field(
+        default=0.7,
+        ge=0.0,
+        le=1.0,
+        description="Minimum confidence threshold for error detection"
+    )
+    domain_context: Optional[str] = Field(
+        default=None,
+        description="Domain context (e.g., 'basketball', 'statistics') for domain-specific error detection"
+    )
+
+    @field_validator('input_formula')
+    def validate_input_formula(cls, v):
+        """Validate input formula"""
+        if not v.strip():
+            raise ValueError("Input formula cannot be empty")
+        return v.strip()
+
+
+class ErrorCorrectionParams(BaseModel):
+    """Parameters for intelligent error correction"""
+
+    detected_errors: List[Dict[str, Any]] = Field(
+        ...,
+        min_items=1,
+        description="List of detected errors to correct"
+    )
+    correction_strategy: Literal["automatic", "suggested", "interactive"] = Field(
+        default="suggested",
+        description="Strategy for error correction"
+    )
+    preserve_intent: bool = Field(
+        default=True,
+        description="Whether to preserve the original intent of the formula"
+    )
+    validation_level: Literal["basic", "comprehensive", "strict"] = Field(
+        default="comprehensive",
+        description="Level of validation for corrected formulas"
+    )
+    include_explanations: bool = Field(
+        default=True,
+        description="Whether to include explanations for corrections"
+    )
+    max_corrections: int = Field(
+        default=5,
+        ge=1,
+        le=20,
+        description="Maximum number of corrections to attempt"
+    )
+
+    @field_validator('detected_errors')
+    def validate_detected_errors(cls, v):
+        """Validate detected errors"""
+        if not v:
+            raise ValueError("At least one error must be provided for correction")
+        return v
+
+
+class FormulaValidationParams(BaseModel):
+    """Parameters for comprehensive formula validation"""
+
+    formula_expression: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Formula expression to validate"
+    )
+    validation_types: List[Literal["syntax", "semantics", "mathematics", "domain", "units", "bounds"]] = Field(
+        default=["syntax", "semantics", "mathematics"],
+        description="Types of validation to perform"
+    )
+    test_data: Optional[Dict[str, List[float]]] = Field(
+        default=None,
+        description="Test data for validation"
+    )
+    expected_range: Optional[Dict[str, Tuple[float, float]]] = Field(
+        default=None,
+        description="Expected value ranges for validation"
+    )
+    domain_constraints: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Domain-specific constraints for validation"
+    )
+    include_performance_analysis: bool = Field(
+        default=False,
+        description="Whether to include performance analysis"
+    )
+
+    @field_validator('formula_expression')
+    def validate_formula_expression(cls, v):
+        """Validate formula expression"""
+        if not v.strip():
+            raise ValueError("Formula expression cannot be empty")
+        return v.strip()
+
+
+class IntelligentSuggestionParams(BaseModel):
+    """Parameters for intelligent correction suggestions"""
+
+    error_context: Dict[str, Any] = Field(
+        ...,
+        description="Context information about the error"
+    )
+    user_intent: Optional[str] = Field(
+        default=None,
+        description="User's intended purpose or goal"
+    )
+    similar_formulas: Optional[List[str]] = Field(
+        default=None,
+        description="Similar formulas for context"
+    )
+    correction_history: Optional[List[Dict[str, Any]]] = Field(
+        default=None,
+        description="History of previous corrections"
+    )
+    suggestion_count: int = Field(
+        default=3,
+        ge=1,
+        le=10,
+        description="Number of suggestions to generate"
+    )
+    include_alternatives: bool = Field(
+        default=True,
+        description="Whether to include alternative approaches"
+    )
+
+    @field_validator('error_context')
+    def validate_error_context(cls, v):
+        """Validate error context"""
+        if not v:
+            raise ValueError("Error context cannot be empty")
+        return v
+
+
+class ErrorAnalysisParams(BaseModel):
+    """Parameters for comprehensive error analysis"""
+
+    analysis_input: Union[str, Dict[str, Any]] = Field(
+        ...,
+        description="Input to analyze (formula string or analysis data)"
+    )
+    analysis_depth: Literal["surface", "deep", "comprehensive"] = Field(
+        default="deep",
+        description="Depth of error analysis"
+    )
+    include_pattern_analysis: bool = Field(
+        default=True,
+        description="Whether to include pattern-based error analysis"
+    )
+    include_statistical_analysis: bool = Field(
+        default=True,
+        description="Whether to include statistical error analysis"
+    )
+    include_context_analysis: bool = Field(
+        default=True,
+        description="Whether to include contextual error analysis"
+    )
+    generate_report: bool = Field(
+        default=False,
+        description="Whether to generate a detailed error analysis report"
+    )
+
+    @field_validator('analysis_input')
+    def validate_analysis_input(cls, v):
+        """Validate analysis input"""
+        if isinstance(v, str) and not v.strip():
+            raise ValueError("Analysis input cannot be empty")
+        elif isinstance(v, dict) and not v:
+            raise ValueError("Analysis input dictionary cannot be empty")
+        return v
+
+
+class ErrorLearningParams(BaseModel):
+    """Parameters for error learning and improvement"""
+
+    error_cases: List[Dict[str, Any]] = Field(
+        ...,
+        min_items=1,
+        description="List of error cases for learning"
+    )
+    learning_type: Literal["supervised", "unsupervised", "reinforcement"] = Field(
+        default="supervised",
+        description="Type of learning to perform"
+    )
+    update_model: bool = Field(
+        default=True,
+        description="Whether to update the error detection model"
+    )
+    validation_split: float = Field(
+        default=0.2,
+        ge=0.1,
+        le=0.5,
+        description="Fraction of data to use for validation"
+    )
+    learning_rate: float = Field(
+        default=0.01,
+        ge=0.001,
+        le=0.1,
+        description="Learning rate for model updates"
+    )
+    epochs: int = Field(
+        default=10,
+        ge=1,
+        le=100,
+        description="Number of training epochs"
+    )
+
+    @field_validator('error_cases')
+    def validate_error_cases(cls, v):
+        """Validate error cases"""
+        if not v:
+            raise ValueError("At least one error case must be provided")
+        return v
+
+
+# ============================================================================
+# Phase 7.5: Automated Report Generation Parameters
+# ============================================================================
+
+class ReportGenerationParams(BaseModel):
+    """Parameters for automated report generation"""
+
+    report_type: Literal["player_analysis", "team_analysis", "game_analysis", "season_summary", "formula_comparison", "predictive_analysis", "custom"] = Field(
+        default="player_analysis",
+        description="Type of report to generate"
+    )
+    data_source: Dict[str, Any] = Field(
+        ...,
+        description="Data source for the report (player stats, team data, etc.)"
+    )
+    analysis_focus: List[str] = Field(
+        default=["performance", "efficiency", "trends"],
+        description="Focus areas for analysis"
+    )
+    report_template: Optional[str] = Field(
+        default=None,
+        description="Custom report template to use"
+    )
+    include_visualizations: bool = Field(
+        default=True,
+        description="Whether to include charts and visualizations"
+    )
+    include_predictions: bool = Field(
+        default=False,
+        description="Whether to include predictive analytics"
+    )
+    include_comparisons: bool = Field(
+        default=True,
+        description="Whether to include comparative analysis"
+    )
+    output_format: Literal["html", "pdf", "json", "markdown"] = Field(
+        default="html",
+        description="Output format for the report"
+    )
+    customization_options: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Additional customization options"
+    )
+
+    @field_validator('data_source')
+    def validate_data_source(cls, v):
+        """Validate data source"""
+        if not v:
+            raise ValueError("Data source cannot be empty")
+        return v
+
+    @field_validator('analysis_focus')
+    def validate_analysis_focus(cls, v):
+        """Validate analysis focus areas"""
+        valid_focuses = ["performance", "efficiency", "trends", "comparisons", "predictions", "insights"]
+        for focus in v:
+            if focus not in valid_focuses:
+                raise ValueError(f"Invalid analysis focus: {focus}. Must be one of {valid_focuses}")
+        return v
+
+
+class ReportInsightParams(BaseModel):
+    """Parameters for generating insights from analysis data"""
+
+    analysis_data: Dict[str, Any] = Field(
+        ...,
+        description="Analysis data to extract insights from"
+    )
+    insight_types: List[Literal["performance", "trend", "anomaly", "comparison", "prediction", "recommendation"]] = Field(
+        default=["performance", "trend", "comparison"],
+        description="Types of insights to generate"
+    )
+    insight_depth: Literal["basic", "detailed", "comprehensive"] = Field(
+        default="detailed",
+        description="Depth of insight analysis"
+    )
+    include_statistical_significance: bool = Field(
+        default=True,
+        description="Whether to include statistical significance analysis"
+    )
+    confidence_threshold: float = Field(
+        default=0.95,
+        ge=0.8,
+        le=0.99,
+        description="Confidence threshold for insights"
+    )
+    max_insights: int = Field(
+        default=10,
+        ge=1,
+        le=50,
+        description="Maximum number of insights to generate"
+    )
+
+    @field_validator('analysis_data')
+    def validate_analysis_data(cls, v):
+        """Validate analysis data"""
+        if not v:
+            raise ValueError("Analysis data cannot be empty")
+        return v
+
+
+class ReportTemplateParams(BaseModel):
+    """Parameters for report template management"""
+
+    template_name: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="Name of the report template"
+    )
+    template_type: Literal["player", "team", "game", "season", "comparison", "custom"] = Field(
+        ...,
+        description="Type of template"
+    )
+    template_content: Dict[str, Any] = Field(
+        ...,
+        description="Template content structure"
+    )
+    template_variables: List[str] = Field(
+        default=[],
+        description="Variables that can be substituted in the template"
+    )
+    template_styles: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Styling options for the template"
+    )
+    is_public: bool = Field(
+        default=False,
+        description="Whether the template is publicly available"
+    )
+
+    @field_validator('template_name')
+    def validate_template_name(cls, v):
+        """Validate template name"""
+        if not v.strip():
+            raise ValueError("Template name cannot be empty")
+        return v.strip()
+
+    @field_validator('template_content')
+    def validate_template_content(cls, v):
+        """Validate template content"""
+        if not v:
+            raise ValueError("Template content cannot be empty")
+        return v
+
+
+class ReportVisualizationParams(BaseModel):
+    """Parameters for report visualization generation"""
+
+    data_to_visualize: Dict[str, Any] = Field(
+        ...,
+        description="Data to create visualizations from"
+    )
+    visualization_types: List[Literal["line_chart", "bar_chart", "scatter_plot", "heatmap", "pie_chart", "histogram", "box_plot"]] = Field(
+        default=["line_chart", "bar_chart"],
+        description="Types of visualizations to generate"
+    )
+    chart_style: Literal["professional", "modern", "minimal", "colorful"] = Field(
+        default="professional",
+        description="Style of the charts"
+    )
+    include_trend_lines: bool = Field(
+        default=True,
+        description="Whether to include trend lines in charts"
+    )
+    include_statistics: bool = Field(
+        default=True,
+        description="Whether to include statistical annotations"
+    )
+    output_resolution: Literal["low", "medium", "high", "ultra"] = Field(
+        default="high",
+        description="Resolution of generated charts"
+    )
+    color_scheme: Optional[str] = Field(
+        default=None,
+        description="Custom color scheme for charts"
+    )
+
+    @field_validator('data_to_visualize')
+    def validate_data_to_visualize(cls, v):
+        """Validate visualization data"""
+        if not v:
+            raise ValueError("Data to visualize cannot be empty")
+        return v
+
+
+class ReportExportParams(BaseModel):
+    """Parameters for report export functionality"""
+
+    report_content: Dict[str, Any] = Field(
+        ...,
+        description="Report content to export"
+    )
+    export_format: Literal["html", "pdf", "json", "markdown", "docx", "xlsx"] = Field(
+        ...,
+        description="Format to export the report in"
+    )
+    export_options: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Additional export options"
+    )
+    include_metadata: bool = Field(
+        default=True,
+        description="Whether to include report metadata"
+    )
+    compression_level: int = Field(
+        default=6,
+        ge=0,
+        le=9,
+        description="Compression level for exported files"
+    )
+    output_filename: Optional[str] = Field(
+        default=None,
+        description="Custom filename for the exported report"
+    )
+
+    @field_validator('report_content')
+    def validate_report_content(cls, v):
+        """Validate report content"""
+        if not v:
+            raise ValueError("Report content cannot be empty")
+        return v
+
+    @field_validator('output_filename')
+    def validate_output_filename(cls, v):
+        """Validate output filename"""
+        if v is not None and not v.strip():
+            raise ValueError("Output filename cannot be empty")
+        return v.strip() if v else None
+
+
+class ReportSchedulingParams(BaseModel):
+    """Parameters for automated report scheduling"""
+
+    schedule_name: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="Name of the scheduled report"
+    )
+    report_config: Dict[str, Any] = Field(
+        ...,
+        description="Configuration for the report to be generated"
+    )
+    schedule_frequency: Literal["daily", "weekly", "monthly", "quarterly", "custom"] = Field(
+        ...,
+        description="Frequency of report generation"
+    )
+    schedule_time: Optional[str] = Field(
+        default=None,
+        description="Time of day to generate the report (HH:MM format)"
+    )
+    schedule_days: Optional[List[int]] = Field(
+        default=None,
+        ge=0,
+        le=6,
+        description="Days of the week to generate reports (0=Monday, 6=Sunday)"
+    )
+    recipients: List[str] = Field(
+        default=[],
+        description="List of email recipients for the report"
+    )
+    is_active: bool = Field(
+        default=True,
+        description="Whether the schedule is currently active"
+    )
+
+    @field_validator('schedule_name')
+    def validate_schedule_name(cls, v):
+        """Validate schedule name"""
+        if not v.strip():
+            raise ValueError("Schedule name cannot be empty")
+        return v.strip()
+
+    @field_validator('schedule_time')
+    def validate_schedule_time(cls, v):
+        """Validate schedule time format"""
+        if v is not None:
+            import re
+            if not re.match(r'^([01]?[0-9]|2[0-3]):[0-5][0-9]$', v):
+                raise ValueError("Schedule time must be in HH:MM format")
+        return v
+
+
+# ============================================================================
+# Phase 8.1: Advanced Formula Intelligence Parameters
+# ============================================================================
+
+class FormulaDerivationParams(BaseModel):
+    """Parameters for formula derivation and step-by-step breakdown"""
+
+    formula_expression: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Formula expression to derive step-by-step"
+    )
+    derivation_depth: Literal["basic", "detailed", "comprehensive"] = Field(
+        default="detailed",
+        description="Depth of derivation explanation"
+    )
+    include_basketball_context: bool = Field(
+        default=True,
+        description="Whether to include basketball concept explanations"
+    )
+    show_mathematical_steps: bool = Field(
+        default=True,
+        description="Whether to show detailed mathematical steps"
+    )
+    include_visualization: bool = Field(
+        default=False,
+        description="Whether to include visual representation of steps"
+    )
+    target_audience: Literal["beginner", "intermediate", "advanced", "expert"] = Field(
+        default="intermediate",
+        description="Target audience for explanation complexity"
+    )
+
+    @field_validator('formula_expression')
+    def validate_formula_expression(cls, v):
+        """Validate formula expression"""
+        if not v.strip():
+            raise ValueError("Formula expression cannot be empty")
+        return v.strip()
+
+
+class FormulaUsageAnalyticsParams(BaseModel):
+    """Parameters for formula usage analytics and pattern analysis"""
+
+    analysis_period: Literal["hour", "day", "week", "month", "all"] = Field(
+        default="week",
+        description="Time period for usage analysis"
+    )
+    formula_categories: Optional[List[str]] = Field(
+        default=None,
+        description="Specific formula categories to analyze"
+    )
+    include_performance_metrics: bool = Field(
+        default=True,
+        description="Whether to include performance analysis"
+    )
+    include_user_patterns: bool = Field(
+        default=True,
+        description="Whether to include user behavior patterns"
+    )
+    generate_recommendations: bool = Field(
+        default=True,
+        description="Whether to generate usage recommendations"
+    )
+    export_format: Literal["json", "csv", "report"] = Field(
+        default="json",
+        description="Format for exporting analytics data"
+    )
+
+
+class FormulaOptimizationParams(BaseModel):
+    """Parameters for formula optimization and performance analysis"""
+
+    formula_expression: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Formula to optimize"
+    )
+    optimization_goals: List[Literal["speed", "accuracy", "simplicity", "memory"]] = Field(
+        default=["speed", "accuracy"],
+        description="Optimization goals to prioritize"
+    )
+    test_data_size: int = Field(
+        default=1000,
+        ge=100,
+        le=100000,
+        description="Size of test dataset for optimization"
+    )
+    include_alternatives: bool = Field(
+        default=True,
+        description="Whether to suggest alternative formulations"
+    )
+    benchmark_against_known: bool = Field(
+        default=True,
+        description="Whether to benchmark against known implementations"
+    )
+    optimization_level: Literal["basic", "aggressive", "comprehensive"] = Field(
+        default="basic",
+        description="Level of optimization to perform"
+    )
+
+    @field_validator('formula_expression')
+    def validate_formula_expression(cls, v):
+        """Validate formula expression"""
+        if not v.strip():
+            raise ValueError("Formula expression cannot be empty")
+        return v.strip()
+
+
+class FormulaInsightParams(BaseModel):
+    """Parameters for generating formula insights and recommendations"""
+
+    analysis_context: Dict[str, Any] = Field(
+        ...,
+        description="Context for insight generation"
+    )
+    insight_types: List[Literal["performance", "usage", "optimization", "educational", "comparison"]] = Field(
+        default=["performance", "usage"],
+        description="Types of insights to generate"
+    )
+    include_predictions: bool = Field(
+        default=False,
+        description="Whether to include predictive insights"
+    )
+    include_historical_trends: bool = Field(
+        default=True,
+        description="Whether to include historical trend analysis"
+    )
+    confidence_threshold: float = Field(
+        default=0.7,
+        ge=0.0,
+        le=1.0,
+        description="Minimum confidence threshold for insights"
+    )
+    max_insights: int = Field(
+        default=10,
+        ge=1,
+        le=50,
+        description="Maximum number of insights to generate"
+    )
+
+    @field_validator('analysis_context')
+    def validate_analysis_context(cls, v):
+        """Validate analysis context"""
+        if not v:
+            raise ValueError("Analysis context cannot be empty")
+        return v
+
+
+class FormulaComparisonParams(BaseModel):
+    """Parameters for comparing different formula implementations"""
+
+    formulas_to_compare: List[str] = Field(
+        ...,
+        min_items=2,
+        max_items=10,
+        description="List of formulas to compare"
+    )
+    comparison_metrics: List[Literal["accuracy", "speed", "complexity", "readability", "memory"]] = Field(
+        default=["accuracy", "speed"],
+        description="Metrics to use for comparison"
+    )
+    test_scenarios: Optional[List[Dict[str, Any]]] = Field(
+        default=None,
+        description="Specific test scenarios for comparison"
+    )
+    include_visualization: bool = Field(
+        default=True,
+        description="Whether to include comparison visualizations"
+    )
+    generate_ranking: bool = Field(
+        default=True,
+        description="Whether to generate formula rankings"
+    )
+    include_recommendations: bool = Field(
+        default=True,
+        description="Whether to include usage recommendations"
+    )
+
+    @field_validator('formulas_to_compare')
+    def validate_formulas_to_compare(cls, v):
+        """Validate formulas to compare"""
+        if len(v) < 2:
+            raise ValueError("At least 2 formulas must be provided for comparison")
+        return v
+
+
+class FormulaLearningParams(BaseModel):
+    """Parameters for adaptive formula learning and improvement"""
+
+    learning_data: List[Dict[str, Any]] = Field(
+        ...,
+        min_items=1,
+        description="Data for learning and improvement"
+    )
+    learning_objective: Literal["accuracy", "performance", "user_satisfaction", "comprehensive"] = Field(
+        default="comprehensive",
+        description="Primary learning objective"
+    )
+    adaptation_rate: float = Field(
+        default=0.1,
+        ge=0.01,
+        le=1.0,
+        description="Rate of adaptation and learning"
+    )
+    include_validation: bool = Field(
+        default=True,
+        description="Whether to include validation in learning process"
+    )
+    update_frequency: Literal["immediate", "batch", "scheduled"] = Field(
+        default="batch",
+        description="Frequency of model updates"
+    )
+    learning_history_size: int = Field(
+        default=1000,
+        ge=100,
+        le=10000,
+        description="Size of learning history to maintain"
+    )
+
+    @field_validator('learning_data')
+    def validate_learning_data(cls, v):
+        """Validate learning data"""
+        if not v:
+            raise ValueError("Learning data cannot be empty")
+        return v
+
+
+# ============================================================================
+# Phase 9.1: Advanced Formula Intelligence Parameters
+# ============================================================================
+
+class FormulaIntelligenceAnalysisParams(BaseModel):
+    """Parameters for AI-powered formula analysis"""
+
+    formula_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="ID of the formula to analyze"
+    )
+    analysis_types: List[Literal["performance", "complexity", "accuracy", "optimization", "pattern", "correlation", "prediction", "insight"]] = Field(
+        default=["performance", "complexity", "accuracy"],
+        description="Types of analysis to perform"
+    )
+    input_data: Optional[Dict[str, List[float]]] = Field(
+        default=None,
+        description="Optional input data for analysis"
+    )
+    analysis_depth: Literal["basic", "detailed", "comprehensive"] = Field(
+        default="comprehensive",
+        description="Depth of analysis to perform"
+    )
+    include_optimization: bool = Field(
+        default=True,
+        description="Whether to include optimization analysis"
+    )
+    include_insights: bool = Field(
+        default=True,
+        description="Whether to include intelligent insights"
+    )
+    confidence_threshold: float = Field(
+        default=0.8,
+        ge=0.0,
+        le=1.0,
+        description="Minimum confidence threshold for insights"
+    )
+
+
+class FormulaIntelligenceOptimizationParams(BaseModel):
+    """Parameters for intelligent formula optimization"""
+
+    formula_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="ID of the formula to optimize"
+    )
+    optimization_objectives: List[Literal["accuracy", "speed", "simplicity", "robustness", "interpretability", "generalization"]] = Field(
+        default=["accuracy", "speed"],
+        description="Objectives for optimization"
+    )
+    input_data: Optional[Dict[str, List[float]]] = Field(
+        default=None,
+        description="Optional input data for optimization"
+    )
+    optimization_method: Literal["genetic_algorithm", "gradient_descent", "simulated_annealing", "particle_swarm"] = Field(
+        default="genetic_algorithm",
+        description="Method for optimization"
+    )
+    max_iterations: int = Field(
+        default=100,
+        ge=10,
+        le=1000,
+        description="Maximum optimization iterations"
+    )
+    target_improvement: float = Field(
+        default=0.1,
+        ge=0.01,
+        le=1.0,
+        description="Target improvement percentage"
+    )
+
+
+class IntelligentInsightGenerationParams(BaseModel):
+    """Parameters for generating intelligent insights"""
+
+    analysis_context: Dict[str, Any] = Field(
+        ...,
+        description="Context from previous analyses"
+    )
+    insight_types: List[Literal["performance_trend", "correlation_discovery", "anomaly_detection", "optimization_opportunity", "pattern_recognition", "predictive_insight", "formula_improvement"]] = Field(
+        default=["performance_trend", "correlation_discovery", "optimization_opportunity"],
+        description="Types of insights to generate"
+    )
+    data_context: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Optional data context"
+    )
+    insight_depth: Literal["basic", "detailed", "comprehensive"] = Field(
+        default="comprehensive",
+        description="Depth of insight generation"
+    )
+    max_insights: int = Field(
+        default=10,
+        ge=1,
+        le=50,
+        description="Maximum number of insights to generate"
+    )
+    confidence_threshold: float = Field(
+        default=0.8,
+        ge=0.0,
+        le=1.0,
+        description="Minimum confidence threshold for insights"
+    )
+
+
+class FormulaPatternDiscoveryParams(BaseModel):
+    """Parameters for discovering patterns across formulas"""
+
+    formula_ids: List[str] = Field(
+        ...,
+        min_items=2,
+        max_items=20,
+        description="List of formula IDs to analyze"
+    )
+    pattern_types: List[Literal["linear", "polynomial", "exponential", "logarithmic", "periodic", "trend", "correlation"]] = Field(
+        default=["linear", "polynomial", "correlation"],
+        description="Types of patterns to look for"
+    )
+    analysis_depth: Literal["basic", "detailed", "comprehensive"] = Field(
+        default="comprehensive",
+        description="Depth of pattern analysis"
+    )
+    include_correlations: bool = Field(
+        default=True,
+        description="Whether to include correlation analysis"
+    )
+    include_optimizations: bool = Field(
+        default=True,
+        description="Whether to include optimization analysis"
+    )
+
+
+class FormulaPerformanceAnalysisParams(BaseModel):
+    """Parameters for formula performance analysis"""
+
+    formula_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="ID of the formula to analyze"
+    )
+    performance_metrics: List[Literal["accuracy", "speed", "memory", "scalability", "robustness"]] = Field(
+        default=["accuracy", "speed"],
+        description="Performance metrics to analyze"
+    )
+    test_data: Optional[Dict[str, List[float]]] = Field(
+        default=None,
+        description="Test data for performance analysis"
+    )
+    benchmark_formulas: Optional[List[str]] = Field(
+        default=None,
+        description="Formulas to benchmark against"
+    )
+    include_comparison: bool = Field(
+        default=True,
+        description="Whether to include comparison analysis"
+    )
+
+
+class FormulaComplexityAnalysisParams(BaseModel):
+    """Parameters for formula complexity analysis"""
+
+    formula_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="ID of the formula to analyze"
+    )
+    complexity_metrics: List[Literal["cyclomatic", "cognitive", "halstead", "maintainability", "readability"]] = Field(
+        default=["cyclomatic", "cognitive", "maintainability"],
+        description="Complexity metrics to calculate"
+    )
+    include_recommendations: bool = Field(
+        default=True,
+        description="Whether to include complexity reduction recommendations"
+    )
+    target_complexity_level: Literal["simple", "moderate", "complex", "very_complex"] = Field(
+        default="moderate",
+        description="Target complexity level for recommendations"
+    )
+
+class UsageTrackingParams(BaseModel):
+    """Parameters for tracking formula usage patterns"""
+
+    tracking_period: Literal["hour", "day", "week", "month", "year", "all"] = Field(
+        default="week",
+        description="Time period for usage tracking"
+    )
+    formula_categories: Optional[List[str]] = Field(
+        default=None,
+        description="Specific formula categories to track"
+    )
+    user_segments: Optional[List[str]] = Field(
+        default=None,
+        description="User segments to analyze (e.g., 'beginner', 'expert')"
+    )
+    include_performance_metrics: bool = Field(
+        default=True,
+        description="Whether to include performance tracking"
+    )
+    include_user_behavior: bool = Field(
+        default=True,
+        description="Whether to include user behavior analysis"
+    )
+    real_time_tracking: bool = Field(
+        default=False,
+        description="Whether to enable real-time tracking"
+    )
+
+
+class UsageInsightParams(BaseModel):
+    """Parameters for generating usage insights"""
+
+    insight_categories: List[Literal["frequency", "performance", "trends", "patterns", "recommendations"]] = Field(
+        default=["frequency", "performance", "trends"],
+        description="Categories of insights to generate"
+    )
+    analysis_depth: Literal["surface", "deep", "comprehensive"] = Field(
+        default="deep",
+        description="Depth of analysis to perform"
+    )
+    include_predictions: bool = Field(
+        default=True,
+        description="Whether to include predictive insights"
+    )
+    include_comparisons: bool = Field(
+        default=True,
+        description="Whether to include comparative analysis"
+    )
+    confidence_threshold: float = Field(
+        default=0.8,
+        ge=0.0,
+        le=1.0,
+        description="Minimum confidence threshold for insights"
+    )
+    max_insights: int = Field(
+        default=15,
+        ge=1,
+        le=100,
+        description="Maximum number of insights to generate"
+    )
+
+
+class UsageOptimizationParams(BaseModel):
+    """Parameters for usage-based optimization"""
+
+    optimization_focus: List[Literal["performance", "usability", "efficiency", "user_satisfaction"]] = Field(
+        default=["performance", "usability"],
+        description="Focus areas for optimization"
+    )
+    target_metrics: Optional[List[str]] = Field(
+        default=None,
+        description="Specific metrics to optimize"
+    )
+    optimization_method: Literal["automatic", "guided", "custom"] = Field(
+        default="guided",
+        description="Method for optimization"
+    )
+    include_ab_testing: bool = Field(
+        default=False,
+        description="Whether to include A/B testing recommendations"
+    )
+    optimization_scope: Literal["formula", "interface", "workflow", "all"] = Field(
+        default="formula",
+        description="Scope of optimization"
+    )
+
+
+class UsageReportingParams(BaseModel):
+    """Parameters for generating usage reports"""
+
+    report_type: Literal["summary", "detailed", "executive", "technical", "custom"] = Field(
+        default="summary",
+        description="Type of report to generate"
+    )
+    report_period: Literal["daily", "weekly", "monthly", "quarterly", "yearly"] = Field(
+        default="weekly",
+        description="Period covered by the report"
+    )
+    include_visualizations: bool = Field(
+        default=True,
+        description="Whether to include charts and graphs"
+    )
+    include_recommendations: bool = Field(
+        default=True,
+        description="Whether to include actionable recommendations"
+    )
+    include_benchmarks: bool = Field(
+        default=True,
+        description="Whether to include performance benchmarks"
+    )
+    export_format: Literal["html", "pdf", "json", "csv", "excel"] = Field(
+        default="html",
+        description="Format for exporting the report"
+    )
+
+
+class UsageAlertParams(BaseModel):
+    """Parameters for setting up usage alerts"""
+
+    alert_conditions: List[Dict[str, Any]] = Field(
+        ...,
+        min_items=1,
+        description="Conditions that trigger alerts"
+    )
+    alert_types: List[Literal["email", "webhook", "dashboard", "sms"]] = Field(
+        default=["email"],
+        description="Types of alerts to send"
+    )
+    alert_frequency: Literal["immediate", "hourly", "daily", "weekly"] = Field(
+        default="immediate",
+        description="Frequency of alert checks"
+    )
+    alert_thresholds: Optional[Dict[str, float]] = Field(
+        default=None,
+        description="Threshold values for alert conditions"
+    )
+    include_context: bool = Field(
+        default=True,
+        description="Whether to include contextual information in alerts"
+    )
+
+    @field_validator('alert_conditions')
+    def validate_alert_conditions(cls, v):
+        """Validate alert conditions"""
+        if not v:
+            raise ValueError("At least one alert condition must be provided")
+        return v
+
+
+class UsageDashboardParams(BaseModel):
+    """Parameters for creating usage dashboards"""
+
+    dashboard_type: Literal["overview", "detailed", "real_time", "custom"] = Field(
+        default="overview",
+        description="Type of dashboard to create"
+    )
+    dashboard_sections: List[Literal["usage_stats", "performance", "trends", "recommendations", "alerts"]] = Field(
+        default=["usage_stats", "performance", "trends"],
+        description="Sections to include in the dashboard"
+    )
+    refresh_interval: int = Field(
+        default=300,
+        ge=60,
+        le=3600,
+        description="Dashboard refresh interval in seconds"
+    )
+    include_filters: bool = Field(
+        default=True,
+        description="Whether to include filtering options"
+    )
+    include_exports: bool = Field(
+        default=True,
+        description="Whether to include export functionality"
+    )
+    customization_options: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Additional customization options"
+    )
+
+
+# ============================================================================
+# Phase 9.2: Multi-Modal Formula Processing Parameters
+# ============================================================================
+
+class TextFormulaProcessingParams(BaseModel):
+    """Parameters for text-based formula processing"""
+
+    text: str = Field(
+        ...,
+        min_length=1,
+        max_length=5000,
+        description="Input text containing formula descriptions"
+    )
+    context: Optional[str] = Field(
+        default=None,
+        max_length=100,
+        description="Optional context (e.g., \"basketball\", \"statistics\")"
+    )
+    confidence_threshold: float = Field(
+        default=0.7,
+        ge=0.0,
+        le=1.0,
+        description="Minimum confidence threshold for extraction"
+    )
+    extraction_methods: List[Literal["direct", "pattern", "nlp", "context"]] = Field(
+        default=["direct", "pattern", "context"],
+        description="Methods to use for formula extraction"
+    )
+    include_validation: bool = Field(
+        default=True,
+        description="Whether to include formula validation"
+    )
+
+
+class ImageFormulaProcessingParams(BaseModel):
+    """Parameters for image-based formula processing"""
+
+    image_data: str = Field(
+        ...,
+        min_length=1,
+        description="Image data (base64 string or file path)"
+    )
+    image_format: Literal["base64", "file_path", "url"] = Field(
+        default="base64",
+        description="Format of the image data"
+    )
+    confidence_threshold: float = Field(
+        default=0.7,
+        ge=0.0,
+        le=1.0,
+        description="Minimum confidence threshold for extraction"
+    )
+    preprocessing_options: List[Literal["grayscale", "threshold", "denoise", "enhance"]] = Field(
+        default=["grayscale", "threshold"],
+        description="Image preprocessing options"
+    )
+    ocr_language: str = Field(
+        default="eng",
+        max_length=10,
+        description="OCR language code"
+    )
+    include_text_extraction: bool = Field(
+        default=True,
+        description="Whether to include raw text extraction"
+    )
+
+
+class DataFormulaProcessingParams(BaseModel):
+    """Parameters for data-driven formula generation"""
+
+    data: Dict[str, List[float]] = Field(
+        ...,
+        min_items=2,
+        description="Dictionary with variable names as keys and data lists as values"
+    )
+    target_variable: str = Field(
+        ...,
+        min_length=1,
+        max_length=50,
+        description="Name of the target variable"
+    )
+    method: Literal["regression", "correlation", "pattern", "symbolic_regression"] = Field(
+        default="regression",
+        description="Method for formula generation"
+    )
+    confidence_threshold: float = Field(
+        default=0.7,
+        ge=0.0,
+        le=1.0,
+        description="Minimum confidence threshold"
+    )
+    include_statistics: bool = Field(
+        default=True,
+        description="Whether to include statistical analysis"
+    )
+    max_complexity: int = Field(
+        default=10,
+        ge=1,
+        le=50,
+        description="Maximum formula complexity"
+    )
+
+    @field_validator("data")
+    def validate_data(cls, v):
+        """Validate data structure"""
+        if not v:
+            raise ValueError("Data dictionary cannot be empty")
+
+        # Check that all values are lists of numbers
+        for key, values in v.items():
+            if not isinstance(values, list):
+                raise ValueError(f"Data for \"{key}\" must be a list")
+            if len(values) < 2:
+                raise ValueError(f"Data for \"{key}\" must have at least 2 values")
+            if not all(isinstance(x, (int, float)) for x in values):
+                raise ValueError(f"All values for \"{key}\" must be numbers")
+
+        return v
+
+
+class CrossModalValidationParams(BaseModel):
+    """Parameters for cross-modal formula validation"""
+
+    formula_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="ID of the formula to validate"
+    )
+    validation_methods: List[Literal["syntax", "semantics", "mathematical", "domain", "consistency"]] = Field(
+        default=["syntax", "semantics", "mathematical"],
+        description="Validation methods to use"
+    )
+    confidence_threshold: float = Field(
+        default=0.8,
+        ge=0.0,
+        le=1.0,
+        description="Minimum confidence threshold"
+    )
+    include_recommendations: bool = Field(
+        default=True,
+        description="Whether to include improvement recommendations"
+    )
+    include_discrepancy_analysis: bool = Field(
+        default=True,
+        description="Whether to include discrepancy analysis"
+    )
+    validation_depth: Literal["basic", "detailed", "comprehensive"] = Field(
+        default="comprehensive",
+        description="Depth of validation to perform"
+    )
+
+
+class MultiModalCapabilitiesParams(BaseModel):
+    """Parameters for getting multi-modal processing capabilities"""
+
+    include_detailed_info: bool = Field(
+        default=False,
+        description="Whether to include detailed capability information"
+    )
+    check_dependencies: bool = Field(
+        default=True,
+        description="Whether to check for required dependencies"
+    )
+    include_performance_info: bool = Field(
+        default=False,
+        description="Whether to include performance information"
+    )
+
+
+# ============================================================================
+# Phase 9.3: Advanced Visualization Engine Parameters
+# ============================================================================
+
+class FormulaVisualizationParams(BaseModel):
+    """Parameters for formula visualization"""
+
+    formula: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Mathematical formula string to visualize"
+    )
+    visualization_type: Literal["formula_graph", "data_plot", "formula_relationship", "interactive_chart", "three_dimensional", "real_time", "static_chart"] = Field(
+        default="formula_graph",
+        description="Type of visualization to create"
+    )
+    chart_type: Literal["line", "scatter", "bar", "histogram", "heatmap", "surface", "contour", "network", "tree", "sankey"] = Field(
+        default="line",
+        description="Type of chart to create"
+    )
+    config: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Visualization configuration options"
+    )
+    variables: Optional[Dict[str, List[float]]] = Field(
+        default=None,
+        description="Variable values for plotting"
+    )
+    export_format: Literal["png", "jpg", "svg", "pdf", "html", "json", "base64"] = Field(
+        default="png",
+        description="Export format for the visualization"
+    )
+
+
+class DataVisualizationParams(BaseModel):
+    """Parameters for data visualization"""
+
+    data: Dict[str, List[float]] = Field(
+        ...,
+        min_items=1,
+        description="Data dictionary with variable names as keys and data lists as values"
+    )
+    visualization_type: Literal["formula_graph", "data_plot", "formula_relationship", "interactive_chart", "three_dimensional", "real_time", "static_chart"] = Field(
+        default="data_plot",
+        description="Type of visualization to create"
+    )
+    chart_type: Literal["line", "scatter", "bar", "histogram", "heatmap", "surface", "contour", "network", "tree", "sankey"] = Field(
+        default="line",
+        description="Type of chart to create"
+    )
+    config: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Visualization configuration options"
+    )
+    export_format: Literal["png", "jpg", "svg", "pdf", "html", "json", "base64"] = Field(
+        default="png",
+        description="Export format for the visualization"
+    )
+
+    @field_validator("data")
+    def validate_data(cls, v):
+        """Validate data structure"""
+        if not v:
+            raise ValueError("Data dictionary cannot be empty")
+
+        # Check that all values are lists of numbers
+        for key, values in v.items():
+            if not isinstance(values, list):
+                raise ValueError(f"Data for '{key}' must be a list")
+            if len(values) < 1:
+                raise ValueError(f"Data for '{key}' must have at least 1 value")
+            if not all(isinstance(x, (int, float)) for x in values):
+                raise ValueError(f"All values for '{key}' must be numbers")
+
+        return v
+
+
+class InteractiveVisualizationParams(BaseModel):
+    """Parameters for interactive visualization"""
+
+    data: Dict[str, Any] = Field(
+        ...,
+        description="Data for interactive visualization"
+    )
+    visualization_type: Literal["formula_graph", "data_plot", "formula_relationship", "interactive_chart", "three_dimensional", "real_time", "static_chart"] = Field(
+        default="interactive_chart",
+        description="Type of visualization to create"
+    )
+    config: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Visualization configuration options"
+    )
+    include_controls: bool = Field(
+        default=True,
+        description="Whether to include interactive controls"
+    )
+    auto_update: bool = Field(
+        default=False,
+        description="Whether to enable automatic updates"
+    )
+
+
+class FormulaRelationshipVisualizationParams(BaseModel):
+    """Parameters for formula relationship visualization"""
+
+    formulas: List[str] = Field(
+        ...,
+        min_items=1,
+        max_items=20,
+        description="List of formula strings to visualize relationships between"
+    )
+    relationships: List[Tuple[str, str, str]] = Field(
+        default=[],
+        description="List of (formula1, formula2, relationship_type) tuples"
+    )
+    config: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Visualization configuration options"
+    )
+    export_format: Literal["png", "jpg", "svg", "pdf", "html", "json", "base64"] = Field(
+        default="png",
+        description="Export format for the visualization"
+    )
+    include_labels: bool = Field(
+        default=True,
+        description="Whether to include formula labels"
+    )
+    show_weights: bool = Field(
+        default=False,
+        description="Whether to show relationship weights"
+    )
+
+
+class VisualizationCapabilitiesParams(BaseModel):
+    """Parameters for getting visualization capabilities"""
+
+    include_detailed_info: bool = Field(
+        default=False,
+        description="Whether to include detailed capability information"
+    )
+    check_dependencies: bool = Field(
+        default=True,
+        description="Whether to check for required dependencies"
+    )
+    include_performance_info: bool = Field(
+        default=False,
+        description="Whether to include performance information"
+    )
+    test_visualizations: bool = Field(
+        default=False,
+        description="Whether to test visualization capabilities"
+    )
+
+
+# ============================================================================
+# Phase 10.1: Production Deployment Pipeline Parameters
+# ============================================================================
+
+class DeploymentParams(BaseModel):
+    """Parameters for application deployment"""
+
+    environment: Literal["development", "staging", "production", "testing"] = Field(
+        ...,
+        description="Target environment for deployment"
+    )
+    version: str = Field(
+        ...,
+        min_length=1,
+        max_length=50,
+        description="Version to deploy (e.g., 'v1.2.3', 'latest')"
+    )
+    strategy: Literal["blue_green", "rolling", "canary", "recreate"] = Field(
+        default="rolling",
+        description="Deployment strategy to use"
+    )
+    config: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Additional deployment configuration options"
+    )
+    replicas: Optional[int] = Field(
+        default=None,
+        ge=1,
+        le=100,
+        description="Number of replicas to deploy"
+    )
+    cpu_limit: Optional[str] = Field(
+        default=None,
+        description="CPU limit per replica (e.g., '1000m', '2')"
+    )
+    memory_limit: Optional[str] = Field(
+        default=None,
+        description="Memory limit per replica (e.g., '1Gi', '2G')"
+    )
+    health_check_path: Optional[str] = Field(
+        default="/health",
+        description="Health check endpoint path"
+    )
+    rollback_enabled: bool = Field(
+        default=True,
+        description="Whether rollback is enabled for this deployment"
+    )
+    auto_rollback_on_failure: bool = Field(
+        default=True,
+        description="Whether to automatically rollback on failure"
+    )
+
+
+class RollbackParams(BaseModel):
+    """Parameters for deployment rollback"""
+
+    deployment_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="ID of the deployment to rollback"
+    )
+    target_version: Optional[str] = Field(
+        default=None,
+        min_length=1,
+        max_length=50,
+        description="Specific version to rollback to (optional)"
+    )
+    force: bool = Field(
+        default=False,
+        description="Force rollback even if target version is older"
+    )
+    preserve_data: bool = Field(
+        default=True,
+        description="Whether to preserve data during rollback"
+    )
+
+
+class HealthCheckParams(BaseModel):
+    """Parameters for health check"""
+
+    endpoint: str = Field(
+        ...,
+        min_length=1,
+        description="Health check endpoint URL"
+    )
+    timeout: int = Field(
+        default=30,
+        ge=1,
+        le=300,
+        description="Timeout in seconds for health check"
+    )
+    retries: int = Field(
+        default=3,
+        ge=0,
+        le=10,
+        description="Number of retry attempts"
+    )
+    interval: int = Field(
+        default=10,
+        ge=1,
+        le=60,
+        description="Interval between retries in seconds"
+    )
+    expected_status_code: int = Field(
+        default=200,
+        ge=100,
+        le=599,
+        description="Expected HTTP status code"
+    )
+
+
+class SecurityScanParams(BaseModel):
+    """Parameters for security scan"""
+
+    image_name: str = Field(
+        ...,
+        min_length=1,
+        description="Docker image name to scan"
+    )
+    scan_type: Literal["vulnerability", "malware", "secrets", "compliance"] = Field(
+        default="vulnerability",
+        description="Type of security scan to perform"
+    )
+    severity_threshold: Literal["critical", "high", "medium", "low"] = Field(
+        default="high",
+        description="Minimum severity threshold for reporting"
+    )
+    fail_on_critical: bool = Field(
+        default=True,
+        description="Whether to fail deployment on critical vulnerabilities"
+    )
+    fail_on_high: bool = Field(
+        default=False,
+        description="Whether to fail deployment on high-severity vulnerabilities"
+    )
+    include_recommendations: bool = Field(
+        default=True,
+        description="Whether to include remediation recommendations"
+    )
+
+
+class PerformanceTestParams(BaseModel):
+    """Parameters for performance test"""
+
+    endpoint: str = Field(
+        ...,
+        min_length=1,
+        description="Endpoint URL to test"
+    )
+    test_config: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Performance test configuration"
+    )
+    duration_seconds: int = Field(
+        default=60,
+        ge=10,
+        le=3600,
+        description="Test duration in seconds"
+    )
+    concurrent_users: int = Field(
+        default=10,
+        ge=1,
+        le=1000,
+        description="Number of concurrent users"
+    )
+    requests_per_second: int = Field(
+        default=100,
+        ge=1,
+        le=10000,
+        description="Target requests per second"
+    )
+    max_response_time_ms: int = Field(
+        default=500,
+        ge=100,
+        le=10000,
+        description="Maximum acceptable response time in milliseconds"
+    )
+    max_error_rate: float = Field(
+        default=0.01,
+        ge=0.0,
+        le=1.0,
+        description="Maximum acceptable error rate (0.0 to 1.0)"
+    )
+
+
+class DeploymentStatusParams(BaseModel):
+    """Parameters for getting deployment status"""
+
+    deployment_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="ID of the deployment to check"
+    )
+    include_logs: bool = Field(
+        default=False,
+        description="Whether to include deployment logs"
+    )
+    include_metrics: bool = Field(
+        default=True,
+        description="Whether to include performance metrics"
+    )
+
+
+class DeploymentListParams(BaseModel):
+    """Parameters for listing deployments"""
+
+    environment: Optional[Literal["development", "staging", "production", "testing"]] = Field(
+        default=None,
+        description="Filter by environment"
+    )
+    status: Optional[Literal["pending", "in_progress", "success", "failed", "rolled_back", "cancelled"]] = Field(
+        default=None,
+        description="Filter by deployment status"
+    )
+    limit: int = Field(
+        default=50,
+        ge=1,
+        le=1000,
+        description="Maximum number of deployments to return"
+    )
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Number of deployments to skip"
+    )
+    include_metadata: bool = Field(
+        default=True,
+        description="Whether to include deployment metadata"
+    )
+
+
+class DeploymentHistoryParams(BaseModel):
+    """Parameters for getting deployment history"""
+
+    environment: Optional[Literal["development", "staging", "production", "testing"]] = Field(
+        default=None,
+        description="Filter by environment"
+    )
+    days: int = Field(
+        default=30,
+        ge=1,
+        le=365,
+        description="Number of days to include in history"
+    )
+    include_rollbacks: bool = Field(
+        default=True,
+        description="Whether to include rollback operations"
+    )
+    include_failed: bool = Field(
+        default=True,
+        description="Whether to include failed deployments"
+    )
+
+
+# ============================================================================
+# Phase 10.2: Performance Monitoring & Optimization Parameters
+# ============================================================================
+
+class PerformanceMonitoringParams(BaseModel):
+    """Parameters for performance monitoring operations"""
+
+    config_path: Optional[str] = Field(
+        default=None,
+        description="Path to performance monitoring configuration file"
+    )
+    collection_interval: Optional[int] = Field(
+        default=None,
+        ge=1,
+        le=300,
+        description="Metrics collection interval in seconds"
+    )
+
+
+class PerformanceMetricParams(BaseModel):
+    """Parameters for recording performance metrics"""
+
+    metric_type: Literal[
+        "cpu_usage", "memory_usage", "disk_usage", "network_io",
+        "response_time", "throughput", "error_rate", "active_connections",
+        "queue_size", "cache_hit_rate", "database_connections",
+        "formula_calculation_time", "api_response_time", "memory_leaks",
+        "garbage_collection"
+    ] = Field(
+        ...,
+        description="Type of metric to record"
+    )
+    value: float = Field(
+        ...,
+        description="Metric value"
+    )
+    tags: Optional[Dict[str, str]] = Field(
+        default=None,
+        description="Optional tags for the metric"
+    )
+
+
+class RequestPerformanceParams(BaseModel):
+    """Parameters for recording request performance"""
+
+    response_time: float = Field(
+        ...,
+        ge=0,
+        description="Response time in milliseconds"
+    )
+    success: bool = Field(
+        ...,
+        description="Whether the request was successful"
+    )
+    endpoint: str = Field(
+        default="",
+        description="API endpoint that was called"
+    )
+
+
+class AlertRuleParams(BaseModel):
+    """Parameters for creating alert rules"""
+
+    metric_type: Literal[
+        "cpu_usage", "memory_usage", "disk_usage", "network_io",
+        "response_time", "throughput", "error_rate", "active_connections",
+        "queue_size", "cache_hit_rate", "database_connections",
+        "formula_calculation_time", "api_response_time", "memory_leaks",
+        "garbage_collection"
+    ] = Field(
+        ...,
+        description="Type of metric to monitor"
+    )
+    threshold: float = Field(
+        ...,
+        description="Threshold value for the alert"
+    )
+    operator: Literal[">", "<", ">=", "<=", "==", "!="] = Field(
+        ...,
+        description="Comparison operator"
+    )
+    severity: Literal["info", "warning", "critical", "emergency"] = Field(
+        ...,
+        description="Alert severity level"
+    )
+    duration_seconds: int = Field(
+        default=60,
+        ge=1,
+        le=3600,
+        description="Duration in seconds before alert triggers"
+    )
+    description: str = Field(
+        default="",
+        description="Description of the alert rule"
+    )
+
+
+class MetricHistoryParams(BaseModel):
+    """Parameters for getting metric history"""
+
+    metric_type: Literal[
+        "cpu_usage", "memory_usage", "disk_usage", "network_io",
+        "response_time", "throughput", "error_rate", "active_connections",
+        "queue_size", "cache_hit_rate", "database_connections",
+        "formula_calculation_time", "api_response_time", "memory_leaks",
+        "garbage_collection"
+    ] = Field(
+        ...,
+        description="Type of metric to get history for"
+    )
+    hours: int = Field(
+        default=24,
+        ge=1,
+        le=168,
+        description="Number of hours of history to retrieve"
+    )
+
+
+class PerformanceReportParams(BaseModel):
+    """Parameters for generating performance reports"""
+
+    hours: int = Field(
+        default=24,
+        ge=1,
+        le=168,
+        description="Number of hours to analyze for the report"
+    )
+    include_recommendations: bool = Field(
+        default=True,
+        description="Whether to include optimization recommendations"
+    )
+    include_alerts: bool = Field(
+        default=True,
+        description="Whether to include alert analysis"
+    )
+
+
+class OptimizationParams(BaseModel):
+    """Parameters for performance optimization"""
+
+    optimization_type: Literal[
+        "memory_optimization", "cpu_optimization", "cache_optimization",
+        "database_optimization", "network_optimization", "formula_optimization",
+        "concurrency_optimization"
+    ] = Field(
+        ...,
+        description="Type of optimization to apply"
+    )
+    auto_apply: bool = Field(
+        default=False,
+        description="Whether to automatically apply the optimization"
+    )
+    dry_run: bool = Field(
+        default=False,
+        description="Whether to simulate the optimization without applying it"
+    )
+
+
+class MonitoringStatusParams(BaseModel):
+    """Parameters for getting monitoring status"""
+
+    include_metrics: bool = Field(
+        default=True,
+        description="Whether to include current metrics in status"
+    )
+    include_alerts: bool = Field(
+        default=True,
+        description="Whether to include active alerts in status"
+    )
+    include_baselines: bool = Field(
+        default=False,
+        description="Whether to include performance baselines"
+    )
+
+
+# ============================================================================
+# Phase 10.3: Documentation & Training Parameters
+# ============================================================================
+
+class DocumentationGenerationParams(BaseModel):
+    """Parameters for generating documentation"""
+
+    title: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        description="Title of the documentation"
+    )
+    description: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Description of the documentation"
+    )
+    doc_type: Literal[
+        "user_guide", "api_documentation", "tutorial", "reference_guide",
+        "training_material", "quick_start", "troubleshooting", "examples"
+    ] = Field(
+        default="user_guide",
+        description="Type of documentation to generate"
+    )
+
+
+class TutorialGenerationParams(BaseModel):
+    """Parameters for generating tutorials"""
+
+    title: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        description="Title of the tutorial"
+    )
+    level: Literal["beginner", "intermediate", "advanced", "expert"] = Field(
+        ...,
+        description="Training difficulty level"
+    )
+    objectives: List[str] = Field(
+        ...,
+        min_items=1,
+        max_items=10,
+        description="Learning objectives for the tutorial"
+    )
+    estimated_duration: Optional[int] = Field(
+        default=None,
+        ge=15,
+        le=480,
+        description="Estimated duration in minutes"
+    )
+
+
+class TrainingModuleParams(BaseModel):
+    """Parameters for creating training modules"""
+
+    title: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        description="Title of the training module"
+    )
+    description: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Description of the training module"
+    )
+    level: Literal["beginner", "intermediate", "advanced", "expert"] = Field(
+        ...,
+        description="Training difficulty level"
+    )
+    prerequisites: Optional[List[str]] = Field(
+        default=None,
+        description="Prerequisites for the training module"
+    )
+    learning_objectives: Optional[List[str]] = Field(
+        default=None,
+        description="Learning objectives for the module"
+    )
+
+
+class QuickStartGuideParams(BaseModel):
+    """Parameters for generating quick start guides"""
+
+    title: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        description="Title of the quick start guide"
+    )
+    include_installation: bool = Field(
+        default=True,
+        description="Whether to include installation instructions"
+    )
+    include_examples: bool = Field(
+        default=True,
+        description="Whether to include code examples"
+    )
+    include_troubleshooting: bool = Field(
+        default=True,
+        description="Whether to include troubleshooting section"
+    )
+
+
+class ComprehensiveDocumentationParams(BaseModel):
+    """Parameters for generating comprehensive documentation"""
+
+    project_title: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        description="Title of the documentation project"
+    )
+    include_user_guide: bool = Field(
+        default=True,
+        description="Whether to include user guide"
+    )
+    include_api_docs: bool = Field(
+        default=True,
+        description="Whether to include API documentation"
+    )
+    include_tutorials: bool = Field(
+        default=True,
+        description="Whether to include tutorials"
+    )
+    include_training_modules: bool = Field(
+        default=True,
+        description="Whether to include training modules"
+    )
+    include_quick_start: bool = Field(
+        default=True,
+        description="Whether to include quick start guide"
+    )
+
+
+class DocumentationExportParams(BaseModel):
+    """Parameters for exporting documentation"""
+
+    doc_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="ID of the documentation to export"
+    )
+    format_type: Literal["markdown", "html", "pdf", "json", "rst"] = Field(
+        ...,
+        description="Output format for the documentation"
+    )
+    include_metadata: bool = Field(
+        default=True,
+        description="Whether to include metadata in export"
+    )
+    custom_styling: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Custom styling options for export"
+    )
+
+
+class DocumentationStatusParams(BaseModel):
+    """Parameters for getting documentation status"""
+
+    include_generated_docs: bool = Field(
+        default=True,
+        description="Whether to include list of generated documents"
+    )
+    include_training_modules: bool = Field(
+        default=True,
+        description="Whether to include list of training modules"
+    )
+    include_file_sizes: bool = Field(
+        default=False,
+        description="Whether to include file sizes"
+    )
+    include_generation_times: bool = Field(
+        default=False,
+        description="Whether to include generation timestamps"
+    )

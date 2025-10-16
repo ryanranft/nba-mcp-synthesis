@@ -1,6 +1,8 @@
 """
 FastMCP Settings for NBA MCP Server
-Environment variable configuration with NBA_MCP_ prefix
+Environment variable configuration with context-rich naming convention
+
+Updated to use the new unified secrets and configuration management system.
 """
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -12,10 +14,12 @@ class NBAMCPSettings(BaseSettings):
     """
     Settings for NBA MCP Server using FastMCP.
 
-    All settings can be configured via environment variables with the prefix NBA_MCP_.
-    For example, NBA_MCP_DEBUG=true will set debug=True.
+    Updated to use context-rich naming convention:
+    - GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW
+    - DB_HOST_NBA_MCP_SYNTHESIS_WORKFLOW
+    - etc.
 
-    Can also be configured via .env file.
+    Can also be configured via .env file or unified configuration system.
     """
 
     model_config = SettingsConfigDict(
@@ -25,6 +29,23 @@ class NBAMCPSettings(BaseSettings):
         nested_model_default_partial_update=True,
         extra="ignore",
     )
+
+    @classmethod
+    def from_unified_config(cls, project: str = 'nba-mcp-synthesis', context: str = 'production'):
+        """Create settings from unified configuration system."""
+        try:
+            from .unified_configuration_manager import UnifiedConfigurationManager
+            config = UnifiedConfigurationManager(project, context)
+
+            # Map unified config to FastMCP settings
+            return cls(
+                debug=config.feature_flags.enable_debug_mode,
+                log_level=config.workflow_config.log_level,
+                # Add other mappings as needed
+            )
+        except Exception as e:
+            print(f"Warning: Could not load unified config: {e}")
+            return cls()
 
     # ==========================================================================
     # Server Settings
@@ -46,19 +67,31 @@ class NBAMCPSettings(BaseSettings):
     # Database Settings (RDS PostgreSQL)
     # ==========================================================================
 
-    rds_host: str = os.getenv("RDS_HOST", "localhost")
+    rds_host: str = (os.getenv("RDS_HOST_NBA_MCP_SYNTHESIS_WORKFLOW") or
+                     os.getenv("RDS_HOST_NBA_MCP_SYNTHESIS_DEVELOPMENT") or
+                     os.getenv("RDS_HOST_NBA_MCP_SYNTHESIS_TEST") or
+                     os.getenv("RDS_HOST", "localhost"))  # Fallback to old name
     """RDS PostgreSQL host"""
 
     rds_port: int = int(os.getenv("RDS_PORT", "5432"))
     """RDS PostgreSQL port"""
 
-    rds_database: str = os.getenv("RDS_DATABASE", "nba_simulator")
+    rds_database: str = (os.getenv("RDS_DATABASE_NBA_MCP_SYNTHESIS_WORKFLOW") or
+                        os.getenv("RDS_DATABASE_NBA_MCP_SYNTHESIS_DEVELOPMENT") or
+                        os.getenv("RDS_DATABASE_NBA_MCP_SYNTHESIS_TEST") or
+                        os.getenv("RDS_DATABASE", "nba_simulator"))  # Fallback to old name
     """RDS database name"""
 
-    rds_username: str = os.getenv("RDS_USERNAME", "postgres")
+    rds_username: str = (os.getenv("RDS_USERNAME_NBA_MCP_SYNTHESIS_WORKFLOW") or
+                        os.getenv("RDS_USERNAME_NBA_MCP_SYNTHESIS_DEVELOPMENT") or
+                        os.getenv("RDS_USERNAME_NBA_MCP_SYNTHESIS_TEST") or
+                        os.getenv("RDS_USERNAME", "postgres"))  # Fallback to old name
     """RDS username"""
 
-    rds_password: str = os.getenv("RDS_PASSWORD", "")
+    rds_password: str = (os.getenv("RDS_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW") or
+                       os.getenv("RDS_PASSWORD_NBA_MCP_SYNTHESIS_DEVELOPMENT") or
+                       os.getenv("RDS_PASSWORD_NBA_MCP_SYNTHESIS_TEST") or
+                       os.getenv("RDS_PASSWORD", ""))  # Fallback to old name
     """RDS password"""
 
     db_pool_size: int = 5
@@ -71,20 +104,32 @@ class NBAMCPSettings(BaseSettings):
     # S3 Settings
     # ==========================================================================
 
-    s3_bucket: str = os.getenv("S3_BUCKET", "nba-sim-raw-data-lake")
+    s3_bucket: str = (os.getenv("S3_BUCKET_NBA_MCP_SYNTHESIS_WORKFLOW") or
+                     os.getenv("S3_BUCKET_NBA_MCP_SYNTHESIS_DEVELOPMENT") or
+                     os.getenv("S3_BUCKET_NBA_MCP_SYNTHESIS_TEST") or
+                     os.getenv("S3_BUCKET", "nba-mcp-books-20251011"))  # Fallback to old name
     """S3 bucket name"""
 
-    s3_region: str = os.getenv("S3_REGION", "us-east-1")
+    s3_region: str = (os.getenv("S3_REGION_NBA_MCP_SYNTHESIS_WORKFLOW") or
+                     os.getenv("S3_REGION_NBA_MCP_SYNTHESIS_DEVELOPMENT") or
+                     os.getenv("S3_REGION_NBA_MCP_SYNTHESIS_TEST") or
+                     os.getenv("S3_REGION", "us-east-1"))  # Fallback to old name
     """S3 region"""
 
     # ==========================================================================
     # AWS Glue Settings
     # ==========================================================================
 
-    glue_database: str = os.getenv("GLUE_DATABASE", "nba_data_catalog")
+    glue_database: str = (os.getenv("GLUE_DATABASE_NBA_MCP_SYNTHESIS_WORKFLOW") or
+                         os.getenv("GLUE_DATABASE_NBA_MCP_SYNTHESIS_DEVELOPMENT") or
+                         os.getenv("GLUE_DATABASE_NBA_MCP_SYNTHESIS_TEST") or
+                         os.getenv("GLUE_DATABASE", "nba_data_catalog"))  # Fallback to old name
     """Glue database name"""
 
-    glue_region: str = os.getenv("GLUE_REGION", "us-east-1")
+    glue_region: str = (os.getenv("GLUE_REGION_NBA_MCP_SYNTHESIS_WORKFLOW") or
+                       os.getenv("GLUE_REGION_NBA_MCP_SYNTHESIS_DEVELOPMENT") or
+                       os.getenv("GLUE_REGION_NBA_MCP_SYNTHESIS_TEST") or
+                       os.getenv("GLUE_REGION", "us-east-1"))  # Fallback to old name
     """Glue region"""
 
     # ==========================================================================
@@ -107,7 +152,10 @@ class NBAMCPSettings(BaseSettings):
     # Slack Settings (Optional)
     # ==========================================================================
 
-    slack_webhook_url: Optional[str] = os.getenv("SLACK_WEBHOOK_URL")
+    slack_webhook_url: Optional[str] = (os.getenv("SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW") or
+                                       os.getenv("SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_DEVELOPMENT") or
+                                       os.getenv("SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_TEST") or
+                                       os.getenv("SLACK_WEBHOOK_URL"))  # Fallback to old name
     """Slack webhook URL for notifications"""
 
     notify_on_success: bool = False

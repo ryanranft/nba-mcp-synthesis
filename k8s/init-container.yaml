@@ -1,0 +1,179 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nba-mcp-synthesis-init-config
+  namespace: nba-mcp-synthesis
+  labels:
+    app: nba-mcp-synthesis
+    environment: production
+    project: nba-mcp-synthesis
+    sport: nba
+    component: init
+data:
+  load_secrets.py: |
+    #!/usr/bin/env python3
+    """
+    Kubernetes Init Container - Secrets Loader
+    Loads secrets from Kubernetes secrets into environment variables
+    """
+
+    import os
+    import sys
+    import logging
+    import json
+    from pathlib import Path
+
+    # Configure logging
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+
+    def load_secrets():
+        """Load secrets from Kubernetes secrets"""
+        logger.info("Loading secrets from Kubernetes secrets...")
+
+        # Define expected secret names
+        expected_secrets = [
+            'GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW',
+            'ANTHROPIC_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW',
+            'DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW',
+            'OPENAI_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW',
+            'DB_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW',
+            'DB_HOST_NBA_MCP_SYNTHESIS_WORKFLOW',
+            'DB_PORT_NBA_MCP_SYNTHESIS_WORKFLOW',
+            'SLACK_WEBHOOK_URL_BIG_CAT_BETS_GLOBAL_WORKFLOW',
+            'LINEAR_API_KEY_BIG_CAT_BETS_GLOBAL_WORKFLOW',
+            'LINEAR_TEAM_ID_BIG_CAT_BETS_GLOBAL_WORKFLOW',
+            'LINEAR_PROJECT_ID_BIG_CAT_BETS_GLOBAL_WORKFLOW'
+        ]
+
+        # Load secrets from environment variables (set by Kubernetes)
+        secrets = {}
+        for secret_name in expected_secrets:
+            value = os.getenv(secret_name)
+            if value:
+                secrets[secret_name] = value
+                logger.debug(f"Loaded secret: {secret_name}")
+            else:
+                logger.warning(f"Secret not found: {secret_name}")
+
+        # Export secrets to a file for the main container
+        secrets_file = Path('/shared/secrets.env')
+        secrets_file.parent.mkdir(parents=True, exist_ok=True)
+
+        with open(secrets_file, 'w') as f:
+            for key, value in secrets.items():
+                f.write(f"export {key}='{value}'\n")
+
+        logger.info(f"Exported {len(secrets)} secrets to {secrets_file}")
+
+        # Create a status file to indicate completion
+        status_file = Path('/shared/secrets_loaded')
+        status_file.write_text('true')
+
+        logger.info("Secrets loading completed successfully")
+
+    if __name__ == '__main__':
+        load_secrets()
+
+  entrypoint.sh: |
+    #!/bin/bash
+    # Kubernetes Init Container Entrypoint
+
+    set -e
+
+    # Configure logging
+    log() {
+        echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $1"
+    }
+
+    log_error() {
+        echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] ERROR: $1" >&2
+    }
+
+    log_success() {
+        echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] SUCCESS: $1"
+    }
+
+    # Load secrets
+    load_secrets() {
+        log "Loading secrets..."
+
+        if [ -f "/app/load_secrets.py" ]; then
+            python3 /app/load_secrets.py
+            if [ $? -eq 0 ]; then
+                log_success "Secrets loaded successfully"
+            else
+                log_error "Failed to load secrets"
+                exit 1
+            fi
+        else
+            log_error "Secrets loader not found"
+            exit 1
+        fi
+    }
+
+    # Wait for dependencies
+    wait_for_dependencies() {
+        log "Waiting for dependencies..."
+
+        # Wait for database if DB_HOST is set
+        if [ -n "$DB_HOST_NBA_MCP_SYNTHESIS_WORKFLOW" ]; then
+            log "Waiting for database at $DB_HOST_NBA_MCP_SYNTHESIS_WORKFLOW..."
+            while ! nc -z "$DB_HOST_NBA_MCP_SYNTHESIS_WORKFLOW" "${DB_PORT_NBA_MCP_SYNTHESIS_WORKFLOW:-5432}"; do
+                log "Database not ready, waiting..."
+                sleep 2
+            done
+            log_success "Database is ready"
+        fi
+
+        # Wait for Redis if REDIS_HOST is set
+        if [ -n "$REDIS_HOST_NBA_MCP_SYNTHESIS_WORKFLOW" ]; then
+            log "Waiting for Redis at $REDIS_HOST_NBA_MCP_SYNTHESIS_WORKFLOW..."
+            while ! nc -z "$REDIS_HOST_NBA_MCP_SYNTHESIS_WORKFLOW" "${REDIS_PORT_NBA_MCP_SYNTHESIS_WORKFLOW:-6379}"; do
+                log "Redis not ready, waiting..."
+                sleep 2
+            done
+            log_success "Redis is ready"
+        fi
+    }
+
+    # Run health check
+    run_health_check() {
+        log "Running health check..."
+
+        # Check if required environment variables are set
+        required_vars=(
+            "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW"
+            "ANTHROPIC_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW"
+            "DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW"
+        )
+
+        for var in "${required_vars[@]}"; do
+            if [ -z "${!var}" ]; then
+                log_error "Required environment variable $var is not set"
+                exit 1
+            fi
+        done
+
+        log_success "Health check passed"
+    }
+
+    # Main execution
+    main() {
+        log "Starting NBA MCP Synthesis init container..."
+
+        # Load secrets
+        load_secrets
+
+        # Wait for dependencies
+        wait_for_dependencies
+
+        # Run health check
+        run_health_check
+
+        log "Init container completed successfully"
+    }
+
+    # Run main function
+    main "$@"
+

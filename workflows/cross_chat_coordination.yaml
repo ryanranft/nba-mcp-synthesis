@@ -68,7 +68,7 @@ steps:
     description: "Combine results from all sources into final report"
     action: claude_synthesis
     params:
-      model: "claude-3-5-sonnet-20241022"
+      model: "${CLAUDE_MODEL:-claude-3-7-sonnet-20250219}"
       context_from_all_steps: true
       task: "Synthesize insights from Claude Code, PyCharm, and MCP data"
       max_tokens: 8000

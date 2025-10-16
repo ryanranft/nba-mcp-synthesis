@@ -20,6 +20,9 @@ from rich.panel import Panel
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+# Import env helper
+from mcp_server.env_helper import get_hierarchical_env
+
 console = Console()
 
 
@@ -94,7 +97,7 @@ class EnvironmentValidator:
         ]
 
         for var, description in required_vars:
-            value = os.getenv(var)
+            value = get_hierarchical_env(var, "NBA_MCP_SYNTHESIS", "WORKFLOW")
 
             if not value:
                 self.results.append(ValidationResult(
@@ -136,7 +139,7 @@ class EnvironmentValidator:
         ]
 
         for var, description in optional_vars:
-            value = os.getenv(var)
+            value = get_hierarchical_env(var, "NBA_MCP_SYNTHESIS", "WORKFLOW")
 
             if not value:
                 self.results.append(ValidationResult(
@@ -181,11 +184,11 @@ class EnvironmentValidator:
         """Test database connectivity"""
         try:
             conn = psycopg2.connect(
-                host=os.getenv('RDS_HOST'),
-                port=os.getenv('RDS_PORT', 5432),
-                database=os.getenv('RDS_DATABASE'),
-                user=os.getenv('RDS_USERNAME'),
-                password=os.getenv('RDS_PASSWORD'),
+                host=get_hierarchical_env('RDS_HOST', "NBA_MCP_SYNTHESIS", "WORKFLOW"),
+                port=get_hierarchical_env('RDS_PORT', "NBA_MCP_SYNTHESIS", "WORKFLOW") or 5432,
+                database=get_hierarchical_env('RDS_DATABASE', "NBA_MCP_SYNTHESIS", "WORKFLOW"),
+                user=get_hierarchical_env('RDS_USERNAME', "NBA_MCP_SYNTHESIS", "WORKFLOW"),
+                password=get_hierarchical_env('RDS_PASSWORD', "NBA_MCP_SYNTHESIS", "WORKFLOW"),
                 connect_timeout=10
             )
 
@@ -216,8 +219,8 @@ class EnvironmentValidator:
     def check_s3_access(self):
         """Test S3 bucket access"""
         try:
-            s3 = boto3.client('s3', region_name=os.getenv('S3_REGION', 'us-east-1'))
-            bucket = os.getenv('S3_BUCKET')
+            s3 = boto3.client('s3', region_name=get_hierarchical_env('S3_REGION', "NBA_MCP_SYNTHESIS", "WORKFLOW") or 'us-east-1')
+            bucket = get_hierarchical_env('S3_BUCKET', "NBA_MCP_SYNTHESIS", "WORKFLOW")
 
             # Try to list objects (limit 1)
             response = s3.list_objects_v2(Bucket=bucket, MaxKeys=1)
@@ -242,7 +245,7 @@ class EnvironmentValidator:
 
     def check_glue_access(self):
         """Test AWS Glue access"""
-        glue_db = os.getenv('GLUE_DATABASE')
+        glue_db = get_hierarchical_env('GLUE_DATABASE', "NBA_MCP_SYNTHESIS", "WORKFLOW")
 
         if not glue_db:
             self.results.append(ValidationResult(
@@ -255,7 +258,7 @@ class EnvironmentValidator:
             return
 
         try:
-            glue = boto3.client('glue', region_name=os.getenv('GLUE_REGION', 'us-east-1'))
+            glue = boto3.client('glue', region_name=get_hierarchical_env('GLUE_REGION', "NBA_MCP_SYNTHESIS", "WORKFLOW") or 'us-east-1')
             response = glue.get_database(Name=glue_db)
 
             # Count tables
@@ -281,7 +284,7 @@ class EnvironmentValidator:
     def check_api_keys(self):
         """Validate API keys for AI models"""
         # DeepSeek
-        deepseek_key = os.getenv('DEEPSEEK_API_KEY')
+        deepseek_key = get_hierarchical_env('DEEPSEEK_API_KEY', "NBA_MCP_SYNTHESIS", "WORKFLOW")
         if deepseek_key and len(deepseek_key) > 10 and not deepseek_key.startswith('your_'):
             self.results.append(ValidationResult(
                 category="API Keys",
@@ -300,7 +303,7 @@ class EnvironmentValidator:
             ))
 
         # Anthropic
-        anthropic_key = os.getenv('ANTHROPIC_API_KEY')
+        anthropic_key = get_hierarchical_env('ANTHROPIC_API_KEY', "NBA_MCP_SYNTHESIS", "WORKFLOW")
         if anthropic_key and len(anthropic_key) > 10 and not anthropic_key.startswith('your_'):
             self.results.append(ValidationResult(
                 category="API Keys",
@@ -319,7 +322,7 @@ class EnvironmentValidator:
             ))
 
         # Ollama (optional)
-        ollama_host = os.getenv('OLLAMA_HOST')
+        ollama_host = get_hierarchical_env('OLLAMA_HOST', "NBA_MCP_SYNTHESIS", "WORKFLOW")
         if ollama_host:
             self.results.append(ValidationResult(
                 category="API Keys",

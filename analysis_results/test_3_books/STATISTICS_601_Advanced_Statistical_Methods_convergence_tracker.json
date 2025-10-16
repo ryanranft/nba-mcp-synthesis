@@ -1,0 +1,154 @@
+{
+  "book_title": "STATISTICS 601 Advanced Statistical Methods",
+  "s3_key": "books/STATISTICS 601 Advanced Statistical Methods ( PDFDrive ).pdf",
+  "start_time": "2025-10-13T10:08:02.594877",
+  "iterations": [
+    {
+      "iteration": 1,
+      "timestamp": "2025-10-13T10:08:03.169241",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 2,
+      "timestamp": "2025-10-13T10:08:03.216926",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 3,
+      "timestamp": "2025-10-13T10:08:03.264136",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 4,
+      "timestamp": "2025-10-13T10:08:03.310569",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 5,
+      "timestamp": "2025-10-13T10:08:03.358419",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 6,
+      "timestamp": "2025-10-13T10:08:03.405913",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 7,
+      "timestamp": "2025-10-13T10:08:03.454238",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 8,
+      "timestamp": "2025-10-13T10:08:03.500988",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 9,
+      "timestamp": "2025-10-13T10:08:03.548277",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 10,
+      "timestamp": "2025-10-13T10:08:03.595331",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 11,
+      "timestamp": "2025-10-13T10:08:03.642051",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 12,
+      "timestamp": "2025-10-13T10:08:03.689015",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 13,
+      "timestamp": "2025-10-13T10:08:03.736501",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 14,
+      "timestamp": "2025-10-13T10:08:03.783875",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 15,
+      "timestamp": "2025-10-13T10:08:03.831461",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    }
+  ],
+  "convergence_achieved": false,
+  "convergence_iteration": null,
+  "total_recommendations": {
+    "critical": 0,
+    "important": 0,
+    "nice_to_have": 0
+  },
+  "new_recommendations": 0,
+  "duplicate_recommendations": 0,
+  "improved_recommendations": 0,
+  "end_time": "2025-10-13T10:08:03.831481",
+  "total_iterations": 15
+}

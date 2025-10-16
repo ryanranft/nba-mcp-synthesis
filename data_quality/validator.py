@@ -80,11 +80,28 @@ class DataValidator:
 
     def _build_postgres_connection_string(self) -> str:
         """Build PostgreSQL connection string from environment variables"""
-        username = os.getenv("RDS_USERNAME")
-        password = os.getenv("RDS_PASSWORD")
-        host = os.getenv("RDS_HOST")
+        # Try new naming convention first, then fallback to old
+        username = (os.getenv("RDS_USERNAME_NBA_MCP_SYNTHESIS_WORKFLOW") or
+                   os.getenv("RDS_USERNAME_NBA_MCP_SYNTHESIS_DEVELOPMENT") or
+                   os.getenv("RDS_USERNAME_NBA_MCP_SYNTHESIS_TEST") or
+                   os.getenv("RDS_USERNAME"))  # Fallback to old name
+        
+        password = (os.getenv("RDS_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW") or
+                   os.getenv("RDS_PASSWORD_NBA_MCP_SYNTHESIS_DEVELOPMENT") or
+                   os.getenv("RDS_PASSWORD_NBA_MCP_SYNTHESIS_TEST") or
+                   os.getenv("RDS_PASSWORD"))  # Fallback to old name
+        
+        host = (os.getenv("RDS_HOST_NBA_MCP_SYNTHESIS_WORKFLOW") or
+               os.getenv("RDS_HOST_NBA_MCP_SYNTHESIS_DEVELOPMENT") or
+               os.getenv("RDS_HOST_NBA_MCP_SYNTHESIS_TEST") or
+               os.getenv("RDS_HOST"))  # Fallback to old name
+        
         port = os.getenv("RDS_PORT", "5432")
-        database = os.getenv("RDS_DATABASE")
+        
+        database = (os.getenv("RDS_DATABASE_NBA_MCP_SYNTHESIS_WORKFLOW") or
+                   os.getenv("RDS_DATABASE_NBA_MCP_SYNTHESIS_DEVELOPMENT") or
+                   os.getenv("RDS_DATABASE_NBA_MCP_SYNTHESIS_TEST") or
+                   os.getenv("RDS_DATABASE"))  # Fallback to old name
 
         if not all([username, password, host, database]):
             raise ValueError(

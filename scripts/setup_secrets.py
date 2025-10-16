@@ -9,6 +9,12 @@ import sys
 from dotenv import load_dotenv
 from pathlib import Path
 
+# Add project root to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# Import env helper
+from mcp_server.env_helper import get_hierarchical_env
+
 def create_secrets():
     """Create secrets in AWS Secrets Manager"""
 
@@ -27,7 +33,7 @@ def create_secrets():
 
     # Verify required variables
     required_vars = ['DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_NAME', 'S3_BUCKET']
-    missing = [var for var in required_vars if not os.getenv(var)]
+    missing = [var for var in required_vars if not get_hierarchical_env(var, "NBA_MCP_SYNTHESIS", "WORKFLOW")]
     if missing:
         print(f"❌ Error: Missing required environment variables:")
         for var in missing:
@@ -35,7 +41,7 @@ def create_secrets():
         sys.exit(1)
 
     # Get region
-    region = os.getenv('AWS_REGION', 'us-east-1')
+    region = get_hierarchical_env('AWS_REGION', "NBA_MCP_SYNTHESIS", "WORKFLOW") or 'us-east-1'
     print(f"📍 AWS Region: {region}")
     print()
 
@@ -56,23 +62,23 @@ def create_secrets():
     # Define secrets
     secrets = {
         'nba-mcp/production/database': {
-            'host': os.getenv('DB_HOST'),
-            'user': os.getenv('DB_USER'),
-            'password': os.getenv('DB_PASSWORD'),
-            'database': os.getenv('DB_NAME'),
-            'port': int(os.getenv('DB_PORT', 5432))
+            'host': get_hierarchical_env('DB_HOST', "NBA_MCP_SYNTHESIS", "WORKFLOW"),
+            'user': get_hierarchical_env('DB_USER', "NBA_MCP_SYNTHESIS", "WORKFLOW"),
+            'password': get_hierarchical_env('DB_PASSWORD', "NBA_MCP_SYNTHESIS", "WORKFLOW"),
+            'database': get_hierarchical_env('DB_NAME', "NBA_MCP_SYNTHESIS", "WORKFLOW"),
+            'port': int(get_hierarchical_env('DB_PORT', "NBA_MCP_SYNTHESIS", "WORKFLOW") or 5432)
         },
         'nba-mcp/production/s3': {
-            'bucket': os.getenv('S3_BUCKET'),
+            'bucket': get_hierarchical_env('S3_BUCKET', "NBA_MCP_SYNTHESIS", "WORKFLOW"),
             'region': region
         }
     }
 
     # Optionally add AWS credentials (if using IAM user instead of role)
-    if os.getenv('AWS_ACCESS_KEY_ID') and os.getenv('AWS_SECRET_ACCESS_KEY'):
+    if get_hierarchical_env('AWS_ACCESS_KEY_ID', "NBA_MCP_SYNTHESIS", "WORKFLOW") and get_hierarchical_env('AWS_SECRET_ACCESS_KEY', "NBA_MCP_SYNTHESIS", "WORKFLOW"):
         secrets['nba-mcp/production/aws'] = {
-            'access_key_id': os.getenv('AWS_ACCESS_KEY_ID'),
-            'secret_access_key': os.getenv('AWS_SECRET_ACCESS_KEY'),
+            'access_key_id': get_hierarchical_env('AWS_ACCESS_KEY_ID', "NBA_MCP_SYNTHESIS", "WORKFLOW"),
+            'secret_access_key': get_hierarchical_env('AWS_SECRET_ACCESS_KEY', "NBA_MCP_SYNTHESIS", "WORKFLOW"),
             'region': region
         }
 

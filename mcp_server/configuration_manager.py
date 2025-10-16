@@ -18,10 +18,31 @@ Features:
 - Schema validation
 
 Use Cases:
-- Multi-environment deployment
-- A/B testing configuration
-- Feature rollout control
-- Configuration as code
+- Multi-environment deployments
+- Feature flag management
+- Configuration hot-swapping
+- Environment-specific overrides
+- Configuration validation
+
+⚠️  DEPRECATION NOTICE ⚠️
+This module is deprecated and will be removed in a future version.
+Please migrate to the new unified configuration system:
+
+1. Use mcp_server.unified_configuration_manager.UnifiedConfigurationManager
+2. Use mcp_server.unified_secrets_manager.UnifiedSecretsManager
+3. Use /Users/ryanranft/load_env_hierarchical.py for loading secrets
+
+Migration Guide:
+- Replace ConfigurationManager with UnifiedConfigurationManager
+- Use context-rich naming convention (e.g., GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW)
+- Load secrets using the hierarchical loader before initializing config
+
+For more details, see:
+- /centralized-secrets-management.plan.md
+- mcp_server/unified_configuration_manager.py
+- mcp_server/unified_secrets_manager.py
+
+This file will be removed in version 2.0.0
 """
 
 import os
@@ -96,6 +117,15 @@ class ConfigurationManager:
     """Centralized configuration manager"""
 
     def __init__(self, environment: str = "development", config_dir: str = "config"):
+        # Deprecation warning
+        import warnings
+        warnings.warn(
+            "ConfigurationManager is deprecated. Use UnifiedConfigurationManager instead. "
+            "See mcp_server/unified_configuration_manager.py for migration guide.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+
         self.environment = environment
         self.config_dir = Path(config_dir)
         self._config: Dict[str, Any] = {}
@@ -106,6 +136,8 @@ class ConfigurationManager:
 
         # Initialize
         self._load_default_config()
+        logger.warning(f"⚠️  DEPRECATED: ConfigurationManager loaded for environment: {environment}")
+        logger.warning("⚠️  Please migrate to UnifiedConfigurationManager")
 
     def _load_default_config(self) -> None:
         """Load default configuration"""

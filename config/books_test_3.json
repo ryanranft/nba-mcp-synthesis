@@ -1,0 +1,91 @@
+{
+    "books": [
+        {
+            "id": "statistics_601",
+            "title": "STATISTICS 601 Advanced Statistical Methods",
+            "author": "Unknown",
+            "s3_path": "books/STATISTICS 601 Advanced Statistical Methods ( PDFDrive ).pdf",
+            "s3_key": "books/STATISTICS 601 Advanced Statistical Methods ( PDFDrive ).pdf",
+            "local_path": "/Users/ryanranft/Downloads/STATISTICS 601 Advanced Statistical Methods ( PDFDrive ).pdf",
+            "format": "pdf",
+            "pages": 0,
+            "category": "statistics",
+            "priority": "high",
+            "status": "pending",
+            "analysis_date": null,
+            "recommendations_count": 0,
+            "convergence_achieved": false
+        },
+        {
+            "id": "basketball_on_paper",
+            "title": "Basketball on Paper",
+            "author": "Dean Oliver",
+            "s3_path": "books/Basketball_on_Paper.pdf",
+            "s3_key": "books/Basketball_on_Paper.pdf",
+            "local_path": "/Users/ryanranft/Downloads/Basketball_on_Paper-pdf.acsm",
+            "format": "acsm",
+            "pages": 0,
+            "category": "basketball_analytics",
+            "priority": "high",
+            "status": "pending",
+            "analysis_date": null,
+            "recommendations_count": 0,
+            "convergence_achieved": false
+        },
+        {
+            "id": "econometric_analysis_greene",
+            "title": "Econometric Analysis",
+            "author": "William H. Greene",
+            "s3_path": "books/econometric-Analysis-Greene.pdf",
+            "s3_key": "books/econometric-Analysis-Greene.pdf",
+            "local_path": "/Users/ryanranft/Downloads/econometric-Analysis-Greene.pdf",
+            "format": "pdf",
+            "pages": 1200,
+            "category": "econometrics",
+            "priority": "medium",
+            "status": "pending",
+            "analysis_date": null,
+            "recommendations_count": 0,
+            "convergence_achieved": false
+        }
+    ],
+    "metadata": {
+        "total_books": 3,
+        "categories": {
+            "statistics": 1,
+            "basketball_analytics": 1,
+            "econometrics": 1
+        },
+        "priorities": {
+            "high": 2,
+            "medium": 1
+        },
+        "status": {
+            "pending": 3
+        },
+        "total_pages": 1200,
+        "created_date": "2025-10-13",
+        "last_updated": "2025-10-13",
+        "test_run": true
+    },
+    "analysis_settings": {
+        "convergence_threshold": 3,
+        "max_iterations": 15,
+        "chunk_size": 50000,
+        "min_recommendations_per_iteration": 5,
+        "strict_convergence": true,
+        "enable_intelligence_layer": true,
+        "enable_project_scanning": true,
+        "enable_deduplication": true
+    },
+    "analysis_config": {
+        "s3_bucket": "nba-mcp-books-20251011",
+        "project_context": "NBA Simulator AWS project - comprehensive basketball analytics platform",
+        "convergence_threshold": 3,
+        "max_iterations": 15,
+        "project_paths": [
+            "/Users/ryanranft/nba-mcp-synthesis",
+            "/Users/ryanranft/nba-simulator-aws"
+        ]
+    }
+}

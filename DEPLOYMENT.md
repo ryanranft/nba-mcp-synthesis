@@ -583,7 +583,7 @@ Before deploying to production, verify:
 - [ ] AWS IAM user has minimal required permissions
 - [ ] S3 bucket has proper access controls
 - [ ] API keys are from production accounts
-- [ ] Slack webhook (if used) is for production channel
+- [ ] Slack webhook (if used) is for production channel (e.g., #all-big-cat-bets)
 
 ### Performance
 

@@ -1,0 +1,247 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nba-mcp-postgres
+  namespace: nba-mcp-synthesis
+  labels:
+    app: nba-mcp-postgres
+    environment: production
+    project: nba-mcp-synthesis
+    sport: nba
+    component: database
+spec:
+  serviceName: nba-mcp-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nba-mcp-postgres
+  template:
+    metadata:
+      labels:
+        app: nba-mcp-postgres
+        environment: production
+        project: nba-mcp-synthesis
+        sport: nba
+        component: database
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: nba-mcp-synthesis-db-secrets
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: nba-mcp-synthesis-db-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nba-mcp-synthesis-db-secrets
+                  key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - nba_mcp_user
+                - -d
+                - nba_mcp_synthesis
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - nba_mcp_user
+                - -d
+                - nba_mcp_synthesis
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "200m"
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-pvc
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        fsGroup: 999
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nba-mcp-postgres
+  namespace: nba-mcp-synthesis
+  labels:
+    app: nba-mcp-postgres
+    environment: production
+    project: nba-mcp-synthesis
+    sport: nba
+    component: database
+spec:
+  selector:
+    app: nba-mcp-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+      protocol: TCP
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: nba-mcp-synthesis
+  labels:
+    app: nba-mcp-postgres
+    environment: production
+    project: nba-mcp-synthesis
+    sport: nba
+    component: database
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: gp2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nba-mcp-redis
+  namespace: nba-mcp-synthesis
+  labels:
+    app: nba-mcp-redis
+    environment: production
+    project: nba-mcp-synthesis
+    sport: nba
+    component: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nba-mcp-redis
+  template:
+    metadata:
+      labels:
+        app: nba-mcp-redis
+        environment: production
+        project: nba-mcp-synthesis
+        sport: nba
+        component: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7
+          ports:
+            - containerPort: 6379
+              name: redis
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nba-mcp-synthesis-redis-secrets
+                  key: REDIS_PASSWORD
+          volumeMounts:
+            - name: redis-storage
+              mountPath: /data
+          livenessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "100m"
+      volumes:
+        - name: redis-storage
+          persistentVolumeClaim:
+            claimName: redis-pvc
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        fsGroup: 999
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nba-mcp-redis
+  namespace: nba-mcp-synthesis
+  labels:
+    app: nba-mcp-redis
+    environment: production
+    project: nba-mcp-synthesis
+    sport: nba
+    component: redis
+spec:
+  selector:
+    app: nba-mcp-redis
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: 6379
+      protocol: TCP
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-pvc
+  namespace: nba-mcp-synthesis
+  labels:
+    app: nba-mcp-redis
+    environment: production
+    project: nba-mcp-synthesis
+    sport: nba
+    component: redis
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: gp2
+

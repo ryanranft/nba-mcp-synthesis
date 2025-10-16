@@ -1,0 +1,90 @@
+version: "3.8"
+
+services:
+  nba-mcp-synthesis-test:
+    build: .
+    container_name: nba-mcp-synthesis-test
+    environment:
+      - PROJECT_NAME=nba-mcp-synthesis
+      - SPORT_NAME=NBA
+      - NBA_MCP_CONTEXT=test
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "8001:8000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    secrets:
+      - mock_api_key
+      - test_db_password
+      - test_db_host
+      - test_db_port
+    depends_on:
+      - postgres-test
+      - redis-test
+    networks:
+      - nba-mcp-network
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  postgres-test:
+    image: postgres:15
+    container_name: nba-mcp-postgres-test
+    environment:
+      - POSTGRES_DB=nba_mcp_synthesis_test
+      - POSTGRES_USER=nba_mcp_test_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/test_db_password
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    secrets:
+      - test_db_password
+    networks:
+      - nba-mcp-network
+    restart: "no"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U nba_mcp_test_user -d nba_mcp_synthesis_test",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-test:
+    image: redis:7
+    container_name: nba-mcp-redis-test
+    volumes:
+      - redis_test_data:/data
+    networks:
+      - nba-mcp-network
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+secrets:
+  mock_api_key:
+    file: ./secrets/MOCK_API_KEY_NBA_MCP_SYNTHESIS_TEST.env
+  test_db_password:
+    file: ./secrets/DB_PASSWORD_NBA_MCP_SYNTHESIS_TEST.env
+  test_db_host:
+    file: ./secrets/DB_HOST_NBA_MCP_SYNTHESIS_TEST.env
+  test_db_port:
+    file: ./secrets/DB_PORT_NBA_MCP_SYNTHESIS_TEST.env
+
+volumes:
+  postgres_test_data:
+  redis_test_data:
+
+networks:
+  nba-mcp-network:
+    driver: bridge
+

@@ -1,0 +1,77 @@
+{
+    "models": {
+        "google_gemini": {
+            "enabled": true,
+            "api_key_env": "GOOGLE_API_KEY",
+            "model_env": "GOOGLE_MODEL",
+            "model": "gemini-2.5-flash",
+            "max_tokens": 8192,
+            "temperature": 0.1,
+            "cost_per_1m_input": 0.0035,
+            "cost_per_1m_output": 0.0105,
+            "role": "reader"
+        },
+        "deepseek": {
+            "enabled": true,
+            "api_key_env": "DEEPSEEK_API_KEY",
+            "model_env": "DEEPSEEK_MODEL",
+            "model": "deepseek-chat",
+            "max_tokens": 4000,
+            "temperature": 0.1,
+            "cost_per_1m_input": 0.14,
+            "cost_per_1m_output": 0.28,
+            "role": "reader"
+        },
+        "claude": {
+            "enabled": true,
+            "api_key_env": "ANTHROPIC_API_KEY",
+            "model_env": "CLAUDE_MODEL",
+            "model": "claude-3-7-sonnet-20250219",
+            "max_tokens": 4000,
+            "temperature": 0.3,
+            "cost_per_1m_input": 3.0,
+            "cost_per_1m_output": 15.0,
+            "role": "synthesizer"
+        },
+        "gpt4": {
+            "enabled": true,
+            "api_key_env": "OPENAI_API_KEY",
+            "model_env": "OPENAI_MODEL",
+            "model": "gpt-4-turbo-preview",
+            "max_tokens": 4000,
+            "temperature": 0.3,
+            "cost_per_1m_input": 10.0,
+            "cost_per_1m_output": 30.0,
+            "role": "synthesizer"
+        }
+    },
+    "analysis_flow": {
+        "stage_1": "Parallel reading by Google Gemini + DeepSeek",
+        "stage_2": "Parallel synthesis by Claude + GPT-4",
+        "stage_3": "Consensus voting (2/2 = Critical, 1/2 = Important)",
+        "stage_4": "Final recommendations with priority classification"
+    },
+    "consensus": {
+        "unanimous_threshold": 2,
+        "majority_threshold": 1,
+        "min_agreement": 1,
+        "similarity_threshold": 0.8
+    },
+    "analysis": {
+        "max_chunk_size": 50000,
+        "overlap_size": 5000,
+        "max_iterations": 5,
+        "parallel_processing": true
+    },
+    "cost_tracking": {
+        "cost_file": "analysis_results/cost_tracking.json",
+        "track_models": [
+            "google_gemini",
+            "deepseek",
+            "claude",
+            "gpt4"
+        ],
+        "budget_limit": 100.0,
+        "alert_threshold": 80.0
+    }
+}

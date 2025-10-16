@@ -16,6 +16,9 @@ from dotenv import load_dotenv
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+# Import env helper
+from mcp_server.env_helper import get_hierarchical_env
+
 from mcp_server.config import MCPConfig
 from mcp_server.connectors.rds_connector import RDSConnector
 from mcp_server.connectors.s3_connector import S3Connector
@@ -199,10 +202,10 @@ def test_project_paths(config: MCPConfig) -> dict:
 def test_api_keys() -> dict:
     """Test if API keys are configured"""
     keys = {
-        "Anthropic": bool(os.getenv("ANTHROPIC_API_KEY")),
-        "OpenAI": bool(os.getenv("OPENAI_API_KEY")),
-        "Google": bool(os.getenv("GOOGLE_API_KEY")),
-        "AWS": bool(os.getenv("AWS_ACCESS_KEY_ID"))
+        "Anthropic": bool(get_hierarchical_env("ANTHROPIC_API_KEY", "NBA_MCP_SYNTHESIS", "WORKFLOW")),
+        "OpenAI": bool(get_hierarchical_env("OPENAI_API_KEY", "NBA_MCP_SYNTHESIS", "WORKFLOW")),
+        "Google": bool(get_hierarchical_env("GOOGLE_API_KEY", "NBA_MCP_SYNTHESIS", "WORKFLOW")),
+        "AWS": bool(get_hierarchical_env("AWS_ACCESS_KEY_ID", "NBA_MCP_SYNTHESIS", "WORKFLOW"))
     }
     
     configured = sum(keys.values())

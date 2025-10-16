@@ -5,6 +5,7 @@ Primary model for mathematical reasoning, SQL optimization, and code generation
 
 from openai import OpenAI, AsyncOpenAI
 import os
+import json
 import logging
 from typing import Dict, Any, Optional, List
 from datetime import datetime
@@ -25,24 +26,34 @@ class DeepSeekModel:
     Pricing: ~$0.14/1M input tokens, $0.28/1M output tokens (20x cheaper than GPT-4)
     """
 
-    def __init__(self, async_mode: bool = True):
+    def __init__(self, api_key: str = None, async_mode: bool = True):
         """
         Initialize DeepSeek client
 
         Args:
+            api_key: DeepSeek API key (if None, will try to get from environment)
             async_mode: Use async client (recommended for better performance)
         """
-        api_key = os.getenv("DEEPSEEK_API_KEY")
-        if not api_key:
-            raise ValueError("DEEPSEEK_API_KEY environment variable is not set")
+        # Try to get API key from parameter or environment
+        if api_key:
+            self.api_key = api_key
+        else:
+            # Try new naming convention first, then fallback to old
+            self.api_key = (os.getenv("DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW") or
+                           os.getenv("DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_DEVELOPMENT") or
+                           os.getenv("DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_TEST") or
+                           os.getenv("DEEPSEEK_API_KEY"))
+
+        if not self.api_key:
+            raise ValueError("DeepSeek API key not provided and not found in environment variables")
 
         base_url = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
         self.model = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
 
         if async_mode:
-            self.client = AsyncOpenAI(api_key=api_key, base_url=base_url)
+            self.client = AsyncOpenAI(api_key=self.api_key, base_url=base_url)
         else:
-            self.client = OpenAI(api_key=api_key, base_url=base_url)
+            self.client = OpenAI(api_key=self.api_key, base_url=base_url)
 
         self.async_mode = async_mode
         logger.info(f"Initialized DeepSeek model: {self.model}")
@@ -319,6 +330,161 @@ Focus on actionable, implementable solutions."""
         input_cost = (usage.prompt_tokens / 1_000_000) * 0.14
         output_cost = (usage.completion_tokens / 1_000_000) * 0.28
         return input_cost + output_cost
+
+    async def analyze_book_content(
+        self,
+        book_content: str,
+        book_metadata: Dict[str, Any],
+        existing_recommendations: Optional[List[Dict[str, Any]]] = None
+    ) -> Dict[str, Any]:
+        """
+        Analyze book content and extract raw recommendations.
+        Parallel to Google's analysis but with DeepSeek's perspective.
+
+        Args:
+            book_content: The full text content of the book.
+            book_metadata: Dictionary containing book title, author, etc.
+            existing_recommendations: List of existing recommendations for context.
+
+        Returns:
+            A dictionary containing DeepSeek's analysis and raw recommendations.
+        """
+        start_time = datetime.now()
+
+        prompt = self._build_extraction_prompt(book_content, book_metadata, existing_recommendations)
+
+        try:
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.1,  # Low temperature for factual extraction
+                max_tokens=4000
+            )
+
+            execution_time = (datetime.now() - start_time).total_seconds()
+
+            # Calculate cost: ~$0.14/1M input, $0.28/1M output
+            input_cost = (response.usage.prompt_tokens / 1_000_000) * 0.14
+            output_cost = (response.usage.completion_tokens / 1_000_000) * 0.28
+            total_cost = input_cost + output_cost
+
+            # Extract text from response
+            response_text = response.choices[0].message.content
+
+            # Attempt to extract JSON recommendations
+            raw_recommendations = self._extract_json_from_response(response_text)
+
+            return {
+                "success": True,
+                "model": "deepseek",
+                "analysis_content": response_text,
+                "raw_recommendations": raw_recommendations,
+                "tokens_input": response.usage.prompt_tokens,
+                "tokens_output": response.usage.completion_tokens,
+                "cost": total_cost,
+                "processing_time": execution_time,
+            }
+
+        except Exception as e:
+            logger.error(f"DeepSeek analysis failed: {e}")
+            return {
+                "success": False,
+                "model": "deepseek",
+                "error": str(e),
+                "processing_time": (datetime.now() - start_time).total_seconds()
+            }
+
+    def _build_extraction_prompt(
+        self,
+        book_content: str,
+        book_metadata: Dict[str, Any],
+        existing_recommendations: Optional[List[Dict[str, Any]]] = None
+    ) -> str:
+        """Build prompt for book content analysis."""
+        title = book_metadata.get('title', 'Unknown')
+        author = book_metadata.get('author', 'Unknown')
+
+        existing_context = ""
+        if existing_recommendations:
+            existing_context = f"""
+EXISTING RECOMMENDATIONS CONTEXT:
+Here are some recommendations already identified from other books or previous analyses. Avoid duplicating these, but identify new or significantly different enhancements:
+{json.dumps(existing_recommendations[:5], indent=2)}
+"""
+
+        prompt = f"""You are an expert technical book analyst for an NBA basketball analytics and simulation project.
+Your task is to thoroughly read and analyze the following technical book content.
+
+IMPORTANT: This is a comprehensive technical textbook. Extract ALL relevant recommendations, including:
+- Statistical methods and models
+- Data analysis techniques
+- Implementation approaches
+- Best practices
+- Mathematical frameworks
+- Validation strategies
+
+Aim for 20-50 recommendations minimum. Be thorough and comprehensive.
+
+BOOK TITLE: "{title}"
+BOOK AUTHOR: {author}
+
+BOOK CONTENT:
+{book_content}
+
+{existing_context}
+
+After analyzing the content, provide two main outputs:
+
+1. **Comprehensive Analysis Summary**: A detailed summary of the book's key concepts, methodologies, and technical insights that are relevant to building and enhancing an NBA basketball analytics and simulation platform on AWS. Focus on aspects related to data processing, machine learning, statistical modeling, system architecture, performance optimization, and data quality.
+
+2. **Raw Recommendations**: A list of potential technical recommendations directly extracted from the book. These should be raw ideas, concepts, or features that could be implemented. Do NOT synthesize or filter them yet; just extract them as they appear or are strongly implied. Each recommendation should have a brief title and description.
+
+OUTPUT FORMAT:
+Provide your response in a structured format, starting with the analysis summary, followed by a JSON array of raw recommendations.
+
+---
+## Comprehensive Analysis Summary
+[Your detailed summary here, covering key concepts, methodologies, and technical insights relevant to NBA analytics on AWS.]
+
+---
+## Raw Recommendations
+```json
+[
+  {{
+    "title": "Raw Recommendation Title 1",
+    "description": "Brief description of the raw recommendation 1",
+    "source_chapter_or_section": "Chapter X"
+  }},
+  {{
+    "title": "Raw Recommendation Title 2",
+    "description": "Brief description of the raw recommendation 2",
+    "source_chapter_or_section": "Chapter Y"
+  }}
+]
+```
+IMPORTANT: Ensure the JSON is valid and correctly formatted. Do not add any extra text outside the JSON block for the raw recommendations section.
+"""
+        return prompt
+
+    def _extract_json_from_response(self, response_text: str) -> List[Dict[str, Any]]:
+        """Extracts the JSON array from the response text."""
+        try:
+            # Find the start and end of the JSON block
+            json_start = response_text.find('```json')
+            json_end = response_text.rfind('```')
+
+            if json_start != -1 and json_end != -1 and json_end > json_start:
+                json_str = response_text[json_start + len('```json'):json_end].strip()
+                return json.loads(json_str)
+            else:
+                logger.warning("No JSON block found in DeepSeek response.")
+                return []
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to decode JSON from DeepSeek response: {e}")
+            return []
+        except Exception as e:
+            logger.error(f"Error extracting JSON from response: {e}")
+            return []
 
     async def close(self):
         """Close the client connection"""

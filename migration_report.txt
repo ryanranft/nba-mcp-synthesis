@@ -1,0 +1,439 @@
+============================================================
+NAMING CONVENTION COMPLIANCE REPORT
+============================================================
+
+📊 SUMMARY:
+   Total files scanned: 114
+   Compliant files: 8
+   Violations found: 106
+   Compliance rate: 7.0%
+
+⚠️  WARNINGS (106):
+   WORKFLOW_ENABLE_LINEAR_ISSUES_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/WORKFLOW_ENABLE_LINEAR_ISSUES_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: LINEAR_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: GOOGLE_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   LINEAR_PROJECT_ID_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/LINEAR_PROJECT_ID_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: LINEAR_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   OPENAI_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/OPENAI_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: OPENAI_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   LINEAR_TEAM_ID_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/LINEAR_TEAM_ID_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: LINEAR_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   WORKFLOW_LOG_LEVEL_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/WORKFLOW_LOG_LEVEL_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: DEEPSEEK_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   WORKFLOW_ENABLE_SLACK_THREADS_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/WORKFLOW_ENABLE_SLACK_THREADS_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: SLACK_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   WORKFLOW_ENABLE_NOTIFICATIONS_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/WORKFLOW_ENABLE_NOTIFICATIONS_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   WORKFLOW_RETRY_BACKOFF_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/WORKFLOW_RETRY_BACKOFF_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   LINEAR_API_KEY_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/LINEAR_API_KEY_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: LINEAR_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: SLACK_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   ANTHROPIC_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/ANTHROPIC_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: ANTHROPIC_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   WORKFLOW_RETRY_DELAY_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/WORKFLOW_RETRY_DELAY_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   WORKFLOW_NOTIFICATION_BATCH_SIZE_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/WORKFLOW_NOTIFICATION_BATCH_SIZE_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: DEEPSEEK_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   WORKFLOW_MAX_COST_PER_BOOK_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/WORKFLOW_MAX_COST_PER_BOOK_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   WORKFLOW_CRITICAL_STAGES_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/WORKFLOW_CRITICAL_STAGES_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   WORKFLOW_BUDGET_ALERT_THRESHOLD_2_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/WORKFLOW_BUDGET_ALERT_THRESHOLD_2_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   WORKFLOW_ENABLE_CHECKPOINTS_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/WORKFLOW_ENABLE_CHECKPOINTS_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   WORKFLOW_CHECKPOINT_INTERVAL_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/WORKFLOW_CHECKPOINT_INTERVAL_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: GOOGLE_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   WORKFLOW_MAX_RETRIES_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/WORKFLOW_MAX_RETRIES_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   SLACK_CHANNEL_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/SLACK_CHANNEL_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: SLACK_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   LINEAR_ENABLE_DEDUPLICATION_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/LINEAR_ENABLE_DEDUPLICATION_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: LINEAR_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   WORKFLOW_BUDGET_ALERT_THRESHOLD_1_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/WORKFLOW_BUDGET_ALERT_THRESHOLD_1_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   ANTHROPIC_API_KEY_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/ANTHROPIC_API_KEY_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: ANTHROPIC_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   TEST_SECRET_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/TEST_SECRET_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   LINEAR_SIMILARITY_THRESHOLD_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/LINEAR_SIMILARITY_THRESHOLD_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: LINEAR_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   OPENAI_API_KEY_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/OPENAI_API_KEY_NBA_MCP_SYNTHESIS_WORFKLOW_NBA_MCP_SYNTHESIS_WORKFLOW.env
+      Suggested: OPENAI_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   NBA_MCP_DB_TIMEOUT_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/NBA_MCP_DB_TIMEOUT_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: DB_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   WORKFLOW_ENABLE_NOTIFICATIONS_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/WORKFLOW_ENABLE_NOTIFICATIONS_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   DEEPSEEK_BASE_URL_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/DEEPSEEK_BASE_URL_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: DEEPSEEK_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   LOG_FILE_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/LOG_FILE_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: DEEPSEEK_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   MCP_LOG_LEVEL_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/MCP_LOG_LEVEL_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SLACK_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   OPENAI_MODEL_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/OPENAI_MODEL_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: OPENAI_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   LINEAR_API_KEY_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/LINEAR_API_KEY_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: LINEAR_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   CLAUDE_MODEL_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/CLAUDE_MODEL_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: GOOGLE_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   GOOGLE_MODEL_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/GOOGLE_MODEL_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: GOOGLE_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   ENVIRONMENT_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/ENVIRONMENT_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   WORKFLOW_CRITICAL_STAGES_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/WORKFLOW_CRITICAL_STAGES_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   RDS_DATABASE_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/RDS_DATABASE_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: DATABASE_ENV_NBA_MCP_SYNTHESIS
+
+   AWS_REGION_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/AWS_REGION_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: AWS_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   WORKFLOW_ENABLE_LINEAR_ISSUES_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/WORKFLOW_ENABLE_LINEAR_ISSUES_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: LINEAR_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   ANTHROPIC_API_KEY_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/ANTHROPIC_API_KEY_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: ANTHROPIC_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   MCP_TOOL_CONCURRENCY_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/MCP_TOOL_CONCURRENCY_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   GLUE_DATABASE_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/GLUE_DATABASE_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: DATABASE_ENV_NBA_MCP_SYNTHESIS
+
+   NBA_MCP_HOST_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/NBA_MCP_HOST_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: HOST_ENV_NBA_MCP_SYNTHESIS
+
+   AWS_ACCESS_KEY_ID_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/AWS_ACCESS_KEY_ID_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: AWS_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   NBA_MCP_RATE_LIMIT_PER_MINUTE_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/NBA_MCP_RATE_LIMIT_PER_MINUTE_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   MAX_QUERY_ROWS_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/MAX_QUERY_ROWS_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   USE_LOCAL_CREDENTIALS_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/USE_LOCAL_CREDENTIALS_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   LINEAR_TEAM_ID_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/LINEAR_TEAM_ID_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: LINEAR_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   NBA_MCP_ENV_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/NBA_MCP_ENV_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   S3_BOOKS_REGION_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/S3_BOOKS_REGION_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   REDIS_URL_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/REDIS_URL_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: REDIS_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   RDS_HOST_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/RDS_HOST_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: HOST_ENV_NBA_MCP_SYNTHESIS
+
+   S3_BUCKET_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/S3_BUCKET_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   MCP_TRANSPORT_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/MCP_TRANSPORT_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   LINEAR_PROJECT_ID_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/LINEAR_PROJECT_ID_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: LINEAR_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   GX_S3_PREFIX_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/GX_S3_PREFIX_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   MCP_LOG_DIR_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/MCP_LOG_DIR_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   MAX_CONTEXT_TOKENS_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/MAX_CONTEXT_TOKENS_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   TEST_SECRET_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/TEST_SECRET_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   MCP_SERVER_HOST_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/MCP_SERVER_HOST_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: HOST_ENV_NBA_MCP_SYNTHESIS
+
+   RDS_USERNAME_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/RDS_USERNAME_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: USERNAME_ENV_NBA_MCP_SYNTHESIS
+
+   NBA_MCP_LOG_LEVEL_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/NBA_MCP_LOG_LEVEL_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   GLUE_REGION_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/GLUE_REGION_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   DB_NAME_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/DB_NAME_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: DB_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   CACHE_ENABLED_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/CACHE_ENABLED_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   MCP_SERVER_PORT_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/MCP_SERVER_PORT_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: PORT_ENV_NBA_MCP_SYNTHESIS
+
+   NBA_MCP_ENABLE_PATH_TRAVERSAL_PROTECTION_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/NBA_MCP_ENABLE_PATH_TRAVERSAL_PROTECTION_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   SYNTHESIS_OUTPUT_DIR_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/SYNTHESIS_OUTPUT_DIR_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   NBA_MCP_DEBUG_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/NBA_MCP_DEBUG_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   DATABASE_URL_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/DATABASE_URL_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: DATABASE_ENV_NBA_MCP_SYNTHESIS
+
+   SLACK_NOTIFY_SUCCESS_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/SLACK_NOTIFY_SUCCESS_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SLACK_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   AWS_SECRET_ACCESS_KEY_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/AWS_SECRET_ACCESS_KEY_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: AWS_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   CACHE_TTL_SECONDS_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/CACHE_TTL_SECONDS_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   RDS_PORT_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/RDS_PORT_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: PORT_ENV_NBA_MCP_SYNTHESIS
+
+   S3_REGION_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/S3_REGION_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   S3_BOOKS_BUCKET_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/S3_BOOKS_BUCKET_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   NBA_MCP_DB_POOL_SIZE_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/NBA_MCP_DB_POOL_SIZE_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: DB_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   OPENAI_API_KEY_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/OPENAI_API_KEY_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: OPENAI_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   NBA_MCP_ENABLE_SQL_INJECTION_PROTECTION_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/NBA_MCP_ENABLE_SQL_INJECTION_PROTECTION_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   NBA_MCP_PORT_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/NBA_MCP_PORT_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: PORT_ENV_NBA_MCP_SYNTHESIS
+
+   GX_S3_BUCKET_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/GX_S3_BUCKET_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   AWS_DEFAULT_REGION_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/AWS_DEFAULT_REGION_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: AWS_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   MCP_LOG_JSON_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/MCP_LOG_JSON_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   RDS_DATABASE_URL_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/RDS_DATABASE_URL_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: DATABASE_ENV_NBA_MCP_SYNTHESIS
+
+   MLFLOW_TRACKING_URI_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/MLFLOW_TRACKING_URI_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   MAX_FILE_SIZE_MB_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/MAX_FILE_SIZE_MB_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   SLACK_NOTIFY_ERROR_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/SLACK_NOTIFY_ERROR_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SLACK_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   NBA_MCP_MAX_CONCURRENT_REQUESTS_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/NBA_MCP_MAX_CONCURRENT_REQUESTS_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   REDIS_DB_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/REDIS_DB_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: REDIS_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   PROJECT_ROOT_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/PROJECT_ROOT_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   SLACK_CHANNEL_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/SLACK_CHANNEL_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SLACK_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   OLLAMA_MODEL_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/OLLAMA_MODEL_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: OLLAMA_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   RDS_PASSWORD_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/RDS_PASSWORD_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: PASSWORD_ENV_NBA_MCP_SYNTHESIS
+
+   QUERY_TIMEOUT_SECONDS_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/QUERY_TIMEOUT_SECONDS_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   DEEPSEEK_MODEL_NBA_MCP_SYNTHESIS_DEVELOPMENT
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.development/DEEPSEEK_MODEL_NBA_MCP_SYNTHESIS_DEVELOPMENT.env
+      Suggested: DEEPSEEK_SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   TEST_SECRET_NBA_MCP_SYNTHESIS_TEST
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.test/TEST_SECRET_NBA_MCP_SYNTHESIS_TEST.env
+      Suggested: SECRET_ENV_NBA_MCP_SYNTHESIS
+
+   SLACK_WEBHOOK_URL_BIG_CAT_BETS_GLOBAL_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_global/.env.global.production/SLACK_WEBHOOK_URL_BIG_CAT_BETS_GLOBAL_WORKFLOW.env
+      Suggested: SLACK_SECRET_ENV_GLOBAL
+
+   LINEAR_API_KEY_BIG_CAT_BETS_GLOBAL_WORKFLOW
+      File: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_global/.env.global.production/LINEAR_API_KEY_BIG_CAT_BETS_GLOBAL_WORKFLOW.env
+      Suggested: LINEAR_SECRET_ENV_GLOBAL
+
+🔧 RECOMMENDATIONS:
+   2. Address WARNING violations for better consistency
+   4. Use the migration tool to automatically rename files
+   5. Update code references to use new naming convention

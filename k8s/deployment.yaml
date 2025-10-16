@@ -1,0 +1,189 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nba-mcp-synthesis
+  namespace: nba-mcp-synthesis
+  labels:
+    app: nba-mcp-synthesis
+    environment: production
+    project: nba-mcp-synthesis
+    sport: nba
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: nba-mcp-synthesis
+  template:
+    metadata:
+      labels:
+        app: nba-mcp-synthesis
+        environment: production
+        project: nba-mcp-synthesis
+        sport: nba
+    spec:
+      # Init container to load secrets
+      initContainers:
+        - name: secrets-loader
+          image: ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/nba-mcp-synthesis:latest
+          command: ["/app/entrypoint.sh"]
+          env:
+            - name: PROJECT_NAME
+              value: "nba-mcp-synthesis"
+            - name: SPORT_NAME
+              value: "NBA"
+            - name: NBA_MCP_CONTEXT
+              value: "production"
+          envFrom:
+            - secretRef:
+                name: nba-mcp-synthesis-secrets
+          volumeMounts:
+            - name: shared-secrets
+              mountPath: /shared
+            - name: init-config
+              mountPath: /app
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+
+      # Main application container
+      containers:
+        - name: nba-mcp-synthesis
+          image: ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/nba-mcp-synthesis:latest
+          ports:
+            - containerPort: 8000
+              name: http
+            - containerPort: 9090
+              name: metrics
+          env:
+            - name: PROJECT_NAME
+              value: "nba-mcp-synthesis"
+            - name: SPORT_NAME
+              value: "NBA"
+            - name: NBA_MCP_CONTEXT
+              value: "production"
+            - name: PYTHONUNBUFFERED
+              value: "1"
+          envFrom:
+            - secretRef:
+                name: nba-mcp-synthesis-secrets
+          volumeMounts:
+            - name: shared-secrets
+              mountPath: /shared
+            - name: app-config
+              mountPath: /app/config
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
+
+      # Volumes
+      volumes:
+        - name: shared-secrets
+          emptyDir: {}
+        - name: init-config
+          configMap:
+            name: nba-mcp-synthesis-init-config
+        - name: app-config
+          configMap:
+            name: nba-mcp-synthesis-app-config
+
+      # Security context
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+
+      # Restart policy
+      restartPolicy: Always
+
+      # Node selector (optional)
+      nodeSelector:
+        kubernetes.io/os: linux
+
+      # Tolerations (optional)
+      tolerations:
+        - key: "node-role.kubernetes.io/master"
+          operator: "Exists"
+          effect: "NoSchedule"
+
+      # Affinity (optional)
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - nba-mcp-synthesis
+                topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nba-mcp-synthesis-service
+  namespace: nba-mcp-synthesis
+  labels:
+    app: nba-mcp-synthesis
+    environment: production
+    project: nba-mcp-synthesis
+    sport: nba
+spec:
+  selector:
+    app: nba-mcp-synthesis
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000
+      protocol: TCP
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nba-mcp-synthesis-headless
+  namespace: nba-mcp-synthesis
+  labels:
+    app: nba-mcp-synthesis
+    environment: production
+    project: nba-mcp-synthesis
+    sport: nba
+spec:
+  selector:
+    app: nba-mcp-synthesis
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
+  clusterIP: None
