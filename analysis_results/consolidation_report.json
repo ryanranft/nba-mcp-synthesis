@@ -1,0 +1,849 @@
+{
+  "original_count": 270,
+  "consolidated_count": 70,
+  "groups_consolidated": 64,
+  "recommendations_merged": 264,
+  "reduction_percentage": 74.07407407407408,
+  "consolidation_log": [
+    {
+      "primary_id": "consolidated_consolidated_rec_101_3020",
+      "merged_ids": [
+        "variation_123_bc8c0e22",
+        "variation_131_4ab32183",
+        "variation_143_87cb5ccd"
+      ],
+      "source_books": [],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.062455"
+    },
+    {
+      "primary_id": "consolidated_consolidated_consolidated_rec_13",
+      "merged_ids": [
+        "variation_114_d2c8308a"
+      ],
+      "source_books": [
+        "Hands-On Machine Learning with Scikit-Learn and TensorFlow",
+        "STATISTICS 601 Advanced Statistical Methods",
+        "The Elements of Statistical Learning"
+      ],
+      "final_category": "important",
+      "consolidation_date": "2025-10-16T00:41:17.062496"
+    },
+    {
+      "primary_id": "consolidated_consolidated_consolidated_rec_15",
+      "merged_ids": [
+        "variation_21_6638296e",
+        "variation_89_1f0e2a38",
+        "variation_96_6e89b5ed",
+        "variation_128_a990d3ff"
+      ],
+      "source_books": [
+        "Designing Machine Learning Systems",
+        "Hands-On Machine Learning with Scikit-Learn and TensorFlow",
+        "The Elements of Statistical Learning"
+      ],
+      "final_category": "nice_to_have",
+      "consolidation_date": "2025-10-16T00:41:17.062622"
+    },
+    {
+      "primary_id": "consolidated_ml_systems_1",
+      "merged_ids": [
+        "variation_82_846221f5"
+      ],
+      "source_books": [
+        "Designing Machine Learning Systems",
+        "STATISTICS 601 Advanced Statistical Methods",
+        "The Elements of Statistical Learning"
+      ],
+      "final_category": "critical",
+      "consolidation_date": "2025-10-16T00:41:17.062656"
+    },
+    {
+      "primary_id": "consolidated_ml_systems_2",
+      "merged_ids": [
+        "variation_90_e99475f8",
+        "variation_116_7f733540",
+        "variation_117_384a6780",
+        "variation_145_faa6ef98"
+      ],
+      "source_books": [
+        "Designing Machine Learning Systems",
+        "Econometric Analysis"
+      ],
+      "final_category": "critical",
+      "consolidation_date": "2025-10-16T00:41:17.062688"
+    },
+    {
+      "primary_id": "consolidated_rec_27_3444",
+      "merged_ids": [
+        "variation_109_014eefbf",
+        "variation_130_e6b82848"
+      ],
+      "source_books": [],
+      "final_category": "Monitoring",
+      "consolidation_date": "2025-10-16T00:41:17.062715"
+    },
+    {
+      "primary_id": "consolidated_rec_29_7732",
+      "merged_ids": [
+        "variation_32_2f26de05",
+        "variation_59_8047194c",
+        "variation_65_2bfa8e58",
+        "variation_118_19c692e6",
+        "variation_167_e3865755"
+      ],
+      "source_books": [],
+      "final_category": "Data Processing",
+      "consolidation_date": "2025-10-16T00:41:17.062746"
+    },
+    {
+      "primary_id": "consolidated_rec_30_5932",
+      "merged_ids": [
+        "variation_1_2d047399",
+        "variation_34_420d359b",
+        "variation_119_a936ab84"
+      ],
+      "source_books": [],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.062772"
+    },
+    {
+      "primary_id": "consolidated_rec_31_5034",
+      "merged_ids": [
+        "variation_16_a1e9df27",
+        "variation_85_4aac2826",
+        "variation_112_ff908047",
+        "variation_146_b6e094ce",
+        "variation_197_780c08f5"
+      ],
+      "source_books": [],
+      "final_category": "Testing",
+      "consolidation_date": "2025-10-16T00:41:17.062805"
+    },
+    {
+      "primary_id": "consolidated_rec_33_2316",
+      "merged_ids": [
+        "variation_138_c03c008c",
+        "variation_190_94d9c49e"
+      ],
+      "source_books": [],
+      "final_category": "Monitoring",
+      "consolidation_date": "2025-10-16T00:41:17.062830"
+    },
+    {
+      "primary_id": "consolidated_rec_36_659",
+      "merged_ids": [
+        "variation_151_ed12568d",
+        "variation_157_49278a42",
+        "variation_169_125ff649"
+      ],
+      "source_books": [],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.062856"
+    },
+    {
+      "primary_id": "consolidated_rec_38_6781",
+      "merged_ids": [
+        "variation_81_ba2da817",
+        "variation_198_4ab53f2b"
+      ],
+      "source_books": [],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.062879"
+    },
+    {
+      "primary_id": "consolidated_rec_39_6262",
+      "merged_ids": [
+        "variation_78_fe4ed834",
+        "variation_101_d7906c3a"
+      ],
+      "source_books": [],
+      "final_category": "Testing",
+      "consolidation_date": "2025-10-16T00:41:17.062903"
+    },
+    {
+      "primary_id": "consolidated_rec_40_8018",
+      "merged_ids": [
+        "variation_5_fd9a7899",
+        "variation_40_b26632b1",
+        "variation_122_271b00b1",
+        "variation_180_596b4bf0"
+      ],
+      "source_books": [],
+      "final_category": "Data Processing",
+      "consolidation_date": "2025-10-16T00:41:17.062931"
+    },
+    {
+      "primary_id": "consolidated_rec_54_9775",
+      "merged_ids": [
+        "variation_149_dd7362ab",
+        "variation_159_1ffd6fd8"
+      ],
+      "source_books": [],
+      "final_category": "Statistics",
+      "consolidation_date": "2025-10-16T00:41:17.062957"
+    },
+    {
+      "primary_id": "consolidated_rec_58_2821",
+      "merged_ids": [
+        "variation_37_87093bcb",
+        "variation_58_62dc6254",
+        "variation_70_9f734974",
+        "variation_80_9c316484",
+        "variation_97_7dc0bec2",
+        "variation_113_c29299c5",
+        "variation_196_35f5f36b"
+      ],
+      "source_books": [],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.062991"
+    },
+    {
+      "primary_id": "consolidated_rec_60_7422",
+      "merged_ids": [
+        "variation_27_ba66728e",
+        "variation_38_91534892",
+        "variation_107_f2742d2d",
+        "variation_137_f214235d",
+        "variation_141_cc683b73",
+        "variation_144_08065c61",
+        "variation_150_ce3bb731",
+        "variation_184_7c9a13ff"
+      ],
+      "source_books": [],
+      "final_category": "Security",
+      "consolidation_date": "2025-10-16T00:41:17.063027"
+    },
+    {
+      "primary_id": "consolidated_rec_64_1595",
+      "merged_ids": [
+        "variation_63_573b37f5",
+        "variation_76_30e56bd1"
+      ],
+      "source_books": [],
+      "final_category": "Data Processing",
+      "consolidation_date": "2025-10-16T00:41:17.063053"
+    },
+    {
+      "primary_id": "consolidated_rec_66_610",
+      "merged_ids": [
+        "variation_14_f9a79646",
+        "variation_69_e767d62a",
+        "variation_156_300760bf"
+      ],
+      "source_books": [],
+      "final_category": "Architecture",
+      "consolidation_date": "2025-10-16T00:41:17.063079"
+    },
+    {
+      "primary_id": "consolidated_rec_73_5364",
+      "merged_ids": [
+        "variation_99_eb464868",
+        "variation_192_e8abe2d1"
+      ],
+      "source_books": [],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.063103"
+    },
+    {
+      "primary_id": "consolidated_rec_78_7121",
+      "merged_ids": [
+        "variation_55_b886a8d9"
+      ],
+      "source_books": [],
+      "final_category": "Statistics",
+      "consolidation_date": "2025-10-16T00:41:17.063128"
+    },
+    {
+      "primary_id": "consolidated_rec_83_4318",
+      "merged_ids": [
+        "variation_4_8a9742be",
+        "variation_31_a815624b",
+        "variation_83_6ac861ff",
+        "variation_121_1dff925c",
+        "variation_124_f34b0e5a"
+      ],
+      "source_books": [],
+      "final_category": "Monitoring",
+      "consolidation_date": "2025-10-16T00:41:17.063164"
+    },
+    {
+      "primary_id": "consolidated_rec_96_787",
+      "merged_ids": [
+        "variation_2_19ee63e9",
+        "variation_44_559fe236",
+        "variation_127_756239e8"
+      ],
+      "source_books": [],
+      "final_category": "Performance",
+      "consolidation_date": "2025-10-16T00:41:17.063194"
+    },
+    {
+      "primary_id": "consolidated_rec_114_5445",
+      "merged_ids": [
+        "variation_73_e4b0e657"
+      ],
+      "source_books": [],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.063216"
+    },
+    {
+      "primary_id": "consolidated_rec_123_9868",
+      "merged_ids": [
+        "variation_3_c3361031",
+        "variation_10_a1625e83",
+        "variation_140_34248064"
+      ],
+      "source_books": [],
+      "final_category": "Statistics",
+      "consolidation_date": "2025-10-16T00:41:17.063242"
+    },
+    {
+      "primary_id": "ml_systems_3",
+      "merged_ids": [
+        "variation_13_a91d5ed3",
+        "variation_108_8391d96e",
+        "variation_132_5a097a2f"
+      ],
+      "source_books": [
+        "Designing Machine Learning Systems"
+      ],
+      "final_category": "critical",
+      "consolidation_date": "2025-10-16T00:41:17.063270"
+    },
+    {
+      "primary_id": "ml_systems_5",
+      "merged_ids": [
+        "variation_30_182fd51b",
+        "variation_47_80dd4180",
+        "variation_93_f13f0522",
+        "variation_174_ff0bd3df"
+      ],
+      "source_books": [
+        "Designing Machine Learning Systems"
+      ],
+      "final_category": "important",
+      "consolidation_date": "2025-10-16T00:41:17.063305"
+    },
+    {
+      "primary_id": "ml_systems_6",
+      "merged_ids": [
+        "variation_22_e48be029",
+        "variation_33_f31a002e",
+        "variation_61_6f15e61e",
+        "variation_98_8fe1a07f",
+        "variation_161_e8153688",
+        "variation_170_f8a15afb"
+      ],
+      "source_books": [
+        "Designing Machine Learning Systems"
+      ],
+      "final_category": "important",
+      "consolidation_date": "2025-10-16T00:41:17.063345"
+    },
+    {
+      "primary_id": "ml_systems_7",
+      "merged_ids": [
+        "variation_36_7851f488",
+        "variation_154_d025247e"
+      ],
+      "source_books": [
+        "Designing Machine Learning Systems"
+      ],
+      "final_category": "nice_to_have",
+      "consolidation_date": "2025-10-16T00:41:17.063375"
+    },
+    {
+      "primary_id": "ml_systems_9",
+      "merged_ids": [
+        "variation_104_f6cc881d",
+        "variation_166_a6f1acc3",
+        "variation_200_a042d77d"
+      ],
+      "source_books": [
+        "Designing Machine Learning Systems"
+      ],
+      "final_category": "nice_to_have",
+      "consolidation_date": "2025-10-16T00:41:17.063405"
+    },
+    {
+      "primary_id": "ml_systems_10",
+      "merged_ids": [
+        "variation_79_590b3d9a"
+      ],
+      "source_books": [
+        "Designing Machine Learning Systems"
+      ],
+      "final_category": "nice_to_have",
+      "consolidation_date": "2025-10-16T00:41:17.063428"
+    },
+    {
+      "primary_id": "rec_21",
+      "merged_ids": [
+        "variation_152_20236708"
+      ],
+      "source_books": [
+        "Econometric Analysis"
+      ],
+      "final_category": "critical",
+      "consolidation_date": "2025-10-16T00:41:17.063451"
+    },
+    {
+      "primary_id": "rec_23",
+      "merged_ids": [
+        "variation_53_a58151cc",
+        "variation_57_1e0943d3",
+        "variation_88_f09ac212"
+      ],
+      "source_books": [
+        "Econometric Analysis"
+      ],
+      "final_category": "important",
+      "consolidation_date": "2025-10-16T00:41:17.063478"
+    },
+    {
+      "primary_id": "rec_24",
+      "merged_ids": [
+        "variation_49_0c8b9c59",
+        "variation_84_d75caba8",
+        "variation_106_0abcec53",
+        "variation_162_39a5a184"
+      ],
+      "source_books": [
+        "Econometric Analysis"
+      ],
+      "final_category": "important",
+      "consolidation_date": "2025-10-16T00:41:17.063508"
+    },
+    {
+      "primary_id": "rec_25",
+      "merged_ids": [
+        "variation_15_c076c154",
+        "variation_71_9103ceef",
+        "variation_179_2aeb060e"
+      ],
+      "source_books": [
+        "Econometric Analysis"
+      ],
+      "final_category": "nice_to_have",
+      "consolidation_date": "2025-10-16T00:41:17.063535"
+    },
+    {
+      "primary_id": "rec_28_9488",
+      "merged_ids": [
+        "variation_86_fe228afc",
+        "variation_165_9604c831",
+        "variation_178_1c826b84",
+        "variation_181_2def89e6"
+      ],
+      "source_books": [
+        "Generated Variation 165",
+        "Generated Variation 178",
+        "Generated Variation 181",
+        "Generated Variation 86",
+        "Unknown Source"
+      ],
+      "final_category": "Business",
+      "consolidation_date": "2025-10-16T00:41:17.063565"
+    },
+    {
+      "primary_id": "rec_62_8709",
+      "merged_ids": [
+        "variation_125_6d1d26d3",
+        "variation_187_63946a4f"
+      ],
+      "source_books": [
+        "Generated Variation 125",
+        "Generated Variation 187",
+        "Unknown Source"
+      ],
+      "final_category": "Monitoring",
+      "consolidation_date": "2025-10-16T00:41:17.063592"
+    },
+    {
+      "primary_id": "rec_84_4636",
+      "merged_ids": [
+        "variation_7_94543e10",
+        "variation_41_a91b04c1",
+        "variation_42_878c2684",
+        "variation_62_87c4330c",
+        "variation_95_73581ec8",
+        "variation_120_6c84482e"
+      ],
+      "source_books": [
+        "Generated Variation 120",
+        "Generated Variation 41",
+        "Generated Variation 42",
+        "Generated Variation 62",
+        "Generated Variation 7",
+        "Generated Variation 95",
+        "Unknown Source"
+      ],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.063625"
+    },
+    {
+      "primary_id": "rec_86_4834",
+      "merged_ids": [
+        "variation_25_82a86e2c",
+        "variation_66_58e0b37e",
+        "variation_68_fc7dad0a",
+        "variation_189_13a4cd18"
+      ],
+      "source_books": [
+        "Generated Variation 189",
+        "Generated Variation 25",
+        "Generated Variation 66",
+        "Generated Variation 68",
+        "Unknown Source"
+      ],
+      "final_category": "Architecture",
+      "consolidation_date": "2025-10-16T00:41:17.063654"
+    },
+    {
+      "primary_id": "rec_89_2623",
+      "merged_ids": [
+        "variation_135_b0f6806c",
+        "variation_188_a9af48c2"
+      ],
+      "source_books": [
+        "Generated Variation 135",
+        "Generated Variation 188",
+        "Unknown Source"
+      ],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.063682"
+    },
+    {
+      "primary_id": "rec_93_6065",
+      "merged_ids": [
+        "variation_67_3d5ad440",
+        "variation_177_e4fcbfb4",
+        "variation_199_ab827173"
+      ],
+      "source_books": [
+        "Generated Variation 177",
+        "Generated Variation 199",
+        "Generated Variation 67",
+        "Unknown Source"
+      ],
+      "final_category": "Data Processing",
+      "consolidation_date": "2025-10-16T00:41:17.063709"
+    },
+    {
+      "primary_id": "rec_99_5279",
+      "merged_ids": [
+        "variation_56_030c44c0"
+      ],
+      "source_books": [
+        "Generated Variation 56",
+        "Unknown Source"
+      ],
+      "final_category": "Statistics",
+      "consolidation_date": "2025-10-16T00:41:17.063735"
+    },
+    {
+      "primary_id": "rec_161_1732",
+      "merged_ids": [
+        "variation_19_61d83b98",
+        "variation_39_cf90cf0a",
+        "variation_91_3e0d92e7",
+        "variation_115_06ec2c57",
+        "variation_176_f414cd19",
+        "variation_183_7807983f"
+      ],
+      "source_books": [
+        "Generated Variation 115",
+        "Generated Variation 176",
+        "Generated Variation 183",
+        "Generated Variation 19",
+        "Generated Variation 39",
+        "Generated Variation 91",
+        "Unknown Source"
+      ],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.063768"
+    },
+    {
+      "primary_id": "rec_164_4969",
+      "merged_ids": [
+        "variation_43_52eec64b"
+      ],
+      "source_books": [
+        "Generated Variation 43",
+        "Unknown Source"
+      ],
+      "final_category": "Performance",
+      "consolidation_date": "2025-10-16T00:41:17.063794"
+    },
+    {
+      "primary_id": "rec_173_4274",
+      "merged_ids": [
+        "variation_8_b9523e1a",
+        "variation_64_64a3a3ea",
+        "variation_185_c6bdcafb"
+      ],
+      "source_books": [
+        "Generated Variation 185",
+        "Generated Variation 64",
+        "Generated Variation 8",
+        "Unknown Source"
+      ],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.063821"
+    },
+    {
+      "primary_id": "rec_182_6468",
+      "merged_ids": [
+        "variation_20_4ff83e7b"
+      ],
+      "source_books": [
+        "Generated Variation 20",
+        "Unknown Source"
+      ],
+      "final_category": "Architecture",
+      "consolidation_date": "2025-10-16T00:41:17.063846"
+    },
+    {
+      "primary_id": "variation_1_bde99fb2",
+      "merged_ids": [
+        "variation_46_63b06fc8",
+        "variation_148_8b6c46c5"
+      ],
+      "source_books": [
+        "Book 40"
+      ],
+      "final_category": "Security",
+      "consolidation_date": "2025-10-16T00:41:17.063872"
+    },
+    {
+      "primary_id": "variation_2_5656b4aa",
+      "merged_ids": [
+        "variation_77_94b6a9a7",
+        "variation_133_f47ca085"
+      ],
+      "source_books": [
+        "Book 41"
+      ],
+      "final_category": "Data",
+      "consolidation_date": "2025-10-16T00:41:17.063900"
+    },
+    {
+      "primary_id": "variation_4_af134df3",
+      "merged_ids": [
+        "variation_6_170545f2",
+        "variation_102_6b020f0c",
+        "variation_164_308b8d7e",
+        "variation_195_893e5926"
+      ],
+      "source_books": [
+        "Book 26"
+      ],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.063929"
+    },
+    {
+      "primary_id": "variation_5_1d89fa20",
+      "merged_ids": [
+        "variation_29_bd9e3ad9",
+        "variation_54_68039dce",
+        "variation_103_e1886ffe",
+        "variation_111_f9a9d526",
+        "variation_136_e0b15664",
+        "variation_153_c7263711",
+        "variation_163_4c6f8afd"
+      ],
+      "source_books": [
+        "Book 1"
+      ],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.063966"
+    },
+    {
+      "primary_id": "variation_6_623db90d",
+      "merged_ids": [
+        "variation_155_206e71a8",
+        "variation_186_a2d69df9"
+      ],
+      "source_books": [
+        "Book 34"
+      ],
+      "final_category": "Data",
+      "consolidation_date": "2025-10-16T00:41:17.063994"
+    },
+    {
+      "primary_id": "variation_9_63aaebab",
+      "merged_ids": [
+        "variation_18_31d1adba",
+        "variation_24_0ce96928",
+        "variation_28_fea8e355",
+        "variation_35_2f5c377e",
+        "variation_72_1366f530",
+        "variation_100_56eb6782",
+        "variation_129_b020f59d",
+        "variation_142_2b707f33",
+        "variation_160_57b28b98",
+        "variation_193_68fdd749"
+      ],
+      "source_books": [
+        "Book 36",
+        "Unknown"
+      ],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.064042"
+    },
+    {
+      "primary_id": "variation_12_072b485c",
+      "merged_ids": [
+        "variation_17_391b8d4b",
+        "variation_60_79dac9ed",
+        "variation_74_fa1f56d0",
+        "variation_94_d5fe7795"
+      ],
+      "source_books": [
+        "Book 5"
+      ],
+      "final_category": "Infrastructure",
+      "consolidation_date": "2025-10-16T00:41:17.064076"
+    },
+    {
+      "primary_id": "variation_24_95bca3ba",
+      "merged_ids": [
+        "variation_139_32ead9b2",
+        "variation_147_69eaa467",
+        "variation_191_656db6c2"
+      ],
+      "source_books": [
+        "Book 14"
+      ],
+      "final_category": "Infrastructure",
+      "consolidation_date": "2025-10-16T00:41:17.064106"
+    },
+    {
+      "primary_id": "variation_28_568cfcee",
+      "merged_ids": [
+        "variation_87_c94eab02"
+      ],
+      "source_books": [
+        "Book 32"
+      ],
+      "final_category": "Security",
+      "consolidation_date": "2025-10-16T00:41:17.064130"
+    },
+    {
+      "primary_id": "consolidated_rec_17",
+      "merged_ids": [
+        "variation_75_66603a58"
+      ],
+      "source_books": [
+        "The Elements of Statistical Learning"
+      ],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.064154"
+    },
+    {
+      "primary_id": "rec_22",
+      "merged_ids": [
+        "variation_11_4d00df1f",
+        "variation_45_9291f1f5",
+        "variation_50_23743798",
+        "variation_105_40c98422",
+        "variation_110_aa88ac63",
+        "variation_194_c05ee6e2"
+      ],
+      "source_books": [
+        "Econometric Analysis"
+      ],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.064192"
+    },
+    {
+      "primary_id": "rec_26",
+      "merged_ids": [
+        "variation_23_319a6df8",
+        "variation_182_3cffa414"
+      ],
+      "source_books": [
+        "Introductory Econometrics: A Modern Approach"
+      ],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.064222"
+    },
+    {
+      "primary_id": "ml_systems_8",
+      "merged_ids": [
+        "variation_48_fe25be4f",
+        "variation_134_67fa117c"
+      ],
+      "source_books": [
+        "Designing Machine Learning Systems"
+      ],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.064250"
+    },
+    {
+      "primary_id": "rec_18",
+      "merged_ids": [
+        "variation_9_07180494",
+        "variation_158_3085f2f1"
+      ],
+      "source_books": [
+        "STATISTICS 601 Advanced Statistical Methods"
+      ],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.064277"
+    },
+    {
+      "primary_id": "rec_19",
+      "merged_ids": [
+        "variation_26_1cc8fc97",
+        "variation_92_91d384c8",
+        "variation_175_3fc6589c"
+      ],
+      "source_books": [
+        "STATISTICS 601 Advanced Statistical Methods"
+      ],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.064307"
+    },
+    {
+      "primary_id": "ml_systems_4",
+      "merged_ids": [
+        "variation_12_146b760e",
+        "variation_171_c9039f13",
+        "variation_173_9c58893d"
+      ],
+      "source_books": [
+        "Designing Machine Learning Systems"
+      ],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.064337"
+    },
+    {
+      "primary_id": "consolidated_rec_21",
+      "merged_ids": [
+        "variation_52_e534f1a2",
+        "variation_168_187448ba"
+      ],
+      "source_books": [
+        "The Elements of Statistical Learning"
+      ],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.064364"
+    },
+    {
+      "primary_id": "rec_20",
+      "merged_ids": [
+        "variation_51_a9827d4c",
+        "variation_126_fe08c3bd",
+        "variation_172_b82eef1b"
+      ],
+      "source_books": [
+        "STATISTICS 601 Advanced Statistical Methods"
+      ],
+      "final_category": "ML",
+      "consolidation_date": "2025-10-16T00:41:17.064393"
+    }
+  ],
+  "timestamp": "2025-10-16T00:41:17.065916"
+}

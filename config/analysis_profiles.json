@@ -1,0 +1,53 @@
+{
+    "profiles": {
+        "max_accuracy": {
+            "models": [
+                "google",
+                "deepseek",
+                "claude",
+                "gpt4"
+            ],
+            "description": "All 4 models for highest quality",
+            "estimated_cost_per_book": "$0.15-0.30",
+            "estimated_time_minutes": 5
+        },
+        "cost_optimized": {
+            "models": [
+                "google",
+                "deepseek",
+                "claude"
+            ],
+            "description": "Skip GPT-4 to reduce cost",
+            "estimated_cost_per_book": "$0.08-0.15",
+            "estimated_time_minutes": 3
+        },
+        "fast": {
+            "models": [
+                "google",
+                "claude"
+            ],
+            "description": "Quick analysis with 2 models",
+            "estimated_cost_per_book": "$0.05-0.10",
+            "estimated_time_minutes": 2
+        },
+        "math_focused": {
+            "models": [
+                "deepseek",
+                "claude",
+                "gpt4"
+            ],
+            "description": "Best for mathematical/statistical content",
+            "estimated_cost_per_book": "$0.10-0.20",
+            "estimated_time_minutes": 4
+        }
+    },
+    "default_profile": "max_accuracy",
+    "budget_warnings": {
+        "low_budget_threshold": 10.0,
+        "medium_budget_threshold": 25.0,
+        "high_budget_threshold": 50.0
+    }
+}
+
+
+

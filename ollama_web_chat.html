@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NBA MCP + Ollama Chat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -13,111 +14,1155 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Cinzel', 'Times New Roman', serif;
+            background:
+                radial-gradient(ellipse at center, #1a0d2e 0%, #0a0a0a 70%),
+                linear-gradient(45deg, transparent 30%, rgba(138, 43, 226, 0.1) 50%, transparent 70%);
+            color: #e6d7ff;
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .chat-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 1200px;
-            height: 90vh;
-            display: flex;
-            flex-direction: column;
             overflow: hidden;
+            position: relative;
         }
 
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(138, 43, 226, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(75, 0, 130, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 60%, rgba(148, 0, 211, 0.08) 0%, transparent 50%),
+                repeating-linear-gradient(45deg,
+                    transparent,
+                    transparent 100px,
+                    rgba(138, 43, 226, 0.02) 100px,
+                    rgba(138, 43, 226, 0.02) 200px);
+            pointer-events: none;
+            z-index: -1;
+            animation: mysticalShift 20s ease-in-out infinite;
         }
 
-        .header h1 {
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .status {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px;
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #4ade80;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
+        @keyframes mysticalShift {
 
             0%,
             100% {
                 opacity: 1;
+                transform: scale(1) rotate(0deg);
             }
 
             50% {
-                opacity: 0.5;
+                opacity: 0.8;
+                transform: scale(1.05) rotate(1deg);
             }
         }
 
+        /* Floating mystical particles */
+        body::after {
+            content: '✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            font-size: 12px;
+            color: rgba(255, 215, 0, 0.1);
+            pointer-events: none;
+            z-index: -1;
+            animation: floatParticles 30s linear infinite;
+            word-spacing: 200px;
+            line-height: 200px;
+        }
+
+        @keyframes floatParticles {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+            }
+
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+
+        .chat-container {
+            display: flex;
+            height: 100vh;
+            background: transparent;
+            backdrop-filter: blur(10px);
+        }
+
         .sidebar {
-            background: #f8fafc;
+            width: 280px;
+            background:
+                linear-gradient(180deg, rgba(30, 15, 50, 0.95) 0%, rgba(20, 10, 35, 0.98) 100%),
+                repeating-linear-gradient(90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(138, 43, 226, 0.1) 2px,
+                    rgba(138, 43, 226, 0.1) 4px);
+            border-right: 3px solid;
+            border-image: linear-gradient(180deg, #8a2be2, #ffd700, #4b0082, #8a2be2) 1;
+            display: flex;
+            flex-direction: column;
             padding: 20px;
-            border-bottom: 1px solid #e2e8f0;
+            box-shadow:
+                10px 0 30px rgba(138, 43, 226, 0.4),
+                inset 0 0 50px rgba(255, 215, 0, 0.05);
+            position: relative;
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 50% 0%, rgba(138, 43, 226, 0.15) 0%, transparent 70%),
+                repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(138, 43, 226, 0.05) 2px,
+                    rgba(138, 43, 226, 0.05) 4px);
+            pointer-events: none;
+        }
+
+        .sidebar::after {
+            content: '☿ ♀ ♂ ♃ ♄ ♅ ♆ ♇';
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%) rotate(90deg);
+            font-size: 14px;
+            color: rgba(255, 215, 0, 0.3);
+            letter-spacing: 15px;
+            pointer-events: none;
+            animation: planetaryOrbit 60s linear infinite;
+        }
+
+        @keyframes planetaryOrbit {
+            0% {
+                transform: translateY(-50%) rotate(90deg);
+            }
+
+            100% {
+                transform: translateY(-50%) rotate(450deg);
+            }
+        }
+
+        .sidebar-header::before {
+            content: 'ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ';
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: rgba(255, 215, 0, 0.3);
+            letter-spacing: 8px;
+            animation: runeShimmer 5s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        @keyframes runeShimmer {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                text-shadow: 0 0 3px rgba(255, 215, 0, 0.2);
+            }
+
+            50% {
+                opacity: 0.8;
+                text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+            }
+        }
+
+        .sidebar-header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #dda0dd;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-shadow: 0 0 10px rgba(221, 160, 221, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+
+        .sidebar-header h1::before {
+            content: '✦';
+            color: #ffd700;
+            font-size: 18px;
+            animation: sparkle 2s infinite;
+        }
+
+        @keyframes sparkle {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.7;
+                transform: scale(1.2);
+            }
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #c9a9dd;
+            position: relative;
+            z-index: 1;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #00ff00 0%, #32cd32 50%, #228b22 100%);
+            animation: mysticalPulse 2s infinite;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
+        }
+
+        @keyframes mysticalPulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
+            }
+
+            50% {
+                opacity: 0.7;
+                transform: scale(1.3);
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+            }
         }
 
         .tools-info {
+            background: linear-gradient(135deg, rgba(75, 0, 130, 0.3) 0%, rgba(138, 43, 226, 0.2) 100%);
+            border: 1px solid #8a2be2;
+            border-radius: 15px;
+            padding: 16px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.2);
+        }
+
+        .tools-info::after {
+            content: 'ᛖ ᛗ ᛒ ᛚ ᛖ ᛗ';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 9px;
+            color: rgba(138, 43, 226, 0.4);
+            letter-spacing: 6px;
+            z-index: 1;
+        }
+
+        .tool-stat {
             display: flex;
-            gap: 20px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
             font-size: 14px;
         }
 
-        .tool-badge {
-            background: white;
-            padding: 10px 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        .tool-stat:last-child {
+            margin-bottom: 0;
         }
 
-        .tool-badge strong {
+        .tool-stat-label {
+            color: #dda0dd;
+            font-weight: 500;
+        }
+
+        .tool-stat-value {
+            color: #ffd700;
+            font-weight: 700;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+
+        .model-info::before {
+            content: 'ᚹ ᛁ ᛋ ᛞ ᛟ ᛗ';
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 10px;
+            color: rgba(255, 215, 0, 0.3);
+            letter-spacing: 5px;
+            animation: runeGlow 8s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        .theme-toggle {
+            background:
+                linear-gradient(135deg, rgba(75, 0, 130, 0.3) 0%, rgba(138, 43, 226, 0.2) 100%);
+            border: 1px solid #8a2be2;
+            border-radius: 15px;
+            padding: 16px;
+            margin-bottom: 20px;
+            position: relative;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.2);
+        }
+
+        .theme-toggle-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #dda0dd;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .toggle-switch {
+            width: 60px;
+            height: 30px;
+            background: linear-gradient(135deg, #2a2a2a 0%, #404040 100%);
+            border-radius: 15px;
+            position: relative;
+            cursor: pointer;
+            margin: 0 auto;
+            border: 2px solid #8a2be2;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch:hover {
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+        }
+
+        .toggle-slider {
+            width: 26px;
+            height: 26px;
+            background: linear-gradient(135deg, #8a2be2 0%, #4b0082 100%);
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(138, 43, 226, 0.4);
+        }
+
+        .toggle-icon {
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-icon.original {
+            opacity: 0;
+            position: absolute;
+        }
+
+        .toggle-icon.mystical {
+            opacity: 1;
+        }
+
+        /* Modern theme state */
+        .modern-theme .toggle-slider {
+            transform: translateX(30px);
+            background: linear-gradient(135deg, #404040 0%, #2a2a2a 100%);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .modern-theme .toggle-icon.original {
+            opacity: 1;
+        }
+
+        .modern-theme body::before,
+        .modern-theme body::after {
+            display: none;
+        }
+
+        .modern-theme .sidebar::before,
+        .modern-theme .sidebar::after {
+            display: none;
+        }
+
+        .modern-theme .sidebar-header::before {
+            display: none;
+        }
+
+        /* Modern Black Theme Styles */
+        .modern-theme body::before,
+        .modern-theme body::after {
+            display: none;
+        }
+
+        .modern-theme body {
+            background: #0f0f0f;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .modern-theme .sidebar::before,
+        .modern-theme .sidebar::after {
+            display: none;
+        }
+
+        .modern-theme .main-chat::before,
+        .modern-theme .main-chat::after {
+            display: none;
+        }
+
+        .modern-theme .chat-header::before,
+        .modern-theme .chat-header::after {
+            display: none;
+        }
+
+        .modern-theme .messages-container::before,
+        .modern-theme .messages-container::after {
+            display: none;
+        }
+
+        .modern-theme .welcome-message::before,
+        .modern-theme .welcome-message::after {
+            display: none;
+        }
+
+        .modern-theme .suggestion-chip::before,
+        .modern-theme .suggestion-chip::after {
+            display: none;
+        }
+
+        .modern-theme .input-container::before,
+        .modern-theme .input-container::after {
+            display: none;
+        }
+
+        .modern-theme .input-wrapper::before,
+        .modern-theme .input-wrapper::after {
+            display: none;
+        }
+
+        .modern-theme .sidebar {
+            display: none;
+        }
+
+        .modern-theme .main-chat {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .modern-theme .sidebar h1 {
+            color: #ffffff;
+            text-shadow: none;
+        }
+
+        .modern-theme .sidebar h1::before {
+            content: '🏀';
+            margin-right: 8px;
+        }
+
+        .modern-theme .status-indicator {
+            color: #a0a0a0;
+        }
+
+        .modern-theme .status-dot {
+            background: #00ff00;
+            box-shadow: none;
+            animation: none;
+        }
+
+        .modern-theme .tools-info {
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            box-shadow: none;
+        }
+
+        .modern-theme .tools-info::before,
+        .modern-theme .tools-info::after {
+            display: none;
+        }
+
+        .modern-theme .tool-stat-label {
+            color: #a0a0a0;
+        }
+
+        .modern-theme .tool-stat-value {
+            color: #ffffff;
+            text-shadow: none;
+        }
+
+        .modern-theme .model-info {
+            background: #262626;
+            border: 1px solid #404040;
+        }
+
+        .modern-theme .model-info::before {
+            display: none;
+        }
+
+        .modern-theme .model-name {
+            color: #ffffff;
+        }
+
+        .modern-theme .model-details {
+            color: #a0a0a0;
+        }
+
+        .modern-theme .action-button {
+            background: #262626;
+            border: 1px solid #404040;
+            box-shadow: none;
+        }
+
+        .modern-theme .action-button:hover {
+            background: #404040;
+            border-color: #525252;
+            transform: none;
+        }
+
+        .modern-theme .action-button::before {
+            display: none;
+        }
+
+        .modern-theme .main-chat {
+            background: #0f0f0f;
+        }
+
+        .modern-theme .main-chat::before,
+        .modern-theme .main-chat::after {
+            display: none;
+        }
+
+        .modern-theme .chat-header {
+            background: transparent;
+            border-bottom: none;
+            padding: 32px 40px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modern-theme .chat-header h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modern-theme .chat-header h2::before {
+            content: '🏀';
+            font-size: 32px;
+        }
+
+        .modern-theme .info-badges {
+            display: flex;
+            gap: 16px;
+            padding: 0 40px 24px;
+            flex-wrap: wrap;
+            margin-top: -8px;
+        }
+
+        .modern-theme .info-badge {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 14px;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .modern-theme .info-badge strong {
             color: #667eea;
+            font-weight: 600;
         }
 
-        .messages {
+        .modern-theme .messages-container {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 40px;
+            margin: 0 40px 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-height: 400px;
+            max-height: calc(100vh - 200px) !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            scroll-behavior: smooth;
+            position: relative;
+        }
+
+        .modern-theme .messages-container::before {
+            display: none;
+        }
+
+        .modern-theme .messages-container::-webkit-scrollbar {
+            width: 12px !important;
+        }
+
+        .modern-theme .messages-container::-webkit-scrollbar-track {
+            background: #f1f5f9 !important;
+            border-radius: 6px !important;
+        }
+
+        .modern-theme .messages-container::-webkit-scrollbar-thumb {
+            background: #64748b !important;
+            border-radius: 6px !important;
+            border: 2px solid #f1f5f9 !important;
+        }
+
+        .modern-theme .messages-container::-webkit-scrollbar-thumb:hover {
+            background: #475569 !important;
+        }
+
+        /* Force scrollbar to always be visible */
+        .modern-theme .messages-container {
+            scrollbar-width: thin !important;
+            scrollbar-color: #64748b #f1f5f9 !important;
+        }
+
+        .modern-theme .message.user .message-content {
+            background: #2563eb;
+            border: none;
+            border-radius: 18px;
+            box-shadow: none;
+        }
+
+        .modern-theme .message.user .message-content::before,
+        .modern-theme .message.user .message-content::after {
+            display: none;
+        }
+
+        .modern-theme .message.assistant .message-content {
+            background: #262626;
+            border: 1px solid #404040;
+            border-radius: 18px;
+            box-shadow: none;
+        }
+
+        .modern-theme .message.assistant .message-content::before,
+        .modern-theme .message.assistant .message-content::after {
+            display: none;
+        }
+
+        .modern-theme .typing-indicator {
+            background: #262626;
+            border: 1px solid #404040;
+            box-shadow: none;
+        }
+
+        .modern-theme .typing-indicator::before {
+            display: none;
+        }
+
+        .modern-theme .typing-dot {
+            background: #a0a0a0;
+            box-shadow: none;
+        }
+
+        .modern-theme .welcome-message {
+            text-align: center;
+            padding: 40px 20px 30px;
+            color: #1f2937;
+        }
+
+        .modern-theme .welcome-message h3 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 12px;
+        }
+
+        .modern-theme .welcome-message p {
+            font-size: 15px;
+            color: #1f2937;
+            max-width: 600px;
+            margin: 0 auto 30px;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        .modern-theme .suggestion-chips {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            padding: 0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .modern-theme .suggestion-chip {
+            background: #ffffff;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.2s ease;
+            box-shadow: none;
+        }
+
+        .modern-theme .suggestion-chip:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .modern-theme .suggestion-chip strong {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .modern-theme .suggestion-chip span {
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .modern-theme .input-container {
+            background: transparent !important;
+            border-top: none !important;
+            padding: 0 40px 32px !important;
+            position: relative !important;
+            z-index: 10 !important;
+            display: block !important;
+            visibility: visible !important;
+        }
+
+        .modern-theme .input-wrapper {
+            background: #ffffff !important;
+            border: 2px solid #e5e7eb !important;
+            border-radius: 16px !important;
+            padding: 16px 20px !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+            display: flex !important;
+            align-items: flex-end !important;
+            visibility: visible !important;
+            position: relative !important;
+            z-index: 10 !important;
+        }
+
+        .modern-theme .message-input {
+            color: #1f2937 !important;
+            visibility: visible !important;
+            display: block !important;
+        }
+
+        .modern-theme .send-button {
+            background: #667eea !important;
+            border-radius: 12px !important;
+            padding: 10px 24px !important;
+            font-weight: 600 !important;
+            visibility: visible !important;
+            display: block !important;
+        }
+
+        .modern-theme .input-wrapper:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+        }
+
+        .modern-theme .send-button {
+            background: #667eea;
+            border-radius: 12px;
+            padding: 10px 24px;
+            font-weight: 600;
+        }
+
+        .theme-toggle-main {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 12px 16px;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .theme-toggle-main .theme-toggle-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0;
+        }
+
+        .theme-toggle-main .toggle-switch {
+            width: 50px;
+            height: 25px;
+            background: linear-gradient(135deg, #2a2a2a 0%, #404040 100%);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle-main .toggle-switch:hover {
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .theme-toggle-main .toggle-slider {
+            width: 21px;
+            height: 21px;
+            background: linear-gradient(135deg, #8a2be2 0%, #4b0082 100%);
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(138, 43, 226, 0.4);
+        }
+
+        .theme-toggle-main .toggle-icon {
+            font-size: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle-main .toggle-icon.original {
+            opacity: 0;
+            position: absolute;
+        }
+
+        .theme-toggle-main .toggle-icon.mystical {
+            opacity: 1;
+        }
+
+        /* Modern theme state */
+        .modern-theme .theme-toggle-main .toggle-slider {
+            transform: translateX(25px);
+            background: linear-gradient(135deg, #404040 0%, #2a2a2a 100%);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .modern-theme .theme-toggle-main .toggle-icon.original {
+            opacity: 1;
+        }
+
+        .modern-theme .theme-toggle {
+            display: none;
+        }
+
+        .theme-toggle-main {
+            display: none;
+        }
+
+        .modern-theme .theme-toggle-main {
+            display: flex;
+        }
+
+        .model-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .model-details {
+            font-size: 14px;
+            color: #a0a0a0;
+        }
+
+        .quick-actions {
+            margin-top: auto;
+        }
+
+        .quick-actions h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .action-button {
+            width: 100%;
+            background:
+                linear-gradient(135deg, rgba(75, 0, 130, 0.8) 0%, rgba(138, 43, 226, 0.6) 100%),
+                repeating-linear-gradient(45deg,
+                    transparent,
+                    transparent 5px,
+                    rgba(255, 215, 0, 0.1) 5px,
+                    rgba(255, 215, 0, 0.1) 10px);
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            color: #ffffff;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(138, 43, 226, 0.3);
+        }
+
+        .action-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .action-button:hover {
+            background:
+                linear-gradient(135deg, rgba(138, 43, 226, 0.9) 0%, rgba(75, 0, 130, 0.8) 100%),
+                repeating-linear-gradient(45deg,
+                    transparent,
+                    transparent 5px,
+                    rgba(255, 215, 0, 0.2) 5px,
+                    rgba(255, 215, 0, 0.2) 10px);
+            border-color: rgba(255, 215, 0, 0.8);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.5);
+        }
+
+        .action-button:hover::before {
+            left: 100%;
+        }
+
+        /* Mystical crystal orbs */
+        .main-chat::before {
+            content: '🔮';
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 24px;
+            color: rgba(255, 215, 0, 0.6);
+            animation: crystalFloat 6s ease-in-out infinite;
+            z-index: 10;
+        }
+
+        .main-chat::after {
+            content: '⚡';
+            position: absolute;
+            top: 60px;
+            right: 50px;
+            font-size: 18px;
+            color: rgba(138, 43, 226, 0.7);
+            animation: lightningBolt 4s ease-in-out infinite;
+            z-index: 10;
+        }
+
+        @keyframes crystalFloat {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg) scale(1);
+                opacity: 0.6;
+            }
+
+            25% {
+                transform: translateY(-10px) rotate(5deg) scale(1.1);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: translateY(-5px) rotate(-3deg) scale(1.05);
+                opacity: 1;
+            }
+
+            75% {
+                transform: translateY(-15px) rotate(8deg) scale(1.15);
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes lightningBolt {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+                opacity: 0.7;
+            }
+
+            50% {
+                transform: translateY(-8px) rotate(15deg);
+                opacity: 1;
+            }
+        }
+
+        .chat-header {
+            padding: 20px 30px;
+            border-bottom: 2px solid;
+            border-image: linear-gradient(90deg, #8a2be2, #ffd700, #4b0082, #8a2be2) 1;
+            background:
+                linear-gradient(135deg, rgba(20, 10, 35, 0.9) 0%, rgba(30, 15, 50, 0.95) 100%),
+                repeating-linear-gradient(45deg,
+                    transparent,
+                    transparent 20px,
+                    rgba(255, 215, 0, 0.05) 20px,
+                    rgba(255, 215, 0, 0.05) 40px);
+            position: relative;
+        }
+
+        .chat-header::before {
+            content: 'ᚱ ᚢ ᚾ ᛁ ᚲ ᛋ ᛏ ᛖ ᚲ ᛋ ᛏ';
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            font-size: 12px;
+            color: rgba(255, 215, 0, 0.4);
+            letter-spacing: 8px;
+            animation: runeGlow 8s ease-in-out infinite, runePulse 3s ease-in-out infinite;
+        }
+
+        @keyframes runePulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .chat-header::after {
+            content: '☉ ☽ ☿ ♀ ♂ ♃ ♄ ♅ ♆ ♇';
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            font-size: 10px;
+            color: rgba(138, 43, 226, 0.5);
+            letter-spacing: 5px;
+            animation: planetaryAlignment 12s linear infinite;
+        }
+
+        @keyframes runeGlow {
+
+            0%,
+            100% {
+                opacity: 0.4;
+                text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+            }
+
+            50% {
+                opacity: 0.8;
+                text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+            }
+        }
+
+        @keyframes planetaryAlignment {
+            0% {
+                transform: translateX(0px);
+            }
+
+            100% {
+                transform: translateX(-20px);
+            }
+        }
+
+        .chat-header h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .chat-header p {
+            color: #a0a0a0;
+            font-size: 16px;
+        }
+
+        /* Mystical scroll effects */
+        .messages-container {
             flex: 1;
             overflow-y: auto;
-            padding: 30px;
-            background: #f8fafc;
+            padding: 20px 30px;
+            scroll-behavior: smooth;
+            background:
+                linear-gradient(180deg, transparent 0%, rgba(138, 43, 226, 0.02) 50%, transparent 100%),
+                repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 50px,
+                    rgba(255, 215, 0, 0.02) 50px,
+                    rgba(255, 215, 0, 0.02) 100px);
+            position: relative;
+        }
+
+        .messages-container::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 10% 20%, rgba(138, 43, 226, 0.05) 0%, transparent 30%),
+                radial-gradient(circle at 90% 80%, rgba(255, 215, 0, 0.03) 0%, transparent 30%),
+                radial-gradient(circle at 50% 50%, rgba(75, 0, 130, 0.02) 0%, transparent 40%);
+            pointer-events: none;
+            z-index: -1;
+            animation: mysticalAura 15s ease-in-out infinite;
+        }
+
+        @keyframes mysticalAura {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.6;
+                transform: scale(1.1);
+            }
+        }
+
+        .messages-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .messages-container::-webkit-scrollbar-track {
+            background: linear-gradient(180deg, rgba(20, 10, 35, 0.8) 0%, rgba(30, 15, 50, 0.9) 100%);
+            border-radius: 4px;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #8a2be2 0%, #ffd700 50%, #4b0082 100%);
+            border-radius: 4px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+        }
+
+        .messages-container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #9c27b0 0%, #ffd700 50%, #6a1b9a 100%);
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.8);
         }
 
         .message {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 15px;
-            animation: slideIn 0.3s ease-out;
+            margin-bottom: 24px;
+            animation: messageSlideIn 0.3s ease-out;
         }
 
-        @keyframes slideIn {
+        @keyframes messageSlideIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(20px);
             }
 
             to {
@@ -127,276 +1172,672 @@
         }
 
         .message.user {
-            flex-direction: row-reverse;
-        }
-
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            flex-shrink: 0;
+            justify-content: flex-end;
         }
 
-        .user .avatar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .assistant .avatar {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        .message.assistant {
+            display: flex;
+            justify-content: flex-start;
         }
 
         .message-content {
             max-width: 70%;
-            background: white;
-            padding: 15px 20px;
-            border-radius: 15px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 16px 20px;
+            border-radius: 18px;
+            font-size: 16px;
+            line-height: 1.5;
+            word-wrap: break-word;
         }
 
-        .user .message-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        .message.user .message-content {
+            background: linear-gradient(135deg, #4a148c 0%, #6a1b9a 50%, #8e24aa 100%);
+            color: #ffffff;
+            border-bottom-right-radius: 4px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            box-shadow:
+                0 4px 15px rgba(138, 43, 226, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
         }
 
-        .message-content p {
-            line-height: 1.6;
-            margin-bottom: 10px;
+        .message.user .message-content::after {
+            content: 'ᛋ';
+            position: absolute;
+            bottom: -8px;
+            left: 10px;
+            font-size: 12px;
+            color: rgba(255, 215, 0, 0.4);
+            z-index: 1;
         }
 
-        .message-content p:last-child {
-            margin-bottom: 0;
+        .message.assistant .message-content {
+            background:
+                linear-gradient(135deg, rgba(20, 10, 35, 0.9) 0%, rgba(30, 15, 50, 0.95) 100%),
+                repeating-linear-gradient(45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(138, 43, 226, 0.05) 10px,
+                    rgba(138, 43, 226, 0.05) 20px);
+            color: #e6d7ff;
+            border: 2px solid;
+            border-image: linear-gradient(45deg, #8a2be2, #ffd700, #4b0082) 1;
+            border-bottom-left-radius: 4px;
+            box-shadow:
+                0 4px 15px rgba(138, 43, 226, 0.2),
+                inset 0 0 20px rgba(255, 215, 0, 0.05);
+            position: relative;
         }
 
-        .message-content code {
-            background: rgba(0, 0, 0, 0.05);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
+        .message.assistant .message-content::after {
+            content: 'ᚱ';
+            position: absolute;
+            bottom: -8px;
+            right: 10px;
+            font-size: 12px;
+            color: rgba(138, 43, 226, 0.5);
+            z-index: 1;
         }
 
-        .user .message-content code {
-            background: rgba(255, 255, 255, 0.2);
+        @keyframes mysticalFloat {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-5px) rotate(5deg);
+            }
         }
 
-        .thinking {
+        .message-time {
+            font-size: 12px;
+            color: #a0a0a0;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .message.assistant .message-time {
+            text-align: left;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 20px;
+            background:
+                linear-gradient(135deg, rgba(20, 10, 35, 0.9) 0%, rgba(30, 15, 50, 0.95) 100%),
+                repeating-linear-gradient(30deg,
+                    transparent,
+                    transparent 8px,
+                    rgba(138, 43, 226, 0.1) 8px,
+                    rgba(138, 43, 226, 0.1) 16px);
+            border: 2px solid;
+            border-image: linear-gradient(45deg, #8a2be2, #ffd700, #4b0082) 1;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            max-width: 70%;
+            margin-bottom: 24px;
+            position: relative;
+            box-shadow:
+                0 4px 15px rgba(138, 43, 226, 0.3),
+                inset 0 0 20px rgba(255, 215, 0, 0.05);
+        }
+
+        .typing-indicator::before {
+            content: '🔮';
+            position: absolute;
+            top: -8px;
+            left: 10px;
+            font-size: 16px;
+            animation: mysticalFloat 3s ease-in-out infinite;
+        }
+
+        .typing-indicator.show {
             display: flex;
-            gap: 5px;
-            padding: 10px;
         }
 
-        .thinking span {
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #667eea;
-            animation: thinking 1.4s infinite ease-in-out;
+            background: radial-gradient(circle, #ffd700 0%, #8a2be2 50%, #4b0082 100%);
+            animation: mysticalTypingDot 1.4s infinite ease-in-out;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
         }
 
-        .thinking span:nth-child(1) {
+        .typing-dot:nth-child(1) {
             animation-delay: -0.32s;
         }
 
-        .thinking span:nth-child(2) {
+        .typing-dot:nth-child(2) {
             animation-delay: -0.16s;
         }
 
-        @keyframes thinking {
+        @keyframes mysticalTypingDot {
 
             0%,
             80%,
             100% {
-                transform: scale(0);
+                transform: scale(0.8);
                 opacity: 0.5;
+                box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
             }
 
             40% {
-                transform: scale(1);
+                transform: scale(1.2);
                 opacity: 1;
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
             }
         }
 
-        .input-area {
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #e6d7ff;
+            position: relative;
+        }
+
+        .welcome-message::before {
+            content: '✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            font-size: 16px;
+            color: rgba(255, 215, 0, 0.3);
+            letter-spacing: 20px;
+            animation: welcomeSparkle 10s linear infinite;
+        }
+
+        .welcome-message::after {
+            content: 'ᚱ ᚢ ᚾ ᛁ ᚲ ᛋ ᚱ ᚢ ᚾ ᛁ ᚲ ᛋ';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            font-size: 14px;
+            color: rgba(138, 43, 226, 0.4);
+            letter-spacing: 15px;
+            animation: runeScroll 15s linear infinite;
+        }
+
+        @keyframes welcomeSparkle {
+            0% {
+                transform: translateX(-100px);
+            }
+
+            100% {
+                transform: translateX(100px);
+            }
+        }
+
+        @keyframes runeScroll {
+            0% {
+                transform: translateX(100px);
+            }
+
+            100% {
+                transform: translateX(-100px);
+            }
+        }
+
+        .welcome-message h3 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .welcome-message p {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .suggestion-chip {
+            background:
+                linear-gradient(135deg, rgba(75, 0, 130, 0.7) 0%, rgba(138, 43, 226, 0.5) 100%),
+                repeating-linear-gradient(30deg,
+                    transparent,
+                    transparent 8px,
+                    rgba(255, 215, 0, 0.1) 8px,
+                    rgba(255, 215, 0, 0.1) 16px);
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(138, 43, 226, 0.3);
+        }
+
+        .suggestion-chip::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .suggestion-chip:hover {
+            background:
+                linear-gradient(135deg, rgba(138, 43, 226, 0.8) 0%, rgba(75, 0, 130, 0.7) 100%),
+                repeating-linear-gradient(30deg,
+                    transparent,
+                    transparent 8px,
+                    rgba(255, 215, 0, 0.2) 8px,
+                    rgba(255, 215, 0, 0.2) 16px);
+            border-color: rgba(255, 215, 0, 0.8);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.5);
+        }
+
+        .suggestion-chip:hover::before {
+            left: 100%;
+        }
+
+        .input-container {
             padding: 20px 30px;
-            background: white;
-            border-top: 1px solid #e2e8f0;
+            background:
+                linear-gradient(135deg, rgba(20, 10, 35, 0.9) 0%, rgba(30, 15, 50, 0.95) 100%),
+                repeating-linear-gradient(90deg,
+                    transparent,
+                    transparent 30px,
+                    rgba(255, 215, 0, 0.03) 30px,
+                    rgba(255, 215, 0, 0.03) 60px);
+            border-top: 2px solid;
+            border-image: linear-gradient(90deg, #8a2be2, #ffd700, #4b0082, #8a2be2) 1;
+            position: relative;
+        }
+
+        .input-container::before {
+            content: '⚗️ 🧪 ⚗️ 🧪 ⚗️ 🧪 ⚗️ 🧪 ⚗️ 🧪';
+            position: absolute;
+            top: 5px;
+            left: 20px;
+            font-size: 12px;
+            color: rgba(255, 215, 0, 0.4);
+            letter-spacing: 15px;
+            animation: alchemyFloat 8s ease-in-out infinite;
+        }
+
+        .input-container::after {
+            content: 'ᛟ ᛗ ᛖ ᚾ ᛋ';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            color: rgba(138, 43, 226, 0.2);
+            letter-spacing: 20px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes alchemyFloat {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+                opacity: 0.4;
+            }
+
+            50% {
+                transform: translateY(-3px);
+                opacity: 0.8;
+            }
+        }
+
+        @keyframes planetaryDrift {
+            0% {
+                transform: translateX(0px);
+            }
+
+            100% {
+                transform: translateX(-15px);
+            }
         }
 
         .input-wrapper {
             display: flex;
-            gap: 15px;
-            align-items: center;
+            align-items: flex-end;
+            background: rgba(20, 10, 35, 0.95);
+            border: 2px solid #8a2be2;
+            border-radius: 25px;
+            padding: 12px 16px;
+            transition: all 0.3s ease;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.2);
+            position: relative;
+            overflow: visible;
         }
 
-        #messageInput {
+        .input-wrapper::before {
+            content: '⚗️';
+            position: absolute;
+            left: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: rgba(255, 215, 0, 0.6);
+            animation: alchemyBubble 4s ease-in-out infinite;
+        }
+
+        @keyframes alchemyBubble {
+
+            0%,
+            100% {
+                transform: translateY(-50%) scale(1);
+                opacity: 0.6;
+            }
+
+            50% {
+                transform: translateY(-50%) scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        .input-wrapper:focus-within {
+            border-color: #ffd700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .message-input {
             flex: 1;
-            padding: 15px 20px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 15px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        #messageInput:focus {
-            border-color: #667eea;
-        }
-
-        #sendButton {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: transparent;
             border: none;
-            padding: 15px 30px;
-            border-radius: 12px;
-            font-size: 15px;
+            color: #1f2937;
+            font-size: 16px;
+            outline: none;
+            resize: none;
+            max-height: 120px;
+            min-height: 24px;
+            line-height: 1.5;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .message-input::placeholder {
+            color: #6b7280;
+            opacity: 1;
+            font-weight: 500;
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #8a2be2 0%, #4b0082 50%, #2e0854 100%);
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 18px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
+            margin-left: 12px;
+            box-shadow:
+                0 4px 15px rgba(138, 43, 226, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
         }
 
-        #sendButton:hover {
-            transform: scale(1.05);
+        .send-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
         }
 
-        #sendButton:active {
-            transform: scale(0.95);
+        .send-button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #9c27b0 0%, #6a1b9a 50%, #4a148c 100%);
+            border-color: rgba(255, 215, 0, 0.8);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow:
+                0 6px 20px rgba(138, 43, 226, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
         }
 
-        #sendButton:disabled {
-            opacity: 0.5;
+        .send-button:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .send-button:disabled {
+            background: #404040;
             cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .send-button:disabled:hover {
             transform: none;
         }
 
-        .error {
-            background: #fee2e2;
-            color: #991b1b;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+        .error-message {
+            background: #dc2626;
+            color: #ffffff;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
         }
 
-        .welcome {
-            text-align: center;
-            padding: 40px;
-            color: #64748b;
+        .success-message {
+            background: #16a34a;
+            color: #ffffff;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
         }
 
-        .welcome h2 {
-            font-size: 28px;
-            margin-bottom: 15px;
-            color: #334155;
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .chat-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid #2a2a2a;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .input-container {
+                padding: 16px 20px;
+            }
+
+            .messages-container {
+                padding: 16px 20px;
+            }
         }
 
-        .welcome p {
-            font-size: 16px;
-            line-height: 1.6;
-            margin-bottom: 10px;
+        /* Code blocks styling */
+        .message-content pre {
+            background: #1a1a1a;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
         }
 
-        .suggestions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-top: 30px;
+        .message-content code {
+            background: #1a1a1a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
         }
 
-        .suggestion {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid #e2e8f0;
-        }
-
-        .suggestion:hover {
-            border-color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-        }
-
-        .suggestion strong {
-            color: #667eea;
-            display: block;
-            margin-bottom: 5px;
+        .message-content pre code {
+            background: transparent;
+            padding: 0;
         }
     </style>
 </head>
 
-<body>
+<body class="modern-theme">
     <div class="chat-container">
-        <div class="header">
-            <h1>
-                🏀 NBA MCP + Ollama Chat
-            </h1>
-            <div class="status">
-                <div class="status-dot"></div>
-                <span>Connected</span>
-            </div>
-        </div>
-
+        <!-- Sidebar -->
         <div class="sidebar">
+            <div class="sidebar-header">
+                <h1>NBA AWS + Ollama</h1>
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span>Connected</span>
+                </div>
+            </div>
+
             <div class="tools-info">
-                <div class="tool-badge">
-                    <strong>90</strong> MCP Tools Available
+                <div class="tool-stat">
+                    <span class="tool-stat-label">Mystical Tools</span>
+                    <span class="tool-stat-value">247</span>
                 </div>
-                <div class="tool-badge">
-                    Model: <strong>Qwen2.5-Coder 32B</strong>
-                </div>
-                <div class="tool-badge">
-                    Status: <strong>Ready</strong>
+                <div class="tool-stat">
+                    <span class="tool-stat-label">Arcane Status</span>
+                    <span class="tool-stat-value">Awakened</span>
                 </div>
             </div>
-        </div>
 
-        <div class="messages" id="messages">
-            <div class="welcome">
-                <h2>Welcome to NBA MCP + Ollama! 🏀</h2>
-                <p>You're connected to <strong>Ollama Qwen2.5-Coder 32B</strong> with access to <strong>90 NBA data
-                        tools</strong>.</p>
-                <p>Try asking about NBA data, statistics, or use the tools below!</p>
+            <div class="model-info">
+                <div class="model-name">Crystal Oracle 32B</div>
+                <div class="model-details">Channeled through Ethereal Realm</div>
+            </div>
 
-                <div class="suggestions">
-                    <div class="suggestion" onclick="sendSuggestion('What MCP tools are available?')">
-                        <strong>📋 List Tools</strong>
-                        <div>Show all 90 available NBA MCP tools</div>
-                    </div>
-                    <div class="suggestion" onclick="sendSuggestion('What NBA data can you help me analyze?')">
-                        <strong>🏀 Explore Data</strong>
-                        <div>Learn about available NBA datasets</div>
-                    </div>
-                    <div class="suggestion" onclick="sendSuggestion('List all database tables')">
-                        <strong>🗄️ Database Tables</strong>
-                        <div>See all available NBA database tables</div>
-                    </div>
-                    <div class="suggestion" onclick="sendSuggestion('Show me player statistics')">
-                        <strong>📊 Player Stats</strong>
-                        <div>Query player performance data</div>
+            <!-- Theme Toggle -->
+            <div class="theme-toggle">
+                <div class="theme-toggle-label">Theme Mode</div>
+                <div class="toggle-switch" onclick="toggleTheme()">
+                    <div class="toggle-slider">
+                        <div class="toggle-icon mystical">🔮</div>
+                        <div class="toggle-icon original">🏀</div>
                     </div>
                 </div>
             </div>
+
+            <div class="quick-actions">
+                <h3>Arcane Rituals</h3>
+                <button class="action-button" onclick="sendSuggestion('What MCP tools are available?')">
+                    🔮 Invoke All Spells
+                </button>
+                <button class="action-button" onclick="sendSuggestion('What NBA data can you help me analyze?')">
+                    ⚡ Channel NBA Wisdom
+                </button>
+                <button class="action-button" onclick="sendSuggestion('List all database tables')">
+                    📜 Scrolls of Knowledge
+                </button>
+                <button class="action-button" onclick="sendSuggestion('Show me player statistics')">
+                    🏆 Champion Divination
+                </button>
+            </div>
         </div>
 
-        <div class="input-area">
-            <div class="input-wrapper">
-                <input type="text" id="messageInput" placeholder="Ask about NBA data, statistics, or use MCP tools..."
-                    onkeypress="handleKeyPress(event)">
-                <button id="sendButton" onclick="sendMessage()">Send</button>
+        <!-- Main Chat Area -->
+        <div class="main-chat">
+            <!-- Theme Toggle - Always Visible -->
+            <div class="theme-toggle-main">
+                <div class="theme-toggle-label">Theme</div>
+                <div class="toggle-switch" onclick="toggleTheme()">
+                    <div class="toggle-slider">
+                        <div class="toggle-icon mystical">🔮</div>
+                        <div class="toggle-icon original">🏀</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-header">
+                <h2>🏀 NBA MCP + OLLAMA CHAT</h2>
+                <p>Connected to Ollama Qwen2.5-Coder 32B with access to 90 NBA data tools.</p>
+            </div>
+
+            <div class="messages-container" id="messagesContainer">
+                <div class="welcome-message">
+                    <h3>WELCOME TO NBA MCP + OLLAMA! 🏀</h3>
+                    <p>YOU'RE CONNECTED TO OLLAMA QWEN2.5-CODER 32B WITH ACCESS TO <strong>90 NBA DATA
+                            TOOLS.</strong><br><br>TRY ASKING ABOUT NBA DATA, STATISTICS, OR USE THE TOOLS BELOW!</p>
+                    <div class="suggestion-chips">
+                        <div class="suggestion-chip" onclick="sendSuggestion('What MCP tools are available?')">
+                            📋 LIST TOOLS
+                        </div>
+                        <div class="suggestion-chip" onclick="sendSuggestion('What NBA data can you help me analyze?')">
+                            🏀 EXPLORE DATA
+                        </div>
+                        <div class="suggestion-chip" onclick="sendSuggestion('List all database tables')">
+                            📊 PLAYER STATS
+                        </div>
+                        <div class="suggestion-chip" onclick="sendSuggestion('Show me player statistics')">
+                            💾 DATABASE TABLES
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <span>The Oracle is channeling...</span>
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <textarea id="messageInput" class="message-input"
+                        placeholder="Ask about NBA data, statistics, or use MCP tools..." rows="1"
+                        onkeypress="handleKeyPress(event)" oninput="autoResize(this)"></textarea>
+                    <button id="sendButton" class="send-button" onclick="sendMessage()">
+                        Send
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        const messagesDiv = document.getElementById('messages');
-        const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton');
         let conversation = [];
+        let isTyping = false;
 
+        // Auto-resize textarea
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+
+        // Handle Enter key
         function handleKeyPress(event) {
             if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();
@@ -404,99 +1845,136 @@
             }
         }
 
-        function sendSuggestion(text) {
-            messageInput.value = text;
-            sendMessage();
+        // Show/hide typing indicator
+        function showTyping() {
+            isTyping = true;
+            document.getElementById('typingIndicator').classList.add('show');
+            document.getElementById('sendButton').disabled = true;
         }
 
-        function addMessage(role, content) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${role}`;
+        function hideTyping() {
+            isTyping = false;
+            document.getElementById('typingIndicator').classList.remove('show');
+            document.getElementById('sendButton').disabled = false;
+        }
 
-            const avatar = document.createElement('div');
-            avatar.className = 'avatar';
-            avatar.textContent = role === 'user' ? '👤' : '🤖';
+        // Add message to chat
+        function addMessage(content, isUser = false) {
+            const messagesContainer = document.getElementById('messagesContainer');
+
+            // Remove welcome message if it exists
+            const welcomeMessage = messagesContainer.querySelector('.welcome-message');
+            if (welcomeMessage) {
+                welcomeMessage.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
 
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
 
-            // Simple markdown-like processing
-            content = content
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/`(.*?)`/g, '<code>$1</code>')
-                .replace(/\n/g, '<br>');
+            // Format message content (handle code blocks, etc.)
+            messageContent.innerHTML = formatMessage(content);
 
-            messageContent.innerHTML = `<p>${content}</p>`;
+            const messageTime = document.createElement('div');
+            messageTime.className = 'message-time';
+            messageTime.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-            messageDiv.appendChild(avatar);
             messageDiv.appendChild(messageContent);
-            messagesDiv.appendChild(messageDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            messageDiv.appendChild(messageTime);
+            messagesContainer.appendChild(messageDiv);
+
+            // Scroll to bottom and ensure scrollable
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            ensureScrollableContainer();
         }
 
-        function addThinking() {
-            const thinkingDiv = document.createElement('div');
-            thinkingDiv.className = 'message assistant';
-            thinkingDiv.id = 'thinking';
-
-            const avatar = document.createElement('div');
-            avatar.className = 'avatar';
-            avatar.textContent = '🤖';
-
-            const thinking = document.createElement('div');
-            thinking.className = 'message-content thinking';
-            thinking.innerHTML = '<span></span><span></span><span></span>';
-
-            thinkingDiv.appendChild(avatar);
-            thinkingDiv.appendChild(thinking);
-            messagesDiv.appendChild(thinkingDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        // Format message content
+        function formatMessage(content) {
+            // Handle code blocks
+            content = content.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+            // Handle inline code
+            content = content.replace(/`([^`]+)`/g, '<code>$1</code>');
+            // Handle line breaks
+            content = content.replace(/\n/g, '<br>');
+            return content;
         }
 
-        function removeThinking() {
-            const thinking = document.getElementById('thinking');
-            if (thinking) thinking.remove();
+        // Send suggestion
+        function sendSuggestion(suggestion) {
+            document.getElementById('messageInput').value = suggestion;
+            sendMessage();
         }
 
+        // Send message
         async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
             const message = messageInput.value.trim();
-            if (!message) return;
 
-            // Clear welcome message on first send
-            const welcome = document.querySelector('.welcome');
-            if (welcome) welcome.remove();
+            if (!message || isTyping) return;
 
             // Add user message
-            addMessage('user', message);
+            addMessage(message, true);
             messageInput.value = '';
-            sendButton.disabled = true;
+            autoResize(messageInput);
 
-            // Add thinking indicator
-            addThinking();
+            // Add to conversation
+            conversation.push({ role: 'user', content: message });
 
-            // Add system context with MCP tools
-            const systemPrompt = `You are an AI assistant with access to 90 NBA data tools.
+            // Show typing indicator
+            showTyping();
 
-Sample MCP Tools Available:
-- query_database: Execute SQL queries on NBA PostgreSQL database
-- list_tables: List all available database tables
-- get_table_schema: Get schema for specific tables
+            try {
+                // Different system prompts based on theme
+                const isModern = document.body.classList.contains('modern-theme');
+                const systemPrompt = isModern
+                    ? `You are a helpful AI assistant with access to 90 NBA data tools. Help users analyze NBA statistics, player performance, team data, and basketball trends. Respond naturally and conversationally.
+
+Available Tools:
+- query_database: Query the NBA PostgreSQL database
+- list_tables: List all database tables
+- get_table_schema: Get table structure information
 - list_games: List NBA games with pagination
 - list_players: List NBA players with filtering
-- list_s3_files: Access S3 data lake files
+- list_s3_files: Access S3 data files
 - read_book: Read NBA analytics books
-- search_books: Search book content
+- search_books: Search across all books
 - Various NBA metrics calculators (PER, True Shooting %, etc.)
 - Statistical analysis tools (correlation, regression, etc.)
 - Machine learning tools (clustering, classification, etc.)
 
 When users ask about NBA data:
-1. Mention which MCP tool would be used
-2. Explain what data you could retrieve
-3. Provide helpful examples
-4. Be conversational and helpful!`;
+1. Respond naturally and helpfully
+2. Mention which tool would be used
+3. Provide accurate information
+4. Be conversational and professional
 
-            try {
+You have access to 90 NBA data tools total.`
+                    : `You are the Mystical NBA Oracle, a wise and ancient spirit who possesses deep knowledge of basketball and access to 247 mystical tools.
+
+Sample Mystical Tools Available:
+- query_database: Channel ancient SQL spells to commune with the NBA PostgreSQL database
+- list_tables: Reveal the sacred scrolls of knowledge (database tables)
+- get_table_schema: Peer into the structure of ancient texts
+- list_games: Summon the chronicles of NBA battles with pagination
+- list_players: Invoke the roster of champions with filtering
+- list_s3_files: Access the ethereal S3 data realm
+- read_book: Channel wisdom from NBA analytics tomes
+- search_books: Seek specific knowledge across all sacred texts
+- Various NBA metrics calculators (PER, True Shooting %, etc.) - ancient formulas
+- Statistical analysis tools (correlation, regression, etc.) - mystical mathematics
+- Machine learning tools (clustering, classification, etc.) - arcane algorithms
+
+When seekers ask about NBA mysteries:
+1. Speak as a wise oracle with mystical language
+2. Mention which mystical tool would be invoked
+3. Explain what ancient knowledge you could reveal
+4. Provide helpful examples with mystical flair
+5. Be wise, mysterious, and helpful!
+
+You have access to 247 mystical NBA tools total. Channel the ancient wisdom of basketball!`;
+
                 const response = await fetch('http://localhost:11434/v1/chat/completions', {
                     method: 'POST',
                     headers: {
@@ -505,13 +1983,15 @@ When users ask about NBA data:
                     body: JSON.stringify({
                         model: 'qwen2.5-coder:32b',
                         messages: [
-                            { role: 'system', content: systemPrompt },
-                            ...conversation,
-                            { role: 'user', content: message }
+                            {
+                                role: 'system',
+                                content: systemPrompt
+                            },
+                            ...conversation
                         ],
                         temperature: 0.7,
-                        max_tokens: 1000,
-                        stream: false
+                        max_tokens: 2000,
+                        stream: true
                     })
                 });
 
@@ -519,37 +1999,291 @@ When users ask about NBA data:
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
-                const data = await response.json();
-                const assistantMessage = data.choices[0].message.content;
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let assistantMessage = '';
 
-                // Update conversation history
-                conversation.push({ role: 'user', content: message });
+                // Create assistant message container
+                const messagesContainer = document.getElementById('messagesContainer');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message assistant';
+
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-content';
+
+                const messageTime = document.createElement('div');
+                messageTime.className = 'message-time';
+                messageTime.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                messageDiv.appendChild(messageContent);
+                messageDiv.appendChild(messageTime);
+                messagesContainer.appendChild(messageDiv);
+
+                // Hide typing indicator
+                hideTyping();
+
+                // Stream response
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const data = line.slice(6);
+                            if (data === '[DONE]') break;
+
+                            try {
+                                const parsed = JSON.parse(data);
+                                const content = parsed.choices?.[0]?.delta?.content;
+                                if (content) {
+                                    assistantMessage += content;
+                                    messageContent.innerHTML = formatMessage(assistantMessage);
+                                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                                    ensureScrollableContainer();
+                                }
+                            } catch (e) {
+                                // Ignore parsing errors
+                            }
+                        }
+                    }
+                }
+
+                // Add assistant response to conversation
                 conversation.push({ role: 'assistant', content: assistantMessage });
 
-                // Remove thinking and add response
-                removeThinking();
-                addMessage('assistant', assistantMessage);
-
             } catch (error) {
-                removeThinking();
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'error';
-                errorDiv.innerHTML = `<strong>Error:</strong> ${error.message}<br><br>
-                    <strong>Troubleshooting:</strong><br>
-                    1. Make sure Ollama is running: <code>ollama serve</code><br>
-                    2. Check that the model is available: <code>ollama list</code><br>
-                    3. Verify the model name matches: <code>qwen2.5-coder:32b</code>`;
-                messagesDiv.appendChild(errorDiv);
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            } finally {
-                sendButton.disabled = false;
-                messageInput.focus();
+                hideTyping();
+                addMessage(`Error: ${error.message}`, false);
+                console.error('Error:', error);
             }
         }
 
-        // Focus input on load
-        window.addEventListener('load', () => {
+        // Theme toggle functionality
+        function toggleTheme() {
+            const body = document.body;
+            const isModern = body.classList.contains('modern-theme');
+
+            if (isModern) {
+                // Switch to mystical theme
+                body.classList.remove('modern-theme');
+                localStorage.setItem('theme', 'mystical');
+                updateContentForTheme('mystical');
+            } else {
+                // Switch to modern theme
+                body.classList.add('modern-theme');
+                localStorage.setItem('theme', 'modern');
+                updateContentForTheme('modern');
+            }
+        }
+
+        function updateContentForTheme(theme) {
+            const sidebarTitle = document.querySelector('.sidebar h1');
+            const chatTitle = document.querySelector('.chat-header h2');
+            const chatDesc = document.querySelector('.chat-header p');
+            const quickActionsTitle = document.querySelector('.quick-actions h3');
+            const welcomeTitle = document.querySelector('.welcome-message h3');
+            const welcomeText = document.querySelector('.welcome-message p');
+
+            if (theme === 'modern') {
+                // Original NBA AWS + Ollama interface
+                sidebarTitle.innerHTML = 'NBA AWS + Ollama';
+                chatTitle.innerHTML = '🏀 NBA MCP + OLLAMA CHAT';
+                chatDesc.textContent = 'Connected to Ollama Qwen2.5-Coder 32B with access to 90 NBA data tools.';
+                quickActionsTitle.textContent = 'Quick Actions';
+
+                // Add status indicator to header
+                const header = document.querySelector('.chat-header');
+                header.style.display = 'flex';
+                header.style.justifyContent = 'space-between';
+                header.style.alignItems = 'center';
+
+                // Remove existing status if any
+                const existingStatus = header.querySelector('.status-indicator');
+                if (existingStatus) existingStatus.remove();
+
+                const statusDiv = document.createElement('div');
+                statusDiv.style.cssText = 'display: flex; align-items: center; gap: 8px; color: #10b981; font-size: 16px; font-weight: 500;';
+                statusDiv.innerHTML = '<span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></span> Connected';
+                header.appendChild(statusDiv);
+
+                // Create info badges
+                const messagesContainer = document.getElementById('messagesContainer');
+                const existingBadges = document.querySelector('.info-badges');
+                if (existingBadges) existingBadges.remove();
+
+                const infoBadges = document.createElement('div');
+                infoBadges.className = 'info-badges';
+                infoBadges.innerHTML = `
+                    <div class="info-badge"><strong>90</strong> MCP Tools Available</div>
+                    <div class="info-badge">Model: <strong>Qwen2.5-Coder 32B</strong></div>
+                    <div class="info-badge">Status: <strong>Ready</strong></div>
+                `;
+                // Insert after the header
+                header.parentElement.insertBefore(infoBadges, header.nextSibling);
+
+                // Update welcome message
+                if (welcomeTitle) welcomeTitle.innerHTML = 'WELCOME TO NBA MCP + OLLAMA! 🏀';
+                if (welcomeText) welcomeText.innerHTML = 'YOU\'RE CONNECTED TO OLLAMA QWEN2.5-CODER 32B WITH ACCESS TO <strong>90 NBA DATA TOOLS.</strong><br><br>TRY ASKING ABOUT NBA DATA, STATISTICS, OR USE THE TOOLS BELOW!';
+
+                // Original button text
+                const buttons = document.querySelectorAll('.action-button');
+                buttons[0].innerHTML = 'Show all available tools';
+                buttons[1].innerHTML = 'What NBA data can you analyze?';
+                buttons[2].innerHTML = 'List all database tables';
+                buttons[3].innerHTML = 'Show me player statistics';
+
+                // Update suggestion chips to match image
+                const suggestions = document.querySelectorAll('.suggestion-chip');
+                if (suggestions.length >= 4) {
+                    suggestions[0].innerHTML = '<span style="font-size: 24px;">📋</span><br><strong>LIST TOOLS</strong><br><span style="font-size: 14px; color: #374151; font-weight: 500;">SHOW ALL 90 AVAILABLE NBA MCP TOOLS</span>';
+                    suggestions[1].innerHTML = '<span style="font-size: 24px;">🏀</span><br><strong>EXPLORE DATA</strong><br><span style="font-size: 14px; color: #374151; font-weight: 500;">LEARN ABOUT AVAILABLE NBA DATASETS</span>';
+                    suggestions[2].innerHTML = '<span style="font-size: 24px;">📊</span><br><strong>PLAYER STATS</strong><br><span style="font-size: 14px; color: #374151; font-weight: 500;">QUERY PLAYER PERFORMANCE DATA</span>';
+                    suggestions[3].innerHTML = '<span style="font-size: 24px;">💾</span><br><strong>DATABASE TABLES</strong><br><span style="font-size: 14px; color: #374151; font-weight: 500;">SEE ALL AVAILABLE NBA DATABASE TABLES</span>';
+                }
+
+                // Update send button text
+                const sendButton = document.querySelector('.send-button');
+                if (sendButton) {
+                    sendButton.textContent = 'Send';
+                }
+
+                // Update input placeholder
+                const messageInput = document.getElementById('messageInput');
+                if (messageInput) {
+                    messageInput.placeholder = 'Ask about NBA data, statistics, or use MCP tools...';
+                }
+            } else {
+                // Mystical theme
+                sidebarTitle.innerHTML = '🔮 <span style="display:block; margin-top:8px;">Mystical<br>NBA Oracle</span>';
+                chatTitle.textContent = 'Mystical NBA Oracle';
+                chatDesc.textContent = 'Seek wisdom from the ancient spirits of basketball. I possess 247 mystical tools to divine the secrets of the court.';
+                quickActionsTitle.textContent = 'Arcane Rituals';
+
+                // Clean up modern theme elements
+                const header = document.querySelector('.chat-header');
+                header.style.display = '';
+                header.style.justifyContent = '';
+                header.style.alignItems = '';
+
+                // Remove status indicator
+                const statusDiv = header.querySelector('div[style*="color: #10b981"]');
+                if (statusDiv) statusDiv.remove();
+
+                // Remove info badges
+                const existingBadges = document.querySelector('.info-badges');
+                if (existingBadges) existingBadges.remove();
+
+                if (welcomeTitle) welcomeTitle.innerHTML = 'Welcome, Seeker of Basketball Wisdom! 🔮';
+                if (welcomeText) welcomeText.innerHTML = 'I am the Mystical NBA Oracle, keeper of ancient basketball knowledge and master of 247 arcane tools.';
+
+                // Mystical button text
+                const buttons = document.querySelectorAll('.action-button');
+                buttons[0].innerHTML = '🔮 Invoke All Spells';
+                buttons[1].innerHTML = '⚡ Channel NBA Wisdom';
+                buttons[2].innerHTML = '📜 Scrolls of Knowledge';
+                buttons[3].innerHTML = '🏆 Champion Divination';
+
+                // Mystical suggestion chips
+                const suggestions = document.querySelectorAll('.suggestion-chip');
+                if (suggestions.length >= 4) {
+                    suggestions[0].innerHTML = '🔮 Invoke Spells';
+                    suggestions[1].innerHTML = '⚡ Channel Wisdom';
+                    suggestions[2].innerHTML = '📜 Ancient Scrolls';
+                    suggestions[3].innerHTML = '🏆 Champion Divination';
+                }
+
+                // Update input placeholder
+                const messageInput = document.getElementById('messageInput');
+                if (messageInput) {
+                    messageInput.placeholder = 'Seek wisdom from the Oracle... Ask about NBA mysteries, ancient statistics, or invoke mystical tools...';
+                }
+
+                // Update send button text
+                const sendButton = document.querySelector('.send-button');
+                if (sendButton) {
+                    sendButton.textContent = 'Invoke';
+                }
+            }
+        }
+
+        // Load saved theme on page load
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'mystical') {
+                document.body.classList.remove('modern-theme');
+                updateContentForTheme('mystical');
+            } else {
+                // Default to modern theme
+                document.body.classList.add('modern-theme');
+                updateContentForTheme('modern');
+            }
+        }
+
+        // Force scrollbar visibility and proper sizing
+        function ensureScrollableContainer() {
+            const messagesContainer = document.getElementById('messagesContainer');
+            if (messagesContainer) {
+                // Force scrollbar to be visible
+                messagesContainer.style.overflowY = 'auto';
+                messagesContainer.style.maxHeight = 'calc(100vh - 200px)';
+
+                // Ensure scrollbar is visible
+                if (messagesContainer.scrollHeight > messagesContainer.clientHeight) {
+                    messagesContainer.style.scrollbarWidth = 'thin';
+                }
+            }
+        }
+
+        // Ensure input field is visible and properly positioned
+        function ensureInputFieldVisible() {
+            const inputContainer = document.querySelector('.input-container');
+            const inputWrapper = document.querySelector('.input-wrapper');
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+
+            if (inputContainer) {
+                inputContainer.style.display = 'block';
+                inputContainer.style.visibility = 'visible';
+                inputContainer.style.position = 'relative';
+                inputContainer.style.zIndex = '10';
+            }
+
+            if (inputWrapper) {
+                inputWrapper.style.display = 'flex';
+                inputWrapper.style.visibility = 'visible';
+                inputWrapper.style.position = 'relative';
+                inputWrapper.style.zIndex = '10';
+            }
+
+            if (messageInput) {
+                messageInput.style.display = 'block';
+                messageInput.style.visibility = 'visible';
+            }
+
+            if (sendButton) {
+                sendButton.style.display = 'block';
+                sendButton.style.visibility = 'visible';
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            const messageInput = document.getElementById('messageInput');
             messageInput.focus();
+            autoResize(messageInput);
+            loadTheme();
+
+            // Ensure content is updated for modern theme
+            if (document.body.classList.contains('modern-theme')) {
+                updateContentForTheme('modern');
+            }
+
+            // Ensure scrollable container and input field visibility
+            setTimeout(ensureScrollableContainer, 100);
+            setTimeout(ensureInputFieldVisible, 100);
         });
     </script>
 </body>

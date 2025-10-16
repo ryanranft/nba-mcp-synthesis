@@ -59,7 +59,7 @@ steps:
     description: "Synthesize final report with Claude"
     action: claude_synthesis
     params:
-      model: "claude-3-5-sonnet-20241022"
+      model: "${CLAUDE_MODEL:-claude-3-7-sonnet-20250219}"
       context_from_previous: true
       task: "Generate comprehensive NBA analysis report"
       max_tokens: 8000

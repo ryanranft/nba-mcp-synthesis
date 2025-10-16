@@ -39,6 +39,13 @@ sqlalchemy>=2.0.36
 pyarrow>=18.0.0
 
 # ============================================
+# Mathematical & Symbolic Computing
+# ============================================
+sympy>=1.13.0              # Symbolic mathematics
+scipy>=1.13.1              # Scientific computing
+matplotlib>=3.9.2          # Plotting (already listed below)
+
+# ============================================
 # Utilities
 # ============================================
 click>=8.1.7           # CLI tools

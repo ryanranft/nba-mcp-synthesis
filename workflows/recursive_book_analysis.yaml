@@ -1,0 +1,581 @@
+name: Recursive Book Analysis Workflow
+
+description: |
+  Automated workflow for analyzing technical books using MCP server with recursive analysis,
+  convergence tracking, and implementation plan generation.
+
+triggers:
+  - name: manual_trigger
+    type: manual
+    description: "Manually trigger book analysis"
+
+  - name: schedule_trigger
+    type: schedule
+    schedule: "0 2 * * 1" # Every Monday at 2 AM
+    description: "Weekly book analysis"
+
+workflow:
+  name: recursive_book_analysis
+  version: "1.0.0"
+
+  steps:
+    - name: validate_environment
+      type: validation
+      description: "Validate environment and dependencies"
+      actions:
+        - check_python_version:
+            min_version: "3.8"
+        - check_dependencies:
+            packages: ["boto3", "requests", "pathlib"]
+        - check_aws_credentials:
+            required: true
+        - check_s3_bucket:
+            bucket: "nba-mcp-books"
+            access: "read_write"
+
+    - name: load_configuration
+      type: data_loading
+      description: "Load book configuration and analysis settings"
+      actions:
+        - load_books_config:
+            path: "config/books_to_analyze.json"
+        - validate_book_metadata:
+            required_fields: ["id", "title", "s3_path", "format"]
+        - load_analysis_settings:
+            convergence_threshold: 3
+            max_iterations: 15
+            chunk_size: 50000
+
+    - name: check_s3_status
+      type: s3_operations
+      description: "Check which books are already in S3"
+      condition: "{{ trigger.type == 'manual' or trigger.check_s3 }}"
+      actions:
+        - check_book_exists:
+            bucket: "nba-mcp-books"
+            key: "{{ book.s3_path }}"
+            for_each: "{{ books }}"
+        - generate_s3_report:
+            output: "s3_status_report.json"
+
+    - name: upload_missing_books
+      type: s3_operations
+      description: "Upload books that are missing from S3"
+      condition: "{{ trigger.type == 'manual' or trigger.upload_only }}"
+      depends_on: ["check_s3_status"]
+      actions:
+        - convert_acsm_files:
+            converter: "Adobe Digital Editions"
+            output_dir: "converted_books/"
+        - upload_to_s3:
+            bucket: "nba-mcp-books"
+            local_path: "{{ book.local_path }}"
+            s3_key: "{{ book.s3_path }}"
+            for_each: "{{ missing_books }}"
+        - verify_upload:
+            bucket: "nba-mcp-books"
+            key: "{{ book.s3_path }}"
+            for_each: "{{ uploaded_books }}"
+
+        - name: configure_google_claude_analysis
+          type: configuration
+          description: "Configure Google Gemini + Claude synthesis settings"
+          depends_on: ["load_configuration"]
+          actions:
+            - setup_google_claude_config:
+                config_file: "config/google_claude_config.json"
+                models:
+                  google_gemini:
+                    enabled: true
+                    api_key_env: "GOOGLE_API_KEY"
+                    model: "gemini-1.5-pro"
+                    max_tokens: 8192
+                    temperature: 0.1
+                    cost_per_1m_input: 0.0035
+                    cost_per_1m_output: 0.0105
+                  claude:
+                    enabled: true
+                    api_key_env: "ANTHROPIC_API_KEY"
+                    model: "${CLAUDE_MODEL:-claude-3-7-sonnet-20250219}"
+                    max_tokens: 4000
+                    temperature: 0.3
+                    cost_per_1m_input: 3.0
+                    cost_per_1m_output: 15.0
+                analysis_flow:
+                  step_1: "Google Gemini reads and analyzes book content"
+                  step_2: "Google extracts raw recommendations"
+                  step_3: "Claude synthesizes implementation recommendations"
+                  step_4: "Claude maps to NBA project phases"
+                  step_5: "Final recommendations with AWS integration details"
+            - verify_api_keys:
+                required_keys:
+                  - "GOOGLE_API_KEY"
+                  - "ANTHROPIC_API_KEY"
+            - initialize_cost_tracking:
+                cost_file: "analysis_results/cost_tracking.json"
+                track_models: ["google_gemini", "claude"]
+
+    - name: analyze_books
+      type: analysis
+      description: "Run recursive analysis on selected books"
+      depends_on: ["configure_google_claude_analysis"]
+      actions:
+        - initialize_mcp_client:
+            server_url: "http://localhost:8000"
+            timeout: 300
+        - run_google_claude_analysis:
+            script: "scripts/google_claude_book_analyzer.py"
+            analyzer: "GoogleClaudeBookAnalyzer"
+            cost_tracking: true
+            for_each: "{{ books_to_analyze }}"
+        - run_recursive_analysis:
+            script: "scripts/recursive_book_analysis.py"
+            args:
+              - "--all" # or "--book {{ specific_book }}"
+              - "--config config/books_to_analyze.json"
+              - "--output-dir analysis_results/"
+            for_each: "{{ books_to_analyze }}"
+        - track_convergence:
+            threshold: 3
+            max_iterations: 15
+            strict_mode: true
+
+    - name: generate_reports
+      type: reporting
+      description: "Generate analysis reports and implementation plans"
+      depends_on: ["analyze_books"]
+      actions:
+        - generate_markdown_reports:
+            template: "templates/book_report.md"
+            output_dir: "analysis_results/"
+            for_each: "{{ analyzed_books }}"
+        - generate_implementation_plans:
+            template: "templates/implementation_plan.md"
+            output_dir: "implementation_plans/"
+            priority_filter: ["critical", "important"]
+        - generate_master_summary:
+            template: "templates/master_summary.md"
+            output: "analysis_results/ALL_BOOKS_MASTER_SUMMARY.md"
+
+    - name: create_book_directories
+      type: directory_management
+      description: "Create organized directory structure for book-specific results"
+      depends_on: ["generate_reports"]
+      actions:
+        - create_base_structure:
+            base_dir: "analysis_results/books"
+            for_each: "{{ analyzed_books }}"
+        - create_book_subdirectories:
+            pattern: "analysis_results/books/{{ book.id }}/"
+            subdirs:
+              - "BY_PHASE"
+            for_each: "{{ analyzed_books }}"
+        - organize_book_files:
+            script: "scripts/organize_book_results.py"
+            source_dir: "analysis_results/"
+            target_base: "analysis_results/books/"
+            config_file: "config/books_to_analyze.json"
+
+    - name: integrate_recommendations
+      type: integration
+      description: "Integrate recommendations with NBA Simulator AWS project phases"
+      depends_on: ["create_book_directories"]
+      actions:
+        - run_recommendation_integration:
+            script: "scripts/integrate_recommendations.py"
+            synthesis_path: "/Users/ryanranft/nba-mcp-synthesis"
+            simulator_path: "/Users/ryanranft/nba-simulator-aws"
+            book_results_dir: "analysis_results/books/"
+
+    - name: generate_implementation_scripts
+      type: code_generation
+      description: "Generate implementation scripts using MCP for database context"
+      depends_on: ["integrate_recommendations"]
+      actions:
+        - run_implementation_generator:
+            script: "scripts/generate_implementation_files.py"
+            mcp_server: "http://localhost:8000"
+            recommendations_file: "analysis_results/master_recommendations.json"
+            output_base: "/Users/ryanranft/nba-simulator-aws/docs/phases"
+            templates_dir: "templates"
+        - verify_generated_files:
+            check_python_syntax: true
+            check_sql_syntax: true
+            check_yaml_syntax: true
+        - generate_execution_plan:
+            output_file: "analysis_results/implementation_execution_plan.md"
+            include_dependencies: true
+            include_time_estimates: true
+        - update_phase_indexes:
+            description: "Update all phase index files with Book Recommendations sections"
+            phases: [1, 2, 3, 4, 5, 6, 8, 9]
+            template: "phase_index_book_recommendations"
+            actions:
+              - update_status_line:
+                  pattern: "**Status:** ✅ COMPLETE"
+                  replacement: "**Status:** ✅ COMPLETE (📚 {{ recommendation_count }} enhancement recommendations available)"
+              - add_book_recommendations_section:
+                  template: |
+                    ## Book Recommendations
+
+                    **Status:** Available for implementation
+                    **Source:** AI/ML technical book analysis (20 books)
+                    **Total Recommendations:** {{ recommendation_count }} recommendations for this phase
+
+                    This phase has {{ recommendation_count }} recommendations from technical book analysis:
+                    - Critical: {{ critical_count }} recommendations
+                    - Important: {{ important_count }} recommendations
+                    - Nice-to-Have: {{ nice_to_have_count }} recommendations
+
+                    **See:** [Book Recommendations](phase_{{ phase_number }}/RECOMMENDATIONS_FROM_BOOKS.md) for complete details
+
+                    **Proposed Updates:** [Proposed Updates](phase_{{ phase_number }}/PROPOSED_UPDATES.md) for integration analysis
+        - update_sub_phase_files:
+            description: "Add Book Recommendations sections to high-priority sub-phase files"
+            priority_phases: [5, 8]
+            actions:
+              - update_phase_5_sub_phase:
+                  file: "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0_machine_learning_models.md"
+                  section: "Book Recommendations"
+                  template: "sub_phase_book_recommendations"
+              - update_phase_8_sub_phase:
+                  file: "/Users/ryanranft/nba-simulator-aws/docs/phases/phase_8/8.0_recursive_data_discovery.md"
+                  section: "Book Recommendations"
+                  template: "sub_phase_book_recommendations"
+        - update_progress_md:
+            description: "Update PROGRESS.md with new session context and phase status entries"
+            file: "/Users/ryanranft/nba-simulator-aws/PROGRESS.md"
+            actions:
+              - add_session_context:
+                  template: |
+                    **Session completed:** {{ current_date }} - AI/ML Book Recommendations Integration
+                      - ✅ **{{ total_recommendations }} recommendations integrated** across {{ phase_count }} phases
+                        - Automated analysis of {{ book_count }} AI/ML technical books
+                        - Master recommendations database: `analysis_results/master_recommendations.json`
+                        - Integration summary: `integration_summary.md`
+                        - Cross-project tracking: `CROSS_PROJECT_IMPLEMENTATION_STATUS.md`
+                      - ✅ **Phase-specific enhancement documents generated**
+                        - Phase 1: {{ phase_1_count }} recommendations (Statistical validation)
+                        - Phase 2: {{ phase_2_count }} recommendations (Data pipelines)
+                        - Phase 3: {{ phase_3_count }} recommendation (Dashboards)
+                        - Phase 4: {{ phase_4_count }} recommendation (Panel data)
+                        - Phase 5: {{ phase_5_count }} recommendations (MLOps - highest priority)
+                        - Phase 6: {{ phase_6_count }} recommendations (Monitoring)
+                        - Phase 8: {{ phase_8_count }} recommendations (Advanced statistics)
+                        - Phase 9: {{ phase_9_count }} recommendations (Deployment)
+                      - ✅ **Integration analysis complete**
+                        - {{ safe_updates_count }} safe updates identified
+                        - {{ conflicts_count }} conflicts detected
+                        - All recommendations mapped to existing phases
+                      - 📊 **Status:** Ready for implementation
+                        - Priority 1: Phase 5 (MLOps foundation)
+                        - Priority 2: Phase 8 (Advanced analytics)
+                        - Implementation tracking: `/Users/ryanranft/nba-mcp-synthesis/scripts/implementation_tracker.py`
+              - update_phase_status_entries:
+                  pattern: "- ✅ \\[Phase {{ phase_number }}:"
+                  replacement: "- ✅ [Phase {{ phase_number }}:"
+                  suffix: " - **COMPLETE** (📚 {{ recommendation_count }} enhancement recommendations available)"
+        - generate_cross_project_status:
+            output: "CROSS_PROJECT_IMPLEMENTATION_STATUS.md"
+        - verify_integration:
+            description: "Verify all files updated correctly and no linting errors"
+            actions:
+              - check_file_updates:
+                  files:
+                    - "/Users/ryanranft/nba-simulator-aws/docs/phases/PHASE_1_INDEX.md"
+                    - "/Users/ryanranft/nba-simulator-aws/docs/phases/PHASE_2_INDEX.md"
+                    - "/Users/ryanranft/nba-simulator-aws/docs/phases/PHASE_3_INDEX.md"
+                    - "/Users/ryanranft/nba-simulator-aws/docs/phases/PHASE_4_INDEX.md"
+                    - "/Users/ryanranft/nba-simulator-aws/docs/phases/PHASE_5_INDEX.md"
+                    - "/Users/ryanranft/nba-simulator-aws/docs/phases/PHASE_6_INDEX.md"
+                    - "/Users/ryanranft/nba-simulator-aws/docs/phases/PHASE_8_INDEX.md"
+                    - "/Users/ryanranft/nba-simulator-aws/docs/phases/PHASE_9_INDEX.md"
+                    - "/Users/ryanranft/nba-simulator-aws/PROGRESS.md"
+              - run_linting_check:
+                  paths:
+                    - "/Users/ryanranft/nba-simulator-aws/docs/phases/"
+                    - "/Users/ryanranft/nba-simulator-aws/PROGRESS.md"
+              - verify_navigation_links:
+                  check_links: true
+                  base_path: "/Users/ryanranft/nba-simulator-aws/docs/phases/"
+
+    - name: notify_completion
+      type: notification
+      description: "Send completion notifications"
+      depends_on: ["generate_implementation_scripts"]
+      actions:
+        - send_success_notification:
+            channels: ["slack", "email"]
+            message: |
+              📚 Book Analysis & Integration Complete!
+
+              Books Analyzed: {{ analyzed_books | length }}
+              Total Recommendations: {{ total_recommendations }}
+              Critical: {{ critical_count }}
+              Important: {{ important_count }}
+              Nice-to-Have: {{ nice_to_have_count }}
+
+              Phase Integration:
+              - Phase Indexes Updated: 8/8
+              - Sub-Phase Files Updated: 2/2 (Phase 5, Phase 8)
+              - PROGRESS.md Updated: ✅
+              - Safe Updates Applied: {{ safe_updates_count }}
+              - Conflicts Detected: {{ conflicts_count }}
+
+              Reports: analysis_results/
+              Plans: implementation_plans/
+              Phase Integration: nba-simulator-aws/docs/phases/
+        - update_project_status:
+            file: "PROJECT_STATUS.md"
+            section: "book_analysis"
+
+    - name: cleanup
+      type: cleanup
+      description: "Clean up temporary files and resources"
+      depends_on: ["notify_completion"]
+      actions:
+        - cleanup_temp_files:
+            patterns: ["*.tmp", "converted_books/*"]
+        - archive_results:
+            archive_dir: "archives/{{ date }}"
+            patterns: ["analysis_results/*", "implementation_plans/*"]
+
+error_handling:
+  - name: s3_error
+    type: s3_operations
+    actions:
+      - log_error:
+          message: "S3 operation failed: {{ error.message }}"
+      - retry_operation:
+          max_attempts: 3
+          delay: 30
+      - fallback_action:
+          action: "skip_book"
+          message: "Skipping book due to S3 error"
+
+  - name: analysis_error
+    type: analysis
+    actions:
+      - log_error:
+          message: "Analysis failed for book: {{ book.title }}"
+      - save_partial_results:
+          output: "partial_results/{{ book.id }}.json"
+      - continue_with_next:
+          message: "Continuing with next book"
+
+  - name: convergence_timeout
+    type: analysis
+    condition: "{{ iterations >= max_iterations }}"
+    actions:
+      - log_warning:
+          message: "Convergence not achieved after {{ max_iterations }} iterations"
+      - save_current_state:
+          output: "timeout_results/{{ book.id }}.json"
+      - mark_for_manual_review:
+          reason: "Convergence timeout"
+
+monitoring:
+  - name: progress_tracking
+    type: metrics
+    metrics:
+      - books_processed:
+          type: counter
+          description: "Number of books processed"
+      - recommendations_generated:
+          type: counter
+          description: "Total recommendations generated"
+      - convergence_rate:
+          type: gauge
+          description: "Percentage of books that achieved convergence"
+      - analysis_duration:
+          type: histogram
+          description: "Time taken for analysis per book"
+
+  - name: health_checks
+    type: health
+    checks:
+      - mcp_server_health:
+          url: "http://localhost:8000/health"
+          timeout: 10
+      - s3_connectivity:
+          bucket: "nba-mcp-books"
+          operation: "head_object"
+      - disk_space:
+          path: "analysis_results/"
+          min_free_gb: 5
+
+configuration:
+  environment:
+    python_path: "/usr/bin/python3"
+    working_directory: "/Users/ryanranft/nba-mcp-synthesis"
+    log_level: "INFO"
+    log_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+  resources:
+    memory_limit: "4GB"
+    cpu_limit: "2 cores"
+    timeout: "2 hours"
+    retry_attempts: 3
+
+  notifications:
+    slack:
+      webhook_url: "{{ env.SLACK_WEBHOOK_URL }}"
+      channel: "#all-big-cat-bets"
+    email:
+      smtp_server: "smtp.gmail.com"
+      recipients: ["ryan@example.com"]
+
+  s3:
+    bucket: "nba-mcp-books"
+    region: "us-east-1"
+    encryption: "AES256"
+    lifecycle:
+      transition_to_ia: 30
+      transition_to_glacier: 90
+
+templates:
+  book_report:
+    path: "templates/book_report.md"
+    variables:
+      - book_title
+      - analysis_date
+      - total_iterations
+      - convergence_status
+      - recommendations_by_category
+
+  implementation_plan:
+    path: "templates/implementation_plan.md"
+    variables:
+      - recommendation_title
+      - category
+      - priority
+      - estimated_time
+      - implementation_steps
+
+  phase_enhancement:
+    path: "templates/phase_enhancement.md"
+    variables:
+      - phase_number
+      - phase_name
+      - recommendations
+      - implementation_priority
+
+  phase_index_book_recommendations:
+    path: "templates/phase_index_book_recommendations.md"
+    variables:
+      - phase_number
+      - recommendation_count
+      - critical_count
+      - important_count
+      - nice_to_have_count
+
+  sub_phase_book_recommendations:
+    path: "templates/sub_phase_book_recommendations.md"
+    variables:
+      - phase_number
+      - sub_phase_name
+      - recommendations_by_priority
+      - critical_recommendations
+      - important_recommendations
+      - nice_to_have_recommendations
+
+  book_readme:
+    path: "templates/book_readme.md"
+    variables:
+      - book_title
+      - book_id
+      - book_author
+      - analysis_date
+      - total_recommendations
+      - critical_count
+      - important_count
+      - nice_to_have_count
+      - recommendations_by_phase
+      - key_recommendations
+      - convergence_iterations
+      - source_chapters
+
+  book_phase_recommendations:
+    path: "templates/book_phase_recommendations.md"
+    variables:
+      - phase_number
+      - total_recommendations
+      - generation_date
+      - recommendations_content
+
+outputs:
+  - name: analysis_results
+    type: directory
+    path: "analysis_results/"
+    description: "Generated analysis reports and convergence trackers"
+
+  - name: implementation_plans
+    type: directory
+    path: "implementation_plans/"
+    description: "Generated implementation plans for recommendations"
+
+  - name: phase_documents
+    type: directory
+    path: "nba-simulator-aws/docs/phases/"
+    description: "Updated phase enhancement documents"
+
+  - name: phase_index_updates
+    type: directory
+    path: "nba-simulator-aws/docs/phases/"
+    description: "Updated phase index files with Book Recommendations sections"
+
+  - name: sub_phase_updates
+    type: directory
+    path: "nba-simulator-aws/docs/phases/"
+    description: "Updated sub-phase files with Book Recommendations sections"
+
+  - name: book_directories
+    type: directory
+    path: "analysis_results/books/"
+    description: "Organized book-specific analysis directories"
+
+  - name: book_phase_recommendations
+    type: directory
+    path: "analysis_results/books/*/BY_PHASE/"
+    description: "Phase-specific recommendations per book"
+
+  - name: progress_updates
+    type: file
+    path: "nba-simulator-aws/PROGRESS.md"
+    description: "Updated PROGRESS.md with session context and phase status"
+
+  - name: cross_project_status
+    type: file
+    path: "CROSS_PROJECT_IMPLEMENTATION_STATUS.md"
+    description: "Cross-project implementation status report"
+
+  - name: master_recommendations
+    type: file
+    path: "analysis_results/master_recommendations.json"
+    description: "Master recommendations database"
+
+metadata:
+  version: "1.1.0"
+  created: "2025-10-12"
+  updated: "2025-10-12"
+  author: "NBA MCP Synthesis Team"
+  description: "Automated recursive book analysis workflow with MCP integration and NBA Simulator AWS phase integration"
+  tags:
+    [
+      "ml",
+      "analysis",
+      "recommendations",
+      "automation",
+      "mcp",
+      "phase-integration",
+      "workflow",
+    ]
+  features:
+    - "Recursive book analysis with convergence tracking"
+    - "Multi-pass analysis (Pass 1: Initial analysis, Pass 2: Context-aware reanalysis, Pass 3: Consolidation, Pass 4: Integration)"
+    - "Automated phase integration with NBA Simulator AWS project"
+    - "Phase index updates with Book Recommendations sections"
+    - "Sub-phase file enhancements"
+    - "PROGRESS.md session context updates"
+    - "Cross-project implementation tracking"
+    - "Comprehensive verification and linting"

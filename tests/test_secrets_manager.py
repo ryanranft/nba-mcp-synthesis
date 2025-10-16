@@ -1,233 +1,168 @@
 """
-Tests for AWS Secrets Manager integration
+Tests for Unified Secrets Manager integration
+
+Updated to test the new unified secrets management system.
 """
 import pytest
 import os
+import subprocess
+import sys
 from unittest.mock import Mock, patch, MagicMock
-from mcp_server.secrets_manager import (
-    SecretsManager,
+from mcp_server.unified_secrets_manager import (
+    UnifiedSecretsManager,
     get_secrets_manager,
-    get_database_config,
-    get_s3_bucket
+    load_secrets_hierarchical
 )
 
 
-class TestSecretsManager:
-    """Test SecretsManager class"""
+class TestUnifiedSecretsManager:
+    """Test UnifiedSecretsManager class"""
 
     def test_initialization(self):
-        """Test SecretsManager initializes correctly"""
-        with patch('boto3.client'):
-            sm = SecretsManager(region_name='us-west-2')
-            assert sm.region_name == 'us-west-2'
-            assert sm.client is not None
+        """Test UnifiedSecretsManager initializes correctly"""
+        sm = UnifiedSecretsManager()
+        assert sm.project is None
+        assert sm.sport is None
+        assert sm.context is None
+        assert sm.secrets == {}
+        assert sm.aliases == {}
 
-    def test_get_secret_success(self):
-        """Test successful secret retrieval"""
-        # Mock boto3 client
-        mock_client = MagicMock()
-        mock_client.get_secret_value.return_value = {
-            'SecretString': '{"key": "value", "password": "secret123"}'
-        }
+    def test_load_secrets_from_files(self):
+        """Test loading secrets from individual .env files"""
+        sm = UnifiedSecretsManager()
 
-        with patch('boto3.client', return_value=mock_client):
-            sm = SecretsManager()
-            secret = sm.get_secret('test-secret')
+        # Mock the directory structure
+        with patch('os.path.exists', return_value=True), \
+             patch('builtins.open', mock_open(read_data="test_secret_value")):
 
-            assert secret == {'key': 'value', 'password': 'secret123'}
-            mock_client.get_secret_value.assert_called_once_with(
-                SecretId='test-secret'
-            )
+            secrets_dir = "/Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production"
 
-    def test_get_secret_not_found(self):
-        """Test handling of non-existent secret"""
-        mock_client = MagicMock()
-        mock_client.exceptions.ResourceNotFoundException = Exception
-        mock_client.get_secret_value.side_effect = (
-            mock_client.exceptions.ResourceNotFoundException()
-        )
+            result = sm._load_secrets_from_files(secrets_dir)
+            assert result == {}
 
-        with patch('boto3.client', return_value=mock_client):
-            sm = SecretsManager()
+    def test_context_detection(self):
+        """Test automatic context detection"""
+        sm = UnifiedSecretsManager()
 
-            with pytest.raises(ValueError, match="not found"):
-                sm.get_secret('nonexistent-secret')
+        # Test CI/CD detection
+        with patch.dict(os.environ, {'CI': 'true'}):
+            context = sm._detect_context()
+            assert context == 'test'
 
-    def test_get_database_credentials(self):
-        """Test retrieving database credentials"""
-        mock_client = MagicMock()
-        mock_client.get_secret_value.return_value = {
-            'SecretString': '{"host": "localhost", "user": "postgres", "password": "secret", "database": "nba", "port": 5432}'
-        }
+        # Test Docker detection
+        with patch.dict(os.environ, {'DOCKER_CONTAINER': 'true'}):
+            context = sm._detect_context()
+            assert context == 'production'
 
-        with patch('boto3.client', return_value=mock_client):
-            sm = SecretsManager()
-            creds = sm.get_database_credentials('production')
+        # Test development detection
+        with patch.dict(os.environ, {'USER': 'developer'}):
+            context = sm._detect_context()
+            assert context == 'development'
 
-            assert creds['host'] == 'localhost'
-            assert creds['user'] == 'postgres'
-            assert creds['password'] == 'secret'
-            assert creds['database'] == 'nba'
-            assert creds['port'] == 5432
+    def test_naming_convention_validation(self):
+        """Test naming convention validation"""
+        sm = UnifiedSecretsManager()
 
-    def test_get_s3_config(self):
-        """Test retrieving S3 configuration"""
-        mock_client = MagicMock()
-        mock_client.get_secret_value.return_value = {
-            'SecretString': '{"bucket": "my-bucket", "region": "us-east-1"}'
-        }
+        # Valid names
+        assert sm._is_valid_naming_convention("GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW")
+        assert sm._is_valid_naming_convention("DB_PASSWORD_NBA_MCP_SYNTHESIS_DEVELOPMENT")
+        assert sm._is_valid_naming_convention("SLACK_WEBHOOK_URL_BIG_CAT_BETS_GLOBAL_WORKFLOW")
 
-        with patch('boto3.client', return_value=mock_client):
-            sm = SecretsManager()
-            config = sm.get_s3_config('production')
+        # Invalid names
+        assert not sm._is_valid_naming_convention("GOOGLE_API_KEY")
+        assert not sm._is_valid_naming_convention("INVALID_NAME")
+        assert not sm._is_valid_naming_convention("GOOGLE_KEY_NBA_WORKFLOW")  # Missing resource type
 
-            assert config['bucket'] == 'my-bucket'
-            assert config['region'] == 'us-east-1'
+    def test_aws_fallback(self):
+        """Test AWS Secrets Manager fallback"""
+        sm = UnifiedSecretsManager()
 
-    def test_secret_caching(self):
-        """Test that secrets are cached"""
-        mock_client = MagicMock()
-        mock_client.get_secret_value.return_value = {
-            'SecretString': '{"key": "value"}'
-        }
+        # Mock AWS client
+        with patch('boto3.client') as mock_boto:
+            mock_client = MagicMock()
+            mock_client.get_secret_value.return_value = {
+                'SecretString': '{"GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key"}'
+            }
+            mock_boto.return_value = mock_client
 
-        with patch('boto3.client', return_value=mock_client):
-            sm = SecretsManager()
+            result = sm._load_from_aws("test-secret")
+            assert result == {"GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key"}
 
-            # First call
-            secret1 = sm.get_secret('test-secret')
+    def test_hierarchical_loading(self):
+        """Test hierarchical secret loading"""
+        # Mock the hierarchical loader
+        with patch('subprocess.run') as mock_run:
+            mock_run.return_value.returncode = 0
+            mock_run.return_value.stdout = "Secrets loaded successfully"
 
-            # Second call (should use cache)
-            secret2 = sm.get_secret('test-secret')
-
-            # Should only call AWS once
-            assert mock_client.get_secret_value.call_count == 1
-
-            # Clear cache
-            sm.clear_cache()
-
-            # Third call (fresh)
-            secret3 = sm.get_secret('test-secret')
-
-            # Should have called AWS twice now
-            assert mock_client.get_secret_value.call_count == 2
-
-    def test_rotate_secret(self):
-        """Test secret rotation"""
-        mock_client = MagicMock()
-        mock_client.rotate_secret.return_value = {'ARN': 'test-arn'}
-
-        with patch('boto3.client', return_value=mock_client):
-            sm = SecretsManager()
-            result = sm.rotate_secret('test-secret')
-
+            result = load_secrets_hierarchical("nba-mcp-synthesis", "NBA", "production")
             assert result is True
-            mock_client.rotate_secret.assert_called_once_with(
-                SecretId='test-secret'
-            )
 
-    def test_rotate_secret_failure(self):
-        """Test secret rotation failure"""
-        mock_client = MagicMock()
-        mock_client.rotate_secret.side_effect = Exception("Rotation failed")
+    def test_get_secret(self):
+        """Test getting a secret by name"""
+        sm = UnifiedSecretsManager()
+        sm.secrets = {"GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key"}
 
-        with patch('boto3.client', return_value=mock_client):
-            sm = SecretsManager()
-            result = sm.rotate_secret('test-secret')
+        assert sm.get_secret("GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW") == "test_key"
+        assert sm.get_secret("NONEXISTENT_KEY") is None
 
-            assert result is False
-
-
-class TestHelperFunctions:
-    """Test helper functions"""
-
-    def test_get_database_config_local_mode(self):
-        """Test get_database_config with local credentials"""
-        with patch.dict(os.environ, {
-            'USE_LOCAL_CREDENTIALS': 'true',
-            'DB_HOST': 'localhost',
-            'DB_USER': 'testuser',
-            'DB_PASSWORD': 'testpass',
-            'DB_NAME': 'testdb',
-            'DB_PORT': '5433'
-        }):
-            config = get_database_config()
-
-            assert config['host'] == 'localhost'
-            assert config['user'] == 'testuser'
-            assert config['password'] == 'testpass'
-            assert config['database'] == 'testdb'
-            assert config['port'] == 5433
-
-    def test_get_database_config_secrets_manager_mode(self):
-        """Test get_database_config with Secrets Manager"""
-        mock_client = MagicMock()
-        mock_client.get_secret_value.return_value = {
-            'SecretString': '{"host": "aws-host", "user": "awsuser", "password": "awspass", "database": "awsdb", "port": 5432}'
+    def test_create_aliases(self):
+        """Test creating backward-compatible aliases"""
+        sm = UnifiedSecretsManager()
+        sm.secrets = {
+            "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key",
+            "DB_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW": "test_password"
         }
 
-        with patch('boto3.client', return_value=mock_client):
-            with patch.dict(os.environ, {'USE_LOCAL_CREDENTIALS': 'false'}):
-                config = get_database_config()
+        sm._create_aliases()
 
-                assert config['host'] == 'aws-host'
-                assert config['user'] == 'awsuser'
-                assert config['password'] == 'awspass'
-
-    def test_get_s3_bucket_local_mode(self):
-        """Test get_s3_bucket with local credentials"""
-        with patch.dict(os.environ, {
-            'USE_LOCAL_CREDENTIALS': 'true',
-            'S3_BUCKET': 'local-bucket'
-        }):
-            bucket = get_s3_bucket()
-            assert bucket == 'local-bucket'
-
-    def test_get_s3_bucket_secrets_manager_mode(self):
-        """Test get_s3_bucket with Secrets Manager"""
-        mock_sm = MagicMock()
-        mock_sm.get_s3_config.return_value = {'bucket': 'aws-bucket'}
-
-        with patch('mcp_server.secrets_manager.get_secrets_manager', return_value=mock_sm):
-            with patch.dict(os.environ, {'USE_LOCAL_CREDENTIALS': 'false'}):
-                bucket = get_s3_bucket()
-                assert bucket == 'aws-bucket'
+        assert "GOOGLE_API_KEY" in sm.aliases
+        assert "DB_PASSWORD" in sm.aliases
+        assert sm.aliases["GOOGLE_API_KEY"] == "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW"
 
 
-class TestIntegration:
-    """Integration tests (require AWS credentials)"""
+def mock_open(read_data):
+    """Helper function to mock file opening"""
+    from unittest.mock import mock_open as _mock_open
+    return _mock_open(read_data=read_data)
 
-    @pytest.mark.integration
-    @pytest.mark.skipif(
-        not os.getenv('RUN_INTEGRATION_TESTS'),
-        reason="Integration tests disabled (set RUN_INTEGRATION_TESTS=1)"
-    )
-    def test_real_secrets_manager_connection(self):
-        """Test actual connection to AWS Secrets Manager"""
-        sm = SecretsManager()
 
-        # List secrets to verify connection
-        response = sm.client.list_secrets(MaxResults=1)
-        assert 'SecretList' in response
+class TestSecretsManagerIntegration:
+    """Integration tests for secrets manager"""
 
-    @pytest.mark.integration
-    @pytest.mark.skipif(
-        not os.getenv('RUN_INTEGRATION_TESTS'),
-        reason="Integration tests disabled"
-    )
-    def test_real_secret_retrieval(self):
-        """Test retrieving actual secret from AWS"""
-        # This test requires nba-mcp/production/database secret to exist
-        try:
-            config = get_database_config()
-            assert 'host' in config
-            assert 'user' in config
-            assert 'password' in config
-            print("✅ Successfully retrieved real secrets from AWS")
-        except ValueError as e:
-            pytest.skip(f"Secret not found (expected for first-time setup): {e}")
+    def test_end_to_end_loading(self):
+        """Test end-to-end secret loading process"""
+        # This test would require actual secret files to be present
+        # For now, we'll test the structure
+        sm = UnifiedSecretsManager()
+
+        # Test that the manager can be initialized
+        assert sm is not None
+
+        # Test that secrets can be loaded (even if empty)
+        sm.load_secrets("nba-mcp-synthesis", "NBA", "production")
+        assert isinstance(sm.secrets, dict)
+        assert isinstance(sm.aliases, dict)
+
+
+class TestConfigurationIntegration:
+    """Test integration with unified configuration manager"""
+
+    def test_config_with_secrets(self):
+        """Test that configuration manager works with loaded secrets"""
+        # Load secrets first
+        result = load_secrets_hierarchical("nba-mcp-synthesis", "NBA", "production")
+        assert result is True
+
+        # Test configuration manager
+        from mcp_server.unified_configuration_manager import UnifiedConfigurationManager
+        config = UnifiedConfigurationManager("nba-mcp-synthesis", "production")
+
+        # Verify configuration loaded
+        assert config is not None
+        assert config.api_config is not None
+        assert config.workflow_config is not None
 
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])
-
