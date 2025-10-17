@@ -125,10 +125,10 @@ python3 scripts/test_notifications.py
 
 ```bash
 # LLM API Keys (Already set)
-GOOGLE_API_KEY=${GOOGLE_API_KEY_REVOKED}
-DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY_REVOKED}
-ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY_REVOKED}
-OPENAI_API_KEY=${OPENAI_API_KEY_REVOKED}
+GOOGLE_API_KEY=your_google_api_key_here
+DEEPSEEK_API_KEY=your_deepseek_api_key_here
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here
 
 # Slack (You need to add)
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/T01ABC123/B01DEF456/xyz789...

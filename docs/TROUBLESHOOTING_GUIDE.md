@@ -166,10 +166,10 @@ hexdump -C /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat
 # Anthropic API keys should start with 'sk-ant-' and be at least 40 characters
 
 # Fix Google API key
-echo "AIzaSyBCM_xiH6LuDNSNdGS7ShJKSmt17GhH9vw" > /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW.env
+echo "your_google_api_key_here" > /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW.env
 
 # Fix OpenAI API key
-echo "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" > /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/OPENAI_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW.env
+echo "your_openai_api_key_here" > /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/OPENAI_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW.env
 
 # Set proper permissions
 chmod 600 /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/*.env

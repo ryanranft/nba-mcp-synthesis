@@ -378,7 +378,7 @@ Validate webhook URL format.
 
 **Example:**
 ```python
-is_valid = SecretsValidator.validate_webhook_url('${SLACK_WEBHOOK_URL_REVOKED}')
+is_valid = SecretsValidator.validate_webhook_url('https://hooks.slack.com/services/YOUR/WEBHOOK/URL')
 print(f"Valid webhook URL: {is_valid}")
 ```
 
@@ -690,12 +690,12 @@ else:
 from load_env_nba_mcp_synthesis_workflow import SecretsValidator
 
 # Validate API keys
-google_key = "AIzaSyBCM_xiH6LuDNSNdGS7ShJKSmt17GhH9vw"
+google_key = "your_google_api_key_here"
 is_valid = SecretsValidator.validate_api_key(google_key, 'GOOGLE')
 print(f"Google API key valid: {is_valid}")
 
 # Validate webhook URL
-webhook_url = "${SLACK_WEBHOOK_URL_REVOKED}"
+webhook_url = "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
 is_valid = SecretsValidator.validate_webhook_url(webhook_url)
 print(f"Webhook URL valid: {is_valid}")
 
