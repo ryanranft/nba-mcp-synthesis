@@ -16,27 +16,28 @@ from pathlib import Path
 from typing import List, Dict, Tuple
 from datetime import datetime
 
+
 def scan_for_hardcoded_secrets(directory: str) -> List[Tuple[str, int, str]]:
     """Scan Python files for hardcoded secrets"""
     patterns = [
-        (r'AKIA[0-9A-Z]{16}', 'AWS Access Key'),
-        (r'AIza[0-9A-Za-z_-]{35}', 'Google API Key'),
-        (r'sk-[a-zA-Z0-9]{20,}', 'OpenAI/Anthropic Key'),
-        (r'sk-proj-[a-zA-Z0-9_-]{20,}', 'OpenAI Project Key'),
-        (r'sk-ant-[a-zA-Z0-9_-]{20,}', 'Anthropic API Key'),
-        (r'password\s*=\s*["\'][^"\']{8,}["\']', 'Hardcoded Password'),
-        (r'lin_api_[a-zA-Z0-9]{40}', 'Linear API Key'),
+        (r"AKIA[0-9A-Z]{16}", "AWS Access Key"),
+        (r"AIza[0-9A-Za-z_-]{35}", "Google API Key"),
+        (r"sk-[a-zA-Z0-9]{20,}", "OpenAI/Anthropic Key"),
+        (r"sk-proj-[a-zA-Z0-9_-]{20,}", "OpenAI Project Key"),
+        (r"sk-ant-[a-zA-Z0-9_-]{20,}", "Anthropic API Key"),
+        (r'password\s*=\s*["\'][^"\']{8,}["\']', "Hardcoded Password"),
+        (r"lin_api_[a-zA-Z0-9]{40}", "Linear API Key"),
     ]
 
     findings = []
-    exclude_dirs = {'venv', '__pycache__', '.venv', 'node_modules', '.git'}
+    exclude_dirs = {"venv", "__pycache__", ".venv", "node_modules", ".git"}
     exclude_files = {
-        'validate_secrets_security.py',  # This file
-        'test_security_scanning.py',  # Test file
-        '.env.example',  # Template file
+        "validate_secrets_security.py",  # This file
+        "test_security_scanning.py",  # Test file
+        ".env.example",  # Template file
     }
 
-    for py_file in Path(directory).rglob('*.py'):
+    for py_file in Path(directory).rglob("*.py"):
         # Skip excluded directories
         if any(excluded in str(py_file) for excluded in exclude_dirs):
             continue
@@ -46,20 +47,32 @@ def scan_for_hardcoded_secrets(directory: str) -> List[Tuple[str, int, str]]:
             continue
 
         try:
-            content = py_file.read_text(errors='ignore')
+            content = py_file.read_text(errors="ignore")
             for pattern, desc in patterns:
                 matches = re.finditer(pattern, content)
                 for match in matches:
-                    line_num = content[:match.start()].count('\n') + 1
+                    line_num = content[: match.start()].count("\n") + 1
                     # Get the actual line content
-                    lines = content.split('\n')
+                    lines = content.split("\n")
                     line_content = lines[line_num - 1] if line_num <= len(lines) else ""
 
                     # Skip if it's clearly a placeholder or example
-                    if any(placeholder in line_content.lower() for placeholder in [
-                        'example', 'placeholder', 'your_', 'test_', 'fake_', 
-                        'mock_', 'sample_', 'demo_', 'xxx', 'yyy', 'pragma: allowlist secret'
-                    ]):
+                    if any(
+                        placeholder in line_content.lower()
+                        for placeholder in [
+                            "example",
+                            "placeholder",
+                            "your_",
+                            "test_",
+                            "fake_",
+                            "mock_",
+                            "sample_",
+                            "demo_",
+                            "xxx",
+                            "yyy",
+                            "pragma: allowlist secret",
+                        ]
+                    ):
                         continue
 
                     findings.append((str(py_file), line_num, desc, line_content[:80]))
@@ -68,24 +81,21 @@ def scan_for_hardcoded_secrets(directory: str) -> List[Tuple[str, int, str]]:
 
     return findings
 
+
 def check_unified_secrets_usage(directory: str) -> Dict[str, List[str]]:
     """Check files using os.getenv instead of unified_secrets_manager"""
-    issues = {
-        'direct_getenv': [],
-        'load_dotenv': [],
-        'missing_unified_import': []
-    }
+    issues = {"direct_getenv": [], "load_dotenv": [], "missing_unified_import": []}
 
-    exclude_dirs = {'venv', '__pycache__', '.venv', 'node_modules', '.git', 'tests'}
+    exclude_dirs = {"venv", "__pycache__", ".venv", "node_modules", ".git", "tests"}
     exclude_files = {
-        'validate_secrets_security.py',
-        'test_security_scanning.py',
-        'unified_secrets_manager.py',  # The manager itself
-        'load_env_hierarchical.py',  # Loader script
-        'env_helper.py',  # Helper that wraps unified manager
+        "validate_secrets_security.py",
+        "test_security_scanning.py",
+        "unified_secrets_manager.py",  # The manager itself
+        "load_env_hierarchical.py",  # Loader script
+        "env_helper.py",  # Helper that wraps unified manager
     }
 
-    for py_file in Path(directory).rglob('*.py'):
+    for py_file in Path(directory).rglob("*.py"):
         # Skip excluded directories
         if any(excluded in str(py_file) for excluded in exclude_dirs):
             continue
@@ -95,36 +105,43 @@ def check_unified_secrets_usage(directory: str) -> Dict[str, List[str]]:
             continue
 
         try:
-            content = py_file.read_text(errors='ignore')
+            content = py_file.read_text(errors="ignore")
 
             # Check for direct os.getenv() usage with uppercase env vars
             if re.search(r'os\.getenv\([\'"][A-Z_]+[\'"]', content):
                 # Check if unified_secrets_manager is imported
-                if 'unified_secrets_manager' not in content and 'env_helper' not in content:
-                    issues['direct_getenv'].append(str(py_file))
+                if (
+                    "unified_secrets_manager" not in content
+                    and "env_helper" not in content
+                ):
+                    issues["direct_getenv"].append(str(py_file))
 
             # Check for load_dotenv() usage
-            if 'load_dotenv()' in content or 'load_dotenv(' in content:
+            if "load_dotenv()" in content or "load_dotenv(" in content:
                 # Check if it's in a legacy file or test
-                if 'legacy' not in str(py_file).lower() and 'test' not in str(py_file).lower():
-                    issues['load_dotenv'].append(str(py_file))
+                if (
+                    "legacy" not in str(py_file).lower()
+                    and "test" not in str(py_file).lower()
+                ):
+                    issues["load_dotenv"].append(str(py_file))
         except Exception as e:
             print(f"Warning: Could not read {py_file}: {e}", file=sys.stderr)
 
     return issues
 
+
 def check_orphaned_env_files(directory: str) -> List[str]:
     """Check for .env files in the project directory"""
     orphaned_files = []
-    exclude_dirs = {'venv', '__pycache__', '.venv', 'node_modules', '.git'}
+    exclude_dirs = {"venv", "__pycache__", ".venv", "node_modules", ".git"}
 
-    for env_file in Path(directory).rglob('.env*'):
+    for env_file in Path(directory).rglob(".env*"):
         # Skip excluded directories
         if any(excluded in str(env_file) for excluded in exclude_dirs):
             continue
 
         # Allow .env.example, .env.template, .secrets.baseline
-        if env_file.name in ['.env.example', '.env.template', '.secrets.baseline']:
+        if env_file.name in [".env.example", ".env.template", ".secrets.baseline"]:
             continue
 
         # Allow directories like .env.production
@@ -134,6 +151,7 @@ def check_orphaned_env_files(directory: str) -> List[str]:
         orphaned_files.append(str(env_file))
 
     return orphaned_files
+
 
 def generate_report(findings, usage_issues, orphaned_files) -> str:
     """Generate security audit report"""
@@ -147,7 +165,9 @@ def generate_report(findings, usage_issues, orphaned_files) -> str:
     ]
 
     # Summary counts
-    total_issues = len(findings) + sum(len(v) for v in usage_issues.values()) + len(orphaned_files)
+    total_issues = (
+        len(findings) + sum(len(v) for v in usage_issues.values()) + len(orphaned_files)
+    )
     if total_issues == 0:
         report.append("✅ **No security issues detected!**")
     else:
@@ -167,7 +187,9 @@ def generate_report(findings, usage_issues, orphaned_files) -> str:
             report.append(f"  {content}")
             report.append(f"  ```")
         report.append("")
-        report.append("**Action Required**: Review and remove hardcoded secrets. Use unified_secrets_manager instead.")
+        report.append(
+            "**Action Required**: Review and remove hardcoded secrets. Use unified_secrets_manager instead."
+        )
     else:
         report.append("✅ No hardcoded secrets detected")
 
@@ -179,26 +201,38 @@ def generate_report(findings, usage_issues, orphaned_files) -> str:
 
     has_usage_issues = any(usage_issues.values())
     if has_usage_issues:
-        if usage_issues['direct_getenv']:
-            report.append(f"### Direct os.getenv() Usage ({len(usage_issues['direct_getenv'])} files)")
+        if usage_issues["direct_getenv"]:
+            report.append(
+                f"### Direct os.getenv() Usage ({len(usage_issues['direct_getenv'])} files)"
+            )
             report.append("")
-            report.append("These files use `os.getenv()` without importing unified_secrets_manager:")
+            report.append(
+                "These files use `os.getenv()` without importing unified_secrets_manager:"
+            )
             report.append("")
-            for file in usage_issues['direct_getenv']:
+            for file in usage_issues["direct_getenv"]:
                 report.append(f"- `{file}`")
             report.append("")
-            report.append("**Action Required**: Import and use `unified_secrets_manager.get_secret()`")
+            report.append(
+                "**Action Required**: Import and use `unified_secrets_manager.get_secret()`"
+            )
             report.append("")
 
-        if usage_issues['load_dotenv']:
-            report.append(f"### load_dotenv() Usage ({len(usage_issues['load_dotenv'])} files)")
+        if usage_issues["load_dotenv"]:
+            report.append(
+                f"### load_dotenv() Usage ({len(usage_issues['load_dotenv'])} files)"
+            )
             report.append("")
-            report.append("These files use `load_dotenv()` instead of hierarchical loading:")
+            report.append(
+                "These files use `load_dotenv()` instead of hierarchical loading:"
+            )
             report.append("")
-            for file in usage_issues['load_dotenv']:
+            for file in usage_issues["load_dotenv"]:
                 report.append(f"- `{file}`")
             report.append("")
-            report.append("**Action Required**: Replace with `load_secrets_hierarchical()`")
+            report.append(
+                "**Action Required**: Replace with `load_secrets_hierarchical()`"
+            )
             report.append("")
     else:
         report.append("✅ All files use unified_secrets_manager properly")
@@ -208,7 +242,9 @@ def generate_report(findings, usage_issues, orphaned_files) -> str:
     report.append("## 3. Orphaned .env Files")
     report.append("")
     if orphaned_files:
-        report.append(f"⚠️  Found {len(orphaned_files)} .env files in project directory:")
+        report.append(
+            f"⚠️  Found {len(orphaned_files)} .env files in project directory:"
+        )
         report.append("")
         for file in orphaned_files:
             report.append(f"- `{file}`")
@@ -216,7 +252,9 @@ def generate_report(findings, usage_issues, orphaned_files) -> str:
         report.append("**Action Required**: Move secrets to hierarchical structure:")
         report.append("```")
         report.append("/Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/")
-        report.append("  big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/")
+        report.append(
+            "  big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/"
+        )
         report.append("```")
     else:
         report.append("✅ No orphaned .env files found")
@@ -227,9 +265,15 @@ def generate_report(findings, usage_issues, orphaned_files) -> str:
     report.append("## 4. Recommendations")
     report.append("")
     report.append("1. **Use hierarchical secrets structure** for all sensitive data")
-    report.append("2. **Import unified_secrets_manager** in all Python files accessing secrets")
-    report.append("3. **Run pre-commit hooks** before committing: `pre-commit run --all-files`")
-    report.append("4. **Audit permissions** regularly: `./scripts/audit_secret_permissions.sh`")
+    report.append(
+        "2. **Import unified_secrets_manager** in all Python files accessing secrets"
+    )
+    report.append(
+        "3. **Run pre-commit hooks** before committing: `pre-commit run --all-files`"
+    )
+    report.append(
+        "4. **Audit permissions** regularly: `./scripts/audit_secret_permissions.sh`"
+    )
     report.append("5. **Review .secrets.baseline** for false positives")
     report.append("")
 
@@ -252,25 +296,37 @@ def generate_report(findings, usage_issues, orphaned_files) -> str:
         report.append("")
         report.append("```bash")
         report.append("git add .")
-        report.append("git commit -m \"feat: security enhancements\"")
+        report.append('git commit -m "feat: security enhancements"')
         report.append("```")
 
-    return '\n'.join(report)
+    return "\n".join(report)
+
 
 def main():
     import argparse
+
     parser = argparse.ArgumentParser(
-        description='Validate secrets security across codebase',
-        formatter_class=argparse.RawDescriptionHelpFormatter
+        description="Validate secrets security across codebase",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument('--check-usage', action='store_true',
-                       help='Check unified_secrets_manager usage')
-    parser.add_argument('--check-s3', action='store_true',
-                       help='Check S3 bucket public access (requires AWS credentials)')
-    parser.add_argument('--output', default='security_audit_report.md',
-                       help='Output file for report (default: security_audit_report.md)')
-    parser.add_argument('--directory', default='.',
-                       help='Directory to scan (default: current directory)')
+    parser.add_argument(
+        "--check-usage", action="store_true", help="Check unified_secrets_manager usage"
+    )
+    parser.add_argument(
+        "--check-s3",
+        action="store_true",
+        help="Check S3 bucket public access (requires AWS credentials)",
+    )
+    parser.add_argument(
+        "--output",
+        default="security_audit_report.md",
+        help="Output file for report (default: security_audit_report.md)",
+    )
+    parser.add_argument(
+        "--directory",
+        default=".",
+        help="Directory to scan (default: current directory)",
+    )
     args = parser.parse_args()
 
     print("=" * 60)
@@ -288,7 +344,7 @@ def main():
 
     # Check unified secrets usage
     print("🔍 Checking unified_secrets_manager usage...")
-    usage_issues = check_unified_secrets_usage('mcp_server')
+    usage_issues = check_unified_secrets_usage("mcp_server")
     total_usage_issues = sum(len(v) for v in usage_issues.values())
     if total_usage_issues > 0:
         print(f"   ⚠️  Found {total_usage_issues} files with usage issues")
@@ -310,10 +366,11 @@ def main():
         try:
             # Import here to avoid requiring boto3 unless needed
             import subprocess
+
             result = subprocess.run(
-                [sys.executable, 'scripts/validate_s3_public_access.py'],
+                [sys.executable, "scripts/validate_s3_public_access.py"],
                 capture_output=True,
-                text=True
+                text=True,
             )
             if result.returncode != 0:
                 s3_issues = 1
@@ -355,6 +412,6 @@ def main():
         print()
         sys.exit(0)
 
-if __name__ == '__main__':
-    main()
 
+if __name__ == "__main__":
+    main()
