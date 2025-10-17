@@ -22,9 +22,11 @@ logger = logging.getLogger(__name__)
 # Configuration Classes
 # ==============================================================================
 
+
 @dataclass
 class RateLimitConfig:
     """Configuration for rate limiting"""
+
     requests_per_minute: int = 60
     requests_per_hour: int = 1000
     burst_size: int = 10  # Allow burst of requests
@@ -34,6 +36,7 @@ class RateLimitConfig:
 @dataclass
 class SecurityConfig:
     """Master security configuration"""
+
     # Rate limiting
     rate_limit: RateLimitConfig = field(default_factory=RateLimitConfig)
 
@@ -47,29 +50,59 @@ class SecurityConfig:
     max_timeout_seconds: float = 120.0
 
     # SQL injection prevention
-    forbidden_sql_keywords: Set[str] = field(default_factory=lambda: {
-        'DROP', 'DELETE', 'UPDATE', 'INSERT', 'TRUNCATE',
-        'ALTER', 'CREATE', 'EXEC', 'EXECUTE', 'GRANT',
-        'REVOKE', 'MERGE', 'REPLACE'
-    })
-    allowed_sql_keywords: Set[str] = field(default_factory=lambda: {
-        'SELECT', 'EXPLAIN', 'SHOW', 'DESCRIBE', 'DESC', 'WITH'
-    })
+    forbidden_sql_keywords: Set[str] = field(
+        default_factory=lambda: {
+            "DROP",
+            "DELETE",
+            "UPDATE",
+            "INSERT",
+            "TRUNCATE",
+            "ALTER",
+            "CREATE",
+            "EXEC",
+            "EXECUTE",
+            "GRANT",
+            "REVOKE",
+            "MERGE",
+            "REPLACE",
+        }
+    )
+    allowed_sql_keywords: Set[str] = field(
+        default_factory=lambda: {
+            "SELECT",
+            "EXPLAIN",
+            "SHOW",
+            "DESCRIBE",
+            "DESC",
+            "WITH",
+        }
+    )
 
     # Path traversal prevention
-    allowed_file_extensions: Set[str] = field(default_factory=lambda: {
-        '.py', '.sql', '.json', '.yaml', '.yml', '.md',
-        '.txt', '.csv', '.log'
-    })
-    forbidden_path_patterns: List[str] = field(default_factory=lambda: [
-        r'\.\.',  # Parent directory
-        r'~',     # Home directory
-        r'/etc/', # System files
-        r'/root/', # Root home
-        r'\.env', # Environment files
-        r'\.git', # Git files
-        r'__pycache__'
-    ])
+    allowed_file_extensions: Set[str] = field(
+        default_factory=lambda: {
+            ".py",
+            ".sql",
+            ".json",
+            ".yaml",
+            ".yml",
+            ".md",
+            ".txt",
+            ".csv",
+            ".log",
+        }
+    )
+    forbidden_path_patterns: List[str] = field(
+        default_factory=lambda: [
+            r"\.\.",  # Parent directory
+            r"~",  # Home directory
+            r"/etc/",  # System files
+            r"/root/",  # Root home
+            r"\.env",  # Environment files
+            r"\.git",  # Git files
+            r"__pycache__",
+        ]
+    )
 
     # IP blocking (for future use)
     enable_ip_blocking: bool = False
@@ -81,6 +114,7 @@ class SecurityConfig:
 # Rate Limiter
 # ==============================================================================
 
+
 class RateLimiter:
     """
     Token bucket rate limiter with per-client tracking
@@ -89,18 +123,20 @@ class RateLimiter:
 
     def __init__(self, config: RateLimitConfig):
         self.config = config
-        self.client_buckets: Dict[str, Dict[str, Any]] = defaultdict(self._create_bucket)
+        self.client_buckets: Dict[str, Dict[str, Any]] = defaultdict(
+            self._create_bucket
+        )
         self._lock = asyncio.Lock()
 
     def _create_bucket(self) -> Dict[str, Any]:
         """Create new token bucket for client"""
         return {
-            'tokens': self.config.burst_size,
-            'last_update': time.time(),
-            'minute_count': 0,
-            'minute_start': time.time(),
-            'hour_count': 0,
-            'hour_start': time.time()
+            "tokens": self.config.burst_size,
+            "last_update": time.time(),
+            "minute_count": 0,
+            "minute_start": time.time(),
+            "hour_count": 0,
+            "hour_start": time.time(),
         }
 
     async def check_rate_limit(self, client_id: str) -> tuple[bool, Optional[str]]:
@@ -121,39 +157,46 @@ class RateLimiter:
             now = time.time()
 
             # Refill tokens based on time elapsed
-            elapsed = now - bucket['last_update']
+            elapsed = now - bucket["last_update"]
             tokens_to_add = elapsed * (self.config.requests_per_minute / 60.0)
-            bucket['tokens'] = min(
-                self.config.burst_size,
-                bucket['tokens'] + tokens_to_add
+            bucket["tokens"] = min(
+                self.config.burst_size, bucket["tokens"] + tokens_to_add
             )
-            bucket['last_update'] = now
+            bucket["last_update"] = now
 
             # Check minute limit
-            if now - bucket['minute_start'] >= 60:
-                bucket['minute_count'] = 0
-                bucket['minute_start'] = now
+            if now - bucket["minute_start"] >= 60:
+                bucket["minute_count"] = 0
+                bucket["minute_start"] = now
 
-            if bucket['minute_count'] >= self.config.requests_per_minute:
-                return False, f"Rate limit exceeded: {self.config.requests_per_minute} requests/minute"
+            if bucket["minute_count"] >= self.config.requests_per_minute:
+                return (
+                    False,
+                    f"Rate limit exceeded: {self.config.requests_per_minute} requests/minute",
+                )
 
             # Check hour limit
-            if now - bucket['hour_start'] >= 3600:
-                bucket['hour_count'] = 0
-                bucket['hour_start'] = now
+            if now - bucket["hour_start"] >= 3600:
+                bucket["hour_count"] = 0
+                bucket["hour_start"] = now
 
-            if bucket['hour_count'] >= self.config.requests_per_hour:
-                return False, f"Rate limit exceeded: {self.config.requests_per_hour} requests/hour"
+            if bucket["hour_count"] >= self.config.requests_per_hour:
+                return (
+                    False,
+                    f"Rate limit exceeded: {self.config.requests_per_hour} requests/hour",
+                )
 
             # Check token bucket
-            if bucket['tokens'] < 1:
-                wait_time = (1 - bucket['tokens']) * (60.0 / self.config.requests_per_minute)
+            if bucket["tokens"] < 1:
+                wait_time = (1 - bucket["tokens"]) * (
+                    60.0 / self.config.requests_per_minute
+                )
                 return False, f"Rate limit exceeded. Retry after {wait_time:.1f}s"
 
             # Consume token and increment counters
-            bucket['tokens'] -= 1
-            bucket['minute_count'] += 1
-            bucket['hour_count'] += 1
+            bucket["tokens"] -= 1
+            bucket["minute_count"] += 1
+            bucket["hour_count"] += 1
 
             return True, None
 
@@ -169,18 +212,19 @@ class RateLimiter:
 
         bucket = self.client_buckets[client_id]
         return {
-            "tokens_remaining": int(bucket['tokens']),
-            "requests_this_minute": bucket['minute_count'],
-            "requests_this_hour": bucket['hour_count'],
+            "tokens_remaining": int(bucket["tokens"]),
+            "requests_this_minute": bucket["minute_count"],
+            "requests_this_hour": bucket["hour_count"],
             "burst_size": self.config.burst_size,
             "minute_limit": self.config.requests_per_minute,
-            "hour_limit": self.config.requests_per_hour
+            "hour_limit": self.config.requests_per_hour,
         }
 
 
 # ==============================================================================
 # SQL Injection Prevention
 # ==============================================================================
+
 
 class SQLValidator:
     """
@@ -205,7 +249,10 @@ class SQLValidator:
 
         # Check length
         if len(query) > self.config.max_sql_query_length:
-            return False, f"SQL query too long (max {self.config.max_sql_query_length} characters)"
+            return (
+                False,
+                f"SQL query too long (max {self.config.max_sql_query_length} characters)",
+            )
 
         # Normalize query for checking
         normalized = query.upper().strip()
@@ -213,7 +260,7 @@ class SQLValidator:
         # Check for forbidden keywords
         for keyword in self.config.forbidden_sql_keywords:
             # Use word boundaries to avoid false positives
-            pattern = r'\b' + re.escape(keyword) + r'\b'
+            pattern = r"\b" + re.escape(keyword) + r"\b"
             if re.search(pattern, normalized):
                 return False, f"Forbidden SQL keyword: {keyword}"
 
@@ -225,7 +272,7 @@ class SQLValidator:
                 break
 
         if not starts_with_allowed:
-            allowed = ', '.join(sorted(self.config.allowed_sql_keywords))
+            allowed = ", ".join(sorted(self.config.allowed_sql_keywords))
             return False, f"Query must start with allowed keyword: {allowed}"
 
         # Check for common SQL injection patterns
@@ -235,7 +282,7 @@ class SQLValidator:
             r";\s*INSERT",
             r";\s*UPDATE",
             r"--\s*$",  # SQL comment at end
-            r"/\*.*\*/", # Multi-line comment
+            r"/\*.*\*/",  # Multi-line comment
             r"UNION\s+SELECT",  # UNION injection
             r"OR\s+1\s*=\s*1",  # Classic injection
             r"OR\s+'1'\s*=\s*'1'",
@@ -259,11 +306,11 @@ class SQLValidator:
             Sanitized identifier
         """
         # Remove any non-alphanumeric characters except underscore
-        sanitized = re.sub(r'[^a-zA-Z0-9_]', '', identifier)
+        sanitized = re.sub(r"[^a-zA-Z0-9_]", "", identifier)
 
         # Ensure it doesn't start with a number
         if sanitized and sanitized[0].isdigit():
-            sanitized = '_' + sanitized
+            sanitized = "_" + sanitized
 
         return sanitized
 
@@ -271,6 +318,7 @@ class SQLValidator:
 # ==============================================================================
 # Path Traversal Prevention
 # ==============================================================================
+
 
 class PathValidator:
     """
@@ -304,7 +352,7 @@ class PathValidator:
         # Check file extension
         _, ext = os.path.splitext(file_path)
         if ext and ext.lower() not in self.config.allowed_file_extensions:
-            allowed = ', '.join(sorted(self.config.allowed_file_extensions))
+            allowed = ", ".join(sorted(self.config.allowed_file_extensions))
             return False, f"File extension '{ext}' not allowed. Allowed: {allowed}"
 
         # Resolve to absolute path and check it's within project root
@@ -324,6 +372,7 @@ class PathValidator:
 # ==============================================================================
 # Request Size Validation
 # ==============================================================================
+
 
 class RequestValidator:
     """
@@ -387,6 +436,7 @@ class RequestValidator:
 # Timeout Enforcement
 # ==============================================================================
 
+
 async def with_timeout(coro, timeout: float, operation_name: str = "Operation"):
     """
     Execute coroutine with timeout
@@ -421,26 +471,26 @@ def enforce_timeout(timeout_seconds: Optional[float] = None):
         async def slow_operation():
             ...
     """
+
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
             timeout = timeout_seconds or 30.0
             try:
-                return await asyncio.wait_for(
-                    func(*args, **kwargs),
-                    timeout=timeout
-                )
+                return await asyncio.wait_for(func(*args, **kwargs), timeout=timeout)
             except asyncio.TimeoutError:
                 logger.error(f"{func.__name__} timed out after {timeout}s")
                 raise TimeoutError(f"{func.__name__} timed out after {timeout}s")
 
         return wrapper
+
     return decorator
 
 
 # ==============================================================================
 # Security Manager (Main Interface)
 # ==============================================================================
+
 
 class SecurityManager:
     """
@@ -458,10 +508,7 @@ class SecurityManager:
         self.failed_requests: Dict[str, List[float]] = defaultdict(list)
 
     async def validate_request(
-        self,
-        client_id: str,
-        tool_name: str,
-        arguments: Dict[str, Any]
+        self, client_id: str, tool_name: str, arguments: Dict[str, Any]
     ) -> tuple[bool, Optional[str]]:
         """
         Comprehensive request validation
@@ -493,8 +540,8 @@ class SecurityManager:
             return False, message
 
         # 4. Tool-specific validation
-        if tool_name in ('query_database', 'query_rds_database'):
-            sql_query = arguments.get('sql') or arguments.get('sql_query')
+        if tool_name in ("query_database", "query_rds_database"):
+            sql_query = arguments.get("sql") or arguments.get("sql_query")
             if sql_query:
                 valid, message = self.sql_validator.validate_sql_query(sql_query)
                 if not valid:
@@ -502,8 +549,8 @@ class SecurityManager:
                     self._record_failed_request(client_id)
                     return False, message
 
-        elif tool_name in ('read_file', 'read_project_file'):
-            file_path = arguments.get('file_path') or arguments.get('path')
+        elif tool_name in ("read_file", "read_project_file"):
+            file_path = arguments.get("file_path") or arguments.get("path")
             if file_path:
                 valid, message = self.path_validator.validate_file_path(file_path)
                 if not valid:
@@ -519,8 +566,7 @@ class SecurityManager:
 
         # Remove old failures (older than 1 hour)
         self.failed_requests[client_id] = [
-            t for t in self.failed_requests[client_id]
-            if now - t < 3600
+            t for t in self.failed_requests[client_id] if now - t < 3600
         ]
 
         # Add new failure
@@ -539,7 +585,9 @@ class SecurityManager:
             "rate_limiter_enabled": self.config.rate_limit.enabled,
             "active_clients": len(self.rate_limiter.client_buckets),
             "clients_with_failures": len(self.failed_requests),
-            "total_failed_requests": sum(len(fails) for fails in self.failed_requests.values())
+            "total_failed_requests": sum(
+                len(fails) for fails in self.failed_requests.values()
+            ),
         }
 
 
@@ -547,19 +595,19 @@ class SecurityManager:
 # Example Usage
 # ==============================================================================
 
+
 async def example_usage():
     """Example of using the security module"""
 
     # Create security configuration
     config = SecurityConfig(
-        rate_limit=RateLimitConfig(
-            requests_per_minute=10,
-            requests_per_hour=100
-        )
+        rate_limit=RateLimitConfig(requests_per_minute=10, requests_per_hour=100)
     )
 
     # Create security manager
-    security = SecurityManager(config, project_root="/Users/ryanranft/nba-mcp-synthesis")
+    security = SecurityManager(
+        config, project_root="/Users/ryanranft/nba-mcp-synthesis"
+    )
 
     # Validate a database query request
     client_id = "test_client_1"
@@ -576,11 +624,11 @@ async def example_usage():
         print(f"❌ Request validation failed: {message}")
 
     # Try an invalid SQL query
-    bad_arguments = {
-        "sql_query": "DROP TABLE games"
-    }
+    bad_arguments = {"sql_query": "DROP TABLE games"}
 
-    valid, message = await security.validate_request(client_id, tool_name, bad_arguments)
+    valid, message = await security.validate_request(
+        client_id, tool_name, bad_arguments
+    )
     print(f"\nInvalid SQL validation: {message}")
 
     # Get security stats

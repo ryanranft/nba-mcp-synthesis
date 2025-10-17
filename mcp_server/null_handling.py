@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 class ImputationStrategy(Enum):
     """Data imputation strategies"""
+
     DROP = "drop"
     MEAN = "mean"
     MEDIAN = "median"
@@ -52,7 +53,7 @@ class NullDataHandler:
             if missing_count > 0:
                 column_missing[col] = {
                     "count": int(missing_count),
-                    "percentage": (missing_count / len(df)) * 100
+                    "percentage": (missing_count / len(df)) * 100,
                 }
 
         analysis = {
@@ -62,7 +63,9 @@ class NullDataHandler:
             "total_missing": int(total_missing),
             "missing_percentage": missing_ratio * 100,
             "columns_with_missing": column_missing,
-            "completely_null_columns": [col for col in df.columns if df[col].isnull().all()]
+            "completely_null_columns": [
+                col for col in df.columns if df[col].isnull().all()
+            ],
         }
 
         logger.info(
@@ -78,7 +81,7 @@ class NullDataHandler:
         column: str,
         strategy: ImputationStrategy,
         fill_value: Optional[Any] = None,
-        k_neighbors: int = 5
+        k_neighbors: int = 5,
     ) -> pd.DataFrame:
         """
         Impute missing values in a specific column.
@@ -106,7 +109,9 @@ class NullDataHandler:
 
         if strategy == ImputationStrategy.DROP:
             df_copy = df_copy.dropna(subset=[column])
-            logger.info(f"Dropped {missing_count} rows with missing values in '{column}'")
+            logger.info(
+                f"Dropped {missing_count} rows with missing values in '{column}'"
+            )
 
         elif strategy == ImputationStrategy.MEAN:
             mean_value = df[column].mean()
@@ -117,22 +122,28 @@ class NullDataHandler:
         elif strategy == ImputationStrategy.MEDIAN:
             median_value = df[column].median()
             df_copy[column].fillna(median_value, inplace=True)
-            self.imputation_stats[column] = {"strategy": "median", "value": median_value}
+            self.imputation_stats[column] = {
+                "strategy": "median",
+                "value": median_value,
+            }
             logger.info(f"Imputed '{column}' with median: {median_value:.2f}")
 
         elif strategy == ImputationStrategy.MODE:
             mode_value = df[column].mode()[0] if not df[column].mode().empty else None
             if mode_value is not None:
                 df_copy[column].fillna(mode_value, inplace=True)
-                self.imputation_stats[column] = {"strategy": "mode", "value": mode_value}
+                self.imputation_stats[column] = {
+                    "strategy": "mode",
+                    "value": mode_value,
+                }
                 logger.info(f"Imputed '{column}' with mode: {mode_value}")
 
         elif strategy == ImputationStrategy.FORWARD_FILL:
-            df_copy[column].fillna(method='ffill', inplace=True)
+            df_copy[column].fillna(method="ffill", inplace=True)
             logger.info(f"Forward filled '{column}'")
 
         elif strategy == ImputationStrategy.BACKWARD_FILL:
-            df_copy[column].fillna(method='bfill', inplace=True)
+            df_copy[column].fillna(method="bfill", inplace=True)
             logger.info(f"Backward filled '{column}'")
 
         elif strategy == ImputationStrategy.CONSTANT:
@@ -140,7 +151,10 @@ class NullDataHandler:
                 logger.error("CONSTANT strategy requires fill_value")
                 return df
             df_copy[column].fillna(fill_value, inplace=True)
-            self.imputation_stats[column] = {"strategy": "constant", "value": fill_value}
+            self.imputation_stats[column] = {
+                "strategy": "constant",
+                "value": fill_value,
+            }
             logger.info(f"Imputed '{column}' with constant: {fill_value}")
 
         elif strategy == ImputationStrategy.INTERPOLATE:
@@ -148,13 +162,20 @@ class NullDataHandler:
             logger.info(f"Interpolated '{column}'")
 
         elif strategy == ImputationStrategy.KNN:
-            logger.warning("KNN imputation requires scikit-learn, using mean as fallback")
+            logger.warning(
+                "KNN imputation requires scikit-learn, using mean as fallback"
+            )
             mean_value = df[column].mean()
             df_copy[column].fillna(mean_value, inplace=True)
 
         return df_copy
 
-    def auto_impute(self, df: pd.DataFrame, numeric_strategy: ImputationStrategy = ImputationStrategy.MEDIAN, categorical_strategy: ImputationStrategy = ImputationStrategy.MODE) -> pd.DataFrame:
+    def auto_impute(
+        self,
+        df: pd.DataFrame,
+        numeric_strategy: ImputationStrategy = ImputationStrategy.MEDIAN,
+        categorical_strategy: ImputationStrategy = ImputationStrategy.MODE,
+    ) -> pd.DataFrame:
         """
         Automatically impute all columns based on data type.
 
@@ -215,14 +236,16 @@ if __name__ == "__main__":
     print("=" * 80)
 
     # Create sample data with missing values
-    df = pd.DataFrame({
-        "player_id": [1, 2, 3, 4, 5],
-        "points": [25.0, None, 18.0, 22.0, None],
-        "rebounds": [8.0, 6.0, None, 7.0, 9.0],
-        "assists": [5.0, 7.0, 4.0, None, 6.0],
-        "team": ["Lakers", None, "Warriors", "Celtics", "Heat"],
-        "position": ["PG", "SG", None, "SF", "PF"]
-    })
+    df = pd.DataFrame(
+        {
+            "player_id": [1, 2, 3, 4, 5],
+            "points": [25.0, None, 18.0, 22.0, None],
+            "rebounds": [8.0, 6.0, None, 7.0, 9.0],
+            "assists": [5.0, 7.0, 4.0, None, 6.0],
+            "team": ["Lakers", None, "Warriors", "Celtics", "Heat"],
+            "position": ["PG", "SG", None, "SF", "PF"],
+        }
+    )
 
     print("\nOriginal DataFrame:")
     print(df)
@@ -235,9 +258,11 @@ if __name__ == "__main__":
     print("=" * 80)
 
     analysis = handler.analyze_missing_data(df)
-    print(f"\nTotal Missing: {analysis['total_missing']} ({analysis['missing_percentage']:.2f}%)")
+    print(
+        f"\nTotal Missing: {analysis['total_missing']} ({analysis['missing_percentage']:.2f}%)"
+    )
     print("\nColumns with Missing Data:")
-    for col, info in analysis['columns_with_missing'].items():
+    for col, info in analysis["columns_with_missing"].items():
         print(f"  - {col}: {info['count']} ({info['percentage']:.1f}%)")
 
     # Impute specific columns
@@ -246,10 +271,16 @@ if __name__ == "__main__":
     print("=" * 80)
 
     df_imputed = handler.impute_column(df.copy(), "points", ImputationStrategy.MEAN)
-    df_imputed = handler.impute_column(df_imputed, "rebounds", ImputationStrategy.MEDIAN)
-    df_imputed = handler.impute_column(df_imputed, "assists", ImputationStrategy.FORWARD_FILL)
+    df_imputed = handler.impute_column(
+        df_imputed, "rebounds", ImputationStrategy.MEDIAN
+    )
+    df_imputed = handler.impute_column(
+        df_imputed, "assists", ImputationStrategy.FORWARD_FILL
+    )
     df_imputed = handler.impute_column(df_imputed, "team", ImputationStrategy.MODE)
-    df_imputed = handler.impute_column(df_imputed, "position", ImputationStrategy.CONSTANT, fill_value="Unknown")
+    df_imputed = handler.impute_column(
+        df_imputed, "position", ImputationStrategy.CONSTANT, fill_value="Unknown"
+    )
 
     print("\nImputed DataFrame:")
     print(df_imputed)
@@ -276,4 +307,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("Null Handling Demo Complete!")
     print("=" * 80)
-

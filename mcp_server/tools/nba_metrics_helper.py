@@ -16,6 +16,7 @@ from mcp_server.tools.logger_config import log_operation
 # Player Efficiency Metrics
 # =============================================================================
 
+
 @log_operation("nba_player_efficiency_rating")
 def calculate_per(stats: Dict[str, Union[int, float]]) -> float:
     """
@@ -58,35 +59,40 @@ def calculate_per(stats: Dict[str, Union[int, float]]) -> float:
         18.5
     """
     required_fields = [
-        "points", "rebounds", "assists", "steals", "blocks",
-        "fgm", "fga", "ftm", "fta", "turnovers", "minutes"
+        "points",
+        "rebounds",
+        "assists",
+        "steals",
+        "blocks",
+        "fgm",
+        "fga",
+        "ftm",
+        "fta",
+        "turnovers",
+        "minutes",
     ]
 
     for field in required_fields:
         if field not in stats:
-            raise ValidationError(
-                f"Missing required field: {field}",
-                field,
-                None
-            )
+            raise ValidationError(f"Missing required field: {field}", field, None)
 
     if stats["minutes"] == 0:
         return 0.0
 
     # Positive contributions
     positive = (
-        stats["points"] +
-        stats["rebounds"] +
-        stats["assists"] +
-        stats["steals"] +
-        stats["blocks"]
+        stats["points"]
+        + stats["rebounds"]
+        + stats["assists"]
+        + stats["steals"]
+        + stats["blocks"]
     )
 
     # Negative contributions
     negative = (
-        (stats["fga"] - stats["fgm"]) +  # Missed FG
-        (stats["fta"] - stats["ftm"]) +  # Missed FT
-        stats["turnovers"]
+        (stats["fga"] - stats["fgm"])  # Missed FG
+        + (stats["fta"] - stats["ftm"])  # Missed FT
+        + stats["turnovers"]
     )
 
     # Calculate per-minute efficiency and scale
@@ -97,9 +103,7 @@ def calculate_per(stats: Dict[str, Union[int, float]]) -> float:
 
 @log_operation("nba_true_shooting_percentage")
 def calculate_true_shooting(
-    points: Union[int, float],
-    fga: Union[int, float],
-    fta: Union[int, float]
+    points: Union[int, float], fga: Union[int, float], fta: Union[int, float]
 ) -> float:
     """
     Calculate True Shooting Percentage (TS%).
@@ -132,9 +136,7 @@ def calculate_true_shooting(
 
 @log_operation("nba_effective_field_goal_percentage")
 def calculate_effective_fg_pct(
-    fgm: Union[int, float],
-    fga: Union[int, float],
-    three_pm: Union[int, float]
+    fgm: Union[int, float], fga: Union[int, float], three_pm: Union[int, float]
 ) -> float:
     """
     Calculate Effective Field Goal Percentage (eFG%).
@@ -172,7 +174,7 @@ def calculate_usage_rate(
     team_minutes: float,
     team_fga: Union[int, float],
     team_fta: Union[int, float],
-    team_turnovers: Union[int, float]
+    team_turnovers: Union[int, float],
 ) -> float:
     """
     Calculate Usage Rate (USG%).
@@ -214,8 +216,7 @@ def calculate_usage_rate(
         return 0.0
 
     usg_rate = (
-        100 * (player_possessions * (team_minutes / 5)) /
-        (minutes * team_possessions)
+        100 * (player_possessions * (team_minutes / 5)) / (minutes * team_possessions)
     )
 
     return round(usg_rate, 2)
@@ -225,10 +226,10 @@ def calculate_usage_rate(
 # Team Efficiency Metrics
 # =============================================================================
 
+
 @log_operation("nba_offensive_rating")
 def calculate_offensive_rating(
-    points: Union[int, float],
-    possessions: Union[int, float]
+    points: Union[int, float], possessions: Union[int, float]
 ) -> float:
     """
     Calculate Offensive Rating (ORtg).
@@ -258,8 +259,7 @@ def calculate_offensive_rating(
 
 @log_operation("nba_defensive_rating")
 def calculate_defensive_rating(
-    points_allowed: Union[int, float],
-    possessions: Union[int, float]
+    points_allowed: Union[int, float], possessions: Union[int, float]
 ) -> float:
     """
     Calculate Defensive Rating (DRtg).
@@ -288,10 +288,7 @@ def calculate_defensive_rating(
 
 
 @log_operation("nba_pace")
-def calculate_pace(
-    possessions: Union[int, float],
-    minutes: float
-) -> float:
+def calculate_pace(possessions: Union[int, float], minutes: float) -> float:
     """
     Calculate Pace (possessions per 48 minutes).
 
@@ -320,11 +317,12 @@ def calculate_pace(
 # Advanced Metrics
 # =============================================================================
 
+
 @log_operation("nba_win_shares")
 def calculate_win_shares(
     marginal_offense: float,
     marginal_defense: float,
-    marginal_points_per_win: float = 30.0
+    marginal_points_per_win: float = 30.0,
 ) -> float:
     """
     Calculate Win Shares (simplified version).
@@ -355,7 +353,7 @@ def calculate_box_plus_minus(
     per: float,
     team_pace: float,
     league_avg_per: float = 15.0,
-    league_avg_pace: float = 100.0
+    league_avg_pace: float = 100.0,
 ) -> float:
     """
     Calculate Box Plus/Minus (BPM) - simplified estimate.
@@ -455,50 +453,34 @@ def calculate_four_factors(stats: Dict[str, Union[int, float]]) -> Dict[str, Any
     """
     # Offensive Four Factors
     off_efg = calculate_effective_fg_pct(
-        stats.get("fgm", 0),
-        stats.get("fga", 0),
-        stats.get("three_pm", 0)
+        stats.get("fgm", 0), stats.get("fga", 0), stats.get("three_pm", 0)
     )
 
     off_tov_pct = calculate_turnover_percentage(
-        stats.get("tov", 0),
-        stats.get("fga", 0),
-        stats.get("fta", 0)
+        stats.get("tov", 0), stats.get("fga", 0), stats.get("fta", 0)
     )
 
     off_orb_pct = calculate_rebound_percentage(
-        stats.get("orb", 0),
-        stats.get("team_orb", 0),
-        stats.get("opp_drb", 0)
+        stats.get("orb", 0), stats.get("team_orb", 0), stats.get("opp_drb", 0)
     )
 
-    off_ftr = calculate_free_throw_rate(
-        stats.get("fta", 0),
-        stats.get("fga", 0)
-    )
+    off_ftr = calculate_free_throw_rate(stats.get("fta", 0), stats.get("fga", 0))
 
     # Defensive Four Factors
     def_efg = calculate_effective_fg_pct(
-        stats.get("opp_fgm", 0),
-        stats.get("opp_fga", 0),
-        stats.get("opp_three_pm", 0)
+        stats.get("opp_fgm", 0), stats.get("opp_fga", 0), stats.get("opp_three_pm", 0)
     )
 
     def_tov_pct = calculate_turnover_percentage(
-        stats.get("opp_tov", 0),
-        stats.get("opp_fga", 0),
-        stats.get("opp_fta", 0)
+        stats.get("opp_tov", 0), stats.get("opp_fga", 0), stats.get("opp_fta", 0)
     )
 
     def_drb_pct = calculate_rebound_percentage(
-        stats.get("drb", 0),
-        stats.get("team_drb", 0),
-        stats.get("opp_orb", 0)
+        stats.get("drb", 0), stats.get("team_drb", 0), stats.get("opp_orb", 0)
     )
 
     def_ftr = calculate_free_throw_rate(
-        stats.get("opp_fta", 0),
-        stats.get("opp_fga", 0)
+        stats.get("opp_fta", 0), stats.get("opp_fga", 0)
     )
 
     return {
@@ -506,22 +488,20 @@ def calculate_four_factors(stats: Dict[str, Union[int, float]]) -> Dict[str, Any
             "efg_pct": off_efg,
             "tov_pct": off_tov_pct,
             "orb_pct": off_orb_pct,
-            "ftr": off_ftr
+            "ftr": off_ftr,
         },
         "defensive": {
             "efg_pct": def_efg,
             "tov_pct": def_tov_pct,
             "drb_pct": def_drb_pct,
-            "ftr": def_ftr
-        }
+            "ftr": def_ftr,
+        },
     }
 
 
 @log_operation("nba_turnover_percentage")
 def calculate_turnover_percentage(
-    tov: Union[int, float],
-    fga: Union[int, float],
-    fta: Union[int, float]
+    tov: Union[int, float], fga: Union[int, float], fta: Union[int, float]
 ) -> float:
     """
     Calculate Turnover Percentage (TOV%).
@@ -556,7 +536,7 @@ def calculate_turnover_percentage(
 def calculate_rebound_percentage(
     rebounds: Union[int, float],
     team_rebounds: Union[int, float],
-    opp_rebounds: Union[int, float]
+    opp_rebounds: Union[int, float],
 ) -> float:
     """
     Calculate Rebound Percentage (REB%).
@@ -594,7 +574,7 @@ def calculate_assist_percentage(
     minutes: float,
     team_minutes: float,
     team_fgm: Union[int, float],
-    player_fgm: Union[int, float] = 0
+    player_fgm: Union[int, float] = 0,
 ) -> float:
     """
     Calculate Assist Percentage (AST%).
@@ -639,7 +619,7 @@ def calculate_steal_percentage(
     steals: Union[int, float],
     minutes: float,
     team_minutes: float,
-    opp_possessions: Union[int, float]
+    opp_possessions: Union[int, float],
 ) -> float:
     """
     Calculate Steal Percentage (STL%).
@@ -677,7 +657,7 @@ def calculate_block_percentage(
     blocks: Union[int, float],
     minutes: float,
     team_minutes: float,
-    opp_two_pa: Union[int, float]
+    opp_two_pa: Union[int, float],
 ) -> float:
     """
     Calculate Block Percentage (BLK%).
@@ -714,10 +694,10 @@ def calculate_block_percentage(
 # Shooting Metrics
 # =============================================================================
 
+
 @log_operation("nba_three_point_rate")
 def calculate_three_point_rate(
-    three_pa: Union[int, float],
-    fga: Union[int, float]
+    three_pa: Union[int, float], fga: Union[int, float]
 ) -> float:
     """
     Calculate 3-Point Attempt Rate (3PAr).
@@ -746,10 +726,7 @@ def calculate_three_point_rate(
 
 
 @log_operation("nba_free_throw_rate")
-def calculate_free_throw_rate(
-    fta: Union[int, float],
-    fga: Union[int, float]
-) -> float:
+def calculate_free_throw_rate(fta: Union[int, float], fga: Union[int, float]) -> float:
     """
     Calculate Free Throw Rate (FTr).
 
@@ -780,11 +757,12 @@ def calculate_free_throw_rate(
 # Utility Functions
 # =============================================================================
 
+
 def estimate_possessions(
     fga: Union[int, float],
     fta: Union[int, float],
     orb: Union[int, float],
-    tov: Union[int, float]
+    tov: Union[int, float],
 ) -> float:
     """
     Estimate total possessions (simplified formula).

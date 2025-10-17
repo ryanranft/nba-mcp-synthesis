@@ -36,20 +36,19 @@ async def test_ollama_primary_synthesis(user_input: str, code: str = None):
     """
     console.print(Panel.fit("Ollama-Primary Synthesis Test", style="bold blue"))
 
-    results = {
-        "ollama": {},
-        "claude": {},
-        "total_cost": 0.0,
-        "execution_time": 0.0
-    }
+    results = {"ollama": {}, "claude": {}, "total_cost": 0.0, "execution_time": 0.0}
 
     # Step 1: Query Ollama (PRIMARY - FREE)
-    console.print("\n[1/2] Querying Ollama (qwen2.5-coder:32b) - Local, FREE", style="cyan")
+    console.print(
+        "\n[1/2] Querying Ollama (qwen2.5-coder:32b) - Local, FREE", style="cyan"
+    )
 
     ollama = OllamaModel()
 
     if not ollama.is_available():
-        console.print("[red]❌ Ollama not available. Please start Ollama service.[/red]")
+        console.print(
+            "[red]❌ Ollama not available. Please start Ollama service.[/red]"
+        )
         return None
 
     # Build prompt
@@ -60,13 +59,17 @@ async def test_ollama_primary_synthesis(user_input: str, code: str = None):
     ollama_result = await ollama.query(
         prompt=prompt,
         temperature=0.3,  # Slightly higher for creativity
-        max_tokens=4000
+        max_tokens=4000,
     )
 
     if ollama_result.get("success"):
         results["ollama"] = ollama_result
-        console.print(f"[green]✓ Ollama completed: {ollama_result.get('tokens_used', 0)} tokens, $0.00 (local)[/green]")
-        console.print(f"\nOllama Response Preview:\n{ollama_result.get('response', '')[:200]}...")
+        console.print(
+            f"[green]✓ Ollama completed: {ollama_result.get('tokens_used', 0)} tokens, $0.00 (local)[/green]"
+        )
+        console.print(
+            f"\nOllama Response Preview:\n{ollama_result.get('response', '')[:200]}..."
+        )
     else:
         console.print(f"[red]✗ Ollama failed: {ollama_result.get('error')}[/red]")
         return None
@@ -77,21 +80,25 @@ async def test_ollama_primary_synthesis(user_input: str, code: str = None):
     claude = ClaudeModel()
 
     synthesis_result = await claude.synthesize(
-        deepseek_result=ollama_result.get('response', ''),
+        deepseek_result=ollama_result.get("response", ""),
         original_request=user_input,
         context_summary="Ollama-primary workflow",
-        include_verification=True
+        include_verification=True,
     )
 
     if synthesis_result.get("success"):
         results["claude"] = synthesis_result
         results["total_cost"] = synthesis_result.get("cost", 0)
-        console.print(f"[green]✓ Claude completed: {synthesis_result.get('tokens_used', 0)} tokens, ${synthesis_result.get('cost', 0):.4f}[/green]")
+        console.print(
+            f"[green]✓ Claude completed: {synthesis_result.get('tokens_used', 0)} tokens, ${synthesis_result.get('cost', 0):.4f}[/green]"
+        )
     else:
-        console.print(f"[yellow]⚠ Claude synthesis failed: {synthesis_result.get('error')}[/yellow]")
+        console.print(
+            f"[yellow]⚠ Claude synthesis failed: {synthesis_result.get('error')}[/yellow]"
+        )
 
     # Display results
-    console.print("\n" + "="*80 + "\n")
+    console.print("\n" + "=" * 80 + "\n")
     console.print(Panel.fit("Final Results", style="bold green"))
 
     # Cost comparison table
@@ -104,10 +111,7 @@ async def test_ollama_primary_synthesis(user_input: str, code: str = None):
     # Old workflow (DeepSeek + Claude)
     old_cost = 0.012850  # From previous test
     table.add_row(
-        "Old (DeepSeek+Claude)",
-        "DeepSeek V3, Claude 3.7",
-        f"${old_cost:.4f}",
-        "—"
+        "Old (DeepSeek+Claude)", "DeepSeek V3, Claude 3.7", f"${old_cost:.4f}", "—"
     )
 
     # New workflow (Ollama + Claude)
@@ -117,24 +121,28 @@ async def test_ollama_primary_synthesis(user_input: str, code: str = None):
         "New (Ollama+Claude)",
         "qwen2.5-coder:32b, Claude 3.7",
         f"${new_cost:.4f}",
-        f"{savings:.1f}% saved"
+        f"{savings:.1f}% saved",
     )
 
     console.print(table)
 
     # Display solutions
-    console.print("\n" + "="*80 + "\n")
+    console.print("\n" + "=" * 80 + "\n")
     console.print(Panel.fit("Ollama Solution", style="bold cyan"))
     console.print(results["ollama"].get("response", "No response"))
 
     if results["claude"].get("response"):
-        console.print("\n" + "="*80 + "\n")
+        console.print("\n" + "=" * 80 + "\n")
         console.print(Panel.fit("Claude Verification", style="bold magenta"))
         console.print(results["claude"].get("response", "No response"))
 
-    console.print("\n" + "="*80 + "\n")
-    console.print(f"[bold green]✅ Total Cost: ${results['total_cost']:.4f}[/bold green]")
-    console.print(f"[bold yellow]💰 Savings vs DeepSeek workflow: {savings:.1f}%[/bold yellow]")
+    console.print("\n" + "=" * 80 + "\n")
+    console.print(
+        f"[bold green]✅ Total Cost: ${results['total_cost']:.4f}[/bold green]"
+    )
+    console.print(
+        f"[bold yellow]💰 Savings vs DeepSeek workflow: {savings:.1f}%[/bold yellow]"
+    )
 
     return results
 
@@ -142,25 +150,27 @@ async def test_ollama_primary_synthesis(user_input: str, code: str = None):
 async def run_comparison_tests():
     """Run multiple test cases to demonstrate Ollama-primary workflow"""
 
-    console.print(Panel.fit(
-        "Ollama-Primary Synthesis Testing\n" +
-        "Comparing: Ollama (local, free) + Claude (minimal cost) vs DeepSeek + Claude",
-        style="bold white on blue"
-    ))
+    console.print(
+        Panel.fit(
+            "Ollama-Primary Synthesis Testing\n"
+            + "Comparing: Ollama (local, free) + Claude (minimal cost) vs DeepSeek + Claude",
+            style="bold white on blue",
+        )
+    )
 
     # Test 1: Simple SQL query
-    console.print("\n\n" + "="*80 + "\n")
+    console.print("\n\n" + "=" * 80 + "\n")
     console.print(Panel.fit("Test 1: Simple SQL Query", style="bold blue"))
 
     await test_ollama_primary_synthesis(
         user_input="Write an optimized SQL query to find the top 10 players by total points scored in the player_game_stats table",
-        code=None
+        code=None,
     )
 
     await asyncio.sleep(2)
 
     # Test 2: Code debugging
-    console.print("\n\n" + "="*80 + "\n")
+    console.print("\n\n" + "=" * 80 + "\n")
     console.print(Panel.fit("Test 2: Code Debugging", style="bold blue"))
 
     await test_ollama_primary_synthesis(
@@ -171,18 +181,18 @@ async def run_comparison_tests():
 
 player_stats = []
 avg = calculate_player_average(player_stats)  # ZeroDivisionError
-"""
+""",
     )
 
     await asyncio.sleep(2)
 
     # Test 3: Code generation
-    console.print("\n\n" + "="*80 + "\n")
+    console.print("\n\n" + "=" * 80 + "\n")
     console.print(Panel.fit("Test 3: Python Function", style="bold blue"))
 
     await test_ollama_primary_synthesis(
         user_input="Write a Python function to calculate win percentage for NBA teams, including handling edge cases",
-        code=None
+        code=None,
     )
 
 
@@ -195,6 +205,7 @@ async def main():
     except Exception as e:
         console.print(f"\n[red]Error: {e}[/red]")
         import traceback
+
         console.print(traceback.format_exc())
 
 

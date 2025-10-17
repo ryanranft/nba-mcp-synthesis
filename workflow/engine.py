@@ -21,7 +21,7 @@ from monitoring.slack_notifier import (
     notify_process_started,
     notify_process_completed,
     notify_process_failed,
-    notify_process_progress
+    notify_process_progress,
 )
 
 logger = logging.getLogger(__name__)
@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 
 class StepStatus(Enum):
     """Status of a workflow step"""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -39,6 +40,7 @@ class StepStatus(Enum):
 
 class WorkflowStatus(Enum):
     """Status of entire workflow"""
+
     CREATED = "created"
     RUNNING = "running"
     PAUSED = "paused"
@@ -50,6 +52,7 @@ class WorkflowStatus(Enum):
 @dataclass
 class WorkflowStep:
     """Represents a single step in a workflow"""
+
     name: str
     description: str
     action: str  # Function name or command to execute
@@ -85,13 +88,14 @@ class WorkflowStep:
             "error": self.error,
             "start_time": self.start_time,
             "end_time": self.end_time,
-            "attempt": self.attempt
+            "attempt": self.attempt,
         }
 
 
 @dataclass
 class Workflow:
     """Represents a complete workflow"""
+
     workflow_id: str
     name: str
     description: str
@@ -121,11 +125,11 @@ class Workflow:
             "current_step_index": self.current_step_index,
             "start_time": self.start_time,
             "end_time": self.end_time,
-            "metadata": self.metadata
+            "metadata": self.metadata,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict) -> 'Workflow':
+    def from_dict(cls, data: Dict) -> "Workflow":
         """Create workflow from dictionary"""
         steps = [
             WorkflowStep(
@@ -143,7 +147,7 @@ class Workflow:
                 error=s.get("error"),
                 start_time=s.get("start_time"),
                 end_time=s.get("end_time"),
-                attempt=s.get("attempt", 0)
+                attempt=s.get("attempt", 0),
             )
             for s in data["steps"]
         ]
@@ -160,7 +164,7 @@ class Workflow:
             current_step_index=data.get("current_step_index", 0),
             start_time=data.get("start_time"),
             end_time=data.get("end_time"),
-            metadata=data.get("metadata", {})
+            metadata=data.get("metadata", {}),
         )
 
 
@@ -169,9 +173,7 @@ class WorkflowEngine:
 
     def __init__(self, state_dir: Optional[str] = None):
         self.state_dir = state_dir or os.path.join(
-            os.path.dirname(__file__),
-            "..",
-            "workflow_state"
+            os.path.dirname(__file__), "..", "workflow_state"
         )
         os.makedirs(self.state_dir, exist_ok=True)
 
@@ -216,7 +218,7 @@ class WorkflowEngine:
 
         state_file = os.path.join(self.state_dir, f"{workflow.workflow_id}.json")
         try:
-            with open(state_file, 'w') as f:
+            with open(state_file, "w") as f:
                 json.dump(workflow.to_dict(), f, indent=2)
             logger.debug(f"Saved workflow state: {workflow.workflow_id}")
         except Exception as e:
@@ -226,7 +228,7 @@ class WorkflowEngine:
         """Load workflow state from disk"""
         state_file = os.path.join(self.state_dir, f"{workflow_id}.json")
         try:
-            with open(state_file, 'r') as f:
+            with open(state_file, "r") as f:
                 data = json.load(f)
             return Workflow.from_dict(data)
         except FileNotFoundError:
@@ -235,11 +237,7 @@ class WorkflowEngine:
             logger.error(f"Failed to load workflow state: {e}")
             return None
 
-    async def _execute_step(
-        self,
-        workflow: Workflow,
-        step: WorkflowStep
-    ) -> bool:
+    async def _execute_step(self, workflow: Workflow, step: WorkflowStep) -> bool:
         """
         Execute a single workflow step
 
@@ -257,7 +255,7 @@ class WorkflowEngine:
                 workflow.name,
                 workflow.source,
                 f"Executing step: {step.name}",
-                {"step": step.name, "attempt": step.attempt}
+                {"step": step.name, "attempt": step.attempt},
             )
 
         # Check if action is registered
@@ -274,8 +272,7 @@ class WorkflowEngine:
 
             # Execute with timeout
             result = await asyncio.wait_for(
-                action_func(**step.params),
-                timeout=step.timeout_seconds
+                action_func(**step.params), timeout=step.timeout_seconds
             )
 
             step.result = result
@@ -294,7 +291,9 @@ class WorkflowEngine:
 
             # Retry if configured
             if step.attempt <= step.retry_count:
-                logger.info(f"Retrying step {step.name} (attempt {step.attempt + 1}/{step.retry_count + 1})")
+                logger.info(
+                    f"Retrying step {step.name} (attempt {step.attempt + 1}/{step.retry_count + 1})"
+                )
                 await asyncio.sleep(step.retry_delay_seconds)
                 return await self._execute_step(workflow, step)
 
@@ -309,7 +308,9 @@ class WorkflowEngine:
 
             # Retry if configured
             if step.attempt <= step.retry_count:
-                logger.info(f"Retrying step {step.name} (attempt {step.attempt + 1}/{step.retry_count + 1})")
+                logger.info(
+                    f"Retrying step {step.name} (attempt {step.attempt + 1}/{step.retry_count + 1})"
+                )
                 await asyncio.sleep(step.retry_delay_seconds)
                 return await self._execute_step(workflow, step)
 
@@ -332,10 +333,7 @@ class WorkflowEngine:
                 workflow.workflow_id,
                 workflow.name,
                 workflow.source,
-                {
-                    "description": workflow.description,
-                    "steps": len(workflow.steps)
-                }
+                {"description": workflow.description, "steps": len(workflow.steps)},
             )
 
         try:
@@ -354,7 +352,7 @@ class WorkflowEngine:
                             workflow.workflow_id,
                             workflow.name,
                             f"Approval required for step: {step.name}\n{step.description}",
-                            timeout_minutes=60
+                            timeout_minutes=60,
                         )
 
                     # In real implementation, we'd wait for external approval
@@ -380,7 +378,7 @@ class WorkflowEngine:
                             workflow.name,
                             step.error or "Unknown error",
                             step.name,
-                            self._calculate_duration(workflow)
+                            self._calculate_duration(workflow),
                         )
 
                     self._save_workflow_state(workflow)
@@ -404,7 +402,7 @@ class WorkflowEngine:
                     workflow.name,
                     self._calculate_duration(workflow),
                     len(workflow.steps),
-                    results
+                    results,
                 )
 
             self._save_workflow_state(workflow)
@@ -418,10 +416,7 @@ class WorkflowEngine:
 
             if workflow.notify_slack:
                 notify_process_failed(
-                    workflow.workflow_id,
-                    workflow.name,
-                    workflow.source,
-                    str(e)
+                    workflow.workflow_id, workflow.name, workflow.source, str(e)
                 )
 
             self._save_workflow_state(workflow)
@@ -440,7 +435,7 @@ class WorkflowEngine:
     @staticmethod
     def load_workflow_from_yaml(yaml_file: str) -> Workflow:
         """Load workflow definition from YAML file"""
-        with open(yaml_file, 'r') as f:
+        with open(yaml_file, "r") as f:
             data = yaml.safe_load(f)
 
         # Convert YAML to workflow
@@ -454,7 +449,7 @@ class WorkflowEngine:
                 continue_on_failure=s.get("continue_on_failure", False),
                 timeout_seconds=s.get("timeout_seconds", 300),
                 retry_count=s.get("retry_count", 0),
-                retry_delay_seconds=s.get("retry_delay_seconds", 5)
+                retry_delay_seconds=s.get("retry_delay_seconds", 5),
             )
             for s in data["steps"]
         ]
@@ -466,7 +461,7 @@ class WorkflowEngine:
             steps=steps,
             source=ProcessSource(data.get("source", "workflow_engine")),
             notify_slack=data.get("notify_slack", True),
-            save_state=data.get("save_state", True)
+            save_state=data.get("save_state", True),
         )
 
     def resume_workflow(self, workflow_id: str) -> Optional[Workflow]:

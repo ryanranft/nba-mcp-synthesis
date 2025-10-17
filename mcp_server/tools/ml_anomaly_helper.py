@@ -15,26 +15,37 @@ from functools import wraps
 
 def log_operation(operation_name: str):
     """Decorator for structured logging of operations"""
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             try:
                 result = func(*args, **kwargs)
-                print(json.dumps({
-                    "operation": operation_name,
-                    "status": "success",
-                    "function": func.__name__
-                }))
+                print(
+                    json.dumps(
+                        {
+                            "operation": operation_name,
+                            "status": "success",
+                            "function": func.__name__,
+                        }
+                    )
+                )
                 return result
             except Exception as e:
-                print(json.dumps({
-                    "operation": operation_name,
-                    "status": "error",
-                    "function": func.__name__,
-                    "error": str(e)
-                }))
+                print(
+                    json.dumps(
+                        {
+                            "operation": operation_name,
+                            "status": "error",
+                            "function": func.__name__,
+                            "error": str(e),
+                        }
+                    )
+                )
                 raise
+
         return wrapper
+
     return decorator
 
 
@@ -42,11 +53,12 @@ def log_operation(operation_name: str):
 # Z-Score Outlier Detection
 # ============================================================================
 
+
 @log_operation("ml_zscore_outliers")
 def detect_outliers_zscore(
     data: List[List[Union[int, float]]],
     threshold: float = 3.0,
-    labels: Optional[List[Any]] = None
+    labels: Optional[List[Any]] = None,
 ) -> Dict[str, Any]:
     """
     Detect outliers using Z-score method.
@@ -111,19 +123,21 @@ def detect_outliers_zscore(
 
         # Max absolute z-score across all features
         max_z = max(abs(z) for z in sample_z_scores)
-        z_scores.append({
-            "index": i,
-            "z_scores": sample_z_scores,
-            "max_z_score": max_z,
-            "is_outlier": max_z > threshold
-        })
+        z_scores.append(
+            {
+                "index": i,
+                "z_scores": sample_z_scores,
+                "max_z_score": max_z,
+                "is_outlier": max_z > threshold,
+            }
+        )
 
         if max_z > threshold:
             outlier_info = {
                 "index": i,
                 "z_scores": sample_z_scores,
                 "max_z_score": max_z,
-                "data": sample
+                "data": sample,
             }
 
             if labels is not None:
@@ -139,7 +153,7 @@ def detect_outliers_zscore(
         "threshold": threshold,
         "total_samples": n_samples,
         "feature_means": means,
-        "feature_stds": stds
+        "feature_stds": stds,
     }
 
 
@@ -147,13 +161,14 @@ def detect_outliers_zscore(
 # Isolation Forest
 # ============================================================================
 
+
 @log_operation("ml_isolation_forest")
 def isolation_forest(
     data: List[List[Union[int, float]]],
     n_trees: int = 100,
     sample_size: Optional[int] = None,
     contamination: float = 0.1,
-    random_seed: Optional[int] = None
+    random_seed: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
     Detect anomalies using Isolation Forest algorithm.
@@ -198,6 +213,7 @@ def isolation_forest(
     # Set random seed
     if random_seed is not None:
         import random
+
         random.seed(random_seed)
 
     import random
@@ -210,7 +226,9 @@ def isolation_forest(
         sample_data = [data[i] for i in sample_indices]
 
         # Build isolation tree
-        tree = _build_isolation_tree(sample_data, height_limit=math.ceil(math.log2(sample_size)))
+        tree = _build_isolation_tree(
+            sample_data, height_limit=math.ceil(math.log2(sample_size))
+        )
         trees.append(tree)
 
     # Calculate anomaly scores
@@ -230,26 +248,24 @@ def isolation_forest(
         c = _average_path_length(sample_size)
         anomaly_score = 2 ** (-avg_path_length / c)
 
-        anomaly_scores.append({
-            "index": i,
-            "score": anomaly_score,
-            "avg_path_length": avg_path_length
-        })
+        anomaly_scores.append(
+            {"index": i, "score": anomaly_score, "avg_path_length": avg_path_length}
+        )
 
     # Sort by score (descending)
     sorted_scores = sorted(anomaly_scores, key=lambda x: x["score"], reverse=True)
 
     # Determine threshold based on contamination
     threshold_index = int(len(data) * contamination)
-    threshold = sorted_scores[threshold_index]["score"] if threshold_index < len(sorted_scores) else 0.5
+    threshold = (
+        sorted_scores[threshold_index]["score"]
+        if threshold_index < len(sorted_scores)
+        else 0.5
+    )
 
     # Identify anomalies
     anomalies = [
-        {
-            "index": item["index"],
-            "score": item["score"],
-            "data": data[item["index"]]
-        }
+        {"index": item["index"], "score": item["score"], "data": data[item["index"]]}
         for item in anomaly_scores
         if item["score"] >= threshold
     ]
@@ -262,14 +278,12 @@ def isolation_forest(
         "anomaly_percentage": (len(anomalies) / len(data)) * 100,
         "n_trees": n_trees,
         "sample_size": sample_size,
-        "contamination": contamination
+        "contamination": contamination,
     }
 
 
 def _build_isolation_tree(
-    data: List[List[Union[int, float]]],
-    height_limit: int,
-    current_height: int = 0
+    data: List[List[Union[int, float]]], height_limit: int, current_height: int = 0
 ) -> Dict[str, Any]:
     """
     Recursively build isolation tree.
@@ -286,10 +300,7 @@ def _build_isolation_tree(
 
     # Terminal node conditions
     if current_height >= height_limit or len(data) <= 1:
-        return {
-            "type": "leaf",
-            "size": len(data)
-        }
+        return {"type": "leaf", "size": len(data)}
 
     # Randomly select feature to split on
     n_features = len(data[0])
@@ -302,10 +313,7 @@ def _build_isolation_tree(
 
     if min_val == max_val:
         # Can't split - all values same
-        return {
-            "type": "leaf",
-            "size": len(data)
-        }
+        return {"type": "leaf", "size": len(data)}
 
     # Random split value
     split_value = random.uniform(min_val, max_val)
@@ -316,10 +324,7 @@ def _build_isolation_tree(
 
     if not left_data or not right_data:
         # Split failed
-        return {
-            "type": "leaf",
-            "size": len(data)
-        }
+        return {"type": "leaf", "size": len(data)}
 
     # Recursively build subtrees
     return {
@@ -327,14 +332,12 @@ def _build_isolation_tree(
         "split_feature": split_feature,
         "split_value": split_value,
         "left": _build_isolation_tree(left_data, height_limit, current_height + 1),
-        "right": _build_isolation_tree(right_data, height_limit, current_height + 1)
+        "right": _build_isolation_tree(right_data, height_limit, current_height + 1),
     }
 
 
 def _isolation_tree_path_length(
-    node: Dict[str, Any],
-    point: List[Union[int, float]],
-    current_height: int
+    node: Dict[str, Any], point: List[Union[int, float]], current_height: int
 ) -> float:
     """
     Calculate path length for point in isolation tree.
@@ -387,11 +390,10 @@ def _average_path_length(n: int) -> float:
 # Local Outlier Factor (LOF)
 # ============================================================================
 
+
 @log_operation("ml_local_outlier_factor")
 def local_outlier_factor(
-    data: List[List[Union[int, float]]],
-    k: int = 20,
-    contamination: float = 0.1
+    data: List[List[Union[int, float]]], k: int = 20, contamination: float = 0.1
 ) -> Dict[str, Any]:
     """
     Detect anomalies using Local Outlier Factor (LOF).
@@ -458,7 +460,7 @@ def local_outlier_factor(
     lrd_scores = []
     for i in range(len(data)):
         # Get k-nearest neighbors
-        k_neighbors = [idx for idx, _ in distances[i][1:k+1]]
+        k_neighbors = [idx for idx, _ in distances[i][1 : k + 1]]
 
         # Calculate reachability distances
         reachability_dists = []
@@ -476,14 +478,14 @@ def local_outlier_factor(
 
         # Local Reachability Density (LRD)
         avg_reachability = sum(reachability_dists) / len(reachability_dists)
-        lrd = 1 / avg_reachability if avg_reachability > 0 else float('inf')
+        lrd = 1 / avg_reachability if avg_reachability > 0 else float("inf")
         lrd_scores.append(lrd)
 
     # Calculate LOF scores
     lof_scores = []
 
     for i in range(len(data)):
-        k_neighbors = [idx for idx, _ in distances[i][1:k+1]]
+        k_neighbors = [idx for idx, _ in distances[i][1 : k + 1]]
 
         # Average LRD of neighbors
         neighbor_lrd_sum = sum(lrd_scores[neighbor_idx] for neighbor_idx in k_neighbors)
@@ -491,16 +493,13 @@ def local_outlier_factor(
 
         # LOF = (avg neighbor LRD) / (point LRD)
         if lrd_scores[i] == 0:
-            lof = float('inf')
-        elif lrd_scores[i] == float('inf'):
+            lof = float("inf")
+        elif lrd_scores[i] == float("inf"):
             lof = 0
         else:
             lof = avg_neighbor_lrd / lrd_scores[i]
 
-        lof_scores.append({
-            "index": i,
-            "lof_score": lof
-        })
+        lof_scores.append({"index": i, "lof_score": lof})
 
     # Sort by LOF score (descending)
     sorted_lof = sorted(lof_scores, key=lambda x: x["lof_score"], reverse=True)
@@ -516,7 +515,7 @@ def local_outlier_factor(
         {
             "index": item["index"],
             "lof_score": item["lof_score"],
-            "data": data[item["index"]]
+            "data": data[item["index"]],
         }
         for item in lof_scores
         if item["lof_score"] >= threshold
@@ -533,11 +532,13 @@ def local_outlier_factor(
         "interpretation": {
             "lof_near_1": "Normal point (similar density to neighbors)",
             "lof_greater_1": "Outlier (lower density than neighbors)",
-            "lof_much_greater_1": "Strong outlier"
-        }
+            "lof_much_greater_1": "Strong outlier",
+        },
     }
 
 
-def _euclidean_distance(point1: List[Union[int, float]], point2: List[Union[int, float]]) -> float:
+def _euclidean_distance(
+    point1: List[Union[int, float]], point2: List[Union[int, float]]
+) -> float:
     """Calculate Euclidean distance between two points."""
     return math.sqrt(sum((x - y) ** 2 for x, y in zip(point1, point2)))

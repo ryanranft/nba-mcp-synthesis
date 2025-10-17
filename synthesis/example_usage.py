@@ -9,16 +9,15 @@ from synthesis import synthesize_with_mcp_context, quick_synthesis
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
 
 async def example_sql_optimization():
     """Example: SQL optimization with MCP context"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("Example 1: SQL Optimization")
-    print("="*80)
+    print("=" * 80)
 
     sql_query = """
     SELECT p.player_name, AVG(ps.points) as avg_points
@@ -33,7 +32,7 @@ async def example_sql_optimization():
         user_input="Optimize this SQL query for better performance",
         selected_code=sql_query,
         query_type="sql_optimization",
-        output_dir="synthesis_output"
+        output_dir="synthesis_output",
     )
 
     print(f"\nStatus: {result['status']}")
@@ -44,14 +43,14 @@ async def example_sql_optimization():
 
 async def example_statistical_analysis():
     """Example: Statistical analysis request"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("Example 2: Statistical Analysis")
-    print("="*80)
+    print("=" * 80)
 
     result = await synthesize_with_mcp_context(
         user_input="Calculate the correlation between player height and average points per game, including statistical significance",
         query_type="statistical_analysis",
-        output_dir="synthesis_output"
+        output_dir="synthesis_output",
     )
 
     print(f"\nStatus: {result['status']}")
@@ -61,14 +60,14 @@ async def example_statistical_analysis():
 
 async def example_etl_generation():
     """Example: ETL pipeline generation"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("Example 3: ETL Pipeline Generation")
-    print("="*80)
+    print("=" * 80)
 
     result = await synthesize_with_mcp_context(
         user_input="Generate an ETL pipeline to extract player stats from S3, transform them to calculate advanced metrics, and load into player_advanced_stats table",
         query_type="etl_generation",
-        output_dir="synthesis_output"
+        output_dir="synthesis_output",
     )
 
     print(f"\nStatus: {result['status']}")
@@ -78,9 +77,9 @@ async def example_etl_generation():
 
 async def example_code_debugging():
     """Example: Code debugging with error context"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("Example 4: Code Debugging")
-    print("="*80)
+    print("=" * 80)
 
     buggy_code = """
     def calculate_win_percentage(games_data):
@@ -93,7 +92,7 @@ async def example_code_debugging():
         user_input="This function crashes with ZeroDivisionError when games_data is empty. Fix it and add proper error handling.",
         selected_code=buggy_code,
         query_type="debugging",
-        output_dir="synthesis_output"
+        output_dir="synthesis_output",
     )
 
     print(f"\nStatus: {result['status']}")
@@ -102,9 +101,9 @@ async def example_code_debugging():
 
 async def example_quick_synthesis():
     """Example: Quick synthesis for simple requests"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("Example 5: Quick Synthesis")
-    print("="*80)
+    print("=" * 80)
 
     solution = await quick_synthesis(
         prompt="Write a Python function to calculate player efficiency rating (PER) from basic stats"
@@ -115,14 +114,14 @@ async def example_quick_synthesis():
 
 async def example_auto_detect():
     """Example: Auto-detect query type"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("Example 6: Auto-detect Query Type")
-    print("="*80)
+    print("=" * 80)
 
     result = await synthesize_with_mcp_context(
         user_input="The SELECT query on game_logs table is taking too long. It has a WHERE clause on game_date and team_id.",
         # query_type not specified - will auto-detect
-        output_dir="synthesis_output"
+        output_dir="synthesis_output",
     )
 
     print(f"\nDetected query type: {result['query_type']}")
@@ -131,9 +130,9 @@ async def example_auto_detect():
 
 async def main():
     """Run all examples"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("NBA MCP Synthesis System - Example Usage")
-    print("="*80)
+    print("=" * 80)
 
     # Run examples
     try:
@@ -144,13 +143,14 @@ async def main():
         await example_quick_synthesis()
         await example_auto_detect()
 
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("All examples completed successfully!")
-        print("="*80 + "\n")
+        print("=" * 80 + "\n")
 
     except Exception as e:
         print(f"\nError running examples: {e}")
         import traceback
+
         traceback.print_exc()
 
 

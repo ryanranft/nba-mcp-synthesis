@@ -19,9 +19,7 @@ class ModelCompressor:
         self.compression_history: list = []
 
     def quantize_weights(
-        self,
-        weights: Dict[str, Any],
-        bits: int = 8
+        self, weights: Dict[str, Any], bits: int = 8
     ) -> Dict[str, Any]:
         """
         Quantize model weights to reduce precision.
@@ -53,7 +51,9 @@ class ModelCompressor:
             else:
                 quantized[key] = value
 
-        compression_ratio = original_size / compressed_size if compressed_size > 0 else 1
+        compression_ratio = (
+            original_size / compressed_size if compressed_size > 0 else 1
+        )
 
         result = {
             "quantized_weights": quantized,
@@ -61,23 +61,25 @@ class ModelCompressor:
             "original_size_bytes": original_size,
             "compressed_size_bytes": compressed_size,
             "compression_ratio": compression_ratio,
-            "size_reduction_percent": (1 - compressed_size / original_size) * 100 if original_size > 0 else 0
+            "size_reduction_percent": (
+                (1 - compressed_size / original_size) * 100 if original_size > 0 else 0
+            ),
         }
 
-        self.compression_history.append({
-            "technique": "quantization",
-            "bits": bits,
-            "compression_ratio": compression_ratio
-        })
+        self.compression_history.append(
+            {
+                "technique": "quantization",
+                "bits": bits,
+                "compression_ratio": compression_ratio,
+            }
+        )
 
         logger.info(f"✅ Quantization complete: {compression_ratio:.2f}x compression")
 
         return result
 
     def prune_weights(
-        self,
-        weights: Dict[str, Any],
-        threshold: float = 0.01
+        self, weights: Dict[str, Any], threshold: float = 0.01
     ) -> Dict[str, Any]:
         """
         Prune small weights (set to zero).
@@ -103,7 +105,11 @@ class ModelCompressor:
             else:
                 pruned[key] = value
 
-        sparsity = (original_params - remaining_params) / original_params * 100 if original_params > 0 else 0
+        sparsity = (
+            (original_params - remaining_params) / original_params * 100
+            if original_params > 0
+            else 0
+        )
 
         result = {
             "pruned_weights": pruned,
@@ -111,14 +117,16 @@ class ModelCompressor:
             "original_params": original_params,
             "remaining_params": remaining_params,
             "pruned_params": original_params - remaining_params,
-            "sparsity_percent": sparsity
+            "sparsity_percent": sparsity,
         }
 
-        self.compression_history.append({
-            "technique": "pruning",
-            "threshold": threshold,
-            "sparsity_percent": sparsity
-        })
+        self.compression_history.append(
+            {
+                "technique": "pruning",
+                "threshold": threshold,
+                "sparsity_percent": sparsity,
+            }
+        )
 
         logger.info(f"✅ Pruning complete: {sparsity:.1f}% sparsity")
 
@@ -129,7 +137,7 @@ class ModelCompressor:
         teacher_model_id: str,
         student_model_id: str,
         temperature: float = 3.0,
-        alpha: float = 0.5
+        alpha: float = 0.5,
     ) -> Dict[str, Any]:
         """
         Generate knowledge distillation configuration.
@@ -154,8 +162,8 @@ class ModelCompressor:
                 "1. Train teacher model to convergence",
                 "2. Generate soft targets from teacher using temperature",
                 "3. Train student model using combined loss",
-                "4. Evaluate student model performance"
-            ]
+                "4. Evaluate student model performance",
+            ],
         }
 
         logger.info(
@@ -179,7 +187,7 @@ class ModelCompressor:
         return {
             "total_operations": len(self.compression_history),
             "techniques_used": list(techniques.keys()),
-            "by_technique": techniques
+            "by_technique": techniques,
         }
 
 
@@ -195,7 +203,7 @@ if __name__ == "__main__":
     mock_weights = {
         "layer1": [0.5, 0.3, -0.2, 0.8, 0.005, -0.003, 0.6],
         "layer2": [-0.4, 0.9, 0.001, -0.7, 0.2, 0.004, -0.1],
-        "bias": [0.1, -0.05, 0.02]
+        "bias": [0.1, -0.05, 0.02],
     }
 
     # Weight Quantization
@@ -240,7 +248,7 @@ if __name__ == "__main__":
         teacher_model_id="large_transformer_model",
         student_model_id="small_lstm_model",
         temperature=3.0,
-        alpha=0.5
+        alpha=0.5,
     )
 
     print(f"\nTeacher: {distill_config['teacher_model']}")
@@ -248,7 +256,7 @@ if __name__ == "__main__":
     print(f"Temperature: {distill_config['temperature']}")
     print(f"Alpha (hard/soft balance): {distill_config['alpha']}")
     print(f"\nInstructions:")
-    for instruction in distill_config['instructions']:
+    for instruction in distill_config["instructions"]:
         print(f"  {instruction}")
 
     # Compression Report
@@ -263,4 +271,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("Model Compression Demo Complete!")
     print("=" * 80)
-

@@ -21,7 +21,7 @@ class ActionTools:
         self,
         project_root: str,
         synthesis_output_dir: str,
-        slack_notifier: Optional[SlackNotifier] = None
+        slack_notifier: Optional[SlackNotifier] = None,
     ):
         """
         Initialize action tools.
@@ -49,7 +49,9 @@ class ActionTools:
         except Exception as e:
             logger.error(f"Failed to create logs directory: {e}")
 
-    def _validate_output_path(self, file_path: str) -> tuple[bool, Optional[Path], Optional[str]]:
+    def _validate_output_path(
+        self, file_path: str
+    ) -> tuple[bool, Optional[Path], Optional[str]]:
         """
         Validate output file path to ensure it's within output directory.
 
@@ -78,10 +80,7 @@ class ActionTools:
             return False, None, f"Invalid path: {str(e)}"
 
     async def save_to_project(
-        self,
-        file_path: str,
-        content: str,
-        overwrite: bool = False
+        self, file_path: str, content: str, overwrite: bool = False
     ) -> Dict[str, Any]:
         """
         Save synthesis results to the project.
@@ -99,11 +98,7 @@ class ActionTools:
             is_valid, path, error = self._validate_output_path(file_path)
             if not is_valid:
                 logger.warning(f"Invalid save path: {file_path}")
-                return {
-                    "success": False,
-                    "error": error,
-                    "file_path": file_path
-                }
+                return {"success": False, "error": error, "file_path": file_path}
 
             # Check if file exists and overwrite is not allowed
             if path.exists() and not overwrite:
@@ -111,7 +106,7 @@ class ActionTools:
                 return {
                     "success": False,
                     "error": f"File already exists. Use overwrite=True to replace it.",
-                    "file_path": str(path)
+                    "file_path": str(path),
                 }
 
             # Create parent directories if they don't exist
@@ -119,7 +114,7 @@ class ActionTools:
 
             # Write content to file
             logger.info(f"Saving file: {path} ({len(content)} bytes)")
-            with open(path, 'w', encoding='utf-8') as f:
+            with open(path, "w", encoding="utf-8") as f:
                 f.write(content)
 
             # Get file stats
@@ -132,16 +127,12 @@ class ActionTools:
                 "size": stats.st_size,
                 "size_kb": round(stats.st_size / 1024, 2),
                 "overwritten": path.exists() and overwrite,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:
             logger.error(f"Error saving file: {e}", exc_info=True)
-            return {
-                "success": False,
-                "error": str(e),
-                "file_path": file_path
-            }
+            return {"success": False, "error": str(e), "file_path": file_path}
 
     async def log_synthesis_result(
         self,
@@ -152,7 +143,7 @@ class ActionTools:
         cost: float,
         success: bool = True,
         error: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         Log synthesis operation metadata.
@@ -183,36 +174,32 @@ class ActionTools:
                 "tokens_used": tokens_used,
                 "cost_usd": cost,
                 "error": error,
-                "metadata": metadata or {}
+                "metadata": metadata or {},
             }
 
             # Save to daily log file
-            log_file = self.logs_dir / f"synthesis_{timestamp.strftime('%Y-%m-%d')}.jsonl"
+            log_file = (
+                self.logs_dir / f"synthesis_{timestamp.strftime('%Y-%m-%d')}.jsonl"
+            )
 
             logger.info(f"Logging synthesis result: {operation} (success={success})")
 
-            with open(log_file, 'a', encoding='utf-8') as f:
-                f.write(json.dumps(log_entry) + '\n')
+            with open(log_file, "a", encoding="utf-8") as f:
+                f.write(json.dumps(log_entry) + "\n")
 
             return {
                 "success": True,
                 "log_file": str(log_file),
                 "timestamp": timestamp.isoformat(),
-                "operation": operation
+                "operation": operation,
             }
 
         except Exception as e:
             logger.error(f"Error logging synthesis result: {e}", exc_info=True)
-            return {
-                "success": False,
-                "error": str(e),
-                "operation": operation
-            }
+            return {"success": False, "error": str(e), "operation": operation}
 
     async def send_slack_notification(
-        self,
-        message: str,
-        blocks: Optional[List[Dict[str, Any]]] = None
+        self, message: str, blocks: Optional[List[Dict[str, Any]]] = None
     ) -> Dict[str, Any]:
         """
         Send notification to Slack.
@@ -231,15 +218,13 @@ class ActionTools:
                 return {
                     "success": False,
                     "error": "Slack notifier not configured. Set SLACK_WEBHOOK_URL in environment.",
-                    "message": message
+                    "message": message,
                 }
 
             logger.info(f"Sending Slack notification: {message[:50]}...")
 
             # Prepare notification payload
-            payload = {
-                "text": message
-            }
+            payload = {"text": message}
 
             if blocks:
                 payload["blocks"] = blocks
@@ -250,16 +235,12 @@ class ActionTools:
             return {
                 "success": result,
                 "message": message,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:
             logger.error(f"Error sending Slack notification: {e}", exc_info=True)
-            return {
-                "success": False,
-                "error": str(e),
-                "message": message
-            }
+            return {"success": False, "error": str(e), "message": message}
 
     async def notify_synthesis_complete(
         self,
@@ -268,7 +249,7 @@ class ActionTools:
         execution_time: float,
         tokens_used: int,
         cost: float,
-        success: bool = True
+        success: bool = True,
     ) -> Dict[str, Any]:
         """
         Send synthesis completion notification to Slack.
@@ -290,7 +271,7 @@ class ActionTools:
                 return {
                     "success": False,
                     "error": "Slack notifier not configured",
-                    "operation": operation
+                    "operation": operation,
                 }
 
             logger.info(f"Sending synthesis completion notification")
@@ -301,27 +282,21 @@ class ActionTools:
                 models_used=models_used,
                 execution_time=execution_time,
                 tokens_used=tokens_used,
-                success=success
+                success=success,
             )
 
             return {
                 "success": result,
                 "operation": operation,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:
             logger.error(f"Error sending synthesis notification: {e}", exc_info=True)
-            return {
-                "success": False,
-                "error": str(e),
-                "operation": operation
-            }
+            return {"success": False, "error": str(e), "operation": operation}
 
     async def get_synthesis_logs(
-        self,
-        date: Optional[str] = None,
-        max_entries: int = 100
+        self, date: Optional[str] = None, max_entries: int = 100
     ) -> Dict[str, Any]:
         """
         Retrieve synthesis logs for a specific date.
@@ -336,7 +311,7 @@ class ActionTools:
         try:
             # Use today if no date specified
             if not date:
-                date = datetime.now().strftime('%Y-%m-%d')
+                date = datetime.now().strftime("%Y-%m-%d")
 
             log_file = self.logs_dir / f"synthesis_{date}.jsonl"
 
@@ -346,14 +321,14 @@ class ActionTools:
                     "date": date,
                     "log_count": 0,
                     "logs": [],
-                    "message": f"No logs found for {date}"
+                    "message": f"No logs found for {date}",
                 }
 
             logger.info(f"Reading synthesis logs for {date}")
 
             # Read log entries
             logs = []
-            with open(log_file, 'r', encoding='utf-8') as f:
+            with open(log_file, "r", encoding="utf-8") as f:
                 for i, line in enumerate(f):
                     if i >= max_entries:
                         break
@@ -369,20 +344,15 @@ class ActionTools:
                 "date": date,
                 "log_count": len(logs),
                 "logs": logs,
-                "log_file": str(log_file)
+                "log_file": str(log_file),
             }
 
         except Exception as e:
             logger.error(f"Error reading synthesis logs: {e}", exc_info=True)
-            return {
-                "success": False,
-                "error": str(e),
-                "date": date
-            }
+            return {"success": False, "error": str(e), "date": date}
 
     async def create_synthesis_report(
-        self,
-        date: Optional[str] = None
+        self, date: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Create a summary report of synthesis operations.
@@ -406,7 +376,7 @@ class ActionTools:
                 return {
                     "success": True,
                     "date": logs_result["date"],
-                    "message": "No synthesis operations found"
+                    "message": "No synthesis operations found",
                 }
 
             # Calculate statistics
@@ -430,11 +400,15 @@ class ActionTools:
                     "total_syntheses": total_syntheses,
                     "successful": successful,
                     "failed": failed,
-                    "success_rate": round(successful / total_syntheses * 100, 1) if total_syntheses > 0 else 0,
+                    "success_rate": (
+                        round(successful / total_syntheses * 100, 1)
+                        if total_syntheses > 0
+                        else 0
+                    ),
                     "total_tokens": total_tokens,
                     "total_cost_usd": round(total_cost, 4),
                     "models_used": sorted(list(all_models)),
-                    "context_sources": sorted(list(all_sources))
+                    "context_sources": sorted(list(all_sources)),
                 },
                 "operations": [
                     {
@@ -442,20 +416,18 @@ class ActionTools:
                         "operation": log.get("operation"),
                         "success": log.get("success"),
                         "tokens": log.get("tokens_used"),
-                        "cost": log.get("cost_usd")
+                        "cost": log.get("cost_usd"),
                     }
                     for log in logs
-                ]
+                ],
             }
 
-            logger.info(f"Generated synthesis report for {logs_result['date']}: {total_syntheses} operations")
+            logger.info(
+                f"Generated synthesis report for {logs_result['date']}: {total_syntheses} operations"
+            )
 
             return report
 
         except Exception as e:
             logger.error(f"Error creating synthesis report: {e}", exc_info=True)
-            return {
-                "success": False,
-                "error": str(e),
-                "date": date
-            }
+            return {"success": False, "error": str(e), "date": date}

@@ -22,8 +22,10 @@ import uuid
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class MetricType(Enum):
     """Types of metrics that can be collected"""
+
     CPU_USAGE = "cpu_usage"
     MEMORY_USAGE = "memory_usage"
     DISK_USAGE = "disk_usage"
@@ -40,15 +42,19 @@ class MetricType(Enum):
     MEMORY_LEAKS = "memory_leaks"
     GARBAGE_COLLECTION = "garbage_collection"
 
+
 class AlertSeverity(Enum):
     """Alert severity levels"""
+
     INFO = "info"
     WARNING = "warning"
     CRITICAL = "critical"
     EMERGENCY = "emergency"
 
+
 class OptimizationType(Enum):
     """Types of optimizations that can be applied"""
+
     MEMORY_OPTIMIZATION = "memory_optimization"
     CPU_OPTIMIZATION = "cpu_optimization"
     CACHE_OPTIMIZATION = "cache_optimization"
@@ -57,9 +63,11 @@ class OptimizationType(Enum):
     FORMULA_OPTIMIZATION = "formula_optimization"
     CONCURRENCY_OPTIMIZATION = "concurrency_optimization"
 
+
 @dataclass
 class MetricData:
     """Individual metric data point"""
+
     metric_id: str
     metric_type: MetricType
     value: float
@@ -67,9 +75,11 @@ class MetricData:
     tags: Dict[str, str] = None
     unit: str = ""
 
+
 @dataclass
 class AlertRule:
     """Alert rule configuration"""
+
     rule_id: str
     metric_type: MetricType
     threshold: float
@@ -79,9 +89,11 @@ class AlertRule:
     enabled: bool = True
     description: str = ""
 
+
 @dataclass
 class Alert:
     """Alert instance"""
+
     alert_id: str
     rule_id: str
     metric_type: MetricType
@@ -93,9 +105,11 @@ class Alert:
     resolved: bool = False
     resolved_at: Optional[datetime] = None
 
+
 @dataclass
 class PerformanceReport:
     """Performance analysis report"""
+
     report_id: str
     start_time: datetime
     end_time: datetime
@@ -105,9 +119,11 @@ class PerformanceReport:
     performance_score: float
     generated_at: datetime
 
+
 @dataclass
 class OptimizationRecommendation:
     """Optimization recommendation"""
+
     recommendation_id: str
     optimization_type: OptimizationType
     priority: int  # 1-10, higher is more important
@@ -117,6 +133,7 @@ class OptimizationRecommendation:
     implementation_effort: str
     risk_level: str
     metrics_affected: List[MetricType]
+
 
 class PerformanceMonitor:
     """Main performance monitoring engine"""
@@ -167,14 +184,14 @@ class PerformanceMonitor:
                 "cpu_usage": 80.0,
                 "memory_usage": 85.0,
                 "response_time": 1000.0,
-                "error_rate": 5.0
+                "error_rate": 5.0,
             },
             "optimization_enabled": True,
-            "auto_optimization": False
+            "auto_optimization": False,
         }
 
         try:
-            with open(self.config_path, 'r') as f:
+            with open(self.config_path, "r") as f:
                 user_config = json.load(f)
                 default_config.update(user_config)
         except FileNotFoundError:
@@ -195,7 +212,9 @@ class PerformanceMonitor:
             return {"status": "already_active", "message": "Monitoring already active"}
 
         self.monitoring_active = True
-        self.monitoring_thread = threading.Thread(target=self._monitoring_loop, daemon=True)
+        self.monitoring_thread = threading.Thread(
+            target=self._monitoring_loop, daemon=True
+        )
         self.monitoring_thread.start()
 
         logger.info("Performance monitoring started")
@@ -203,7 +222,7 @@ class PerformanceMonitor:
             "status": "started",
             "message": "Performance monitoring started",
             "collection_interval": self.collection_interval,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     def stop_monitoring(self) -> Dict[str, Any]:
@@ -224,7 +243,7 @@ class PerformanceMonitor:
         return {
             "status": "stopped",
             "message": "Performance monitoring stopped",
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     def _monitoring_loop(self):
@@ -244,29 +263,45 @@ class PerformanceMonitor:
         try:
             # CPU usage
             cpu_percent = psutil.cpu_percent(interval=1)
-            self._record_metric(MetricType.CPU_USAGE, cpu_percent, {"host": "localhost"})
+            self._record_metric(
+                MetricType.CPU_USAGE, cpu_percent, {"host": "localhost"}
+            )
 
             # Memory usage
             memory = psutil.virtual_memory()
-            self._record_metric(MetricType.MEMORY_USAGE, memory.percent, {"host": "localhost"})
+            self._record_metric(
+                MetricType.MEMORY_USAGE, memory.percent, {"host": "localhost"}
+            )
 
             # Disk usage
-            disk = psutil.disk_usage('/')
+            disk = psutil.disk_usage("/")
             disk_percent = (disk.used / disk.total) * 100
-            self._record_metric(MetricType.DISK_USAGE, disk_percent, {"host": "localhost"})
+            self._record_metric(
+                MetricType.DISK_USAGE, disk_percent, {"host": "localhost"}
+            )
 
             # Network I/O
             network = psutil.net_io_counters()
-            self._record_metric(MetricType.NETWORK_IO, network.bytes_sent + network.bytes_recv, {"host": "localhost"})
+            self._record_metric(
+                MetricType.NETWORK_IO,
+                network.bytes_sent + network.bytes_recv,
+                {"host": "localhost"},
+            )
 
             # Process-specific metrics
             process = psutil.Process()
-            self._record_metric(MetricType.MEMORY_USAGE, process.memory_percent(), {"process": "nba-mcp-server"})
+            self._record_metric(
+                MetricType.MEMORY_USAGE,
+                process.memory_percent(),
+                {"process": "nba-mcp-server"},
+            )
 
         except Exception as e:
             logger.error(f"Error collecting system metrics: {e}")
 
-    def _record_metric(self, metric_type: MetricType, value: float, tags: Dict[str, str] = None):
+    def _record_metric(
+        self, metric_type: MetricType, value: float, tags: Dict[str, str] = None
+    ):
         """Record a metric data point"""
         metric_id = f"{metric_type.value}_{uuid.uuid4().hex[:8]}"
         metric_data = MetricData(
@@ -274,7 +309,7 @@ class PerformanceMonitor:
             metric_type=metric_type,
             value=value,
             timestamp=datetime.now(),
-            tags=tags or {}
+            tags=tags or {},
         )
 
         self.metrics[metric_type.value].append(metric_data)
@@ -283,11 +318,14 @@ class PerformanceMonitor:
         # Keep only recent history (last 24 hours)
         cutoff_time = datetime.now() - timedelta(hours=24)
         self.metric_history[metric_type.value] = [
-            m for m in self.metric_history[metric_type.value]
+            m
+            for m in self.metric_history[metric_type.value]
             if m.timestamp > cutoff_time
         ]
 
-    def record_custom_metric(self, metric_type: MetricType, value: float, tags: Dict[str, str] = None) -> Dict[str, Any]:
+    def record_custom_metric(
+        self, metric_type: MetricType, value: float, tags: Dict[str, str] = None
+    ) -> Dict[str, Any]:
         """
         Record a custom metric
 
@@ -305,13 +343,15 @@ class PerformanceMonitor:
                 "status": "recorded",
                 "metric_type": metric_type.value,
                 "value": value,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
         except Exception as e:
             logger.error(f"Error recording custom metric: {e}")
             return {"status": "error", "message": str(e)}
 
-    def record_request_metrics(self, response_time: float, success: bool, endpoint: str = "") -> Dict[str, Any]:
+    def record_request_metrics(
+        self, response_time: float, success: bool, endpoint: str = ""
+    ) -> Dict[str, Any]:
         """
         Record request performance metrics
 
@@ -331,22 +371,30 @@ class PerformanceMonitor:
                 self.error_count += 1
 
             # Record response time
-            self._record_metric(MetricType.RESPONSE_TIME, response_time, {"endpoint": endpoint})
+            self._record_metric(
+                MetricType.RESPONSE_TIME, response_time, {"endpoint": endpoint}
+            )
 
             # Record throughput
-            throughput = self.request_count / max(1, (datetime.now() - self.start_time).total_seconds())
-            self._record_metric(MetricType.THROUGHPUT, throughput, {"endpoint": endpoint})
+            throughput = self.request_count / max(
+                1, (datetime.now() - self.start_time).total_seconds()
+            )
+            self._record_metric(
+                MetricType.THROUGHPUT, throughput, {"endpoint": endpoint}
+            )
 
             # Record error rate
             error_rate = (self.error_count / self.request_count) * 100
-            self._record_metric(MetricType.ERROR_RATE, error_rate, {"endpoint": endpoint})
+            self._record_metric(
+                MetricType.ERROR_RATE, error_rate, {"endpoint": endpoint}
+            )
 
             return {
                 "status": "recorded",
                 "response_time": response_time,
                 "success": success,
                 "endpoint": endpoint,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
         except Exception as e:
             logger.error(f"Error recording request metrics: {e}")
@@ -370,7 +418,7 @@ class PerformanceMonitor:
                 "rule_id": rule.rule_id,
                 "metric_type": rule.metric_type.value,
                 "threshold": rule.threshold,
-                "severity": rule.severity.value
+                "severity": rule.severity.value,
             }
         except Exception as e:
             logger.error(f"Error creating alert rule: {e}")
@@ -391,7 +439,9 @@ class PerformanceMonitor:
                 latest_value = metric_data[-1].value
 
                 # Check threshold
-                if self._evaluate_threshold(latest_value, rule.threshold, rule.operator):
+                if self._evaluate_threshold(
+                    latest_value, rule.threshold, rule.operator
+                ):
                     # Check if alert already exists
                     if rule_id not in self.active_alerts:
                         alert = Alert(
@@ -402,7 +452,7 @@ class PerformanceMonitor:
                             threshold=rule.threshold,
                             severity=rule.severity,
                             timestamp=datetime.now(),
-                            message=f"{rule.metric_type.value} {rule.operator} {rule.threshold} (current: {latest_value})"
+                            message=f"{rule.metric_type.value} {rule.operator} {rule.threshold} (current: {latest_value})",
                         )
                         self.active_alerts[rule_id] = alert
                         self.alert_history.append(alert)
@@ -419,7 +469,9 @@ class PerformanceMonitor:
             except Exception as e:
                 logger.error(f"Error checking alert rule {rule_id}: {e}")
 
-    def _evaluate_threshold(self, value: float, threshold: float, operator: str) -> bool:
+    def _evaluate_threshold(
+        self, value: float, threshold: float, operator: str
+    ) -> bool:
         """Evaluate threshold condition"""
         if operator == ">":
             return value > threshold
@@ -451,16 +503,18 @@ class PerformanceMonitor:
                 current_metrics[metric_type] = {
                     "value": latest.value,
                     "timestamp": latest.timestamp.isoformat(),
-                    "tags": latest.tags
+                    "tags": latest.tags,
                 }
 
         return {
             "status": "success",
             "current_metrics": current_metrics,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
-    def get_metric_history(self, metric_type: MetricType, hours: int = 24) -> Dict[str, Any]:
+    def get_metric_history(
+        self, metric_type: MetricType, hours: int = 24
+    ) -> Dict[str, Any]:
         """
         Get metric history for a specific metric type
 
@@ -474,11 +528,7 @@ class PerformanceMonitor:
         try:
             cutoff_time = datetime.now() - timedelta(hours=hours)
             history = [
-                {
-                    "value": m.value,
-                    "timestamp": m.timestamp.isoformat(),
-                    "tags": m.tags
-                }
+                {"value": m.value, "timestamp": m.timestamp.isoformat(), "tags": m.tags}
                 for m in self.metric_history[metric_type.value]
                 if m.timestamp > cutoff_time
             ]
@@ -488,7 +538,7 @@ class PerformanceMonitor:
                 "metric_type": metric_type.value,
                 "history": history,
                 "hours": hours,
-                "count": len(history)
+                "count": len(history),
             }
         except Exception as e:
             logger.error(f"Error getting metric history: {e}")
@@ -503,22 +553,24 @@ class PerformanceMonitor:
         """
         active_alerts = []
         for alert in self.active_alerts.values():
-            active_alerts.append({
-                "alert_id": alert.alert_id,
-                "rule_id": alert.rule_id,
-                "metric_type": alert.metric_type.value,
-                "current_value": alert.current_value,
-                "threshold": alert.threshold,
-                "severity": alert.severity.value,
-                "timestamp": alert.timestamp.isoformat(),
-                "message": alert.message
-            })
+            active_alerts.append(
+                {
+                    "alert_id": alert.alert_id,
+                    "rule_id": alert.rule_id,
+                    "metric_type": alert.metric_type.value,
+                    "current_value": alert.current_value,
+                    "threshold": alert.threshold,
+                    "severity": alert.severity.value,
+                    "timestamp": alert.timestamp.isoformat(),
+                    "message": alert.message,
+                }
+            )
 
         return {
             "status": "success",
             "active_alerts": active_alerts,
             "count": len(active_alerts),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     def _update_performance_baselines(self):
@@ -560,14 +612,14 @@ class PerformanceMonitor:
                             "min": min(values),
                             "max": max(values),
                             "avg": statistics.mean(values),
-                            "median": statistics.median(values)
+                            "median": statistics.median(values),
                         }
 
             # Calculate alerts summary
             alerts_summary = {
                 "total_alerts": len(self.alert_history),
                 "active_alerts": len(self.active_alerts),
-                "alerts_by_severity": defaultdict(int)
+                "alerts_by_severity": defaultdict(int),
             }
 
             for alert in self.alert_history:
@@ -588,13 +640,10 @@ class PerformanceMonitor:
                 alerts_summary=dict(alerts_summary),
                 optimization_recommendations=recommendations,
                 performance_score=performance_score,
-                generated_at=datetime.now()
+                generated_at=datetime.now(),
             )
 
-            return {
-                "status": "success",
-                "report": asdict(report)
-            }
+            return {"status": "success", "report": asdict(report)}
         except Exception as e:
             logger.error(f"Error generating performance report: {e}")
             return {"status": "error", "message": str(e)}
@@ -607,58 +656,66 @@ class PerformanceMonitor:
             # CPU optimization
             cpu_data = self.metrics[MetricType.CPU_USAGE.value]
             if cpu_data and cpu_data[-1].value > 80:
-                recommendations.append({
-                    "type": OptimizationType.CPU_OPTIMIZATION.value,
-                    "priority": 8,
-                    "title": "High CPU Usage Detected",
-                    "description": "CPU usage is above 80%. Consider optimizing CPU-intensive operations.",
-                    "expected_improvement": "20-30% CPU reduction",
-                    "implementation_effort": "Medium",
-                    "risk_level": "Low",
-                    "metrics_affected": [MetricType.CPU_USAGE.value]
-                })
+                recommendations.append(
+                    {
+                        "type": OptimizationType.CPU_OPTIMIZATION.value,
+                        "priority": 8,
+                        "title": "High CPU Usage Detected",
+                        "description": "CPU usage is above 80%. Consider optimizing CPU-intensive operations.",
+                        "expected_improvement": "20-30% CPU reduction",
+                        "implementation_effort": "Medium",
+                        "risk_level": "Low",
+                        "metrics_affected": [MetricType.CPU_USAGE.value],
+                    }
+                )
 
             # Memory optimization
             memory_data = self.metrics[MetricType.MEMORY_USAGE.value]
             if memory_data and memory_data[-1].value > 85:
-                recommendations.append({
-                    "type": OptimizationType.MEMORY_OPTIMIZATION.value,
-                    "priority": 9,
-                    "title": "High Memory Usage Detected",
-                    "description": "Memory usage is above 85%. Consider memory optimization strategies.",
-                    "expected_improvement": "15-25% memory reduction",
-                    "implementation_effort": "High",
-                    "risk_level": "Medium",
-                    "metrics_affected": [MetricType.MEMORY_USAGE.value]
-                })
+                recommendations.append(
+                    {
+                        "type": OptimizationType.MEMORY_OPTIMIZATION.value,
+                        "priority": 9,
+                        "title": "High Memory Usage Detected",
+                        "description": "Memory usage is above 85%. Consider memory optimization strategies.",
+                        "expected_improvement": "15-25% memory reduction",
+                        "implementation_effort": "High",
+                        "risk_level": "Medium",
+                        "metrics_affected": [MetricType.MEMORY_USAGE.value],
+                    }
+                )
 
             # Response time optimization
             response_data = self.metrics[MetricType.RESPONSE_TIME.value]
             if response_data and response_data[-1].value > 1000:
-                recommendations.append({
-                    "type": OptimizationType.FORMULA_OPTIMIZATION.value,
-                    "priority": 7,
-                    "title": "Slow Response Times",
-                    "description": "Response times are above 1000ms. Consider optimizing formula calculations.",
-                    "expected_improvement": "30-50% response time reduction",
-                    "implementation_effort": "Medium",
-                    "risk_level": "Low",
-                    "metrics_affected": [MetricType.RESPONSE_TIME.value]
-                })
+                recommendations.append(
+                    {
+                        "type": OptimizationType.FORMULA_OPTIMIZATION.value,
+                        "priority": 7,
+                        "title": "Slow Response Times",
+                        "description": "Response times are above 1000ms. Consider optimizing formula calculations.",
+                        "expected_improvement": "30-50% response time reduction",
+                        "implementation_effort": "Medium",
+                        "risk_level": "Low",
+                        "metrics_affected": [MetricType.RESPONSE_TIME.value],
+                    }
+                )
 
             # Error rate optimization
             error_data = self.metrics[MetricType.ERROR_RATE.value]
             if error_data and error_data[-1].value > 5:
-                recommendations.append({
-                    "type": OptimizationType.CONCURRENCY_OPTIMIZATION.value,
-                    "priority": 10,
-                    "title": "High Error Rate",
-                    "description": "Error rate is above 5%. Consider improving error handling and concurrency.",
-                    "expected_improvement": "50-70% error reduction",
-                    "implementation_effort": "High",
-                    "risk_level": "High",
-                    "metrics_affected": [MetricType.ERROR_RATE.value]
-                })
+                recommendations.append(
+                    {
+                        "type": OptimizationType.CONCURRENCY_OPTIMIZATION.value,
+                        "priority": 10,
+                        "title": "High Error Rate",
+                        "description": "Error rate is above 5%. Consider improving error handling and concurrency.",
+                        "expected_improvement": "50-70% error reduction",
+                        "implementation_effort": "High",
+                        "risk_level": "High",
+                        "metrics_affected": [MetricType.ERROR_RATE.value],
+                    }
+                )
 
         except Exception as e:
             logger.error(f"Error generating optimization recommendations: {e}")
@@ -699,7 +756,9 @@ class PerformanceMonitor:
             logger.error(f"Error calculating performance score: {e}")
             return 50.0  # Default score
 
-    def optimize_performance(self, optimization_type: OptimizationType) -> Dict[str, Any]:
+    def optimize_performance(
+        self, optimization_type: OptimizationType
+    ) -> Dict[str, Any]:
         """
         Apply performance optimization
 
@@ -721,7 +780,10 @@ class PerformanceMonitor:
             elif optimization_type == OptimizationType.FORMULA_OPTIMIZATION:
                 result = self._apply_formula_optimization()
             else:
-                result = {"status": "not_implemented", "message": f"Optimization type {optimization_type.value} not implemented"}
+                result = {
+                    "status": "not_implemented",
+                    "message": f"Optimization type {optimization_type.value} not implemented",
+                }
 
             result["optimization_id"] = optimization_id
             result["optimization_type"] = optimization_type.value
@@ -745,9 +807,9 @@ class PerformanceMonitor:
                 "changes": [
                     "Reduced memory allocation overhead",
                     "Optimized garbage collection settings",
-                    "Implemented memory pooling for frequent allocations"
+                    "Implemented memory pooling for frequent allocations",
                 ],
-                "expected_improvement": "15-25% memory reduction"
+                "expected_improvement": "15-25% memory reduction",
             }
         except Exception as e:
             return {"status": "error", "message": str(e)}
@@ -763,9 +825,9 @@ class PerformanceMonitor:
                 "changes": [
                     "Optimized algorithm complexity",
                     "Implemented CPU-efficient caching",
-                    "Reduced unnecessary computations"
+                    "Reduced unnecessary computations",
                 ],
-                "expected_improvement": "20-30% CPU reduction"
+                "expected_improvement": "20-30% CPU reduction",
             }
         except Exception as e:
             return {"status": "error", "message": str(e)}
@@ -781,9 +843,9 @@ class PerformanceMonitor:
                 "changes": [
                     "Increased cache hit ratio",
                     "Optimized cache eviction policies",
-                    "Implemented intelligent cache warming"
+                    "Implemented intelligent cache warming",
                 ],
-                "expected_improvement": "30-40% response time improvement"
+                "expected_improvement": "30-40% response time improvement",
             }
         except Exception as e:
             return {"status": "error", "message": str(e)}
@@ -799,9 +861,9 @@ class PerformanceMonitor:
                 "changes": [
                     "Optimized mathematical operations",
                     "Implemented formula result caching",
-                    "Reduced redundant calculations"
+                    "Reduced redundant calculations",
                 ],
-                "expected_improvement": "25-35% calculation time reduction"
+                "expected_improvement": "25-35% calculation time reduction",
             }
         except Exception as e:
             return {"status": "error", "message": str(e)}
@@ -821,11 +883,13 @@ class PerformanceMonitor:
             "active_alerts": len(self.active_alerts),
             "alert_rules": len(self.alert_rules),
             "performance_baselines": len(self.performance_baselines),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
+
 
 # Global monitor instance
 _global_monitor: Optional[PerformanceMonitor] = None
+
 
 def get_performance_monitor() -> PerformanceMonitor:
     """Get global performance monitor instance"""
@@ -834,18 +898,23 @@ def get_performance_monitor() -> PerformanceMonitor:
         _global_monitor = PerformanceMonitor()
     return _global_monitor
 
+
 # Standalone functions for MCP integration
 def start_performance_monitoring(config_path: Optional[str] = None) -> Dict[str, Any]:
     """Start performance monitoring"""
     monitor = get_performance_monitor()
     return monitor.start_monitoring()
 
+
 def stop_performance_monitoring() -> Dict[str, Any]:
     """Stop performance monitoring"""
     monitor = get_performance_monitor()
     return monitor.stop_monitoring()
 
-def record_performance_metric(metric_type: str, value: float, tags: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+
+def record_performance_metric(
+    metric_type: str, value: float, tags: Optional[Dict[str, str]] = None
+) -> Dict[str, Any]:
     """Record a performance metric"""
     monitor = get_performance_monitor()
     try:
@@ -854,17 +923,21 @@ def record_performance_metric(metric_type: str, value: float, tags: Optional[Dic
     except ValueError:
         return {"status": "error", "message": f"Invalid metric type: {metric_type}"}
 
-def record_request_performance(response_time: float, success: bool, endpoint: str = "") -> Dict[str, Any]:
+
+def record_request_performance(
+    response_time: float, success: bool, endpoint: str = ""
+) -> Dict[str, Any]:
     """Record request performance metrics"""
     monitor = get_performance_monitor()
     return monitor.record_request_metrics(response_time, success, endpoint)
+
 
 def create_performance_alert_rule(
     metric_type: str,
     threshold: float,
     operator: str,
     severity: str,
-    description: str = ""
+    description: str = "",
 ) -> Dict[str, Any]:
     """Create a performance alert rule"""
     monitor = get_performance_monitor()
@@ -875,26 +948,30 @@ def create_performance_alert_rule(
             threshold=threshold,
             operator=operator,
             severity=AlertSeverity(severity),
-            description=description
+            description=description,
         )
         return monitor.create_alert_rule(rule)
     except ValueError as e:
         return {"status": "error", "message": f"Invalid parameter: {e}"}
+
 
 def get_performance_metrics(hours: int = 24) -> Dict[str, Any]:
     """Get current performance metrics"""
     monitor = get_performance_monitor()
     return monitor.get_current_metrics()
 
+
 def get_performance_alerts() -> Dict[str, Any]:
     """Get active performance alerts"""
     monitor = get_performance_monitor()
     return monitor.get_active_alerts()
 
+
 def generate_performance_report(hours: int = 24) -> Dict[str, Any]:
     """Generate performance report"""
     monitor = get_performance_monitor()
     return monitor.generate_performance_report(hours)
+
 
 def optimize_performance(optimization_type: str) -> Dict[str, Any]:
     """Apply performance optimization"""
@@ -903,7 +980,11 @@ def optimize_performance(optimization_type: str) -> Dict[str, Any]:
         opt_enum = OptimizationType(optimization_type)
         return monitor.optimize_performance(opt_enum)
     except ValueError:
-        return {"status": "error", "message": f"Invalid optimization type: {optimization_type}"}
+        return {
+            "status": "error",
+            "message": f"Invalid optimization type: {optimization_type}",
+        }
+
 
 def get_monitoring_status() -> Dict[str, Any]:
     """Get monitoring status"""

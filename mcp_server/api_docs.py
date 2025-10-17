@@ -1,4 +1,5 @@
 """API Documentation (OpenAPI/Swagger) - IMPORTANT 10"""
+
 from typing import Dict, Any, List
 from dataclasses import dataclass, asdict
 
@@ -6,6 +7,7 @@ from dataclasses import dataclass, asdict
 @dataclass
 class APIEndpoint:
     """API endpoint documentation"""
+
     path: str
     method: str
     summary: str
@@ -40,11 +42,11 @@ class OpenAPIGenerator:
             "info": {
                 "title": self.title,
                 "version": self.version,
-                "description": self.description
+                "description": self.description,
             },
             "servers": [
                 {"url": "http://localhost:8000", "description": "Local development"},
-                {"url": "https://api.nba-mcp.com", "description": "Production"}
+                {"url": "https://api.nba-mcp.com", "description": "Production"},
             ],
             "paths": self._generate_paths(),
             "components": {
@@ -53,19 +55,16 @@ class OpenAPIGenerator:
                     "BearerAuth": {
                         "type": "http",
                         "scheme": "bearer",
-                        "bearerFormat": "JWT"
+                        "bearerFormat": "JWT",
                     },
                     "ApiKeyAuth": {
                         "type": "apiKey",
                         "in": "header",
-                        "name": "X-API-Key"
-                    }
-                }
+                        "name": "X-API-Key",
+                    },
+                },
             },
-            "security": [
-                {"BearerAuth": []},
-                {"ApiKeyAuth": []}
-            ]
+            "security": [{"BearerAuth": []}, {"ApiKeyAuth": []}],
         }
         return spec
 
@@ -81,7 +80,7 @@ class OpenAPIGenerator:
                 "description": endpoint.description,
                 "tags": endpoint.tags,
                 "parameters": endpoint.parameters,
-                "responses": endpoint.responses
+                "responses": endpoint.responses,
             }
 
         return paths
@@ -91,108 +90,119 @@ class OpenAPIGenerator:
 nba_api = OpenAPIGenerator(
     title="NBA MCP API",
     version="1.0.0",
-    description="NBA Machine Learning Context Protocol API"
+    description="NBA Machine Learning Context Protocol API",
 )
 
 # Add schemas
-nba_api.add_schema("Player", {
-    "type": "object",
-    "properties": {
-        "id": {"type": "integer"},
-        "name": {"type": "string"},
-        "team": {"type": "string"},
-        "position": {"type": "string"}
-    }
-})
+nba_api.add_schema(
+    "Player",
+    {
+        "type": "object",
+        "properties": {
+            "id": {"type": "integer"},
+            "name": {"type": "string"},
+            "team": {"type": "string"},
+            "position": {"type": "string"},
+        },
+    },
+)
 
-nba_api.add_schema("Game", {
-    "type": "object",
-    "properties": {
-        "id": {"type": "integer"},
-        "home_team": {"type": "string"},
-        "away_team": {"type": "string"},
-        "date": {"type": "string", "format": "date"}
-    }
-})
+nba_api.add_schema(
+    "Game",
+    {
+        "type": "object",
+        "properties": {
+            "id": {"type": "integer"},
+            "home_team": {"type": "string"},
+            "away_team": {"type": "string"},
+            "date": {"type": "string", "format": "date"},
+        },
+    },
+)
 
 # Add endpoints
-nba_api.add_endpoint(APIEndpoint(
-    path="/api/players",
-    method="GET",
-    summary="List players",
-    description="Get a list of NBA players with optional filters",
-    parameters=[
-        {
-            "name": "team",
-            "in": "query",
-            "schema": {"type": "string"},
-            "description": "Filter by team name"
-        },
-        {
-            "name": "season",
-            "in": "query",
-            "schema": {"type": "integer"},
-            "description": "Filter by season"
-        }
-    ],
-    responses={
-        200: {
-            "description": "Successful response",
-            "content": {
-                "application/json": {
-                    "schema": {
-                        "type": "array",
-                        "items": {"$ref": "#/components/schemas/Player"}
+nba_api.add_endpoint(
+    APIEndpoint(
+        path="/api/players",
+        method="GET",
+        summary="List players",
+        description="Get a list of NBA players with optional filters",
+        parameters=[
+            {
+                "name": "team",
+                "in": "query",
+                "schema": {"type": "string"},
+                "description": "Filter by team name",
+            },
+            {
+                "name": "season",
+                "in": "query",
+                "schema": {"type": "integer"},
+                "description": "Filter by season",
+            },
+        ],
+        responses={
+            200: {
+                "description": "Successful response",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/Player"},
+                        }
                     }
-                }
-            }
+                },
+            },
+            401: {"description": "Unauthorized"},
+            429: {"description": "Rate limit exceeded"},
         },
-        401: {"description": "Unauthorized"},
-        429: {"description": "Rate limit exceeded"}
-    },
-    tags=["Players"]
-))
+        tags=["Players"],
+    )
+)
 
-nba_api.add_endpoint(APIEndpoint(
-    path="/api/games",
-    method="GET",
-    summary="List games",
-    description="Get a list of NBA games",
-    parameters=[
-        {
-            "name": "season",
-            "in": "query",
-            "schema": {"type": "integer"},
-            "required": True,
-            "description": "Season year"
-        }
-    ],
-    responses={
-        200: {
-            "description": "Successful response",
-            "content": {
-                "application/json": {
-                    "schema": {
-                        "type": "array",
-                        "items": {"$ref": "#/components/schemas/Game"}
-                    }
-                }
+nba_api.add_endpoint(
+    APIEndpoint(
+        path="/api/games",
+        method="GET",
+        summary="List games",
+        description="Get a list of NBA games",
+        parameters=[
+            {
+                "name": "season",
+                "in": "query",
+                "schema": {"type": "integer"},
+                "required": True,
+                "description": "Season year",
             }
-        }
-    },
-    tags=["Games"]
-))
+        ],
+        responses={
+            200: {
+                "description": "Successful response",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/Game"},
+                        }
+                    }
+                },
+            }
+        },
+        tags=["Games"],
+    )
+)
+
 
 # Generate and save spec
 def save_openapi_spec(filename: str = "openapi.json"):
     """Save OpenAPI spec to file"""
     import json
+
     spec = nba_api.generate()
-    with open(filename, 'w') as f:
+    with open(filename, "w") as f:
         json.dump(spec, f, indent=2)
     print(f"✅ OpenAPI spec saved to {filename}")
 
 
 if __name__ == "__main__":
     save_openapi_spec()
-

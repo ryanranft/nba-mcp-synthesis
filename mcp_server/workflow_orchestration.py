@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 class TaskStatus(Enum):
     """Task execution status"""
+
     PENDING = "pending"
     QUEUED = "queued"
     RUNNING = "running"
@@ -29,6 +30,7 @@ class TaskStatus(Enum):
 @dataclass
 class Task:
     """Workflow task"""
+
     task_id: str
     func: Callable
     dependencies: List[str] = field(default_factory=list)
@@ -47,6 +49,7 @@ class Task:
 @dataclass
 class WorkflowRun:
     """Workflow execution run"""
+
     run_id: str
     workflow_id: str
     start_time: datetime
@@ -59,7 +62,9 @@ class WorkflowRun:
 class DAG:
     """Directed Acyclic Graph for workflow orchestration"""
 
-    def __init__(self, dag_id: str, description: str = "", schedule: Optional[str] = None):
+    def __init__(
+        self, dag_id: str, description: str = "", schedule: Optional[str] = None
+    ):
         """
         Initialize DAG.
 
@@ -84,7 +89,7 @@ class DAG:
         func: Callable,
         dependencies: Optional[List[str]] = None,
         max_retries: int = 3,
-        timeout_seconds: Optional[int] = None
+        timeout_seconds: Optional[int] = None,
     ):
         """
         Add a task to the DAG.
@@ -101,7 +106,7 @@ class DAG:
             func=func,
             dependencies=dependencies or [],
             max_retries=max_retries,
-            timeout_seconds=timeout_seconds
+            timeout_seconds=timeout_seconds,
         )
 
         self.tasks[task_id] = task
@@ -161,7 +166,9 @@ class DAG:
 
         return result
 
-    def execute(self, run_id: Optional[str] = None, context: Optional[Dict] = None) -> WorkflowRun:
+    def execute(
+        self, run_id: Optional[str] = None, context: Optional[Dict] = None
+    ) -> WorkflowRun:
         """
         Execute the workflow.
 
@@ -184,7 +191,7 @@ class DAG:
             workflow_id=self.dag_id,
             start_time=datetime.utcnow(),
             status=TaskStatus.RUNNING,
-            metadata=context or {}
+            metadata=context or {},
         )
 
         # Copy tasks for this run
@@ -194,7 +201,7 @@ class DAG:
                 func=task.func,
                 dependencies=task.dependencies.copy(),
                 max_retries=task.max_retries,
-                timeout_seconds=task.timeout_seconds
+                timeout_seconds=task.timeout_seconds,
             )
 
         logger.info(f"Starting workflow run: {run_id}")
@@ -273,7 +280,9 @@ class DAG:
                 else:
                     task.status = TaskStatus.FAILED
                     task.end_time = datetime.utcnow()
-                    logger.error(f"Task {task.task_id} failed after {task.max_retries} retries: {e}")
+                    logger.error(
+                        f"Task {task.task_id} failed after {task.max_retries} retries: {e}"
+                    )
                     return False
 
         return False
@@ -295,15 +304,16 @@ class DAG:
                     "retry_count": task.retry_count,
                     "duration_seconds": (
                         (task.end_time - task.start_time).total_seconds()
-                        if task.end_time and task.start_time else None
+                        if task.end_time and task.start_time
+                        else None
                     ),
-                    "error": task.error
+                    "error": task.error,
                 }
                 for task in run.tasks.values()
-            ]
+            ],
         }
 
-        with open(metadata_file, 'w') as f:
+        with open(metadata_file, "w") as f:
             json.dump(metadata, f, indent=2)
 
         logger.info(f"Saved run metadata to {metadata_file}")
@@ -317,15 +327,17 @@ class DAG:
                 "start_time": run.start_time.isoformat(),
                 "duration_seconds": (
                     (run.end_time - run.start_time).total_seconds()
-                    if run.end_time else None
+                    if run.end_time
+                    else None
                 ),
-                "tasks_completed": len([
-                    t for t in run.tasks.values()
-                    if t.status == TaskStatus.SUCCESS
-                ]),
-                "tasks_total": len(run.tasks)
+                "tasks_completed": len(
+                    [t for t in run.tasks.values() if t.status == TaskStatus.SUCCESS]
+                ),
+                "tasks_total": len(run.tasks),
             }
-            for run in sorted(self.runs, key=lambda r: r.start_time, reverse=True)[:limit]
+            for run in sorted(self.runs, key=lambda r: r.start_time, reverse=True)[
+                :limit
+            ]
         ]
 
 
@@ -364,7 +376,7 @@ if __name__ == "__main__":
     dag = DAG(
         dag_id="nba_etl_pipeline",
         description="Daily ETL pipeline for NBA stats",
-        schedule="0 2 * * *"  # Run at 2 AM daily
+        schedule="0 2 * * *",  # Run at 2 AM daily
     )
 
     # Add tasks with dependencies
@@ -405,13 +417,15 @@ if __name__ == "__main__":
         status_icon = {
             TaskStatus.SUCCESS: "✅",
             TaskStatus.FAILED: "❌",
-            TaskStatus.SKIPPED: "⏭️"
+            TaskStatus.SKIPPED: "⏭️",
         }.get(task.status, "❓")
 
         print(f"\n  {status_icon} {task.task_id}")
         print(f"     Status: {task.status.value}")
         if task.start_time and task.end_time:
-            print(f"     Duration: {(task.end_time - task.start_time).total_seconds():.2f}s")
+            print(
+                f"     Duration: {(task.end_time - task.start_time).total_seconds():.2f}s"
+            )
         if task.error:
             print(f"     Error: {task.error}")
 
@@ -430,4 +444,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("Workflow Orchestration Demo Complete!")
     print("=" * 80)
-

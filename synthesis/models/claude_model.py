@@ -30,15 +30,19 @@ class ClaudeModel:
     def __init__(self):
         """Initialize Claude client"""
         # Try new naming convention first, then fallback to old
-        api_key = get_hierarchical_env("ANTHROPIC_API_KEY", "NBA_MCP_SYNTHESIS", "WORKFLOW")
-        
+        api_key = get_hierarchical_env(
+            "ANTHROPIC_API_KEY", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+        )
+
         if not api_key:
             raise ValueError("ANTHROPIC_API_KEY environment variable is not set")
 
         self.client = anthropic.Anthropic(api_key=api_key)
         # Try new naming convention first, then fallback to old
-        self.model = (get_hierarchical_env("CLAUDE_MODEL", "NBA_MCP_SYNTHESIS", "WORKFLOW") or
-                     "claude-3-7-sonnet-20250219")  # Fallback to default
+        self.model = (
+            get_hierarchical_env("CLAUDE_MODEL", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+            or "claude-3-7-sonnet-20250219"
+        )  # Fallback to default
         logger.info(f"Initialized Claude model: {self.model}")
 
     async def synthesize(
@@ -46,7 +50,7 @@ class ClaudeModel:
         deepseek_result: str,
         original_request: str,
         context_summary: str,
-        include_verification: bool = True
+        include_verification: bool = True,
     ) -> Dict[str, Any]:
         """
         Synthesize and explain DeepSeek's solution
@@ -66,7 +70,7 @@ class ClaudeModel:
             deepseek_result=deepseek_result,
             original_request=original_request,
             context_summary=context_summary,
-            include_verification=include_verification
+            include_verification=include_verification,
         )
 
         try:
@@ -74,7 +78,7 @@ class ClaudeModel:
                 model=self.model,
                 max_tokens=4000,
                 temperature=0.5,  # Moderate temperature for clear explanations
-                messages=[{"role": "user", "content": prompt}]
+                messages=[{"role": "user", "content": prompt}],
             )
 
             execution_time = (datetime.now() - start_time).total_seconds()
@@ -88,12 +92,13 @@ class ClaudeModel:
                 "success": True,
                 "model": "claude",
                 "response": response.content[0].text,
-                "tokens_used": response.usage.input_tokens + response.usage.output_tokens,
+                "tokens_used": response.usage.input_tokens
+                + response.usage.output_tokens,
                 "tokens_input": response.usage.input_tokens,
                 "tokens_output": response.usage.output_tokens,
                 "cost": total_cost,
                 "execution_time": execution_time,
-                "stop_reason": response.stop_reason
+                "stop_reason": response.stop_reason,
             }
 
         except Exception as e:
@@ -102,14 +107,11 @@ class ClaudeModel:
                 "success": False,
                 "model": "claude",
                 "error": str(e),
-                "execution_time": (datetime.now() - start_time).total_seconds()
+                "execution_time": (datetime.now() - start_time).total_seconds(),
             }
 
     async def verify_solution(
-        self,
-        solution: str,
-        problem: str,
-        expected_properties: Optional[Dict] = None
+        self, solution: str, problem: str, expected_properties: Optional[Dict] = None
     ) -> Dict[str, Any]:
         """
         Verify a solution's correctness
@@ -122,7 +124,11 @@ class ClaudeModel:
         Returns:
             Verification result
         """
-        expected_props = f'Expected Properties:\n{expected_properties}' if expected_properties else ''
+        expected_props = (
+            f"Expected Properties:\n{expected_properties}"
+            if expected_properties
+            else ""
+        )
         prompt = f"""Verify this solution:
 
 Problem:
@@ -147,29 +153,26 @@ Provide a clear verification report."""
                 model=self.model,
                 max_tokens=2000,
                 temperature=0.3,  # Low temperature for precision
-                messages=[{"role": "user", "content": prompt}]
+                messages=[{"role": "user", "content": prompt}],
             )
 
             return {
                 "success": True,
                 "model": "claude",
                 "verification": response.content[0].text,
-                "tokens_used": response.usage.input_tokens + response.usage.output_tokens
+                "tokens_used": response.usage.input_tokens
+                + response.usage.output_tokens,
             }
 
         except Exception as e:
             logger.error(f"Claude verification failed: {e}")
-            return {
-                "success": False,
-                "model": "claude",
-                "error": str(e)
-            }
+            return {"success": False, "model": "claude", "error": str(e)}
 
     async def explain_code(
         self,
         code: str,
         context: Optional[str] = None,
-        target_audience: str = "developers"
+        target_audience: str = "developers",
     ) -> Dict[str, Any]:
         """
         Generate clear explanation of code
@@ -185,10 +188,10 @@ Provide a clear verification report."""
         audience_prompts = {
             "developers": "technical implementation details and best practices",
             "analysts": "business logic and data transformations",
-            "non-technical": "plain language explanation without technical jargon"
+            "non-technical": "plain language explanation without technical jargon",
         }
 
-        context_str = f'Context: {context}' if context else ''
+        context_str = f"Context: {context}" if context else ""
         prompt = f"""Explain this code clearly for {target_audience}:
 
 {code}
@@ -208,29 +211,23 @@ Provide:
                 model=self.model,
                 max_tokens=3000,
                 temperature=0.6,
-                messages=[{"role": "user", "content": prompt}]
+                messages=[{"role": "user", "content": prompt}],
             )
 
             return {
                 "success": True,
                 "model": "claude",
                 "explanation": response.content[0].text,
-                "tokens_used": response.usage.input_tokens + response.usage.output_tokens
+                "tokens_used": response.usage.input_tokens
+                + response.usage.output_tokens,
             }
 
         except Exception as e:
             logger.error(f"Claude explanation failed: {e}")
-            return {
-                "success": False,
-                "model": "claude",
-                "error": str(e)
-            }
+            return {"success": False, "model": "claude", "error": str(e)}
 
     async def generate_documentation(
-        self,
-        code: str,
-        solution_description: str,
-        context_used: Dict[str, Any]
+        self, code: str, solution_description: str, context_used: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
         Generate comprehensive documentation
@@ -268,30 +265,27 @@ Generate markdown documentation including:
                 model=self.model,
                 max_tokens=4000,
                 temperature=0.5,
-                messages=[{"role": "user", "content": prompt}]
+                messages=[{"role": "user", "content": prompt}],
             )
 
             return {
                 "success": True,
                 "model": "claude",
                 "documentation": response.content[0].text,
-                "tokens_used": response.usage.input_tokens + response.usage.output_tokens
+                "tokens_used": response.usage.input_tokens
+                + response.usage.output_tokens,
             }
 
         except Exception as e:
             logger.error(f"Claude documentation generation failed: {e}")
-            return {
-                "success": False,
-                "model": "claude",
-                "error": str(e)
-            }
+            return {"success": False, "model": "claude", "error": str(e)}
 
     def _build_synthesis_prompt(
         self,
         deepseek_result: str,
         original_request: str,
         context_summary: str,
-        include_verification: bool
+        include_verification: bool,
     ) -> str:
         """Build prompt for synthesis"""
         prompt_parts = [
@@ -300,7 +294,11 @@ Generate markdown documentation including:
             f"DeepSeek Solution:\n{deepseek_result}\n",
             f"Context Used:\n{context_summary}\n",
             "Please provide:\n",
-            "1. Verification of the solution's correctness\n" if include_verification else "",
+            (
+                "1. Verification of the solution's correctness\n"
+                if include_verification
+                else ""
+            ),
             "2. Clear explanation for implementation\n",
             "3. Any missing considerations or edge cases\n",
             "4. Specific implementation steps\n",
@@ -313,7 +311,7 @@ Generate markdown documentation including:
             "## Implementation Steps\n",
             "[Step-by-step guide]\n\n",
             "## Additional Considerations\n",
-            "[Edge cases, performance, etc.]\n"
+            "[Edge cases, performance, etc.]\n",
         ]
 
         return "".join(p for p in prompt_parts if p)
@@ -323,7 +321,7 @@ Generate markdown documentation including:
         google_analysis: str,
         google_recommendations: List[Dict[str, Any]],
         book_metadata: Dict[str, Any],
-        existing_recommendations: Optional[List[Dict[str, Any]]] = None
+        existing_recommendations: Optional[List[Dict[str, Any]]] = None,
     ) -> Dict[str, Any]:
         """
         Synthesize Google's book analysis into implementation recommendations
@@ -343,7 +341,7 @@ Generate markdown documentation including:
             google_analysis=google_analysis,
             google_recommendations=google_recommendations,
             book_metadata=book_metadata,
-            existing_recommendations=existing_recommendations
+            existing_recommendations=existing_recommendations,
         )
 
         try:
@@ -351,7 +349,7 @@ Generate markdown documentation including:
                 model=self.model,
                 max_tokens=4000,
                 temperature=0.3,  # Low temperature for precise synthesis
-                messages=[{"role": "user", "content": prompt}]
+                messages=[{"role": "user", "content": prompt}],
             )
 
             execution_time = (datetime.now() - start_time).total_seconds()
@@ -365,12 +363,13 @@ Generate markdown documentation including:
                 "success": True,
                 "model": "claude",
                 "content": response.content[0].text,
-                "tokens_used": response.usage.input_tokens + response.usage.output_tokens,
+                "tokens_used": response.usage.input_tokens
+                + response.usage.output_tokens,
                 "tokens_input": response.usage.input_tokens,
                 "tokens_output": response.usage.output_tokens,
                 "cost": total_cost,
                 "processing_time": execution_time,
-                "stop_reason": response.stop_reason
+                "stop_reason": response.stop_reason,
             }
 
         except Exception as e:
@@ -379,10 +378,12 @@ Generate markdown documentation including:
                 "success": False,
                 "model": "claude",
                 "error": str(e),
-                "processing_time": (datetime.now() - start_time).total_seconds()
+                "processing_time": (datetime.now() - start_time).total_seconds(),
             }
 
-    async def extract_recommendations_from_response(self, response: Dict[str, Any]) -> List[Dict[str, Any]]:
+    async def extract_recommendations_from_response(
+        self, response: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """Extract structured recommendations from Claude response with robust parsing"""
         if not response.get("success"):
             return []
@@ -393,8 +394,8 @@ Generate markdown documentation including:
             # Try direct JSON parse first
             try:
                 data = json.loads(content)
-                if isinstance(data, dict) and 'recommendations' in data:
-                    return data['recommendations']
+                if isinstance(data, dict) and "recommendations" in data:
+                    return data["recommendations"]
                 elif isinstance(data, list):
                     return data
             except json.JSONDecodeError:
@@ -402,19 +403,20 @@ Generate markdown documentation including:
 
             # Try to find JSON blocks
             import re
-            json_pattern = r'```json\s*(\{.*?\})\s*```'
+
+            json_pattern = r"```json\s*(\{.*?\})\s*```"
             matches = re.findall(json_pattern, content, re.DOTALL)
 
             for match in matches:
                 try:
                     data = json.loads(match)
-                    if 'recommendations' in data:
-                        return data['recommendations']
+                    if "recommendations" in data:
+                        return data["recommendations"]
                 except json.JSONDecodeError:
                     continue
 
             # Try to find JSON array directly
-            json_pattern = r'```json\s*(\[.*?\])\s*```'
+            json_pattern = r"```json\s*(\[.*?\])\s*```"
             matches = re.findall(json_pattern, content, re.DOTALL)
 
             for match in matches:
@@ -424,8 +426,8 @@ Generate markdown documentation including:
                     continue
 
             # Try to find JSON array in content with better error handling
-            json_start = content.find('[')
-            json_end = content.rfind(']') + 1
+            json_start = content.find("[")
+            json_end = content.rfind("]") + 1
 
             if json_start != -1 and json_end > json_start:
                 json_content = content[json_start:json_end]
@@ -442,7 +444,9 @@ Generate markdown documentation including:
                         if self._validate_recommendation(rec):
                             valid_recommendations.append(rec)
                         else:
-                            logger.warning(f"Skipping invalid recommendation: {rec.get('title', 'Unknown')}")
+                            logger.warning(
+                                f"Skipping invalid recommendation: {rec.get('title', 'Unknown')}"
+                            )
 
                     return valid_recommendations
                 except json.JSONDecodeError as e:
@@ -464,15 +468,15 @@ Generate markdown documentation including:
         """Attempt to repair common JSON issues"""
         try:
             # Remove trailing commas
-            json_str = re.sub(r',\s*}', '}', json_str)
-            json_str = re.sub(r',\s*]', ']', json_str)
+            json_str = re.sub(r",\s*}", "}", json_str)
+            json_str = re.sub(r",\s*]", "]", json_str)
 
             # Fix unescaped quotes in strings
             json_str = re.sub(r'(?<!\\)"(?=.*?":)', r'\\"', json_str)
 
             # Remove any non-JSON content before/after
-            json_start = json_str.find('[')
-            json_end = json_str.rfind(']') + 1
+            json_start = json_str.find("[")
+            json_end = json_str.rfind("]") + 1
             if json_start != -1 and json_end > json_start:
                 json_str = json_str[json_start:json_end]
 
@@ -486,12 +490,12 @@ Generate markdown documentation including:
         google_analysis: str,
         google_recommendations: List[Dict[str, Any]],
         book_metadata: Dict[str, Any],
-        existing_recommendations: Optional[List[Dict[str, Any]]] = None
+        existing_recommendations: Optional[List[Dict[str, Any]]] = None,
     ) -> str:
         """Build prompt for implementation synthesis"""
 
-        title = book_metadata.get('title', 'Unknown')
-        author = book_metadata.get('author', 'Unknown')
+        title = book_metadata.get("title", "Unknown")
+        author = book_metadata.get("author", "Unknown")
 
         existing_context = ""
         if existing_recommendations:
@@ -583,7 +587,13 @@ Begin synthesis now:"""
 
     def _validate_recommendation(self, rec: Dict[str, Any]) -> bool:
         """Validate recommendation structure"""
-        required_fields = ['title', 'description', 'priority', 'time_estimate', 'mapped_phase']
+        required_fields = [
+            "title",
+            "description",
+            "priority",
+            "time_estimate",
+            "mapped_phase",
+        ]
         return all(field in rec for field in required_fields)
 
     def _format_context(self, context: Dict[str, Any]) -> str:

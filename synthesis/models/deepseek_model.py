@@ -39,13 +39,17 @@ class DeepSeekModel:
             self.api_key = api_key
         else:
             # Try new naming convention first, then fallback to old
-            self.api_key = (os.getenv("DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW") or
-                           os.getenv("DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_DEVELOPMENT") or
-                           os.getenv("DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_TEST") or
-                           os.getenv("DEEPSEEK_API_KEY"))
+            self.api_key = (
+                os.getenv("DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW")
+                or os.getenv("DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_DEVELOPMENT")
+                or os.getenv("DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_TEST")
+                or os.getenv("DEEPSEEK_API_KEY")
+            )
 
         if not self.api_key:
-            raise ValueError("DeepSeek API key not provided and not found in environment variables")
+            raise ValueError(
+                "DeepSeek API key not provided and not found in environment variables"
+            )
 
         base_url = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
         self.model = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
@@ -64,7 +68,7 @@ class DeepSeekModel:
         context: Optional[Dict[str, Any]] = None,
         temperature: float = 0.3,
         max_tokens: int = 4000,
-        system_prompt: Optional[str] = None
+        system_prompt: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Query DeepSeek with MCP context
@@ -95,20 +99,20 @@ class DeepSeekModel:
                     model=self.model,
                     messages=[
                         {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": enhanced_prompt}
+                        {"role": "user", "content": enhanced_prompt},
                     ],
                     temperature=temperature,
-                    max_tokens=max_tokens
+                    max_tokens=max_tokens,
                 )
             else:
                 response = self.client.chat.completions.create(
                     model=self.model,
                     messages=[
                         {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": enhanced_prompt}
+                        {"role": "user", "content": enhanced_prompt},
                     ],
                     temperature=temperature,
-                    max_tokens=max_tokens
+                    max_tokens=max_tokens,
                 )
 
             execution_time = (datetime.now() - start_time).total_seconds()
@@ -123,7 +127,7 @@ class DeepSeekModel:
                 "cost": self._calculate_cost(response.usage),
                 "execution_time": execution_time,
                 "temperature": temperature,
-                "finish_reason": response.choices[0].finish_reason
+                "finish_reason": response.choices[0].finish_reason,
             }
 
         except Exception as e:
@@ -132,7 +136,7 @@ class DeepSeekModel:
                 "success": False,
                 "model": "deepseek",
                 "error": str(e),
-                "execution_time": (datetime.now() - start_time).total_seconds()
+                "execution_time": (datetime.now() - start_time).total_seconds(),
             }
 
     async def optimize_sql(
@@ -140,7 +144,7 @@ class DeepSeekModel:
         sql_query: str,
         schema: Optional[Dict] = None,
         table_stats: Optional[Dict] = None,
-        explain_plan: Optional[str] = None
+        explain_plan: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Specialized method for SQL optimization
@@ -158,7 +162,7 @@ class DeepSeekModel:
             "query": sql_query,
             "schema": schema,
             "table_stats": table_stats,
-            "explain_plan": explain_plan
+            "explain_plan": explain_plan,
         }
 
         prompt = f"""Optimize this SQL query for PostgreSQL:
@@ -175,14 +179,14 @@ Provide:
             prompt=prompt,
             context=context,
             temperature=0.2,  # Low temperature for precision
-            system_prompt="You are an expert PostgreSQL database optimizer specializing in NBA data analysis."
+            system_prompt="You are an expert PostgreSQL database optimizer specializing in NBA data analysis.",
         )
 
     async def analyze_statistics(
         self,
         data_description: str,
         sample_data: Optional[Any] = None,
-        statistical_question: str = ""
+        statistical_question: str = "",
     ) -> Dict[str, Any]:
         """
         Specialized method for statistical analysis
@@ -195,10 +199,7 @@ Provide:
         Returns:
             Statistical analysis and recommendations
         """
-        context = {
-            "data_description": data_description,
-            "sample_data": sample_data
-        }
+        context = {"data_description": data_description, "sample_data": sample_data}
 
         prompt = f"""Perform statistical analysis:
 
@@ -215,14 +216,14 @@ Provide:
             prompt=prompt,
             context=context,
             temperature=0.25,
-            system_prompt="You are an expert statistician and data scientist specializing in sports analytics."
+            system_prompt="You are an expert statistician and data scientist specializing in sports analytics.",
         )
 
     async def debug_code(
         self,
         code: str,
         error_message: Optional[str] = None,
-        expected_behavior: Optional[str] = None
+        expected_behavior: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Specialized method for code debugging
@@ -235,11 +236,7 @@ Provide:
         Returns:
             Fixed code with explanation
         """
-        context = {
-            "code": code,
-            "error": error_message,
-            "expected": expected_behavior
-        }
+        context = {"code": code, "error": error_message, "expected": expected_behavior}
 
         prompt = f"""Debug this code:
 
@@ -258,7 +255,7 @@ Provide:
             prompt=prompt,
             context=context,
             temperature=0.3,
-            system_prompt="You are an expert Python developer specializing in data pipelines and ETL systems."
+            system_prompt="You are an expert Python developer specializing in data pipelines and ETL systems.",
         )
 
     def _format_prompt_with_context(self, prompt: str, context: Dict) -> str:
@@ -267,13 +264,19 @@ Provide:
 
         # Add relevant context sections
         if context.get("schema"):
-            sections.append(f"Database Schema:\n{self._format_schema(context['schema'])}\n")
+            sections.append(
+                f"Database Schema:\n{self._format_schema(context['schema'])}\n"
+            )
 
         if context.get("table_stats"):
-            sections.append(f"Table Statistics:\n{self._format_stats(context['table_stats'])}\n")
+            sections.append(
+                f"Table Statistics:\n{self._format_stats(context['table_stats'])}\n"
+            )
 
         if context.get("sample_data"):
-            sections.append(f"Sample Data:\n{self._format_sample_data(context['sample_data'])}\n")
+            sections.append(
+                f"Sample Data:\n{self._format_sample_data(context['sample_data'])}\n"
+            )
 
         if context.get("explain_plan"):
             sections.append(f"EXPLAIN Plan:\n{context['explain_plan']}\n")
@@ -298,7 +301,9 @@ Provide:
     def _format_sample_data(self, data: Any) -> str:
         """Format sample data for prompt"""
         if isinstance(data, list) and len(data) > 0:
-            return f"  First {min(5, len(data))} rows:\n  " + "\n  ".join(str(row) for row in data[:5])
+            return f"  First {min(5, len(data))} rows:\n  " + "\n  ".join(
+                str(row) for row in data[:5]
+            )
         return str(data)
 
     def _get_default_system_prompt(self) -> str:
@@ -335,7 +340,7 @@ Focus on actionable, implementable solutions."""
         self,
         book_content: str,
         book_metadata: Dict[str, Any],
-        existing_recommendations: Optional[List[Dict[str, Any]]] = None
+        existing_recommendations: Optional[List[Dict[str, Any]]] = None,
     ) -> Dict[str, Any]:
         """
         Analyze book content and extract raw recommendations.
@@ -351,14 +356,16 @@ Focus on actionable, implementable solutions."""
         """
         start_time = datetime.now()
 
-        prompt = self._build_extraction_prompt(book_content, book_metadata, existing_recommendations)
+        prompt = self._build_extraction_prompt(
+            book_content, book_metadata, existing_recommendations
+        )
 
         try:
             response = await self.client.chat.completions.create(
                 model=self.model,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.1,  # Low temperature for factual extraction
-                max_tokens=4000
+                max_tokens=4000,
             )
 
             execution_time = (datetime.now() - start_time).total_seconds()
@@ -391,18 +398,18 @@ Focus on actionable, implementable solutions."""
                 "success": False,
                 "model": "deepseek",
                 "error": str(e),
-                "processing_time": (datetime.now() - start_time).total_seconds()
+                "processing_time": (datetime.now() - start_time).total_seconds(),
             }
 
     def _build_extraction_prompt(
         self,
         book_content: str,
         book_metadata: Dict[str, Any],
-        existing_recommendations: Optional[List[Dict[str, Any]]] = None
+        existing_recommendations: Optional[List[Dict[str, Any]]] = None,
     ) -> str:
         """Build prompt for book content analysis."""
-        title = book_metadata.get('title', 'Unknown')
-        author = book_metadata.get('author', 'Unknown')
+        title = book_metadata.get("title", "Unknown")
+        author = book_metadata.get("author", "Unknown")
 
         existing_context = ""
         if existing_recommendations:
@@ -470,11 +477,11 @@ IMPORTANT: Ensure the JSON is valid and correctly formatted. Do not add any extr
         """Extracts the JSON array from the response text."""
         try:
             # Find the start and end of the JSON block
-            json_start = response_text.find('```json')
-            json_end = response_text.rfind('```')
+            json_start = response_text.find("```json")
+            json_end = response_text.rfind("```")
 
             if json_start != -1 and json_end != -1 and json_end > json_start:
-                json_str = response_text[json_start + len('```json'):json_end].strip()
+                json_str = response_text[json_start + len("```json") : json_end].strip()
                 return json.loads(json_str)
             else:
                 logger.warning("No JSON block found in DeepSeek response.")
@@ -488,5 +495,5 @@ IMPORTANT: Ensure the JSON is valid and correctly formatted. Do not add any extr
 
     async def close(self):
         """Close the client connection"""
-        if self.async_mode and hasattr(self.client, 'close'):
+        if self.async_mode and hasattr(self.client, "close"):
             await self.client.close()

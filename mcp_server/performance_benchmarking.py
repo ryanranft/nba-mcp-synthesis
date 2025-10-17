@@ -26,7 +26,7 @@ class PerformanceBenchmark:
         predict_fn: callable,
         test_data: List[Any],
         true_labels: Optional[List[Any]] = None,
-        num_iterations: int = 10
+        num_iterations: int = 10,
     ) -> Dict[str, Any]:
         """
         Benchmark a model.
@@ -70,12 +70,12 @@ class PerformanceBenchmark:
                 "median": statistics.median(latencies),
                 "min": min(latencies),
                 "max": max(latencies),
-                "std": statistics.stdev(latencies) if len(latencies) > 1 else 0
+                "std": statistics.stdev(latencies) if len(latencies) > 1 else 0,
             },
             "throughput_samples_per_sec": throughput,
             "accuracy_percent": accuracy,
             "test_size": len(test_data),
-            "iterations": num_iterations
+            "iterations": num_iterations,
         }
 
         self.results.append(result)
@@ -88,8 +88,7 @@ class PerformanceBenchmark:
         return result
 
     def compare_benchmarks(
-        self,
-        model_ids: Optional[List[str]] = None
+        self, model_ids: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """
         Compare benchmark results.
@@ -105,33 +104,41 @@ class PerformanceBenchmark:
 
         results_to_compare = self.results
         if model_ids:
-            results_to_compare = [
-                r for r in self.results if r["model_id"] in model_ids
-            ]
+            results_to_compare = [r for r in self.results if r["model_id"] in model_ids]
 
         # Find best by each metric
         best_latency = min(results_to_compare, key=lambda r: r["latency_ms"]["mean"])
-        best_throughput = max(results_to_compare, key=lambda r: r["throughput_samples_per_sec"])
-        best_accuracy = max(
-            [r for r in results_to_compare if r["accuracy_percent"] is not None],
-            key=lambda r: r["accuracy_percent"]
-        ) if any(r["accuracy_percent"] is not None for r in results_to_compare) else None
+        best_throughput = max(
+            results_to_compare, key=lambda r: r["throughput_samples_per_sec"]
+        )
+        best_accuracy = (
+            max(
+                [r for r in results_to_compare if r["accuracy_percent"] is not None],
+                key=lambda r: r["accuracy_percent"],
+            )
+            if any(r["accuracy_percent"] is not None for r in results_to_compare)
+            else None
+        )
 
         return {
             "models_compared": len(results_to_compare),
             "best_latency": {
                 "model_id": best_latency["model_id"],
-                "latency_ms": best_latency["latency_ms"]["mean"]
+                "latency_ms": best_latency["latency_ms"]["mean"],
             },
             "best_throughput": {
                 "model_id": best_throughput["model_id"],
-                "throughput": best_throughput["throughput_samples_per_sec"]
+                "throughput": best_throughput["throughput_samples_per_sec"],
             },
-            "best_accuracy": {
-                "model_id": best_accuracy["model_id"],
-                "accuracy": best_accuracy["accuracy_percent"]
-            } if best_accuracy else None,
-            "all_results": results_to_compare
+            "best_accuracy": (
+                {
+                    "model_id": best_accuracy["model_id"],
+                    "accuracy": best_accuracy["accuracy_percent"],
+                }
+                if best_accuracy
+                else None
+            ),
+            "all_results": results_to_compare,
         }
 
     def generate_report(self) -> str:
@@ -146,7 +153,7 @@ class PerformanceBenchmark:
             report += f"Model: {result['model_id']}\n"
             report += f"  Latency (mean): {result['latency_ms']['mean']:.2f}ms\n"
             report += f"  Throughput: {result['throughput_samples_per_sec']:.1f} samples/sec\n"
-            if result['accuracy_percent']:
+            if result["accuracy_percent"]:
                 report += f"  Accuracy: {result['accuracy_percent']:.2f}%\n"
             report += "\n"
 
@@ -174,6 +181,7 @@ if __name__ == "__main__":
 
     # Test data
     import random
+
     test_data = [[random.randint(0, 20) for _ in range(5)] for _ in range(50)]
     true_labels = [sum(x) > 50 for x in test_data]
 
@@ -185,27 +193,15 @@ if __name__ == "__main__":
     benchmark = PerformanceBenchmark()
 
     benchmark.benchmark_model(
-        "fast_model",
-        fast_model,
-        test_data,
-        true_labels,
-        num_iterations=5
+        "fast_model", fast_model, test_data, true_labels, num_iterations=5
     )
 
     benchmark.benchmark_model(
-        "slow_model",
-        slow_model,
-        test_data,
-        true_labels,
-        num_iterations=5
+        "slow_model", slow_model, test_data, true_labels, num_iterations=5
     )
 
     benchmark.benchmark_model(
-        "accurate_model",
-        accurate_model,
-        test_data,
-        true_labels,
-        num_iterations=5
+        "accurate_model", accurate_model, test_data, true_labels, num_iterations=5
     )
 
     print(f"\n✅ Benchmarked 3 models")
@@ -217,16 +213,21 @@ if __name__ == "__main__":
 
     comparison = benchmark.compare_benchmarks()
 
-    print(f"\nBest Latency: {comparison['best_latency']['model_id']} "
-          f"({comparison['best_latency']['latency_ms']:.2f}ms)")
-    print(f"Best Throughput: {comparison['best_throughput']['model_id']} "
-          f"({comparison['best_throughput']['throughput']:.1f} samples/sec)")
-    if comparison['best_accuracy']:
-        print(f"Best Accuracy: {comparison['best_accuracy']['model_id']} "
-              f"({comparison['best_accuracy']['accuracy']:.2f}%)")
+    print(
+        f"\nBest Latency: {comparison['best_latency']['model_id']} "
+        f"({comparison['best_latency']['latency_ms']:.2f}ms)"
+    )
+    print(
+        f"Best Throughput: {comparison['best_throughput']['model_id']} "
+        f"({comparison['best_throughput']['throughput']:.1f} samples/sec)"
+    )
+    if comparison["best_accuracy"]:
+        print(
+            f"Best Accuracy: {comparison['best_accuracy']['model_id']} "
+            f"({comparison['best_accuracy']['accuracy']:.2f}%)"
+        )
 
     # Report
     print("\n" + "=" * 80)
     print(benchmark.generate_report())
     print("=" * 80)
-

@@ -30,8 +30,7 @@ import logging
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -44,7 +43,7 @@ class AcsmConverter:
         possible_paths = [
             "/Applications/Adobe Digital Editions.app",
             "/Applications/Adobe Digital Editions 4.5.app",
-            "/Applications/Adobe Digital Editions 4.0.app"
+            "/Applications/Adobe Digital Editions 4.0.app",
         ]
 
         self.ade_app_path = None
@@ -57,7 +56,7 @@ class AcsmConverter:
 
     def needs_conversion(self, file_path: str) -> bool:
         """Check if file is an .acsm file that needs conversion."""
-        return file_path.endswith('.acsm')
+        return file_path.endswith(".acsm")
 
     def is_ade_installed(self) -> bool:
         """Check if Adobe Digital Editions is installed."""
@@ -81,7 +80,7 @@ class AcsmConverter:
         try:
             # Open .acsm file with ADE
             logger.info(f"Opening {acsm_path} with Adobe Digital Editions...")
-            subprocess.run(['open', '-a', self.ade_app_path, acsm_path])
+            subprocess.run(["open", "-a", self.ade_app_path, acsm_path])
 
             # Wait for conversion and check Digital Editions folder
             book_name = os.path.splitext(os.path.basename(acsm_path))[0]
@@ -107,7 +106,7 @@ class AcsmConverter:
         while time.time() - start_time < timeout:
             # Check for PDF files that might match
             for filename in os.listdir(self.digital_editions_dir):
-                if filename.endswith('.pdf') and book_name.lower() in filename.lower():
+                if filename.endswith(".pdf") and book_name.lower() in filename.lower():
                     pdf_path = os.path.join(self.digital_editions_dir, filename)
                     return pdf_path
 
@@ -117,7 +116,8 @@ class AcsmConverter:
 
     def prompt_manual_conversion(self, acsm_file: str) -> Optional[str]:
         """Prompt user with manual conversion instructions."""
-        print(f"""
+        print(
+            f"""
 ╔══════════════════════════════════════════════════════════════════╗
 ║           ⚠️  MANUAL CONVERSION REQUIRED                         ║
 ╚══════════════════════════════════════════════════════════════════╝
@@ -147,13 +147,15 @@ Options:
   [q]     - Quit script
   [c]     - Check if PDF was manually converted
 
-Your choice: """, end='')
+Your choice: """,
+            end="",
+        )
 
         user_input = input().lower().strip()
 
-        if user_input == 'q':
+        if user_input == "q":
             sys.exit(0)
-        elif user_input == 'c':
+        elif user_input == "c":
             # Check for manually converted PDF
             downloads_dir = os.path.expanduser("~/Downloads")
             basketball_pdf = os.path.join(downloads_dir, "Basketball_on_Paper.pdf")
@@ -168,7 +170,8 @@ Your choice: """, end='')
 
     def check_google_books_alternative(self):
         """Display Google Books alternative instructions."""
-        print("""
+        print(
+            """
 ╔══════════════════════════════════════════════════════════════════╗
 ║           📱 ALTERNATIVE: Check Google Books                     ║
 ╚══════════════════════════════════════════════════════════════════╝
@@ -181,7 +184,8 @@ This book appears to be from Google Books.
 4. Save to Downloads folder as: Basketball_on_Paper.pdf
 
 ═══════════════════════════════════════════════════════════════════
-""")
+"""
+        )
 
     def handle_conversion(self, book: Dict) -> Optional[str]:
         """
@@ -190,7 +194,7 @@ This book appears to be from Google Books.
         Returns:
             Path to converted PDF if successful, None otherwise
         """
-        acsm_path = book['local_path']
+        acsm_path = book["local_path"]
 
         if not os.path.exists(acsm_path):
             logger.error(f"❌ .acsm file not found: {acsm_path}")
@@ -214,7 +218,7 @@ class BookManager:
 
     def __init__(self, s3_bucket: str):
         self.s3_bucket = s3_bucket
-        self.s3_client = boto3.client('s3')
+        self.s3_client = boto3.client("s3")
         self.converter = AcsmConverter()
 
     def book_exists_in_s3(self, s3_key: str) -> bool:
@@ -223,7 +227,7 @@ class BookManager:
             self.s3_client.head_object(Bucket=self.s3_bucket, Key=s3_key)
             return True
         except ClientError as e:
-            if e.response['Error']['Code'] == '404':
+            if e.response["Error"]["Code"] == "404":
                 return False
             else:
                 logger.error(f"Error checking S3: {e}")
@@ -240,7 +244,9 @@ class BookManager:
             logger.error(f"❌ Upload failed: {e}")
             return False
 
-    def check_and_upload_books(self, book_list: List[Dict], skip_conversion: bool = False) -> Dict:
+    def check_and_upload_books(
+        self, book_list: List[Dict], skip_conversion: bool = False
+    ) -> Dict:
         """
         Check S3 status and upload missing books.
 
@@ -248,11 +254,11 @@ class BookManager:
             Dictionary with categorized results
         """
         results = {
-            'already_in_s3': [],
-            'uploaded': [],
-            'needs_conversion': [],
-            'failed': [],
-            'skipped': []
+            "already_in_s3": [],
+            "uploaded": [],
+            "needs_conversion": [],
+            "failed": [],
+            "skipped": [],
         }
 
         for book in book_list:
@@ -261,51 +267,54 @@ class BookManager:
             logger.info(f"{'='*70}")
 
             # Check if already marked as in S3
-            if book.get('status') == 'already_in_s3':
+            if book.get("status") == "already_in_s3":
                 logger.info(f"✅ Already in S3 (pre-marked): {book['s3_path']}")
-                results['already_in_s3'].append(book)
+                results["already_in_s3"].append(book)
                 continue
 
             # Check S3 directly
-            if self.book_exists_in_s3(book['s3_path']):
+            if self.book_exists_in_s3(book["s3_path"]):
                 logger.info(f"✅ Already in S3: {book['s3_path']}")
-                results['already_in_s3'].append(book)
+                results["already_in_s3"].append(book)
                 continue
 
             # Handle conversion if needed
-            if book.get('requires_conversion'):
+            if book.get("requires_conversion"):
                 if skip_conversion:
-                    logger.info(f"⏭️  Skipping conversion (--skip-conversion): {book['title']}")
-                    results['skipped'].append(book)
+                    logger.info(
+                        f"⏭️  Skipping conversion (--skip-conversion): {book['title']}"
+                    )
+                    results["skipped"].append(book)
                     continue
 
-                if book['conversion_type'] == 'acsm_to_pdf':
+                if book["conversion_type"] == "acsm_to_pdf":
                     converted_path = self.converter.handle_conversion(book)
                     if converted_path:
-                        if self.upload_to_s3(converted_path, book['s3_path']):
-                            results['uploaded'].append(book)
+                        if self.upload_to_s3(converted_path, book["s3_path"]):
+                            results["uploaded"].append(book)
                         else:
-                            results['failed'].append(book)
+                            results["failed"].append(book)
                     else:
                         logger.warning(f"⚠️  Conversion needed for: {book['title']}")
-                        results['needs_conversion'].append(book)
+                        results["needs_conversion"].append(book)
             else:
                 # Regular PDF upload
-                local_path = book['local_path']
+                local_path = book["local_path"]
                 if os.path.exists(local_path):
-                    if self.upload_to_s3(local_path, book['s3_path']):
-                        results['uploaded'].append(book)
+                    if self.upload_to_s3(local_path, book["s3_path"]):
+                        results["uploaded"].append(book)
                     else:
-                        results['failed'].append(book)
+                        results["failed"].append(book)
                 else:
                     logger.error(f"❌ File not found: {local_path}")
-                    results['failed'].append(book)
+                    results["failed"].append(book)
 
         return results
 
     def print_summary(self, results: Dict):
         """Print summary of book upload results."""
-        print(f"""
+        print(
+            f"""
 ╔══════════════════════════════════════════════════════════════════╗
 ║                    📊 UPLOAD SUMMARY                             ║
 ╚══════════════════════════════════════════════════════════════════╝
@@ -319,17 +328,18 @@ class BookManager:
 Total processed:        {sum(len(v) for v in results.values())} books
 
 ═══════════════════════════════════════════════════════════════════
-""")
+"""
+        )
 
-        if results['needs_conversion']:
+        if results["needs_conversion"]:
             print("Books requiring conversion:")
-            for book in results['needs_conversion']:
+            for book in results["needs_conversion"]:
                 print(f"  - {book['title']}")
             print()
 
-        if results['failed']:
+        if results["failed"]:
             print("Failed uploads:")
-            for book in results['failed']:
+            for book in results["failed"]:
                 print(f"  - {book['title']}")
             print()
 
@@ -350,12 +360,7 @@ class ProjectScanner:
         """
         logger.info("🔍 Scanning project codebases...")
 
-        knowledge = {
-            'projects': {},
-            'total_files': 0,
-            'modules': [],
-            'features': []
-        }
+        knowledge = {"projects": {}, "total_files": 0, "modules": [], "features": []}
 
         for project_path in self.project_paths:
             if not os.path.exists(project_path):
@@ -366,29 +371,40 @@ class ProjectScanner:
             logger.info(f"  Scanning: {project_name}")
 
             project_info = self._scan_directory(project_path)
-            knowledge['projects'][project_name] = project_info
-            knowledge['total_files'] += project_info['file_count']
-            knowledge['modules'].extend(project_info['modules'])
-            knowledge['features'].extend(project_info['features'])
+            knowledge["projects"][project_name] = project_info
+            knowledge["total_files"] += project_info["file_count"]
+            knowledge["modules"].extend(project_info["modules"])
+            knowledge["features"].extend(project_info["features"])
 
         self.knowledge_base = knowledge
-        logger.info(f"✅ Scanned {knowledge['total_files']} files across {len(knowledge['projects'])} projects")
+        logger.info(
+            f"✅ Scanned {knowledge['total_files']} files across {len(knowledge['projects'])} projects"
+        )
 
         return knowledge
 
     def _scan_directory(self, path: str) -> Dict:
         """Scan a single directory and extract information."""
         info = {
-            'path': path,
-            'file_count': 0,
-            'modules': [],
-            'features': [],
-            'structure': {}
+            "path": path,
+            "file_count": 0,
+            "modules": [],
+            "features": [],
+            "structure": {},
         }
 
         # Ignore directories
-        ignore_dirs = {'.git', '__pycache__', 'node_modules', '.pytest_cache',
-                       'venv', 'env', '.venv', 'dist', 'build'}
+        ignore_dirs = {
+            ".git",
+            "__pycache__",
+            "node_modules",
+            ".pytest_cache",
+            "venv",
+            "env",
+            ".venv",
+            "dist",
+            "build",
+        }
 
         for root, dirs, files in os.walk(path):
             # Remove ignored directories
@@ -397,21 +413,23 @@ class ProjectScanner:
             rel_path = os.path.relpath(root, path)
 
             for file in files:
-                if file.endswith('.py'):
-                    info['file_count'] += 1
+                if file.endswith(".py"):
+                    info["file_count"] += 1
                     file_path = os.path.join(root, file)
 
                     # Extract module name
-                    if file != '__init__.py':
+                    if file != "__init__.py":
                         module_name = file[:-3]  # Remove .py
-                        info['modules'].append({
-                            'name': module_name,
-                            'path': os.path.relpath(file_path, path)
-                        })
+                        info["modules"].append(
+                            {
+                                "name": module_name,
+                                "path": os.path.relpath(file_path, path),
+                            }
+                        )
 
                     # Try to detect features by reading file
                     features = self._detect_features(file_path)
-                    info['features'].extend(features)
+                    info["features"].extend(features)
 
         return info
 
@@ -420,13 +438,14 @@ class ProjectScanner:
         features = []
 
         try:
-            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                 content = f.read()
 
                 # Look for class definitions
-                if 'class ' in content:
+                if "class " in content:
                     import re
-                    classes = re.findall(r'class\s+(\w+)', content)
+
+                    classes = re.findall(r"class\s+(\w+)", content)
                     features.extend([f"Class: {cls}" for cls in classes])
         except Exception as e:
             logger.debug(f"Error reading {file_path}: {e}")
@@ -437,7 +456,9 @@ class ProjectScanner:
 class MasterRecommendations:
     """Manages master recommendations across all books."""
 
-    def __init__(self, master_file: str = "analysis_results/master_recommendations.json"):
+    def __init__(
+        self, master_file: str = "analysis_results/master_recommendations.json"
+    ):
         self.master_file = master_file
         self.recommendations = self._load_master()
 
@@ -445,27 +466,23 @@ class MasterRecommendations:
         """Load existing master recommendations."""
         if os.path.exists(self.master_file):
             logger.info(f"📖 Loading master recommendations from {self.master_file}")
-            with open(self.master_file, 'r') as f:
+            with open(self.master_file, "r") as f:
                 return json.load(f)
         else:
             logger.info("📝 Creating new master recommendations file")
             return {
-                'recommendations': [],
-                'by_category': {
-                    'critical': [],
-                    'important': [],
-                    'nice_to_have': []
-                },
-                'by_book': {},
-                'last_updated': datetime.now().isoformat()
+                "recommendations": [],
+                "by_category": {"critical": [], "important": [], "nice_to_have": []},
+                "by_book": {},
+                "last_updated": datetime.now().isoformat(),
             }
 
     def save_master(self):
         """Save master recommendations to file."""
-        self.recommendations['last_updated'] = datetime.now().isoformat()
+        self.recommendations["last_updated"] = datetime.now().isoformat()
 
         os.makedirs(os.path.dirname(self.master_file), exist_ok=True)
-        with open(self.master_file, 'w') as f:
+        with open(self.master_file, "w") as f:
             json.dump(self.recommendations, f, indent=2)
 
         logger.info(f"💾 Saved master recommendations to {self.master_file}")
@@ -483,10 +500,10 @@ class MasterRecommendations:
         if not isinstance(new_rec, str):
             new_rec = str(new_rec)
 
-        for existing in self.recommendations['recommendations']:
-            similarity = SequenceMatcher(None,
-                                        new_rec.lower(),
-                                        existing['title'].lower()).ratio()
+        for existing in self.recommendations["recommendations"]:
+            similarity = SequenceMatcher(
+                None, new_rec.lower(), existing["title"].lower()
+            ).ratio()
 
             if similarity >= threshold:
                 return existing
@@ -496,39 +513,41 @@ class MasterRecommendations:
     def add_recommendation(self, rec: Dict, book_title: str):
         """Add or update recommendation in master list."""
         # Check for similar recommendation
-        title = rec['title'] if isinstance(rec['title'], str) else str(rec['title'])
+        title = rec["title"] if isinstance(rec["title"], str) else str(rec["title"])
         similar = self.find_similar(title)
 
         if similar:
             # Update existing recommendation
-            if book_title not in similar.get('source_books', []):
-                similar.setdefault('source_books', []).append(book_title)
+            if book_title not in similar.get("source_books", []):
+                similar.setdefault("source_books", []).append(book_title)
 
             # Potentially upgrade priority
-            priority_order = {'nice_to_have': 0, 'important': 1, 'critical': 2}
-            if priority_order.get(rec['category'], 0) > priority_order.get(similar.get('category'), 0):
+            priority_order = {"nice_to_have": 0, "important": 1, "critical": 2}
+            if priority_order.get(rec["category"], 0) > priority_order.get(
+                similar.get("category"), 0
+            ):
                 logger.info(f"⬆️  Upgrading recommendation priority: {rec['title']}")
-                similar['category'] = rec['category']
+                similar["category"] = rec["category"]
         else:
             # Add new recommendation
             new_rec = {
-                'id': f"rec_{len(self.recommendations['recommendations']) + 1}",
-                'title': rec['title'],
-                'category': rec['category'],
-                'source_books': [book_title],
-                'added_date': datetime.now().isoformat()
+                "id": f"rec_{len(self.recommendations['recommendations']) + 1}",
+                "title": rec["title"],
+                "category": rec["category"],
+                "source_books": [book_title],
+                "added_date": datetime.now().isoformat(),
             }
 
-            if 'reasoning' in rec:
-                new_rec['reasoning'] = rec['reasoning']
+            if "reasoning" in rec:
+                new_rec["reasoning"] = rec["reasoning"]
 
-            self.recommendations['recommendations'].append(new_rec)
-            self.recommendations['by_category'][rec['category']].append(new_rec['id'])
+            self.recommendations["recommendations"].append(new_rec)
+            self.recommendations["by_category"][rec["category"]].append(new_rec["id"])
 
             # Track by book
-            if book_title not in self.recommendations['by_book']:
-                self.recommendations['by_book'][book_title] = []
-            self.recommendations['by_book'][book_title].append(new_rec['id'])
+            if book_title not in self.recommendations["by_book"]:
+                self.recommendations["by_book"][book_title] = []
+            self.recommendations["by_book"][book_title].append(new_rec["id"])
 
 
 class RecursiveAnalyzer:
@@ -536,16 +555,19 @@ class RecursiveAnalyzer:
 
     def __init__(self, config: Dict):
         self.config = config
-        self.s3_bucket = config['s3_bucket']
-        self.project_context = config['project_context']
-        self.convergence_threshold = config['convergence_threshold']
-        self.max_iterations = config['max_iterations']
+        self.s3_bucket = config["s3_bucket"]
+        self.project_context = config["project_context"]
+        self.convergence_threshold = config["convergence_threshold"]
+        self.max_iterations = config["max_iterations"]
 
         # Initialize project scanner
-        self.project_paths = config.get('project_paths', [
-            '/Users/ryanranft/nba-mcp-synthesis',
-            '/Users/ryanranft/nba-simulator-aws'
-        ])
+        self.project_paths = config.get(
+            "project_paths",
+            [
+                "/Users/ryanranft/nba-mcp-synthesis",
+                "/Users/ryanranft/nba-simulator-aws",
+            ],
+        )
         self.scanner = ProjectScanner(self.project_paths)
 
         # Initialize master recommendations
@@ -575,20 +597,16 @@ class RecursiveAnalyzer:
 
         # Initialize tracking
         tracker = {
-            'book_title': book['title'],
-            's3_path': book['s3_path'],
-            'start_time': datetime.now().isoformat(),
-            'iterations': [],
-            'convergence_achieved': False,
-            'convergence_iteration': None,
-            'total_recommendations': {
-                'critical': 0,
-                'important': 0,
-                'nice_to_have': 0
-            },
-            'new_recommendations': 0,
-            'duplicate_recommendations': 0,
-            'improved_recommendations': 0
+            "book_title": book["title"],
+            "s3_path": book["s3_path"],
+            "start_time": datetime.now().isoformat(),
+            "iterations": [],
+            "convergence_achieved": False,
+            "convergence_iteration": None,
+            "total_recommendations": {"critical": 0, "important": 0, "nice_to_have": 0},
+            "new_recommendations": 0,
+            "duplicate_recommendations": 0,
+            "improved_recommendations": 0,
         }
 
         consecutive_nice_only = 0
@@ -599,62 +617,78 @@ class RecursiveAnalyzer:
             logger.info(f"\n🔄 Iteration {iteration}/{self.max_iterations}")
 
             # Run intelligent MCP analysis with deduplication
-            recommendations = await self._analyze_with_mcp_and_intelligence(book, iteration)
+            recommendations = await self._analyze_with_mcp_and_intelligence(
+                book, iteration
+            )
 
             # Track iteration
             iteration_data = {
-                'iteration': iteration,
-                'timestamp': datetime.now().isoformat(),
-                'recommendations': recommendations
+                "iteration": iteration,
+                "timestamp": datetime.now().isoformat(),
+                "recommendations": recommendations,
             }
-            tracker['iterations'].append(iteration_data)
+            tracker["iterations"].append(iteration_data)
 
             # Update totals
-            for category in ['critical', 'important', 'nice_to_have']:
-                tracker['total_recommendations'][category] += len(recommendations.get(category, []))
+            for category in ["critical", "important", "nice_to_have"]:
+                tracker["total_recommendations"][category] += len(
+                    recommendations.get(category, [])
+                )
 
             # Update master recommendations
-            for category in ['critical', 'important', 'nice_to_have']:
+            for category in ["critical", "important", "nice_to_have"]:
                 for rec_title in recommendations.get(category, []):
-                    self.master_recs.add_recommendation({
-                        'title': rec_title,
-                        'category': category
-                    }, book['title'])
+                    self.master_recs.add_recommendation(
+                        {"title": rec_title, "category": category}, book["title"]
+                    )
 
             # Check convergence
-            has_critical = len(recommendations.get('critical', [])) > 0
-            has_important = len(recommendations.get('important', [])) > 0
-            has_only_nice = not has_critical and not has_important and len(recommendations.get('nice_to_have', [])) > 0
+            has_critical = len(recommendations.get("critical", [])) > 0
+            has_important = len(recommendations.get("important", [])) > 0
+            has_only_nice = (
+                not has_critical
+                and not has_important
+                and len(recommendations.get("nice_to_have", [])) > 0
+            )
 
             if has_only_nice:
                 consecutive_nice_only += 1
-                logger.info(f"✅ Nice-to-Have only iteration ({consecutive_nice_only}/{self.convergence_threshold})")
+                logger.info(
+                    f"✅ Nice-to-Have only iteration ({consecutive_nice_only}/{self.convergence_threshold})"
+                )
 
                 if consecutive_nice_only >= self.convergence_threshold:
-                    logger.info(f"\n🎉 CONVERGENCE ACHIEVED after {iteration} iterations!")
-                    tracker['convergence_achieved'] = True
-                    tracker['convergence_iteration'] = iteration
+                    logger.info(
+                        f"\n🎉 CONVERGENCE ACHIEVED after {iteration} iterations!"
+                    )
+                    tracker["convergence_achieved"] = True
+                    tracker["convergence_iteration"] = iteration
                     break
             else:
                 consecutive_nice_only = 0
                 logger.info(f"🔄 Still finding Critical/Important recommendations")
 
-        tracker['end_time'] = datetime.now().isoformat()
-        tracker['total_iterations'] = iteration
+        tracker["end_time"] = datetime.now().isoformat()
+        tracker["total_iterations"] = iteration
 
         # Save master recommendations
         self.master_recs.save_master()
 
         # Save tracker
-        tracker_file = os.path.join(output_dir, f"{self._sanitize_filename(book['title'])}_convergence_tracker.json")
-        with open(tracker_file, 'w') as f:
+        tracker_file = os.path.join(
+            output_dir,
+            f"{self._sanitize_filename(book['title'])}_convergence_tracker.json",
+        )
+        with open(tracker_file, "w") as f:
             json.dump(tracker, f, indent=2)
 
         logger.info(f"\n✅ Tracker saved: {tracker_file}")
 
         return tracker
 
-    async def analyze_with_existing_context(self, book: Dict, existing_recs: List[Dict], iteration: int) -> Dict:
+    async def analyze_with_existing_context(
+        self, book: Dict, existing_recs: List[Dict], iteration: int
+    ) -> Dict:
         """
         Analyze book with awareness of existing recommendations.
         Only return new items not already captured.
@@ -667,7 +701,9 @@ class RecursiveAnalyzer:
         Returns:
             Dict with categorized recommendations (only new ones)
         """
-        logger.info("🔍 Running context-aware analysis with existing recommendations...")
+        logger.info(
+            "🔍 Running context-aware analysis with existing recommendations..."
+        )
 
         # Import four-model analyzer
         from four_model_book_analyzer import FourModelBookAnalyzer
@@ -677,9 +713,17 @@ class RecursiveAnalyzer:
 
         # Convert to expected format
         recommendations = {
-            'critical': [r for r in synthesis_result.recommendations if r.get('priority') == 'CRITICAL'],
-            'important': [r for r in synthesis_result.recommendations if r.get('priority') == 'IMPORTANT'],
-            'nice_to_have': []  # Only include Critical/Important from consensus
+            "critical": [
+                r
+                for r in synthesis_result.recommendations
+                if r.get("priority") == "CRITICAL"
+            ],
+            "important": [
+                r
+                for r in synthesis_result.recommendations
+                if r.get("priority") == "IMPORTANT"
+            ],
+            "nice_to_have": [],  # Only include Critical/Important from consensus
         }
 
         # Add cost tracking info
@@ -691,7 +735,9 @@ class RecursiveAnalyzer:
         logger.info(f"🔢 Tokens used: {synthesis_result.total_tokens:,}")
         logger.info(f"⏱️ Processing time: {synthesis_result.total_time:.1f}s")
 
-        logger.info(f"  Found {sum(len(v) for v in recommendations.values())} NEW recommendations")
+        logger.info(
+            f"  Found {sum(len(v) for v in recommendations.values())} NEW recommendations"
+        )
         logger.info(f"    Critical: {len(recommendations.get('critical', []))}")
         logger.info(f"    Important: {len(recommendations.get('important', []))}")
         logger.info(f"    Nice-to-Have: {len(recommendations.get('nice_to_have', []))}")
@@ -706,19 +752,21 @@ class RecursiveAnalyzer:
         context_parts = ["EXISTING RECOMMENDATIONS:"]
 
         for rec in existing_recs[:50]:  # Limit to first 50 for context
-            title = rec.get('title', 'N/A')
-            category = rec.get('category', 'N/A')
-            source_books = ', '.join(rec.get('source_books', []))
-            reasoning = rec.get('reasoning', 'No reasoning provided')
+            title = rec.get("title", "N/A")
+            category = rec.get("category", "N/A")
+            source_books = ", ".join(rec.get("source_books", []))
+            reasoning = rec.get("reasoning", "No reasoning provided")
 
             context_parts.append(f"- {title} ({category})")
             context_parts.append(f"  Source: {source_books}")
             context_parts.append(f"  Reasoning: {reasoning}")
             context_parts.append("")
 
-        return '\n'.join(context_parts)
+        return "\n".join(context_parts)
 
-    def _build_context_aware_prompt(self, book: Dict, existing_context: str, iteration: int) -> str:
+    def _build_context_aware_prompt(
+        self, book: Dict, existing_context: str, iteration: int
+    ) -> str:
         """Build prompt for context-aware analysis."""
 
         prompt = f"""
@@ -752,73 +800,66 @@ Only include recommendations that are genuinely new or significantly different f
 """
         return prompt
 
-    def _simulated_context_aware_analysis(self, book: Dict, existing_recs: List[Dict],
-                                         iteration: int, prompt: str) -> Dict:
+    def _simulated_context_aware_analysis(
+        self, book: Dict, existing_recs: List[Dict], iteration: int, prompt: str
+    ) -> Dict:
         """
         Simulated context-aware analysis that demonstrates filtering.
         In production, this would use real MCP tool calls.
         """
         # Extract existing recommendation titles for comparison
-        existing_titles = {rec.get('title', '').lower() for rec in existing_recs}
+        existing_titles = {rec.get("title", "").lower() for rec in existing_recs}
 
         # Simulate some potential recommendations based on book category
-        potential_recs = {
-            'critical': [],
-            'important': [],
-            'nice_to_have': []
-        }
+        potential_recs = {"critical": [], "important": [], "nice_to_have": []}
 
-        book_category = book.get('category', '').lower()
+        book_category = book.get("category", "").lower()
 
-        if 'statistics' in book_category:
-            potential_recs['critical'].extend([
-                'Advanced Statistical Testing Framework',
-                'Bayesian Analysis Pipeline',
-                'Statistical Model Validation System'
-            ])
-            potential_recs['important'].extend([
-                'Hypothesis Testing Automation',
-                'Statistical Power Analysis Tools'
-            ])
-            potential_recs['nice_to_have'].extend([
-                'Interactive Statistical Dashboards',
-                'Statistical Report Generation'
-            ])
-        elif 'machine_learning' in book_category:
-            potential_recs['critical'].extend([
-                'Advanced Feature Engineering Pipeline',
-                'Model Ensemble Framework',
-                'Hyperparameter Optimization System'
-            ])
-            potential_recs['important'].extend([
-                'Model Interpretability Tools',
-                'Automated Model Selection'
-            ])
-            potential_recs['nice_to_have'].extend([
-                'ML Experiment Tracking Dashboard',
-                'Model Performance Visualization'
-            ])
-        elif 'econometrics' in book_category:
-            potential_recs['critical'].extend([
-                'Time Series Analysis Framework',
-                'Panel Data Processing System',
-                'Causal Inference Pipeline'
-            ])
-            potential_recs['important'].extend([
-                'Econometric Model Validation',
-                'Statistical Significance Testing'
-            ])
-            potential_recs['nice_to_have'].extend([
-                'Econometric Visualization Tools',
-                'Research Paper Generation'
-            ])
+        if "statistics" in book_category:
+            potential_recs["critical"].extend(
+                [
+                    "Advanced Statistical Testing Framework",
+                    "Bayesian Analysis Pipeline",
+                    "Statistical Model Validation System",
+                ]
+            )
+            potential_recs["important"].extend(
+                ["Hypothesis Testing Automation", "Statistical Power Analysis Tools"]
+            )
+            potential_recs["nice_to_have"].extend(
+                ["Interactive Statistical Dashboards", "Statistical Report Generation"]
+            )
+        elif "machine_learning" in book_category:
+            potential_recs["critical"].extend(
+                [
+                    "Advanced Feature Engineering Pipeline",
+                    "Model Ensemble Framework",
+                    "Hyperparameter Optimization System",
+                ]
+            )
+            potential_recs["important"].extend(
+                ["Model Interpretability Tools", "Automated Model Selection"]
+            )
+            potential_recs["nice_to_have"].extend(
+                ["ML Experiment Tracking Dashboard", "Model Performance Visualization"]
+            )
+        elif "econometrics" in book_category:
+            potential_recs["critical"].extend(
+                [
+                    "Time Series Analysis Framework",
+                    "Panel Data Processing System",
+                    "Causal Inference Pipeline",
+                ]
+            )
+            potential_recs["important"].extend(
+                ["Econometric Model Validation", "Statistical Significance Testing"]
+            )
+            potential_recs["nice_to_have"].extend(
+                ["Econometric Visualization Tools", "Research Paper Generation"]
+            )
 
         # Filter out recommendations that are too similar to existing ones
-        filtered_recs = {
-            'critical': [],
-            'important': [],
-            'nice_to_have': []
-        }
+        filtered_recs = {"critical": [], "important": [], "nice_to_have": []}
 
         for category, recs in potential_recs.items():
             for rec in recs:
@@ -843,9 +884,12 @@ Only include recommendations that are genuinely new or significantly different f
     def _calculate_similarity(self, text1: str, text2: str) -> float:
         """Calculate similarity between two text strings."""
         from difflib import SequenceMatcher
+
         return SequenceMatcher(None, text1, text2).ratio()
 
-    async def _analyze_with_mcp_and_intelligence(self, book: Dict, iteration: int) -> Dict:
+    async def _analyze_with_mcp_and_intelligence(
+        self, book: Dict, iteration: int
+    ) -> Dict:
         """
         Perform intelligent MCP analysis with deduplication and evaluation.
 
@@ -873,9 +917,17 @@ Only include recommendations that are genuinely new or significantly different f
 
         # Convert to expected format
         recommendations = {
-            'critical': [r for r in synthesis_result.recommendations if r.get('priority') == 'CRITICAL'],
-            'important': [r for r in synthesis_result.recommendations if r.get('priority') == 'IMPORTANT'],
-            'nice_to_have': []  # Only include Critical/Important from consensus
+            "critical": [
+                r
+                for r in synthesis_result.recommendations
+                if r.get("priority") == "CRITICAL"
+            ],
+            "important": [
+                r
+                for r in synthesis_result.recommendations
+                if r.get("priority") == "IMPORTANT"
+            ],
+            "nice_to_have": [],  # Only include Critical/Important from consensus
         }
 
         # Add cost tracking info
@@ -887,7 +939,9 @@ Only include recommendations that are genuinely new or significantly different f
         logger.info(f"🔢 Tokens used: {synthesis_result.total_tokens:,}")
         logger.info(f"⏱️ Processing time: {synthesis_result.total_time:.1f}s")
 
-        logger.info(f"  Found {sum(len(v) for v in recommendations.values())} recommendations")
+        logger.info(
+            f"  Found {sum(len(v) for v in recommendations.values())} recommendations"
+        )
         logger.info(f"    Critical: {len(recommendations.get('critical', []))}")
         logger.info(f"    Important: {len(recommendations.get('important', []))}")
         logger.info(f"    Nice-to-Have: {len(recommendations.get('nice_to_have', []))}")
@@ -898,11 +952,19 @@ Only include recommendations that are genuinely new or significantly different f
         """Build comprehensive prompt for MCP with project context."""
 
         # Summarize existing implementations
-        modules_summary = f"{len(self.knowledge_base['modules'])} modules" if self.knowledge_base else "N/A"
-        features_summary = f"{len(self.knowledge_base['features'])} features" if self.knowledge_base else "N/A"
+        modules_summary = (
+            f"{len(self.knowledge_base['modules'])} modules"
+            if self.knowledge_base
+            else "N/A"
+        )
+        features_summary = (
+            f"{len(self.knowledge_base['features'])} features"
+            if self.knowledge_base
+            else "N/A"
+        )
 
         # Summarize existing recommendations
-        existing_recs_count = len(self.master_recs.recommendations['recommendations'])
+        existing_recs_count = len(self.master_recs.recommendations["recommendations"])
 
         prompt = f"""
 Analyze the book "{book['title']}" in the context of the NBA MCP Synthesis project.
@@ -942,7 +1004,9 @@ GOAL: Avoid duplicate recommendations. Focus on gaps and meaningful improvements
 
         return prompt
 
-    def _simulated_intelligent_analysis(self, book: Dict, iteration: int, prompt: str) -> Dict:
+    def _simulated_intelligent_analysis(
+        self, book: Dict, iteration: int, prompt: str
+    ) -> Dict:
         """
         Simulated intelligent analysis demonstrating deduplication logic.
 
@@ -957,49 +1021,49 @@ GOAL: Avoid duplicate recommendations. Focus on gaps and meaningful improvements
         # Simulate recommendations that decrease as we find fewer gaps
         if iteration == 1:
             return {
-                'critical': [
-                    'Implement model registry with versioning',
-                    'Add comprehensive data validation pipeline'
+                "critical": [
+                    "Implement model registry with versioning",
+                    "Add comprehensive data validation pipeline",
                 ],
-                'important': [
-                    'Enhance distributed tracing coverage',
-                    'Add automated performance benchmarking',
-                    'Implement feature importance tracking'
+                "important": [
+                    "Enhance distributed tracing coverage",
+                    "Add automated performance benchmarking",
+                    "Implement feature importance tracking",
                 ],
-                'nice_to_have': [
-                    'Add more comprehensive API examples',
-                    'Improve inline documentation'
-                ]
+                "nice_to_have": [
+                    "Add more comprehensive API examples",
+                    "Improve inline documentation",
+                ],
             }
         elif iteration == 2:
             # Some items already recommended/implemented
             return {
-                'critical': [],  # Critical items addressed
-                'important': [
-                    'Add model drift detection alerts',
-                    'Implement A/B testing statistical framework'
+                "critical": [],  # Critical items addressed
+                "important": [
+                    "Add model drift detection alerts",
+                    "Implement A/B testing statistical framework",
                 ],
-                'nice_to_have': [
-                    'Create video tutorials',
-                    'Add interactive documentation'
-                ]
+                "nice_to_have": [
+                    "Create video tutorials",
+                    "Add interactive documentation",
+                ],
             }
         else:
             # Convergence: only minor improvements left
             return {
-                'critical': [],
-                'important': [],
-                'nice_to_have': [
-                    'Polish dashboard UI',
-                    'Add code examples for edge cases'
-                ]
+                "critical": [],
+                "important": [],
+                "nice_to_have": [
+                    "Polish dashboard UI",
+                    "Add code examples for edge cases",
+                ],
             }
 
     def _sanitize_filename(self, filename: str) -> str:
         """Convert title to safe filename."""
         # Remove special characters
-        safe = "".join(c for c in filename if c.isalnum() or c in (' ', '-', '_'))
-        return safe.replace(' ', '_')
+        safe = "".join(c for c in filename if c.isalnum() or c in (" ", "-", "_"))
+        return safe.replace(" ", "_")
 
 
 class RecommendationGenerator:
@@ -1007,13 +1071,15 @@ class RecommendationGenerator:
 
     def generate_report(self, tracker: Dict, output_dir: str) -> str:
         """Generate comprehensive markdown report."""
-        book_title = tracker['book_title']
+        book_title = tracker["book_title"]
         safe_title = self._sanitize_filename(book_title)
-        report_file = os.path.join(output_dir, f"{safe_title}_RECOMMENDATIONS_COMPLETE.md")
+        report_file = os.path.join(
+            output_dir, f"{safe_title}_RECOMMENDATIONS_COMPLETE.md"
+        )
 
         content = self._build_report_content(tracker)
 
-        with open(report_file, 'w') as f:
+        with open(report_file, "w") as f:
             f.write(content)
 
         logger.info(f"✅ Report generated: {report_file}")
@@ -1021,8 +1087,10 @@ class RecommendationGenerator:
 
     def _build_report_content(self, tracker: Dict) -> str:
         """Build markdown content for report."""
-        book_title = tracker['book_title']
-        convergence_status = "✅ ACHIEVED" if tracker['convergence_achieved'] else "❌ NOT ACHIEVED"
+        book_title = tracker["book_title"]
+        convergence_status = (
+            "✅ ACHIEVED" if tracker["convergence_achieved"] else "❌ NOT ACHIEVED"
+        )
 
         content = f"""# 📚 Recursive Analysis: {book_title}
 
@@ -1049,9 +1117,9 @@ class RecommendationGenerator:
 
 """
 
-        for iter_data in tracker['iterations']:
-            iter_num = iter_data['iteration']
-            recs = iter_data['recommendations']
+        for iter_data in tracker["iterations"]:
+            iter_num = iter_data["iteration"]
+            recs = iter_data["recommendations"]
 
             content += f"""### Iteration {iter_num}
 
@@ -1061,27 +1129,27 @@ class RecommendationGenerator:
 
 """
 
-            if recs.get('critical'):
+            if recs.get("critical"):
                 content += "#### 🔴 Critical\n\n"
-                for rec in recs['critical']:
+                for rec in recs["critical"]:
                     content += f"- {rec}\n"
                 content += "\n"
 
-            if recs.get('important'):
+            if recs.get("important"):
                 content += "#### 🟡 Important\n\n"
-                for rec in recs['important']:
+                for rec in recs["important"]:
                     content += f"- {rec}\n"
                 content += "\n"
 
-            if recs.get('nice_to_have'):
+            if recs.get("nice_to_have"):
                 content += "#### 🟢 Nice-to-Have\n\n"
-                for rec in recs['nice_to_have']:
+                for rec in recs["nice_to_have"]:
                     content += f"- {rec}\n"
                 content += "\n"
 
             content += "---\n\n"
 
-        if tracker['convergence_achieved']:
+        if tracker["convergence_achieved"]:
             content += f"""## 🎉 Convergence Achieved!
 
 Convergence was achieved at iteration {tracker['convergence_iteration']}.
@@ -1118,8 +1186,8 @@ Consider extending max_iterations or reviewing analysis criteria.
 
     def _sanitize_filename(self, filename: str) -> str:
         """Convert title to safe filename."""
-        safe = "".join(c for c in filename if c.isalnum() or c in (' ', '-', '_'))
-        return safe.replace(' ', '_')
+        safe = "".join(c for c in filename if c.isalnum() or c in (" ", "-", "_"))
+        return safe.replace(" ", "_")
 
 
 class PlanGenerator:
@@ -1127,7 +1195,7 @@ class PlanGenerator:
 
     def generate_plans(self, tracker: Dict, output_dir: str) -> List[str]:
         """Generate implementation plans for recommendations."""
-        book_title = tracker['book_title']
+        book_title = tracker["book_title"]
         safe_title = self._sanitize_filename(book_title)
 
         # Create plans directory for this book
@@ -1137,16 +1205,16 @@ class PlanGenerator:
         generated_plans = []
 
         # Collect all unique recommendations
-        all_recs = {'critical': set(), 'important': set(), 'nice_to_have': set()}
+        all_recs = {"critical": set(), "important": set(), "nice_to_have": set()}
 
-        for iter_data in tracker['iterations']:
-            recs = iter_data['recommendations']
-            for category in ['critical', 'important', 'nice_to_have']:
+        for iter_data in tracker["iterations"]:
+            recs = iter_data["recommendations"]
+            for category in ["critical", "important", "nice_to_have"]:
                 all_recs[category].update(recs.get(category, []))
 
         # Generate plans for critical and important items
         plan_num = 1
-        for category in ['critical', 'important']:
+        for category in ["critical", "important"]:
             for rec in sorted(all_recs[category]):
                 plan_file = self._generate_plan_file(
                     rec, category, plan_num, plans_dir, book_title
@@ -1161,13 +1229,19 @@ class PlanGenerator:
         logger.info(f"✅ Generated {len(generated_plans)} implementation plans")
         return generated_plans
 
-    def _generate_plan_file(self, recommendation: str, category: str,
-                          plan_num: int, plans_dir: str, book_title: str) -> str:
+    def _generate_plan_file(
+        self,
+        recommendation: str,
+        category: str,
+        plan_num: int,
+        plans_dir: str,
+        book_title: str,
+    ) -> str:
         """Generate individual implementation plan file."""
         safe_rec = self._sanitize_filename(recommendation)
         plan_file = os.path.join(plans_dir, f"{plan_num:02d}_{safe_rec}.md")
 
-        priority = "🔴 HIGH" if category == 'critical' else "🟡 MEDIUM"
+        priority = "🔴 HIGH" if category == "critical" else "🟡 MEDIUM"
 
         content = f"""# Implementation Plan: {recommendation}
 
@@ -1247,16 +1321,18 @@ TBD
 **Generated:** {datetime.now().isoformat()}
 """
 
-        with open(plan_file, 'w') as f:
+        with open(plan_file, "w") as f:
             f.write(content)
 
         return plan_file
 
-    def _generate_plans_readme(self, all_recs: Dict, plans_dir: str, book_title: str) -> str:
+    def _generate_plans_readme(
+        self, all_recs: Dict, plans_dir: str, book_title: str
+    ) -> str:
         """Generate README for implementation plans."""
         readme_file = os.path.join(plans_dir, "README.md")
 
-        total_plans = len(all_recs['critical']) + len(all_recs['important'])
+        total_plans = len(all_recs["critical"]) + len(all_recs["important"])
 
         content = f"""# 🚀 Implementation Plans: {book_title}
 
@@ -1272,14 +1348,16 @@ TBD
 """
 
         plan_num = 1
-        for rec in sorted(all_recs['critical']):
+        for rec in sorted(all_recs["critical"]):
             safe_rec = self._sanitize_filename(rec)
             content += f"{plan_num}. [{rec}]({plan_num:02d}_{safe_rec}.md)\n"
             plan_num += 1
 
-        content += f"\n### 🟡 Important Priority ({len(all_recs['important'])} plans)\n\n"
+        content += (
+            f"\n### 🟡 Important Priority ({len(all_recs['important'])} plans)\n\n"
+        )
 
-        for rec in sorted(all_recs['important']):
+        for rec in sorted(all_recs["important"]):
             safe_rec = self._sanitize_filename(rec)
             content += f"{plan_num}. [{rec}]({plan_num:02d}_{safe_rec}.md)\n"
             plan_num += 1
@@ -1304,7 +1382,7 @@ Track your implementation progress:
 """
 
         plan_num = 1
-        for category in ['critical', 'important']:
+        for category in ["critical", "important"]:
             for rec in sorted(all_recs[category]):
                 content += f"| {plan_num} | {rec} | 🔲 TODO | - |\n"
                 plan_num += 1
@@ -1321,27 +1399,27 @@ Questions? Refer back to the analysis report or the source book.
 **Good luck with your implementation!** 🚀
 """
 
-        with open(readme_file, 'w') as f:
+        with open(readme_file, "w") as f:
             f.write(content)
 
         return readme_file
 
     def _sanitize_filename(self, filename: str) -> str:
         """Convert title to safe filename."""
-        safe = "".join(c for c in filename if c.isalnum() or c in (' ', '-', '_'))
-        return safe.replace(' ', '_')
+        safe = "".join(c for c in filename if c.isalnum() or c in (" ", "-", "_"))
+        return safe.replace(" ", "_")
 
 
 def load_config(config_path: str) -> Dict:
     """Load books configuration from JSON file."""
-    with open(config_path, 'r') as f:
+    with open(config_path, "r") as f:
         return json.load(f)
 
 
 async def main():
     """Main entry point for recursive book analysis."""
     parser = argparse.ArgumentParser(
-        description='Recursive Book Analysis Workflow',
+        description="Recursive Book Analysis Workflow",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -1351,29 +1429,43 @@ Examples:
   python scripts/recursive_book_analysis.py --upload-only
   python scripts/recursive_book_analysis.py --convert-acsm
   python scripts/recursive_book_analysis.py --resume tracker.json
-        """
+        """,
     )
 
-    parser.add_argument('--all', action='store_true',
-                      help='Analyze all books in configuration')
-    parser.add_argument('--book', type=str,
-                      help='Analyze specific book by title')
-    parser.add_argument('--check-s3', action='store_true',
-                      help='Check which books are in S3')
-    parser.add_argument('--upload-only', action='store_true',
-                      help='Upload missing books only')
-    parser.add_argument('--convert-acsm', action='store_true',
-                      help='Handle .acsm conversions only')
-    parser.add_argument('--resume', type=str, metavar='TRACKER_FILE',
-                      help='Resume previous analysis from tracker file')
-    parser.add_argument('--skip-conversion', action='store_true',
-                      help='Skip books that need conversion')
-    parser.add_argument('--config', type=str,
-                      default='config/books_to_analyze.json',
-                      help='Path to books configuration file')
-    parser.add_argument('--output-dir', type=str,
-                      default='analysis_results',
-                      help='Output directory for results')
+    parser.add_argument(
+        "--all", action="store_true", help="Analyze all books in configuration"
+    )
+    parser.add_argument("--book", type=str, help="Analyze specific book by title")
+    parser.add_argument(
+        "--check-s3", action="store_true", help="Check which books are in S3"
+    )
+    parser.add_argument(
+        "--upload-only", action="store_true", help="Upload missing books only"
+    )
+    parser.add_argument(
+        "--convert-acsm", action="store_true", help="Handle .acsm conversions only"
+    )
+    parser.add_argument(
+        "--resume",
+        type=str,
+        metavar="TRACKER_FILE",
+        help="Resume previous analysis from tracker file",
+    )
+    parser.add_argument(
+        "--skip-conversion", action="store_true", help="Skip books that need conversion"
+    )
+    parser.add_argument(
+        "--config",
+        type=str,
+        default="config/books_to_analyze.json",
+        help="Path to books configuration file",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default="analysis_results",
+        help="Output directory for results",
+    )
 
     args = parser.parse_args()
 
@@ -1383,20 +1475,22 @@ Examples:
         sys.exit(1)
 
     config_data = load_config(args.config)
-    books = config_data['books']
-    analysis_config = config_data.get('analysis_config', config_data.get('analysis_settings', {}))
+    books = config_data["books"]
+    analysis_config = config_data.get(
+        "analysis_config", config_data.get("analysis_settings", {})
+    )
 
     # Create output directory
     os.makedirs(args.output_dir, exist_ok=True)
 
     # Initialize managers
-    book_manager = BookManager(analysis_config['s3_bucket'])
+    book_manager = BookManager(analysis_config["s3_bucket"])
 
     # Handle different commands
     if args.check_s3:
         logger.info("\n📋 Checking S3 status for all books...\n")
         for book in books:
-            exists = book_manager.book_exists_in_s3(book['s3_path'])
+            exists = book_manager.book_exists_in_s3(book["s3_path"])
             status = "✅ In S3" if exists else "❌ Missing"
             print(f"{status}: {book['title']}")
         return
@@ -1411,7 +1505,7 @@ Examples:
         logger.info("\n🔄 Handling .acsm conversions...\n")
         converter = AcsmConverter()
         for book in books:
-            if book.get('requires_conversion'):
+            if book.get("requires_conversion"):
                 converter.handle_conversion(book)
         return
 
@@ -1424,7 +1518,7 @@ Examples:
     # Filter books if specific book requested
     books_to_analyze = books
     if args.book:
-        books_to_analyze = [b for b in books if args.book.lower() in b['title'].lower()]
+        books_to_analyze = [b for b in books if args.book.lower() in b["title"].lower()]
         if not books_to_analyze:
             logger.error(f"❌ Book not found: {args.book}")
             sys.exit(1)
@@ -1435,7 +1529,9 @@ Examples:
 
     # Upload books if needed
     logger.info("\n📤 Checking and uploading books to S3...\n")
-    results = book_manager.check_and_upload_books(books_to_analyze, args.skip_conversion)
+    results = book_manager.check_and_upload_books(
+        books_to_analyze, args.skip_conversion
+    )
     book_manager.print_summary(results)
 
     # Analyze books
@@ -1447,8 +1543,10 @@ Examples:
 
     for book in books_to_analyze:
         # Skip if needs conversion and wasn't converted
-        if book in results['needs_conversion'] or book in results['skipped']:
-            logger.warning(f"⏭️  Skipping analysis for: {book['title']} (needs conversion)")
+        if book in results["needs_conversion"] or book in results["skipped"]:
+            logger.warning(
+                f"⏭️  Skipping analysis for: {book['title']} (needs conversion)"
+            )
             continue
 
         # Run recursive analysis
@@ -1460,12 +1558,14 @@ Examples:
         # Generate implementation plans
         plan_files = plan_gen.generate_plans(tracker, args.output_dir)
 
-        analysis_results.append({
-            'book': book,
-            'tracker': tracker,
-            'report_file': report_file,
-            'plan_files': plan_files
-        })
+        analysis_results.append(
+            {
+                "book": book,
+                "tracker": tracker,
+                "report_file": report_file,
+                "plan_files": plan_files,
+            }
+        )
 
     # Generate master summary
     if len(analysis_results) > 1:
@@ -1482,7 +1582,7 @@ def _generate_master_summary(analysis_results: List[Dict], output_dir: str):
     """Generate master summary combining all book analyses."""
     summary_file = os.path.join(output_dir, "ALL_BOOKS_MASTER_SUMMARY.md")
 
-    total_recs = {'critical': 0, 'important': 0, 'nice_to_have': 0}
+    total_recs = {"critical": 0, "important": 0, "nice_to_have": 0}
     total_iterations = 0
     converged_count = 0
 
@@ -1498,13 +1598,13 @@ def _generate_master_summary(analysis_results: List[Dict], output_dir: str):
 """
 
     for result in analysis_results:
-        tracker = result['tracker']
-        total_iterations += tracker['total_iterations']
-        if tracker['convergence_achieved']:
+        tracker = result["tracker"]
+        total_iterations += tracker["total_iterations"]
+        if tracker["convergence_achieved"]:
             converged_count += 1
 
-        for category in ['critical', 'important', 'nice_to_have']:
-            total_recs[category] += tracker['total_recommendations'][category]
+        for category in ["critical", "important", "nice_to_have"]:
+            total_recs[category] += tracker["total_recommendations"][category]
 
     content += f"""
 | Metric | Value |
@@ -1525,9 +1625,9 @@ def _generate_master_summary(analysis_results: List[Dict], output_dir: str):
 """
 
     for result in analysis_results:
-        book = result['book']
-        tracker = result['tracker']
-        status = "✅" if tracker['convergence_achieved'] else "⏳"
+        book = result["book"]
+        tracker = result["tracker"]
+        status = "✅" if tracker["convergence_achieved"] else "⏳"
 
         content += f"""### {status} {book['title']}
 
@@ -1553,13 +1653,13 @@ def _generate_master_summary(analysis_results: List[Dict], output_dir: str):
 **Happy implementing!** 🚀
 """
 
-    with open(summary_file, 'w') as f:
+    with open(summary_file, "w") as f:
         f.write(content)
 
     logger.info(f"✅ Master summary generated: {summary_file}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import asyncio
-    asyncio.run(main())
 
+    asyncio.run(main())

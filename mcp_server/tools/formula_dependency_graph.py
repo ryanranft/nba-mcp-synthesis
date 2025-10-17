@@ -22,6 +22,7 @@ try:
     import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
     from matplotlib.colors import LinearSegmentedColormap
+
     NETWORKX_AVAILABLE = True
 except ImportError:
     nx = None
@@ -31,6 +32,7 @@ except ImportError:
 try:
     import sympy as sp
     from sympy.parsing.sympy_parser import parse_expr
+
     SYMPY_AVAILABLE = True
 except ImportError:
     sp = None
@@ -47,6 +49,7 @@ ToolError = ValidationError
 
 class FormulaType(Enum):
     """Types of formulas in the dependency graph"""
+
     BASIC = "basic"
     ADVANCED = "advanced"
     COMPOSITE = "composite"
@@ -56,6 +59,7 @@ class FormulaType(Enum):
 
 class DependencyType(Enum):
     """Types of dependencies between formulas"""
+
     DIRECT = "direct"  # Formula A directly uses Formula B
     INDIRECT = "indirect"  # Formula A uses Formula B through another formula
     COMPONENT = "component"  # Formula A is a component of Formula B
@@ -65,6 +69,7 @@ class DependencyType(Enum):
 @dataclass
 class FormulaNode:
     """Represents a formula in the dependency graph"""
+
     formula_id: str
     name: str
     formula: str
@@ -80,6 +85,7 @@ class FormulaNode:
 @dataclass
 class FormulaDependency:
     """Represents a dependency between two formulas"""
+
     source_id: str
     target_id: str
     dependency_type: DependencyType
@@ -90,6 +96,7 @@ class FormulaDependency:
 @dataclass
 class DependencyGraph:
     """Container for the complete dependency graph"""
+
     nodes: Dict[str, FormulaNode] = field(default_factory=dict)
     dependencies: List[FormulaDependency] = field(default_factory=list)
     categories: Dict[str, List[str]] = field(default_factory=dict)
@@ -98,16 +105,20 @@ class DependencyGraph:
 def check_dependencies():
     """Check if required libraries are available."""
     if not SYMPY_AVAILABLE:
-        raise ToolError("SymPy is required for formula dependency analysis. Please install it: pip install sympy")
+        raise ToolError(
+            "SymPy is required for formula dependency analysis. Please install it: pip install sympy"
+        )
     if not NETWORKX_AVAILABLE:
-        raise ToolError("NetworkX and Matplotlib are required for graph visualization. Please install them: pip install networkx matplotlib")
+        raise ToolError(
+            "NetworkX and Matplotlib are required for graph visualization. Please install them: pip install networkx matplotlib"
+        )
 
 
 @log_operation("formula_dependency_create_graph")
 def create_formula_dependency_graph(
     formulas: Optional[Dict[str, Dict[str, Any]]] = None,
     analyze_dependencies: bool = True,
-    include_custom_formulas: bool = True
+    include_custom_formulas: bool = True,
 ) -> DependencyGraph:
     """
     Create a dependency graph from a collection of formulas.
@@ -130,36 +141,143 @@ def create_formula_dependency_graph(
     if formulas is None:
         try:
             from .algebra_helper import get_sports_formula
+
             # Get all available formula names by calling the function with a dummy name
             # and catching the error to see what's available
             available_formulas = [
-                    "per", "true_shooting", "usage_rate", "four_factors_shooting",
-                    "four_factors_turnovers", "pace", "vorp", "ws_per_48", "game_score",
-                    "pie", "bpm_offensive", "bpm_defensive", "win_shares_offensive",
-                    "corner_3pt_pct", "rim_fg_pct", "midrange_efficiency", "catch_and_shoot_pct",
-                    "defensive_win_shares", "steal_percentage", "block_percentage",
-                    "defensive_rating", "net_rating", "offensive_efficiency", "defensive_efficiency",
-                    "pace_factor", "clutch_performance", "on_off_differential", "plus_minus_per_100",
-                    "assist_percentage", "rebound_percentage", "turnover_percentage", "free_throw_rate",
-                    "effective_field_goal_percentage", "true_shooting_percentage", "player_efficiency_rating",
-                    "pace_adjusted_stats", "clutch_time_rating", "defensive_impact", "offensive_impact",
-                    "shooting_efficiency_differential", "possession_usage", "defensive_rebound_percentage",
-                    "offensive_rebound_percentage", "team_efficiency_differential", "pace_adjusted_offensive_rating",
-                    "pace_adjusted_defensive_rating"
-                ]
+                "per",
+                "true_shooting",
+                "usage_rate",
+                "four_factors_shooting",
+                "four_factors_turnovers",
+                "pace",
+                "vorp",
+                "ws_per_48",
+                "game_score",
+                "pie",
+                "bpm_offensive",
+                "bpm_defensive",
+                "win_shares_offensive",
+                "corner_3pt_pct",
+                "rim_fg_pct",
+                "midrange_efficiency",
+                "catch_and_shoot_pct",
+                "defensive_win_shares",
+                "steal_percentage",
+                "block_percentage",
+                "defensive_rating",
+                "net_rating",
+                "offensive_efficiency",
+                "defensive_efficiency",
+                "pace_factor",
+                "clutch_performance",
+                "on_off_differential",
+                "plus_minus_per_100",
+                "assist_percentage",
+                "rebound_percentage",
+                "turnover_percentage",
+                "free_throw_rate",
+                "effective_field_goal_percentage",
+                "true_shooting_percentage",
+                "player_efficiency_rating",
+                "pace_adjusted_stats",
+                "clutch_time_rating",
+                "defensive_impact",
+                "offensive_impact",
+                "shooting_efficiency_differential",
+                "possession_usage",
+                "defensive_rebound_percentage",
+                "offensive_rebound_percentage",
+                "team_efficiency_differential",
+                "pace_adjusted_offensive_rating",
+                "pace_adjusted_defensive_rating",
+            ]
 
             # Build formulas dictionary by calling get_sports_formula for each
             formulas = {}
             for formula_name in available_formulas:
                 try:
                     # Call with minimal data to get the formula structure
-                    result = get_sports_formula(formula_name, **{var: 1.0 for var in ["PTS", "FGA", "FTA", "FGM", "STL", "3PM", "FTM", "BLK", "OREB", "AST", "DREB", "PF", "TOV", "MP", "REB", "USG", "WS", "BPM", "VORP", "PER", "TS", "EFG", "USG_PCT", "PACE", "ORtg", "DRtg", "NetRtg", "OBPM", "DBPM", "OWS", "DWS", "AST_PCT", "REB_PCT", "TOV_PCT", "FTR", "EFG_PCT", "TS_PCT", "DRB_PCT", "ORB_PCT", "POSS_PCT", "TEAM_GAMES", "TEAM_MINUTES", "TEAM_FGM", "TEAM_FGA", "TEAM_FTM", "TEAM_FTA", "TEAM_TOV", "TEAM_ORB", "TEAM_DRB", "TEAM_PACE", "TEAM_ORtg", "TEAM_DRtg", "TEAM_NetRtg", "TEAM_OBPM", "TEAM_DBPM", "TEAM_OWS", "TEAM_DWS", "TEAM_AST_PCT", "TEAM_REB_PCT", "TEAM_TOV_PCT", "TEAM_FTR", "TEAM_EFG_PCT", "TEAM_TS_PCT", "TEAM_DRB_PCT", "TEAM_ORB_PCT", "TEAM_POSS_PCT"]})
-                    if 'formula' in result:
+                    result = get_sports_formula(
+                        formula_name,
+                        **{
+                            var: 1.0
+                            for var in [
+                                "PTS",
+                                "FGA",
+                                "FTA",
+                                "FGM",
+                                "STL",
+                                "3PM",
+                                "FTM",
+                                "BLK",
+                                "OREB",
+                                "AST",
+                                "DREB",
+                                "PF",
+                                "TOV",
+                                "MP",
+                                "REB",
+                                "USG",
+                                "WS",
+                                "BPM",
+                                "VORP",
+                                "PER",
+                                "TS",
+                                "EFG",
+                                "USG_PCT",
+                                "PACE",
+                                "ORtg",
+                                "DRtg",
+                                "NetRtg",
+                                "OBPM",
+                                "DBPM",
+                                "OWS",
+                                "DWS",
+                                "AST_PCT",
+                                "REB_PCT",
+                                "TOV_PCT",
+                                "FTR",
+                                "EFG_PCT",
+                                "TS_PCT",
+                                "DRB_PCT",
+                                "ORB_PCT",
+                                "POSS_PCT",
+                                "TEAM_GAMES",
+                                "TEAM_MINUTES",
+                                "TEAM_FGM",
+                                "TEAM_FGA",
+                                "TEAM_FTM",
+                                "TEAM_FTA",
+                                "TEAM_TOV",
+                                "TEAM_ORB",
+                                "TEAM_DRB",
+                                "TEAM_PACE",
+                                "TEAM_ORtg",
+                                "TEAM_DRtg",
+                                "TEAM_NetRtg",
+                                "TEAM_OBPM",
+                                "TEAM_DBPM",
+                                "TEAM_OWS",
+                                "TEAM_DWS",
+                                "TEAM_AST_PCT",
+                                "TEAM_REB_PCT",
+                                "TEAM_TOV_PCT",
+                                "TEAM_FTR",
+                                "TEAM_EFG_PCT",
+                                "TEAM_TS_PCT",
+                                "TEAM_DRB_PCT",
+                                "TEAM_ORB_PCT",
+                                "TEAM_POSS_PCT",
+                            ]
+                        },
+                    )
+                    if "formula" in result:
                         formulas[formula_name] = {
-                            'formula': result['formula'],
-                            'variables': result.get('variables', []),
-                            'description': result.get('description', ''),
-                            'name': formula_name.replace('_', ' ').title()
+                            "formula": result["formula"],
+                            "variables": result.get("variables", []),
+                            "description": result.get("description", ""),
+                            "name": formula_name.replace("_", " ").title(),
                         }
                 except Exception as e:
                     logger.warning(f"Could not get formula {formula_name}: {e}")
@@ -175,13 +293,13 @@ def create_formula_dependency_graph(
         try:
             node = FormulaNode(
                 formula_id=formula_id,
-                name=formula_data.get('name', formula_id),
-                formula=formula_data['formula'],
-                variables=formula_data.get('variables', []),
+                name=formula_data.get("name", formula_id),
+                formula=formula_data["formula"],
+                variables=formula_data.get("variables", []),
                 formula_type=_determine_formula_type(formula_id, formula_data),
-                description=formula_data.get('description', ''),
-                complexity_score=_calculate_complexity_score(formula_data['formula']),
-                category=formula_data.get('category', 'general')
+                description=formula_data.get("description", ""),
+                complexity_score=_calculate_complexity_score(formula_data["formula"]),
+                category=formula_data.get("category", "general"),
             )
             graph.nodes[formula_id] = node
 
@@ -199,26 +317,30 @@ def create_formula_dependency_graph(
     if analyze_dependencies:
         graph.dependencies = _analyze_formula_dependencies(graph.nodes)
 
-    logger.info(f"Created dependency graph with {len(graph.nodes)} nodes and {len(graph.dependencies)} dependencies")
+    logger.info(
+        f"Created dependency graph with {len(graph.nodes)} nodes and {len(graph.dependencies)} dependencies"
+    )
     return graph
 
 
-def _determine_formula_type(formula_id: str, formula_data: Dict[str, Any]) -> FormulaType:
+def _determine_formula_type(
+    formula_id: str, formula_data: Dict[str, Any]
+) -> FormulaType:
     """Determine the type of a formula based on its characteristics."""
-    formula = formula_data.get('formula', '')
-    variables = formula_data.get('variables', [])
+    formula = formula_data.get("formula", "")
+    variables = formula_data.get("variables", [])
 
     # Check for composite formulas (formulas that reference other formulas)
-    if any(var in formula for var in ['PER', 'TS%', 'USG%', 'WS', 'BPM']):
+    if any(var in formula for var in ["PER", "TS%", "USG%", "WS", "BPM"]):
         return FormulaType.COMPOSITE
 
     # Check for advanced metrics
-    advanced_keywords = ['win shares', 'box plus minus', 'vorp', 'pace', 'rating']
+    advanced_keywords = ["win shares", "box plus minus", "vorp", "pace", "rating"]
     if any(keyword in formula_id.lower() for keyword in advanced_keywords):
         return FormulaType.ADVANCED
 
     # Check for derived formulas
-    if len(variables) > 5 or '+' in formula or '-' in formula:
+    if len(variables) > 5 or "+" in formula or "-" in formula:
         return FormulaType.DERIVED
 
     return FormulaType.BASIC
@@ -229,13 +351,13 @@ def _calculate_complexity_score(formula: str) -> int:
     score = 1
 
     # Add points for mathematical operations
-    score += formula.count('+') + formula.count('-')
-    score += formula.count('*') + formula.count('/')
-    score += formula.count('**') * 2  # Exponents are more complex
-    score += formula.count('(') + formula.count(')')
+    score += formula.count("+") + formula.count("-")
+    score += formula.count("*") + formula.count("/")
+    score += formula.count("**") * 2  # Exponents are more complex
+    score += formula.count("(") + formula.count(")")
 
     # Add points for complex functions
-    complex_functions = ['sqrt', 'log', 'exp', 'sin', 'cos', 'tan']
+    complex_functions = ["sqrt", "log", "exp", "sin", "cos", "tan"]
     for func in complex_functions:
         score += formula.count(func) * 2
 
@@ -243,7 +365,9 @@ def _calculate_complexity_score(formula: str) -> int:
     return min(score, 10)
 
 
-def _analyze_formula_dependencies(nodes: Dict[str, FormulaNode]) -> List[FormulaDependency]:
+def _analyze_formula_dependencies(
+    nodes: Dict[str, FormulaNode],
+) -> List[FormulaDependency]:
     """Analyze dependencies between formulas."""
     dependencies = []
 
@@ -267,7 +391,7 @@ def _analyze_formula_dependencies(nodes: Dict[str, FormulaNode]) -> List[Formula
                         target_id=target_id,
                         dependency_type=DependencyType.DIRECT,
                         strength=strength,
-                        description=f"{source_node.name} uses variables from {target_node.name}"
+                        description=f"{source_node.name} uses variables from {target_node.name}",
                     )
                     dependencies.append(dependency)
 
@@ -278,7 +402,7 @@ def _analyze_formula_dependencies(nodes: Dict[str, FormulaNode]) -> List[Formula
                     target_id=target_id,
                     dependency_type=DependencyType.COMPONENT,
                     strength=0.8,
-                    description=f"{source_node.name} references {target_node.name}"
+                    description=f"{source_node.name} references {target_node.name}",
                 )
                 dependencies.append(dependency)
 
@@ -292,7 +416,7 @@ def visualize_dependency_graph(
     show_labels: bool = True,
     node_size: int = 1000,
     edge_width: float = 1.0,
-    save_path: Optional[str] = None
+    save_path: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Create a visualization of the formula dependency graph.
@@ -319,12 +443,15 @@ def visualize_dependency_graph(
 
     # Add nodes
     for formula_id, node in graph.nodes.items():
-        G.add_node(formula_id, **{
-            'name': node.name,
-            'formula_type': node.formula_type.value,
-            'complexity': node.complexity_score,
-            'category': node.category
-        })
+        G.add_node(
+            formula_id,
+            **{
+                "name": node.name,
+                "formula_type": node.formula_type.value,
+                "complexity": node.complexity_score,
+                "category": node.category,
+            },
+        )
 
     # Add edges
     for dep in graph.dependencies:
@@ -332,7 +459,7 @@ def visualize_dependency_graph(
             dep.source_id,
             dep.target_id,
             weight=dep.strength,
-            dependency_type=dep.dependency_type.value
+            dependency_type=dep.dependency_type.value,
         )
 
     # Create visualization
@@ -344,31 +471,32 @@ def visualize_dependency_graph(
     elif layout == "circular":
         pos = nx.circular_layout(G)
     elif layout == "hierarchical":
-        pos = nx.nx_agraph.graphviz_layout(G, prog='dot') if hasattr(nx, 'nx_agraph') else nx.spring_layout(G)
+        pos = (
+            nx.nx_agraph.graphviz_layout(G, prog="dot")
+            if hasattr(nx, "nx_agraph")
+            else nx.spring_layout(G)
+        )
     else:
         pos = nx.spring_layout(G)
 
     # Color nodes by formula type
     node_colors = []
     type_colors = {
-        FormulaType.BASIC.value: '#FF6B6B',
-        FormulaType.ADVANCED.value: '#4ECDC4',
-        FormulaType.COMPOSITE.value: '#45B7D1',
-        FormulaType.DERIVED.value: '#96CEB4',
-        FormulaType.CUSTOM.value: '#FFEAA7'
+        FormulaType.BASIC.value: "#FF6B6B",
+        FormulaType.ADVANCED.value: "#4ECDC4",
+        FormulaType.COMPOSITE.value: "#45B7D1",
+        FormulaType.DERIVED.value: "#96CEB4",
+        FormulaType.CUSTOM.value: "#FFEAA7",
     }
 
     for node in G.nodes():
         node_data = G.nodes[node]
-        formula_type = node_data.get('formula_type', FormulaType.BASIC.value)
-        node_colors.append(type_colors.get(formula_type, '#95A5A6'))
+        formula_type = node_data.get("formula_type", FormulaType.BASIC.value)
+        node_colors.append(type_colors.get(formula_type, "#95A5A6"))
 
     # Draw nodes
     nx.draw_networkx_nodes(
-        G, pos,
-        node_color=node_colors,
-        node_size=node_size,
-        alpha=0.8
+        G, pos, node_color=node_colors, node_size=node_size, alpha=0.8
     )
 
     # Draw edges with different styles for different dependency types
@@ -377,25 +505,26 @@ def visualize_dependency_graph(
 
     for edge in G.edges():
         edge_data = G.edges[edge]
-        dep_type = edge_data.get('dependency_type', DependencyType.DIRECT.value)
+        dep_type = edge_data.get("dependency_type", DependencyType.DIRECT.value)
 
         if dep_type == DependencyType.DIRECT.value:
-            edge_colors.append('#2C3E50')
-            edge_styles.append('solid')
+            edge_colors.append("#2C3E50")
+            edge_styles.append("solid")
         elif dep_type == DependencyType.COMPONENT.value:
-            edge_colors.append('#E74C3C')
-            edge_styles.append('dashed')
+            edge_colors.append("#E74C3C")
+            edge_styles.append("dashed")
         elif dep_type == DependencyType.DERIVED.value:
-            edge_colors.append('#3498DB')
-            edge_styles.append('dotted')
+            edge_colors.append("#3498DB")
+            edge_styles.append("dotted")
         else:
-            edge_colors.append('#95A5A6')
-            edge_styles.append('solid')
+            edge_colors.append("#95A5A6")
+            edge_styles.append("solid")
 
     # Draw edges
     for i, (edge, color, style) in enumerate(zip(G.edges(), edge_colors, edge_styles)):
         nx.draw_networkx_edges(
-            G, pos,
+            G,
+            pos,
             edgelist=[edge],
             edge_color=color,
             style=style,
@@ -403,56 +532,65 @@ def visualize_dependency_graph(
             alpha=0.6,
             arrows=True,
             arrowsize=20,
-            arrowstyle='->'
+            arrowstyle="->",
         )
 
     # Draw labels
     if show_labels:
         labels = {node: graph.nodes[node].name for node in G.nodes()}
-        nx.draw_networkx_labels(G, pos, labels, font_size=8, font_weight='bold')
+        nx.draw_networkx_labels(G, pos, labels, font_size=8, font_weight="bold")
 
     # Create legend
     legend_elements = [
-        mpatches.Patch(color=color, label=formula_type.replace('_', ' ').title())
+        mpatches.Patch(color=color, label=formula_type.replace("_", " ").title())
         for formula_type, color in type_colors.items()
     ]
-    plt.legend(handles=legend_elements, loc='upper right', bbox_to_anchor=(1.15, 1))
+    plt.legend(handles=legend_elements, loc="upper right", bbox_to_anchor=(1.15, 1))
 
-    plt.title("Sports Analytics Formula Dependency Graph", fontsize=16, fontweight='bold')
-    plt.axis('off')
+    plt.title(
+        "Sports Analytics Formula Dependency Graph", fontsize=16, fontweight="bold"
+    )
+    plt.axis("off")
     plt.tight_layout()
 
     # Save if requested
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
         logger.info(f"Graph visualization saved to {save_path}")
 
     # Calculate statistics
     stats = {
-        'total_nodes': len(G.nodes()),
-        'total_edges': len(G.edges()),
-        'average_degree': sum(dict(G.degree()).values()) / len(G.nodes()) if G.nodes() else 0,
-        'strongly_connected_components': len(list(nx.strongly_connected_components(G))),
-        'formula_types': {ft.value: sum(1 for n in G.nodes() if G.nodes[n].get('formula_type') == ft.value) for ft in FormulaType},
-        'dependency_types': {dt.value: sum(1 for d in graph.dependencies if d.dependency_type == dt) for dt in DependencyType}
+        "total_nodes": len(G.nodes()),
+        "total_edges": len(G.edges()),
+        "average_degree": (
+            sum(dict(G.degree()).values()) / len(G.nodes()) if G.nodes() else 0
+        ),
+        "strongly_connected_components": len(list(nx.strongly_connected_components(G))),
+        "formula_types": {
+            ft.value: sum(
+                1 for n in G.nodes() if G.nodes[n].get("formula_type") == ft.value
+            )
+            for ft in FormulaType
+        },
+        "dependency_types": {
+            dt.value: sum(1 for d in graph.dependencies if d.dependency_type == dt)
+            for dt in DependencyType
+        },
     }
 
     plt.show()
 
     return {
-        'status': 'success',
-        'visualization_created': True,
-        'statistics': stats,
-        'save_path': save_path
+        "status": "success",
+        "visualization_created": True,
+        "statistics": stats,
+        "save_path": save_path,
     }
 
 
 @log_operation("formula_dependency_find_paths")
 def find_dependency_paths(
-    graph: DependencyGraph,
-    source_formula: str,
-    target_formula: str,
-    max_depth: int = 5
+    graph: DependencyGraph, source_formula: str, target_formula: str, max_depth: int = 5
 ) -> Dict[str, Any]:
     """
     Find all dependency paths between two formulas.
@@ -484,7 +622,9 @@ def find_dependency_paths(
 
     # Find all simple paths
     try:
-        paths = list(nx.all_simple_paths(G, source_formula, target_formula, cutoff=max_depth))
+        paths = list(
+            nx.all_simple_paths(G, source_formula, target_formula, cutoff=max_depth)
+        )
     except nx.NetworkXNoPath:
         paths = []
 
@@ -502,35 +642,40 @@ def find_dependency_paths(
             for dep in graph.dependencies:
                 if dep.source_id == source and dep.target_id == target:
                     path_strength *= dep.strength
-                    path_description.append(f"{graph.nodes[source].name} → {graph.nodes[target].name}")
+                    path_description.append(
+                        f"{graph.nodes[source].name} → {graph.nodes[target].name}"
+                    )
                     break
 
-        path_analysis.append({
-            'path_id': i + 1,
-            'path': path,
-            'strength': path_strength,
-            'length': len(path) - 1,
-            'description': ' → '.join(path_description)
-        })
+        path_analysis.append(
+            {
+                "path_id": i + 1,
+                "path": path,
+                "strength": path_strength,
+                "length": len(path) - 1,
+                "description": " → ".join(path_description),
+            }
+        )
 
     # Sort by strength
-    path_analysis.sort(key=lambda x: x['strength'], reverse=True)
+    path_analysis.sort(key=lambda x: x["strength"], reverse=True)
 
     return {
-        'status': 'success',
-        'source_formula': source_formula,
-        'target_formula': target_formula,
-        'total_paths': len(paths),
-        'paths': path_analysis,
-        'shortest_path_length': min([p['length'] for p in path_analysis]) if path_analysis else None,
-        'strongest_path': path_analysis[0] if path_analysis else None
+        "status": "success",
+        "source_formula": source_formula,
+        "target_formula": target_formula,
+        "total_paths": len(paths),
+        "paths": path_analysis,
+        "shortest_path_length": (
+            min([p["length"] for p in path_analysis]) if path_analysis else None
+        ),
+        "strongest_path": path_analysis[0] if path_analysis else None,
     }
 
 
 @log_operation("formula_dependency_analyze_complexity")
 def analyze_formula_complexity(
-    graph: DependencyGraph,
-    formula_id: Optional[str] = None
+    graph: DependencyGraph, formula_id: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Analyze the complexity of formulas in the dependency graph.
@@ -565,56 +710,91 @@ def analyze_formula_complexity(
         out_degree = G.out_degree(formula_id)
 
         # Find dependencies
-        dependencies = [dep for dep in graph.dependencies if dep.source_id == formula_id]
+        dependencies = [
+            dep for dep in graph.dependencies if dep.source_id == formula_id
+        ]
         dependents = [dep for dep in graph.dependencies if dep.target_id == formula_id]
 
         analysis = {
-            'formula_id': formula_id,
-            'formula_name': node.name,
-            'complexity_score': node.complexity_score,
-            'formula_type': node.formula_type.value,
-            'in_degree': in_degree,
-            'out_degree': out_degree,
-            'total_dependencies': len(dependencies),
-            'total_dependents': len(dependents),
-            'dependencies': [{'target': dep.target_id, 'strength': dep.strength, 'type': dep.dependency_type.value} for dep in dependencies],
-            'dependents': [{'source': dep.source_id, 'strength': dep.strength, 'type': dep.dependency_type.value} for dep in dependents]
+            "formula_id": formula_id,
+            "formula_name": node.name,
+            "complexity_score": node.complexity_score,
+            "formula_type": node.formula_type.value,
+            "in_degree": in_degree,
+            "out_degree": out_degree,
+            "total_dependencies": len(dependencies),
+            "total_dependents": len(dependents),
+            "dependencies": [
+                {
+                    "target": dep.target_id,
+                    "strength": dep.strength,
+                    "type": dep.dependency_type.value,
+                }
+                for dep in dependencies
+            ],
+            "dependents": [
+                {
+                    "source": dep.source_id,
+                    "strength": dep.strength,
+                    "type": dep.dependency_type.value,
+                }
+                for dep in dependents
+            ],
         }
     else:
         # Analyze all formulas - only for nodes that exist in the NetworkX graph
         graph_node_ids = list(G.nodes())
-        complexity_scores = [node.complexity_score for node_id, node in graph.nodes.items() if node_id in G]
+        complexity_scores = [
+            node.complexity_score
+            for node_id, node in graph.nodes.items()
+            if node_id in G
+        ]
         in_degrees = [len(list(G.predecessors(node_id))) for node_id in graph_node_ids]
         out_degrees = [len(list(G.successors(node_id))) for node_id in graph_node_ids]
 
         # Find most complex formulas
-        most_complex = sorted([(node_id, node) for node_id, node in graph.nodes.items() if node_id in G], key=lambda x: x[1].complexity_score, reverse=True)[:5]
+        most_complex = sorted(
+            [(node_id, node) for node_id, node in graph.nodes.items() if node_id in G],
+            key=lambda x: x[1].complexity_score,
+            reverse=True,
+        )[:5]
 
         # Find most connected formulas
-        most_connected = sorted([(node_id, node) for node_id, node in graph.nodes.items() if node_id in G], key=lambda x: len(list(G.neighbors(x[0]))) if x[0] in G else 0, reverse=True)[:5]
+        most_connected = sorted(
+            [(node_id, node) for node_id, node in graph.nodes.items() if node_id in G],
+            key=lambda x: len(list(G.neighbors(x[0]))) if x[0] in G else 0,
+            reverse=True,
+        )[:5]
 
         analysis = {
-            'total_formulas': len(graph.nodes),
-            'average_complexity': sum(complexity_scores) / len(complexity_scores) if complexity_scores else 0,
-            'max_complexity': max(complexity_scores) if complexity_scores else 0,
-            'min_complexity': min(complexity_scores) if complexity_scores else 0,
-            'average_in_degree': sum(in_degrees) / len(in_degrees) if in_degrees else 0,
-            'average_out_degree': sum(out_degrees) / len(out_degrees) if out_degrees else 0,
-            'most_complex_formulas': [{'id': fid, 'name': node.name, 'complexity': node.complexity_score} for fid, node in most_complex],
-            'most_connected_formulas': [{'id': fid, 'name': node.name, 'degree': G.degree(fid)} for fid, node in most_connected]
+            "total_formulas": len(graph.nodes),
+            "average_complexity": (
+                sum(complexity_scores) / len(complexity_scores)
+                if complexity_scores
+                else 0
+            ),
+            "max_complexity": max(complexity_scores) if complexity_scores else 0,
+            "min_complexity": min(complexity_scores) if complexity_scores else 0,
+            "average_in_degree": sum(in_degrees) / len(in_degrees) if in_degrees else 0,
+            "average_out_degree": (
+                sum(out_degrees) / len(out_degrees) if out_degrees else 0
+            ),
+            "most_complex_formulas": [
+                {"id": fid, "name": node.name, "complexity": node.complexity_score}
+                for fid, node in most_complex
+            ],
+            "most_connected_formulas": [
+                {"id": fid, "name": node.name, "degree": G.degree(fid)}
+                for fid, node in most_connected
+            ],
         }
 
-    return {
-        'status': 'success',
-        'analysis': analysis
-    }
+    return {"status": "success", "analysis": analysis}
 
 
 @log_operation("formula_dependency_export_graph")
 def export_dependency_graph(
-    graph: DependencyGraph,
-    format: str = "json",
-    include_visualization: bool = False
+    graph: DependencyGraph, format: str = "json", include_visualization: bool = False
 ) -> Dict[str, Any]:
     """
     Export the dependency graph in various formats.
@@ -634,50 +814,52 @@ def export_dependency_graph(
     check_dependencies()
 
     export_data = {
-        'metadata': {
-            'total_nodes': len(graph.nodes),
-            'total_dependencies': len(graph.dependencies),
-            'categories': list(graph.categories.keys()),
-            'export_format': format
+        "metadata": {
+            "total_nodes": len(graph.nodes),
+            "total_dependencies": len(graph.dependencies),
+            "categories": list(graph.categories.keys()),
+            "export_format": format,
         },
-        'nodes': {},
-        'dependencies': []
+        "nodes": {},
+        "dependencies": [],
     }
 
     # Export nodes
     for formula_id, node in graph.nodes.items():
-        export_data['nodes'][formula_id] = {
-            'name': node.name,
-            'formula': node.formula,
-            'variables': node.variables,
-            'formula_type': node.formula_type.value,
-            'description': node.description,
-            'complexity_score': node.complexity_score,
-            'category': node.category
+        export_data["nodes"][formula_id] = {
+            "name": node.name,
+            "formula": node.formula,
+            "variables": node.variables,
+            "formula_type": node.formula_type.value,
+            "description": node.description,
+            "complexity_score": node.complexity_score,
+            "category": node.category,
         }
 
     # Export dependencies
     for dep in graph.dependencies:
-        export_data['dependencies'].append({
-            'source_id': dep.source_id,
-            'target_id': dep.target_id,
-            'dependency_type': dep.dependency_type.value,
-            'strength': dep.strength,
-            'description': dep.description
-        })
+        export_data["dependencies"].append(
+            {
+                "source_id": dep.source_id,
+                "target_id": dep.target_id,
+                "dependency_type": dep.dependency_type.value,
+                "strength": dep.strength,
+                "description": dep.description,
+            }
+        )
 
     # Add visualization data if requested
     if include_visualization:
         try:
             viz_result = visualize_dependency_graph(graph, save_path=None)
-            export_data['visualization'] = viz_result['statistics']
+            export_data["visualization"] = viz_result["statistics"]
         except Exception as e:
             logger.warning(f"Failed to include visualization data: {e}")
 
     return {
-        'status': 'success',
-        'export_format': format,
-        'export_data': export_data,
-        'node_count': len(graph.nodes),
-        'dependency_count': len(graph.dependencies)
+        "status": "success",
+        "export_format": format,
+        "export_data": export_data,
+        "node_count": len(graph.nodes),
+        "dependency_count": len(graph.dependencies),
     }

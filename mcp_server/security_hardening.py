@@ -39,6 +39,7 @@ logger = logging.getLogger(__name__)
 
 class SecurityLevel(Enum):
     """Security severity levels"""
+
     CRITICAL = 5
     HIGH = 4
     MEDIUM = 3
@@ -48,6 +49,7 @@ class SecurityLevel(Enum):
 
 class ThreatType(Enum):
     """Types of security threats"""
+
     SQL_INJECTION = "sql_injection"
     XSS = "cross_site_scripting"
     CSRF = "cross_site_request_forgery"
@@ -60,6 +62,7 @@ class ThreatType(Enum):
 @dataclass
 class SecurityFinding:
     """Security vulnerability or issue"""
+
     finding_id: str
     title: str
     description: str
@@ -75,6 +78,7 @@ class SecurityFinding:
 @dataclass
 class ThreatEvent:
     """Security threat event"""
+
     event_id: str
     threat_type: ThreatType
     source_ip: str
@@ -93,18 +97,20 @@ class InputValidator:
         r"(\bUNION\b.*\bSELECT\b)",
         r"(\bOR\b\s+\d+\s*=\s*\d+)",
         r"(';.*--)",
-        r"(\bDROP\b\s+\bTABLE\b)"
+        r"(\bDROP\b\s+\bTABLE\b)",
     ]
 
     XSS_PATTERNS = [
         r"<script[^>]*>.*?</script>",
         r"javascript:",
         r"onerror\s*=",
-        r"onclick\s*="
+        r"onclick\s*=",
     ]
 
     def __init__(self):
-        self.sql_patterns = [re.compile(p, re.IGNORECASE) for p in self.SQL_INJECTION_PATTERNS]
+        self.sql_patterns = [
+            re.compile(p, re.IGNORECASE) for p in self.SQL_INJECTION_PATTERNS
+        ]
         self.xss_patterns = [re.compile(p, re.IGNORECASE) for p in self.XSS_PATTERNS]
 
     def check_sql_injection(self, input_string: str) -> bool:
@@ -126,16 +132,22 @@ class InputValidator:
     def sanitize_html(self, input_string: str) -> str:
         """Sanitize HTML input"""
         # Remove dangerous tags
-        sanitized = re.sub(r'<script[^>]*>.*?</script>', '', input_string, flags=re.IGNORECASE)
-        sanitized = re.sub(r'<iframe[^>]*>.*?</iframe>', '', sanitized, flags=re.IGNORECASE)
-        sanitized = re.sub(r'javascript:', '', sanitized, flags=re.IGNORECASE)
+        sanitized = re.sub(
+            r"<script[^>]*>.*?</script>", "", input_string, flags=re.IGNORECASE
+        )
+        sanitized = re.sub(
+            r"<iframe[^>]*>.*?</iframe>", "", sanitized, flags=re.IGNORECASE
+        )
+        sanitized = re.sub(r"javascript:", "", sanitized, flags=re.IGNORECASE)
 
         # Escape remaining HTML
-        sanitized = sanitized.replace('<', '&lt;').replace('>', '&gt;')
+        sanitized = sanitized.replace("<", "&lt;").replace(">", "&gt;")
 
         return sanitized
 
-    def validate_input(self, input_string: str, check_sql: bool = True, check_xss: bool = True) -> Dict[str, Any]:
+    def validate_input(
+        self, input_string: str, check_sql: bool = True, check_xss: bool = True
+    ) -> Dict[str, Any]:
         """Comprehensive input validation"""
         issues = []
 
@@ -148,9 +160,11 @@ class InputValidator:
         is_safe = len(issues) == 0
 
         return {
-            'is_safe': is_safe,
-            'issues': issues,
-            'sanitized': self.sanitize_html(input_string) if not is_safe else input_string
+            "is_safe": is_safe,
+            "issues": issues,
+            "sanitized": (
+                self.sanitize_html(input_string) if not is_safe else input_string
+            ),
         }
 
 
@@ -161,10 +175,20 @@ class PasswordStrengthChecker:
 
     def __init__(self):
         # Common passwords to block
-        self.common_passwords = set([
-            'password', '123456', 'password123', 'admin', 'letmein',
-            'welcome', 'monkey', '1234567890', 'qwerty', 'abc123'
-        ])
+        self.common_passwords = set(
+            [
+                "password",
+                "123456",
+                "password123",
+                "admin",
+                "letmein",
+                "welcome",
+                "monkey",
+                "1234567890",
+                "qwerty",
+                "abc123",
+            ]
+        )
 
     def check_strength(self, password: str) -> Dict[str, Any]:
         """Analyze password strength"""
@@ -178,9 +202,9 @@ class PasswordStrengthChecker:
             feedback.append(f"Password should be at least {self.MIN_LENGTH} characters")
 
         # Character variety
-        has_lower = bool(re.search(r'[a-z]', password))
-        has_upper = bool(re.search(r'[A-Z]', password))
-        has_digit = bool(re.search(r'\d', password))
+        has_lower = bool(re.search(r"[a-z]", password))
+        has_upper = bool(re.search(r"[A-Z]", password))
+        has_digit = bool(re.search(r"\d", password))
         has_special = bool(re.search(r'[!@#$%^&*(),.?":{}|<>]', password))
 
         if has_lower:
@@ -207,12 +231,14 @@ class PasswordStrengthChecker:
             feedback = ["This is a commonly used password - choose something unique"]
 
         # Repeated characters
-        if re.search(r'(.)\1{2,}', password):
+        if re.search(r"(.)\1{2,}", password):
             score -= 1
             feedback.append("Avoid repeating characters")
 
         # Sequential characters
-        if re.search(r'(012|123|234|345|456|567|678|789|890|abc|bcd|cde)', password.lower()):
+        if re.search(
+            r"(012|123|234|345|456|567|678|789|890|abc|bcd|cde)", password.lower()
+        ):
             score -= 1
             feedback.append("Avoid sequential characters")
 
@@ -225,11 +251,11 @@ class PasswordStrengthChecker:
             strength = "weak"
 
         return {
-            'strength': strength,
-            'score': max(0, score),
-            'max_score': 6,
-            'feedback': feedback,
-            'is_acceptable': score >= 4
+            "strength": strength,
+            "score": max(0, score),
+            "max_score": 6,
+            "feedback": feedback,
+            "is_acceptable": score >= 4,
         }
 
     def generate_strong_password(self, length: int = 16) -> str:
@@ -241,7 +267,7 @@ class PasswordStrengthChecker:
             secrets.choice(string.ascii_lowercase),
             secrets.choice(string.ascii_uppercase),
             secrets.choice(string.digits),
-            secrets.choice(string.punctuation)
+            secrets.choice(string.punctuation),
         ]
 
         # Fill remaining length
@@ -251,7 +277,7 @@ class PasswordStrengthChecker:
         # Shuffle
         secrets.SystemRandom().shuffle(password)
 
-        return ''.join(password)
+        return "".join(password)
 
 
 class RateLimitingEnhanced:
@@ -263,20 +289,17 @@ class RateLimitingEnhanced:
         self.suspicious_ips: Dict[str, int] = {}
 
     def check_rate_limit(
-        self,
-        identifier: str,
-        max_requests: int = 100,
-        window_seconds: int = 60
+        self, identifier: str, max_requests: int = 100, window_seconds: int = 60
     ) -> Dict[str, Any]:
         """Check if identifier exceeds rate limit"""
 
         # Check if blocked
         if identifier in self.blocked_ips:
             return {
-                'allowed': False,
-                'reason': 'IP blocked',
-                'requests_made': 0,
-                'limit': max_requests
+                "allowed": False,
+                "reason": "IP blocked",
+                "requests_made": 0,
+                "limit": max_requests,
             }
 
         now = datetime.now()
@@ -287,8 +310,7 @@ class RateLimitingEnhanced:
             self.request_counts[identifier] = []
 
         self.request_counts[identifier] = [
-            ts for ts in self.request_counts[identifier]
-            if ts > cutoff
+            ts for ts in self.request_counts[identifier] if ts > cutoff
         ]
 
         # Add current request
@@ -307,17 +329,17 @@ class RateLimitingEnhanced:
                 logger.warning(f"Blocked IP for rate limit violations: {identifier}")
 
             return {
-                'allowed': False,
-                'reason': 'Rate limit exceeded',
-                'requests_made': request_count,
-                'limit': max_requests
+                "allowed": False,
+                "reason": "Rate limit exceeded",
+                "requests_made": request_count,
+                "limit": max_requests,
             }
 
         return {
-            'allowed': True,
-            'requests_made': request_count,
-            'limit': max_requests,
-            'remaining': max_requests - request_count
+            "allowed": True,
+            "requests_made": request_count,
+            "limit": max_requests,
+            "remaining": max_requests - request_count,
         }
 
     def unblock_ip(self, identifier: str) -> bool:
@@ -338,31 +360,41 @@ class SecurityScanner:
         self.findings: List[SecurityFinding] = []
         self.next_finding_id = 0
 
-    def scan_dependencies(self, dependencies: List[Dict[str, str]]) -> List[SecurityFinding]:
+    def scan_dependencies(
+        self, dependencies: List[Dict[str, str]]
+    ) -> List[SecurityFinding]:
         """Scan dependencies for known vulnerabilities"""
         findings = []
 
         # Simulated vulnerability database
         known_vulns = {
-            'requests': {'version': '2.25.0', 'cve': 'CVE-2021-33503', 'severity': SecurityLevel.HIGH},
-            'urllib3': {'version': '1.26.4', 'cve': 'CVE-2021-28363', 'severity': SecurityLevel.MEDIUM}
+            "requests": {
+                "version": "2.25.0",
+                "cve": "CVE-2021-33503",
+                "severity": SecurityLevel.HIGH,
+            },
+            "urllib3": {
+                "version": "1.26.4",
+                "cve": "CVE-2021-28363",
+                "severity": SecurityLevel.MEDIUM,
+            },
         }
 
         for dep in dependencies:
-            package = dep['name']
-            version = dep['version']
+            package = dep["name"]
+            version = dep["version"]
 
             if package in known_vulns:
                 vuln = known_vulns[package]
-                if version == vuln['version']:
+                if version == vuln["version"]:
                     finding = self._create_finding(
                         title=f"Vulnerable dependency: {package}",
                         description=f"Package {package} version {version} has known vulnerability",
-                        severity=vuln['severity'],
+                        severity=vuln["severity"],
                         category="dependency",
                         affected_component=package,
-                        cve_id=vuln['cve'],
-                        remediation=f"Upgrade {package} to latest version"
+                        cve_id=vuln["cve"],
+                        remediation=f"Upgrade {package} to latest version",
                     )
                     findings.append(finding)
 
@@ -373,25 +405,29 @@ class SecurityScanner:
         findings = []
 
         # Check for insecure configurations
-        if configs.get('DEBUG', False):
-            findings.append(self._create_finding(
-                title="Debug mode enabled in production",
-                description="DEBUG=True exposes sensitive information",
-                severity=SecurityLevel.HIGH,
-                category="configuration",
-                affected_component="settings",
-                remediation="Set DEBUG=False in production"
-            ))
+        if configs.get("DEBUG", False):
+            findings.append(
+                self._create_finding(
+                    title="Debug mode enabled in production",
+                    description="DEBUG=True exposes sensitive information",
+                    severity=SecurityLevel.HIGH,
+                    category="configuration",
+                    affected_component="settings",
+                    remediation="Set DEBUG=False in production",
+                )
+            )
 
-        if not configs.get('USE_SSL', True):
-            findings.append(self._create_finding(
-                title="SSL not enforced",
-                description="Connections are not encrypted",
-                severity=SecurityLevel.CRITICAL,
-                category="configuration",
-                affected_component="network",
-                remediation="Enable SSL/TLS for all connections"
-            ))
+        if not configs.get("USE_SSL", True):
+            findings.append(
+                self._create_finding(
+                    title="SSL not enforced",
+                    description="Connections are not encrypted",
+                    severity=SecurityLevel.CRITICAL,
+                    category="configuration",
+                    affected_component="network",
+                    remediation="Enable SSL/TLS for all connections",
+                )
+            )
 
         return findings
 
@@ -403,7 +439,7 @@ class SecurityScanner:
         category: str,
         affected_component: str,
         cve_id: Optional[str] = None,
-        remediation: Optional[str] = None
+        remediation: Optional[str] = None,
     ) -> SecurityFinding:
         """Create a security finding"""
         finding = SecurityFinding(
@@ -414,7 +450,7 @@ class SecurityScanner:
             category=category,
             affected_component=affected_component,
             cve_id=cve_id,
-            remediation=remediation
+            remediation=remediation,
         )
 
         self.next_finding_id += 1
@@ -422,10 +458,13 @@ class SecurityScanner:
 
         return finding
 
-    def get_findings_by_severity(self, min_severity: SecurityLevel = SecurityLevel.LOW) -> List[SecurityFinding]:
+    def get_findings_by_severity(
+        self, min_severity: SecurityLevel = SecurityLevel.LOW
+    ) -> List[SecurityFinding]:
         """Get findings above minimum severity"""
         return [
-            f for f in self.findings
+            f
+            for f in self.findings
             if f.severity.value >= min_severity.value and not f.false_positive
         ]
 
@@ -438,7 +477,7 @@ class SecurityScanner:
             SecurityLevel.CRITICAL: 25,
             SecurityLevel.HIGH: 15,
             SecurityLevel.MEDIUM: 5,
-            SecurityLevel.LOW: 2
+            SecurityLevel.LOW: 2,
         }
 
         for finding in self.findings:
@@ -460,11 +499,15 @@ class SecurityScanner:
             grade = "F"
 
         return {
-            'score': total_score,
-            'grade': grade,
-            'total_findings': len(self.findings),
-            'critical_findings': len([f for f in self.findings if f.severity == SecurityLevel.CRITICAL]),
-            'high_findings': len([f for f in self.findings if f.severity == SecurityLevel.HIGH])
+            "score": total_score,
+            "grade": grade,
+            "total_findings": len(self.findings),
+            "critical_findings": len(
+                [f for f in self.findings if f.severity == SecurityLevel.CRITICAL]
+            ),
+            "high_findings": len(
+                [f for f in self.findings if f.severity == SecurityLevel.HIGH]
+            ),
         }
 
 
@@ -483,31 +526,27 @@ class SecurityHardening:
 
         # Scan dependencies (example)
         deps = [
-            {'name': 'requests', 'version': '2.25.0'},
-            {'name': 'boto3', 'version': '1.18.0'}
+            {"name": "requests", "version": "2.25.0"},
+            {"name": "boto3", "version": "1.18.0"},
         ]
         dep_findings = self.scanner.scan_dependencies(deps)
 
         # Scan configurations (example)
-        configs = {
-            'DEBUG': False,
-            'USE_SSL': True
-        }
+        configs = {"DEBUG": False, "USE_SSL": True}
         config_findings = self.scanner.scan_configurations(configs)
 
         # Get security score
         security_score = self.scanner.get_security_score()
 
         return {
-            'security_score': security_score,
-            'dependency_findings': len(dep_findings),
-            'config_findings': len(config_findings),
-            'total_findings': len(self.scanner.findings),
-            'critical_findings': [
-                f for f in self.scanner.findings
-                if f.severity == SecurityLevel.CRITICAL
+            "security_score": security_score,
+            "dependency_findings": len(dep_findings),
+            "config_findings": len(config_findings),
+            "total_findings": len(self.scanner.findings),
+            "critical_findings": [
+                f for f in self.scanner.findings if f.severity == SecurityLevel.CRITICAL
             ],
-            'threat_events': len(self.threat_events)
+            "threat_events": len(self.threat_events),
         }
 
 
@@ -525,14 +564,14 @@ if __name__ == "__main__":
     malicious_inputs = [
         "'; DROP TABLE users;--",
         "<script>alert('XSS')</script>",
-        "normal input"
+        "normal input",
     ]
 
     for input_str in malicious_inputs:
         result = security.input_validator.validate_input(input_str)
-        safe_status = "✓ SAFE" if result['is_safe'] else "✗ UNSAFE"
+        safe_status = "✓ SAFE" if result["is_safe"] else "✗ UNSAFE"
         print(f"{safe_status}: {input_str[:50]}")
-        if not result['is_safe']:
+        if not result["is_safe"]:
             print(f"  Issues: {', '.join(result['issues'])}")
 
     # Password strength
@@ -545,17 +584,18 @@ if __name__ == "__main__":
         print(f"Password: {'*' * len(pwd)}")
         print(f"  Strength: {result['strength'].upper()}")
         print(f"  Score: {result['score']}/{result['max_score']}")
-        if result['feedback']:
+        if result["feedback"]:
             print(f"  Feedback: {', '.join(result['feedback'])}")
 
     # Run security audit
     print("\n--- Security Audit ---\n")
     audit = security.run_security_audit()
 
-    print(f"Security Score: {audit['security_score']['score']}/100 (Grade: {audit['security_score']['grade']})")
+    print(
+        f"Security Score: {audit['security_score']['score']}/100 (Grade: {audit['security_score']['grade']})"
+    )
     print(f"Total Findings: {audit['total_findings']}")
     print(f"  Critical: {audit['security_score']['critical_findings']}")
     print(f"  High: {audit['security_score']['high_findings']}")
 
     print("\n=== Demo Complete ===")
-

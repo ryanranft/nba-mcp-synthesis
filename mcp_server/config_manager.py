@@ -37,6 +37,7 @@ logger = logging.getLogger(__name__)
 
 class Environment(Enum):
     """Environment types"""
+
     DEVELOPMENT = "development"
     STAGING = "staging"
     PRODUCTION = "production"
@@ -46,6 +47,7 @@ class Environment(Enum):
 @dataclass
 class DatabaseConfig:
     """Database configuration"""
+
     host: str
     port: int
     database: str
@@ -62,6 +64,7 @@ class DatabaseConfig:
 @dataclass
 class CacheConfig:
     """Cache configuration"""
+
     enabled: bool = True
     backend: str = "redis"  # redis, memcached, or local
     host: Optional[str] = "localhost"
@@ -73,6 +76,7 @@ class CacheConfig:
 @dataclass
 class LoggingConfig:
     """Logging configuration"""
+
     level: str = "INFO"
     format: str = "json"  # json or text
     output: str = "stdout"  # stdout, file, or cloudwatch
@@ -84,6 +88,7 @@ class LoggingConfig:
 @dataclass
 class SecurityConfig:
     """Security configuration"""
+
     jwt_secret_key: str
     jwt_expiry_minutes: int = 30
     api_rate_limit: int = 100  # requests per minute
@@ -98,6 +103,7 @@ class SecurityConfig:
 @dataclass
 class MLConfig:
     """ML/Model configuration"""
+
     model_registry_path: str
     mlflow_tracking_uri: str
     experiment_name: str = "nba_mcp"
@@ -109,6 +115,7 @@ class MLConfig:
 @dataclass
 class MonitoringConfig:
     """Monitoring and observability configuration"""
+
     enable_metrics: bool = True
     prometheus_port: int = 9090
     grafana_port: int = 3000
@@ -130,11 +137,12 @@ class ConfigManager:
         """
         # Deprecation warning
         import warnings
+
         warnings.warn(
             "ConfigManager is deprecated. Use UnifiedConfigurationManager instead. "
             "See mcp_server/unified_configuration_manager.py for migration guide.",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
 
         env_str = env or os.getenv("NBA_MCP_ENV", "development")
@@ -143,7 +151,9 @@ class ConfigManager:
         self.config: Dict[str, Any] = {}
 
         self._load_config()
-        logger.warning(f"⚠️  DEPRECATED: ConfigManager loaded for environment: {self.environment.value}")
+        logger.warning(
+            f"⚠️  DEPRECATED: ConfigManager loaded for environment: {self.environment.value}"
+        )
         logger.warning("⚠️  Please migrate to UnifiedConfigurationManager")
 
     def _load_config(self):
@@ -237,7 +247,7 @@ class ConfigManager:
 
     def get(self, key: str, default: Any = None) -> Any:
         """Get configuration value by key (supports dot notation)"""
-        keys = key.split('.')
+        keys = key.split(".")
         value = self.config
 
         for k in keys:
@@ -266,7 +276,7 @@ class ConfigManager:
 
     def export_config(self, path: str):
         """Export current configuration to file"""
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             json.dump(self.config, f, indent=2)
         logger.info(f"Configuration exported to {path}")
 
@@ -277,7 +287,7 @@ class ConfigManager:
             "database.port",
             "database.database",
             "security.jwt_secret_key",
-            "ml.model_registry_path"
+            "ml.model_registry_path",
         ]
 
         missing_keys = []
@@ -317,27 +327,18 @@ if __name__ == "__main__":
 
     # Base configuration (shared across all environments)
     base_config = {
-        "database": {
-            "port": 5432,
-            "max_connections": 10,
-            "ssl_mode": "require"
-        },
+        "database": {"port": 5432, "max_connections": 10, "ssl_mode": "require"},
         "cache": {
             "enabled": True,
             "backend": "redis",
             "port": 6379,
-            "ttl_seconds": 3600
+            "ttl_seconds": 3600,
         },
-        "logging": {
-            "format": "json"
-        },
-        "ml": {
-            "experiment_name": "nba_mcp",
-            "drift_threshold": 0.05
-        }
+        "logging": {"format": "json"},
+        "ml": {"experiment_name": "nba_mcp", "drift_threshold": 0.05},
     }
 
-    with open(config_dir / "base.json", 'w') as f:
+    with open(config_dir / "base.json", "w") as f:
         json.dump(base_config, f, indent=2)
 
     # Development configuration
@@ -347,36 +348,31 @@ if __name__ == "__main__":
             "database": "nba_mcp_dev",
             "user": "dev_user",
             "password": "dev_password",
-            "ssl_mode": "disable"
+            "ssl_mode": "disable",
         },
-        "cache": {
-            "host": "localhost"
-        },
-        "logging": {
-            "level": "DEBUG",
-            "output": "stdout"
-        },
+        "cache": {"host": "localhost"},
+        "logging": {"level": "DEBUG", "output": "stdout"},
         "security": {
             "jwt_secret_key": "dev-secret-key-change-in-production",
             "jwt_expiry_minutes": 60,
             "api_rate_limit": 1000,
             "enable_cors": True,
-            "allowed_origins": ["http://localhost:3000", "http://localhost:8000"]
+            "allowed_origins": ["http://localhost:3000", "http://localhost:8000"],
         },
         "ml": {
             "model_registry_path": "./models",
             "mlflow_tracking_uri": "http://localhost:5000",
             "enable_drift_detection": True,
-            "enable_ab_testing": False
+            "enable_ab_testing": False,
         },
         "monitoring": {
             "enable_metrics": True,
             "enable_tracing": False,
-            "enable_profiling": True
-        }
+            "enable_profiling": True,
+        },
     }
 
-    with open(config_dir / "development.json", 'w') as f:
+    with open(config_dir / "development.json", "w") as f:
         json.dump(dev_config, f, indent=2)
 
     # Production configuration
@@ -387,40 +383,38 @@ if __name__ == "__main__":
             "user": "prod_user",
             "password": "${DB_PASSWORD}",  # Should come from Secrets Manager
             "max_connections": 50,
-            "ssl_mode": "require"
+            "ssl_mode": "require",
         },
-        "cache": {
-            "host": "redis-prod.cache.amazonaws.com"
-        },
+        "cache": {"host": "redis-prod.cache.amazonaws.com"},
         "logging": {
             "level": "INFO",
             "output": "cloudwatch",
             "cloudwatch_group": "/aws/nba-mcp/prod",
-            "cloudwatch_stream": "application"
+            "cloudwatch_stream": "application",
         },
         "security": {
             "jwt_secret_key": "${JWT_SECRET}",  # Should come from Secrets Manager
             "jwt_expiry_minutes": 30,
             "api_rate_limit": 100,
             "enable_cors": True,
-            "allowed_origins": ["https://nba-mcp.com", "https://api.nba-mcp.com"]
+            "allowed_origins": ["https://nba-mcp.com", "https://api.nba-mcp.com"],
         },
         "ml": {
             "model_registry_path": "s3://nba-mcp-models-prod/registry",
             "mlflow_tracking_uri": "https://mlflow-prod.nba-mcp.com",
             "enable_drift_detection": True,
-            "enable_ab_testing": True
+            "enable_ab_testing": True,
         },
         "monitoring": {
             "enable_metrics": True,
             "prometheus_port": 9090,
             "enable_tracing": True,
             "jaeger_endpoint": "https://jaeger-prod.nba-mcp.com/api/traces",
-            "enable_profiling": False
-        }
+            "enable_profiling": False,
+        },
     }
 
-    with open(config_dir / "production.json", 'w') as f:
+    with open(config_dir / "production.json", "w") as f:
         json.dump(prod_config, f, indent=2)
 
     print("\n✅ Sample config files created in config/ directory\n")
@@ -429,7 +423,7 @@ if __name__ == "__main__":
     for env_name in ["development", "production"]:
         print(f"\n{'=' * 70}")
         print(f"Loading {env_name.upper()} configuration")
-        print('=' * 70)
+        print("=" * 70)
 
         config_mgr = ConfigManager(env=env_name)
 
@@ -470,9 +464,10 @@ if __name__ == "__main__":
         print(f"  Profiling Enabled: {monitoring_config.enable_profiling}")
 
         # Validate configuration
-        print(f"\n✓ Configuration Validation: {'PASSED' if config_mgr.validate_config() else 'FAILED'}")
+        print(
+            f"\n✓ Configuration Validation: {'PASSED' if config_mgr.validate_config() else 'FAILED'}"
+        )
 
     print("\n" + "=" * 70)
     print("Configuration Manager Demo Complete!")
     print("=" * 70)
-

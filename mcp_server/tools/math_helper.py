@@ -16,6 +16,7 @@ from mcp_server.tools.logger_config import log_operation
 # Arithmetic Operations
 # =============================================================================
 
+
 @log_operation("math_add")
 def add(a: Union[int, float], b: Union[int, float]) -> Union[int, float]:
     """
@@ -38,7 +39,9 @@ def add(a: Union[int, float], b: Union[int, float]) -> Union[int, float]:
 
 
 @log_operation("math_subtract")
-def subtract(minuend: Union[int, float], subtrahend: Union[int, float]) -> Union[int, float]:
+def subtract(
+    minuend: Union[int, float], subtrahend: Union[int, float]
+) -> Union[int, float]:
     """
     Subtract the second number from the first number.
 
@@ -102,9 +105,7 @@ def divide(numerator: Union[int, float], denominator: Union[int, float]) -> floa
     """
     if denominator == 0:
         raise ValidationError(
-            "Division by zero is not allowed",
-            "denominator",
-            denominator
+            "Division by zero is not allowed", "denominator", denominator
         )
     return numerator / denominator
 
@@ -130,17 +131,15 @@ def sum_numbers(numbers: List[Union[int, float]]) -> Union[int, float]:
         46.0
     """
     if not numbers:
-        raise ValidationError(
-            "Numbers list cannot be empty",
-            "numbers",
-            numbers
-        )
+        raise ValidationError("Numbers list cannot be empty", "numbers", numbers)
 
     return sum(numbers)
 
 
 @log_operation("math_modulo")
-def modulo(numerator: Union[int, float], denominator: Union[int, float]) -> Union[int, float]:
+def modulo(
+    numerator: Union[int, float], denominator: Union[int, float]
+) -> Union[int, float]:
     """
     Calculate the remainder when dividing two numbers.
 
@@ -162,9 +161,7 @@ def modulo(numerator: Union[int, float], denominator: Union[int, float]) -> Unio
     """
     if denominator == 0:
         raise ValidationError(
-            "Modulo by zero is not allowed",
-            "denominator",
-            denominator
+            "Modulo by zero is not allowed", "denominator", denominator
         )
     return numerator % denominator
 
@@ -172,6 +169,7 @@ def modulo(numerator: Union[int, float], denominator: Union[int, float]) -> Unio
 # =============================================================================
 # Rounding Operations
 # =============================================================================
+
 
 @log_operation("math_round")
 def round_number(number: Union[int, float], decimals: int = 0) -> Union[int, float]:
@@ -237,6 +235,7 @@ def ceiling(number: Union[int, float]) -> int:
 # =============================================================================
 # Trigonometric Operations (for shot angle calculations, etc.)
 # =============================================================================
+
 
 @log_operation("math_sin")
 def sine(radians: float) -> float:
@@ -341,6 +340,7 @@ def radians_to_degrees(radians: float) -> float:
 # =============================================================================
 # Utility Functions
 # =============================================================================
+
 
 def check_dependencies():
     """

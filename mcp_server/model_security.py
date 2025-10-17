@@ -32,7 +32,7 @@ class ModelSecurityManager:
         """Load trusted model registry from file"""
         try:
             if Path(self.trusted_models_registry).exists():
-                with open(self.trusted_models_registry, 'r') as f:
+                with open(self.trusted_models_registry, "r") as f:
                     return json.load(f)
             return {}
         except Exception as e:
@@ -42,7 +42,7 @@ class ModelSecurityManager:
     def _save_trusted_models(self):
         """Save trusted models registry to file"""
         try:
-            with open(self.trusted_models_registry, 'w') as f:
+            with open(self.trusted_models_registry, "w") as f:
                 json.dump(self.trusted_models, f, indent=2)
             logger.info("Trusted models registry saved")
         except Exception as e:
@@ -74,7 +74,7 @@ class ModelSecurityManager:
         model_name: str,
         model_path: str,
         version: str,
-        metadata: Optional[Dict] = None
+        metadata: Optional[Dict] = None,
     ) -> bool:
         """
         Register a model as trusted by storing its hash.
@@ -96,7 +96,7 @@ class ModelSecurityManager:
                 "version": version,
                 "path": model_path,
                 "registered_at": datetime.utcnow().isoformat(),
-                "metadata": metadata or {}
+                "metadata": metadata or {},
             }
 
             self._save_trusted_models()
@@ -142,10 +142,7 @@ class ModelSecurityManager:
             return False
 
     def detect_data_poisoning(
-        self,
-        training_data: np.ndarray,
-        labels: np.ndarray,
-        threshold: float = 0.05
+        self, training_data: np.ndarray, labels: np.ndarray, threshold: float = 0.05
     ) -> Dict[str, Any]:
         """
         Detect potential data poisoning by analyzing statistical anomalies.
@@ -158,11 +155,7 @@ class ModelSecurityManager:
         Returns:
             Dict with poisoning detection results
         """
-        results = {
-            "is_poisoned": False,
-            "anomalies_detected": [],
-            "confidence": 0.0
-        }
+        results = {"is_poisoned": False, "anomalies_detected": [], "confidence": 0.0}
 
         try:
             # 1. Check for duplicate samples (potential backdoor)
@@ -171,12 +164,14 @@ class ModelSecurityManager:
             duplicate_ratio = 1 - (unique_samples / total_samples)
 
             if duplicate_ratio > threshold:
-                results["anomalies_detected"].append({
-                    "type": "high_duplicate_ratio",
-                    "value": duplicate_ratio,
-                    "threshold": threshold,
-                    "severity": "HIGH"
-                })
+                results["anomalies_detected"].append(
+                    {
+                        "type": "high_duplicate_ratio",
+                        "value": duplicate_ratio,
+                        "threshold": threshold,
+                        "severity": "HIGH",
+                    }
+                )
 
             # 2. Check label distribution (class imbalance attacks)
             unique_labels, label_counts = np.unique(labels, return_counts=True)
@@ -185,12 +180,14 @@ class ModelSecurityManager:
             # Check if any class is suspiciously underrepresented
             min_class_ratio = np.min(label_distribution)
             if min_class_ratio < threshold / 2:
-                results["anomalies_detected"].append({
-                    "type": "extreme_class_imbalance",
-                    "value": min_class_ratio,
-                    "threshold": threshold / 2,
-                    "severity": "MEDIUM"
-                })
+                results["anomalies_detected"].append(
+                    {
+                        "type": "extreme_class_imbalance",
+                        "value": min_class_ratio,
+                        "threshold": threshold / 2,
+                        "severity": "MEDIUM",
+                    }
+                )
 
             # 3. Check for outliers in feature space
             feature_means = np.mean(training_data, axis=0)
@@ -202,12 +199,14 @@ class ModelSecurityManager:
             outlier_ratio = np.sum(outlier_mask) / total_samples
 
             if outlier_ratio > threshold:
-                results["anomalies_detected"].append({
-                    "type": "high_outlier_ratio",
-                    "value": outlier_ratio,
-                    "threshold": threshold,
-                    "severity": "MEDIUM"
-                })
+                results["anomalies_detected"].append(
+                    {
+                        "type": "high_outlier_ratio",
+                        "value": outlier_ratio,
+                        "threshold": threshold,
+                        "severity": "MEDIUM",
+                    }
+                )
 
             # 4. Check for correlated mislabeling
             # (advanced: would require validation set comparison)
@@ -216,13 +215,13 @@ class ModelSecurityManager:
             if results["anomalies_detected"]:
                 results["is_poisoned"] = True
                 high_severity_count = sum(
-                    1 for a in results["anomalies_detected"]
-                    if a["severity"] == "HIGH"
+                    1 for a in results["anomalies_detected"] if a["severity"] == "HIGH"
                 )
                 results["confidence"] = min(
-                    0.3 + (high_severity_count * 0.2) +
-                    (len(results["anomalies_detected"]) * 0.1),
-                    1.0
+                    0.3
+                    + (high_severity_count * 0.2)
+                    + (len(results["anomalies_detected"]) * 0.1),
+                    1.0,
                 )
 
             logger.info(
@@ -238,9 +237,7 @@ class ModelSecurityManager:
         return results
 
     def validate_input_data(
-        self,
-        input_data: np.ndarray,
-        reference_stats: Optional[Dict] = None
+        self, input_data: np.ndarray, reference_stats: Optional[Dict] = None
     ) -> bool:
         """
         Validate input data against expected distribution.
@@ -289,11 +286,7 @@ class ModelSecurityManager:
             return False
 
     def audit_model_usage(
-        self,
-        model_name: str,
-        user_id: str,
-        input_hash: str,
-        prediction: Any
+        self, model_name: str, user_id: str, input_hash: str, prediction: Any
     ):
         """
         Audit model usage for security monitoring.
@@ -309,7 +302,7 @@ class ModelSecurityManager:
             "model_name": model_name,
             "user_id": user_id,
             "input_hash": input_hash,
-            "prediction_type": type(prediction).__name__
+            "prediction_type": type(prediction).__name__,
         }
 
         # Log to audit trail (in production, send to CloudWatch/S3)
@@ -328,7 +321,7 @@ if __name__ == "__main__":
 
     # Simulate creating a model file
     test_model_path = "/tmp/test_model.pkl"
-    with open(test_model_path, 'wb') as f:
+    with open(test_model_path, "wb") as f:
         f.write(b"test model weights")
 
     security_mgr.register_trusted_model(
@@ -338,8 +331,8 @@ if __name__ == "__main__":
         metadata={
             "author": "ML Team",
             "purpose": "NBA game outcome prediction",
-            "training_date": "2025-10-01"
-        }
+            "training_date": "2025-10-01",
+        },
     )
 
     # Example 2: Verify model integrity
@@ -348,21 +341,21 @@ if __name__ == "__main__":
     print("=" * 60)
 
     is_valid = security_mgr.verify_model_integrity(
-        model_name="nba_prediction_model",
-        model_path=test_model_path
+        model_name="nba_prediction_model", model_path=test_model_path
     )
     print(f"Model integrity check: {'PASSED' if is_valid else 'FAILED'}")
 
     # Simulate tampering
     print("\nSimulating model tampering...")
-    with open(test_model_path, 'ab') as f:
+    with open(test_model_path, "ab") as f:
         f.write(b"malicious code")
 
     is_valid = security_mgr.verify_model_integrity(
-        model_name="nba_prediction_model",
-        model_path=test_model_path
+        model_name="nba_prediction_model", model_path=test_model_path
     )
-    print(f"Model integrity check after tampering: {'PASSED' if is_valid else 'FAILED'}")
+    print(
+        f"Model integrity check after tampering: {'PASSED' if is_valid else 'FAILED'}"
+    )
 
     # Example 3: Detect data poisoning
     print("\n" + "=" * 60)
@@ -377,18 +370,22 @@ if __name__ == "__main__":
     print(f"Clean data check: {'POISONED' if results['is_poisoned'] else 'CLEAN'}")
 
     # Poisoned training data (with many duplicates)
-    poisoned_data = np.vstack([
-        clean_data,
-        np.tile(clean_data[0], (100, 1))  # Add 100 duplicate backdoor samples
-    ])
+    poisoned_data = np.vstack(
+        [
+            clean_data,
+            np.tile(clean_data[0], (100, 1)),  # Add 100 duplicate backdoor samples
+        ]
+    )
     poisoned_labels = np.concatenate([clean_labels, np.ones(100)])
 
     results = security_mgr.detect_data_poisoning(poisoned_data, poisoned_labels)
     print(f"\nPoisoned data check: {'POISONED' if results['is_poisoned'] else 'CLEAN'}")
     print(f"Confidence: {results['confidence']:.2%}")
     print(f"Anomalies detected: {len(results['anomalies_detected'])}")
-    for anomaly in results['anomalies_detected']:
-        print(f"  - {anomaly['type']}: {anomaly['value']:.4f} (severity: {anomaly['severity']})")
+    for anomaly in results["anomalies_detected"]:
+        print(
+            f"  - {anomaly['type']}: {anomaly['value']:.4f} (severity: {anomaly['severity']})"
+        )
 
     # Example 4: Validate input data
     print("\n" + "=" * 60)
@@ -416,4 +413,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 60)
     print("Model Security Checks Complete!")
     print("=" * 60)
-

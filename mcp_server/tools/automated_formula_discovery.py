@@ -30,8 +30,10 @@ logger = logging.getLogger(__name__)
 # Data Structures
 # =============================================================================
 
+
 class DiscoveryMethod(Enum):
     """Methods for formula discovery"""
+
     GENETIC = "genetic"
     SYMBOLIC_REGRESSION = "symbolic_regression"
     PATTERN_MATCHING = "pattern_matching"
@@ -40,6 +42,7 @@ class DiscoveryMethod(Enum):
 
 class ComplexityLevel(Enum):
     """Complexity levels for discovered formulas"""
+
     SIMPLE = "simple"
     MODERATE = "moderate"
     COMPLEX = "complex"
@@ -48,6 +51,7 @@ class ComplexityLevel(Enum):
 
 class ValidationMetric(Enum):
     """Validation metrics for formula assessment"""
+
     R_SQUARED = "r_squared"
     MAE = "mae"
     RMSE = "rmse"
@@ -58,6 +62,7 @@ class ValidationMetric(Enum):
 @dataclass
 class DiscoveredFormula:
     """Represents a discovered formula with metadata"""
+
     formula_id: str
     expression: str
     latex_expression: str
@@ -75,6 +80,7 @@ class DiscoveredFormula:
 @dataclass
 class PatternResult:
     """Represents a discovered pattern"""
+
     pattern_id: str
     pattern_type: str
     correlation: float
@@ -87,6 +93,7 @@ class PatternResult:
 @dataclass
 class OptimizationResult:
     """Represents formula optimization results"""
+
     original_formula: str
     optimized_formula: str
     improvement_score: float
@@ -98,6 +105,7 @@ class OptimizationResult:
 # =============================================================================
 # Core Discovery Engine
 # =============================================================================
+
 
 class AutomatedFormulaDiscoveryEngine:
     """Main engine for automated formula discovery"""
@@ -113,12 +121,18 @@ class AutomatedFormulaDiscoveryEngine:
         """Load existing sports formulas for reference"""
         try:
             from .algebra_helper import get_sports_formula
+
             formulas = {}
 
             # Load common sports formulas
             common_formulas = [
-                "per", "true_shooting", "usage_rate", "defensive_rating",
-                "pace", "game_score", "effective_field_goal_percentage"
+                "per",
+                "true_shooting",
+                "usage_rate",
+                "defensive_rating",
+                "pace",
+                "game_score",
+                "effective_field_goal_percentage",
             ]
 
             for formula_id in common_formulas:
@@ -142,7 +156,7 @@ class AutomatedFormulaDiscoveryEngine:
         discovery_method: DiscoveryMethod = DiscoveryMethod.HYBRID,
         complexity_limit: ComplexityLevel = ComplexityLevel.MODERATE,
         max_formulas: int = 5,
-        confidence_threshold: float = 0.7
+        confidence_threshold: float = 0.7,
     ) -> Dict[str, Any]:
         """
         Discover formulas from data patterns using specified method.
@@ -160,7 +174,9 @@ class AutomatedFormulaDiscoveryEngine:
             Dictionary with discovered formulas and metadata
         """
         try:
-            logger.info(f"Starting formula discovery for {len(available_variables)} variables")
+            logger.info(
+                f"Starting formula discovery for {len(available_variables)} variables"
+            )
 
             discovered_formulas = []
 
@@ -170,13 +186,19 @@ class AutomatedFormulaDiscoveryEngine:
                 )
                 discovered_formulas.extend(genetic_formulas)
 
-            if discovery_method in [DiscoveryMethod.SYMBOLIC_REGRESSION, DiscoveryMethod.HYBRID]:
+            if discovery_method in [
+                DiscoveryMethod.SYMBOLIC_REGRESSION,
+                DiscoveryMethod.HYBRID,
+            ]:
                 symbolic_formulas = self._symbolic_regression_discovery(
                     available_variables, target_variable, complexity_limit, max_formulas
                 )
                 discovered_formulas.extend(symbolic_formulas)
 
-            if discovery_method in [DiscoveryMethod.PATTERN_MATCHING, DiscoveryMethod.HYBRID]:
+            if discovery_method in [
+                DiscoveryMethod.PATTERN_MATCHING,
+                DiscoveryMethod.HYBRID,
+            ]:
                 pattern_formulas = self._pattern_matching_discovery(
                     available_variables, target_variable, complexity_limit, max_formulas
                 )
@@ -184,14 +206,14 @@ class AutomatedFormulaDiscoveryEngine:
 
             # Filter by confidence threshold
             filtered_formulas = [
-                f for f in discovered_formulas
+                f
+                for f in discovered_formulas
                 if f.confidence_score >= confidence_threshold
             ]
 
             # Sort by confidence and accuracy
             filtered_formulas.sort(
-                key=lambda x: (x.confidence_score, x.accuracy_score),
-                reverse=True
+                key=lambda x: (x.confidence_score, x.accuracy_score), reverse=True
             )
 
             # Limit to max_formulas
@@ -218,7 +240,7 @@ class AutomatedFormulaDiscoveryEngine:
                         "discovery_method": f.discovery_method.value,
                         "validation_metrics": f.validation_metrics,
                         "interpretation": f.interpretation,
-                        "use_cases": f.use_cases
+                        "use_cases": f.use_cases,
                     }
                     for f in final_formulas
                 ],
@@ -226,8 +248,8 @@ class AutomatedFormulaDiscoveryEngine:
                     "method_used": discovery_method.value,
                     "complexity_limit": complexity_limit.value,
                     "confidence_threshold": confidence_threshold,
-                    "data_description": data_description
-                }
+                    "data_description": data_description,
+                },
             }
 
         except Exception as e:
@@ -236,7 +258,7 @@ class AutomatedFormulaDiscoveryEngine:
                 "status": "error",
                 "error": str(e),
                 "discovered_formulas": [],
-                "discovery_summary": {}
+                "discovery_summary": {},
             }
 
     def _genetic_algorithm_discovery(
@@ -244,7 +266,7 @@ class AutomatedFormulaDiscoveryEngine:
         variables: List[str],
         target: Optional[str],
         complexity_limit: ComplexityLevel,
-        max_formulas: int
+        max_formulas: int,
     ) -> List[DiscoveredFormula]:
         """Discover formulas using genetic algorithm approach"""
         try:
@@ -260,7 +282,9 @@ class AutomatedFormulaDiscoveryEngine:
                 # Evaluate fitness
                 fitness_scores = []
                 for formula_expr in population:
-                    fitness = self._evaluate_formula_fitness(formula_expr, variables, target)
+                    fitness = self._evaluate_formula_fitness(
+                        formula_expr, variables, target
+                    )
                     fitness_scores.append(fitness)
 
                 # Select best formulas
@@ -271,8 +295,11 @@ class AutomatedFormulaDiscoveryEngine:
                 for i in best_indices:
                     if fitness_scores[i] > 0.5:  # Only keep good formulas
                         formula = self._create_discovered_formula(
-                            population[i], variables, DiscoveryMethod.GENETIC,
-                            fitness_scores[i], target
+                            population[i],
+                            variables,
+                            DiscoveryMethod.GENETIC,
+                            fitness_scores[i],
+                            target,
                         )
                         formulas.append(formula)
 
@@ -293,37 +320,51 @@ class AutomatedFormulaDiscoveryEngine:
         variables: List[str],
         target: Optional[str],
         complexity_limit: ComplexityLevel,
-        max_formulas: int
+        max_formulas: int,
     ) -> List[DiscoveredFormula]:
         """Discover formulas using symbolic regression"""
         try:
             formulas = []
 
             # Generate polynomial expressions
-            polynomial_degrees = [1, 2, 3] if complexity_limit != ComplexityLevel.SIMPLE else [1, 2]
+            polynomial_degrees = (
+                [1, 2, 3] if complexity_limit != ComplexityLevel.SIMPLE else [1, 2]
+            )
 
             for degree in polynomial_degrees:
                 if len(variables) >= 2:
                     # Linear combinations
-                    formula_expr = self._generate_polynomial_expression(variables, degree)
-                    fitness = self._evaluate_formula_fitness(formula_expr, variables, target)
+                    formula_expr = self._generate_polynomial_expression(
+                        variables, degree
+                    )
+                    fitness = self._evaluate_formula_fitness(
+                        formula_expr, variables, target
+                    )
 
                     if fitness > 0.6:
                         formula = self._create_discovered_formula(
-                            formula_expr, variables, DiscoveryMethod.SYMBOLIC_REGRESSION,
-                            fitness, target
+                            formula_expr,
+                            variables,
+                            DiscoveryMethod.SYMBOLIC_REGRESSION,
+                            fitness,
+                            target,
                         )
                         formulas.append(formula)
 
                 # Interaction terms
                 if len(variables) >= 2 and complexity_limit != ComplexityLevel.SIMPLE:
                     interaction_expr = self._generate_interaction_expression(variables)
-                    fitness = self._evaluate_formula_fitness(interaction_expr, variables, target)
+                    fitness = self._evaluate_formula_fitness(
+                        interaction_expr, variables, target
+                    )
 
                     if fitness > 0.6:
                         formula = self._create_discovered_formula(
-                            interaction_expr, variables, DiscoveryMethod.SYMBOLIC_REGRESSION,
-                            fitness, target
+                            interaction_expr,
+                            variables,
+                            DiscoveryMethod.SYMBOLIC_REGRESSION,
+                            fitness,
+                            target,
                         )
                         formulas.append(formula)
 
@@ -338,7 +379,7 @@ class AutomatedFormulaDiscoveryEngine:
         variables: List[str],
         target: Optional[str],
         complexity_limit: ComplexityLevel,
-        max_formulas: int
+        max_formulas: int,
     ) -> List[DiscoveredFormula]:
         """Discover formulas using pattern matching"""
         try:
@@ -347,29 +388,42 @@ class AutomatedFormulaDiscoveryEngine:
             # Common sports analytics patterns
             patterns = [
                 # Efficiency patterns
-                lambda vars: f"({vars[0]} * {vars[1]}) / {vars[2]}" if len(vars) >= 3 else None,
-                lambda vars: f"{vars[0]} / ({vars[1]} + {vars[2]})" if len(vars) >= 3 else None,
+                lambda vars: (
+                    f"({vars[0]} * {vars[1]}) / {vars[2]}" if len(vars) >= 3 else None
+                ),
+                lambda vars: (
+                    f"{vars[0]} / ({vars[1]} + {vars[2]})" if len(vars) >= 3 else None
+                ),
                 lambda vars: f"({vars[0]} + {vars[1]}) / 2" if len(vars) >= 2 else None,
-
                 # Rate patterns
                 lambda vars: f"{vars[0]} / {vars[1]}" if len(vars) >= 2 else None,
-                lambda vars: f"({vars[0]} / {vars[1]}) * 100" if len(vars) >= 2 else None,
-
+                lambda vars: (
+                    f"({vars[0]} / {vars[1]}) * 100" if len(vars) >= 2 else None
+                ),
                 # Ratio patterns
-                lambda vars: f"{vars[0]} / ({vars[0]} + {vars[1]})" if len(vars) >= 2 else None,
-                lambda vars: f"({vars[0]} - {vars[1]}) / {vars[2]}" if len(vars) >= 3 else None,
+                lambda vars: (
+                    f"{vars[0]} / ({vars[0]} + {vars[1]})" if len(vars) >= 2 else None
+                ),
+                lambda vars: (
+                    f"({vars[0]} - {vars[1]}) / {vars[2]}" if len(vars) >= 3 else None
+                ),
             ]
 
             for pattern_func in patterns:
                 try:
                     formula_expr = pattern_func(variables)
                     if formula_expr:
-                        fitness = self._evaluate_formula_fitness(formula_expr, variables, target)
+                        fitness = self._evaluate_formula_fitness(
+                            formula_expr, variables, target
+                        )
 
                         if fitness > 0.5:
                             formula = self._create_discovered_formula(
-                                formula_expr, variables, DiscoveryMethod.PATTERN_MATCHING,
-                                fitness, target
+                                formula_expr,
+                                variables,
+                                DiscoveryMethod.PATTERN_MATCHING,
+                                fitness,
+                                target,
                             )
                             formulas.append(formula)
                 except Exception as e:
@@ -382,7 +436,9 @@ class AutomatedFormulaDiscoveryEngine:
             logger.error(f"Pattern matching discovery failed: {e}")
             return []
 
-    def _generate_formula_population(self, variables: List[str], size: int) -> List[str]:
+    def _generate_formula_population(
+        self, variables: List[str], size: int
+    ) -> List[str]:
         """Generate initial population of formula expressions"""
         population = []
 
@@ -390,11 +446,11 @@ class AutomatedFormulaDiscoveryEngine:
             # Random formula generation
             if len(variables) >= 2:
                 # Simple arithmetic combinations
-                operations = ['+', '-', '*', '/']
+                operations = ["+", "-", "*", "/"]
                 var1, var2 = random.sample(variables, 2)
                 operation = random.choice(operations)
 
-                if operation == '/':
+                if operation == "/":
                     formula = f"{var1} / ({var2} + 1)"  # Avoid division by zero
                 else:
                     formula = f"{var1} {operation} {var2}"
@@ -404,10 +460,7 @@ class AutomatedFormulaDiscoveryEngine:
         return population
 
     def _evaluate_formula_fitness(
-        self,
-        formula_expr: str,
-        variables: List[str],
-        target: Optional[str]
+        self, formula_expr: str, variables: List[str], target: Optional[str]
     ) -> float:
         """Evaluate fitness of a formula expression"""
         try:
@@ -437,7 +490,7 @@ class AutomatedFormulaDiscoveryEngine:
             var_usage_score = len(set(used_vars) & set(variables)) / len(variables)
             complexity_score = 1.0 - complexity
 
-            fitness = (var_usage_score * 0.6 + complexity_score * 0.4)
+            fitness = var_usage_score * 0.6 + complexity_score * 0.4
 
             return min(fitness, 0.9)
 
@@ -451,7 +504,7 @@ class AutomatedFormulaDiscoveryEngine:
         variables: List[str],
         method: DiscoveryMethod,
         fitness: float,
-        target: Optional[str]
+        target: Optional[str],
     ) -> DiscoveredFormula:
         """Create a DiscoveredFormula object"""
         formula_id = f"discovered_{method.value}_{len(self.discovered_formulas)}"
@@ -470,7 +523,9 @@ class AutomatedFormulaDiscoveryEngine:
         complexity = self._assess_formula_complexity(expression)
 
         # Generate interpretation
-        interpretation = self._generate_formula_interpretation(expression, used_vars, target)
+        interpretation = self._generate_formula_interpretation(
+            expression, used_vars, target
+        )
 
         # Identify use cases
         use_cases = self._identify_formula_use_cases(expression, used_vars)
@@ -487,18 +542,18 @@ class AutomatedFormulaDiscoveryEngine:
             validation_metrics={"fitness": fitness},
             interpretation=interpretation,
             use_cases=use_cases,
-            created_at=str(np.datetime64('now'))
+            created_at=str(np.datetime64("now")),
         )
 
     def _extract_variables_from_expression(self, expression: str) -> List[str]:
         """Extract variable names from a formula expression"""
         try:
             # Use regex to find variable names
-            var_pattern = r'\b[a-zA-Z_][a-zA-Z0-9_]*\b'
+            var_pattern = r"\b[a-zA-Z_][a-zA-Z0-9_]*\b"
             variables = re.findall(var_pattern, expression)
 
             # Filter out mathematical functions and constants
-            math_functions = {'sin', 'cos', 'tan', 'log', 'exp', 'sqrt', 'abs'}
+            math_functions = {"sin", "cos", "tan", "log", "exp", "sqrt", "abs"}
             variables = [v for v in variables if v not in math_functions]
 
             return list(set(variables))
@@ -510,28 +565,30 @@ class AutomatedFormulaDiscoveryEngine:
         """Assess complexity of a formula expression"""
         try:
             # Count operations
-            operations = expression.count('+') + expression.count('-') + \
-                        expression.count('*') + expression.count('/') + \
-                        expression.count('**') + expression.count('^')
+            operations = (
+                expression.count("+")
+                + expression.count("-")
+                + expression.count("*")
+                + expression.count("/")
+                + expression.count("**")
+                + expression.count("^")
+            )
 
             # Count parentheses
-            parentheses = expression.count('(') + expression.count(')')
+            parentheses = expression.count("(") + expression.count(")")
 
             # Count variables
             variables = len(self._extract_variables_from_expression(expression))
 
             # Normalize complexity (0-1 scale)
-            complexity = (operations * 0.1 + parentheses * 0.05 + variables * 0.1)
+            complexity = operations * 0.1 + parentheses * 0.05 + variables * 0.1
             return min(complexity, 1.0)
 
         except Exception:
             return 0.5
 
     def _generate_formula_interpretation(
-        self,
-        expression: str,
-        variables: List[str],
-        target: Optional[str]
+        self, expression: str, variables: List[str], target: Optional[str]
     ) -> str:
         """Generate human-readable interpretation of the formula"""
         try:
@@ -540,22 +597,26 @@ class AutomatedFormulaDiscoveryEngine:
             elif len(variables) == 2:
                 return f"Relationship between {variables[0]} and {variables[1]}"
             else:
-                return f"Multi-variable relationship involving {', '.join(variables[:3])}"
+                return (
+                    f"Multi-variable relationship involving {', '.join(variables[:3])}"
+                )
         except Exception:
             return "Complex mathematical relationship"
 
-    def _identify_formula_use_cases(self, expression: str, variables: List[str]) -> List[str]:
+    def _identify_formula_use_cases(
+        self, expression: str, variables: List[str]
+    ) -> List[str]:
         """Identify potential use cases for the formula"""
         use_cases = []
 
         # Check for common sports analytics patterns
-        if '/' in expression and '+' in expression:
+        if "/" in expression and "+" in expression:
             use_cases.append("Efficiency calculation")
 
-        if '*' in expression and len(variables) >= 2:
+        if "*" in expression and len(variables) >= 2:
             use_cases.append("Rate calculation")
 
-        if '-' in expression:
+        if "-" in expression:
             use_cases.append("Differential analysis")
 
         if len(variables) >= 3:
@@ -587,7 +648,7 @@ class AutomatedFormulaDiscoveryEngine:
             # Simple mutation: change operation or add/subtract constant
             if random.random() < 0.5:
                 # Change operation
-                operations = ['+', '-', '*', '/']
+                operations = ["+", "-", "*", "/"]
                 for op in operations:
                     if op in formula:
                         new_op = random.choice([o for o in operations if o != op])
@@ -607,11 +668,12 @@ class AutomatedFormulaDiscoveryEngine:
 # Pattern Analysis Functions
 # =============================================================================
 
+
 def analyze_data_patterns(
     data_patterns: List[Dict[str, Any]],
     pattern_types: List[str],
     correlation_threshold: float = 0.5,
-    significance_level: float = 0.05
+    significance_level: float = 0.05,
 ) -> Dict[str, Any]:
     """
     Analyze data patterns for formula discovery.
@@ -639,7 +701,7 @@ def analyze_data_patterns(
             # Calculate correlations
             correlations = {}
             for i, var1 in enumerate(variables):
-                for var2 in variables[i+1:]:
+                for var2 in variables[i + 1 :]:
                     try:
                         values1 = pattern_data[var1]
                         values2 = pattern_data[var2]
@@ -649,7 +711,10 @@ def analyze_data_patterns(
                                 corr_matrix = np.corrcoef(values1, values2)
                                 if corr_matrix.shape == (2, 2):
                                     corr = corr_matrix[0, 1]
-                                    if not np.isnan(corr) and abs(corr) >= correlation_threshold:
+                                    if (
+                                        not np.isnan(corr)
+                                        and abs(corr) >= correlation_threshold
+                                    ):
                                         correlations[f"{var1}_{var2}"] = corr
                             except Exception:
                                 # Skip if correlation calculation fails
@@ -664,7 +729,9 @@ def analyze_data_patterns(
                     # Linear relationship
                     best_corr = max(correlations.items(), key=lambda x: abs(x[1]))
                     try:
-                        var1, var2 = best_corr[0].split('_', 1)  # Split only on first underscore
+                        var1, var2 = best_corr[0].split(
+                            "_", 1
+                        )  # Split only on first underscore
                         corr_value = best_corr[1]
                     except ValueError:
                         # Skip if correlation key format is unexpected
@@ -677,7 +744,7 @@ def analyze_data_patterns(
                         significance=1.0 - abs(corr_value),
                         formula_expression=f"{var1} * {abs(corr_value):.2f} + {var2}",
                         variables=[var1, var2],
-                        confidence=abs(corr_value)
+                        confidence=abs(corr_value),
                     )
                     pattern_results.append(pattern_result)
 
@@ -691,7 +758,7 @@ def analyze_data_patterns(
                         significance=0.05,
                         formula_expression=f"{var1}**2 + {var2}",
                         variables=[var1, var2],
-                        confidence=0.7
+                        confidence=0.7,
                     )
                     pattern_results.append(pattern_result)
 
@@ -706,15 +773,15 @@ def analyze_data_patterns(
                     "significance": p.significance,
                     "formula_expression": p.formula_expression,
                     "variables": p.variables,
-                    "confidence": p.confidence
+                    "confidence": p.confidence,
                 }
                 for p in pattern_results
             ],
             "analysis_summary": {
                 "correlation_threshold": correlation_threshold,
                 "significance_level": significance_level,
-                "pattern_types_analyzed": pattern_types
-            }
+                "pattern_types_analyzed": pattern_types,
+            },
         }
 
     except Exception as e:
@@ -723,7 +790,7 @@ def analyze_data_patterns(
             "status": "error",
             "error": str(e),
             "pattern_results": [],
-            "analysis_summary": {}
+            "analysis_summary": {},
         }
 
 
@@ -731,11 +798,12 @@ def analyze_data_patterns(
 # Formula Validation Functions
 # =============================================================================
 
+
 def validate_discovered_formulas(
     formula_expressions: List[str],
     test_data: Optional[Dict[str, List[float]]] = None,
     validation_metrics: List[str] = None,
-    minimum_performance: float = 0.6
+    minimum_performance: float = 0.6,
 ) -> Dict[str, Any]:
     """
     Validate discovered formulas using various metrics.
@@ -765,8 +833,8 @@ def validate_discovered_formulas(
                     continue
 
                 # Extract variables
-                variables = re.findall(r'\b[a-zA-Z_][a-zA-Z0-9_]*\b', formula_expr)
-                math_functions = {'sin', 'cos', 'tan', 'log', 'exp', 'sqrt', 'abs'}
+                variables = re.findall(r"\b[a-zA-Z_][a-zA-Z0-9_]*\b", formula_expr)
+                math_functions = {"sin", "cos", "tan", "log", "exp", "sqrt", "abs"}
                 variables = [v for v in variables if v not in math_functions]
 
                 # Calculate validation metrics
@@ -788,25 +856,29 @@ def validate_discovered_formulas(
                 overall_performance = np.mean(list(metrics.values()))
 
                 if overall_performance >= minimum_performance:
-                    validation_results.append({
-                        "formula_id": f"formula_{i}",
-                        "expression": formula_expr,
-                        "variables": variables,
-                        "validation_metrics": metrics,
-                        "overall_performance": overall_performance,
-                        "validation_status": "passed",
-                        "recommendation": "Formula shows good performance"
-                    })
+                    validation_results.append(
+                        {
+                            "formula_id": f"formula_{i}",
+                            "expression": formula_expr,
+                            "variables": variables,
+                            "validation_metrics": metrics,
+                            "overall_performance": overall_performance,
+                            "validation_status": "passed",
+                            "recommendation": "Formula shows good performance",
+                        }
+                    )
                 else:
-                    validation_results.append({
-                        "formula_id": f"formula_{i}",
-                        "expression": formula_expr,
-                        "variables": variables,
-                        "validation_metrics": metrics,
-                        "overall_performance": overall_performance,
-                        "validation_status": "failed",
-                        "recommendation": "Formula needs improvement"
-                    })
+                    validation_results.append(
+                        {
+                            "formula_id": f"formula_{i}",
+                            "expression": formula_expr,
+                            "variables": variables,
+                            "validation_metrics": metrics,
+                            "overall_performance": overall_performance,
+                            "validation_status": "failed",
+                            "recommendation": "Formula needs improvement",
+                        }
+                    )
 
             except Exception as e:
                 logger.warning(f"Validation error for formula {i}: {e}")
@@ -819,13 +891,19 @@ def validate_discovered_formulas(
             "status": "success",
             "total_formulas": len(formula_expressions),
             "validated_formulas": len(validation_results),
-            "passed_validation": len([r for r in validation_results if r["validation_status"] == "passed"]),
+            "passed_validation": len(
+                [r for r in validation_results if r["validation_status"] == "passed"]
+            ),
             "validation_results": validation_results,
             "validation_summary": {
                 "minimum_performance": minimum_performance,
                 "metrics_used": validation_metrics,
-                "average_performance": np.mean([r["overall_performance"] for r in validation_results]) if validation_results else 0.0
-            }
+                "average_performance": (
+                    np.mean([r["overall_performance"] for r in validation_results])
+                    if validation_results
+                    else 0.0
+                ),
+            },
         }
 
     except Exception as e:
@@ -834,7 +912,7 @@ def validate_discovered_formulas(
             "status": "error",
             "error": str(e),
             "validation_results": [],
-            "validation_summary": {}
+            "validation_summary": {},
         }
 
 
@@ -842,11 +920,12 @@ def validate_discovered_formulas(
 # Formula Optimization Functions
 # =============================================================================
 
+
 def optimize_discovered_formula(
     base_formula: str,
     optimization_objective: str = "balanced",
     optimization_method: str = "genetic_algorithm",
-    max_iterations: int = 100
+    max_iterations: int = 100,
 ) -> Dict[str, Any]:
     """
     Optimize a discovered formula for better performance.
@@ -864,15 +943,15 @@ def optimize_discovered_formula(
         logger.info(f"Optimizing formula: {base_formula[:50]}...")
 
         # Extract variables from base formula
-        variables = re.findall(r'\b[a-zA-Z_][a-zA-Z0-9_]*\b', base_formula)
-        math_functions = {'sin', 'cos', 'tan', 'log', 'exp', 'sqrt', 'abs'}
+        variables = re.findall(r"\b[a-zA-Z_][a-zA-Z0-9_]*\b", base_formula)
+        math_functions = {"sin", "cos", "tan", "log", "exp", "sqrt", "abs"}
         variables = [v for v in variables if v not in math_functions]
 
         if not variables:
             return {
                 "status": "error",
                 "error": "No variables found in formula",
-                "optimization_result": {}
+                "optimization_result": {},
             }
 
         # Generate optimized formula (simplified approach)
@@ -883,7 +962,9 @@ def optimize_discovered_formula(
             for iteration in range(max_iterations):
                 # Random optimization step
                 if random.random() < 0.1:  # 10% chance of improvement
-                    optimized_formula = f"({optimized_formula}) * {random.uniform(0.9, 1.1):.3f}"
+                    optimized_formula = (
+                        f"({optimized_formula}) * {random.uniform(0.9, 1.1):.3f}"
+                    )
 
         elif optimization_method == "gradient_descent":
             # Simulate gradient descent optimization
@@ -897,7 +978,7 @@ def optimize_discovered_formula(
             "original_performance": random.uniform(0.6, 0.8),
             "optimized_performance": random.uniform(0.7, 0.9),
             "improvement": improvement_score,
-            "complexity_change": random.uniform(-0.1, 0.1)
+            "complexity_change": random.uniform(-0.1, 0.1),
         }
 
         optimization_result = OptimizationResult(
@@ -906,7 +987,7 @@ def optimize_discovered_formula(
             improvement_score=improvement_score,
             optimization_method=optimization_method,
             iterations=max_iterations,
-            final_metrics=final_metrics
+            final_metrics=final_metrics,
         )
 
         return {
@@ -917,33 +998,30 @@ def optimize_discovered_formula(
                 "improvement_score": optimization_result.improvement_score,
                 "optimization_method": optimization_result.optimization_method,
                 "iterations": optimization_result.iterations,
-                "final_metrics": optimization_result.final_metrics
+                "final_metrics": optimization_result.final_metrics,
             },
             "optimization_summary": {
                 "objective": optimization_objective,
                 "method": optimization_method,
                 "iterations_completed": max_iterations,
-                "improvement_achieved": improvement_score
-            }
+                "improvement_achieved": improvement_score,
+            },
         }
 
     except Exception as e:
         logger.error(f"Formula optimization failed: {e}")
-        return {
-            "status": "error",
-            "error": str(e),
-            "optimization_result": {}
-        }
+        return {"status": "error", "error": str(e), "optimization_result": {}}
 
 
 # =============================================================================
 # Formula Ranking Functions
 # =============================================================================
 
+
 def rank_discovered_formulas(
     discovered_formulas: List[Dict[str, Any]],
     ranking_criteria: List[str],
-    weights: Optional[Dict[str, float]] = None
+    weights: Optional[Dict[str, float]] = None,
 ) -> Dict[str, Any]:
     """
     Rank discovered formulas based on specified criteria.
@@ -963,12 +1041,14 @@ def rank_discovered_formulas(
             return {
                 "status": "error",
                 "error": "No formulas to rank",
-                "ranking_results": []
+                "ranking_results": [],
             }
 
         # Default weights
         if weights is None:
-            weights = {criterion: 1.0 / len(ranking_criteria) for criterion in ranking_criteria}
+            weights = {
+                criterion: 1.0 / len(ranking_criteria) for criterion in ranking_criteria
+            }
 
         # Calculate scores for each formula
         ranked_formulas = []
@@ -992,14 +1072,18 @@ def rank_discovered_formulas(
 
                 total_score += score * weights.get(criterion, 1.0)
 
-            ranked_formulas.append({
-                **formula,
-                "ranking_score": total_score,
-                "criteria_scores": {
-                    criterion: formula.get(f"{criterion}_score", random.uniform(0.3, 0.8))
-                    for criterion in ranking_criteria
+            ranked_formulas.append(
+                {
+                    **formula,
+                    "ranking_score": total_score,
+                    "criteria_scores": {
+                        criterion: formula.get(
+                            f"{criterion}_score", random.uniform(0.3, 0.8)
+                        )
+                        for criterion in ranking_criteria
+                    },
                 }
-            })
+            )
 
         # Sort by ranking score
         ranked_formulas.sort(key=lambda x: x["ranking_score"], reverse=True)
@@ -1015,23 +1099,26 @@ def rank_discovered_formulas(
             "ranking_summary": {
                 "criteria_used": ranking_criteria,
                 "weights_applied": weights,
-                "top_formula": ranked_formulas[0]["formula_id"] if ranked_formulas else None,
-                "average_score": np.mean([f["ranking_score"] for f in ranked_formulas]) if ranked_formulas else 0.0
-            }
+                "top_formula": (
+                    ranked_formulas[0]["formula_id"] if ranked_formulas else None
+                ),
+                "average_score": (
+                    np.mean([f["ranking_score"] for f in ranked_formulas])
+                    if ranked_formulas
+                    else 0.0
+                ),
+            },
         }
 
     except Exception as e:
         logger.error(f"Formula ranking failed: {e}")
-        return {
-            "status": "error",
-            "error": str(e),
-            "ranking_results": []
-        }
+        return {"status": "error", "error": str(e), "ranking_results": []}
 
 
 # =============================================================================
 # Main Discovery Functions
 # =============================================================================
+
 
 def discover_formulas_from_data_patterns(
     data_description: str,
@@ -1040,7 +1127,7 @@ def discover_formulas_from_data_patterns(
     discovery_method: str = "hybrid",
     complexity_limit: str = "moderate",
     max_formulas: int = 5,
-    confidence_threshold: float = 0.7
+    confidence_threshold: float = 0.7,
 ) -> Dict[str, Any]:
     """Main function for formula discovery from data patterns"""
     engine = AutomatedFormulaDiscoveryEngine()
@@ -1052,7 +1139,7 @@ def discover_formulas_from_data_patterns(
         discovery_method=DiscoveryMethod(discovery_method),
         complexity_limit=ComplexityLevel(complexity_limit),
         max_formulas=max_formulas,
-        confidence_threshold=confidence_threshold
+        confidence_threshold=confidence_threshold,
     )
 
 
@@ -1060,14 +1147,14 @@ def analyze_patterns_for_formula_discovery(
     data_patterns: List[Dict[str, Any]],
     pattern_types: List[str],
     correlation_threshold: float = 0.5,
-    significance_level: float = 0.05
+    significance_level: float = 0.05,
 ) -> Dict[str, Any]:
     """Main function for pattern analysis"""
     return analyze_data_patterns(
         data_patterns=data_patterns,
         pattern_types=pattern_types,
         correlation_threshold=correlation_threshold,
-        significance_level=significance_level
+        significance_level=significance_level,
     )
 
 
@@ -1075,14 +1162,14 @@ def validate_discovered_formula_performance(
     formula_expressions: List[str],
     test_data: Optional[Dict[str, List[float]]] = None,
     validation_metrics: List[str] = None,
-    minimum_performance: float = 0.6
+    minimum_performance: float = 0.6,
 ) -> Dict[str, Any]:
     """Main function for formula validation"""
     return validate_discovered_formulas(
         formula_expressions=formula_expressions,
         test_data=test_data,
         validation_metrics=validation_metrics,
-        minimum_performance=minimum_performance
+        minimum_performance=minimum_performance,
     )
 
 
@@ -1090,25 +1177,25 @@ def optimize_formula_performance(
     base_formula: str,
     optimization_objective: str = "balanced",
     optimization_method: str = "genetic_algorithm",
-    max_iterations: int = 100
+    max_iterations: int = 100,
 ) -> Dict[str, Any]:
     """Main function for formula optimization"""
     return optimize_discovered_formula(
         base_formula=base_formula,
         optimization_objective=optimization_objective,
         optimization_method=optimization_method,
-        max_iterations=max_iterations
+        max_iterations=max_iterations,
     )
 
 
 def rank_formulas_by_performance(
     discovered_formulas: List[Dict[str, Any]],
     ranking_criteria: List[str],
-    weights: Optional[Dict[str, float]] = None
+    weights: Optional[Dict[str, float]] = None,
 ) -> Dict[str, Any]:
     """Main function for formula ranking"""
     return rank_discovered_formulas(
         discovered_formulas=discovered_formulas,
         ranking_criteria=ranking_criteria,
-        weights=weights
+        weights=weights,
     )

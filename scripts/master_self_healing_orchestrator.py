@@ -16,6 +16,7 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+
 class MasterSelfHealingOrchestrator:
     """Master orchestrator for self-healing workflow."""
 
@@ -90,17 +91,22 @@ class MasterSelfHealingOrchestrator:
 
         # Import and run status checker
         from scripts.immediate_status_checker import ImmediateStatusChecker
+
         checker = ImmediateStatusChecker()
         status = checker.check_all_processes()
 
         print(f"📊 Found {len(status)} running processes")
 
         # Check for stuck processes
-        stuck_processes = [p for p in status if p.runtime_seconds > p.expected_max_runtime]
+        stuck_processes = [
+            p for p in status if p.runtime_seconds > p.expected_max_runtime
+        ]
         if stuck_processes:
             print(f"⚠️ Found {len(stuck_processes)} stuck processes")
             for process in stuck_processes:
-                print(f"   - {process.name} (PID {process.pid}): {process.runtime_seconds:.1f}s")
+                print(
+                    f"   - {process.name} (PID {process.pid}): {process.runtime_seconds:.1f}s"
+                )
 
     async def _kill_stuck_processes(self):
         """Kill any stuck processes."""
@@ -108,6 +114,7 @@ class MasterSelfHealingOrchestrator:
 
         # Import and run deployment manager
         from scripts.deployment_manager import DeploymentManager
+
         manager = DeploymentManager()
 
         # Kill all deployments
@@ -123,7 +130,12 @@ class MasterSelfHealingOrchestrator:
         """Validate all API keys."""
         print("🔑 Validating API keys...")
 
-        required_keys = ['GOOGLE_API_KEY', 'DEEPSEEK_API_KEY', 'ANTHROPIC_API_KEY', 'OPENAI_API_KEY']
+        required_keys = [
+            "GOOGLE_API_KEY",
+            "DEEPSEEK_API_KEY",
+            "ANTHROPIC_API_KEY",
+            "OPENAI_API_KEY",
+        ]
         valid_keys = 0
 
         for key in required_keys:
@@ -145,6 +157,7 @@ class MasterSelfHealingOrchestrator:
 
         # Import and run model tester
         from scripts.individual_model_tester import IndividualModelTester
+
         tester = IndividualModelTester()
 
         results = await tester.test_all_models()
@@ -152,52 +165,62 @@ class MasterSelfHealingOrchestrator:
         # Convert to dict format
         test_results = []
         for result in results:
-            test_results.append({
-                'model_name': result.model_name,
-                'success': result.success,
-                'error_message': result.error_message,
-                'runtime_seconds': result.runtime_seconds,
-                'api_key_valid': result.api_key_valid,
-                'recommendations_count': result.recommendations_count,
-                'cost': result.cost,
-                'timestamp': result.timestamp
-            })
+            test_results.append(
+                {
+                    "model_name": result.model_name,
+                    "success": result.success,
+                    "error_message": result.error_message,
+                    "runtime_seconds": result.runtime_seconds,
+                    "api_key_valid": result.api_key_valid,
+                    "recommendations_count": result.recommendations_count,
+                    "cost": result.cost,
+                    "timestamp": result.timestamp,
+                }
+            )
 
         return test_results
 
-    async def _analyze_results(self, test_results: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def _analyze_results(
+        self, test_results: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """Analyze test results."""
         print("📊 Analyzing test results...")
 
-        successful_models = [r for r in test_results if r['success']]
-        failed_models = [r for r in test_results if not r['success']]
+        successful_models = [r for r in test_results if r["success"]]
+        failed_models = [r for r in test_results if not r["success"]]
 
         analysis = {
-            'total_models': len(test_results),
-            'successful_models': len(successful_models),
-            'failed_models': len(failed_models),
-            'success_rate': len(successful_models) / len(test_results) if test_results else 0,
-            'successful_model_names': [r['model_name'] for r in successful_models],
-            'failed_model_names': [r['model_name'] for r in failed_models],
-            'issues': []
+            "total_models": len(test_results),
+            "successful_models": len(successful_models),
+            "failed_models": len(failed_models),
+            "success_rate": (
+                len(successful_models) / len(test_results) if test_results else 0
+            ),
+            "successful_model_names": [r["model_name"] for r in successful_models],
+            "failed_model_names": [r["model_name"] for r in failed_models],
+            "issues": [],
         }
 
         # Identify specific issues
         for result in failed_models:
-            if not result['api_key_valid']:
-                analysis['issues'].append(f"API key issue: {result['model_name']}")
-            elif 'timeout' in result['error_message'].lower():
-                analysis['issues'].append(f"Timeout issue: {result['model_name']}")
-            elif 'import' in result['error_message'].lower():
-                analysis['issues'].append(f"Import issue: {result['model_name']}")
+            if not result["api_key_valid"]:
+                analysis["issues"].append(f"API key issue: {result['model_name']}")
+            elif "timeout" in result["error_message"].lower():
+                analysis["issues"].append(f"Timeout issue: {result['model_name']}")
+            elif "import" in result["error_message"].lower():
+                analysis["issues"].append(f"Import issue: {result['model_name']}")
             else:
-                analysis['issues'].append(f"Unknown issue: {result['model_name']} - {result['error_message']}")
+                analysis["issues"].append(
+                    f"Unknown issue: {result['model_name']} - {result['error_message']}"
+                )
 
-        print(f"📊 Analysis: {analysis['successful_models']}/{analysis['total_models']} models successful ({analysis['success_rate']:.1%})")
+        print(
+            f"📊 Analysis: {analysis['successful_models']}/{analysis['total_models']} models successful ({analysis['success_rate']:.1%})"
+        )
 
-        if analysis['issues']:
+        if analysis["issues"]:
             print("⚠️ Issues detected:")
-            for issue in analysis['issues']:
+            for issue in analysis["issues"]:
                 print(f"   - {issue}")
 
         return analysis
@@ -211,7 +234,9 @@ class MasterSelfHealingOrchestrator:
         # Check if success rate is above threshold
         if len(self.all_results) > 0:
             recent_results = self.all_results[-4:]  # Last 4 tests
-            success_rate = sum(1 for r in recent_results if r['success']) / len(recent_results)
+            success_rate = sum(1 for r in recent_results if r["success"]) / len(
+                recent_results
+            )
             if success_rate >= self.success_threshold:
                 return True
 
@@ -221,14 +246,14 @@ class MasterSelfHealingOrchestrator:
         """Apply fixes based on analysis."""
         print("🔧 Applying fixes...")
 
-        for issue in analysis['issues']:
-            if 'API key issue' in issue:
+        for issue in analysis["issues"]:
+            if "API key issue" in issue:
                 print(f"🔑 Fixing API key issue: {issue}")
                 await self._fix_api_keys()
-            elif 'timeout issue' in issue:
+            elif "timeout issue" in issue:
                 print(f"⏰ Fixing timeout issue: {issue}")
                 await self._fix_timeout_issues()
-            elif 'import issue' in issue:
+            elif "import issue" in issue:
                 print(f"📦 Fixing import issue: {issue}")
                 await self._fix_import_issues()
             else:
@@ -242,10 +267,10 @@ class MasterSelfHealingOrchestrator:
         # Load from .env.workflow
         env_file = Path(".env.workflow")
         if env_file.exists():
-            with open(env_file, 'r') as f:
+            with open(env_file, "r") as f:
                 for line in f:
-                    if '=' in line and not line.startswith('#'):
-                        key, value = line.strip().split('=', 1)
+                    if "=" in line and not line.startswith("#"):
+                        key, value = line.strip().split("=", 1)
                         os.environ[key] = value
 
             print("✅ API keys loaded from .env.workflow")
@@ -266,10 +291,10 @@ class MasterSelfHealingOrchestrator:
 
         # Check if all required modules exist
         required_modules = [
-            'synthesis.models.google_model',
-            'synthesis.models.deepseek_model',
-            'synthesis.models.claude_model',
-            'synthesis.models.gpt4_model'
+            "synthesis.models.google_model",
+            "synthesis.models.deepseek_model",
+            "synthesis.models.claude_model",
+            "synthesis.models.gpt4_model",
         ]
 
         for module in required_modules:
@@ -288,6 +313,7 @@ class MasterSelfHealingOrchestrator:
 
         # Kill all processes
         from scripts.deployment_manager import DeploymentManager
+
         manager = DeploymentManager()
         manager.kill_all_deployments()
         manager.wait_for_processes_to_stop()
@@ -297,21 +323,23 @@ class MasterSelfHealingOrchestrator:
 
     async def _generate_final_report(self):
         """Generate final report."""
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("📊 FINAL REPORT")
-        print("="*80)
+        print("=" * 80)
 
         total_runtime = time.time() - self.start_time
 
         report = {
-            'timestamp': datetime.now().isoformat(),
-            'total_runtime_seconds': total_runtime,
-            'iterations_completed': self.iteration,
-            'max_iterations': self.max_iterations,
-            'successful_models': list(self.successful_models),
-            'failed_models': list(self.failed_models),
-            'all_results': self.all_results,
-            'success_rate': len(self.successful_models) / 4 if self.successful_models else 0
+            "timestamp": datetime.now().isoformat(),
+            "total_runtime_seconds": total_runtime,
+            "iterations_completed": self.iteration,
+            "max_iterations": self.max_iterations,
+            "successful_models": list(self.successful_models),
+            "failed_models": list(self.failed_models),
+            "all_results": self.all_results,
+            "success_rate": (
+                len(self.successful_models) / 4 if self.successful_models else 0
+            ),
         }
 
         print(f"⏱️ Total runtime: {total_runtime:.1f} seconds")
@@ -322,16 +350,17 @@ class MasterSelfHealingOrchestrator:
 
         # Save report
         report_file = f"logs/master_workflow_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        with open(report_file, 'w') as f:
+        with open(report_file, "w") as f:
             json.dump(report, f, indent=2)
 
         print(f"💾 Report saved to: {report_file}")
+
 
 async def main():
     """Main function."""
     orchestrator = MasterSelfHealingOrchestrator()
     await orchestrator.run_complete_workflow()
 
+
 if __name__ == "__main__":
     asyncio.run(main())
-

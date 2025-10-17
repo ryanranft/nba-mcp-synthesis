@@ -27,7 +27,9 @@ from scripts.multi_model_book_analyzer import MultiModelBookAnalyzer, CostTracke
 from scripts.organize_book_results import BookResultsOrganizer
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -42,7 +44,7 @@ class MultiModelTester:
                 "author": "Chip Huyen",
                 "genre": "Machine Learning",
                 "pages": 461,
-                "s3_path": "books/designing-machine-learning-systems.pdf"
+                "s3_path": "books/designing-machine-learning-systems.pdf",
             },
             {
                 "id": "statistics_601",
@@ -50,8 +52,8 @@ class MultiModelTester:
                 "author": "Various",
                 "genre": "Statistics",
                 "pages": 300,
-                "s3_path": "books/statistics-601-advanced.pdf"
-            }
+                "s3_path": "books/statistics-601-advanced.pdf",
+            },
         ]
 
         self.results_dir = Path("test_results/multi_model")
@@ -93,7 +95,9 @@ class MultiModelTester:
 
             # Check configuration
             config = analyzer.config
-            logger.info(f"   Consensus threshold: {config['consensus']['unanimous_threshold']}")
+            logger.info(
+                f"   Consensus threshold: {config['consensus']['unanimous_threshold']}"
+            )
             logger.info(f"   Max iterations: {config['analysis']['max_iterations']}")
 
             # Verify at least one model is working
@@ -120,34 +124,45 @@ class MultiModelTester:
                 result = await analyzer.analyze_book(book)
 
                 # Validate results
-                total_recs = len(result.unanimous_recommendations) + len(result.majority_recommendations)
+                total_recs = len(result.unanimous_recommendations) + len(
+                    result.majority_recommendations
+                )
                 logger.info(f"   Total recommendations: {total_recs}")
-                logger.info(f"   Unanimous (Critical): {len(result.unanimous_recommendations)}")
-                logger.info(f"   Majority (Important): {len(result.majority_recommendations)}")
+                logger.info(
+                    f"   Unanimous (Critical): {len(result.unanimous_recommendations)}"
+                )
+                logger.info(
+                    f"   Majority (Important): {len(result.majority_recommendations)}"
+                )
                 logger.info(f"   Cost: ${result.total_cost:.2f}")
                 logger.info(f"   Tokens: {result.total_tokens:,}")
                 logger.info(f"   Time: {result.total_time:.1f}s")
 
                 # Save results
                 result_file = self.results_dir / f"{book['id']}_analysis.json"
-                with open(result_file, 'w') as f:
-                    json.dump({
-                        "book": book,
-                        "unanimous_recommendations": result.unanimous_recommendations,
-                        "majority_recommendations": result.majority_recommendations,
-                        "total_cost": result.total_cost,
-                        "total_tokens": result.total_tokens,
-                        "total_time": result.total_time,
-                        "model_responses": [
-                            {
-                                "model_name": r.model_name,
-                                "cost": r.cost,
-                                "tokens_used": r.tokens_used,
-                                "processing_time": r.processing_time,
-                                "error": r.error
-                            } for r in result.model_responses
-                        ]
-                    }, f, indent=2)
+                with open(result_file, "w") as f:
+                    json.dump(
+                        {
+                            "book": book,
+                            "unanimous_recommendations": result.unanimous_recommendations,
+                            "majority_recommendations": result.majority_recommendations,
+                            "total_cost": result.total_cost,
+                            "total_tokens": result.total_tokens,
+                            "total_time": result.total_time,
+                            "model_responses": [
+                                {
+                                    "model_name": r.model_name,
+                                    "cost": r.cost,
+                                    "tokens_used": r.tokens_used,
+                                    "processing_time": r.processing_time,
+                                    "error": r.error,
+                                }
+                                for r in result.model_responses
+                            ],
+                        },
+                        f,
+                        indent=2,
+                    )
 
                 logger.info(f"   ✅ Analysis complete: {result_file}")
 
@@ -160,7 +175,9 @@ class MultiModelTester:
         logger.info("\n💰 Test 3: Cost Tracking")
 
         try:
-            cost_tracker = CostTracker(str(self.results_dir / "test_cost_tracking.json"))
+            cost_tracker = CostTracker(
+                str(self.results_dir / "test_cost_tracking.json")
+            )
 
             # Add some test sessions
             cost_tracker.add_session(5.25, 15000)
@@ -172,7 +189,9 @@ class MultiModelTester:
             logger.info(f"   Total cost: ${summary['total_cost']:.2f}")
             logger.info(f"   Total tokens: {summary['total_tokens']:,}")
             logger.info(f"   Sessions: {summary['session_count']}")
-            logger.info(f"   Average per session: ${summary['average_per_session']:.2f}")
+            logger.info(
+                f"   Average per session: ${summary['average_per_session']:.2f}"
+            )
 
             # Verify cost file exists
             cost_file = self.results_dir / "test_cost_tracking.json"
@@ -204,7 +223,7 @@ class MultiModelTester:
                     "source_book_id": "designing_ml_systems",
                     "mapped_phase": 5,
                     "consensus_score": "3/3",
-                    "agreeing_models": ["deepseek", "claude", "ollama"]
+                    "agreeing_models": ["deepseek", "claude", "ollama"],
                 },
                 {
                     "id": "test_rec_2",
@@ -218,20 +237,24 @@ class MultiModelTester:
                     "source_book_id": "designing_ml_systems",
                     "mapped_phase": 5,
                     "consensus_score": "2/3",
-                    "agreeing_models": ["deepseek", "claude"]
-                }
+                    "agreeing_models": ["deepseek", "claude"],
+                },
             ]
 
             # Create master recommendations file
             master_file = self.results_dir / "master_recommendations.json"
-            with open(master_file, 'w') as f:
-                json.dump({
-                    "recommendations": test_recommendations,
-                    "metadata": {
-                        "total_recommendations": len(test_recommendations),
-                        "generated_date": datetime.now().isoformat()
-                    }
-                }, f, indent=2)
+            with open(master_file, "w") as f:
+                json.dump(
+                    {
+                        "recommendations": test_recommendations,
+                        "metadata": {
+                            "total_recommendations": len(test_recommendations),
+                            "generated_date": datetime.now().isoformat(),
+                        },
+                    },
+                    f,
+                    indent=2,
+                )
 
             # Test organizer
             organizer = BookResultsOrganizer(str(self.results_dir))
@@ -240,11 +263,13 @@ class MultiModelTester:
             book_metadata = {
                 "title": "Designing Machine Learning Systems",
                 "author": "Chip Huyen",
-                "genre": "Machine Learning"
+                "genre": "Machine Learning",
             }
 
             # Organize results
-            result = organizer.organize_single_book("designing_ml_systems", book_metadata)
+            result = organizer.organize_single_book(
+                "designing_ml_systems", book_metadata
+            )
 
             if result["success"]:
                 logger.info(f"   ✅ Directory structure created successfully")
@@ -256,7 +281,7 @@ class MultiModelTester:
                     "README.md",
                     "CRITICAL_RECOMMENDATIONS.md",
                     "IMPORTANT_RECOMMENDATIONS.md",
-                    "BY_PHASE/PHASE_5_RECOMMENDATIONS.md"
+                    "BY_PHASE/PHASE_5_RECOMMENDATIONS.md",
                 ]
 
                 for file_path in expected_files:
@@ -267,7 +292,9 @@ class MultiModelTester:
                         logger.warning(f"   ⚠️ {file_path} not found")
 
             else:
-                raise RuntimeError(f"Directory organization failed: {result.get('error', 'Unknown error')}")
+                raise RuntimeError(
+                    f"Directory organization failed: {result.get('error', 'Unknown error')}"
+                )
 
         except Exception as e:
             logger.error(f"   ❌ Directory structure test failed: {e}")
@@ -282,24 +309,28 @@ class MultiModelTester:
             from scripts.recursive_book_analysis import RecursiveAnalyzer
 
             config = {
-                's3_bucket': 'nba-data-lake',
-                'project_context': 'NBA MCP Synthesis',
-                'convergence_threshold': 3,
-                'max_iterations': 2,
-                'project_paths': ['/Users/ryanranft/nba-mcp-synthesis']
+                "s3_bucket": "nba-data-lake",
+                "project_context": "NBA MCP Synthesis",
+                "convergence_threshold": 3,
+                "max_iterations": 2,
+                "project_paths": ["/Users/ryanranft/nba-mcp-synthesis"],
             }
 
             analyzer = RecursiveAnalyzer(config)
 
             # Test async method exists
-            if hasattr(analyzer, 'analyze_book_recursively'):
-                logger.info("   ✅ RecursiveAnalyzer has async analyze_book_recursively method")
+            if hasattr(analyzer, "analyze_book_recursively"):
+                logger.info(
+                    "   ✅ RecursiveAnalyzer has async analyze_book_recursively method"
+                )
             else:
                 raise RuntimeError("RecursiveAnalyzer missing async method")
 
             # Test multi-model integration method exists
-            if hasattr(analyzer, '_analyze_with_mcp_and_intelligence'):
-                logger.info("   ✅ RecursiveAnalyzer has multi-model integration method")
+            if hasattr(analyzer, "_analyze_with_mcp_and_intelligence"):
+                logger.info(
+                    "   ✅ RecursiveAnalyzer has multi-model integration method"
+                )
             else:
                 raise RuntimeError("RecursiveAnalyzer missing multi-model method")
 
@@ -316,7 +347,7 @@ async def main():
     print("=" * 50)
 
     # Check environment variables
-    required_env_vars = ['DEEPSEEK_API_KEY', 'ANTHROPIC_API_KEY']
+    required_env_vars = ["DEEPSEEK_API_KEY", "ANTHROPIC_API_KEY"]
     missing_vars = [var for var in required_env_vars if not os.getenv(var)]
 
     if missing_vars:
@@ -332,8 +363,12 @@ async def main():
         await tester.run_tests()
         print("\n🎉 All tests passed! Multi-model integration is ready.")
         print("\nNext steps:")
-        print("1. Run 2-book test: python scripts/test_multi_model_analysis.py --books 2")
-        print("2. Full deployment: python scripts/deploy_book_analysis.py --config config/books_to_analyze_all_ai_ml.json")
+        print(
+            "1. Run 2-book test: python scripts/test_multi_model_analysis.py --books 2"
+        )
+        print(
+            "2. Full deployment: python scripts/deploy_book_analysis.py --config config/books_to_analyze_all_ai_ml.json"
+        )
 
     except Exception as e:
         print(f"\n❌ Tests failed: {e}")
@@ -346,7 +381,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
-
-

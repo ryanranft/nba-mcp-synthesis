@@ -12,8 +12,9 @@ from unittest.mock import Mock, patch, MagicMock
 from mcp_server.unified_secrets_manager import (
     UnifiedSecretsManager,
     get_secrets_manager,
-    load_secrets_hierarchical
+    load_secrets_hierarchical,
 )
+
 
 class TestDockerScenarios:
     """Test Docker scenarios for secrets manager"""
@@ -26,8 +27,8 @@ class TestDockerScenarios:
         (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         # Mock Docker environment
-        with patch.dict(os.environ, {'DOCKER_CONTAINER': 'true'}):
-            with patch('os.path.exists', return_value=True):
+        with patch.dict(os.environ, {"DOCKER_CONTAINER": "true"}):
+            with patch("os.path.exists", return_value=True):
                 sm = UnifiedSecretsManager()
                 sm.load_secrets("test_project", "TEST", "test")
 
@@ -44,11 +45,11 @@ class TestDockerScenarios:
         (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         # Mock Docker Compose environment
-        with patch.dict(os.environ, {
-            'DOCKER_CONTAINER': 'true',
-            'COMPOSE_PROJECT_NAME': 'test_project'
-        }):
-            with patch('os.path.exists', return_value=True):
+        with patch.dict(
+            os.environ,
+            {"DOCKER_CONTAINER": "true", "COMPOSE_PROJECT_NAME": "test_project"},
+        ):
+            with patch("os.path.exists", return_value=True):
                 sm = UnifiedSecretsManager()
                 sm.load_secrets("test_project", "TEST", "test")
 
@@ -64,7 +65,7 @@ class TestDockerScenarios:
         (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         # Mock Docker volume mount
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             sm = UnifiedSecretsManager()
             sm.load_secrets("test_project", "TEST", "test")
 
@@ -78,7 +79,7 @@ class TestDockerScenarios:
         (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         # Mock Docker network isolation
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             sm = UnifiedSecretsManager()
             sm.load_secrets("test_project", "TEST", "test")
 
@@ -93,7 +94,7 @@ class TestDockerScenarios:
         (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         # Mock Docker health check
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             sm = UnifiedSecretsManager()
             sm.load_secrets("test_project", "TEST", "test")
 
@@ -108,7 +109,7 @@ class TestDockerScenarios:
         (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         # Mock Docker restart
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             sm = UnifiedSecretsManager()
             sm.load_secrets("test_project", "TEST", "test")
 
@@ -126,7 +127,7 @@ class TestDockerScenarios:
         (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         # Mock multi-container environment
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             sm1 = UnifiedSecretsManager()
             sm2 = UnifiedSecretsManager()
 
@@ -144,12 +145,14 @@ class TestDockerScenarios:
         (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         # Mock Docker secrets rotation
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             sm = UnifiedSecretsManager()
             sm.load_secrets("test_project", "TEST", "test")
 
             # Test rotation
-            (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("new_test_key")
+            (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text(
+                "new_test_key"
+            )
             sm.reload_secrets()
 
             assert sm.get_secret("GOOGLE_API_KEY_TEST_PROJECT_TEST") == "new_test_key"
@@ -168,7 +171,7 @@ class TestDockerScenarios:
         (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         # Mock Docker logging
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             sm = UnifiedSecretsManager()
             sm.load_secrets("test_project", "TEST", "test")
 
@@ -187,7 +190,7 @@ class TestDockerScenarios:
         (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         # Mock Docker error scenarios
-        with patch('os.path.exists', return_value=False):
+        with patch("os.path.exists", return_value=False):
             sm = UnifiedSecretsManager()
             result = sm.load_secrets("test_project", "TEST", "test")
 
@@ -200,10 +203,12 @@ class TestDockerScenarios:
         secret_dir.mkdir(parents=True)
 
         for i in range(100):
-            (secret_dir / f"TEST_SECRET_{i}_TEST_PROJECT_TEST.env").write_text(f"test_value_{i}")
+            (secret_dir / f"TEST_SECRET_{i}_TEST_PROJECT_TEST.env").write_text(
+                f"test_value_{i}"
+            )
 
         # Mock Docker performance scenarios
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             sm = UnifiedSecretsManager()
             sm.load_secrets("test_project", "TEST", "test")
 
@@ -218,7 +223,7 @@ class TestDockerScenarios:
         (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         # Mock Docker security scenarios
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             sm = UnifiedSecretsManager()
             sm.load_secrets("test_project", "TEST", "test")
 
@@ -234,7 +239,7 @@ class TestDockerScenarios:
         (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         # Mock Docker monitoring
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             sm = UnifiedSecretsManager()
             sm.load_secrets("test_project", "TEST", "test")
 
@@ -242,4 +247,3 @@ class TestDockerScenarios:
             assert sm.validate_secrets() is True
             assert len(sm.secrets) == 1
             assert len(sm.aliases) == 1
-

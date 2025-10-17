@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 class JobStatus(Enum):
     """Job execution status"""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -27,6 +28,7 @@ class JobStatus(Enum):
 
 class JobPriority(Enum):
     """Job priority levels"""
+
     LOW = 0
     NORMAL = 1
     HIGH = 2
@@ -36,6 +38,7 @@ class JobPriority(Enum):
 @dataclass
 class JobExecution:
     """Record of a single job execution"""
+
     execution_id: str
     job_name: str
     status: JobStatus
@@ -49,6 +52,7 @@ class JobExecution:
 @dataclass
 class ScheduledJob:
     """Scheduled job configuration"""
+
     job_name: str
     job_func: Callable
     schedule_type: str  # "cron", "interval", "once"
@@ -79,7 +83,7 @@ class JobScheduler:
         schedule_config: Dict[str, Any],
         priority: JobPriority = JobPriority.NORMAL,
         max_retries: int = 3,
-        timeout_seconds: int = 300
+        timeout_seconds: int = 300,
     ) -> bool:
         """
         Register a new scheduled job.
@@ -106,14 +110,16 @@ class JobScheduler:
             schedule_config=schedule_config,
             priority=priority,
             max_retries=max_retries,
-            timeout_seconds=timeout_seconds
+            timeout_seconds=timeout_seconds,
         )
 
         # Calculate next run time
         job.next_run_time = self._calculate_next_run_time(job)
 
         self.jobs[job_name] = job
-        logger.info(f"Job '{job_name}' registered ({schedule_type}, next run: {job.next_run_time})")
+        logger.info(
+            f"Job '{job_name}' registered ({schedule_type}, next run: {job.next_run_time})"
+        )
         return True
 
     def _calculate_next_run_time(self, job: ScheduledJob) -> Optional[datetime]:
@@ -126,7 +132,9 @@ class JobScheduler:
             interval_minutes = job.schedule_config.get("minutes", 0)
             interval_hours = job.schedule_config.get("hours", 0)
 
-            total_seconds = interval_seconds + (interval_minutes * 60) + (interval_hours * 3600)
+            total_seconds = (
+                interval_seconds + (interval_minutes * 60) + (interval_hours * 3600)
+            )
 
             if job.last_execution and job.last_execution.completed_at:
                 last_completed = datetime.fromisoformat(job.last_execution.completed_at)
@@ -166,7 +174,7 @@ class JobScheduler:
             execution_id=execution_id,
             job_name=job.job_name,
             status=JobStatus.RUNNING,
-            started_at=datetime.utcnow().isoformat()
+            started_at=datetime.utcnow().isoformat(),
         )
 
         logger.info(f"Executing job '{job.job_name}' (execution_id: {execution_id})")
@@ -259,7 +267,9 @@ class JobScheduler:
             return
 
         self.running = True
-        self.scheduler_thread = threading.Thread(target=self._scheduler_loop, daemon=True)
+        self.scheduler_thread = threading.Thread(
+            target=self._scheduler_loop, daemon=True
+        )
         self.scheduler_thread.start()
         logger.info("Scheduler started in background thread")
 
@@ -282,15 +292,21 @@ class JobScheduler:
             "enabled": job.enabled,
             "schedule_type": job.schedule_type,
             "schedule_config": job.schedule_config,
-            "next_run_time": job.next_run_time.isoformat() if job.next_run_time else None,
-            "last_execution": {
-                "status": job.last_execution.status.value,
-                "started_at": job.last_execution.started_at,
-                "completed_at": job.last_execution.completed_at,
-                "duration_seconds": job.last_execution.duration_seconds,
-                "error": job.last_execution.error
-            } if job.last_execution else None,
-            "execution_count": len(job.execution_history)
+            "next_run_time": (
+                job.next_run_time.isoformat() if job.next_run_time else None
+            ),
+            "last_execution": (
+                {
+                    "status": job.last_execution.status.value,
+                    "started_at": job.last_execution.started_at,
+                    "completed_at": job.last_execution.completed_at,
+                    "duration_seconds": job.last_execution.duration_seconds,
+                    "error": job.last_execution.error,
+                }
+                if job.last_execution
+                else None
+            ),
+            "execution_count": len(job.execution_history),
         }
 
     def get_all_jobs_status(self) -> List[Dict[str, Any]]:
@@ -328,7 +344,7 @@ if __name__ == "__main__":
         job_func=daily_model_retrain,
         schedule_type="cron",
         schedule_config={"hour": 2, "minute": 0},  # 2:00 AM daily
-        priority=JobPriority.HIGH
+        priority=JobPriority.HIGH,
     )
 
     scheduler.register_job(
@@ -336,7 +352,7 @@ if __name__ == "__main__":
         job_func=hourly_data_sync,
         schedule_type="interval",
         schedule_config={"minutes": 60},
-        priority=JobPriority.NORMAL
+        priority=JobPriority.NORMAL,
     )
 
     scheduler.register_job(
@@ -344,7 +360,7 @@ if __name__ == "__main__":
         job_func=drift_detection,
         schedule_type="interval",
         schedule_config={"minutes": 15},
-        priority=JobPriority.HIGH
+        priority=JobPriority.HIGH,
     )
 
     print(f"\n✅ Registered {len(scheduler.jobs)} jobs")
@@ -357,7 +373,9 @@ if __name__ == "__main__":
     for job_status in scheduler.get_all_jobs_status():
         print(f"\n📋 {job_status['job_name']}")
         print(f"   Enabled: {job_status['enabled']}")
-        print(f"   Schedule: {job_status['schedule_type']} - {job_status['schedule_config']}")
+        print(
+            f"   Schedule: {job_status['schedule_type']} - {job_status['schedule_config']}"
+        )
         print(f"   Next Run: {job_status['next_run_time']}")
 
     # Manually run a job
@@ -373,4 +391,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("Job Scheduler Demo Complete!")
     print("=" * 80)
-

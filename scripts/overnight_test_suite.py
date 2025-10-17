@@ -22,6 +22,7 @@ import asyncio
 import json
 import time
 import traceback
+import os
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any, Optional
@@ -30,34 +31,44 @@ import argparse
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+# Import env helper
+from mcp_server.env_helper import get_hierarchical_env
+
+
 # Color output
 class Colors:
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    RED = '\033[91m'
-    BLUE = '\033[94m'
-    CYAN = '\033[96m'
-    END = '\033[0m'
-    BOLD = '\033[1m'
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
+    BLUE = "\033[94m"
+    CYAN = "\033[96m"
+    END = "\033[0m"
+    BOLD = "\033[1m"
+
 
 def print_header(text: str):
     print(f"\n{Colors.BOLD}{Colors.BLUE}{'='*80}{Colors.END}")
     print(f"{Colors.BOLD}{Colors.BLUE}{text:^80}{Colors.END}")
     print(f"{Colors.BOLD}{Colors.BLUE}{'='*80}{Colors.END}\n")
 
+
 def print_section(text: str):
     print(f"\n{Colors.BOLD}{Colors.CYAN}{'-'*80}{Colors.END}")
     print(f"{Colors.BOLD}{Colors.CYAN}{text}{Colors.END}")
     print(f"{Colors.BOLD}{Colors.CYAN}{'-'*80}{Colors.END}")
 
+
 def print_success(text: str):
     print(f"{Colors.GREEN}✅ {text}{Colors.END}")
+
 
 def print_warning(text: str):
     print(f"{Colors.YELLOW}⚠️  {text}{Colors.END}")
 
+
 def print_error(text: str):
     print(f"{Colors.RED}❌ {text}{Colors.END}")
+
 
 def print_info(text: str):
     print(f"{Colors.BLUE}ℹ️  {text}{Colors.END}")
@@ -65,6 +76,7 @@ def print_info(text: str):
 
 class TestResult:
     """Container for test results"""
+
     def __init__(self, name: str, category: str):
         self.name = name
         self.category = category
@@ -76,13 +88,13 @@ class TestResult:
 
     def to_dict(self) -> Dict:
         return {
-            'name': self.name,
-            'category': self.category,
-            'passed': self.passed,
-            'duration': self.duration,
-            'error': self.error,
-            'details': self.details,
-            'timestamp': self.timestamp
+            "name": self.name,
+            "category": self.category,
+            "passed": self.passed,
+            "duration": self.duration,
+            "error": self.error,
+            "details": self.details,
+            "timestamp": self.timestamp,
         }
 
 
@@ -96,11 +108,11 @@ class TestSuite:
         self.results: List[TestResult] = []
         self.start_time = time.time()
         self.summary = {
-            'total': 0,
-            'passed': 0,
-            'failed': 0,
-            'warnings': 0,
-            'duration': 0.0
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "warnings": 0,
+            "duration": 0.0,
         }
 
     async def run_test(self, test_func, name: str, category: str) -> TestResult:
@@ -112,9 +124,9 @@ class TestSuite:
 
         try:
             test_result = await test_func()
-            result.passed = test_result.get('passed', False)
-            result.details = test_result.get('details', {})
-            result.error = test_result.get('error')
+            result.passed = test_result.get("passed", False)
+            result.details = test_result.get("details", {})
+            result.error = test_result.get("error")
 
             if result.passed:
                 print_success(f"{name} - PASSED ({result.duration:.2f}s)")
@@ -134,22 +146,26 @@ class TestSuite:
 
     def generate_summary(self):
         """Generate test summary"""
-        self.summary['total'] = len(self.results)
-        self.summary['passed'] = sum(1 for r in self.results if r.passed)
-        self.summary['failed'] = sum(1 for r in self.results if not r.passed)
-        self.summary['duration'] = time.time() - self.start_time
+        self.summary["total"] = len(self.results)
+        self.summary["passed"] = sum(1 for r in self.results if r.passed)
+        self.summary["failed"] = sum(1 for r in self.results if not r.passed)
+        self.summary["duration"] = time.time() - self.start_time
 
     def save_results(self):
         """Save test results to files"""
 
         # JSON results
         json_path = self.output_dir / "test_report.json"
-        with open(json_path, 'w') as f:
-            json.dump({
-                'summary': self.summary,
-                'results': [r.to_dict() for r in self.results],
-                'timestamp': datetime.now().isoformat()
-            }, f, indent=2)
+        with open(json_path, "w") as f:
+            json.dump(
+                {
+                    "summary": self.summary,
+                    "results": [r.to_dict() for r in self.results],
+                    "timestamp": datetime.now().isoformat(),
+                },
+                f,
+                indent=2,
+            )
 
         print_info(f"JSON report saved: {json_path}")
 
@@ -303,9 +319,9 @@ class TestSuite:
 """
 
         for result in self.results:
-            status_badge = 'badge-pass' if result.passed else 'badge-fail'
-            status_text = 'PASS' if result.passed else 'FAIL'
-            error_html = ''
+            status_badge = "badge-pass" if result.passed else "badge-fail"
+            status_text = "PASS" if result.passed else "FAIL"
+            error_html = ""
 
             if result.error:
                 error_html = f'<div class="error-details">{result.error}</div>'
@@ -328,30 +344,35 @@ class TestSuite:
 </html>
 """
 
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             f.write(html)
 
     def generate_csv_metrics(self, path: Path):
         """Generate CSV metrics"""
         import csv
 
-        with open(path, 'w', newline='') as f:
+        with open(path, "w", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(['Test Name', 'Category', 'Status', 'Duration (s)', 'Error'])
+            writer.writerow(
+                ["Test Name", "Category", "Status", "Duration (s)", "Error"]
+            )
 
             for result in self.results:
-                writer.writerow([
-                    result.name,
-                    result.category,
-                    'PASS' if result.passed else 'FAIL',
-                    f"{result.duration:.2f}",
-                    result.error or ''
-                ])
+                writer.writerow(
+                    [
+                        result.name,
+                        result.category,
+                        "PASS" if result.passed else "FAIL",
+                        f"{result.duration:.2f}",
+                        result.error or "",
+                    ]
+                )
 
 
 # =============================================================================
 # TEST IMPLEMENTATIONS
 # =============================================================================
+
 
 async def test_environment_setup() -> Dict:
     """Test 1: Environment setup and configuration"""
@@ -361,25 +382,33 @@ async def test_environment_setup() -> Dict:
 
         load_dotenv()
 
-        required_vars = ['RDS_HOST', 'S3_BUCKET', 'RDS_DATABASE']
-        missing = [v for v in required_vars if not os.getenv(v)]
+        required_vars = ["RDS_HOST", "S3_BUCKET", "RDS_DATABASE"]
+        missing = [
+            v
+            for v in required_vars
+            if not get_hierarchical_env(v, "NBA_MCP_SYNTHESIS", "WORKFLOW")
+        ]
 
         if missing:
             return {
-                'passed': False,
-                'error': f"Missing environment variables: {', '.join(missing)}"
+                "passed": False,
+                "error": f"Missing environment variables: {', '.join(missing)}",
             }
 
         return {
-            'passed': True,
-            'details': {
-                'env_vars_found': len(required_vars),
-                'database': os.getenv('RDS_DATABASE'),
-                's3_bucket': os.getenv('S3_BUCKET')
-            }
+            "passed": True,
+            "details": {
+                "env_vars_found": len(required_vars),
+                "database": get_hierarchical_env(
+                    "RDS_DATABASE", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+                ),
+                "s3_bucket": get_hierarchical_env(
+                    "S3_BUCKET", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+                ),
+            },
         }
     except Exception as e:
-        return {'passed': False, 'error': str(e)}
+        return {"passed": False, "error": str(e)}
 
 
 async def test_fastmcp_import() -> Dict:
@@ -388,14 +417,14 @@ async def test_fastmcp_import() -> Dict:
         from mcp_server import fastmcp_server
 
         return {
-            'passed': True,
-            'details': {
-                'server_name': fastmcp_server.mcp.name,
-                'tools_registered': len(fastmcp_server.mcp._tool_manager._tools)
-            }
+            "passed": True,
+            "details": {
+                "server_name": fastmcp_server.mcp.name,
+                "tools_registered": len(fastmcp_server.mcp._tool_manager._tools),
+            },
         }
     except Exception as e:
-        return {'passed': False, 'error': str(e)}
+        return {"passed": False, "error": str(e)}
 
 
 async def test_pydantic_models() -> Dict:
@@ -409,30 +438,28 @@ async def test_pydantic_models() -> Dict:
 
         # Test SQL injection blocking
         try:
-            bad_params = QueryDatabaseParams(sql_query="SELECT * FROM users; DROP TABLE users;")
-            return {'passed': False, 'error': 'SQL injection not blocked'}
+            bad_params = QueryDatabaseParams(
+                sql_query="SELECT * FROM users; DROP TABLE users;"
+            )
+            return {"passed": False, "error": "SQL injection not blocked"}
         except:
             pass  # Expected to fail
 
         # Test response model
         result = QueryResult(
-            columns=['test'],
-            rows=[[1]],
-            row_count=1,
-            query="SELECT 1",
-            success=True
+            columns=["test"], rows=[[1]], row_count=1, query="SELECT 1", success=True
         )
 
         return {
-            'passed': True,
-            'details': {
-                'validation_working': True,
-                'sql_injection_blocked': True,
-                'response_model_working': True
-            }
+            "passed": True,
+            "details": {
+                "validation_working": True,
+                "sql_injection_blocked": True,
+                "response_model_working": True,
+            },
         }
     except Exception as e:
-        return {'passed': False, 'error': str(e)}
+        return {"passed": False, "error": str(e)}
 
 
 async def test_lifespan_initialization() -> Dict:
@@ -446,24 +473,29 @@ async def test_lifespan_initialization() -> Dict:
         app = MockApp()
 
         async with nba_lifespan(app) as context:
-            required_keys = ['rds_connector', 's3_connector', 'glue_connector', 'config']
+            required_keys = [
+                "rds_connector",
+                "s3_connector",
+                "glue_connector",
+                "config",
+            ]
             missing = [k for k in required_keys if k not in context]
 
             if missing:
                 return {
-                    'passed': False,
-                    'error': f"Missing context keys: {', '.join(missing)}"
+                    "passed": False,
+                    "error": f"Missing context keys: {', '.join(missing)}",
                 }
 
             return {
-                'passed': True,
-                'details': {
-                    'resources_initialized': len(context),
-                    'connectors': list(context.keys())
-                }
+                "passed": True,
+                "details": {
+                    "resources_initialized": len(context),
+                    "connectors": list(context.keys()),
+                },
             }
     except Exception as e:
-        return {'passed': False, 'error': str(e)}
+        return {"passed": False, "error": str(e)}
 
 
 async def test_database_connection() -> Dict:
@@ -475,33 +507,42 @@ async def test_database_connection() -> Dict:
             pass
 
         async with nba_lifespan(MockApp()) as context:
-            rds = context['rds_connector']
+            rds = context["rds_connector"]
 
             # Simple query - RDS returns a dict with 'success' and 'rows' keys
             result = await rds.execute_query("SELECT 1 as test")
 
-            if not result.get('success') or result.get('row_count', 0) == 0:
-                return {'passed': False, 'error': f"No results from test query: {result.get('error', 'Unknown error')}"}
+            if not result.get("success") or result.get("row_count", 0) == 0:
+                return {
+                    "passed": False,
+                    "error": f"No results from test query: {result.get('error', 'Unknown error')}",
+                }
 
             # Count tables
-            tables_result = await rds.execute_query("""
+            tables_result = await rds.execute_query(
+                """
                 SELECT COUNT(*) as count
                 FROM information_schema.tables
                 WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
-            """)
+            """
+            )
 
-            table_count = tables_result['rows'][0]['count'] if tables_result.get('success') and tables_result.get('rows') else 0
+            table_count = (
+                tables_result["rows"][0]["count"]
+                if tables_result.get("success") and tables_result.get("rows")
+                else 0
+            )
 
             return {
-                'passed': True,
-                'details': {
-                    'connection_successful': True,
-                    'test_query_passed': True,
-                    'tables_found': table_count
-                }
+                "passed": True,
+                "details": {
+                    "connection_successful": True,
+                    "test_query_passed": True,
+                    "tables_found": table_count,
+                },
             }
     except Exception as e:
-        return {'passed': False, 'error': str(e)}
+        return {"passed": False, "error": str(e)}
 
 
 async def test_s3_connection() -> Dict:
@@ -513,26 +554,26 @@ async def test_s3_connection() -> Dict:
             pass
 
         async with nba_lifespan(MockApp()) as context:
-            s3 = context['s3_connector']
+            s3 = context["s3_connector"]
 
             # List a few files
             result = await s3.list_files(prefix="", max_keys=5)
 
-            if not result.get('success'):
-                return {'passed': False, 'error': result.get('error', 'Unknown error')}
+            if not result.get("success"):
+                return {"passed": False, "error": result.get("error", "Unknown error")}
 
-            files = result.get('files', [])
+            files = result.get("files", [])
 
             return {
-                'passed': True,
-                'details': {
-                    'connection_successful': True,
-                    'files_listed': len(files),
-                    'sample_files': [f.get('key') for f in files[:3]] if files else []
-                }
+                "passed": True,
+                "details": {
+                    "connection_successful": True,
+                    "files_listed": len(files),
+                    "sample_files": [f.get("key") for f in files[:3]] if files else [],
+                },
             }
     except Exception as e:
-        return {'passed': False, 'error': str(e)}
+        return {"passed": False, "error": str(e)}
 
 
 async def test_query_tool() -> Dict:
@@ -554,10 +595,17 @@ async def test_query_tool() -> Dict:
                 self.request_context = self.MockRequestContext(lifespan_context)
                 self.logs = []
 
-            async def info(self, msg): self.logs.append(('info', msg))
-            async def debug(self, msg): self.logs.append(('debug', msg))
-            async def error(self, msg): self.logs.append(('error', msg))
-            async def report_progress(self, *args): pass
+            async def info(self, msg):
+                self.logs.append(("info", msg))
+
+            async def debug(self, msg):
+                self.logs.append(("debug", msg))
+
+            async def error(self, msg):
+                self.logs.append(("error", msg))
+
+            async def report_progress(self, *args):
+                pass
 
         async with nba_lifespan(MockApp()) as lifespan_context:
             ctx = MockContext(lifespan_context)
@@ -566,21 +614,24 @@ async def test_query_tool() -> Dict:
             result = await query_database(params, ctx)
 
             if not result.success:
-                return {'passed': False, 'error': result.error}
+                return {"passed": False, "error": result.error}
 
             if result.row_count != 1:
-                return {'passed': False, 'error': f'Expected 1 row, got {result.row_count}'}
+                return {
+                    "passed": False,
+                    "error": f"Expected 1 row, got {result.row_count}",
+                }
 
             return {
-                'passed': True,
-                'details': {
-                    'rows_returned': result.row_count,
-                    'columns': result.columns,
-                    'context_logging': len(ctx.logs)
-                }
+                "passed": True,
+                "details": {
+                    "rows_returned": result.row_count,
+                    "columns": result.columns,
+                    "context_logging": len(ctx.logs),
+                },
             }
     except Exception as e:
-        return {'passed': False, 'error': str(e)}
+        return {"passed": False, "error": str(e)}
 
 
 async def test_list_tables_tool() -> Dict:
@@ -601,8 +652,11 @@ async def test_list_tables_tool() -> Dict:
             def __init__(self, lifespan_context):
                 self.request_context = self.MockRequestContext(lifespan_context)
 
-            async def info(self, msg): pass
-            async def error(self, msg): pass
+            async def info(self, msg):
+                pass
+
+            async def error(self, msg):
+                pass
 
         async with nba_lifespan(MockApp()) as lifespan_context:
             ctx = MockContext(lifespan_context)
@@ -611,20 +665,20 @@ async def test_list_tables_tool() -> Dict:
             result = await list_tables(params, ctx)
 
             if not result.success:
-                return {'passed': False, 'error': result.error}
+                return {"passed": False, "error": result.error}
 
             if result.count == 0:
-                return {'passed': False, 'error': 'No tables found'}
+                return {"passed": False, "error": "No tables found"}
 
             return {
-                'passed': True,
-                'details': {
-                    'tables_found': result.count,
-                    'sample_tables': result.tables[:5]
-                }
+                "passed": True,
+                "details": {
+                    "tables_found": result.count,
+                    "sample_tables": result.tables[:5],
+                },
             }
     except Exception as e:
-        return {'passed': False, 'error': str(e)}
+        return {"passed": False, "error": str(e)}
 
 
 async def test_performance_query() -> Dict:
@@ -636,7 +690,7 @@ async def test_performance_query() -> Dict:
             pass
 
         async with nba_lifespan(MockApp()) as context:
-            rds = context['rds_connector']
+            rds = context["rds_connector"]
 
             # Run query 10 times
             times = []
@@ -652,21 +706,21 @@ async def test_performance_query() -> Dict:
             # Check if performance is acceptable (< 1 second average)
             if avg_time > 1.0:
                 return {
-                    'passed': False,
-                    'error': f'Performance too slow: {avg_time:.3f}s average'
+                    "passed": False,
+                    "error": f"Performance too slow: {avg_time:.3f}s average",
                 }
 
             return {
-                'passed': True,
-                'details': {
-                    'iterations': len(times),
-                    'avg_time_ms': avg_time * 1000,
-                    'min_time_ms': min_time * 1000,
-                    'max_time_ms': max_time * 1000
-                }
+                "passed": True,
+                "details": {
+                    "iterations": len(times),
+                    "avg_time_ms": avg_time * 1000,
+                    "min_time_ms": min_time * 1000,
+                    "max_time_ms": max_time * 1000,
+                },
             }
     except Exception as e:
-        return {'passed': False, 'error': str(e)}
+        return {"passed": False, "error": str(e)}
 
 
 async def test_concurrent_queries() -> Dict:
@@ -678,13 +732,10 @@ async def test_concurrent_queries() -> Dict:
             pass
 
         async with nba_lifespan(MockApp()) as context:
-            rds = context['rds_connector']
+            rds = context["rds_connector"]
 
             # Run 5 queries concurrently
-            tasks = [
-                rds.execute_query("SELECT 1")
-                for _ in range(5)
-            ]
+            tasks = [rds.execute_query("SELECT 1") for _ in range(5)]
 
             start = time.time()
             results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -694,25 +745,26 @@ async def test_concurrent_queries() -> Dict:
             failures = [r for r in results if isinstance(r, Exception)]
             if failures:
                 return {
-                    'passed': False,
-                    'error': f'{len(failures)} concurrent queries failed'
+                    "passed": False,
+                    "error": f"{len(failures)} concurrent queries failed",
                 }
 
             return {
-                'passed': True,
-                'details': {
-                    'concurrent_queries': len(tasks),
-                    'all_succeeded': True,
-                    'total_duration_ms': duration * 1000
-                }
+                "passed": True,
+                "details": {
+                    "concurrent_queries": len(tasks),
+                    "all_succeeded": True,
+                    "total_duration_ms": duration * 1000,
+                },
             }
     except Exception as e:
-        return {'passed': False, 'error': str(e)}
+        return {"passed": False, "error": str(e)}
 
 
 # =============================================================================
 # MAIN TEST RUNNER
 # =============================================================================
+
 
 async def run_all_tests(output_dir: str):
     """Run all tests and generate report"""
@@ -728,11 +780,15 @@ async def run_all_tests(output_dir: str):
     await suite.run_test(test_environment_setup, "Environment Setup", "Setup")
     await suite.run_test(test_fastmcp_import, "FastMCP Import", "Setup")
     await suite.run_test(test_pydantic_models, "Pydantic Models", "Setup")
-    await suite.run_test(test_lifespan_initialization, "Lifespan Initialization", "Setup")
+    await suite.run_test(
+        test_lifespan_initialization, "Lifespan Initialization", "Setup"
+    )
 
     # Category 2: Connectivity
     print_section("Category 2: Connectivity Tests")
-    await suite.run_test(test_database_connection, "Database Connection", "Connectivity")
+    await suite.run_test(
+        test_database_connection, "Database Connection", "Connectivity"
+    )
     await suite.run_test(test_s3_connection, "S3 Connection", "Connectivity")
 
     # Category 3: Tool Functionality
@@ -754,13 +810,13 @@ async def run_all_tests(output_dir: str):
     print_header("Test Summary")
     print(f"Total Tests:     {suite.summary['total']}")
     print_success(f"Passed:          {suite.summary['passed']}")
-    if suite.summary['failed'] > 0:
+    if suite.summary["failed"] > 0:
         print_error(f"Failed:          {suite.summary['failed']}")
     print(f"Total Duration:  {suite.summary['duration']:.2f}s")
     print(f"\nEnd Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
     # Final status
-    if suite.summary['failed'] == 0:
+    if suite.summary["failed"] == 0:
         print_header("✅ ALL TESTS PASSED!")
         return 0
     else:
@@ -770,11 +826,11 @@ async def run_all_tests(output_dir: str):
 
 def main():
     """Main entry point"""
-    parser = argparse.ArgumentParser(description='NBA MCP Overnight Test Suite')
+    parser = argparse.ArgumentParser(description="NBA MCP Overnight Test Suite")
     parser.add_argument(
-        '--output-dir',
-        default='./test_results',
-        help='Output directory for test results (default: ./test_results)'
+        "--output-dir",
+        default="./test_results",
+        help="Output directory for test results (default: ./test_results)",
     )
 
     args = parser.parse_args()

@@ -1,4 +1,5 @@
 """Data Privacy & PII Protection"""
+
 import hashlib
 import re
 from typing import Any, Dict, List, Optional
@@ -9,10 +10,10 @@ logger = logging.getLogger(__name__)
 
 # PII Detection Patterns
 PII_PATTERNS = {
-    'ssn': re.compile(r'\d{3}-\d{2}-\d{4}'),
-    'email': re.compile(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'),
-    'phone': re.compile(r'\d{3}-\d{3}-\d{4}'),
-    'credit_card': re.compile(r'\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}'),
+    "ssn": re.compile(r"\d{3}-\d{2}-\d{4}"),
+    "email": re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"),
+    "phone": re.compile(r"\d{3}-\d{3}-\d{4}"),
+    "credit_card": re.compile(r"\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}"),
 }
 
 
@@ -48,12 +49,14 @@ class PrivacyAudit:
 
     def log_access(self, user_id: str, resource: str, action: str):
         """Log data access"""
-        self.access_log.append({
-            'user_id': user_id,
-            'resource': resource,
-            'action': action,
-            'timestamp': __import__('datetime').datetime.utcnow().isoformat()
-        })
+        self.access_log.append(
+            {
+                "user_id": user_id,
+                "resource": resource,
+                "action": action,
+                "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+            }
+        )
         logger.info(f"📋 Access: {user_id} {action} {resource}")
 
 
@@ -64,4 +67,3 @@ _privacy_audit = PrivacyAudit()
 def get_privacy_audit() -> PrivacyAudit:
     """Get global privacy audit instance"""
     return _privacy_audit
-

@@ -28,23 +28,22 @@ class GlueTools:
                     "properties": {
                         "table_name": {
                             "type": "string",
-                            "description": "Name of the table to get metadata for"
+                            "description": "Name of the table to get metadata for",
                         }
                     },
-                    "required": ["table_name"]
-                }
+                    "required": ["table_name"],
+                },
             ),
             Tool(
                 name="list_glue_tables",
                 description="List all tables in the AWS Glue Data Catalog",
-                inputSchema={
-                    "type": "object",
-                    "properties": {}
-                }
-            )
+                inputSchema={"type": "object", "properties": {}},
+            ),
         ]
 
-    async def execute(self, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(
+        self, tool_name: str, arguments: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Execute a Glue tool"""
         try:
             if tool_name == "get_glue_table_metadata":
@@ -56,26 +55,14 @@ class GlueTools:
 
         except Exception as e:
             logger.error(f"Error executing {tool_name}: {e}")
-            return {
-                "success": False,
-                "error": str(e),
-                "tool": tool_name
-            }
+            return {"success": False, "error": str(e), "tool": tool_name}
 
     async def _get_table_metadata(self, table_name: str) -> Dict[str, Any]:
         """Get table metadata from Glue"""
         metadata = await self.glue_connector.get_table_metadata(table_name)
-        return {
-            "success": True,
-            "table_name": table_name,
-            "metadata": metadata
-        }
+        return {"success": True, "table_name": table_name, "metadata": metadata}
 
     async def _list_tables(self) -> Dict[str, Any]:
         """List all tables in Glue catalog"""
         tables = await self.glue_connector.list_tables()
-        return {
-            "success": True,
-            "tables": tables,
-            "count": len(tables)
-        }
+        return {"success": True, "tables": tables, "count": len(tables)}

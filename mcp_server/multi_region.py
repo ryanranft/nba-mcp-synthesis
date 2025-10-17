@@ -38,6 +38,7 @@ logger = logging.getLogger(__name__)
 
 class DeploymentStrategy(Enum):
     """Deployment strategies"""
+
     ACTIVE_ACTIVE = "active-active"  # All regions serve traffic
     ACTIVE_PASSIVE = "active-passive"  # Primary + failover
     MULTI_MASTER = "multi-master"  # All regions read-write
@@ -45,6 +46,7 @@ class DeploymentStrategy(Enum):
 
 class RegionStatus(Enum):
     """Region status"""
+
     HEALTHY = "healthy"
     DEGRADED = "degraded"
     UNAVAILABLE = "unavailable"
@@ -54,6 +56,7 @@ class RegionStatus(Enum):
 @dataclass
 class Region:
     """AWS region configuration"""
+
     name: str
     code: str  # e.g., us-east-1
     is_primary: bool = False
@@ -68,6 +71,7 @@ class Region:
 @dataclass
 class RegionalResource:
     """Resource deployed to a region"""
+
     resource_type: str  # rds, s3, ec2, etc.
     resource_id: str
     region_code: str
@@ -82,17 +86,17 @@ class RegionManager:
 
     # AWS regions
     AVAILABLE_REGIONS = {
-        'us-east-1': {'name': 'US East (N. Virginia)', 'latency_to_us': 0},
-        'us-east-2': {'name': 'US East (Ohio)', 'latency_to_us': 10},
-        'us-west-1': {'name': 'US West (N. California)', 'latency_to_us': 70},
-        'us-west-2': {'name': 'US West (Oregon)', 'latency_to_us': 80},
-        'eu-west-1': {'name': 'Europe (Ireland)', 'latency_to_us': 90},
-        'eu-central-1': {'name': 'Europe (Frankfurt)', 'latency_to_us': 110},
-        'ap-southeast-1': {'name': 'Asia Pacific (Singapore)', 'latency_to_us': 200},
-        'ap-northeast-1': {'name': 'Asia Pacific (Tokyo)', 'latency_to_us': 150},
+        "us-east-1": {"name": "US East (N. Virginia)", "latency_to_us": 0},
+        "us-east-2": {"name": "US East (Ohio)", "latency_to_us": 10},
+        "us-west-1": {"name": "US West (N. California)", "latency_to_us": 70},
+        "us-west-2": {"name": "US West (Oregon)", "latency_to_us": 80},
+        "eu-west-1": {"name": "Europe (Ireland)", "latency_to_us": 90},
+        "eu-central-1": {"name": "Europe (Frankfurt)", "latency_to_us": 110},
+        "ap-southeast-1": {"name": "Asia Pacific (Singapore)", "latency_to_us": 200},
+        "ap-northeast-1": {"name": "Asia Pacific (Tokyo)", "latency_to_us": 150},
     }
 
-    def __init__(self, primary_region: str = 'us-east-1'):
+    def __init__(self, primary_region: str = "us-east-1"):
         self.primary_region = primary_region
         self.regions: Dict[str, Region] = {}
         self.resources: Dict[str, List[RegionalResource]] = {}
@@ -102,10 +106,10 @@ class RegionManager:
         """Initialize available regions"""
         for code, info in self.AVAILABLE_REGIONS.items():
             self.regions[code] = Region(
-                name=info['name'],
+                name=info["name"],
                 code=code,
                 is_primary=(code == self.primary_region),
-                latency_ms=info['latency_to_us']
+                latency_ms=info["latency_to_us"],
             )
 
     def enable_region(self, region_code: str) -> bool:
@@ -136,11 +140,14 @@ class RegionManager:
     def get_active_regions(self) -> List[Region]:
         """Get all active regions"""
         return [
-            r for r in self.regions.values()
+            r
+            for r in self.regions.values()
             if r.enabled and r.status == RegionStatus.HEALTHY
         ]
 
-    def get_closest_region(self, client_latencies: Dict[str, float]) -> Optional[Region]:
+    def get_closest_region(
+        self, client_latencies: Dict[str, float]
+    ) -> Optional[Region]:
         """Get closest region based on latency"""
         active = self.get_active_regions()
         if not active:
@@ -148,7 +155,7 @@ class RegionManager:
 
         # Find region with lowest latency
         best_region = None
-        best_latency = float('inf')
+        best_latency = float("inf")
 
         for region in active:
             latency = client_latencies.get(region.code, region.latency_ms)
@@ -167,7 +174,7 @@ class RegionManager:
 
         try:
             # Try to connect to AWS in that region
-            ec2 = boto3.client('ec2', region_name=region_code)
+            ec2 = boto3.client("ec2", region_name=region_code)
             ec2.describe_regions(RegionNames=[region_code])
 
             region.status = RegionStatus.HEALTHY
@@ -221,50 +228,47 @@ class CrossRegionReplicator:
         self.replication_status: Dict[str, Dict[str, Any]] = {}
 
     def setup_s3_replication(
-        self,
-        bucket_name: str,
-        source_region: str,
-        target_regions: List[str]
+        self, bucket_name: str, source_region: str, target_regions: List[str]
     ) -> bool:
         """Set up S3 cross-region replication"""
         try:
-            s3 = boto3.client('s3', region_name=source_region)
+            s3 = boto3.client("s3", region_name=source_region)
 
             # Configure replication
             replication_config = {
-                'Role': f'arn:aws:iam::ACCOUNT_ID:role/s3-replication-role',
-                'Rules': []
+                "Role": f"arn:aws:iam::ACCOUNT_ID:role/s3-replication-role",
+                "Rules": [],
             }
 
             for i, target_region in enumerate(target_regions):
                 rule = {
-                    'ID': f'replication-rule-{i}',
-                    'Priority': i,
-                    'Filter': {'Prefix': ''},
-                    'Status': 'Enabled',
-                    'Destination': {
-                        'Bucket': f'arn:aws:s3:::{bucket_name}-{target_region}',
-                        'ReplicationTime': {
-                            'Status': 'Enabled',
-                            'Time': {'Minutes': 15}
+                    "ID": f"replication-rule-{i}",
+                    "Priority": i,
+                    "Filter": {"Prefix": ""},
+                    "Status": "Enabled",
+                    "Destination": {
+                        "Bucket": f"arn:aws:s3:::{bucket_name}-{target_region}",
+                        "ReplicationTime": {
+                            "Status": "Enabled",
+                            "Time": {"Minutes": 15},
                         },
-                        'Metrics': {
-                            'Status': 'Enabled',
-                            'EventThreshold': {'Minutes': 15}
-                        }
+                        "Metrics": {
+                            "Status": "Enabled",
+                            "EventThreshold": {"Minutes": 15},
+                        },
                     },
-                    'DeleteMarkerReplication': {'Status': 'Enabled'}
+                    "DeleteMarkerReplication": {"Status": "Enabled"},
                 }
-                replication_config['Rules'].append(rule)
+                replication_config["Rules"].append(rule)
 
             # Note: This is a placeholder. In production, you'd actually call:
             # s3.put_bucket_replication(Bucket=bucket_name, ReplicationConfiguration=replication_config)
 
             self.replication_status[bucket_name] = {
-                'source': source_region,
-                'targets': target_regions,
-                'status': 'active',
-                'last_updated': datetime.now()
+                "source": source_region,
+                "targets": target_regions,
+                "status": "active",
+                "last_updated": datetime.now(),
             }
 
             logger.info(f"S3 replication configured for {bucket_name}")
@@ -275,14 +279,11 @@ class CrossRegionReplicator:
             return False
 
     def setup_rds_replication(
-        self,
-        db_instance_id: str,
-        source_region: str,
-        target_region: str
+        self, db_instance_id: str, source_region: str, target_region: str
     ) -> bool:
         """Set up RDS cross-region read replica"""
         try:
-            rds = boto3.client('rds', region_name=source_region)
+            rds = boto3.client("rds", region_name=source_region)
 
             # Note: This is a placeholder. In production, you'd call:
             # rds.create_db_instance_read_replica(
@@ -292,10 +293,10 @@ class CrossRegionReplicator:
             # )
 
             self.replication_status[db_instance_id] = {
-                'source': source_region,
-                'target': target_region,
-                'status': 'replicating',
-                'last_updated': datetime.now()
+                "source": source_region,
+                "target": target_region,
+                "status": "replicating",
+                "last_updated": datetime.now(),
             }
 
             logger.info(f"RDS replication configured for {db_instance_id}")
@@ -316,8 +317,8 @@ class CrossRegionReplicator:
     def get_replication_status(self) -> Dict[str, Any]:
         """Get status of all replications"""
         return {
-            'total_replications': len(self.replication_status),
-            'replications': self.replication_status
+            "total_replications": len(self.replication_status),
+            "replications": self.replication_status,
         }
 
 
@@ -328,12 +329,7 @@ class FailoverManager:
         self.region_manager = region_manager
         self.failover_history: List[Dict[str, Any]] = []
 
-    def trigger_failover(
-        self,
-        from_region: str,
-        to_region: str,
-        reason: str
-    ) -> bool:
+    def trigger_failover(self, from_region: str, to_region: str, reason: str) -> bool:
         """Trigger failover from one region to another"""
 
         # Validate regions
@@ -365,11 +361,11 @@ class FailoverManager:
 
         # Record failover
         failover_event = {
-            'timestamp': datetime.now(),
-            'from_region': from_region,
-            'to_region': to_region,
-            'reason': reason,
-            'duration_seconds': 0  # Would measure in production
+            "timestamp": datetime.now(),
+            "from_region": from_region,
+            "to_region": to_region,
+            "reason": reason,
+            "duration_seconds": 0,  # Would measure in production
         }
         self.failover_history.append(failover_event)
 
@@ -393,7 +389,7 @@ class FailoverManager:
         return self.trigger_failover(
             from_region=unhealthy_region,
             to_region=target_region.code,
-            reason="Automatic failover due to unhealthy region"
+            reason="Automatic failover due to unhealthy region",
         )
 
     def get_failover_history(self, limit: int = 10) -> List[Dict[str, Any]]:
@@ -404,7 +400,7 @@ class FailoverManager:
 class MultiRegionDeployment:
     """Main multi-region deployment orchestrator"""
 
-    def __init__(self, primary_region: str = 'us-east-1'):
+    def __init__(self, primary_region: str = "us-east-1"):
         self.region_manager = RegionManager(primary_region)
         self.replicator = CrossRegionReplicator(self.region_manager)
         self.failover_manager = FailoverManager(self.region_manager)
@@ -412,7 +408,7 @@ class MultiRegionDeployment:
     def deploy_to_regions(
         self,
         regions: List[str],
-        strategy: DeploymentStrategy = DeploymentStrategy.ACTIVE_ACTIVE
+        strategy: DeploymentStrategy = DeploymentStrategy.ACTIVE_ACTIVE,
     ) -> Dict[str, bool]:
         """Deploy to multiple regions"""
         results = {}
@@ -426,7 +422,9 @@ class MultiRegionDeployment:
                 if strategy == DeploymentStrategy.ACTIVE_ACTIVE:
                     weight = 100 // len(regions)
                 elif strategy == DeploymentStrategy.ACTIVE_PASSIVE:
-                    weight = 100 if region_code == self.region_manager.primary_region else 0
+                    weight = (
+                        100 if region_code == self.region_manager.primary_region else 0
+                    )
                 else:
                     weight = 100
 
@@ -448,12 +446,12 @@ class MultiRegionDeployment:
         replication_status = self.replicator.get_replication_status()
 
         return {
-            'primary_region': self.region_manager.primary_region,
-            'active_regions': [r.code for r in active_regions],
-            'total_regions': len(self.region_manager.regions),
-            'resource_distribution': resource_dist,
-            'replication_count': replication_status['total_replications'],
-            'failover_history_count': len(self.failover_manager.failover_history)
+            "primary_region": self.region_manager.primary_region,
+            "active_regions": [r.code for r in active_regions],
+            "total_regions": len(self.region_manager.regions),
+            "resource_distribution": resource_dist,
+            "replication_count": replication_status["total_replications"],
+            "failover_history_count": len(self.failover_manager.failover_history),
         }
 
 
@@ -463,14 +461,13 @@ if __name__ == "__main__":
     print("=== Multi-Region Deployment Demo ===\n")
 
     # Create deployment
-    deployment = MultiRegionDeployment(primary_region='us-east-1')
+    deployment = MultiRegionDeployment(primary_region="us-east-1")
 
     # Deploy to multiple regions
     print("--- Deploying to Regions ---\n")
-    regions_to_deploy = ['us-east-1', 'us-west-2', 'eu-west-1']
+    regions_to_deploy = ["us-east-1", "us-west-2", "eu-west-1"]
     results = deployment.deploy_to_regions(
-        regions_to_deploy,
-        strategy=DeploymentStrategy.ACTIVE_ACTIVE
+        regions_to_deploy, strategy=DeploymentStrategy.ACTIVE_ACTIVE
     )
 
     for region, success in results.items():
@@ -492,4 +489,3 @@ if __name__ == "__main__":
     print(f"Total regions: {summary['total_regions']}")
 
     print("\n=== Demo Complete ===")
-

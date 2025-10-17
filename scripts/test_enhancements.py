@@ -45,6 +45,7 @@ async def test_server_initialization():
     except Exception as e:
         print(f"\n❌ Server initialization test FAILED: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -64,7 +65,7 @@ async def test_prompts():
             "suggest_queries",
             "analyze_team_performance",
             "compare_players",
-            "game_analysis"
+            "game_analysis",
         ]
 
         prompt_names = [p.name for p in prompts]
@@ -75,7 +76,9 @@ async def test_prompts():
             print(f"✓ Prompt '{expected}' registered")
 
         # Test getting a specific prompt
-        suggest_prompt = fastmcp_server.mcp._prompt_manager.get_prompt("suggest_queries")
+        suggest_prompt = fastmcp_server.mcp._prompt_manager.get_prompt(
+            "suggest_queries"
+        )
         assert suggest_prompt is not None, "Could not retrieve suggest_queries prompt"
         print("✓ Can retrieve specific prompts")
 
@@ -85,6 +88,7 @@ async def test_prompts():
     except Exception as e:
         print(f"\n❌ Prompts test FAILED: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -117,6 +121,7 @@ async def test_resource_templates():
     except Exception as e:
         print(f"\n❌ Resource templates test FAILED: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -148,6 +153,7 @@ async def test_custom_routes():
     except Exception as e:
         print(f"\n❌ Custom routes test FAILED: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -183,6 +189,7 @@ async def test_transport_modes():
     except Exception as e:
         print(f"\n❌ Transport modes test FAILED: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -203,10 +210,10 @@ async def test_settings():
         print(f"Host: {settings.host}")
         print(f"Port: {settings.port}")
 
-        assert hasattr(settings, 'host'), "Missing host setting"
-        assert hasattr(settings, 'port'), "Missing port setting"
-        assert hasattr(settings, 'debug'), "Missing debug setting"
-        assert hasattr(settings, 'log_level'), "Missing log_level setting"
+        assert hasattr(settings, "host"), "Missing host setting"
+        assert hasattr(settings, "port"), "Missing port setting"
+        assert hasattr(settings, "debug"), "Missing debug setting"
+        assert hasattr(settings, "log_level"), "Missing log_level setting"
 
         print("✓ All required settings present")
 
@@ -216,6 +223,7 @@ async def test_settings():
     except Exception as e:
         print(f"\n❌ Settings test FAILED: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 

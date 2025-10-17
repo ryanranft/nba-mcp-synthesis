@@ -11,6 +11,7 @@ Date: October 13, 2025
 
 import sys
 import os
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import asyncio
@@ -20,7 +21,9 @@ import numpy as np
 from typing import Dict, List
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -49,7 +52,7 @@ class TestSymbolicRegression(unittest.TestCase):
                 self.test_data["points"],
                 self.test_data["rebounds"],
                 self.test_data["assists"],
-                self.test_data["minutes"]
+                self.test_data["minutes"],
             )
         ]
 
@@ -66,7 +69,7 @@ class TestSymbolicRegression(unittest.TestCase):
                 input_variables=["points", "rebounds", "assists", "minutes"],
                 regression_type="linear",
                 min_r_squared=0.3,  # Lower threshold for test data
-                random_state=42
+                random_state=42,
             )
 
             logger.info(f"✓ Formula discovered: {result['formula_string']}")
@@ -74,9 +77,9 @@ class TestSymbolicRegression(unittest.TestCase):
             logger.info(f"  MSE: {result['mean_squared_error']:.3f}")
             logger.info(f"  Complexity: {result['complexity']}")
 
-            self.assertIn('formula_string', result)
-            self.assertIn('r_squared', result)
-            self.assertGreater(result['r_squared'], 0.3)
+            self.assertIn("formula_string", result)
+            self.assertIn("r_squared", result)
+            self.assertGreater(result["r_squared"], 0.3)
 
             logger.info("✓ Linear formula discovery test passed")
 
@@ -98,16 +101,16 @@ class TestSymbolicRegression(unittest.TestCase):
                 regression_type="polynomial",
                 max_complexity=3,
                 min_r_squared=0.4,
-                random_state=42
+                random_state=42,
             )
 
             logger.info(f"✓ Formula discovered: {result['formula_string']}")
             logger.info(f"  R²: {result['r_squared']:.3f}")
             logger.info(f"  Complexity: {result['complexity']}")
 
-            self.assertIn('formula_string', result)
-            self.assertIn('r_squared', result)
-            self.assertGreater(result['r_squared'], 0.4)
+            self.assertIn("formula_string", result)
+            self.assertIn("r_squared", result)
+            self.assertGreater(result["r_squared"], 0.4)
 
             logger.info("✓ Polynomial formula discovery test passed")
 
@@ -129,10 +132,10 @@ class TestSymbolicRegression(unittest.TestCase):
                 input_variables=["points", "rebounds"],
                 regression_type="linear",
                 min_r_squared=0.3,
-                random_state=42
+                random_state=42,
             )
 
-            formula = discovery_result['formula_string']
+            formula = discovery_result["formula_string"]
             logger.info(f"  Discovered formula: {formula}")
 
             # Validate it on the same data (should pass)
@@ -140,16 +143,18 @@ class TestSymbolicRegression(unittest.TestCase):
                 formula=formula,
                 test_data=self.test_data,
                 target_variable="efficiency",
-                threshold_r_squared=0.3
+                threshold_r_squared=0.3,
             )
 
             logger.info(f"✓ Formula validated successfully")
             logger.info(f"  R²: {validation_result['r_squared']:.3f}")
             logger.info(f"  MSE: {validation_result['mean_squared_error']:.3f}")
-            logger.info(f"  Valid predictions: {validation_result['valid_predictions']}/{validation_result['total_predictions']}")
+            logger.info(
+                f"  Valid predictions: {validation_result['valid_predictions']}/{validation_result['total_predictions']}"
+            )
 
-            self.assertEqual(validation_result['validation_status'], 'success')
-            self.assertGreater(validation_result['r_squared'], 0.3)
+            self.assertEqual(validation_result["validation_status"], "success")
+            self.assertGreater(validation_result["r_squared"], 0.3)
 
             logger.info("✓ Formula validation test passed")
 
@@ -169,15 +174,19 @@ class TestSymbolicRegression(unittest.TestCase):
                 metric_name="custom_efficiency",
                 description="Custom player efficiency metric",
                 variables=["points", "rebounds", "assists"],
-                parameters={"weight_points": 1.5, "weight_rebounds": 0.8, "weight_assists": 1.2}
+                parameters={
+                    "weight_points": 1.5,
+                    "weight_rebounds": 0.8,
+                    "weight_assists": 1.2,
+                },
             )
 
             logger.info(f"✓ Custom metric created: {result['metric_name']}")
             logger.info(f"  Formula: {result['formula']}")
             logger.info(f"  Description: {result['description']}")
 
-            self.assertEqual(result['status'], 'success')
-            self.assertEqual(result['metric_name'], 'custom_efficiency')
+            self.assertEqual(result["status"], "success")
+            self.assertEqual(result["metric_name"], "custom_efficiency")
 
             logger.info("✓ Custom metric generation test passed")
 
@@ -197,19 +206,19 @@ class TestSymbolicRegression(unittest.TestCase):
                 target_variable="efficiency",
                 discovery_method="correlation",
                 max_formulas=5,
-                complexity_range=(1, 3)
+                complexity_range=(1, 3),
             )
 
             logger.info(f"✓ Discovered {len(result['discovered_patterns'])} patterns")
 
-            for i, pattern in enumerate(result['discovered_patterns'][:3], 1):
+            for i, pattern in enumerate(result["discovered_patterns"][:3], 1):
                 logger.info(f"  Pattern {i}:")
                 logger.info(f"    Type: {pattern['pattern_type']}")
                 logger.info(f"    Score: {pattern['score']:.3f}")
                 logger.info(f"    Formula: {pattern['suggested_formula']}")
 
-            self.assertEqual(result['status'], 'success')
-            self.assertGreater(len(result['discovered_patterns']), 0)
+            self.assertEqual(result["status"], "success")
+            self.assertGreater(len(result["discovered_patterns"]), 0)
 
             logger.info("✓ Pattern discovery (correlation) test passed")
 
@@ -229,18 +238,20 @@ class TestSymbolicRegression(unittest.TestCase):
                 target_variable="efficiency",
                 discovery_method="polynomial",
                 max_formulas=5,
-                complexity_range=(1, 3)
+                complexity_range=(1, 3),
             )
 
-            logger.info(f"✓ Discovered {len(result['discovered_patterns'])} polynomial patterns")
+            logger.info(
+                f"✓ Discovered {len(result['discovered_patterns'])} polynomial patterns"
+            )
 
-            for i, pattern in enumerate(result['discovered_patterns'][:3], 1):
+            for i, pattern in enumerate(result["discovered_patterns"][:3], 1):
                 logger.info(f"  Pattern {i}:")
                 logger.info(f"    Type: {pattern['pattern_type']}")
                 logger.info(f"    Score: {pattern['score']:.3f}")
 
-            self.assertEqual(result['status'], 'success')
-            self.assertGreater(len(result['discovered_patterns']), 0)
+            self.assertEqual(result["status"], "success")
+            self.assertGreater(len(result["discovered_patterns"]), 0)
 
             logger.info("✓ Pattern discovery (polynomial) test passed")
 
@@ -265,12 +276,12 @@ class TestSymbolicRegression(unittest.TestCase):
 
             # True shooting percentage-like metric
             shooting_data["shooting_efficiency"] = [
-                (2*tpm + 3*threepm + ftm) / max(ta, 1) * 100
+                (2 * tpm + 3 * threepm + ftm) / max(ta, 1) * 100
                 for tpm, threepm, ftm, ta in zip(
                     shooting_data["two_pt_made"],
                     shooting_data["three_pt_made"],
                     shooting_data["free_throws_made"],
-                    shooting_data["total_attempts"]
+                    shooting_data["total_attempts"],
                 )
             ]
 
@@ -278,10 +289,15 @@ class TestSymbolicRegression(unittest.TestCase):
             result = symbolic_regression.discover_formula_from_data(
                 data=shooting_data,
                 target_variable="shooting_efficiency",
-                input_variables=["two_pt_made", "three_pt_made", "free_throws_made", "total_attempts"],
+                input_variables=[
+                    "two_pt_made",
+                    "three_pt_made",
+                    "free_throws_made",
+                    "total_attempts",
+                ],
                 regression_type="linear",
                 min_r_squared=0.7,
-                random_state=42
+                random_state=42,
             )
 
             logger.info(f"✓ Shooting efficiency formula discovered")
@@ -290,17 +306,17 @@ class TestSymbolicRegression(unittest.TestCase):
 
             # Generate custom metric
             metric_result = symbolic_regression.generate_custom_metric(
-                formula=result['formula_string'],
+                formula=result["formula_string"],
                 metric_name="discovered_shooting_efficiency",
                 description="Data-driven shooting efficiency metric",
-                variables=result['input_variables'],
-                parameters={"r_squared": result['r_squared']}
+                variables=result["input_variables"],
+                parameters={"r_squared": result["r_squared"]},
             )
 
             logger.info(f"✓ Custom metric '{metric_result['metric_name']}' created")
 
-            self.assertGreater(result['r_squared'], 0.7)
-            self.assertEqual(metric_result['status'], 'success')
+            self.assertGreater(result["r_squared"], 0.7)
+            self.assertEqual(metric_result["status"], "success")
 
             logger.info("✓ Real-world scenario test passed")
 
@@ -311,9 +327,9 @@ class TestSymbolicRegression(unittest.TestCase):
 
 async def run_all_tests():
     """Run all tests asynchronously"""
-    logger.info("\n" + "="*70)
+    logger.info("\n" + "=" * 70)
     logger.info("Starting Phase 5.1: Symbolic Regression Tests")
-    logger.info("="*70 + "\n")
+    logger.info("=" * 70 + "\n")
 
     test_suite = unittest.TestLoader().loadTestsFromTestCase(TestSymbolicRegression)
     runner = unittest.TextTestRunner(verbosity=2)
@@ -331,17 +347,16 @@ async def run_all_tests():
         await test.test_discover_patterns_polynomial()
         await test.test_real_world_scenario()
 
-        logger.info("\n" + "="*70)
+        logger.info("\n" + "=" * 70)
         logger.info("✓ All Phase 5.1 Symbolic Regression Tests Passed!")
-        logger.info("="*70)
+        logger.info("=" * 70)
 
     except Exception as e:
-        logger.error("\n" + "="*70)
+        logger.error("\n" + "=" * 70)
         logger.error(f"❌ Tests Failed: {e}")
-        logger.error("="*70)
+        logger.error("=" * 70)
         raise
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(run_all_tests())
-

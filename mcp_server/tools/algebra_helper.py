@@ -21,12 +21,18 @@ try:
     from sympy import symbols, solve, diff, integrate, simplify, expand, factor
     from sympy import latex, pretty_print, Matrix, Symbol, Eq
     from sympy.parsing.sympy_parser import parse_expr
+
     SYMPY_AVAILABLE = True
 except ImportError:
     sp = None
     SYMPY_AVAILABLE = False
 
-from .sports_validation import validate_formula_inputs, ValidationError as SportsValidationError, suggest_fixes_for_error, validate_formula_consistency
+from .sports_validation import (
+    validate_formula_inputs,
+    ValidationError as SportsValidationError,
+    suggest_fixes_for_error,
+    validate_formula_consistency,
+)
 
 from ..exceptions import ValidationError
 from .logger_config import log_operation
@@ -47,6 +53,7 @@ def check_sympy_dependency():
 # =============================================================================
 # Core Algebraic Operations
 # =============================================================================
+
 
 @log_operation("algebra_solve_equation")
 def solve_equation(equation_str: str, variable: str = None) -> Dict[str, Any]:
@@ -71,8 +78,8 @@ def solve_equation(equation_str: str, variable: str = None) -> Dict[str, Any]:
 
     try:
         # Parse the equation
-        if '=' in equation_str:
-            left, right = equation_str.split('=', 1)
+        if "=" in equation_str:
+            left, right = equation_str.split("=", 1)
             left_expr = parse_expr(left.strip())
             right_expr = parse_expr(right.strip())
             equation = Eq(left_expr, right_expr)
@@ -86,7 +93,9 @@ def solve_equation(equation_str: str, variable: str = None) -> Dict[str, Any]:
             if len(variables) == 1:
                 variable = str(variables[0])
             else:
-                raise ValueError(f"Multiple variables found: {variables}. Please specify 'variable' parameter.")
+                raise ValueError(
+                    f"Multiple variables found: {variables}. Please specify 'variable' parameter."
+                )
 
         var_symbol = symbols(variable)
 
@@ -110,7 +119,7 @@ def solve_equation(equation_str: str, variable: str = None) -> Dict[str, Any]:
             "variable": variable,
             "equation": str(equation),
             "num_solutions": len(solutions),
-            "success": True
+            "success": True,
         }
 
     except Exception as e:
@@ -122,7 +131,7 @@ def solve_equation(equation_str: str, variable: str = None) -> Dict[str, Any]:
             "equation": equation_str,
             "num_solutions": 0,
             "success": False,
-            "error": str(e)
+            "error": str(e),
         }
 
 
@@ -151,7 +160,7 @@ def simplify_expression(expression_str: str) -> Dict[str, Any]:
             "original": expression_str,
             "simplified": str(simplified),
             "latex": latex(simplified),
-            "success": True
+            "success": True,
         }
 
     except Exception as e:
@@ -161,12 +170,14 @@ def simplify_expression(expression_str: str) -> Dict[str, Any]:
             "simplified": expression_str,
             "latex": expression_str,
             "success": False,
-            "error": str(e)
+            "error": str(e),
         }
 
 
 @log_operation("algebra_differentiate")
-def differentiate_expression(expression_str: str, variable: str, order: int = 1) -> Dict[str, Any]:
+def differentiate_expression(
+    expression_str: str, variable: str, order: int = 1
+) -> Dict[str, Any]:
     """
     Differentiate an expression with respect to a variable.
 
@@ -196,7 +207,7 @@ def differentiate_expression(expression_str: str, variable: str, order: int = 1)
             "latex": latex(derivative),
             "variable": variable,
             "order": order,
-            "success": True
+            "success": True,
         }
 
     except Exception as e:
@@ -208,14 +219,17 @@ def differentiate_expression(expression_str: str, variable: str, order: int = 1)
             "variable": variable,
             "order": order,
             "success": False,
-            "error": str(e)
+            "error": str(e),
         }
 
 
 @log_operation("algebra_integrate")
-def integrate_expression(expression_str: str, variable: str,
-                        lower_limit: Optional[Union[int, float]] = None,
-                        upper_limit: Optional[Union[int, float]] = None) -> Dict[str, Any]:
+def integrate_expression(
+    expression_str: str,
+    variable: str,
+    lower_limit: Optional[Union[int, float]] = None,
+    upper_limit: Optional[Union[int, float]] = None,
+) -> Dict[str, Any]:
     """
     Integrate an expression with respect to a variable.
 
@@ -254,7 +268,7 @@ def integrate_expression(expression_str: str, variable: str,
                 "type": "definite",
                 "limits": [lower_limit, upper_limit],
                 "value": numerical_value,
-                "success": True
+                "success": True,
             }
         else:
             # Indefinite integral
@@ -266,7 +280,7 @@ def integrate_expression(expression_str: str, variable: str,
                 "latex": latex(integral),
                 "variable": variable,
                 "type": "indefinite",
-                "success": True
+                "success": True,
             }
 
     except Exception as e:
@@ -277,13 +291,14 @@ def integrate_expression(expression_str: str, variable: str,
             "latex": expression_str,
             "variable": variable,
             "success": False,
-            "error": str(e)
+            "error": str(e),
         }
 
 
 # =============================================================================
 # Sports Analytics Equation Templates
 # =============================================================================
+
 
 @log_operation("algebra_sports_formula")
 def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
@@ -366,285 +381,321 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
     formulas = {
         "per": {
             "formula": "PER = (FGM * 85.910 + STL * 53.897 + 3PM * 51.757 + FTM * 46.845 + BLK * 39.190 + OREB * 39.190 + AST * 34.677 + DREB * 14.707 - PF * 17.174 - (FTA - FTM) * 20.091 - (FGA - FGM) * 39.190 - TOV * 53.897) * (1 / MP)",
-            "variables": ["FGM", "STL", "3PM", "FTM", "BLK", "OREB", "AST", "DREB", "PF", "FTA", "FGA", "TOV", "MP"],
-            "description": "Player Efficiency Rating - comprehensive player value metric"
+            "variables": [
+                "FGM",
+                "STL",
+                "3PM",
+                "FTM",
+                "BLK",
+                "OREB",
+                "AST",
+                "DREB",
+                "PF",
+                "FTA",
+                "FGA",
+                "TOV",
+                "MP",
+            ],
+            "description": "Player Efficiency Rating - comprehensive player value metric",
         },
-
         "true_shooting": {
             "formula": "TS% = PTS / (2 * (FGA + 0.44 * FTA))",
             "variables": ["PTS", "FGA", "FTA"],
-            "description": "True Shooting Percentage - accounts for 3-pointers and free throws"
+            "description": "True Shooting Percentage - accounts for 3-pointers and free throws",
         },
-
         "usage_rate": {
             "formula": "USG% = ((FGA + 0.44 * FTA + TOV) * (TM_MP / 5)) / (MP * (TM_FGA + 0.44 * TM_FTA + TM_TOV)) * 100",
-            "variables": ["FGA", "FTA", "TOV", "TM_MP", "MP", "TM_FGA", "TM_FTA", "TM_TOV"],
-            "description": "Usage Rate - percentage of team plays used by player"
+            "variables": [
+                "FGA",
+                "FTA",
+                "TOV",
+                "TM_MP",
+                "MP",
+                "TM_FGA",
+                "TM_FTA",
+                "TM_TOV",
+            ],
+            "description": "Usage Rate - percentage of team plays used by player",
         },
-
         "four_factors_shooting": {
             "formula": "eFG% = (FGM + 0.5 * 3PM) / FGA",
             "variables": ["FGM", "3PM", "FGA"],
-            "description": "Effective Field Goal Percentage - adjusts for 3-pointers"
+            "description": "Effective Field Goal Percentage - adjusts for 3-pointers",
         },
-
         "four_factors_turnovers": {
             "formula": "TOV% = TOV / (FGA + 0.44 * FTA + TOV) * 100",
             "variables": ["TOV", "FGA", "FTA"],
-            "description": "Turnover Percentage - turnovers per 100 plays"
+            "description": "Turnover Percentage - turnovers per 100 plays",
         },
-
         "pace": {
             "formula": "Pace = 48 * ((TM_POSS + OPP_POSS) / (2 * TM_MP))",
             "variables": ["TM_POSS", "OPP_POSS", "TM_MP"],
-            "description": "Pace - possessions per 48 minutes"
+            "description": "Pace - possessions per 48 minutes",
         },
-
         # Advanced Player Metrics
         "vorp": {
             "formula": "VORP = (BPM - (-2.0)) * (POSS_PCT / 100) * (TEAM_GAMES / 82)",
             "variables": ["BPM", "POSS_PCT", "TEAM_GAMES"],
-            "description": "Value Over Replacement Player - measures value above replacement level"
+            "description": "Value Over Replacement Player - measures value above replacement level",
         },
-
         "ws_per_48": {
             "formula": "WS/48 = (WS * 48 * TEAM_GAMES) / MP",
             "variables": ["WS", "TEAM_GAMES", "MP"],
-            "description": "Win Shares per 48 minutes - win shares normalized to 48 minutes"
+            "description": "Win Shares per 48 minutes - win shares normalized to 48 minutes",
         },
-
         "game_score": {
             "formula": "Game Score = PTS + 0.4 * FGM - 0.7 * FGA - 0.4 * (FTA - FTM) + 0.7 * OREB + 0.3 * DREB + STL + 0.7 * AST + 0.7 * BLK - 0.4 * PF - TOV",
-            "variables": ["PTS", "FGM", "FGA", "FTA", "FTM", "OREB", "DREB", "STL", "AST", "BLK", "PF", "TOV"],
-            "description": "Game Score - single-game performance metric"
+            "variables": [
+                "PTS",
+                "FGM",
+                "FGA",
+                "FTA",
+                "FTM",
+                "OREB",
+                "DREB",
+                "STL",
+                "AST",
+                "BLK",
+                "PF",
+                "TOV",
+            ],
+            "description": "Game Score - single-game performance metric",
         },
-
         "pie": {
             "formula": "PIE = (PTS + FGM + FTM - FGA - FTA + DREB + (0.5 * OREB) + AST + STL + (0.5 * BLK) - PF - TOV) / (GmPTS + GmFGM + GmFTM - GmFGA - GmFTA + GmDREB + (0.5 * GmOREB) + GmAST + GmSTL + (0.5 * GmBLK) - GmPF - GmTOV)",
-            "variables": ["PTS", "FGM", "FTM", "FGA", "FTA", "DREB", "OREB", "AST", "STL", "BLK", "PF", "TOV", "GmPTS", "GmFGM", "GmFTM", "GmFGA", "GmFTA", "GmDREB", "GmOREB", "GmAST", "GmSTL", "GmBLK", "GmPF", "GmTOV"],
-            "description": "Player Impact Estimate - percentage of team's positive contributions"
+            "variables": [
+                "PTS",
+                "FGM",
+                "FTM",
+                "FGA",
+                "FTA",
+                "DREB",
+                "OREB",
+                "AST",
+                "STL",
+                "BLK",
+                "PF",
+                "TOV",
+                "GmPTS",
+                "GmFGM",
+                "GmFTM",
+                "GmFGA",
+                "GmFTA",
+                "GmDREB",
+                "GmOREB",
+                "GmAST",
+                "GmSTL",
+                "GmBLK",
+                "GmPF",
+                "GmTOV",
+            ],
+            "description": "Player Impact Estimate - percentage of team's positive contributions",
         },
-
         # Shooting Analytics
         "corner_3pt_pct": {
             "formula": "Corner 3PT% = Corner_3PM / Corner_3PA",
             "variables": ["Corner_3PM", "Corner_3PA"],
-            "description": "Corner 3-Point Percentage - shooting efficiency from corner"
+            "description": "Corner 3-Point Percentage - shooting efficiency from corner",
         },
-
         "rim_fg_pct": {
             "formula": "Rim FG% = Rim_FGM / Rim_FGA",
             "variables": ["Rim_FGM", "Rim_FGA"],
-            "description": "Rim Field Goal Percentage - shooting efficiency at the rim"
+            "description": "Rim Field Goal Percentage - shooting efficiency at the rim",
         },
-
         "midrange_efficiency": {
             "formula": "Midrange Efficiency = Midrange_FGM / Midrange_FGA",
             "variables": ["Midrange_FGM", "Midrange_FGA"],
-            "description": "Midrange Shooting Efficiency - shooting from midrange areas"
+            "description": "Midrange Shooting Efficiency - shooting from midrange areas",
         },
-
         "catch_and_shoot_pct": {
             "formula": "Catch & Shoot% = C&S_FGM / C&S_FGA",
             "variables": ["C&S_FGM", "C&S_FGA"],
-            "description": "Catch and Shoot Percentage - shooting off passes"
+            "description": "Catch and Shoot Percentage - shooting off passes",
         },
-
         # Defensive Metrics
         "defensive_win_shares": {
             "formula": "DWS = (DRtg - 110) * (MP / 48) * (TEAM_PACE / 100)",
             "variables": ["DRtg", "MP", "TEAM_PACE"],
-            "description": "Defensive Win Shares - defensive contribution to team wins"
+            "description": "Defensive Win Shares - defensive contribution to team wins",
         },
-
         "steal_percentage": {
             "formula": "STL% = (STL * (TM_MP / 5)) / (MP * OPP_POSS) * 100",
             "variables": ["STL", "TM_MP", "MP", "OPP_POSS"],
-            "description": "Steal Percentage - steals per 100 opponent possessions"
+            "description": "Steal Percentage - steals per 100 opponent possessions",
         },
-
         "block_percentage": {
             "formula": "BLK% = (BLK * (TM_MP / 5)) / (MP * OPP_2PA) * 100",
             "variables": ["BLK", "TM_MP", "MP", "OPP_2PA"],
-            "description": "Block Percentage - blocks per 100 opponent 2-point attempts"
+            "description": "Block Percentage - blocks per 100 opponent 2-point attempts",
         },
-
         "defensive_rating": {
             "formula": "DRtg = 100 * (OPP_PTS / OPP_POSS)",
             "variables": ["OPP_PTS", "OPP_POSS"],
-            "description": "Defensive Rating - points allowed per 100 possessions"
+            "description": "Defensive Rating - points allowed per 100 possessions",
         },
-
         # Team Metrics
         "net_rating": {
             "formula": "Net Rating = ORtg - DRtg",
             "variables": ["ORtg", "DRtg"],
-            "description": "Net Rating - difference between offensive and defensive rating"
+            "description": "Net Rating - difference between offensive and defensive rating",
         },
-
         "offensive_efficiency": {
             "formula": "Offensive Efficiency = (PTS / POSS) * 100",
             "variables": ["PTS", "POSS"],
-            "description": "Offensive Efficiency - points per 100 possessions"
+            "description": "Offensive Efficiency - points per 100 possessions",
         },
-
         "defensive_efficiency": {
             "formula": "Defensive Efficiency = (OPP_PTS / OPP_POSS) * 100",
             "variables": ["OPP_PTS", "OPP_POSS"],
-            "description": "Defensive Efficiency - points allowed per 100 possessions"
+            "description": "Defensive Efficiency - points allowed per 100 possessions",
         },
-
         "pace_factor": {
             "formula": "Pace Factor = PACE / League_Avg_Pace",
             "variables": ["PACE", "League_Avg_Pace"],
-            "description": "Pace Factor - team pace relative to league average"
+            "description": "Pace Factor - team pace relative to league average",
         },
-
         # Situational Metrics
         "clutch_performance": {
             "formula": "Clutch Performance = (Clutch_PTS + Clutch_AST + Clutch_REB) / Clutch_MIN",
             "variables": ["Clutch_PTS", "Clutch_AST", "Clutch_REB", "Clutch_MIN"],
-            "description": "Clutch Performance - performance in close game situations"
+            "description": "Clutch Performance - performance in close game situations",
         },
-
         "on_off_differential": {
             "formula": "On/Off Differential = Team_ORtg_On - Team_ORtg_Off",
             "variables": ["Team_ORtg_On", "Team_ORtg_Off"],
-            "description": "On/Off Court Differential - team performance with/without player"
+            "description": "On/Off Court Differential - team performance with/without player",
         },
-
         "plus_minus_per_100": {
             "formula": "Plus/Minus per 100 = (Plus_Minus * 100) / MP",
             "variables": ["Plus_Minus", "MP"],
-            "description": "Plus/Minus per 100 possessions - point differential normalized"
+            "description": "Plus/Minus per 100 possessions - point differential normalized",
         },
-
         # Additional Advanced Metrics
         "bpm_offensive": {
             "formula": "OBPM = (Raw_OBPM * Pace_Adjustment) + League_Avg_OBPM",
             "variables": ["Raw_OBPM", "Pace_Adjustment", "League_Avg_OBPM"],
-            "description": "Offensive Box Plus/Minus - offensive contribution per 100 possessions"
+            "description": "Offensive Box Plus/Minus - offensive contribution per 100 possessions",
         },
-
         "bpm_defensive": {
             "formula": "DBPM = (Raw_DBPM * Pace_Adjustment) + League_Avg_DBPM",
             "variables": ["Raw_DBPM", "Pace_Adjustment", "League_Avg_DBPM"],
-            "description": "Defensive Box Plus/Minus - defensive contribution per 100 possessions"
+            "description": "Defensive Box Plus/Minus - defensive contribution per 100 possessions",
         },
-
         "win_shares_offensive": {
             "formula": "OWS = (PTS - League_Avg_PTS_per_Poss * POSS) * (MP / (TEAM_MP / 5))",
             "variables": ["PTS", "League_Avg_PTS_per_Poss", "POSS", "MP", "TEAM_MP"],
-            "description": "Offensive Win Shares - offensive contribution to team wins"
+            "description": "Offensive Win Shares - offensive contribution to team wins",
         },
-
         "assist_percentage": {
             "formula": "AST% = (AST * (TM_MP / 5)) / (MP * (TM_FGM - Player_FGM)) * 100",
             "variables": ["AST", "TM_MP", "MP", "TM_FGM", "Player_FGM"],
-            "description": "Assist Percentage - assists per 100 teammate field goals"
+            "description": "Assist Percentage - assists per 100 teammate field goals",
         },
-
         "rebound_percentage": {
             "formula": "REB% = (REB * (TM_MP / 5)) / (MP * (TM_REB + OPP_REB)) * 100",
             "variables": ["REB", "TM_MP", "MP", "TM_REB", "OPP_REB"],
-            "description": "Rebound Percentage - rebounds per 100 available rebounds"
+            "description": "Rebound Percentage - rebounds per 100 available rebounds",
         },
-
         "turnover_percentage": {
             "formula": "TOV% = TOV / (FGA + 0.44 * FTA + TOV) * 100",
             "variables": ["TOV", "FGA", "FTA"],
-            "description": "Turnover Percentage - turnovers per 100 plays"
+            "description": "Turnover Percentage - turnovers per 100 plays",
         },
-
         "free_throw_rate": {
             "formula": "FTR = FTA / FGA",
             "variables": ["FTA", "FGA"],
-            "description": "Free Throw Rate - free throw attempts per field goal attempt"
+            "description": "Free Throw Rate - free throw attempts per field goal attempt",
         },
-
         "effective_field_goal_percentage": {
             "formula": "eFG% = (FGM + 0.5 * 3PM) / FGA",
             "variables": ["FGM", "3PM", "FGA"],
-            "description": "Effective Field Goal Percentage - adjusts for 3-pointers"
+            "description": "Effective Field Goal Percentage - adjusts for 3-pointers",
         },
-
         "true_shooting_percentage": {
             "formula": "TS% = PTS / (2 * (FGA + 0.44 * FTA))",
             "variables": ["PTS", "FGA", "FTA"],
-            "description": "True Shooting Percentage - accounts for all shooting"
+            "description": "True Shooting Percentage - accounts for all shooting",
         },
-
         "player_efficiency_rating": {
             "formula": "PER = (FGM * 85.910 + STL * 53.897 + 3PM * 51.757 + FTM * 46.845 + BLK * 39.190 + OREB * 39.190 + AST * 34.677 + DREB * 14.707 - PF * 17.174 - (FTA - FTM) * 20.091 - (FGA - FGM) * 39.190 - TOV * 53.897) * (1 / MP)",
-            "variables": ["FGM", "STL", "3PM", "FTM", "BLK", "OREB", "AST", "DREB", "PF", "FTA", "FGA", "TOV", "MP"],
-            "description": "Player Efficiency Rating - comprehensive player value"
+            "variables": [
+                "FGM",
+                "STL",
+                "3PM",
+                "FTM",
+                "BLK",
+                "OREB",
+                "AST",
+                "DREB",
+                "PF",
+                "FTA",
+                "FGA",
+                "TOV",
+                "MP",
+            ],
+            "description": "Player Efficiency Rating - comprehensive player value",
         },
-
         "pace_adjusted_stats": {
             "formula": "Pace_Adjusted = (Stat * League_Avg_Pace) / Team_Pace",
             "variables": ["Stat", "League_Avg_Pace", "Team_Pace"],
-            "description": "Pace Adjusted Statistics - normalizes stats for pace differences"
+            "description": "Pace Adjusted Statistics - normalizes stats for pace differences",
         },
-
         "clutch_time_rating": {
             "formula": "Clutch Rating = (Clutch_PTS + Clutch_AST + Clutch_REB - Clutch_TOV) / Clutch_MIN * 48",
-            "variables": ["Clutch_PTS", "Clutch_AST", "Clutch_REB", "Clutch_TOV", "Clutch_MIN"],
-            "description": "Clutch Time Rating - performance in clutch situations per 48 minutes"
+            "variables": [
+                "Clutch_PTS",
+                "Clutch_AST",
+                "Clutch_REB",
+                "Clutch_TOV",
+                "Clutch_MIN",
+            ],
+            "description": "Clutch Time Rating - performance in clutch situations per 48 minutes",
         },
-
         "defensive_impact": {
             "formula": "Defensive Impact = (Team_DRtg_Off - Team_DRtg_On) * (MP / TEAM_MP)",
             "variables": ["Team_DRtg_Off", "Team_DRtg_On", "MP", "TEAM_MP"],
-            "description": "Defensive Impact - team defensive rating change with player on court"
+            "description": "Defensive Impact - team defensive rating change with player on court",
         },
-
         "offensive_impact": {
             "formula": "Offensive Impact = (Team_ORtg_On - Team_ORtg_Off) * (MP / TEAM_MP)",
             "variables": ["Team_ORtg_On", "Team_ORtg_Off", "MP", "TEAM_MP"],
-            "description": "Offensive Impact - team offensive rating change with player on court"
+            "description": "Offensive Impact - team offensive rating change with player on court",
         },
-
         "shooting_efficiency_differential": {
             "formula": "Shooting Efficiency Differential = Player_eFG% - League_Avg_eFG%",
             "variables": ["Player_eFG%", "League_Avg_eFG%"],
-            "description": "Shooting Efficiency Differential - player efficiency vs league average"
+            "description": "Shooting Efficiency Differential - player efficiency vs league average",
         },
-
         "possession_usage": {
             "formula": "Possession Usage = (FGA + 0.44 * FTA + TOV) / Team_Possessions * 100",
             "variables": ["FGA", "FTA", "TOV", "Team_Possessions"],
-            "description": "Possession Usage - percentage of team possessions used by player"
+            "description": "Possession Usage - percentage of team possessions used by player",
         },
-
         "defensive_rebound_percentage": {
             "formula": "DRB% = (DREB * (TM_MP / 5)) / (MP * (TM_DREB + OPP_OREB)) * 100",
             "variables": ["DREB", "TM_MP", "MP", "TM_DREB", "OPP_OREB"],
-            "description": "Defensive Rebound Percentage - defensive rebounds per 100 available"
+            "description": "Defensive Rebound Percentage - defensive rebounds per 100 available",
         },
-
         "offensive_rebound_percentage": {
             "formula": "ORB% = (OREB * (TM_MP / 5)) / (MP * (TM_OREB + OPP_DREB)) * 100",
             "variables": ["OREB", "TM_MP", "MP", "TM_OREB", "OPP_DREB"],
-            "description": "Offensive Rebound Percentage - offensive rebounds per 100 available"
+            "description": "Offensive Rebound Percentage - offensive rebounds per 100 available",
         },
-
         "team_efficiency_differential": {
             "formula": "Team Efficiency Differential = Team_ORtg - Team_DRtg",
             "variables": ["Team_ORtg", "Team_DRtg"],
-            "description": "Team Efficiency Differential - net rating for team performance"
+            "description": "Team Efficiency Differential - net rating for team performance",
         },
-
         "pace_adjusted_offensive_rating": {
             "formula": "Pace-Adjusted ORtg = ORtg * (League_Avg_Pace / Team_Pace)",
             "variables": ["ORtg", "League_Avg_Pace", "Team_Pace"],
-            "description": "Pace-Adjusted Offensive Rating - offensive rating normalized for pace"
+            "description": "Pace-Adjusted Offensive Rating - offensive rating normalized for pace",
         },
-
         "pace_adjusted_defensive_rating": {
             "formula": "Pace-Adjusted DRtg = DRtg * (League_Avg_Pace / Team_Pace)",
             "variables": ["DRtg", "League_Avg_Pace", "Team_Pace"],
-            "description": "Pace-Adjusted Defensive Rating - defensive rating normalized for pace"
-        }
+            "description": "Pace-Adjusted Defensive Rating - defensive rating normalized for pace",
+        },
     }
 
     if formula_name not in formulas:
@@ -661,7 +712,9 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
                 # Check for consistency warnings
                 warnings = validate_formula_consistency(formula_name, validated_kwargs)
                 if warnings:
-                    logger.warning(f"Formula consistency warnings for {formula_name}: {warnings}")
+                    logger.warning(
+                        f"Formula consistency warnings for {formula_name}: {warnings}"
+                    )
             except SportsValidationError as e:
                 suggestions = suggest_fixes_for_error(str(e), formula_name)
                 error_msg = f"Validation error for {formula_name}: {e}"
@@ -696,7 +749,9 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
                 expr = parse_expr(clean_formula)
                 result = float(expr.evalf())
             except Exception as parse_error:
-                logger.warning(f"Could not parse substituted formula '{substituted_formula}': {parse_error}")
+                logger.warning(
+                    f"Could not parse substituted formula '{substituted_formula}': {parse_error}"
+                )
                 # Try manual calculation for common patterns
                 try:
                     # Simple manual calculation for basic arithmetic
@@ -713,7 +768,7 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
             "substituted_values": substituted_values,
             "substituted_formula": substituted_formula,
             "result": result,
-            "success": True
+            "success": True,
         }
 
     except Exception as e:
@@ -725,7 +780,7 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
             "variables": formula_info["variables"],
             "description": formula_info["description"],
             "success": False,
-            "error": str(e)
+            "error": str(e),
         }
 
 
@@ -733,8 +788,11 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
 # LaTeX Rendering and Display
 # =============================================================================
 
+
 @log_operation("algebra_render_latex")
-def render_equation_latex(expression_str: str, display_mode: bool = False) -> Dict[str, Any]:
+def render_equation_latex(
+    expression_str: str, display_mode: bool = False
+) -> Dict[str, Any]:
     """
     Convert a mathematical expression to LaTeX format.
 
@@ -762,7 +820,7 @@ def render_equation_latex(expression_str: str, display_mode: bool = False) -> Di
             "expression": expression_str,
             "latex": latex_code,
             "display_mode": display_mode,
-            "success": True
+            "success": True,
         }
 
         if display_mode:
@@ -779,7 +837,7 @@ def render_equation_latex(expression_str: str, display_mode: bool = False) -> Di
             "latex": expression_str,
             "display_mode": display_mode,
             "success": False,
-            "error": str(e)
+            "error": str(e),
         }
 
 
@@ -803,9 +861,9 @@ def parse_latex_equation(latex_str: str) -> Dict[str, Any]:
     try:
         # Remove LaTeX delimiters if present
         clean_latex = latex_str.strip()
-        if clean_latex.startswith('$') and clean_latex.endswith('$'):
+        if clean_latex.startswith("$") and clean_latex.endswith("$"):
             clean_latex = clean_latex[1:-1]
-        if clean_latex.startswith('$$') and clean_latex.endswith('$$'):
+        if clean_latex.startswith("$$") and clean_latex.endswith("$$"):
             clean_latex = clean_latex[2:-2]
 
         # Convert LaTeX to SymPy expression
@@ -815,7 +873,7 @@ def parse_latex_equation(latex_str: str) -> Dict[str, Any]:
             "latex": latex_str,
             "expression": str(expr),
             "simplified_latex": latex(expr),
-            "success": True
+            "success": True,
         }
 
     except Exception as e:
@@ -824,7 +882,7 @@ def parse_latex_equation(latex_str: str) -> Dict[str, Any]:
             "latex": latex_str,
             "expression": latex_str,
             "success": False,
-            "error": str(e)
+            "error": str(e),
         }
 
 
@@ -832,10 +890,11 @@ def parse_latex_equation(latex_str: str) -> Dict[str, Any]:
 # Matrix Operations for Advanced Analytics
 # =============================================================================
 
+
 @log_operation("algebra_matrix_operations")
-def matrix_operations(matrix_data: List[List[Union[int, float]]],
-                     operation: str,
-                     **kwargs) -> Dict[str, Any]:
+def matrix_operations(
+    matrix_data: List[List[Union[int, float]]], operation: str, **kwargs
+) -> Dict[str, Any]:
     """
     Perform matrix operations for advanced analytics.
 
@@ -879,10 +938,12 @@ def matrix_operations(matrix_data: List[List[Union[int, float]]],
             result = matrix.T
 
         else:
-            raise ValueError(f"Unknown operation '{operation}'. Available: determinant, inverse, eigenvalues, multiply, transpose")
+            raise ValueError(
+                f"Unknown operation '{operation}'. Available: determinant, inverse, eigenvalues, multiply, transpose"
+            )
 
         # Convert result to appropriate format
-        if hasattr(result, 'tolist'):
+        if hasattr(result, "tolist"):
             result_data = result.tolist()
         else:
             result_data = result
@@ -891,8 +952,8 @@ def matrix_operations(matrix_data: List[List[Union[int, float]]],
             "operation": operation,
             "input_matrix": matrix_data,
             "result": result_data,
-            "latex": latex(result) if hasattr(result, '__iter__') else str(result),
-            "success": True
+            "latex": latex(result) if hasattr(result, "__iter__") else str(result),
+            "success": True,
         }
 
     except Exception as e:
@@ -902,13 +963,14 @@ def matrix_operations(matrix_data: List[List[Union[int, float]]],
             "input_matrix": matrix_data,
             "result": None,
             "success": False,
-            "error": str(e)
+            "error": str(e),
         }
 
 
 # =============================================================================
 # Equation System Solving
 # =============================================================================
+
 
 @log_operation("algebra_solve_system")
 def solve_equation_system(equations: List[str], variables: List[str]) -> Dict[str, Any]:
@@ -932,8 +994,8 @@ def solve_equation_system(equations: List[str], variables: List[str]) -> Dict[st
         # Parse equations
         parsed_equations = []
         for eq_str in equations:
-            if '=' in eq_str:
-                left, right = eq_str.split('=', 1)
+            if "=" in eq_str:
+                left, right = eq_str.split("=", 1)
                 left_expr = parse_expr(left.strip())
                 right_expr = parse_expr(right.strip())
                 parsed_equations.append(Eq(left_expr, right_expr))
@@ -948,19 +1010,27 @@ def solve_equation_system(equations: List[str], variables: List[str]) -> Dict[st
 
         # Convert solutions to dictionary
         if isinstance(solutions, dict):
-            solution_dict = {str(k): float(v.evalf()) if v.is_real else str(v) for k, v in solutions.items()}
+            solution_dict = {
+                str(k): float(v.evalf()) if v.is_real else str(v)
+                for k, v in solutions.items()
+            }
         else:
             solution_dict = {}
             for i, sol in enumerate(solutions):
                 if isinstance(sol, dict):
-                    solution_dict.update({str(k): float(v.evalf()) if v.is_real else str(v) for k, v in sol.items()})
+                    solution_dict.update(
+                        {
+                            str(k): float(v.evalf()) if v.is_real else str(v)
+                            for k, v in sol.items()
+                        }
+                    )
 
         return {
             "equations": equations,
             "variables": variables,
             "solutions": solution_dict,
             "num_solutions": len(solutions) if isinstance(solutions, list) else 1,
-            "success": True
+            "success": True,
         }
 
     except Exception as e:
@@ -970,5 +1040,5 @@ def solve_equation_system(equations: List[str], variables: List[str]) -> Dict[st
             "variables": variables,
             "solutions": {},
             "success": False,
-            "error": str(e)
+            "error": str(e),
         }

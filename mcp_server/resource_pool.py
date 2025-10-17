@@ -37,11 +37,12 @@ from contextlib import contextmanager
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class ResourceState(Enum):
     """Resource state"""
+
     IDLE = "idle"
     IN_USE = "in_use"
     INVALID = "invalid"
@@ -51,6 +52,7 @@ class ResourceState(Enum):
 @dataclass
 class PooledResource(Generic[T]):
     """Wrapper for pooled resource"""
+
     resource: T
     resource_id: str
     state: ResourceState = ResourceState.IDLE
@@ -98,7 +100,7 @@ class ResourcePool(Generic[T]):
         max_size: int = 10,
         max_idle_seconds: int = 300,
         max_age_seconds: int = 3600,
-        validation_interval_seconds: int = 60
+        validation_interval_seconds: int = 60,
     ):
         self.factory = factory
         self.validator = validator or (lambda r: True)
@@ -141,10 +143,7 @@ class ResourcePool(Generic[T]):
         """Create new pooled resource"""
         try:
             resource = self.factory()
-            pooled = PooledResource(
-                resource=resource,
-                resource_id=self._generate_id()
-            )
+            pooled = PooledResource(resource=resource, resource_id=self._generate_id())
 
             with self._lock:
                 self._resources[pooled.resource_id] = pooled
@@ -255,7 +254,9 @@ class ResourcePool(Generic[T]):
                         if not self._validate_resource(pooled):
                             pooled.mark_invalid()
                             self._total_validation_failures += 1
-                            logger.warning(f"Resource validation failed: {pooled.resource_id}")
+                            logger.warning(
+                                f"Resource validation failed: {pooled.resource_id}"
+                            )
 
     def _start_background_tasks(self) -> None:
         """Start background maintenance threads"""
@@ -264,7 +265,9 @@ class ResourcePool(Generic[T]):
         self._cleaner_thread = threading.Thread(target=self._cleanup_loop, daemon=True)
         self._cleaner_thread.start()
 
-        self._validator_thread = threading.Thread(target=self._validation_loop, daemon=True)
+        self._validator_thread = threading.Thread(
+            target=self._validation_loop, daemon=True
+        )
         self._validator_thread.start()
 
         logger.info("Resource pool background tasks started")
@@ -302,13 +305,17 @@ class ResourcePool(Generic[T]):
                         try:
                             pooled = self._create_resource()
                             pooled.mark_in_use()
-                            logger.debug(f"Created and acquired new resource: {pooled.resource_id}")
+                            logger.debug(
+                                f"Created and acquired new resource: {pooled.resource_id}"
+                            )
                             return pooled.resource
                         except Exception as e:
                             logger.error(f"Failed to create resource: {e}")
                             raise
                     else:
-                        raise RuntimeError("Pool exhausted and cannot create more resources")
+                        raise RuntimeError(
+                            "Pool exhausted and cannot create more resources"
+                        )
 
     def release(self, resource: T) -> None:
         """Release resource back to pool"""
@@ -332,7 +339,9 @@ class ResourcePool(Generic[T]):
                     logger.debug(f"Released resource: {pooled.resource_id}")
                 except Full:
                     # Pool full, destroy resource
-                    logger.warning(f"Pool full, destroying resource: {pooled.resource_id}")
+                    logger.warning(
+                        f"Pool full, destroying resource: {pooled.resource_id}"
+                    )
                     self._destroy_resource(pooled)
             else:
                 # Invalid, destroy it
@@ -353,29 +362,28 @@ class ResourcePool(Generic[T]):
         with self._lock:
             total_resources = len(self._resources)
             idle_resources = sum(
-                1 for r in self._resources.values()
-                if r.state == ResourceState.IDLE
+                1 for r in self._resources.values() if r.state == ResourceState.IDLE
             )
             in_use_resources = sum(
-                1 for r in self._resources.values()
-                if r.state == ResourceState.IN_USE
+                1 for r in self._resources.values() if r.state == ResourceState.IN_USE
             )
             invalid_resources = sum(
-                1 for r in self._resources.values()
-                if r.state == ResourceState.INVALID
+                1 for r in self._resources.values() if r.state == ResourceState.INVALID
             )
 
             return {
-                'total_resources': total_resources,
-                'idle_resources': idle_resources,
-                'in_use_resources': in_use_resources,
-                'invalid_resources': invalid_resources,
-                'available_capacity': self.max_size - total_resources,
-                'utilization_percent': (in_use_resources / self.max_size * 100) if self.max_size > 0 else 0,
-                'total_created': self._total_created,
-                'total_destroyed': self._total_destroyed,
-                'total_acquisitions': self._total_acquisitions,
-                'total_validation_failures': self._total_validation_failures
+                "total_resources": total_resources,
+                "idle_resources": idle_resources,
+                "in_use_resources": in_use_resources,
+                "invalid_resources": invalid_resources,
+                "available_capacity": self.max_size - total_resources,
+                "utilization_percent": (
+                    (in_use_resources / self.max_size * 100) if self.max_size > 0 else 0
+                ),
+                "total_created": self._total_created,
+                "total_destroyed": self._total_destroyed,
+                "total_acquisitions": self._total_acquisitions,
+                "total_validation_failures": self._total_validation_failures,
             }
 
     def shutdown(self) -> None:
@@ -400,6 +408,7 @@ class ResourcePool(Generic[T]):
 # Example: Database connection pool
 class MockConnection:
     """Mock database connection for demo"""
+
     def __init__(self):
         self.connected = True
         self.query_count = 0
@@ -438,7 +447,7 @@ if __name__ == "__main__":
         destructor=close_connection,
         min_size=2,
         max_size=5,
-        max_idle_seconds=30
+        max_idle_seconds=30,
     )
 
     print("--- Basic Usage ---")
@@ -482,4 +491,3 @@ if __name__ == "__main__":
     pool.shutdown()
 
     print("\n=== Demo Complete ===")
-

@@ -42,6 +42,7 @@ logger = logging.getLogger(__name__)
 
 class EventPriority(Enum):
     """Event priority levels"""
+
     LOW = 3
     NORMAL = 2
     HIGH = 1
@@ -51,6 +52,7 @@ class EventPriority(Enum):
 @dataclass
 class Event:
     """Event definition"""
+
     event_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     event_type: str = ""
     topic: str = ""
@@ -64,8 +66,8 @@ class Event:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         data = asdict(self)
-        data['priority'] = self.priority.value
-        data['timestamp'] = self.timestamp.isoformat()
+        data["priority"] = self.priority.value
+        data["timestamp"] = self.timestamp.isoformat()
         return data
 
     def to_json(self) -> str:
@@ -81,7 +83,7 @@ class EventFilter:
         event_types: Optional[Set[str]] = None,
         topics: Optional[Set[str]] = None,
         sources: Optional[Set[str]] = None,
-        min_priority: Optional[EventPriority] = None
+        min_priority: Optional[EventPriority] = None,
     ):
         self.event_types = event_types
         self.topics = topics
@@ -108,6 +110,7 @@ class EventFilter:
 @dataclass
 class Subscription:
     """Event subscription"""
+
     subscription_id: str
     subscriber_name: str
     callback: Callable[[Event], None]
@@ -134,7 +137,7 @@ class EventBus:
         self,
         subscriber_name: str,
         callback: Callable[[Event], None],
-        event_filter: Optional[EventFilter] = None
+        event_filter: Optional[EventFilter] = None,
     ) -> str:
         """Subscribe to events"""
         subscription_id = str(uuid.uuid4())
@@ -143,7 +146,7 @@ class EventBus:
             subscription_id=subscription_id,
             subscriber_name=subscriber_name,
             callback=callback,
-            event_filter=event_filter
+            event_filter=event_filter,
         )
 
         with self._lock:
@@ -181,7 +184,9 @@ class EventBus:
                     continue
 
                 # Check filter
-                if subscription.event_filter and not subscription.event_filter.matches(event):
+                if subscription.event_filter and not subscription.event_filter.matches(
+                    event
+                ):
                     continue
 
                 # Deliver event
@@ -192,15 +197,15 @@ class EventBus:
                     delivered += 1
                     self.total_delivered += 1
                 except Exception as e:
-                    logger.error(f"Error delivering event to {subscription.subscriber_name}: {e}")
+                    logger.error(
+                        f"Error delivering event to {subscription.subscriber_name}: {e}"
+                    )
 
         logger.debug(f"Published event {event.event_id} to {delivered} subscribers")
         return delivered
 
     def get_history(
-        self,
-        event_filter: Optional[EventFilter] = None,
-        limit: int = 100
+        self, event_filter: Optional[EventFilter] = None, limit: int = 100
     ) -> List[Event]:
         """Get event history"""
         with self._lock:
@@ -215,18 +220,22 @@ class EventBus:
         """Get event bus statistics"""
         with self._lock:
             return {
-                'total_published': self.total_published,
-                'total_delivered': self.total_delivered,
-                'active_subscriptions': len(self.subscriptions),
-                'history_size': len(self.event_history),
-                'subscriptions': [
+                "total_published": self.total_published,
+                "total_delivered": self.total_delivered,
+                "active_subscriptions": len(self.subscriptions),
+                "history_size": len(self.event_history),
+                "subscriptions": [
                     {
-                        'name': sub.subscriber_name,
-                        'event_count': sub.event_count,
-                        'last_event': sub.last_event_time.isoformat() if sub.last_event_time else None
+                        "name": sub.subscriber_name,
+                        "event_count": sub.event_count,
+                        "last_event": (
+                            sub.last_event_time.isoformat()
+                            if sub.last_event_time
+                            else None
+                        ),
                     }
                     for sub in self.subscriptions.values()
-                ]
+                ],
             }
 
 
@@ -318,6 +327,7 @@ class TopicRouter:
 # NBA-specific event types
 class NBAEventType:
     """NBA event types"""
+
     PLAYER_STAT_UPDATE = "player.stat.update"
     GAME_STARTED = "game.started"
     GAME_ENDED = "game.ended"
@@ -338,11 +348,8 @@ class NBAEventPublisher:
         event = Event(
             event_type=NBAEventType.PLAYER_STAT_UPDATE,
             topic="nba.players",
-            payload={
-                'player_id': player_id,
-                'stats': stats
-            },
-            source="stats_service"
+            payload={"player_id": player_id, "stats": stats},
+            source="stats_service",
         )
         self.event_bus.publish(event)
 
@@ -352,12 +359,12 @@ class NBAEventPublisher:
             event_type=NBAEventType.GAME_STARTED,
             topic="nba.games",
             payload={
-                'game_id': game_id,
-                'home_team': home_team,
-                'away_team': away_team
+                "game_id": game_id,
+                "home_team": home_team,
+                "away_team": away_team,
             },
             priority=EventPriority.HIGH,
-            source="game_service"
+            source="game_service",
         )
         self.event_bus.publish(event)
 
@@ -366,11 +373,8 @@ class NBAEventPublisher:
         event = Event(
             event_type=NBAEventType.PREDICTION_GENERATED,
             topic="nba.ml",
-            payload={
-                'model': model_name,
-                'prediction': prediction
-            },
-            source="ml_service"
+            payload={"model": model_name, "prediction": prediction},
+            source="ml_service",
         )
         self.event_bus.publish(event)
 
@@ -404,7 +408,7 @@ if __name__ == "__main__":
     bus.subscribe("all_events", all_events_handler)
 
     # Subscribe to player events only
-    player_filter = EventFilter(topics={'nba.players'})
+    player_filter = EventFilter(topics={"nba.players"})
 
     def player_events_handler(event: Event):
         print(f"[PLAYERS] Player {event.payload['player_id']} stats updated")
@@ -426,7 +430,7 @@ if __name__ == "__main__":
     print("--- Publishing Events ---\n")
 
     # Normal priority player event
-    publisher.player_stat_updated(23, {'ppg': 25.5, 'rpg': 8.0})
+    publisher.player_stat_updated(23, {"ppg": 25.5, "rpg": 8.0})
     time.sleep(0.1)
 
     # High priority game event
@@ -435,8 +439,7 @@ if __name__ == "__main__":
 
     # ML prediction event
     publisher.prediction_generated(
-        "game_predictor_v2",
-        {'winner': 'Lakers', 'confidence': 0.72}
+        "game_predictor_v2", {"winner": "Lakers", "confidence": 0.72}
     )
     time.sleep(0.1)
 
@@ -448,7 +451,7 @@ if __name__ == "__main__":
     print(f"Active subscriptions: {stats['active_subscriptions']}")
 
     print("\nSubscription details:")
-    for sub in stats['subscriptions']:
+    for sub in stats["subscriptions"]:
         print(f"  - {sub['name']}: {sub['event_count']} events")
 
     # Event history
@@ -469,15 +472,10 @@ if __name__ == "__main__":
 
     # Push events to stream
     for i in range(3):
-        event = Event(
-            event_type="test.event",
-            topic="test",
-            payload={'index': i}
-        )
+        event = Event(event_type="test.event", topic="test", payload={"index": i})
         stream.push(event)
 
     time.sleep(1)
     stream.stop()
 
     print("\n=== Demo Complete ===")
-

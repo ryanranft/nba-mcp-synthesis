@@ -30,6 +30,7 @@ load_dotenv()
 @dataclass
 class LoadTestResult:
     """Individual load test result"""
+
     test_name: str
     request_id: int
     start_time: float
@@ -44,6 +45,7 @@ class LoadTestResult:
 @dataclass
 class LoadTestMetrics:
     """Aggregated load test metrics"""
+
     test_name: str
     total_requests: int
     successful_requests: int
@@ -101,12 +103,7 @@ class LoadTester:
                 break
 
     async def _run_single_request(
-        self,
-        test_name: str,
-        request_id: int,
-        task_func: Callable,
-        *args,
-        **kwargs
+        self, test_name: str, request_id: int, task_func: Callable, *args, **kwargs
     ) -> LoadTestResult:
         """Run a single request and capture metrics"""
         start_time = time.time()
@@ -120,10 +117,10 @@ class LoadTester:
 
             # Extract metrics from result
             if isinstance(result, dict):
-                if result.get('status') != 'success':
+                if result.get("status") != "success":
                     status = "partial_failure"
-                cost = result.get('total_cost', 0.0)
-                tokens_used = result.get('total_tokens', 0)
+                cost = result.get("total_cost", 0.0)
+                tokens_used = result.get("total_tokens", 0)
 
         except Exception as e:
             status = "failed"
@@ -141,7 +138,7 @@ class LoadTester:
             status=status,
             error=error,
             cost=cost,
-            tokens_used=tokens_used
+            tokens_used=tokens_used,
         )
 
     async def run_concurrent_load(
@@ -150,7 +147,7 @@ class LoadTester:
         task_func: Callable,
         num_concurrent: int,
         task_args: List = None,
-        task_kwargs: Dict = None
+        task_kwargs: Dict = None,
     ) -> List[LoadTestResult]:
         """Run concurrent requests"""
         print(f"\n{'='*80}")
@@ -168,11 +165,7 @@ class LoadTester:
             kwargs = task_kwargs or {}
 
             task = self._run_single_request(
-                test_name,
-                i + 1,
-                task_func,
-                *args,
-                **kwargs
+                test_name, i + 1, task_func, *args, **kwargs
             )
             tasks.append(task)
 
@@ -217,7 +210,9 @@ class LoadTester:
 
         # Durations
         durations = [r.duration for r in results]
-        total_duration = max(r.end_time for r in results) - min(r.start_time for r in results)
+        total_duration = max(r.end_time for r in results) - min(
+            r.start_time for r in results
+        )
         rps = total_requests / total_duration if total_duration > 0 else 0
 
         # Response time percentiles
@@ -254,7 +249,7 @@ class LoadTester:
             mean_cost_per_request=mean_cost,
             peak_cpu_percent=peak_cpu,
             peak_memory_mb=peak_memory,
-            error_rate=error_rate
+            error_rate=error_rate,
         )
 
     def print_metrics(self, metrics: LoadTestMetrics):
@@ -266,8 +261,12 @@ class LoadTester:
         # Requests
         print("📊 Request Summary")
         print(f"  Total Requests:      {metrics.total_requests}")
-        print(f"  Successful:          {metrics.successful_requests} ({(1-metrics.error_rate)*100:.1f}%)")
-        print(f"  Failed:              {metrics.failed_requests} ({metrics.error_rate*100:.1f}%)")
+        print(
+            f"  Successful:          {metrics.successful_requests} ({(1-metrics.error_rate)*100:.1f}%)"
+        )
+        print(
+            f"  Failed:              {metrics.failed_requests} ({metrics.error_rate*100:.1f}%)"
+        )
         print(f"  Throughput:          {metrics.requests_per_second:.2f} req/s")
         print()
 
@@ -303,10 +302,10 @@ class LoadTester:
         data = {
             "timestamp": datetime.now().isoformat(),
             "results": [asdict(r) for r in self.results],
-            "metrics": asdict(self.calculate_metrics()) if self.results else None
+            "metrics": asdict(self.calculate_metrics()) if self.results else None,
         }
 
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             json.dump(data, f, indent=2)
 
         print(f"📁 Results saved to: {output_file}")
@@ -314,28 +313,25 @@ class LoadTester:
 
 # Test Scenarios
 
+
 async def scenario_mcp_database_query(mcp_server_url: str):
     """Scenario: MCP database query"""
     client = MCPClient(server_url=mcp_server_url)
 
     try:
         await client.connect()
-        result = await client.call_tool("query_database", {
-            "sql": "SELECT COUNT(*) FROM games LIMIT 1"
-        })
+        result = await client.call_tool(
+            "query_database", {"sql": "SELECT COUNT(*) FROM games LIMIT 1"}
+        )
         await client.disconnect()
 
         return {
-            "status": "success" if result.get('success') else "failed",
+            "status": "success" if result.get("success") else "failed",
             "total_cost": 0,  # MCP calls are free
-            "total_tokens": 0
+            "total_tokens": 0,
         }
     except Exception as e:
-        return {
-            "status": "failed",
-            "error": str(e),
-            "total_cost": 0
-        }
+        return {"status": "failed", "error": str(e), "total_cost": 0}
 
 
 async def scenario_simple_synthesis(mcp_server_url: str):
@@ -346,7 +342,7 @@ async def scenario_simple_synthesis(mcp_server_url: str):
         user_input=request,
         query_type="general_analysis",
         enable_ollama_verification=False,
-        mcp_server_url=mcp_server_url
+        mcp_server_url=mcp_server_url,
     )
 
     return result
@@ -360,7 +356,7 @@ async def scenario_sql_generation(mcp_server_url: str):
         user_input=request,
         query_type="sql_optimization",
         enable_ollama_verification=False,
-        mcp_server_url=mcp_server_url
+        mcp_server_url=mcp_server_url,
     )
 
     return result
@@ -368,9 +364,9 @@ async def scenario_sql_generation(mcp_server_url: str):
 
 async def run_load_tests():
     """Run comprehensive load test suite"""
-    print("="*80)
+    print("=" * 80)
     print("NBA MCP Synthesis - Load Testing Framework")
-    print("="*80)
+    print("=" * 80)
 
     mcp_server_url = os.getenv("MCP_SERVER_URL", "http://localhost:3000")
     tester = LoadTester(mcp_server_url)
@@ -381,7 +377,7 @@ async def run_load_tests():
         test_name="baseline_simple_synthesis",
         task_func=scenario_simple_synthesis,
         num_concurrent=1,
-        task_args=[mcp_server_url]
+        task_args=[mcp_server_url],
     )
 
     # Test 2: Moderate load (5 concurrent users)
@@ -390,7 +386,7 @@ async def run_load_tests():
         test_name="moderate_simple_synthesis",
         task_func=scenario_simple_synthesis,
         num_concurrent=5,
-        task_args=[mcp_server_url]
+        task_args=[mcp_server_url],
     )
 
     # Test 3: High load (10 concurrent users)
@@ -399,7 +395,7 @@ async def run_load_tests():
         test_name="high_simple_synthesis",
         task_func=scenario_simple_synthesis,
         num_concurrent=10,
-        task_args=[mcp_server_url]
+        task_args=[mcp_server_url],
     )
 
     # Test 4: MCP-only load (25 concurrent database queries)
@@ -408,7 +404,7 @@ async def run_load_tests():
         test_name="mcp_database_load",
         task_func=scenario_mcp_database_query,
         num_concurrent=25,
-        task_args=[mcp_server_url]
+        task_args=[mcp_server_url],
     )
 
     # Test 5: Stress test (25 concurrent synthesis requests)
@@ -417,13 +413,13 @@ async def run_load_tests():
         test_name="stress_synthesis",
         task_func=scenario_simple_synthesis,
         num_concurrent=25,
-        task_args=[mcp_server_url]
+        task_args=[mcp_server_url],
     )
 
     # Calculate and print overall metrics
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("OVERALL TEST RESULTS")
-    print("="*80)
+    print("=" * 80)
 
     metrics = tester.calculate_metrics()
     tester.print_metrics(metrics)
@@ -434,9 +430,9 @@ async def run_load_tests():
     tester.save_results(output_file)
 
     # Performance assertions
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("PERFORMANCE VALIDATION")
-    print("="*80 + "\n")
+    print("=" * 80 + "\n")
 
     passed = True
 
@@ -466,14 +462,16 @@ async def run_load_tests():
     if metrics.requests_per_second < 0.5:
         print(f"⚠️  WARN: Low throughput ({metrics.requests_per_second:.2f} req/s)")
     else:
-        print(f"✅ PASS: Throughput ({metrics.requests_per_second:.2f} req/s) acceptable")
+        print(
+            f"✅ PASS: Throughput ({metrics.requests_per_second:.2f} req/s) acceptable"
+        )
 
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     if passed:
         print("✅ ALL PERFORMANCE CHECKS PASSED")
     else:
         print("❌ SOME PERFORMANCE CHECKS FAILED")
-    print("="*80 + "\n")
+    print("=" * 80 + "\n")
 
     return passed
 

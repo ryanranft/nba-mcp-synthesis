@@ -39,6 +39,7 @@ logger = logging.getLogger(__name__)
 
 class QueueType(Enum):
     """Message queue types"""
+
     RABBITMQ = "rabbitmq"
     KAFKA = "kafka"
     SQS = "sqs"
@@ -47,6 +48,7 @@ class QueueType(Enum):
 
 class MessagePriority(Enum):
     """Message priority levels"""
+
     LOW = 1
     NORMAL = 5
     HIGH = 10
@@ -56,6 +58,7 @@ class MessagePriority(Enum):
 @dataclass
 class Message:
     """Message structure"""
+
     id: str
     body: Dict[str, Any]
     priority: MessagePriority = MessagePriority.NORMAL
@@ -66,28 +69,32 @@ class Message:
 
     def to_json(self) -> str:
         """Serialize message to JSON"""
-        return json.dumps({
-            'id': self.id,
-            'body': self.body,
-            'priority': self.priority.value,
-            'timestamp': self.timestamp.isoformat(),
-            'retry_count': self.retry_count,
-            'max_retries': self.max_retries,
-            'delay_seconds': self.delay_seconds
-        })
+        return json.dumps(
+            {
+                "id": self.id,
+                "body": self.body,
+                "priority": self.priority.value,
+                "timestamp": self.timestamp.isoformat(),
+                "retry_count": self.retry_count,
+                "max_retries": self.max_retries,
+                "delay_seconds": self.delay_seconds,
+            }
+        )
 
     @classmethod
-    def from_json(cls, json_str: str) -> 'Message':
+    def from_json(cls, json_str: str) -> "Message":
         """Deserialize message from JSON"""
         data = json.loads(json_str)
         return cls(
-            id=data['id'],
-            body=data['body'],
-            priority=MessagePriority(data.get('priority', MessagePriority.NORMAL.value)),
-            timestamp=datetime.fromisoformat(data['timestamp']),
-            retry_count=data.get('retry_count', 0),
-            max_retries=data.get('max_retries', 3),
-            delay_seconds=data.get('delay_seconds', 0)
+            id=data["id"],
+            body=data["body"],
+            priority=MessagePriority(
+                data.get("priority", MessagePriority.NORMAL.value)
+            ),
+            timestamp=datetime.fromisoformat(data["timestamp"]),
+            retry_count=data.get("retry_count", 0),
+            max_retries=data.get("max_retries", 3),
+            delay_seconds=data.get("delay_seconds", 0),
         )
 
 
@@ -128,9 +135,14 @@ class MessageQueueBase(ABC):
 class RabbitMQAdapter(MessageQueueBase):
     """RabbitMQ message queue adapter"""
 
-    def __init__(self, host: str = 'localhost', port: int = 5672,
-                 username: str = 'guest', password: str = 'guest',
-                 virtual_host: str = '/'):
+    def __init__(
+        self,
+        host: str = "localhost",
+        port: int = 5672,
+        username: str = "guest",
+        password: str = "guest",
+        virtual_host: str = "/",
+    ):
         self.host = host
         self.port = port
         self.username = username
@@ -143,12 +155,13 @@ class RabbitMQAdapter(MessageQueueBase):
         """Connect to RabbitMQ"""
         try:
             import pika
+
             credentials = pika.PlainCredentials(self.username, self.password)
             parameters = pika.ConnectionParameters(
                 host=self.host,
                 port=self.port,
                 virtual_host=self.virtual_host,
-                credentials=credentials
+                credentials=credentials,
             )
             self.connection = pika.BlockingConnection(parameters)
             self.channel = self.connection.channel()
@@ -176,21 +189,19 @@ class RabbitMQAdapter(MessageQueueBase):
         try:
             # Declare queue
             self.channel.queue_declare(
-                queue=queue_name,
-                durable=True,
-                arguments={'x-max-priority': 15}
+                queue=queue_name, durable=True, arguments={"x-max-priority": 15}
             )
 
             # Publish message
             import pika
+
             self.channel.basic_publish(
-                exchange='',
+                exchange="",
                 routing_key=queue_name,
                 body=message.to_json(),
                 properties=pika.BasicProperties(
-                    delivery_mode=2,  # Persistent
-                    priority=message.priority.value
-                )
+                    delivery_mode=2, priority=message.priority.value  # Persistent
+                ),
             )
             logger.debug(f"Sent message {message.id} to {queue_name}")
             return True
@@ -238,7 +249,7 @@ class KafkaAdapter(MessageQueueBase):
     """Apache Kafka message queue adapter"""
 
     def __init__(self, bootstrap_servers: List[str] = None):
-        self.bootstrap_servers = bootstrap_servers or ['localhost:9092']
+        self.bootstrap_servers = bootstrap_servers or ["localhost:9092"]
         self.producer = None
         self.consumer = None
 
@@ -246,9 +257,10 @@ class KafkaAdapter(MessageQueueBase):
         """Connect to Kafka"""
         try:
             from kafka import KafkaProducer, KafkaConsumer
+
             self.producer = KafkaProducer(
                 bootstrap_servers=self.bootstrap_servers,
-                value_serializer=lambda v: v.encode('utf-8')
+                value_serializer=lambda v: v.encode("utf-8"),
             )
             logger.info(f"Connected to Kafka at {self.bootstrap_servers}")
             return True
@@ -286,12 +298,13 @@ class KafkaAdapter(MessageQueueBase):
         """Receive message from Kafka topic"""
         if not self.consumer:
             from kafka import KafkaConsumer
+
             self.consumer = KafkaConsumer(
                 queue_name,
                 bootstrap_servers=self.bootstrap_servers,
-                auto_offset_reset='earliest',
+                auto_offset_reset="earliest",
                 enable_auto_commit=False,
-                value_deserializer=lambda m: m.decode('utf-8')
+                value_deserializer=lambda m: m.decode("utf-8"),
             )
 
         try:
@@ -351,20 +364,25 @@ class MessageQueueManager:
             self.stop_worker(queue_name)
         self.adapter.disconnect()
 
-    def send_message(self, queue_name: str, body: Dict[str, Any],
-                     priority: MessagePriority = MessagePriority.NORMAL,
-                     delay_seconds: int = 0) -> bool:
+    def send_message(
+        self,
+        queue_name: str,
+        body: Dict[str, Any],
+        priority: MessagePriority = MessagePriority.NORMAL,
+        delay_seconds: int = 0,
+    ) -> bool:
         """Send message to queue"""
         message = Message(
             id=f"{queue_name}_{int(time.time() * 1000)}",
             body=body,
             priority=priority,
-            delay_seconds=delay_seconds
+            delay_seconds=delay_seconds,
         )
         return self.adapter.send(queue_name, message)
 
-    def start_worker(self, queue_name: str, handler: Callable[[Message], bool],
-                     max_workers: int = 1) -> None:
+    def start_worker(
+        self, queue_name: str, handler: Callable[[Message], bool], max_workers: int = 1
+    ) -> None:
         """Start worker thread(s) to process messages"""
         if queue_name in self.workers:
             logger.warning(f"Worker for {queue_name} already running")
@@ -389,11 +407,19 @@ class MessageQueueManager:
                             # Retry logic
                             if message.retry_count < message.max_retries:
                                 message.retry_count += 1
-                                self.adapter.reject(queue_name, message.id, requeue=True)
-                                logger.warning(f"Message {message.id} failed, requeuing (retry {message.retry_count}/{message.max_retries})")
+                                self.adapter.reject(
+                                    queue_name, message.id, requeue=True
+                                )
+                                logger.warning(
+                                    f"Message {message.id} failed, requeuing (retry {message.retry_count}/{message.max_retries})"
+                                )
                             else:
-                                self.adapter.reject(queue_name, message.id, requeue=False)
-                                logger.error(f"Message {message.id} failed after {message.max_retries} retries, moving to DLQ")
+                                self.adapter.reject(
+                                    queue_name, message.id, requeue=False
+                                )
+                                logger.error(
+                                    f"Message {message.id} failed after {message.max_retries} retries, moving to DLQ"
+                                )
                     except Exception as e:
                         logger.error(f"Error processing message: {e}")
                         self.adapter.reject(queue_name, message.id, requeue=True)
@@ -420,7 +446,7 @@ def nba_data_ingestion_handler(message: Message) -> bool:
     try:
         logger.info(f"Processing NBA data ingestion: {message.body}")
         # Simulate data ingestion
-        game_id = message.body.get('game_id')
+        game_id = message.body.get("game_id")
         # Fetch and process game data...
         time.sleep(1)  # Simulate processing time
         logger.info(f"Successfully ingested game {game_id}")
@@ -434,7 +460,7 @@ def ml_training_handler(message: Message) -> bool:
     """Handler for ML model training tasks"""
     try:
         logger.info(f"Processing ML training: {message.body}")
-        model_type = message.body.get('model_type')
+        model_type = message.body.get("model_type")
         # Train model...
         time.sleep(2)  # Simulate training time
         logger.info(f"Successfully trained {model_type} model")
@@ -450,30 +476,30 @@ if __name__ == "__main__":
     # Create message queue manager (RabbitMQ example)
     manager = MessageQueueManager(
         queue_type=QueueType.RABBITMQ,
-        host='localhost',
+        host="localhost",
         port=5672,
-        username='guest',
-        password='guest'
+        username="guest",
+        password="guest",
     )
 
     # Connect to broker
     if manager.connect():
         # Send some messages
         manager.send_message(
-            'nba_data_ingestion',
-            {'game_id': 12345, 'season': 2024},
-            priority=MessagePriority.HIGH
+            "nba_data_ingestion",
+            {"game_id": 12345, "season": 2024},
+            priority=MessagePriority.HIGH,
         )
 
         manager.send_message(
-            'ml_training',
-            {'model_type': 'player_prediction', 'dataset': 'games_2024'},
-            priority=MessagePriority.NORMAL
+            "ml_training",
+            {"model_type": "player_prediction", "dataset": "games_2024"},
+            priority=MessagePriority.NORMAL,
         )
 
         # Start workers
-        manager.start_worker('nba_data_ingestion', nba_data_ingestion_handler)
-        manager.start_worker('ml_training', ml_training_handler)
+        manager.start_worker("nba_data_ingestion", nba_data_ingestion_handler)
+        manager.start_worker("ml_training", ml_training_handler)
 
         # Let workers process messages
         try:
@@ -484,4 +510,3 @@ if __name__ == "__main__":
         # Cleanup
         manager.disconnect()
         print("Done!")
-

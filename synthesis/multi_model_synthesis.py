@@ -20,6 +20,7 @@ from .models import DeepSeekModel, ClaudeModel, OllamaModel
 try:
     sys.path.insert(0, str(Path(__file__).parent.parent))
     from mcp_server.logging_config import get_logger, RequestContext, PerformanceLogger
+
     STRUCTURED_LOGGING_AVAILABLE = True
     logger = get_logger(__name__)
 except ImportError:
@@ -29,8 +30,10 @@ except ImportError:
 # Import Slack notifier if available
 try:
     import sys
+
     sys.path.insert(0, str(Path(__file__).parent.parent))
     from mcp_server.connectors.slack_notifier import SlackNotifier
+
     SLACK_AVAILABLE = True
 except ImportError:
     SLACK_AVAILABLE = False
@@ -44,7 +47,7 @@ async def synthesize_with_mcp_context(
     file_path: Optional[str] = None,
     mcp_server_url: str = "http://localhost:3000",
     enable_ollama_verification: bool = True,
-    output_dir: Optional[str] = None
+    output_dir: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Main synthesis function with MCP context gathering
@@ -76,7 +79,7 @@ async def synthesize_with_mcp_context(
         "start_time": start_time.isoformat(),
         "models_used": [],
         "total_cost": 0.0,
-        "total_tokens": 0
+        "total_tokens": 0,
     }
 
     try:
@@ -103,9 +106,7 @@ async def synthesize_with_mcp_context(
             # Step 3: Gather context using MCP
             logger.info("\n[3/7] Gathering context from MCP server...")
             mcp_context = await mcp_client.gather_context(
-                query_type=query_type,
-                user_input=user_input,
-                code=selected_code
+                query_type=query_type, user_input=user_input, code=selected_code
             )
             logger.info(f"Context gathered: {len(mcp_context)} sections")
             result["mcp_context"] = mcp_context
@@ -119,14 +120,14 @@ async def synthesize_with_mcp_context(
             user_input=user_input,
             code=selected_code,
             context=mcp_context,
-            query_type=query_type
+            query_type=query_type,
         )
 
         deepseek_result = await deepseek.query(
             prompt=deepseek_prompt,
             context=mcp_context,
             temperature=0.2,  # Low temperature for precision
-            max_tokens=4000
+            max_tokens=4000,
         )
 
         result["deepseek_result"] = deepseek_result
@@ -135,7 +136,9 @@ async def synthesize_with_mcp_context(
         if deepseek_result.get("success"):
             result["total_cost"] += deepseek_result.get("cost", 0)
             result["total_tokens"] += deepseek_result.get("tokens_used", 0)
-            logger.info(f"✓ DeepSeek completed: {deepseek_result.get('tokens_used', 0)} tokens, ${deepseek_result.get('cost', 0):.4f}")
+            logger.info(
+                f"✓ DeepSeek completed: {deepseek_result.get('tokens_used', 0)} tokens, ${deepseek_result.get('cost', 0):.4f}"
+            )
         else:
             logger.error(f"✗ DeepSeek failed: {deepseek_result.get('error')}")
             result["status"] = "partial_failure"
@@ -150,7 +153,7 @@ async def synthesize_with_mcp_context(
             deepseek_result=deepseek_result.get("response", ""),
             original_request=user_input,
             context_summary=context_summary,
-            include_verification=True
+            include_verification=True,
         )
 
         result["claude_synthesis"] = synthesis_result
@@ -159,7 +162,9 @@ async def synthesize_with_mcp_context(
         if synthesis_result.get("success"):
             result["total_cost"] += synthesis_result.get("cost", 0)
             result["total_tokens"] += synthesis_result.get("tokens_used", 0)
-            logger.info(f"✓ Claude completed: {synthesis_result.get('tokens_used', 0)} tokens, ${synthesis_result.get('cost', 0):.4f}")
+            logger.info(
+                f"✓ Claude completed: {synthesis_result.get('tokens_used', 0)} tokens, ${synthesis_result.get('cost', 0):.4f}"
+            )
         else:
             logger.error(f"✗ Claude failed: {synthesis_result.get('error')}")
             result["status"] = "partial_failure"
@@ -172,12 +177,13 @@ async def synthesize_with_mcp_context(
 
             if ollama.is_available():
                 # Extract code from DeepSeek response
-                code_to_verify = extract_code_from_response(deepseek_result.get("response", ""))
+                code_to_verify = extract_code_from_response(
+                    deepseek_result.get("response", "")
+                )
 
                 if code_to_verify:
                     ollama_result = await ollama.quick_verify(
-                        code=code_to_verify,
-                        description=user_input
+                        code=code_to_verify, description=user_input
                     )
 
                     result["ollama_verification"] = ollama_result
@@ -186,7 +192,9 @@ async def synthesize_with_mcp_context(
                     if ollama_result.get("success"):
                         logger.info(f"✓ Ollama verification completed (local, $0.00)")
                     else:
-                        logger.warning(f"✗ Ollama verification failed: {ollama_result.get('error')}")
+                        logger.warning(
+                            f"✗ Ollama verification failed: {ollama_result.get('error')}"
+                        )
                 else:
                     logger.info("No code to verify, skipping Ollama")
             else:
@@ -213,7 +221,7 @@ async def synthesize_with_mcp_context(
             synthesis_result=synthesis_result,
             verification=ollama_result,
             context=mcp_context,
-            user_input=user_input
+            user_input=user_input,
         )
         result["formatted_output"] = formatted_output
 
@@ -222,7 +230,7 @@ async def synthesize_with_mcp_context(
             output_path = await save_synthesis_result(
                 result=result,
                 output_dir=output_dir or os.getenv("SYNTHESIS_OUTPUT_DIR"),
-                query_type=query_type
+                query_type=query_type,
             )
             result["output_file"] = output_path
             logger.info(f"✓ Results saved to: {output_path}")
@@ -244,11 +252,11 @@ async def synthesize_with_mcp_context(
         # Send Slack notification if configured
         await _send_slack_notification(
             operation=query_type or "general_analysis",
-            models_used=result['models_used'],
-            execution_time=result['execution_time_seconds'],
-            tokens_used=result['total_tokens'],
-            cost=result['total_cost'],
-            success=(result['status'] == "success")
+            models_used=result["models_used"],
+            execution_time=result["execution_time_seconds"],
+            tokens_used=result["total_tokens"],
+            cost=result["total_cost"],
+            success=(result["status"] == "success"),
         )
 
         return result
@@ -262,26 +270,28 @@ async def synthesize_with_mcp_context(
         # Calculate execution time even for failures
         if "start_time" in result:
             end_time = datetime.now()
-            result["execution_time_seconds"] = (end_time - datetime.fromisoformat(result["start_time"])).total_seconds()
+            result["execution_time_seconds"] = (
+                end_time - datetime.fromisoformat(result["start_time"])
+            ).total_seconds()
 
         # Send failure notification to Slack
         await _send_slack_notification(
             operation=query_type or "general_analysis",
-            models_used=result.get('models_used', []),
-            execution_time=result.get('execution_time_seconds', 0),
-            tokens_used=result.get('total_tokens', 0),
-            cost=result.get('total_cost', 0),
+            models_used=result.get("models_used", []),
+            execution_time=result.get("execution_time_seconds", 0),
+            tokens_used=result.get("total_tokens", 0),
+            cost=result.get("total_cost", 0),
             success=False,
-            error=str(e)
+            error=str(e),
         )
 
         return result
 
     finally:
         # Cleanup
-        if 'mcp_client' in locals():
+        if "mcp_client" in locals():
             await mcp_client.disconnect()
-        if 'deepseek' in locals():
+        if "deepseek" in locals():
             await deepseek.close()
 
 
@@ -299,27 +309,71 @@ def detect_query_type(user_input: str, code: Optional[str] = None) -> str:
     text = (user_input + " " + (code or "")).lower()
 
     # SQL optimization keywords
-    sql_keywords = ["optimize", "query", "sql", "select", "join", "index", "explain", "performance", "slow"]
+    sql_keywords = [
+        "optimize",
+        "query",
+        "sql",
+        "select",
+        "join",
+        "index",
+        "explain",
+        "performance",
+        "slow",
+    ]
     if any(k in text for k in sql_keywords) and ("select" in text or "from" in text):
         return "sql_optimization"
 
     # Statistical analysis keywords
-    stats_keywords = ["statistical", "statistics", "analysis", "correlation", "regression", "mean", "median", "distribution"]
+    stats_keywords = [
+        "statistical",
+        "statistics",
+        "analysis",
+        "correlation",
+        "regression",
+        "mean",
+        "median",
+        "distribution",
+    ]
     if any(k in text for k in stats_keywords):
         return "statistical_analysis"
 
     # ETL generation keywords
-    etl_keywords = ["etl", "extract", "transform", "load", "pipeline", "migration", "import", "export"]
+    etl_keywords = [
+        "etl",
+        "extract",
+        "transform",
+        "load",
+        "pipeline",
+        "migration",
+        "import",
+        "export",
+    ]
     if any(k in text for k in etl_keywords):
         return "etl_generation"
 
     # Debugging keywords
-    debug_keywords = ["debug", "error", "exception", "bug", "fix", "traceback", "failing", "broken"]
+    debug_keywords = [
+        "debug",
+        "error",
+        "exception",
+        "bug",
+        "fix",
+        "traceback",
+        "failing",
+        "broken",
+    ]
     if any(k in text for k in debug_keywords):
         return "debugging"
 
     # Code optimization keywords
-    code_keywords = ["optimize code", "refactor", "improve", "performance", "faster", "efficient"]
+    code_keywords = [
+        "optimize code",
+        "refactor",
+        "improve",
+        "performance",
+        "faster",
+        "efficient",
+    ]
     if any(k in text for k in code_keywords) and code:
         return "code_optimization"
 
@@ -371,7 +425,9 @@ def summarize_context(context: Dict[str, Any]) -> str:
 
     # Summarize metadata
     if "metadata" in context and context["metadata"]:
-        summary_parts.append(f"Metadata available for {len(context['metadata'])} tables")
+        summary_parts.append(
+            f"Metadata available for {len(context['metadata'])} tables"
+        )
 
     return " | ".join(summary_parts) if summary_parts else "Minimal context available"
 
@@ -390,7 +446,7 @@ def extract_code_from_response(response: str) -> Optional[str]:
         return None
 
     # Extract code from markdown code blocks
-    code_pattern = r'```(?:python|sql|bash)?\n(.*?)```'
+    code_pattern = r"```(?:python|sql|bash)?\n(.*?)```"
     matches = re.findall(code_pattern, response, re.DOTALL)
 
     if matches:
@@ -398,7 +454,7 @@ def extract_code_from_response(response: str) -> Optional[str]:
         return max(matches, key=len).strip()
 
     # If no code blocks, check if entire response looks like code
-    if response.strip().startswith(('def ', 'class ', 'SELECT', 'import', 'from ')):
+    if response.strip().startswith(("def ", "class ", "SELECT", "import", "from ")):
         return response.strip()
 
     return None
@@ -409,7 +465,7 @@ def format_final_output(
     synthesis_result: Dict[str, Any],
     verification: Optional[Dict[str, Any]],
     context: Dict[str, Any],
-    user_input: str
+    user_input: str,
 ) -> str:
     """
     Format final output for saving
@@ -438,35 +494,37 @@ def format_final_output(
         "",
         "## Claude Synthesis",
         synthesis_result.get("response", "No response available"),
-        ""
+        "",
     ]
 
     # Add verification if available
     if verification and verification.get("success"):
-        output_lines.extend([
-            "## Ollama Verification",
-            verification.get("verification", "No verification available"),
-            ""
-        ])
+        output_lines.extend(
+            [
+                "## Ollama Verification",
+                verification.get("verification", "No verification available"),
+                "",
+            ]
+        )
 
     # Add metadata
-    output_lines.extend([
-        "## Synthesis Metadata",
-        f"- DeepSeek Tokens: {deepseek_result.get('tokens_used', 0)}",
-        f"- DeepSeek Cost: ${deepseek_result.get('cost', 0):.4f}",
-        f"- Claude Tokens: {synthesis_result.get('tokens_used', 0)}",
-        f"- Claude Cost: ${synthesis_result.get('cost', 0):.4f}",
-        f"- Total Cost: ${(deepseek_result.get('cost', 0) + synthesis_result.get('cost', 0)):.4f}",
-        ""
-    ])
+    output_lines.extend(
+        [
+            "## Synthesis Metadata",
+            f"- DeepSeek Tokens: {deepseek_result.get('tokens_used', 0)}",
+            f"- DeepSeek Cost: ${deepseek_result.get('cost', 0):.4f}",
+            f"- Claude Tokens: {synthesis_result.get('tokens_used', 0)}",
+            f"- Claude Cost: ${synthesis_result.get('cost', 0):.4f}",
+            f"- Total Cost: ${(deepseek_result.get('cost', 0) + synthesis_result.get('cost', 0)):.4f}",
+            "",
+        ]
+    )
 
     return "\n".join(output_lines)
 
 
 async def save_synthesis_result(
-    result: Dict[str, Any],
-    output_dir: str,
-    query_type: str
+    result: Dict[str, Any], output_dir: str, query_type: str
 ) -> str:
     """
     Save synthesis result to file
@@ -489,14 +547,14 @@ async def save_synthesis_result(
     file_path = output_path / filename
 
     # Save JSON result
-    with open(file_path, 'w') as f:
+    with open(file_path, "w") as f:
         json.dump(result, f, indent=2, default=str)
 
     # Also save formatted markdown
     md_filename = f"synthesis_{query_type}_{timestamp}.md"
     md_path = output_path / md_filename
 
-    with open(md_path, 'w') as f:
+    with open(md_path, "w") as f:
         f.write(result.get("formatted_output", "No output available"))
 
     logger.info(f"Saved synthesis result to {file_path}")
@@ -506,10 +564,7 @@ async def save_synthesis_result(
 
 
 def _build_deepseek_prompt(
-    user_input: str,
-    code: Optional[str],
-    context: Dict[str, Any],
-    query_type: str
+    user_input: str, code: Optional[str], context: Dict[str, Any], query_type: str
 ) -> str:
     """
     Build enhanced prompt for DeepSeek
@@ -598,11 +653,7 @@ def calculate_total_time(start_time: datetime, end_time: datetime) -> float:
 
 
 # Convenience function for quick synthesis
-async def quick_synthesis(
-    prompt: str,
-    code: Optional[str] = None,
-    **kwargs
-) -> str:
+async def quick_synthesis(prompt: str, code: Optional[str] = None, **kwargs) -> str:
     """
     Quick synthesis function that returns just the final code/solution
 
@@ -615,9 +666,7 @@ async def quick_synthesis(
         Final code or solution as string
     """
     result = await synthesize_with_mcp_context(
-        user_input=prompt,
-        selected_code=code,
-        **kwargs
+        user_input=prompt, selected_code=code, **kwargs
     )
 
     if result.get("status") == "success":
@@ -633,7 +682,7 @@ async def _send_slack_notification(
     tokens_used: int,
     cost: float,
     success: bool = True,
-    error: Optional[str] = None
+    error: Optional[str] = None,
 ):
     """
     Send Slack notification for synthesis completion
@@ -659,8 +708,7 @@ async def _send_slack_notification(
     try:
         # Initialize Slack notifier
         slack = SlackNotifier(
-            webhook_url=webhook_url,
-            channel=os.getenv("SLACK_CHANNEL")  # Optional
+            webhook_url=webhook_url, channel=os.getenv("SLACK_CHANNEL")  # Optional
         )
 
         # Send notification
@@ -669,25 +717,26 @@ async def _send_slack_notification(
             models_used=models_used,
             execution_time=execution_time,
             tokens_used=tokens_used,
-            success=success
+            success=success,
         )
 
         # If there was an error, send additional error context
         if not success and error:
-            await slack.send_notification({
-                "text": f"Error details: {error[:500]}",
-                "blocks": [
-                    {
-                        "type": "section",
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": f"```{error[:1000]}```"
+            await slack.send_notification(
+                {
+                    "text": f"Error details: {error[:500]}",
+                    "blocks": [
+                        {
+                            "type": "section",
+                            "text": {"type": "mrkdwn", "text": f"```{error[:1000]}```"},
                         }
-                    }
-                ]
-            })
+                    ],
+                }
+            )
 
-        logger.debug(f"Slack notification sent: {operation} {'success' if success else 'failed'}")
+        logger.debug(
+            f"Slack notification sent: {operation} {'success' if success else 'failed'}"
+        )
 
     except Exception as e:
         # Don't let Slack failures break synthesis

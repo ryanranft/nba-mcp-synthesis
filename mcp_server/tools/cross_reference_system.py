@@ -35,8 +35,10 @@ logger = logging.getLogger(__name__)
 # Enums and Data Classes
 # =============================================================================
 
+
 class SourceType(Enum):
     """Types of citation sources"""
+
     BOOK = "book"
     JOURNAL = "journal"
     WEBSITE = "website"
@@ -49,6 +51,7 @@ class SourceType(Enum):
 
 class FormulaUsageType(Enum):
     """Types of formula usage"""
+
     CALCULATION = "calculation"
     ANALYSIS = "analysis"
     RESEARCH = "research"
@@ -60,6 +63,7 @@ class FormulaUsageType(Enum):
 
 class SyncFrequency(Enum):
     """NBA data sync frequencies"""
+
     DAILY = "daily"
     WEEKLY = "weekly"
     MONTHLY = "monthly"
@@ -69,6 +73,7 @@ class SyncFrequency(Enum):
 @dataclass
 class FormulaCitation:
     """Citation information for a formula"""
+
     citation_id: str
     formula_id: str
     source_type: SourceType
@@ -98,6 +103,7 @@ class FormulaCitation:
 @dataclass
 class PageMapping:
     """Page mapping for a formula in a book"""
+
     mapping_id: str
     formula_id: str
     book_id: str
@@ -123,6 +129,7 @@ class PageMapping:
 @dataclass
 class NBAConnection:
     """NBA API connection for a formula"""
+
     connection_id: str
     formula_id: str
     nba_endpoint: str
@@ -148,6 +155,7 @@ class NBAConnection:
 @dataclass
 class FormulaUsage:
     """Formula usage tracking record"""
+
     usage_id: str
     formula_id: str
     usage_type: FormulaUsageType
@@ -170,6 +178,7 @@ class FormulaUsage:
 # =============================================================================
 # Cross-Reference System Class
 # =============================================================================
+
 
 class CrossReferenceSystem:
     """
@@ -202,7 +211,7 @@ class CrossReferenceSystem:
         issue: Optional[str] = None,
         chapter: Optional[str] = None,
         section: Optional[str] = None,
-        reliability_score: float = 1.0
+        reliability_score: float = 1.0,
     ) -> FormulaCitation:
         """
         Add a citation for a formula.
@@ -245,7 +254,7 @@ class CrossReferenceSystem:
             issue=issue,
             chapter=chapter,
             section=section,
-            reliability_score=reliability_score
+            reliability_score=reliability_score,
         )
 
         self.citations[citation_id] = citation
@@ -265,7 +274,7 @@ class CrossReferenceSystem:
         equation_number: Optional[str] = None,
         section_title: Optional[str] = None,
         chapter_title: Optional[str] = None,
-        confidence_score: float = 1.0
+        confidence_score: float = 1.0,
     ) -> PageMapping:
         """
         Add a page mapping for a formula.
@@ -300,7 +309,7 @@ class CrossReferenceSystem:
             equation_number=equation_number,
             section_title=section_title,
             chapter_title=chapter_title,
-            confidence_score=confidence_score
+            confidence_score=confidence_score,
         )
 
         self.page_mappings[mapping_id] = mapping
@@ -318,7 +327,7 @@ class CrossReferenceSystem:
         player_id: Optional[str] = None,
         game_id: Optional[str] = None,
         parameters: Optional[Dict[str, Any]] = None,
-        sync_frequency: str = "daily"
+        sync_frequency: str = "daily",
     ) -> NBAConnection:
         """
         Add an NBA API connection for a formula.
@@ -349,7 +358,7 @@ class CrossReferenceSystem:
             player_id=player_id,
             game_id=game_id,
             parameters=parameters,
-            sync_frequency=SyncFrequency(sync_frequency)
+            sync_frequency=SyncFrequency(sync_frequency),
         )
 
         self.nba_connections[connection_id] = connection
@@ -369,7 +378,7 @@ class CrossReferenceSystem:
         success: bool = True,
         error_message: Optional[str] = None,
         ip_address: Optional[str] = None,
-        user_agent: Optional[str] = None
+        user_agent: Optional[str] = None,
     ) -> FormulaUsage:
         """
         Track usage of a formula.
@@ -404,7 +413,7 @@ class CrossReferenceSystem:
             success=success,
             error_message=error_message,
             ip_address=ip_address,
-            user_agent=user_agent
+            user_agent=user_agent,
         )
 
         self.formula_usage[usage_id] = usage
@@ -424,60 +433,70 @@ class CrossReferenceSystem:
         """
         # Find citations for this formula
         formula_citations = [
-            asdict(citation) for citation in self.citations.values()
+            asdict(citation)
+            for citation in self.citations.values()
             if citation.formula_id == formula_id
         ]
 
         # Find page mappings for this formula
         formula_mappings = [
-            asdict(mapping) for mapping in self.page_mappings.values()
+            asdict(mapping)
+            for mapping in self.page_mappings.values()
             if mapping.formula_id == formula_id
         ]
 
         # Find NBA connections for this formula
         formula_connections = [
-            asdict(connection) for connection in self.nba_connections.values()
+            asdict(connection)
+            for connection in self.nba_connections.values()
             if connection.formula_id == formula_id
         ]
 
         # Find usage records for this formula
         formula_usage_records = [
-            asdict(usage) for usage in self.formula_usage.values()
+            asdict(usage)
+            for usage in self.formula_usage.values()
             if usage.formula_id == formula_id
         ]
 
         # Calculate usage statistics
         total_usage = len(formula_usage_records)
-        successful_usage = len([u for u in formula_usage_records if u['success']])
+        successful_usage = len([u for u in formula_usage_records if u["success"]])
         failed_usage = total_usage - successful_usage
 
         avg_execution_time = None
         if formula_usage_records:
-            execution_times = [u['execution_time_ms'] for u in formula_usage_records if u['execution_time_ms']]
+            execution_times = [
+                u["execution_time_ms"]
+                for u in formula_usage_records
+                if u["execution_time_ms"]
+            ]
             if execution_times:
                 avg_execution_time = sum(execution_times) / len(execution_times)
 
         return {
-            'formula_id': formula_id,
-            'cross_references': {
-                'citations': formula_citations,
-                'page_mappings': formula_mappings,
-                'nba_connections': formula_connections,
-                'usage_records': formula_usage_records,
-                'total_citations': len(formula_citations),
-                'total_page_mappings': len(formula_mappings),
-                'total_nba_connections': len(formula_connections),
-                'total_usage_records': total_usage
+            "formula_id": formula_id,
+            "cross_references": {
+                "citations": formula_citations,
+                "page_mappings": formula_mappings,
+                "nba_connections": formula_connections,
+                "usage_records": formula_usage_records,
+                "total_citations": len(formula_citations),
+                "total_page_mappings": len(formula_mappings),
+                "total_nba_connections": len(formula_connections),
+                "total_usage_records": total_usage,
             },
-            'usage_statistics': {
-                'total_usage': total_usage,
-                'successful_usage': successful_usage,
-                'failed_usage': failed_usage,
-                'success_rate': successful_usage / total_usage if total_usage > 0 else 0,
-                'average_execution_time_ms': avg_execution_time
+            "usage_statistics": {
+                "total_usage": total_usage,
+                "successful_usage": successful_usage,
+                "failed_usage": failed_usage,
+                "success_rate": (
+                    successful_usage / total_usage if total_usage > 0 else 0
+                ),
+                "average_execution_time_ms": avg_execution_time,
             },
-            'status': 'success',
-            'message': f"Cross-references retrieved for formula {formula_id}"
+            "status": "success",
+            "message": f"Cross-references retrieved for formula {formula_id}",
         }
 
     def sync_formula_nba_data(self, connection_id: str) -> Dict[str, Any]:
@@ -506,40 +525,37 @@ class CrossReferenceSystem:
 
         # Simulate data retrieval
         mock_data = {
-            'formula_id': connection.formula_id,
-            'data_type': connection.data_type,
-            'season': connection.season,
-            'team_id': connection.team_id,
-            'player_id': connection.player_id,
-            'game_id': connection.game_id,
-            'sync_timestamp': sync_timestamp.isoformat(),
-            'records_synced': 42,  # Mock number
-            'data_sample': {
-                'points': 25.4,
-                'rebounds': 8.2,
-                'assists': 6.8,
-                'field_goal_percentage': 0.487
-            }
+            "formula_id": connection.formula_id,
+            "data_type": connection.data_type,
+            "season": connection.season,
+            "team_id": connection.team_id,
+            "player_id": connection.player_id,
+            "game_id": connection.game_id,
+            "sync_timestamp": sync_timestamp.isoformat(),
+            "records_synced": 42,  # Mock number
+            "data_sample": {
+                "points": 25.4,
+                "rebounds": 8.2,
+                "assists": 6.8,
+                "field_goal_percentage": 0.487,
+            },
         }
 
         logger.info(f"NBA data synced for connection {connection_id}")
 
         return {
-            'connection_id': connection_id,
-            'formula_id': connection.formula_id,
-            'sync_timestamp': sync_timestamp.isoformat(),
-            'sync_status': 'completed',
-            'records_synced': mock_data['records_synced'],
-            'data_sample': mock_data['data_sample'],
-            'status': 'success',
-            'message': f"NBA data synced for connection {connection_id}"
+            "connection_id": connection_id,
+            "formula_id": connection.formula_id,
+            "sync_timestamp": sync_timestamp.isoformat(),
+            "sync_status": "completed",
+            "records_synced": mock_data["records_synced"],
+            "data_sample": mock_data["data_sample"],
+            "status": "success",
+            "message": f"NBA data synced for connection {connection_id}",
         }
 
     def search_formulas_by_reference(
-        self,
-        search_query: str,
-        search_type: str = "all",
-        max_results: int = 50
+        self, search_query: str, search_type: str = "all", max_results: int = 50
     ) -> Dict[str, Any]:
         """
         Search formulas by their cross-references.
@@ -558,90 +574,120 @@ class CrossReferenceSystem:
         if search_type in ["all", "citations"]:
             # Search citations
             for citation in self.citations.values():
-                if (query_lower in citation.title.lower() or
-                    (citation.author and query_lower in citation.author.lower()) or
-                    (citation.publisher and query_lower in citation.publisher.lower())):
-                    results.append({
-                        'type': 'citation',
-                        'formula_id': citation.formula_id,
-                        'citation_id': citation.citation_id,
-                        'title': citation.title,
-                        'author': citation.author,
-                        'source_type': citation.source_type.value,
-                        'relevance_score': self._calculate_relevance_score(search_query, citation.title)
-                    })
+                if (
+                    query_lower in citation.title.lower()
+                    or (citation.author and query_lower in citation.author.lower())
+                    or (
+                        citation.publisher and query_lower in citation.publisher.lower()
+                    )
+                ):
+                    results.append(
+                        {
+                            "type": "citation",
+                            "formula_id": citation.formula_id,
+                            "citation_id": citation.citation_id,
+                            "title": citation.title,
+                            "author": citation.author,
+                            "source_type": citation.source_type.value,
+                            "relevance_score": self._calculate_relevance_score(
+                                search_query, citation.title
+                            ),
+                        }
+                    )
 
         if search_type in ["all", "pages"]:
             # Search page mappings
             for mapping in self.page_mappings.values():
-                if (query_lower in mapping.book_id.lower() or
-                    (mapping.section_title and query_lower in mapping.section_title.lower()) or
-                    (mapping.chapter_title and query_lower in mapping.chapter_title.lower())):
-                    results.append({
-                        'type': 'page_mapping',
-                        'formula_id': mapping.formula_id,
-                        'mapping_id': mapping.mapping_id,
-                        'book_id': mapping.book_id,
-                        'page_number': mapping.page_number,
-                        'section_title': mapping.section_title,
-                        'chapter_title': mapping.chapter_title,
-                        'relevance_score': self._calculate_relevance_score(search_query, mapping.book_id)
-                    })
+                if (
+                    query_lower in mapping.book_id.lower()
+                    or (
+                        mapping.section_title
+                        and query_lower in mapping.section_title.lower()
+                    )
+                    or (
+                        mapping.chapter_title
+                        and query_lower in mapping.chapter_title.lower()
+                    )
+                ):
+                    results.append(
+                        {
+                            "type": "page_mapping",
+                            "formula_id": mapping.formula_id,
+                            "mapping_id": mapping.mapping_id,
+                            "book_id": mapping.book_id,
+                            "page_number": mapping.page_number,
+                            "section_title": mapping.section_title,
+                            "chapter_title": mapping.chapter_title,
+                            "relevance_score": self._calculate_relevance_score(
+                                search_query, mapping.book_id
+                            ),
+                        }
+                    )
 
         if search_type in ["all", "nba"]:
             # Search NBA connections
             for connection in self.nba_connections.values():
-                if (query_lower in connection.data_type.lower() or
-                    (connection.season and query_lower in connection.season.lower())):
-                    results.append({
-                        'type': 'nba_connection',
-                        'formula_id': connection.formula_id,
-                        'connection_id': connection.connection_id,
-                        'data_type': connection.data_type,
-                        'season': connection.season,
-                        'nba_endpoint': connection.nba_endpoint,
-                        'relevance_score': self._calculate_relevance_score(search_query, connection.data_type)
-                    })
+                if query_lower in connection.data_type.lower() or (
+                    connection.season and query_lower in connection.season.lower()
+                ):
+                    results.append(
+                        {
+                            "type": "nba_connection",
+                            "formula_id": connection.formula_id,
+                            "connection_id": connection.connection_id,
+                            "data_type": connection.data_type,
+                            "season": connection.season,
+                            "nba_endpoint": connection.nba_endpoint,
+                            "relevance_score": self._calculate_relevance_score(
+                                search_query, connection.data_type
+                            ),
+                        }
+                    )
 
         if search_type in ["all", "usage"]:
             # Search usage records
             for usage in self.formula_usage.values():
-                if (query_lower in usage.usage_type.value.lower() or
-                    (usage.user_id and query_lower in usage.user_id.lower())):
-                    results.append({
-                        'type': 'usage',
-                        'formula_id': usage.formula_id,
-                        'usage_id': usage.usage_id,
-                        'usage_type': usage.usage_type.value,
-                        'user_id': usage.user_id,
-                        'success': usage.success,
-                        'relevance_score': self._calculate_relevance_score(search_query, usage.usage_type.value)
-                    })
+                if query_lower in usage.usage_type.value.lower() or (
+                    usage.user_id and query_lower in usage.user_id.lower()
+                ):
+                    results.append(
+                        {
+                            "type": "usage",
+                            "formula_id": usage.formula_id,
+                            "usage_id": usage.usage_id,
+                            "usage_type": usage.usage_type.value,
+                            "user_id": usage.user_id,
+                            "success": usage.success,
+                            "relevance_score": self._calculate_relevance_score(
+                                search_query, usage.usage_type.value
+                            ),
+                        }
+                    )
 
         # Sort by relevance score and limit results
-        results.sort(key=lambda x: x['relevance_score'], reverse=True)
+        results.sort(key=lambda x: x["relevance_score"], reverse=True)
         results = results[:max_results]
 
         # Group results by formula_id
         formula_results = {}
         for result in results:
-            formula_id = result['formula_id']
+            formula_id = result["formula_id"]
             if formula_id not in formula_results:
                 formula_results[formula_id] = {
-                    'formula_id': formula_id,
-                    'references': [],
-                    'total_references': 0
+                    "formula_id": formula_id,
+                    "references": [],
+                    "total_references": 0,
                 }
-            formula_results[formula_id]['references'].append(result)
-            formula_results[formula_id]['total_references'] += 1
+            formula_results[formula_id]["references"].append(result)
+            formula_results[formula_id]["total_references"] += 1
 
         return {
-            'search_query': search_query,
-            'search_type': search_type,
-            'total_results': len(results),
-            'formula_results': list(formula_results.values()),
-            'status': 'success',
-            'message': f"Search completed for '{search_query}'"
+            "search_query": search_query,
+            "search_type": search_type,
+            "total_results": len(results),
+            "formula_results": list(formula_results.values()),
+            "status": "success",
+            "message": f"Search completed for '{search_query}'",
         }
 
     def _calculate_relevance_score(self, query: str, text: str) -> float:
@@ -687,6 +733,7 @@ class CrossReferenceSystem:
 # Standalone Functions for MCP Tools
 # =============================================================================
 
+
 def add_formula_citation(
     formula_id: str,
     source_type: str,
@@ -702,7 +749,7 @@ def add_formula_citation(
     issue: Optional[str] = None,
     chapter: Optional[str] = None,
     section: Optional[str] = None,
-    reliability_score: float = 1.0
+    reliability_score: float = 1.0,
 ) -> Dict[str, Any]:
     """
     Add a citation for a formula (standalone function).
@@ -743,13 +790,13 @@ def add_formula_citation(
         issue=issue,
         chapter=chapter,
         section=section,
-        reliability_score=reliability_score
+        reliability_score=reliability_score,
     )
 
     return {
-        'status': 'success',
-        'citation': asdict(citation),
-        'message': f"Citation added for formula {formula_id}"
+        "status": "success",
+        "citation": asdict(citation),
+        "message": f"Citation added for formula {formula_id}",
     }
 
 
@@ -782,9 +829,7 @@ def sync_formula_nba_data(connection_id: str) -> Dict[str, Any]:
 
 
 def search_formulas_by_reference(
-    search_query: str,
-    search_type: str = "all",
-    max_results: int = 50
+    search_query: str, search_type: str = "all", max_results: int = 50
 ) -> Dict[str, Any]:
     """
     Search formulas by their cross-references (standalone function).
@@ -804,6 +849,7 @@ def search_formulas_by_reference(
 # =============================================================================
 # Utility Functions
 # =============================================================================
+
 
 def asdict(obj) -> Dict[str, Any]:
     """
@@ -843,7 +889,7 @@ def validate_formula_id(formula_id: str) -> bool:
         return False
 
     # Check for valid characters (alphanumeric, underscore, hyphen)
-    if not re.match(r'^[a-zA-Z0-9_-]+$', formula_id):
+    if not re.match(r"^[a-zA-Z0-9_-]+$", formula_id):
         return False
 
     # Check length
@@ -883,6 +929,7 @@ def validate_confidence_score(score: float) -> bool:
 # Export Functions
 # =============================================================================
 
+
 def export_cross_references_to_json(formula_id: str) -> str:
     """
     Export cross-references for a formula to JSON.
@@ -909,15 +956,17 @@ def export_all_cross_references_to_json() -> str:
     system = CrossReferenceSystem()
 
     all_data = {
-        'citations': [asdict(citation) for citation in system.citations.values()],
-        'page_mappings': [asdict(mapping) for mapping in system.page_mappings.values()],
-        'nba_connections': [asdict(connection) for connection in system.nba_connections.values()],
-        'formula_usage': [asdict(usage) for usage in system.formula_usage.values()],
-        'export_timestamp': datetime.now(timezone.utc).isoformat(),
-        'total_citations': len(system.citations),
-        'total_page_mappings': len(system.page_mappings),
-        'total_nba_connections': len(system.nba_connections),
-        'total_formula_usage': len(system.formula_usage)
+        "citations": [asdict(citation) for citation in system.citations.values()],
+        "page_mappings": [asdict(mapping) for mapping in system.page_mappings.values()],
+        "nba_connections": [
+            asdict(connection) for connection in system.nba_connections.values()
+        ],
+        "formula_usage": [asdict(usage) for usage in system.formula_usage.values()],
+        "export_timestamp": datetime.now(timezone.utc).isoformat(),
+        "total_citations": len(system.citations),
+        "total_page_mappings": len(system.page_mappings),
+        "total_nba_connections": len(system.nba_connections),
+        "total_formula_usage": len(system.formula_usage),
     }
 
     return json.dumps(all_data, indent=2, default=str)
@@ -937,7 +986,7 @@ if __name__ == "__main__":
         title="Basketball Analytics Guide",
         author="John Smith",
         page_number=45,
-        reliability_score=0.95
+        reliability_score=0.95,
     )
     print(f"✓ Citation added: {citation.citation_id}")
 
@@ -947,7 +996,7 @@ if __name__ == "__main__":
         book_id="basketball_guide_2024",
         page_number=45,
         section_title="Player Efficiency",
-        confidence_score=0.9
+        confidence_score=0.9,
     )
     print(f"✓ Page mapping added: {mapping.mapping_id}")
 
@@ -956,7 +1005,7 @@ if __name__ == "__main__":
         formula_id="per",
         nba_endpoint="/stats/player",
         data_type="player_stats",
-        season="2023-24"
+        season="2023-24",
     )
     print(f"✓ NBA connection added: {connection.connection_id}")
 
@@ -966,13 +1015,15 @@ if __name__ == "__main__":
         usage_type=FormulaUsageType.CALCULATION,
         user_id="user123",
         execution_time_ms=150,
-        success=True
+        success=True,
     )
     print(f"✓ Usage tracked: {usage.usage_id}")
 
     # Test getting cross-references
     cross_refs = system.get_formula_cross_references("per")
-    print(f"✓ Cross-references retrieved: {cross_refs['cross_references']['total_citations']} citations")
+    print(
+        f"✓ Cross-references retrieved: {cross_refs['cross_references']['total_citations']} citations"
+    )
 
     # Test search
     search_results = system.search_formulas_by_reference("basketball")

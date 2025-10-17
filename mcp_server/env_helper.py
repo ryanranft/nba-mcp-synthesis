@@ -11,9 +11,7 @@ from typing import Optional, List
 
 
 def get_hierarchical_env(
-    base_name: str,
-    project: str = "NBA_MCP_SYNTHESIS",
-    context: str = "WORKFLOW"
+    base_name: str, project: str = "NBA_MCP_SYNTHESIS", context: str = "WORKFLOW"
 ) -> Optional[str]:
     """
     Get environment variable with hierarchical fallback.
@@ -49,7 +47,7 @@ def get_hierarchical_env_with_default(
     base_name: str,
     default: str,
     project: str = "NBA_MCP_SYNTHESIS",
-    context: str = "WORKFLOW"
+    context: str = "WORKFLOW",
 ) -> str:
     """
     Get environment variable with hierarchical fallback and default value.
@@ -71,7 +69,7 @@ def get_hierarchical_env_int(
     base_name: str,
     default: int,
     project: str = "NBA_MCP_SYNTHESIS",
-    context: str = "WORKFLOW"
+    context: str = "WORKFLOW",
 ) -> int:
     """
     Get environment variable as integer with hierarchical fallback and default value.
@@ -99,7 +97,7 @@ def get_hierarchical_env_bool(
     base_name: str,
     default: bool,
     project: str = "NBA_MCP_SYNTHESIS",
-    context: str = "WORKFLOW"
+    context: str = "WORKFLOW",
 ) -> bool:
     """
     Get environment variable as boolean with hierarchical fallback and default value.
@@ -121,9 +119,7 @@ def get_hierarchical_env_bool(
 
 
 def get_all_hierarchical_envs(
-    base_names: List[str],
-    project: str = "NBA_MCP_SYNTHESIS",
-    context: str = "WORKFLOW"
+    base_names: List[str], project: str = "NBA_MCP_SYNTHESIS", context: str = "WORKFLOW"
 ) -> dict:
     """
     Get multiple environment variables with hierarchical fallback.
@@ -145,7 +141,7 @@ def get_all_hierarchical_envs(
 def validate_required_envs(
     required_names: List[str],
     project: str = "NBA_MCP_SYNTHESIS",
-    context: str = "WORKFLOW"
+    context: str = "WORKFLOW",
 ) -> List[str]:
     """
     Validate that required environment variables are set.
@@ -166,37 +162,54 @@ def validate_required_envs(
 
 
 # Convenience functions for common use cases
-def get_api_key(service: str, project: str = "NBA_MCP_SYNTHESIS", context: str = "WORKFLOW") -> Optional[str]:
+def get_api_key(
+    service: str, project: str = "NBA_MCP_SYNTHESIS", context: str = "WORKFLOW"
+) -> Optional[str]:
     """Get API key for a service (e.g., 'GOOGLE', 'ANTHROPIC', 'OPENAI', 'DEEPSEEK')"""
     return get_hierarchical_env(f"{service}_API_KEY", project, context)
 
 
-def get_aws_credential(credential_type: str, project: str = "NBA_MCP_SYNTHESIS", context: str = "WORKFLOW") -> Optional[str]:
+def get_aws_credential(
+    credential_type: str, project: str = "NBA_MCP_SYNTHESIS", context: str = "WORKFLOW"
+) -> Optional[str]:
     """Get AWS credential (e.g., 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY')"""
     return get_hierarchical_env(credential_type, project, context)
 
 
-def get_database_config(config_type: str, project: str = "NBA_MCP_SYNTHESIS", context: str = "WORKFLOW") -> Optional[str]:
+def get_database_config(
+    config_type: str, project: str = "NBA_MCP_SYNTHESIS", context: str = "WORKFLOW"
+) -> Optional[str]:
     """Get database configuration (e.g., 'RDS_HOST', 'RDS_USERNAME', 'RDS_PASSWORD', 'RDS_DATABASE')"""
     return get_hierarchical_env(config_type, project, context)
 
 
-def get_s3_config(config_type: str, project: str = "NBA_MCP_SYNTHESIS", context: str = "WORKFLOW") -> Optional[str]:
+def get_s3_config(
+    config_type: str, project: str = "NBA_MCP_SYNTHESIS", context: str = "WORKFLOW"
+) -> Optional[str]:
     """Get S3 configuration (e.g., 'S3_BUCKET', 'S3_REGION')"""
     return get_hierarchical_env(config_type, project, context)
 
 
-def get_glue_config(config_type: str, project: str = "NBA_MCP_SYNTHESIS", context: str = "WORKFLOW") -> Optional[str]:
+def get_glue_config(
+    config_type: str, project: str = "NBA_MCP_SYNTHESIS", context: str = "WORKFLOW"
+) -> Optional[str]:
     """Get Glue configuration (e.g., 'GLUE_DATABASE', 'GLUE_REGION')"""
     return get_hierarchical_env(config_type, project, context)
 
 
-def get_slack_config(config_type: str, project: str = "NBA_MCP_SYNTHESIS", context: str = "WORKFLOW") -> Optional[str]:
+def get_slack_config(
+    config_type: str, project: str = "NBA_MCP_SYNTHESIS", context: str = "WORKFLOW"
+) -> Optional[str]:
     """Get Slack configuration (e.g., 'SLACK_WEBHOOK_URL')"""
     return get_hierarchical_env(config_type, project, context)
 
 
-def get_model_config(model_type: str, config_type: str = "MODEL", project: str = "NBA_MCP_SYNTHESIS", context: str = "WORKFLOW") -> Optional[str]:
+def get_model_config(
+    model_type: str,
+    config_type: str = "MODEL",
+    project: str = "NBA_MCP_SYNTHESIS",
+    context: str = "WORKFLOW",
+) -> Optional[str]:
     """Get model configuration (e.g., 'GOOGLE_MODEL', 'CLAUDE_MODEL', 'OPENAI_MODEL')"""
     return get_hierarchical_env(f"{model_type}_{config_type}", project, context)
 
@@ -214,7 +227,7 @@ if __name__ == "__main__":
         "DEEPSEEK_API_KEY",
         "AWS_ACCESS_KEY_ID",
         "RDS_HOST",
-        "S3_BUCKET"
+        "S3_BUCKET",
     ]
 
     print("\nTesting hierarchical loading:")
@@ -234,4 +247,3 @@ if __name__ == "__main__":
         print(f"  Missing required variables: {missing}")
     else:
         print("  All required variables are present")
-

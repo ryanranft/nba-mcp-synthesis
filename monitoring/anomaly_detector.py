@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 # Try to import ML libraries (optional dependencies)
 try:
     from scipy import stats
+
     SCIPY_AVAILABLE = True
 except ImportError:
     SCIPY_AVAILABLE = False
@@ -27,6 +28,7 @@ except ImportError:
 @dataclass
 class AnomalyResult:
     """Result of anomaly detection"""
+
     is_anomaly: bool
     metric_name: str
     value: float
@@ -38,10 +40,7 @@ class AnomalyResult:
     context: Optional[Dict[str, Any]] = None
 
     def to_dict(self) -> Dict:
-        return {
-            **asdict(self),
-            "expected_range": list(self.expected_range)
-        }
+        return {**asdict(self), "expected_range": list(self.expected_range)}
 
 
 class StatisticalAnomalyDetector:
@@ -51,7 +50,7 @@ class StatisticalAnomalyDetector:
         self,
         window_size: int = 100,
         z_score_threshold: float = 3.0,
-        iqr_multiplier: float = 1.5
+        iqr_multiplier: float = 1.5,
     ):
         """
         Initialize detector
@@ -74,10 +73,7 @@ class StatisticalAnomalyDetector:
         self.history[metric_name].append(value)
 
     def detect_zscore(
-        self,
-        metric_name: str,
-        value: float,
-        add_to_history: bool = True
+        self, metric_name: str, value: float, add_to_history: bool = True
     ) -> Optional[AnomalyResult]:
         """
         Detect anomalies using Z-score method
@@ -138,16 +134,13 @@ class StatisticalAnomalyDetector:
                 confidence=min(z_score / 5.0, 1.0),  # Normalize to 0-1
                 method="z-score",
                 timestamp=datetime.now().isoformat(),
-                context={"z_score": z_score, "mean": mean, "std": std}
+                context={"z_score": z_score, "mean": mean, "std": std},
             )
 
         return None
 
     def detect_iqr(
-        self,
-        metric_name: str,
-        value: float,
-        add_to_history: bool = True
+        self, metric_name: str, value: float, add_to_history: bool = True
     ) -> Optional[AnomalyResult]:
         """
         Detect anomalies using IQR (Interquartile Range) method
@@ -207,7 +200,7 @@ class StatisticalAnomalyDetector:
                 confidence=min(relative_distance / 3.0, 1.0),
                 method="iqr",
                 timestamp=datetime.now().isoformat(),
-                context={"q1": q1, "q3": q3, "iqr": iqr}
+                context={"q1": q1, "q3": q3, "iqr": iqr},
             )
 
         return None
@@ -217,7 +210,7 @@ class StatisticalAnomalyDetector:
         metric_name: str,
         value: float,
         method: str = "both",
-        add_to_history: bool = True
+        add_to_history: bool = True,
     ) -> List[AnomalyResult]:
         """
         Detect anomalies using specified method(s)
@@ -258,10 +251,7 @@ class TimeSeriesAnomalyDetector:
         self.timeseries_data: Dict[str, List[Tuple[datetime, float]]] = {}
 
     def add_data_point(
-        self,
-        metric_name: str,
-        value: float,
-        timestamp: Optional[datetime] = None
+        self, metric_name: str, value: float, timestamp: Optional[datetime] = None
     ):
         """Add time-stamped data point"""
         if metric_name not in self.timeseries_data:
@@ -273,15 +263,11 @@ class TimeSeriesAnomalyDetector:
         # Clean old data
         cutoff = datetime.now() - timedelta(hours=self.lookback_hours)
         self.timeseries_data[metric_name] = [
-            (t, v) for t, v in self.timeseries_data[metric_name]
-            if t > cutoff
+            (t, v) for t, v in self.timeseries_data[metric_name] if t > cutoff
         ]
 
     def detect_trend_deviation(
-        self,
-        metric_name: str,
-        value: float,
-        deviation_threshold: float = 0.3
+        self, metric_name: str, value: float, deviation_threshold: float = 0.3
     ) -> Optional[AnomalyResult]:
         """
         Detect if current value deviates significantly from recent trend
@@ -297,7 +283,10 @@ class TimeSeriesAnomalyDetector:
         if not SCIPY_AVAILABLE:
             return None
 
-        if metric_name not in self.timeseries_data or len(self.timeseries_data[metric_name]) < 5:
+        if (
+            metric_name not in self.timeseries_data
+            or len(self.timeseries_data[metric_name]) < 5
+        ):
             self.add_data_point(metric_name, value)
             return None
 
@@ -350,8 +339,8 @@ class TimeSeriesAnomalyDetector:
                     "predicted": predicted,
                     "deviation": deviation,
                     "trend_slope": slope,
-                    "r_squared": r_value ** 2
-                }
+                    "r_squared": r_value**2,
+                },
             )
 
         return None
@@ -364,28 +353,30 @@ class AnomalyDetectionSystem:
         self,
         enable_statistical: bool = True,
         enable_timeseries: bool = True,
-        models_dir: Optional[str] = None
+        models_dir: Optional[str] = None,
     ):
         self.enable_statistical = enable_statistical and SCIPY_AVAILABLE
         self.enable_timeseries = enable_timeseries and SCIPY_AVAILABLE
 
         if not SCIPY_AVAILABLE:
-            logger.warning("scipy not installed. Statistical anomaly detection disabled.")
+            logger.warning(
+                "scipy not installed. Statistical anomaly detection disabled."
+            )
             logger.warning("To enable: pip install scipy")
 
-        self.statistical_detector = StatisticalAnomalyDetector() if self.enable_statistical else None
-        self.timeseries_detector = TimeSeriesAnomalyDetector() if self.enable_timeseries else None
+        self.statistical_detector = (
+            StatisticalAnomalyDetector() if self.enable_statistical else None
+        )
+        self.timeseries_detector = (
+            TimeSeriesAnomalyDetector() if self.enable_timeseries else None
+        )
 
         self.models_dir = models_dir or os.path.join(
-            os.path.dirname(__file__),
-            "models"
+            os.path.dirname(__file__), "models"
         )
         os.makedirs(self.models_dir, exist_ok=True)
 
-    def detect_anomalies(
-        self,
-        metrics: Dict[str, float]
-    ) -> List[AnomalyResult]:
+    def detect_anomalies(self, metrics: Dict[str, float]) -> List[AnomalyResult]:
         """
         Detect anomalies across multiple metrics
 
@@ -405,7 +396,9 @@ class AnomalyDetectionSystem:
 
             # Time-series detection
             if self.timeseries_detector:
-                result = self.timeseries_detector.detect_trend_deviation(metric_name, value)
+                result = self.timeseries_detector.detect_trend_deviation(
+                    metric_name, value
+                )
                 if result:
                     anomalies.append(result)
 
@@ -424,10 +417,10 @@ class AnomalyDetectionSystem:
                         "mean": float(np.mean(list(history))),
                         "std": float(np.std(list(history))),
                         "min": float(np.min(list(history))),
-                        "max": float(np.max(list(history)))
+                        "max": float(np.max(list(history))),
                     }
 
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(baselines, f, indent=2)
 
         logger.info(f"Saved baselines to {filepath}")
@@ -440,7 +433,7 @@ class AnomalyDetectionSystem:
             logger.warning(f"Baseline file not found: {filepath}")
             return
 
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             baselines = json.load(f)
 
         logger.info(f"Loaded baselines for {len(baselines)} metrics")
@@ -464,9 +457,9 @@ def get_anomaly_detector() -> AnomalyDetectionSystem:
 if __name__ == "__main__":
     import sys
 
-    print("="*70)
+    print("=" * 70)
     print("NBA MCP Synthesis - Anomaly Detection Test")
-    print("="*70)
+    print("=" * 70)
     print()
 
     if not SCIPY_AVAILABLE:
@@ -498,7 +491,7 @@ if __name__ == "__main__":
         ("Normal", 105),
         ("Slight anomaly", 130),
         ("Clear anomaly", 200),
-        ("Critical anomaly", 300)
+        ("Critical anomaly", 300),
     ]
 
     for label, value in test_cases:
@@ -510,11 +503,13 @@ if __name__ == "__main__":
                 print(f"     Severity: {anomaly.severity}")
                 print(f"     Confidence: {anomaly.confidence:.2%}")
                 print(f"     Method: {anomaly.method}")
-                print(f"     Expected: {anomaly.expected_range[0]:.1f} - {anomaly.expected_range[1]:.1f}")
+                print(
+                    f"     Expected: {anomaly.expected_range[0]:.1f} - {anomaly.expected_range[1]:.1f}"
+                )
         else:
             print(f"  ✅ {label}: {value} (normal)")
 
     print()
-    print("="*70)
+    print("=" * 70)
     print("✅ Anomaly detection test complete!")
-    print("="*70)
+    print("=" * 70)

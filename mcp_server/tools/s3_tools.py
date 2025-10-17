@@ -19,13 +19,10 @@ class S3Tools:
     def __init__(self, s3_connector: S3Connector):
         """Initialize S3 tools with S3 connector"""
         self.s3 = s3_connector
-        self.supported_formats = ['.parquet', '.csv', '.json', '.txt', '.log']
+        self.supported_formats = [".parquet", ".csv", ".json", ".txt", ".log"]
 
     async def fetch_s3_sample(
-        self,
-        file_path: str,
-        sample_size: int = 1000,
-        max_file_size_mb: int = 1
+        self, file_path: str, sample_size: int = 1000, max_file_size_mb: int = 1
     ) -> Dict[str, Any]:
         """
         Fetch sample data from S3 file with size limits.
@@ -49,12 +46,14 @@ class S3Tools:
             # Check file size limit
             file_size_mb = metadata["size"] / (1024 * 1024)
             if file_size_mb > max_file_size_mb:
-                logger.warning(f"File too large: {file_size_mb:.2f}MB > {max_file_size_mb}MB")
+                logger.warning(
+                    f"File too large: {file_size_mb:.2f}MB > {max_file_size_mb}MB"
+                )
                 return {
                     "success": False,
                     "error": f"File size ({file_size_mb:.2f}MB) exceeds maximum ({max_file_size_mb}MB)",
                     "file_path": file_path,
-                    "file_size_mb": file_size_mb
+                    "file_size_mb": file_size_mb,
                 }
 
             # Get file extension
@@ -66,43 +65,34 @@ class S3Tools:
                 return {
                     "success": False,
                     "error": f"Unsupported file type: {file_ext}. Supported: {', '.join(self.supported_formats)}",
-                    "file_path": file_path
+                    "file_path": file_path,
                 }
 
             # Handle different file types
-            if file_ext == '.parquet':
+            if file_ext == ".parquet":
                 return await self._fetch_parquet_sample(file_path, sample_size)
-            elif file_ext == '.csv':
+            elif file_ext == ".csv":
                 return await self._fetch_csv_sample(file_path, sample_size)
-            elif file_ext == '.json':
+            elif file_ext == ".json":
                 return await self._fetch_json_sample(file_path, sample_size)
             else:
                 # Text files (txt, log, etc.)
                 return await self.s3.fetch_file_sample(
-                    file_path=file_path,
-                    sample_size=sample_size,
-                    sample_type="lines"
+                    file_path=file_path, sample_size=sample_size, sample_type="lines"
                 )
 
         except Exception as e:
             logger.error(f"Error fetching S3 sample: {e}", exc_info=True)
-            return {
-                "success": False,
-                "error": str(e),
-                "file_path": file_path
-            }
+            return {"success": False, "error": str(e), "file_path": file_path}
 
     async def _fetch_parquet_sample(
-        self,
-        file_path: str,
-        sample_size: int
+        self, file_path: str, sample_size: int
     ) -> Dict[str, Any]:
         """Fetch sample from parquet file"""
         try:
             # Get full file content
             result = await self.s3.fetch_file_sample(
-                file_path=file_path,
-                sample_type="full"
+                file_path=file_path, sample_type="full"
             )
 
             if not result["success"]:
@@ -110,7 +100,10 @@ class S3Tools:
 
             # Read parquet with pandas
             import pyarrow.parquet as pq
-            table = pq.read_table(io.BytesIO(result["sample_content"].encode('latin-1')))
+
+            table = pq.read_table(
+                io.BytesIO(result["sample_content"].encode("latin-1"))
+            )
             df = table.to_pandas()
 
             # Sample rows
@@ -123,9 +116,9 @@ class S3Tools:
                 "total_rows": len(df),
                 "sample_rows": len(sample_df),
                 "columns": list(df.columns),
-                "sample_data": sample_df.to_dict(orient='records'),
+                "sample_data": sample_df.to_dict(orient="records"),
                 "file_size": result["file_size"],
-                "last_modified": result["last_modified"]
+                "last_modified": result["last_modified"],
             }
 
         except Exception as e:
@@ -133,20 +126,17 @@ class S3Tools:
             return {
                 "success": False,
                 "error": f"Failed to read parquet file: {str(e)}",
-                "file_path": file_path
+                "file_path": file_path,
             }
 
     async def _fetch_csv_sample(
-        self,
-        file_path: str,
-        sample_size: int
+        self, file_path: str, sample_size: int
     ) -> Dict[str, Any]:
         """Fetch sample from CSV file"""
         try:
             # Get full file content
             result = await self.s3.fetch_file_sample(
-                file_path=file_path,
-                sample_type="full"
+                file_path=file_path, sample_type="full"
             )
 
             if not result["success"]:
@@ -165,9 +155,9 @@ class S3Tools:
                 "total_rows": len(df),
                 "sample_rows": len(sample_df),
                 "columns": list(df.columns),
-                "sample_data": sample_df.to_dict(orient='records'),
+                "sample_data": sample_df.to_dict(orient="records"),
                 "file_size": result["file_size"],
-                "last_modified": result["last_modified"]
+                "last_modified": result["last_modified"],
             }
 
         except Exception as e:
@@ -175,20 +165,17 @@ class S3Tools:
             return {
                 "success": False,
                 "error": f"Failed to read CSV file: {str(e)}",
-                "file_path": file_path
+                "file_path": file_path,
             }
 
     async def _fetch_json_sample(
-        self,
-        file_path: str,
-        sample_size: int
+        self, file_path: str, sample_size: int
     ) -> Dict[str, Any]:
         """Fetch sample from JSON file"""
         try:
             # Get full file content
             result = await self.s3.fetch_file_sample(
-                file_path=file_path,
-                sample_type="full"
+                file_path=file_path, sample_type="full"
             )
 
             if not result["success"]:
@@ -196,6 +183,7 @@ class S3Tools:
 
             # Parse JSON
             import json
+
             data = json.loads(result["sample_content"])
 
             # Handle different JSON structures
@@ -214,10 +202,12 @@ class S3Tools:
                 "file_path": file_path,
                 "format": "json",
                 "total_items": total_items,
-                "sample_items": len(sample_data) if isinstance(sample_data, list) else 1,
+                "sample_items": (
+                    len(sample_data) if isinstance(sample_data, list) else 1
+                ),
                 "sample_data": sample_data,
                 "file_size": result["file_size"],
-                "last_modified": result["last_modified"]
+                "last_modified": result["last_modified"],
             }
 
         except Exception as e:
@@ -225,13 +215,11 @@ class S3Tools:
             return {
                 "success": False,
                 "error": f"Failed to read JSON file: {str(e)}",
-                "file_path": file_path
+                "file_path": file_path,
             }
 
     async def list_s3_files(
-        self,
-        prefix: str = "",
-        max_keys: int = 100
+        self, prefix: str = "", max_keys: int = 100
     ) -> Dict[str, Any]:
         """
         List files in S3 bucket with optional prefix filter.
@@ -254,11 +242,7 @@ class S3Tools:
 
         except Exception as e:
             logger.error(f"Error listing S3 files: {e}", exc_info=True)
-            return {
-                "success": False,
-                "error": str(e),
-                "prefix": prefix
-            }
+            return {"success": False, "error": str(e), "prefix": prefix}
 
     async def get_s3_file_info(self, file_path: str) -> Dict[str, Any]:
         """
@@ -281,23 +265,18 @@ class S3Tools:
                 result["extension"] = Path(file_path).suffix
                 result["filename"] = Path(file_path).name
 
-                logger.info(f"File info retrieved: {result['size_mb']}MB, {result['extension']}")
+                logger.info(
+                    f"File info retrieved: {result['size_mb']}MB, {result['extension']}"
+                )
 
             return result
 
         except Exception as e:
             logger.error(f"Error getting S3 file info: {e}", exc_info=True)
-            return {
-                "success": False,
-                "error": str(e),
-                "file_path": file_path
-            }
+            return {"success": False, "error": str(e), "file_path": file_path}
 
     async def search_s3_files(
-        self,
-        prefix: str = "",
-        extension: Optional[str] = None,
-        max_keys: int = 100
+        self, prefix: str = "", extension: Optional[str] = None, max_keys: int = 100
     ) -> Dict[str, Any]:
         """
         Search for files in S3 with filters.
@@ -331,7 +310,7 @@ class S3Tools:
                 "extension_filter": extension,
                 "file_count": len(files),
                 "files": files,
-                "truncated": result.get("truncated", False)
+                "truncated": result.get("truncated", False),
             }
 
         except Exception as e:
@@ -340,5 +319,5 @@ class S3Tools:
                 "success": False,
                 "error": str(e),
                 "prefix": prefix,
-                "extension": extension
+                "extension": extension,
             }

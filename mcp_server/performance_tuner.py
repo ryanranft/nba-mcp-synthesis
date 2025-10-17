@@ -39,6 +39,7 @@ logger = logging.getLogger(__name__)
 
 class ResourceType(Enum):
     """Resource types to optimize"""
+
     DATABASE = "database"
     CACHE = "cache"
     API = "api"
@@ -48,6 +49,7 @@ class ResourceType(Enum):
 
 class OptimizationGoal(Enum):
     """Optimization objectives"""
+
     LATENCY = "latency"  # Minimize response time
     THROUGHPUT = "throughput"  # Maximize requests/sec
     COST = "cost"  # Minimize cost
@@ -57,6 +59,7 @@ class OptimizationGoal(Enum):
 @dataclass
 class PerformanceMetric:
     """Single performance measurement"""
+
     timestamp: datetime
     latency_ms: float
     throughput_rps: float
@@ -68,6 +71,7 @@ class PerformanceMetric:
 @dataclass
 class OptimizationConfig:
     """Configuration for optimization"""
+
     cache_size_mb: int = 512
     connection_pool_size: int = 10
     query_timeout_ms: int = 5000
@@ -79,6 +83,7 @@ class OptimizationConfig:
 @dataclass
 class OptimizationResult:
     """Result of optimization"""
+
     config: OptimizationConfig
     improvement_percent: float
     before_metrics: Dict[str, float]
@@ -101,10 +106,10 @@ class PerformanceProfiler:
         """Get baseline performance metrics"""
         if not self.metrics:
             return {
-                'avg_latency_ms': 0.0,
-                'avg_throughput_rps': 0.0,
-                'p95_latency_ms': 0.0,
-                'p99_latency_ms': 0.0
+                "avg_latency_ms": 0.0,
+                "avg_throughput_rps": 0.0,
+                "p95_latency_ms": 0.0,
+                "p99_latency_ms": 0.0,
             }
 
         latencies = [m.latency_ms for m in self.metrics]
@@ -115,12 +120,12 @@ class PerformanceProfiler:
         p99_idx = int(len(sorted_latencies) * 0.99)
 
         return {
-            'avg_latency_ms': round(statistics.mean(latencies), 2),
-            'avg_throughput_rps': round(statistics.mean(throughputs), 2),
-            'p95_latency_ms': round(sorted_latencies[p95_idx], 2),
-            'p99_latency_ms': round(sorted_latencies[p99_idx], 2),
-            'min_latency_ms': round(min(latencies), 2),
-            'max_latency_ms': round(max(latencies), 2)
+            "avg_latency_ms": round(statistics.mean(latencies), 2),
+            "avg_throughput_rps": round(statistics.mean(throughputs), 2),
+            "p95_latency_ms": round(sorted_latencies[p95_idx], 2),
+            "p99_latency_ms": round(sorted_latencies[p99_idx], 2),
+            "min_latency_ms": round(min(latencies), 2),
+            "max_latency_ms": round(max(latencies), 2),
         }
 
     def detect_performance_regression(self, threshold_percent: float = 10.0) -> bool:
@@ -152,21 +157,18 @@ class QueryOptimizer:
         query_id: str,
         execution_time_ms: float,
         rows_examined: int,
-        rows_returned: int
+        rows_returned: int,
     ) -> Dict[str, Any]:
         """Analyze query performance"""
 
         if query_id not in self.query_stats:
-            self.query_stats[query_id] = {
-                'execution_times': [],
-                'total_runs': 0
-            }
+            self.query_stats[query_id] = {"execution_times": [], "total_runs": 0}
 
         stats = self.query_stats[query_id]
-        stats['execution_times'].append(execution_time_ms)
-        stats['total_runs'] += 1
+        stats["execution_times"].append(execution_time_ms)
+        stats["total_runs"] += 1
 
-        avg_time = statistics.mean(stats['execution_times'])
+        avg_time = statistics.mean(stats["execution_times"])
 
         # Determine if query is slow
         is_slow = avg_time > self.slow_query_threshold_ms
@@ -184,14 +186,14 @@ class QueryOptimizer:
                 recommendation = "Optimize query structure or add caching"
 
         return {
-            'query_id': query_id,
-            'avg_execution_time_ms': round(avg_time, 2),
-            'total_runs': stats['total_runs'],
-            'is_slow': is_slow,
-            'efficiency_percent': round(efficiency, 2),
-            'rows_examined': rows_examined,
-            'rows_returned': rows_returned,
-            'recommendation': recommendation
+            "query_id": query_id,
+            "avg_execution_time_ms": round(avg_time, 2),
+            "total_runs": stats["total_runs"],
+            "is_slow": is_slow,
+            "efficiency_percent": round(efficiency, 2),
+            "rows_examined": rows_examined,
+            "rows_returned": rows_returned,
+            "recommendation": recommendation,
         }
 
     def get_slow_queries(self, limit: int = 10) -> List[Dict[str, Any]]:
@@ -199,16 +201,18 @@ class QueryOptimizer:
         queries = []
 
         for query_id, stats in self.query_stats.items():
-            avg_time = statistics.mean(stats['execution_times'])
+            avg_time = statistics.mean(stats["execution_times"])
             if avg_time > self.slow_query_threshold_ms:
-                queries.append({
-                    'query_id': query_id,
-                    'avg_time_ms': round(avg_time, 2),
-                    'runs': stats['total_runs']
-                })
+                queries.append(
+                    {
+                        "query_id": query_id,
+                        "avg_time_ms": round(avg_time, 2),
+                        "runs": stats["total_runs"],
+                    }
+                )
 
         # Sort by average time
-        queries.sort(key=lambda x: x['avg_time_ms'], reverse=True)
+        queries.sort(key=lambda x: x["avg_time_ms"], reverse=True)
         return queries[:limit]
 
 
@@ -257,12 +261,12 @@ class CacheTuner:
             reason = "Current size is optimal"
 
         return {
-            'current_size_mb': current_size_mb,
-            'recommended_size_mb': recommended_size,
-            'reason': reason,
-            'hit_rate': round(hit_rate, 2),
-            'total_accesses': self.cache_hits + self.cache_misses,
-            'evictions': self.evictions
+            "current_size_mb": current_size_mb,
+            "recommended_size_mb": recommended_size,
+            "reason": reason,
+            "hit_rate": round(hit_rate, 2),
+            "total_accesses": self.cache_hits + self.cache_misses,
+            "evictions": self.evictions,
         }
 
 
@@ -285,9 +289,9 @@ class ConnectionPoolTuner:
         """Recommend optimal pool size"""
         if not self.active_connections:
             return {
-                'current_size': current_size,
-                'recommended_size': current_size,
-                'reason': "Insufficient data"
+                "current_size": current_size,
+                "recommended_size": current_size,
+                "reason": "Insufficient data",
             }
 
         avg_active = statistics.mean(self.active_connections)
@@ -310,12 +314,12 @@ class ConnectionPoolTuner:
             reason = "Current pool size is optimal"
 
         return {
-            'current_size': current_size,
-            'recommended_size': recommended_size,
-            'reason': reason,
-            'avg_active': round(avg_active, 2),
-            'max_active': max_active,
-            'avg_wait_ms': round(avg_wait, 2)
+            "current_size": current_size,
+            "recommended_size": recommended_size,
+            "reason": reason,
+            "avg_active": round(avg_active, 2),
+            "max_active": max_active,
+            "avg_wait_ms": round(avg_wait, 2),
         }
 
 
@@ -331,39 +335,38 @@ class AutoScalingOptimizer:
         trigger_metric: str,
         trigger_value: float,
         instances_before: int,
-        instances_after: int
+        instances_after: int,
     ) -> None:
         """Record auto-scaling event"""
-        self.scale_events.append({
-            'timestamp': datetime.now(),
-            'scale_type': scale_type,
-            'trigger_metric': trigger_metric,
-            'trigger_value': trigger_value,
-            'instances_before': instances_before,
-            'instances_after': instances_after
-        })
+        self.scale_events.append(
+            {
+                "timestamp": datetime.now(),
+                "scale_type": scale_type,
+                "trigger_metric": trigger_metric,
+                "trigger_value": trigger_value,
+                "instances_before": instances_before,
+                "instances_after": instances_after,
+            }
+        )
 
     def analyze_scaling_efficiency(self) -> Dict[str, Any]:
         """Analyze auto-scaling efficiency"""
         if not self.scale_events:
-            return {
-                'total_events': 0,
-                'thrashing_detected': False
-            }
+            return {"total_events": 0, "thrashing_detected": False}
 
         # Check for thrashing (scaling up and down frequently)
         recent_events = self.scale_events[-10:]
         if len(recent_events) >= 6:
             alternating = all(
-                recent_events[i]['scale_type'] != recent_events[i+1]['scale_type']
+                recent_events[i]["scale_type"] != recent_events[i + 1]["scale_type"]
                 for i in range(len(recent_events) - 1)
             )
             thrashing = alternating
         else:
             thrashing = False
 
-        scale_ups = sum(1 for e in self.scale_events if e['scale_type'] == 'up')
-        scale_downs = sum(1 for e in self.scale_events if e['scale_type'] == 'down')
+        scale_ups = sum(1 for e in self.scale_events if e["scale_type"] == "up")
+        scale_downs = sum(1 for e in self.scale_events if e["scale_type"] == "down")
 
         recommendation = None
         if thrashing:
@@ -374,11 +377,11 @@ class AutoScalingOptimizer:
             recommendation = "Consider decreasing baseline capacity"
 
         return {
-            'total_events': len(self.scale_events),
-            'scale_ups': scale_ups,
-            'scale_downs': scale_downs,
-            'thrashing_detected': thrashing,
-            'recommendation': recommendation
+            "total_events": len(self.scale_events),
+            "scale_ups": scale_ups,
+            "scale_downs": scale_downs,
+            "thrashing_detected": thrashing,
+            "recommendation": recommendation,
         }
 
 
@@ -395,8 +398,7 @@ class PerformanceTuner:
         self.current_config = OptimizationConfig()
 
     def run_optimization(
-        self,
-        goal: OptimizationGoal = OptimizationGoal.BALANCED
+        self, goal: OptimizationGoal = OptimizationGoal.BALANCED
     ) -> OptimizationResult:
         """Run full optimization"""
 
@@ -404,17 +406,21 @@ class PerformanceTuner:
         before_metrics = self.profiler.get_baseline()
 
         # Get recommendations
-        cache_rec = self.cache_tuner.recommend_cache_size(self.current_config.cache_size_mb)
-        pool_rec = self.pool_tuner.recommend_pool_size(self.current_config.connection_pool_size)
+        cache_rec = self.cache_tuner.recommend_cache_size(
+            self.current_config.cache_size_mb
+        )
+        pool_rec = self.pool_tuner.recommend_pool_size(
+            self.current_config.connection_pool_size
+        )
 
         # Apply recommendations
         new_config = OptimizationConfig(
-            cache_size_mb=cache_rec['recommended_size_mb'],
-            connection_pool_size=pool_rec['recommended_size'],
+            cache_size_mb=cache_rec["recommended_size_mb"],
+            connection_pool_size=pool_rec["recommended_size"],
             query_timeout_ms=self.current_config.query_timeout_ms,
             max_retries=self.current_config.max_retries,
             batch_size=self.current_config.batch_size,
-            prefetch_enabled=self.current_config.prefetch_enabled
+            prefetch_enabled=self.current_config.prefetch_enabled,
         )
 
         # Calculate improvement (simulated)
@@ -422,9 +428,9 @@ class PerformanceTuner:
 
         # After metrics (simulated - would measure actual)
         after_metrics = {
-            'avg_latency_ms': before_metrics['avg_latency_ms'] * 0.85,
-            'avg_throughput_rps': before_metrics['avg_throughput_rps'] * 1.15,
-            'p95_latency_ms': before_metrics['p95_latency_ms'] * 0.80
+            "avg_latency_ms": before_metrics["avg_latency_ms"] * 0.85,
+            "avg_throughput_rps": before_metrics["avg_throughput_rps"] * 1.15,
+            "p95_latency_ms": before_metrics["p95_latency_ms"] * 0.80,
         }
 
         recommendation = f"Applied cache tuning ({cache_rec['reason']}) and pool optimization ({pool_rec['reason']})"
@@ -434,26 +440,30 @@ class PerformanceTuner:
             improvement_percent=improvement,
             before_metrics=before_metrics,
             after_metrics=after_metrics,
-            recommendation=recommendation
+            recommendation=recommendation,
         )
 
     def get_optimization_report(self) -> Dict[str, Any]:
         """Get comprehensive optimization report"""
 
         return {
-            'performance_baseline': self.profiler.get_baseline(),
-            'slow_queries': self.query_optimizer.get_slow_queries(),
-            'cache_stats': {
-                'hit_rate': round(self.cache_tuner.get_hit_rate(), 2),
-                'recommendation': self.cache_tuner.recommend_cache_size(self.current_config.cache_size_mb)
+            "performance_baseline": self.profiler.get_baseline(),
+            "slow_queries": self.query_optimizer.get_slow_queries(),
+            "cache_stats": {
+                "hit_rate": round(self.cache_tuner.get_hit_rate(), 2),
+                "recommendation": self.cache_tuner.recommend_cache_size(
+                    self.current_config.cache_size_mb
+                ),
             },
-            'connection_pool': self.pool_tuner.recommend_pool_size(self.current_config.connection_pool_size),
-            'auto_scaling': self.scaling_optimizer.analyze_scaling_efficiency(),
-            'current_config': {
-                'cache_size_mb': self.current_config.cache_size_mb,
-                'connection_pool_size': self.current_config.connection_pool_size,
-                'query_timeout_ms': self.current_config.query_timeout_ms
-            }
+            "connection_pool": self.pool_tuner.recommend_pool_size(
+                self.current_config.connection_pool_size
+            ),
+            "auto_scaling": self.scaling_optimizer.analyze_scaling_efficiency(),
+            "current_config": {
+                "cache_size_mb": self.current_config.cache_size_mb,
+                "connection_pool_size": self.current_config.connection_pool_size,
+                "query_timeout_ms": self.current_config.query_timeout_ms,
+            },
         }
 
 
@@ -474,7 +484,7 @@ if __name__ == "__main__":
             throughput_rps=1000 - i * 2,
             cpu_percent=60 + i * 0.1,
             memory_mb=2048 + i * 10,
-            cost_per_hour=5.0
+            cost_per_hour=5.0,
         )
         tuner.profiler.record_metric(metric)
 
@@ -514,4 +524,3 @@ if __name__ == "__main__":
     print(f"\nConnection pool: {report['connection_pool']['reason']}")
 
     print("\n=== Demo Complete ===")
-

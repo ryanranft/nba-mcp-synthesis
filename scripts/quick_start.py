@@ -42,28 +42,26 @@ async def demo_sql_optimization():
     console.print(f"[yellow]Original Query:[/yellow]\n{sql_query}")
 
     result = await synthesize_with_mcp_context(
-        user_input=user_input,
-        selected_code=sql_query,
-        query_type="sql_optimization"
+        user_input=user_input, selected_code=sql_query, query_type="sql_optimization"
     )
 
-    if result['status'] == 'success':
+    if result["status"] == "success":
         console.print(f"\n[green]✓ Optimization Complete![/green]")
         console.print(f"[dim]Total Cost: ${result['total_cost']:.4f}[/dim]")
         console.print(f"[dim]Execution Time: {result['execution_time']:.2f}s[/dim]\n")
 
         # Display optimized query
-        if result.get('final_code'):
-            console.print(Panel(
-                result['final_code'],
-                title="Optimized Query",
-                border_style="green"
-            ))
+        if result.get("final_code"):
+            console.print(
+                Panel(
+                    result["final_code"], title="Optimized Query", border_style="green"
+                )
+            )
 
         # Display explanation
-        if result.get('final_explanation'):
+        if result.get("final_explanation"):
             console.print("\n[bold]Explanation:[/bold]")
-            console.print(Markdown(result['final_explanation'][:500] + "..."))
+            console.print(Markdown(result["final_explanation"][:500] + "..."))
 
     else:
         console.print(f"[red]✗ Failed: {result.get('error', 'Unknown error')}[/red]")
@@ -80,20 +78,23 @@ async def demo_statistical_analysis():
     """
 
     result = await synthesize_with_mcp_context(
-        user_input=user_input,
-        query_type="statistical_analysis"
+        user_input=user_input, query_type="statistical_analysis"
     )
 
-    if result['status'] == 'success':
+    if result["status"] == "success":
         console.print(f"\n[green]✓ Analysis Complete![/green]")
-        console.print(f"[dim]Cost: ${result['total_cost']:.4f} | Time: {result['execution_time']:.2f}s[/dim]\n")
+        console.print(
+            f"[dim]Cost: ${result['total_cost']:.4f} | Time: {result['execution_time']:.2f}s[/dim]\n"
+        )
 
-        if result.get('final_code'):
-            console.print(Panel(
-                result['final_code'][:400] + "...",
-                title="Statistical Code",
-                border_style="blue"
-            ))
+        if result.get("final_code"):
+            console.print(
+                Panel(
+                    result["final_code"][:400] + "...",
+                    title="Statistical Code",
+                    border_style="blue",
+                )
+            )
     else:
         console.print(f"[red]✗ Failed: {result.get('error', 'Unknown error')}[/red]")
 
@@ -109,16 +110,18 @@ async def demo_quick_synthesis():
         "Write a function to calculate Player Efficiency Rating (PER)"
     )
 
-    if result['status'] == 'success':
+    if result["status"] == "success":
         console.print(f"\n[green]✓ Synthesis Complete![/green]")
         console.print(f"[dim]Cost: ${result['total_cost']:.4f}[/dim]\n")
 
-        if result.get('final_code'):
-            console.print(Panel(
-                result['final_code'][:300] + "...",
-                title="Generated Function",
-                border_style="cyan"
-            ))
+        if result.get("final_code"):
+            console.print(
+                Panel(
+                    result["final_code"][:300] + "...",
+                    title="Generated Function",
+                    border_style="cyan",
+                )
+            )
     else:
         console.print(f"[red]✗ Failed: {result.get('error', 'Unknown error')}[/red]")
 
@@ -134,15 +137,17 @@ async def test_model_connections():
         console.print("[yellow]Testing DeepSeek...[/yellow]")
         deepseek = DeepSeekModel()
         result = await deepseek.query("Hello", temperature=0.3)
-        if result.get('success'):
-            console.print(f"  [green]✓ DeepSeek connected (Cost: ${result['cost']:.4f})[/green]")
-            results['deepseek'] = True
+        if result.get("success"):
+            console.print(
+                f"  [green]✓ DeepSeek connected (Cost: ${result['cost']:.4f})[/green]"
+            )
+            results["deepseek"] = True
         else:
             console.print(f"  [red]✗ DeepSeek failed: {result.get('error')}[/red]")
-            results['deepseek'] = False
+            results["deepseek"] = False
     except Exception as e:
         console.print(f"  [red]✗ DeepSeek error: {e}[/red]")
-        results['deepseek'] = False
+        results["deepseek"] = False
 
     # Test Claude
     try:
@@ -152,17 +157,19 @@ async def test_model_connections():
             deepseek_result="Test result",
             original_request="Test",
             context_summary="Test context",
-            include_verification=False
+            include_verification=False,
         )
-        if result.get('success'):
-            console.print(f"  [green]✓ Claude connected (Cost: ${result['cost']:.4f})[/green]")
-            results['claude'] = True
+        if result.get("success"):
+            console.print(
+                f"  [green]✓ Claude connected (Cost: ${result['cost']:.4f})[/green]"
+            )
+            results["claude"] = True
         else:
             console.print(f"  [red]✗ Claude failed: {result.get('error')}[/red]")
-            results['claude'] = False
+            results["claude"] = False
     except Exception as e:
         console.print(f"  [red]✗ Claude error: {e}[/red]")
-        results['claude'] = False
+        results["claude"] = False
 
     # Test Ollama (optional)
     try:
@@ -170,29 +177,33 @@ async def test_model_connections():
         ollama = OllamaModel()
         if ollama.is_available():
             result = await ollama.quick_verify("print('test')")
-            if result.get('success'):
+            if result.get("success"):
                 console.print(f"  [green]✓ Ollama connected (Local, $0)[/green]")
-                results['ollama'] = True
+                results["ollama"] = True
             else:
-                console.print(f"  [yellow]⚠ Ollama available but verification failed[/yellow]")
-                results['ollama'] = False
+                console.print(
+                    f"  [yellow]⚠ Ollama available but verification failed[/yellow]"
+                )
+                results["ollama"] = False
         else:
             console.print(f"  [dim]⏭ Ollama not available (optional)[/dim]")
-            results['ollama'] = None
+            results["ollama"] = None
     except Exception as e:
         console.print(f"  [dim]⏭ Ollama not available: {e}[/dim]")
-        results['ollama'] = None
+        results["ollama"] = None
 
     return results
 
 
 async def main():
     """Main demo function"""
-    console.print(Panel(
-        "[bold]NBA MCP Synthesis System - Quick Start Demo[/bold]\n"
-        "[dim]Multi-Model AI with DeepSeek, Claude, and Ollama[/dim]",
-        style="blue"
-    ))
+    console.print(
+        Panel(
+            "[bold]NBA MCP Synthesis System - Quick Start Demo[/bold]\n"
+            "[dim]Multi-Model AI with DeepSeek, Claude, and Ollama[/dim]",
+            style="blue",
+        )
+    )
 
     # Check for required API keys
     missing_keys = []
@@ -212,12 +223,14 @@ async def main():
     console.print("\n[bold cyan]Step 1: Testing Model Connections[/bold cyan]")
     connections = await test_model_connections()
 
-    if not connections.get('deepseek'):
+    if not connections.get("deepseek"):
         console.print("\n[red]✗ DeepSeek connection failed - cannot proceed[/red]")
         return
 
-    if not connections.get('claude'):
-        console.print("\n[yellow]⚠ Claude connection failed - synthesis will be limited[/yellow]")
+    if not connections.get("claude"):
+        console.print(
+            "\n[yellow]⚠ Claude connection failed - synthesis will be limited[/yellow]"
+        )
 
     # Run demos
     console.print("\n[bold cyan]Step 2: Running Synthesis Demos[/bold cyan]")
@@ -225,7 +238,7 @@ async def main():
     demos = [
         ("SQL Optimization", demo_sql_optimization),
         ("Statistical Analysis", demo_statistical_analysis),
-        ("Quick Synthesis", demo_quick_synthesis)
+        ("Quick Synthesis", demo_quick_synthesis),
     ]
 
     for name, demo_func in demos:
@@ -238,17 +251,19 @@ async def main():
             console.print(f"\n[red]✗ Demo '{name}' failed: {e}[/red]")
 
     # Summary
-    console.print("\n" + "="*60)
-    console.print(Panel(
-        "[bold green]Quick Start Complete![/bold green]\n\n"
-        "Next Steps:\n"
-        "1. Check synthesis_output/ for saved results\n"
-        "2. Review logs/ for detailed execution logs\n"
-        "3. Try the PyCharm integration for live synthesis\n"
-        "4. Explore synthesis/example_usage.py for more examples\n\n"
-        "[dim]For full documentation, see synthesis/README.md[/dim]",
-        style="green"
-    ))
+    console.print("\n" + "=" * 60)
+    console.print(
+        Panel(
+            "[bold green]Quick Start Complete![/bold green]\n\n"
+            "Next Steps:\n"
+            "1. Check synthesis_output/ for saved results\n"
+            "2. Review logs/ for detailed execution logs\n"
+            "3. Try the PyCharm integration for live synthesis\n"
+            "4. Explore synthesis/example_usage.py for more examples\n\n"
+            "[dim]For full documentation, see synthesis/README.md[/dim]",
+            style="green",
+        )
+    )
 
 
 if __name__ == "__main__":
@@ -259,4 +274,5 @@ if __name__ == "__main__":
     except Exception as e:
         console.print(f"\n[red]Fatal error: {e}[/red]")
         import traceback
+
         traceback.print_exc()

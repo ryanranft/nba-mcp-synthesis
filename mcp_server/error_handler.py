@@ -1,4 +1,5 @@
 """Centralized error handling"""
+
 import logging
 import traceback
 from typing import Optional, Dict, Any
@@ -10,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 class ErrorCategory(Enum):
     """Error categories for classification"""
+
     VALIDATION = "validation"
     AUTHENTICATION = "authentication"
     AUTHORIZATION = "authorization"
@@ -23,6 +25,7 @@ class ErrorCategory(Enum):
 
 class ErrorSeverity(Enum):
     """Error severity levels"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -37,7 +40,7 @@ class NBAMCPError(Exception):
         message: str,
         category: ErrorCategory,
         severity: ErrorSeverity = ErrorSeverity.MEDIUM,
-        details: Optional[Dict[str, Any]] = None
+        details: Optional[Dict[str, Any]] = None,
     ):
         self.message = message
         self.category = category
@@ -53,43 +56,55 @@ class NBAMCPError(Exception):
             "category": self.category.value,
             "severity": self.severity.value,
             "details": self.details,
-            "timestamp": self.timestamp
+            "timestamp": self.timestamp,
         }
 
 
 # Specific error types
 class ValidationError(NBAMCPError):
     """Validation error"""
+
     def __init__(self, message: str, details: Optional[Dict] = None):
         super().__init__(message, ErrorCategory.VALIDATION, ErrorSeverity.LOW, details)
 
 
 class AuthenticationError(NBAMCPError):
     """Authentication error"""
+
     def __init__(self, message: str, details: Optional[Dict] = None):
-        super().__init__(message, ErrorCategory.AUTHENTICATION, ErrorSeverity.HIGH, details)
+        super().__init__(
+            message, ErrorCategory.AUTHENTICATION, ErrorSeverity.HIGH, details
+        )
 
 
 class AuthorizationError(NBAMCPError):
     """Authorization error"""
+
     def __init__(self, message: str, details: Optional[Dict] = None):
-        super().__init__(message, ErrorCategory.AUTHORIZATION, ErrorSeverity.HIGH, details)
+        super().__init__(
+            message, ErrorCategory.AUTHORIZATION, ErrorSeverity.HIGH, details
+        )
 
 
 class DatabaseError(NBAMCPError):
     """Database error"""
+
     def __init__(self, message: str, details: Optional[Dict] = None):
         super().__init__(message, ErrorCategory.DATABASE, ErrorSeverity.HIGH, details)
 
 
 class RateLimitError(NBAMCPError):
     """Rate limit exceeded"""
+
     def __init__(self, message: str, details: Optional[Dict] = None):
-        super().__init__(message, ErrorCategory.RATE_LIMIT, ErrorSeverity.MEDIUM, details)
+        super().__init__(
+            message, ErrorCategory.RATE_LIMIT, ErrorSeverity.MEDIUM, details
+        )
 
 
 class NotFoundError(NBAMCPError):
     """Resource not found"""
+
     def __init__(self, message: str, details: Optional[Dict] = None):
         super().__init__(message, ErrorCategory.NOT_FOUND, ErrorSeverity.LOW, details)
 
@@ -102,9 +117,7 @@ class ErrorHandler:
         self.errors_by_category = {}
 
     def handle_error(
-        self,
-        error: Exception,
-        context: Optional[Dict[str, Any]] = None
+        self, error: Exception, context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Handle an error
@@ -127,7 +140,7 @@ class ErrorHandler:
                 message=str(error),
                 category=ErrorCategory.INTERNAL,
                 severity=ErrorSeverity.HIGH,
-                details={"original_type": type(error).__name__}
+                details={"original_type": type(error).__name__},
             )
 
         # Track by category
@@ -156,7 +169,7 @@ class ErrorHandler:
         """Get error statistics"""
         return {
             "total_errors": self.error_count,
-            "errors_by_category": self.errors_by_category
+            "errors_by_category": self.errors_by_category,
         }
 
 
@@ -174,11 +187,12 @@ def get_error_handler() -> ErrorHandler:
 
 def handle_errors(func):
     """Decorator to automatically handle errors"""
+
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
         except Exception as e:
             handler = get_error_handler()
             return handler.handle_error(e, context={"function": func.__name__})
-    return wrapper
 
+    return wrapper

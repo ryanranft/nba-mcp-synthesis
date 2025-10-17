@@ -12,18 +12,19 @@ import json
 from datetime import datetime
 from pathlib import Path
 
+
 def monitor_workflow():
     """Monitor the self-healing workflow."""
     print("🔍 Monitoring Self-Healing Workflow...")
-    print("="*50)
+    print("=" * 50)
 
     # Find the workflow process
     workflow_pid = None
-    for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+    for proc in psutil.process_iter(["pid", "name", "cmdline"]):
         try:
-            cmdline = ' '.join(proc.info['cmdline']) if proc.info['cmdline'] else ''
-            if 'master_self_healing_orchestrator.py' in cmdline:
-                workflow_pid = proc.info['pid']
+            cmdline = " ".join(proc.info["cmdline"]) if proc.info["cmdline"] else ""
+            if "master_self_healing_orchestrator.py" in cmdline:
+                workflow_pid = proc.info["pid"]
                 break
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             continue
@@ -46,11 +47,15 @@ def monitor_workflow():
             proc = psutil.Process(workflow_pid)
             if proc.is_running():
                 runtime = time.time() - proc.create_time()
-                print(f"✅ Workflow running (PID: {workflow_pid}, Runtime: {runtime:.1f}s)")
+                print(
+                    f"✅ Workflow running (PID: {workflow_pid}, Runtime: {runtime:.1f}s)"
+                )
 
                 # Check for new log files
                 log_files = list(Path("logs").glob("*.json"))
-                recent_logs = [f for f in log_files if f.stat().st_mtime > start_time - 60]
+                recent_logs = [
+                    f for f in log_files if f.stat().st_mtime > start_time - 60
+                ]
 
                 if recent_logs:
                     print(f"📄 Recent log files: {len(recent_logs)}")
@@ -59,15 +64,24 @@ def monitor_workflow():
 
                 # Check for any other processes
                 other_processes = []
-                for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+                for proc in psutil.process_iter(["pid", "name", "cmdline"]):
                     try:
-                        cmdline = ' '.join(proc.info['cmdline']) if proc.info['cmdline'] else ''
-                        if any(target in cmdline for target in [
-                            'individual_model_tester.py',
-                            'immediate_status_checker.py',
-                            'deployment_manager.py'
-                        ]):
-                            other_processes.append(f"{proc.info['name']} (PID: {proc.info['pid']})")
+                        cmdline = (
+                            " ".join(proc.info["cmdline"])
+                            if proc.info["cmdline"]
+                            else ""
+                        )
+                        if any(
+                            target in cmdline
+                            for target in [
+                                "individual_model_tester.py",
+                                "immediate_status_checker.py",
+                                "deployment_manager.py",
+                            ]
+                        ):
+                            other_processes.append(
+                                f"{proc.info['name']} (PID: {proc.info['pid']})"
+                            )
                     except (psutil.NoSuchProcess, psutil.AccessDenied):
                         continue
 
@@ -90,6 +104,6 @@ def monitor_workflow():
 
     print(f"\n📊 Monitoring complete after {time.time() - start_time:.1f}s")
 
+
 if __name__ == "__main__":
     monitor_workflow()
-

@@ -19,7 +19,9 @@ console = Console()
 def print_header():
     """Print setup header"""
     console.print("\n[bold blue]🏀 NBA MCP Synthesis System Setup[/bold blue]")
-    console.print("[dim]This script will help you configure the MCP server and synthesis system[/dim]\n")
+    console.print(
+        "[dim]This script will help you configure the MCP server and synthesis system[/dim]\n"
+    )
 
 
 def check_python_version():
@@ -45,10 +47,7 @@ def create_virtual_environment():
             env_name = Prompt.ask("Environment name", default="mcp-synthesis")
             console.print(f"Creating conda environment: {env_name}")
 
-            subprocess.run([
-                "conda", "create", "-n", env_name,
-                "python=3.11", "-y"
-            ])
+            subprocess.run(["conda", "create", "-n", env_name, "python=3.11", "-y"])
 
             console.print(f"[green]✓[/green] Created conda environment: {env_name}")
             console.print(f"\n[cyan]Activate with:[/cyan] conda activate {env_name}")
@@ -73,9 +72,9 @@ def install_dependencies():
     console.print("\n[yellow]Installing dependencies...[/yellow]")
 
     if Path("requirements.txt").exists():
-        subprocess.run([
-            sys.executable, "-m", "pip", "install", "-r", "requirements.txt"
-        ])
+        subprocess.run(
+            [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"]
+        )
         console.print("[green]✓[/green] Dependencies installed")
     else:
         console.print("[red]requirements.txt not found![/red]")
@@ -98,7 +97,9 @@ def configure_environment():
 
     # AWS RDS Configuration
     console.print("\n[cyan]AWS RDS PostgreSQL Configuration:[/cyan]")
-    env_config["RDS_HOST"] = Prompt.ask("RDS Host", default="nba-sim-db.xxxxx.us-east-1.rds.amazonaws.com")
+    env_config["RDS_HOST"] = Prompt.ask(
+        "RDS Host", default="nba-sim-db.xxxxx.us-east-1.rds.amazonaws.com"
+    )
     env_config["RDS_DATABASE"] = Prompt.ask("Database name", default="nba_simulator")
     env_config["RDS_USERNAME"] = Prompt.ask("Username", default="postgres")
     env_config["RDS_PASSWORD"] = Prompt.ask("Password", password=True)
@@ -116,9 +117,15 @@ def configure_environment():
 
     # API Keys
     console.print("\n[cyan]AI Model API Keys:[/cyan]")
-    env_config["ANTHROPIC_API_KEY"] = Prompt.ask("Anthropic API Key (Claude)", password=True, default="")
-    env_config["OPENAI_API_KEY"] = Prompt.ask("OpenAI API Key (GPT-4o)", password=True, default="")
-    env_config["GOOGLE_API_KEY"] = Prompt.ask("Google API Key (Gemini)", password=True, default="")
+    env_config["ANTHROPIC_API_KEY"] = Prompt.ask(
+        "Anthropic API Key (Claude)", password=True, default=""
+    )
+    env_config["OPENAI_API_KEY"] = Prompt.ask(
+        "OpenAI API Key (GPT-4o)", password=True, default=""
+    )
+    env_config["GOOGLE_API_KEY"] = Prompt.ask(
+        "Google API Key (Gemini)", password=True, default=""
+    )
 
     # Optional Slack
     if Confirm.ask("\nConfigure Slack notifications?", default=False):
@@ -157,7 +164,9 @@ def configure_environment():
         # Project
         f.write("# Project Paths\n")
         f.write(f"PROJECT_ROOT={env_config['PROJECT_ROOT']}\n")
-        f.write(f"SYNTHESIS_OUTPUT_DIR={env_config['PROJECT_ROOT']}/synthesis_output\n\n")
+        f.write(
+            f"SYNTHESIS_OUTPUT_DIR={env_config['PROJECT_ROOT']}/synthesis_output\n\n"
+        )
 
         # API Keys
         f.write("# AI Model API Keys\n")
@@ -206,7 +215,7 @@ def create_directories():
         "synthesis/config",
         "tests/fixtures",
         "docs",
-        "examples"
+        "examples",
     ]
 
     for dir_path in directories:
@@ -230,7 +239,7 @@ def setup_pycharm_tool():
         "description": "Synthesize code using 4 AI models with NBA project context",
         "program": str(python_path),
         "arguments": f'"{wrapper_path}" "$FilePath$" "$SelectedText$" "$Prompt$"',
-        "workingDirectory": "$ProjectFileDir$"
+        "workingDirectory": "$ProjectFileDir$",
     }
 
     # Save configuration
@@ -240,7 +249,9 @@ def setup_pycharm_tool():
     with open(config_file, "w") as f:
         json.dump(config, f, indent=2)
 
-    console.print("[green]✓[/green] PyCharm configuration saved to docs/pycharm_tool_config.json")
+    console.print(
+        "[green]✓[/green] PyCharm configuration saved to docs/pycharm_tool_config.json"
+    )
 
     console.print("\n[cyan]To add to PyCharm:[/cyan]")
     console.print("1. Open PyCharm Settings → Tools → External Tools")
@@ -264,7 +275,9 @@ def test_connections():
         if result.returncode == 0:
             console.print("[green]✓[/green] Connection tests passed")
         else:
-            console.print("[yellow]⚠[/yellow] Some connections failed (check configuration)")
+            console.print(
+                "[yellow]⚠[/yellow] Some connections failed (check configuration)"
+            )
     else:
         console.print("[yellow]Test script not found[/yellow]")
 
@@ -282,7 +295,7 @@ def main():
         ("Configuring environment", configure_environment),
         ("Creating directories", create_directories),
         ("Setting up PyCharm tool", setup_pycharm_tool),
-        ("Testing connections", test_connections)
+        ("Testing connections", test_connections),
     ]
 
     failed = False
@@ -301,7 +314,7 @@ def main():
                 break
 
     # Final summary
-    console.print("\n" + "="*50)
+    console.print("\n" + "=" * 50)
     if not failed:
         console.print("[bold green]✅ Setup Complete![/bold green]")
         console.print("\n[cyan]Next steps:[/cyan]")

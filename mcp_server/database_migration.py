@@ -38,6 +38,7 @@ logger = logging.getLogger(__name__)
 
 class MigrationStatus(Enum):
     """Migration execution status"""
+
     PENDING = "pending"
     RUNNING = "running"
     SUCCESS = "success"
@@ -47,14 +48,16 @@ class MigrationStatus(Enum):
 
 class MigrationType(Enum):
     """Type of migration"""
+
     SCHEMA = "schema"  # DDL operations
-    DATA = "data"      # DML operations
+    DATA = "data"  # DML operations
     HYBRID = "hybrid"  # Both DDL and DML
 
 
 @dataclass
 class Migration:
     """Migration definition"""
+
     version: str
     name: str
     migration_type: MigrationType
@@ -75,13 +78,13 @@ class Migration:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'version': self.version,
-            'name': self.name,
-            'migration_type': self.migration_type.value,
-            'description': self.description,
-            'checksum': self.checksum,
-            'applied_at': self.applied_at.isoformat() if self.applied_at else None,
-            'status': self.status.value
+            "version": self.version,
+            "name": self.name,
+            "migration_type": self.migration_type.value,
+            "description": self.description,
+            "checksum": self.checksum,
+            "applied_at": self.applied_at.isoformat() if self.applied_at else None,
+            "status": self.status.value,
         }
 
 
@@ -133,10 +136,13 @@ class MigrationManager:
             logger.info(f"Created migrations directory: {self.migrations_dir}")
             return
 
-        migration_files = sorted([
-            f for f in os.listdir(self.migrations_dir)
-            if f.endswith('.sql') or f.endswith('.py')
-        ])
+        migration_files = sorted(
+            [
+                f
+                for f in os.listdir(self.migrations_dir)
+                if f.endswith(".sql") or f.endswith(".py")
+            ]
+        )
 
         for filename in migration_files:
             filepath = os.path.join(self.migrations_dir, filename)
@@ -149,7 +155,7 @@ class MigrationManager:
     def _load_migration_file(self, filepath: str) -> Optional[Migration]:
         """Load single migration file"""
         try:
-            with open(filepath, 'r') as f:
+            with open(filepath, "r") as f:
                 content = f.read()
 
             # Parse migration file
@@ -163,37 +169,37 @@ class MigrationManager:
             # -- down:
             # DROP TABLE players;
 
-            lines = content.split('\n')
+            lines = content.split("\n")
             metadata = {}
             up_sql = []
             down_sql = []
             current_section = None
 
             for line in lines:
-                if line.startswith('-- version:'):
-                    metadata['version'] = line.split(':', 1)[1].strip()
-                elif line.startswith('-- name:'):
-                    metadata['name'] = line.split(':', 1)[1].strip()
-                elif line.startswith('-- type:'):
-                    metadata['type'] = line.split(':', 1)[1].strip()
-                elif line.startswith('-- description:'):
-                    metadata['description'] = line.split(':', 1)[1].strip()
-                elif line.startswith('-- up:'):
-                    current_section = 'up'
-                elif line.startswith('-- down:'):
-                    current_section = 'down'
-                elif current_section == 'up' and not line.startswith('--'):
+                if line.startswith("-- version:"):
+                    metadata["version"] = line.split(":", 1)[1].strip()
+                elif line.startswith("-- name:"):
+                    metadata["name"] = line.split(":", 1)[1].strip()
+                elif line.startswith("-- type:"):
+                    metadata["type"] = line.split(":", 1)[1].strip()
+                elif line.startswith("-- description:"):
+                    metadata["description"] = line.split(":", 1)[1].strip()
+                elif line.startswith("-- up:"):
+                    current_section = "up"
+                elif line.startswith("-- down:"):
+                    current_section = "down"
+                elif current_section == "up" and not line.startswith("--"):
                     up_sql.append(line)
-                elif current_section == 'down' and not line.startswith('--'):
+                elif current_section == "down" and not line.startswith("--"):
                     down_sql.append(line)
 
             return Migration(
-                version=metadata.get('version', '000'),
-                name=metadata.get('name', 'unnamed'),
-                migration_type=MigrationType(metadata.get('type', 'schema')),
-                up_sql='\n'.join(up_sql).strip(),
-                down_sql='\n'.join(down_sql).strip(),
-                description=metadata.get('description', '')
+                version=metadata.get("version", "000"),
+                name=metadata.get("name", "unnamed"),
+                migration_type=MigrationType(metadata.get("type", "schema")),
+                up_sql="\n".join(up_sql).strip(),
+                down_sql="\n".join(down_sql).strip(),
+                description=metadata.get("description", ""),
             )
         except Exception as e:
             logger.error(f"Failed to load migration from {filepath}: {e}")
@@ -216,7 +222,7 @@ class MigrationManager:
 
     def get_pending_migrations(self) -> List[Migration]:
         """Get list of pending migrations"""
-        applied = {m['version'] for m in self.get_applied_migrations()}
+        applied = {m["version"] for m in self.get_applied_migrations()}
         return [m for m in self.migrations if m.version not in applied]
 
     def apply_migration(self, migration: Migration) -> bool:
@@ -242,16 +248,19 @@ class MigrationManager:
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """
 
-            self.db.execute(insert_sql, (
-                migration.version,
-                migration.name,
-                migration.migration_type.value,
-                migration.description,
-                migration.checksum,
-                end_time,
-                MigrationStatus.SUCCESS.value,
-                execution_time_ms
-            ))
+            self.db.execute(
+                insert_sql,
+                (
+                    migration.version,
+                    migration.name,
+                    migration.migration_type.value,
+                    migration.description,
+                    migration.checksum,
+                    end_time,
+                    MigrationStatus.SUCCESS.value,
+                    execution_time_ms,
+                ),
+            )
 
             # Commit transaction
             self.db.commit()
@@ -259,7 +268,9 @@ class MigrationManager:
             migration.applied_at = end_time
             migration.status = MigrationStatus.SUCCESS
 
-            logger.info(f"Migration {migration.version} applied successfully in {execution_time_ms}ms")
+            logger.info(
+                f"Migration {migration.version} applied successfully in {execution_time_ms}ms"
+            )
             return True
 
         except Exception as e:
@@ -273,15 +284,18 @@ class MigrationManager:
             """
 
             try:
-                self.db.execute(error_insert, (
-                    migration.version,
-                    migration.name,
-                    migration.migration_type.value,
-                    migration.description,
-                    migration.checksum,
-                    MigrationStatus.FAILED.value,
-                    str(e)
-                ))
+                self.db.execute(
+                    error_insert,
+                    (
+                        migration.version,
+                        migration.name,
+                        migration.migration_type.value,
+                        migration.description,
+                        migration.checksum,
+                        MigrationStatus.FAILED.value,
+                        str(e),
+                    ),
+                )
                 self.db.commit()
             except:
                 pass
@@ -351,8 +365,12 @@ class MigrationManager:
         for migration_record in reversed(to_rollback):
             # Find migration object
             migration = next(
-                (m for m in self.migrations if m.version == migration_record['version']),
-                None
+                (
+                    m
+                    for m in self.migrations
+                    if m.version == migration_record["version"]
+                ),
+                None,
             )
 
             if not migration:
@@ -372,15 +390,21 @@ class MigrationManager:
         for applied_migration in applied:
             # Find corresponding migration file
             migration = next(
-                (m for m in self.migrations if m.version == applied_migration['version']),
-                None
+                (
+                    m
+                    for m in self.migrations
+                    if m.version == applied_migration["version"]
+                ),
+                None,
             )
 
             if not migration:
-                logger.error(f"Migration {applied_migration['version']} is applied but file not found")
+                logger.error(
+                    f"Migration {applied_migration['version']} is applied but file not found"
+                )
                 return False
 
-            if migration.checksum != applied_migration['checksum']:
+            if migration.checksum != applied_migration["checksum"]:
                 logger.error(f"Migration {migration.version} checksum mismatch!")
                 logger.error(f"Expected: {applied_migration['checksum']}")
                 logger.error(f"Found: {migration.checksum}")
@@ -395,7 +419,7 @@ class MigrationManager:
         up_sql: str,
         down_sql: str,
         migration_type: MigrationType = MigrationType.SCHEMA,
-        description: str = ""
+        description: str = "",
     ) -> str:
         """Generate a new migration file"""
         # Get next version number
@@ -419,7 +443,7 @@ class MigrationManager:
         filename = f"{next_version}_{name}.sql"
         filepath = os.path.join(self.migrations_dir, filename)
 
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             f.write(content)
 
         logger.info(f"Generated migration: {filepath}")
@@ -452,7 +476,7 @@ def create_nba_migrations(manager: MigrationManager) -> None:
         """,
         down_sql="DROP TABLE players;",
         migration_type=MigrationType.SCHEMA,
-        description="Create initial players table with indexes"
+        description="Create initial players table with indexes",
     )
 
     # Migration 2: Add player stats
@@ -469,7 +493,7 @@ def create_nba_migrations(manager: MigrationManager) -> None:
         ALTER TABLE players DROP COLUMN apg;
         """,
         migration_type=MigrationType.SCHEMA,
-        description="Add basic stats columns to players table"
+        description="Add basic stats columns to players table",
     )
 
 
@@ -480,10 +504,17 @@ if __name__ == "__main__":
 
     # Mock database connection
     class MockDB:
-        def execute(self, sql, params=None): pass
-        def commit(self): pass
-        def rollback(self): pass
-        def begin(self): pass
+        def execute(self, sql, params=None):
+            pass
+
+        def commit(self):
+            pass
+
+        def rollback(self):
+            pass
+
+        def begin(self):
+            pass
 
     manager = MigrationManager(MockDB())
 
@@ -498,4 +529,3 @@ if __name__ == "__main__":
     print("\nPending migrations:")
     for migration in manager.get_pending_migrations():
         print(f"  - {migration.version}: {migration.name}")
-

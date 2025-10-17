@@ -40,6 +40,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class FunctionDoc:
     """Function documentation"""
+
     name: str
     signature: str
     docstring: Optional[str]
@@ -51,6 +52,7 @@ class FunctionDoc:
 @dataclass
 class ClassDoc:
     """Class documentation"""
+
     name: str
     docstring: Optional[str]
     methods: List[FunctionDoc]
@@ -60,6 +62,7 @@ class ClassDoc:
 @dataclass
 class ModuleDoc:
     """Module documentation"""
+
     name: str
     filepath: str
     docstring: Optional[str]
@@ -73,7 +76,7 @@ class CodeAnalyzer:
 
     def analyze_file(self, filepath: str) -> ModuleDoc:
         """Analyze a Python file"""
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             content = f.read()
 
         tree = ast.parse(content)
@@ -84,7 +87,7 @@ class CodeAnalyzer:
             docstring=ast.get_docstring(tree),
             classes=[],
             functions=[],
-            imports=[]
+            imports=[],
         )
 
         for node in ast.walk(tree):
@@ -122,14 +125,16 @@ class CodeAnalyzer:
                 # Class attributes
                 if isinstance(item.target, ast.Name):
                     attr_name = item.target.id
-                    attr_type = ast.unparse(item.annotation) if item.annotation else "Any"
-                    attributes.append({'name': attr_name, 'type': attr_type})
+                    attr_type = (
+                        ast.unparse(item.annotation) if item.annotation else "Any"
+                    )
+                    attributes.append({"name": attr_name, "type": attr_type})
 
         return ClassDoc(
             name=node.name,
             docstring=ast.get_docstring(node),
             methods=methods,
-            attributes=attributes
+            attributes=attributes,
         )
 
     def _analyze_function(self, node: ast.FunctionDef) -> FunctionDoc:
@@ -139,7 +144,7 @@ class CodeAnalyzer:
         for arg in node.args.args:
             param_name = arg.arg
             param_type = ast.unparse(arg.annotation) if arg.annotation else "Any"
-            parameters.append({'name': param_name, 'type': param_type})
+            parameters.append({"name": param_name, "type": param_type})
 
         # Extract return type
         returns = None
@@ -158,7 +163,7 @@ class CodeAnalyzer:
             docstring=docstring,
             parameters=parameters,
             returns=returns,
-            examples=examples
+            examples=examples,
         )
 
     def _extract_examples(self, docstring: str) -> List[str]:
@@ -167,21 +172,21 @@ class CodeAnalyzer:
         in_example = False
         current_example = []
 
-        for line in docstring.split('\n'):
-            if 'Example:' in line or 'Examples:' in line:
+        for line in docstring.split("\n"):
+            if "Example:" in line or "Examples:" in line:
                 in_example = True
                 continue
 
             if in_example:
-                if line.strip().startswith('>>>') or line.strip().startswith('...'):
+                if line.strip().startswith(">>>") or line.strip().startswith("..."):
                     current_example.append(line.strip())
-                elif current_example and line.strip() == '':
-                    examples.append('\n'.join(current_example))
+                elif current_example and line.strip() == "":
+                    examples.append("\n".join(current_example))
                     current_example = []
                     in_example = False
 
         if current_example:
-            examples.append('\n'.join(current_example))
+            examples.append("\n".join(current_example))
 
         return examples
 
@@ -226,7 +231,7 @@ class MarkdownGenerator:
             for func in module_doc.functions:
                 lines.extend(self._generate_function_docs(func))
 
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
     def _generate_class_docs(self, class_doc: ClassDoc) -> List[str]:
         """Generate documentation for a class"""
@@ -253,13 +258,13 @@ class MarkdownGenerator:
             lines.append("")
 
             for method in class_doc.methods:
-                if not method.name.startswith('_'):  # Skip private methods
+                if not method.name.startswith("_"):  # Skip private methods
                     lines.append(f"#### `{method.signature}`")
                     lines.append("")
 
                     if method.docstring:
                         # First line of docstring
-                        first_line = method.docstring.split('\n')[0]
+                        first_line = method.docstring.split("\n")[0]
                         lines.append(first_line)
                         lines.append("")
 
@@ -306,38 +311,29 @@ class APIDocGenerator:
     """Generate API documentation"""
 
     def generate_openapi_spec(
-        self,
-        title: str,
-        version: str,
-        endpoints: List[Dict[str, Any]]
+        self, title: str, version: str, endpoints: List[Dict[str, Any]]
     ) -> Dict[str, Any]:
         """Generate OpenAPI 3.0 specification"""
 
         spec = {
             "openapi": "3.0.0",
-            "info": {
-                "title": title,
-                "version": version,
-                "description": "NBA MCP API"
-            },
-            "servers": [
-                {"url": "https://api.nba-mcp.com/v1"}
-            ],
-            "paths": {}
+            "info": {"title": title, "version": version, "description": "NBA MCP API"},
+            "servers": [{"url": "https://api.nba-mcp.com/v1"}],
+            "paths": {},
         }
 
         for endpoint in endpoints:
-            path = endpoint['path']
-            method = endpoint['method'].lower()
+            path = endpoint["path"]
+            method = endpoint["method"].lower()
 
-            spec['paths'][path] = {
+            spec["paths"][path] = {
                 method: {
-                    "summary": endpoint.get('summary', ''),
-                    "description": endpoint.get('description', ''),
-                    "parameters": endpoint.get('parameters', []),
-                    "responses": endpoint.get('responses', {
-                        "200": {"description": "Successful response"}
-                    })
+                    "summary": endpoint.get("summary", ""),
+                    "description": endpoint.get("description", ""),
+                    "parameters": endpoint.get("parameters", []),
+                    "responses": endpoint.get(
+                        "responses", {"200": {"description": "Successful response"}}
+                    ),
                 }
             }
 
@@ -345,79 +341,74 @@ class APIDocGenerator:
 
     def generate_api_markdown(self, endpoints: List[Dict[str, Any]]) -> str:
         """Generate API documentation in Markdown"""
-        lines = [
-            "# API Documentation",
-            "",
-            "## Endpoints",
-            ""
-        ]
+        lines = ["# API Documentation", "", "## Endpoints", ""]
 
         for endpoint in endpoints:
             lines.append(f"### {endpoint['method']} {endpoint['path']}")
             lines.append("")
 
-            if 'description' in endpoint:
-                lines.append(endpoint['description'])
+            if "description" in endpoint:
+                lines.append(endpoint["description"])
                 lines.append("")
 
             # Parameters
-            if 'parameters' in endpoint:
+            if "parameters" in endpoint:
                 lines.append("**Parameters:**")
                 lines.append("")
-                for param in endpoint['parameters']:
-                    lines.append(f"- `{param['name']}` ({param.get('type', 'string')}): {param.get('description', '')}")
+                for param in endpoint["parameters"]:
+                    lines.append(
+                        f"- `{param['name']}` ({param.get('type', 'string')}): {param.get('description', '')}"
+                    )
                 lines.append("")
 
             # Example request
-            if 'example_request' in endpoint:
+            if "example_request" in endpoint:
                 lines.append("**Example Request:**")
                 lines.append("")
                 lines.append("```bash")
-                lines.append(endpoint['example_request'])
+                lines.append(endpoint["example_request"])
                 lines.append("```")
                 lines.append("")
 
             # Example response
-            if 'example_response' in endpoint:
+            if "example_response" in endpoint:
                 lines.append("**Example Response:**")
                 lines.append("")
                 lines.append("```json")
-                lines.append(json.dumps(endpoint['example_response'], indent=2))
+                lines.append(json.dumps(endpoint["example_response"], indent=2))
                 lines.append("```")
                 lines.append("")
 
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
 
 class ArchitectureDiagrammer:
     """Generate architecture diagrams"""
 
     def generate_mermaid_diagram(
-        self,
-        components: List[Dict[str, Any]],
-        connections: List[Dict[str, str]]
+        self, components: List[Dict[str, Any]], connections: List[Dict[str, str]]
     ) -> str:
         """Generate Mermaid diagram"""
         lines = ["```mermaid", "graph TD"]
 
         # Components
         for comp in components:
-            comp_id = comp['id']
-            comp_name = comp['name']
-            comp_type = comp.get('type', 'component')
+            comp_id = comp["id"]
+            comp_name = comp["name"]
+            comp_type = comp.get("type", "component")
 
-            if comp_type == 'database':
+            if comp_type == "database":
                 lines.append(f"    {comp_id}[({comp_name})]")
-            elif comp_type == 'service':
+            elif comp_type == "service":
                 lines.append(f"    {comp_id}[{comp_name}]")
-            elif comp_type == 'external':
+            elif comp_type == "external":
                 lines.append(f"    {comp_id}{{{comp_name}}}")
 
         # Connections
         for conn in connections:
-            from_id = conn['from']
-            to_id = conn['to']
-            label = conn.get('label', '')
+            from_id = conn["from"]
+            to_id = conn["to"]
+            label = conn.get("label", "")
 
             if label:
                 lines.append(f"    {from_id} -->|{label}| {to_id}")
@@ -425,24 +416,24 @@ class ArchitectureDiagrammer:
                 lines.append(f"    {from_id} --> {to_id}")
 
         lines.append("```")
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
     def generate_sequence_diagram(self, interactions: List[Dict[str, str]]) -> str:
         """Generate Mermaid sequence diagram"""
         lines = ["```mermaid", "sequenceDiagram"]
 
         for interaction in interactions:
-            actor = interaction['from']
-            target = interaction['to']
-            message = interaction['message']
+            actor = interaction["from"]
+            target = interaction["to"]
+            message = interaction["message"]
 
             lines.append(f"    {actor}->>+{target}: {message}")
 
-            if 'response' in interaction:
+            if "response" in interaction:
                 lines.append(f"    {target}-->>-{actor}: {interaction['response']}")
 
         lines.append("```")
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
 
 class DocumentationGenerator:
@@ -462,7 +453,7 @@ class DocumentationGenerator:
         source_path = Path(source_dir)
 
         for filepath in source_path.rglob(pattern):
-            if '__pycache__' in str(filepath) or 'test_' in filepath.name:
+            if "__pycache__" in str(filepath) or "test_" in filepath.name:
                 continue
 
             try:
@@ -471,7 +462,7 @@ class DocumentationGenerator:
 
                 # Write to output
                 output_file = self.output_dir / f"{module_doc.name}.md"
-                with open(output_file, 'w') as f:
+                with open(output_file, "w") as f:
                     f.write(markdown)
 
                 logger.info(f"Generated docs for {module_doc.name}")
@@ -483,31 +474,27 @@ class DocumentationGenerator:
         # Markdown
         markdown = self.api_gen.generate_api_markdown(endpoints)
         output_file = self.output_dir / "API.md"
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             f.write(markdown)
 
         # OpenAPI spec
         spec = self.api_gen.generate_openapi_spec(
-            title="NBA MCP API",
-            version="1.0.0",
-            endpoints=endpoints
+            title="NBA MCP API", version="1.0.0", endpoints=endpoints
         )
         spec_file = self.output_dir / "openapi.json"
-        with open(spec_file, 'w') as f:
+        with open(spec_file, "w") as f:
             json.dump(spec, f, indent=2)
 
         logger.info("Generated API documentation")
 
     def generate_architecture_docs(
-        self,
-        components: List[Dict[str, Any]],
-        connections: List[Dict[str, str]]
+        self, components: List[Dict[str, Any]], connections: List[Dict[str, str]]
     ) -> None:
         """Generate architecture documentation"""
         diagram = self.diagram_gen.generate_mermaid_diagram(components, connections)
 
         output_file = self.output_dir / "ARCHITECTURE.md"
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             f.write("# System Architecture\n\n")
             f.write(diagram)
 
@@ -529,14 +516,14 @@ if __name__ == "__main__":
         {"id": "B", "name": "PostgreSQL", "type": "database"},
         {"id": "C", "name": "S3", "type": "database"},
         {"id": "D", "name": "Redis", "type": "database"},
-        {"id": "E", "name": "Client", "type": "external"}
+        {"id": "E", "name": "Client", "type": "external"},
     ]
 
     connections = [
         {"from": "E", "to": "A", "label": "API Request"},
         {"from": "A", "to": "B", "label": "Query"},
         {"from": "A", "to": "C", "label": "Read/Write"},
-        {"from": "A", "to": "D", "label": "Cache"}
+        {"from": "A", "to": "D", "label": "Cache"},
     ]
 
     doc_gen.generate_architecture_docs(components, connections)
@@ -551,11 +538,19 @@ if __name__ == "__main__":
             "summary": "List players",
             "description": "Get list of NBA players with pagination",
             "parameters": [
-                {"name": "limit", "type": "integer", "description": "Max results (default: 50)"},
-                {"name": "offset", "type": "integer", "description": "Pagination offset"}
+                {
+                    "name": "limit",
+                    "type": "integer",
+                    "description": "Max results (default: 50)",
+                },
+                {
+                    "name": "offset",
+                    "type": "integer",
+                    "description": "Pagination offset",
+                },
             ],
             "example_request": "curl https://api.nba-mcp.com/v1/api/players?limit=10",
-            "example_response": {"players": [{"id": 1, "name": "LeBron James"}]}
+            "example_response": {"players": [{"id": 1, "name": "LeBron James"}]},
         }
     ]
 
@@ -564,4 +559,3 @@ if __name__ == "__main__":
 
     print("\n=== Documentation Generated ===")
     print(f"Output directory: {doc_gen.output_dir}")
-

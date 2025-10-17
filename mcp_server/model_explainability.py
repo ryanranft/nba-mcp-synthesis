@@ -1,4 +1,5 @@
 """Model Explainability - BOOK RECOMMENDATION 5 & IMPORTANT"""
+
 import numpy as np
 from typing import Dict, List, Any, Optional, Union
 import logging
@@ -29,19 +30,18 @@ class SHAPExplainer:
             import shap
 
             # Auto-detect model type and create appropriate explainer
-            if hasattr(self.model, 'predict_proba'):
+            if hasattr(self.model, "predict_proba"):
                 # Tree-based models
                 self.explainer = shap.TreeExplainer(self.model)
                 logger.info("✅ Using TreeExplainer")
-            elif hasattr(self.model, 'coef_'):
+            elif hasattr(self.model, "coef_"):
                 # Linear models
                 self.explainer = shap.LinearExplainer(self.model, self.background_data)
                 logger.info("✅ Using LinearExplainer")
             else:
                 # Deep learning or other models
                 self.explainer = shap.KernelExplainer(
-                    self.model.predict,
-                    self.background_data
+                    self.model.predict, self.background_data
                 )
                 logger.info("✅ Using KernelExplainer")
         except ImportError:
@@ -51,7 +51,7 @@ class SHAPExplainer:
     def explain_prediction(
         self,
         X: Union[np.ndarray, pd.DataFrame],
-        feature_names: Optional[List[str]] = None
+        feature_names: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Explain a single prediction
@@ -72,7 +72,7 @@ class SHAPExplainer:
         shap_values = self.explainer.shap_values(X)
 
         # Get prediction
-        if hasattr(self.model, 'predict_proba'):
+        if hasattr(self.model, "predict_proba"):
             prediction = self.model.predict_proba(X)[0]
         else:
             prediction = self.model.predict(X)[0]
@@ -83,7 +83,9 @@ class SHAPExplainer:
             X_values = X.values[0]
         else:
             X_values = X[0] if len(X.shape) > 1 else X
-            feature_names = feature_names or [f"feature_{i}" for i in range(len(X_values))]
+            feature_names = feature_names or [
+                f"feature_{i}" for i in range(len(X_values))
+            ]
 
         # Get top contributing features
         if isinstance(shap_values, list):
@@ -93,26 +95,30 @@ class SHAPExplainer:
         contributions.sort(key=lambda x: abs(x[2]), reverse=True)
 
         return {
-            "prediction": float(prediction) if isinstance(prediction, np.ndarray) else prediction,
+            "prediction": (
+                float(prediction) if isinstance(prediction, np.ndarray) else prediction
+            ),
             "top_features": [
                 {
                     "feature": name,
                     "value": float(value),
                     "contribution": float(contrib),
-                    "impact": "positive" if contrib > 0 else "negative"
+                    "impact": "positive" if contrib > 0 else "negative",
                 }
                 for name, value, contrib in contributions[:10]
             ],
-            "base_value": float(self.explainer.expected_value) if hasattr(self.explainer, 'expected_value') else 0.0
+            "base_value": (
+                float(self.explainer.expected_value)
+                if hasattr(self.explainer, "expected_value")
+                else 0.0
+            ),
         }
 
     def _simple_explanation(
-        self,
-        X: Union[np.ndarray, pd.DataFrame],
-        feature_names: Optional[List[str]]
+        self, X: Union[np.ndarray, pd.DataFrame], feature_names: Optional[List[str]]
     ) -> Dict[str, Any]:
         """Simplified explanation when SHAP is not available"""
-        if hasattr(self.model, 'feature_importances_'):
+        if hasattr(self.model, "feature_importances_"):
             # Tree-based models
             importances = self.model.feature_importances_
 
@@ -121,7 +127,9 @@ class SHAPExplainer:
                 X_values = X.values[0]
             else:
                 X_values = X[0] if len(X.shape) > 1 else X
-                feature_names = feature_names or [f"feature_{i}" for i in range(len(X_values))]
+                feature_names = feature_names or [
+                    f"feature_{i}" for i in range(len(X_values))
+                ]
 
             contributions = list(zip(feature_names, X_values, importances))
             contributions.sort(key=lambda x: abs(x[2]), reverse=True)
@@ -129,27 +137,37 @@ class SHAPExplainer:
             prediction = self.model.predict(X)[0]
 
             return {
-                "prediction": float(prediction) if isinstance(prediction, np.ndarray) else prediction,
+                "prediction": (
+                    float(prediction)
+                    if isinstance(prediction, np.ndarray)
+                    else prediction
+                ),
                 "top_features": [
                     {
                         "feature": name,
                         "value": float(value),
-                        "importance": float(importance)
+                        "importance": float(importance),
                     }
                     for name, value, importance in contributions[:10]
                 ],
-                "note": "Using feature importances (SHAP not available)"
+                "note": "Using feature importances (SHAP not available)",
             }
-        elif hasattr(self.model, 'coef_'):
+        elif hasattr(self.model, "coef_"):
             # Linear models
-            coefficients = self.model.coef_[0] if len(self.model.coef_.shape) > 1 else self.model.coef_
+            coefficients = (
+                self.model.coef_[0]
+                if len(self.model.coef_.shape) > 1
+                else self.model.coef_
+            )
 
             if isinstance(X, pd.DataFrame):
                 feature_names = X.columns.tolist()
                 X_values = X.values[0]
             else:
                 X_values = X[0] if len(X.shape) > 1 else X
-                feature_names = feature_names or [f"feature_{i}" for i in range(len(X_values))]
+                feature_names = feature_names or [
+                    f"feature_{i}" for i in range(len(X_values))
+                ]
 
             contributions = list(zip(feature_names, X_values, coefficients))
             contributions.sort(key=lambda x: abs(x[2]), reverse=True)
@@ -157,22 +175,26 @@ class SHAPExplainer:
             prediction = self.model.predict(X)[0]
 
             return {
-                "prediction": float(prediction) if isinstance(prediction, np.ndarray) else prediction,
+                "prediction": (
+                    float(prediction)
+                    if isinstance(prediction, np.ndarray)
+                    else prediction
+                ),
                 "top_features": [
                     {
                         "feature": name,
                         "value": float(value),
                         "coefficient": float(coef),
-                        "contribution": float(value * coef)
+                        "contribution": float(value * coef),
                     }
                     for name, value, coef in contributions[:10]
                 ],
-                "note": "Using linear coefficients (SHAP not available)"
+                "note": "Using linear coefficients (SHAP not available)",
             }
         else:
             return {
                 "prediction": "unknown",
-                "error": "Model explainability not supported for this model type"
+                "error": "Model explainability not supported for this model type",
             }
 
 
@@ -192,19 +214,20 @@ class FeatureImportanceAnalyzer:
         Returns:
             DataFrame with feature importances
         """
-        if hasattr(self.model, 'feature_importances_'):
+        if hasattr(self.model, "feature_importances_"):
             importances = self.model.feature_importances_
-        elif hasattr(self.model, 'coef_'):
-            importances = np.abs(self.model.coef_[0] if len(self.model.coef_.shape) > 1 else self.model.coef_)
+        elif hasattr(self.model, "coef_"):
+            importances = np.abs(
+                self.model.coef_[0]
+                if len(self.model.coef_.shape) > 1
+                else self.model.coef_
+            )
         else:
             logger.error("❌ Model does not support feature importance")
             return pd.DataFrame()
 
-        df = pd.DataFrame({
-            'feature': feature_names,
-            'importance': importances
-        })
-        df = df.sort_values('importance', ascending=False)
+        df = pd.DataFrame({"feature": feature_names, "importance": importances})
+        df = df.sort_values("importance", ascending=False)
 
         return df
 
@@ -217,9 +240,9 @@ class FeatureImportanceAnalyzer:
             df_top = df.head(top_n)
 
             plt.figure(figsize=(10, 8))
-            plt.barh(df_top['feature'], df_top['importance'])
-            plt.xlabel('Importance')
-            plt.title(f'Top {top_n} Feature Importances')
+            plt.barh(df_top["feature"], df_top["importance"])
+            plt.xlabel("Importance")
+            plt.title(f"Top {top_n} Feature Importances")
             plt.tight_layout()
 
             return plt
@@ -239,7 +262,7 @@ class ModelExplainer:
     def explain(
         self,
         X: Union[np.ndarray, pd.DataFrame],
-        feature_names: Optional[List[str]] = None
+        feature_names: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Explain prediction with all available methods
@@ -255,15 +278,19 @@ class ModelExplainer:
 
         # Add global importance
         if feature_names:
-            global_importance = self.importance_analyzer.get_global_importance(feature_names)
-            explanation['global_feature_importance'] = global_importance.to_dict('records')[:10]
+            global_importance = self.importance_analyzer.get_global_importance(
+                feature_names
+            )
+            explanation["global_feature_importance"] = global_importance.to_dict(
+                "records"
+            )[:10]
 
         return explanation
 
     def generate_report(
         self,
         X: Union[np.ndarray, pd.DataFrame],
-        feature_names: Optional[List[str]] = None
+        feature_names: Optional[List[str]] = None,
     ) -> str:
         """Generate human-readable explanation report"""
         explanation = self.explain(X, feature_names)
@@ -277,11 +304,11 @@ class ModelExplainer:
 🎯 Top Contributing Features:
 """
 
-        for i, feature in enumerate(explanation['top_features'][:5], 1):
-            impact = "📈" if feature.get('impact') == 'positive' else "📉"
+        for i, feature in enumerate(explanation["top_features"][:5], 1):
+            impact = "📈" if feature.get("impact") == "positive" else "📉"
             report += f"\n{i}. {impact} {feature['feature']}"
             report += f"\n   Value: {feature['value']:.4f}"
-            if 'contribution' in feature:
+            if "contribution" in feature:
                 report += f"\n   Contribution: {feature['contribution']:.4f}"
 
         report += f"\n\n{'='*60}\n"
@@ -305,7 +332,7 @@ if __name__ == "__main__":
 
     # Explain a prediction
     X_test = np.random.randn(1, 5)
-    feature_names = ['points', 'assists', 'rebounds', 'steals', 'blocks']
+    feature_names = ["points", "assists", "rebounds", "steals", "blocks"]
 
     explanation = explainer.explain(X_test, feature_names)
     print(explanation)
@@ -313,4 +340,3 @@ if __name__ == "__main__":
     # Generate report
     report = explainer.generate_report(X_test, feature_names)
     print(report)
-

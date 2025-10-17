@@ -17,6 +17,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 # Load environment
 load_dotenv()
 
+from mcp_server.env_helper import get_hierarchical_env
+
 # Create FastMCP server
 mcp = FastMCP("nba-mcp-server")
 
@@ -35,11 +37,17 @@ async def query_database(sql: str) -> dict:
     from mcp_server.connectors.rds_connector import RDSConnector
 
     connector = RDSConnector(
-        host=os.getenv('RDS_HOST'),
-        port=int(os.getenv('RDS_PORT', 5432)),
-        database=os.getenv('RDS_DATABASE'),
-        username=os.getenv('RDS_USERNAME'),
-        password=os.getenv('RDS_PASSWORD')
+        host=get_hierarchical_env("RDS_HOST", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+        or "localhost",
+        port=int(
+            get_hierarchical_env("RDS_PORT", "NBA_MCP_SYNTHESIS", "WORKFLOW") or "5432"
+        ),
+        database=get_hierarchical_env("RDS_DATABASE", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+        or "nba_stats",
+        username=get_hierarchical_env("RDS_USERNAME", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+        or "postgres",
+        password=get_hierarchical_env("RDS_PASSWORD", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+        or "",
     )
 
     result = await connector.execute_query(sql, max_rows=100)
@@ -54,11 +62,17 @@ async def list_tables() -> dict:
     from mcp_server.connectors.rds_connector import RDSConnector
 
     connector = RDSConnector(
-        host=os.getenv('RDS_HOST'),
-        port=int(os.getenv('RDS_PORT', 5432)),
-        database=os.getenv('RDS_DATABASE'),
-        username=os.getenv('RDS_USERNAME'),
-        password=os.getenv('RDS_PASSWORD')
+        host=get_hierarchical_env("RDS_HOST", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+        or "localhost",
+        port=int(
+            get_hierarchical_env("RDS_PORT", "NBA_MCP_SYNTHESIS", "WORKFLOW") or "5432"
+        ),
+        database=get_hierarchical_env("RDS_DATABASE", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+        or "nba_stats",
+        username=get_hierarchical_env("RDS_USERNAME", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+        or "postgres",
+        password=get_hierarchical_env("RDS_PASSWORD", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+        or "",
     )
 
     tables = await connector.list_tables()
@@ -81,11 +95,17 @@ async def get_table_schema(table_name: str) -> dict:
     from mcp_server.connectors.rds_connector import RDSConnector
 
     connector = RDSConnector(
-        host=os.getenv('RDS_HOST'),
-        port=int(os.getenv('RDS_PORT', 5432)),
-        database=os.getenv('RDS_DATABASE'),
-        username=os.getenv('RDS_USERNAME'),
-        password=os.getenv('RDS_PASSWORD')
+        host=get_hierarchical_env("RDS_HOST", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+        or "localhost",
+        port=int(
+            get_hierarchical_env("RDS_PORT", "NBA_MCP_SYNTHESIS", "WORKFLOW") or "5432"
+        ),
+        database=get_hierarchical_env("RDS_DATABASE", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+        or "nba_stats",
+        username=get_hierarchical_env("RDS_USERNAME", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+        or "postgres",
+        password=get_hierarchical_env("RDS_PASSWORD", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+        or "",
     )
 
     schema = await connector.get_table_schema(table_name)
@@ -109,8 +129,7 @@ async def list_s3_files(prefix: str = "", max_keys: int = 100) -> dict:
     from mcp_server.connectors.s3_connector import S3Connector
 
     connector = S3Connector(
-        bucket_name=os.getenv('S3_BUCKET'),
-        region=os.getenv('S3_REGION', 'us-east-1')
+        bucket_name=os.getenv("S3_BUCKET"), region=os.getenv("S3_REGION", "us-east-1")
     )
 
     result = await connector.list_files(prefix=prefix, max_keys=max_keys)
@@ -119,8 +138,12 @@ async def list_s3_files(prefix: str = "", max_keys: int = 100) -> dict:
 
 if __name__ == "__main__":
     print("🚀 Starting NBA MCP Server (Simple Mode)...")
-    print(f"📊 Database: {os.getenv('RDS_DATABASE')}")
-    print(f"🪣 S3 Bucket: {os.getenv('S3_BUCKET')}")
+    print(
+        f"📊 Database: {get_hierarchical_env('RDS_DATABASE', 'NBA_MCP_SYNTHESIS', 'WORKFLOW') or 'nba_stats'}"
+    )
+    print(
+        f"🪣 S3 Bucket: {get_hierarchical_env('S3_BUCKET', 'NBA_MCP_SYNTHESIS', 'WORKFLOW') or 'nba-mcp-books-20251011'}"
+    )
     print()
 
     mcp.run()

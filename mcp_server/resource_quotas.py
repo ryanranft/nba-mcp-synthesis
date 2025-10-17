@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 class ResourceType(Enum):
     """Types of resources that can be limited"""
+
     API_CALLS = "api_calls"
     STORAGE_GB = "storage_gb"
     COMPUTE_HOURS = "compute_hours"
@@ -25,6 +26,7 @@ class ResourceType(Enum):
 @dataclass
 class ResourceQuota:
     """Quota configuration for a resource"""
+
     resource_type: ResourceType
     limit: float
     period: str  # 'hour', 'day', 'month'
@@ -34,6 +36,7 @@ class ResourceQuota:
 
 class QuotaExceededException(Exception):
     """Raised when a resource quota is exceeded"""
+
     pass
 
 
@@ -48,46 +51,46 @@ class ResourceQuotaManager:
         self.tier_quotas = {
             "free": {
                 ResourceType.API_CALLS: ResourceQuota(
-                    ResourceType.API_CALLS, 1000, 'day'
+                    ResourceType.API_CALLS, 1000, "day"
                 ),
                 ResourceType.STORAGE_GB: ResourceQuota(
-                    ResourceType.STORAGE_GB, 1.0, 'month'
+                    ResourceType.STORAGE_GB, 1.0, "month"
                 ),
                 ResourceType.PREDICTIONS: ResourceQuota(
-                    ResourceType.PREDICTIONS, 100, 'hour'
+                    ResourceType.PREDICTIONS, 100, "hour"
                 ),
             },
             "basic": {
                 ResourceType.API_CALLS: ResourceQuota(
-                    ResourceType.API_CALLS, 10000, 'day'
+                    ResourceType.API_CALLS, 10000, "day"
                 ),
                 ResourceType.STORAGE_GB: ResourceQuota(
-                    ResourceType.STORAGE_GB, 10.0, 'month'
+                    ResourceType.STORAGE_GB, 10.0, "month"
                 ),
                 ResourceType.PREDICTIONS: ResourceQuota(
-                    ResourceType.PREDICTIONS, 1000, 'hour'
+                    ResourceType.PREDICTIONS, 1000, "hour"
                 ),
                 ResourceType.COMPUTE_HOURS: ResourceQuota(
-                    ResourceType.COMPUTE_HOURS, 10, 'month'
+                    ResourceType.COMPUTE_HOURS, 10, "month"
                 ),
             },
             "premium": {
                 ResourceType.API_CALLS: ResourceQuota(
-                    ResourceType.API_CALLS, 100000, 'day'
+                    ResourceType.API_CALLS, 100000, "day"
                 ),
                 ResourceType.STORAGE_GB: ResourceQuota(
-                    ResourceType.STORAGE_GB, 100.0, 'month'
+                    ResourceType.STORAGE_GB, 100.0, "month"
                 ),
                 ResourceType.PREDICTIONS: ResourceQuota(
-                    ResourceType.PREDICTIONS, 10000, 'hour'
+                    ResourceType.PREDICTIONS, 10000, "hour"
                 ),
                 ResourceType.COMPUTE_HOURS: ResourceQuota(
-                    ResourceType.COMPUTE_HOURS, 100, 'month'
+                    ResourceType.COMPUTE_HOURS, 100, "month"
                 ),
                 ResourceType.DATA_TRANSFER_GB: ResourceQuota(
-                    ResourceType.DATA_TRANSFER_GB, 500, 'month'
+                    ResourceType.DATA_TRANSFER_GB, 500, "month"
                 ),
-            }
+            },
         }
 
     def set_user_tier(self, user_id: str, tier: str):
@@ -109,30 +112,46 @@ class ResourceQuotaManager:
                 limit=quota.limit,
                 period=quota.period,
                 current_usage=0.0,
-                reset_at=self._calculate_reset_time(quota.period)
+                reset_at=self._calculate_reset_time(quota.period),
             )
 
-        logger.info(f"Set {user_id} to {tier} tier with {len(self.quotas[user_id])} quotas")
+        logger.info(
+            f"Set {user_id} to {tier} tier with {len(self.quotas[user_id])} quotas"
+        )
 
     def _calculate_reset_time(self, period: str) -> datetime:
         """Calculate when quota should reset"""
         now = datetime.utcnow()
-        if period == 'hour':
+        if period == "hour":
             return now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
-        elif period == 'day':
-            return (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-        elif period == 'month':
+        elif period == "day":
+            return (now + timedelta(days=1)).replace(
+                hour=0, minute=0, second=0, microsecond=0
+            )
+        elif period == "month":
             if now.month == 12:
-                return now.replace(year=now.year + 1, month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+                return now.replace(
+                    year=now.year + 1,
+                    month=1,
+                    day=1,
+                    hour=0,
+                    minute=0,
+                    second=0,
+                    microsecond=0,
+                )
             else:
-                return now.replace(month=now.month + 1, day=1, hour=0, minute=0, second=0, microsecond=0)
+                return now.replace(
+                    month=now.month + 1,
+                    day=1,
+                    hour=0,
+                    minute=0,
+                    second=0,
+                    microsecond=0,
+                )
         return now + timedelta(days=30)
 
     def check_and_consume(
-        self,
-        user_id: str,
-        resource_type: ResourceType,
-        amount: float = 1.0
+        self, user_id: str, resource_type: ResourceType, amount: float = 1.0
     ) -> bool:
         """
         Check if user has quota and consume it.
@@ -150,7 +169,7 @@ class ResourceQuotaManager:
         """
         # Initialize user if not exists (default to free tier)
         if user_id not in self.quotas:
-            self.set_user_tier(user_id, 'free')
+            self.set_user_tier(user_id, "free")
 
         # Check if resource type exists for user
         if resource_type not in self.quotas[user_id]:
@@ -200,9 +219,11 @@ class ResourceQuotaManager:
             usage[resource_type.value] = {
                 "current": quota.current_usage,
                 "limit": quota.limit,
-                "percentage": (quota.current_usage / quota.limit * 100) if quota.limit > 0 else 0,
+                "percentage": (
+                    (quota.current_usage / quota.limit * 100) if quota.limit > 0 else 0
+                ),
                 "period": quota.period,
-                "reset_at": quota.reset_at.isoformat() if quota.reset_at else None
+                "reset_at": quota.reset_at.isoformat() if quota.reset_at else None,
             }
 
         return usage
@@ -212,7 +233,7 @@ class ResourceQuotaManager:
         user_id: str,
         resource_type: ResourceType,
         limit: float,
-        period: str = 'month'
+        period: str = "month",
     ):
         """
         Set custom quota for a user.
@@ -231,17 +252,16 @@ class ResourceQuotaManager:
             limit=limit,
             period=period,
             current_usage=0.0,
-            reset_at=self._calculate_reset_time(period)
+            reset_at=self._calculate_reset_time(period),
         )
 
-        logger.info(f"Set custom quota for {user_id}: {resource_type.value}={limit}/{period}")
+        logger.info(
+            f"Set custom quota for {user_id}: {resource_type.value}={limit}/{period}"
+        )
 
     def get_all_users_usage(self) -> Dict[str, Dict]:
         """Get usage for all users"""
-        return {
-            user_id: self.get_usage(user_id)
-            for user_id in self.quotas.keys()
-        }
+        return {user_id: self.get_usage(user_id) for user_id in self.quotas.keys()}
 
 
 # Example usage
@@ -271,7 +291,9 @@ if __name__ == "__main__":
     usage = manager.get_usage("free_user")
     for resource, details in usage.items():
         print(f"\n{resource}:")
-        print(f"  Usage: {details['current']}/{details['limit']} ({details['percentage']:.1f}%)")
+        print(
+            f"  Usage: {details['current']}/{details['limit']} ({details['percentage']:.1f}%)"
+        )
         print(f"  Period: {details['period']}")
 
     # Simulate usage
@@ -284,7 +306,9 @@ if __name__ == "__main__":
             manager.check_and_consume("free_user", ResourceType.API_CALLS, 250)
             usage = manager.get_usage("free_user")
             api_usage = usage[ResourceType.API_CALLS.value]
-            print(f"✅ Batch {i+1}: {api_usage['current']}/{api_usage['limit']} API calls")
+            print(
+                f"✅ Batch {i+1}: {api_usage['current']}/{api_usage['limit']} API calls"
+            )
         except QuotaExceededException as e:
             print(f"❌ Batch {i+1}: {e}")
             break
@@ -295,10 +319,7 @@ if __name__ == "__main__":
     print("=" * 80)
 
     manager.set_custom_quota(
-        "free_user",
-        ResourceType.PREDICTIONS,
-        limit=500,
-        period='day'
+        "free_user", ResourceType.PREDICTIONS, limit=500, period="day"
     )
     print("✅ Set custom prediction quota for free_user: 500/day")
 
@@ -311,10 +332,9 @@ if __name__ == "__main__":
     for user_id, usage in all_usage.items():
         print(f"\n{user_id}:")
         for resource, details in usage.items():
-            if details['percentage'] > 0:  # Only show used resources
+            if details["percentage"] > 0:  # Only show used resources
                 print(f"  - {resource}: {details['percentage']:.1f}% used")
 
     print("\n" + "=" * 80)
     print("Resource Quotas Demo Complete!")
     print("=" * 80)
-

@@ -2,6 +2,7 @@
 API Authentication & Authorization for NBA MCP
 Implements JWT tokens and API key authentication
 """
+
 import jwt
 import secrets
 import hashlib
@@ -16,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 class Role(Enum):
     """User roles for authorization"""
+
     ADMIN = "admin"
     USER = "user"
     READ_ONLY = "read_only"
@@ -42,10 +44,7 @@ class JWTAuth:
         return secrets.token_urlsafe(32)
 
     def create_token(
-        self,
-        user_id: str,
-        role: Role,
-        custom_claims: Optional[Dict[str, Any]] = None
+        self, user_id: str, role: Role, custom_claims: Optional[Dict[str, Any]] = None
     ) -> str:
         """
         Create a JWT token
@@ -93,7 +92,7 @@ class JWTAuth:
                 token,
                 self.secret_key,
                 algorithms=[self.algorithm],
-                options={"require": ["sub", "role", "exp"]}
+                options={"require": ["sub", "role", "exp"]},
             )
 
             logger.debug(f"✅ Token verified for user: {payload['sub']}")
@@ -124,8 +123,11 @@ class JWTAuth:
         new_token = self.create_token(
             user_id=payload["sub"],
             role=Role(payload["role"]),
-            custom_claims={k: v for k, v in payload.items()
-                          if k not in ["sub", "role", "iat", "exp", "jti"]}
+            custom_claims={
+                k: v
+                for k, v in payload.items()
+                if k not in ["sub", "role", "iat", "exp", "jti"]
+            },
         )
 
         logger.info(f"🔄 Refreshed token for user: {payload['sub']}")
@@ -141,10 +143,7 @@ class APIKeyAuth:
         # In production, store in database or Secrets Manager
 
     def generate_api_key(
-        self,
-        name: str,
-        role: Role,
-        expires_days: Optional[int] = None
+        self, name: str, role: Role, expires_days: Optional[int] = None
     ) -> str:
         """
         Generate a new API key
@@ -175,7 +174,7 @@ class APIKeyAuth:
             "created_at": datetime.utcnow().isoformat(),
             "expires_at": expiry.isoformat() if expiry else None,
             "last_used": None,
-            "use_count": 0
+            "use_count": 0,
         }
 
         logger.info(f"✅ Generated API key: {name} (role: {role.value})")
@@ -259,29 +258,29 @@ class Authorization:
             "write": True,
             "delete": True,
             "manage_users": True,
-            "view_metrics": True
+            "view_metrics": True,
         },
         Role.USER: {
             "read": True,
             "write": True,
             "delete": False,
             "manage_users": False,
-            "view_metrics": True
+            "view_metrics": True,
         },
         Role.READ_ONLY: {
             "read": True,
             "write": False,
             "delete": False,
             "manage_users": False,
-            "view_metrics": True
+            "view_metrics": True,
         },
         Role.SERVICE: {
             "read": True,
             "write": True,
             "delete": False,
             "manage_users": False,
-            "view_metrics": False
-        }
+            "view_metrics": False,
+        },
     }
 
     @classmethod
@@ -340,8 +339,7 @@ def get_api_key_auth() -> APIKeyAuth:
 
 
 def authenticate_request(
-    token: Optional[str] = None,
-    api_key: Optional[str] = None
+    token: Optional[str] = None, api_key: Optional[str] = None
 ) -> Optional[Dict[str, Any]]:
     """
     Authenticate a request using JWT or API key
@@ -362,7 +360,7 @@ def authenticate_request(
                 "user_id": payload["sub"],
                 "role": Role(payload["role"]),
                 "auth_method": "jwt",
-                "payload": payload
+                "payload": payload,
             }
 
     # Try API key
@@ -374,9 +372,8 @@ def authenticate_request(
                 "user_id": metadata["name"],
                 "role": Role(metadata["role"]),
                 "auth_method": "api_key",
-                "metadata": metadata
+                "metadata": metadata,
             }
 
     logger.warning("❌ Authentication failed: no valid token or API key")
     return None
-

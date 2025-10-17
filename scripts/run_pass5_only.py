@@ -19,16 +19,16 @@ from multi_pass_book_deployment import MultiPassOrchestrator
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
 
 async def run_pass5_only():
     """Run only Pass 5: Implementation Generation"""
 
     print("🚀 Starting Pass 5 Only - Implementation Generation")
-    print("="*60)
+    print("=" * 60)
 
     # Create orchestrator
     orchestrator = MultiPassOrchestrator()
@@ -68,16 +68,18 @@ async def run_pass5_only():
 
         # Show summary
         progress = orchestrator._load_progress()
-        pass5_data = progress.get('pass_5', {})
+        pass5_data = progress.get("pass_5", {})
 
-        print(f"   Implementations Generated: {pass5_data.get('implementations_generated', 0)}")
+        print(
+            f"   Implementations Generated: {pass5_data.get('implementations_generated', 0)}"
+        )
         print(f"   Files Created: {pass5_data.get('files_created', 0)}")
 
         # Count actual files
         total_files = 0
         for root, dirs, files in os.walk(target_dir):
             for file in files:
-                if file.endswith(('.py', '.sql', '.yaml', '.yml', '.md')):
+                if file.endswith((".py", ".sql", ".yaml", ".yml", ".md")):
                     total_files += 1
 
         print(f"   Total Implementation Files: {total_files}")
@@ -87,6 +89,7 @@ async def run_pass5_only():
         return False
 
     return True
+
 
 def main():
     """Main function"""
@@ -108,6 +111,7 @@ def main():
         print(f"\n❌ Pass 5 Only execution failed: {e}")
         logger.error(f"Pass 5 execution failed: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

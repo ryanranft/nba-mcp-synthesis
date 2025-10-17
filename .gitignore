@@ -291,6 +291,24 @@ api_keys.json
 .secrets
 .secret.*
 
+# Cursor secrets directory (hierarchical structure)
+.cursor/secrets/
+~/.cursor/secrets/
+
+# Hierarchical secrets base path (outside project)
+/Users/*/Desktop/++/big_cat_bets_assets/
+
+# Individual secret file patterns (hierarchical naming convention)
+*_API_KEY_*.env
+*_SECRET_KEY_*.env
+*_PASSWORD_*.env
+*_TOKEN_*.env
+*_WEBHOOK_URL_*.env
+*_ACCESS_KEY_*.env
+
+# detect-secrets baseline (track this for CI/CD)
+!.secrets.baseline
+
 # Environment files (comprehensive)
 .env
 .env.*

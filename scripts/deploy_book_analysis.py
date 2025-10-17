@@ -39,11 +39,11 @@ def setup_logging(verbose: bool = False):
 
     logging.basicConfig(
         level=level,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         handlers=[
             logging.StreamHandler(),
-            logging.FileHandler('analysis_results/deployment.log')
-        ]
+            logging.FileHandler("analysis_results/deployment.log"),
+        ],
     )
 
 
@@ -54,10 +54,10 @@ def validate_config(config_path: str) -> bool:
         return False
 
     try:
-        with open(config_path, 'r') as f:
+        with open(config_path, "r") as f:
             config = json.load(f)
 
-        books = config.get('books', [])
+        books = config.get("books", [])
         if not books:
             logger.error("No books found in configuration")
             return False
@@ -76,41 +76,45 @@ def validate_config(config_path: str) -> bool:
 def show_deployment_summary(config_path: str):
     """Show deployment summary without executing."""
     try:
-        with open(config_path, 'r') as f:
+        with open(config_path, "r") as f:
             config = json.load(f)
 
-        books = config.get('books', [])
-        metadata = config.get('metadata', {})
+        books = config.get("books", [])
+        metadata = config.get("metadata", {})
 
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("📚 BOOK ANALYSIS DEPLOYMENT SUMMARY")
-        print("="*70)
+        print("=" * 70)
 
         print(f"\n📖 Books to Process: {len(books)}")
         print(f"📊 Total Pages: {metadata.get('total_pages', 'Unknown')}")
 
         # Show book categories
-        categories = metadata.get('categories', {})
+        categories = metadata.get("categories", {})
         if categories:
             print(f"\n📂 Categories:")
             for category, count in categories.items():
                 print(f"   - {category}: {count} books")
 
         # Show priorities
-        priorities = metadata.get('priorities', {})
+        priorities = metadata.get("priorities", {})
         if priorities:
             print(f"\n⭐ Priorities:")
             for priority, count in priorities.items():
                 print(f"   - {priority}: {count} books")
 
         # Show analysis settings
-        settings = config.get('analysis_settings', {})
+        settings = config.get("analysis_settings", {})
         if settings:
             print(f"\n⚙️  Analysis Settings:")
-            print(f"   - Convergence Threshold: {settings.get('convergence_threshold', 3)}")
+            print(
+                f"   - Convergence Threshold: {settings.get('convergence_threshold', 3)}"
+            )
             print(f"   - Max Iterations: {settings.get('max_iterations', 15)}")
             print(f"   - Chunk Size: {settings.get('chunk_size', 50000)}")
-            print(f"   - Strict Convergence: {settings.get('strict_convergence', True)}")
+            print(
+                f"   - Strict Convergence: {settings.get('strict_convergence', True)}"
+            )
 
         print(f"\n🔄 Deployment Phases:")
         print(f"   1. Pass 1: Individual book convergence analysis")
@@ -122,7 +126,7 @@ def show_deployment_summary(config_path: str):
         print(f"💾 Checkpoint System: Enabled")
         print(f"📄 Progress Tracking: analysis_results/multi_pass_progress.json")
 
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
 
     except Exception as e:
         logger.error(f"Error showing summary: {e}")
@@ -151,9 +155,9 @@ def run_test_deployment(orchestrator: MultiPassOrchestrator) -> bool:
 
     # Modify config to only process first 3 books
     original_config = orchestrator.config.copy()
-    test_books = original_config['books'][:3]
-    orchestrator.config['books'] = test_books
-    orchestrator.config['metadata']['total_books'] = len(test_books)
+    test_books = original_config["books"][:3]
+    orchestrator.config["books"] = test_books
+    orchestrator.config["metadata"]["total_books"] = len(test_books)
 
     logger.info(f"📚 Test books: {[book['title'] for book in test_books]}")
 
@@ -184,45 +188,35 @@ Examples:
   python scripts/deploy_book_analysis.py --pass-num 1       # Run Pass 1 only
   python scripts/deploy_book_analysis.py --resume           # Resume from checkpoint
   python scripts/deploy_book_analysis.py --dry-run          # Show summary only
-        """
+        """,
     )
 
     parser.add_argument(
-        '--config',
-        default='config/books_to_analyze.json',
-        help='Path to books configuration file (default: config/books_to_analyze.json)'
+        "--config",
+        default="config/books_to_analyze.json",
+        help="Path to books configuration file (default: config/books_to_analyze.json)",
     )
 
     parser.add_argument(
-        '--pass-num',
+        "--pass-num",
         type=int,
         choices=[1, 2, 3, 4],
-        help='Run specific pass only (1-4)'
+        help="Run specific pass only (1-4)",
     )
 
     parser.add_argument(
-        '--resume',
-        action='store_true',
-        help='Resume from last checkpoint'
+        "--resume", action="store_true", help="Resume from last checkpoint"
     )
 
-    parser.add_argument(
-        '--test',
-        action='store_true',
-        help='Test with 2-3 books only'
-    )
+    parser.add_argument("--test", action="store_true", help="Test with 2-3 books only")
 
     parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Show what would be done without executing'
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without executing",
     )
 
-    parser.add_argument(
-        '--verbose',
-        action='store_true',
-        help='Enable verbose logging'
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
 
     args = parser.parse_args()
 

@@ -37,6 +37,7 @@ def timeout_handler(signum, frame):
     logger.error("Integration timed out after 300 seconds")
     sys.exit(1)
 
+
 def main():
     """
     Main integration workflow with timeout protection.
@@ -47,11 +48,19 @@ def main():
 
     try:
         # Parse command line arguments
-        parser = argparse.ArgumentParser(description='Integrate recommendations into NBA Simulator AWS')
-        parser.add_argument('--synthesis-path', required=True, help='Path to synthesis project')
-        parser.add_argument('--simulator-path', required=True, help='Path to simulator project')
-        parser.add_argument('--book-results', help='Path to book analysis results')
-        parser.add_argument('--timeout', type=int, default=300, help='Timeout in seconds (default: 300)')
+        parser = argparse.ArgumentParser(
+            description="Integrate recommendations into NBA Simulator AWS"
+        )
+        parser.add_argument(
+            "--synthesis-path", required=True, help="Path to synthesis project"
+        )
+        parser.add_argument(
+            "--simulator-path", required=True, help="Path to simulator project"
+        )
+        parser.add_argument("--book-results", help="Path to book analysis results")
+        parser.add_argument(
+            "--timeout", type=int, default=300, help="Timeout in seconds (default: 300)"
+        )
 
         args = parser.parse_args()
 
@@ -66,11 +75,17 @@ def main():
         # Validate paths
         if not os.path.exists(synthesis_path):
             logger.error(f"Synthesis path does not exist: {synthesis_path}")
-            return {"success": False, "error": f"Synthesis path not found: {synthesis_path}"}
+            return {
+                "success": False,
+                "error": f"Synthesis path not found: {synthesis_path}",
+            }
 
         if not os.path.exists(simulator_path):
             logger.error(f"Simulator path does not exist: {simulator_path}")
-            return {"success": False, "error": f"Simulator path not found: {simulator_path}"}
+            return {
+                "success": False,
+                "error": f"Simulator path not found: {simulator_path}",
+            }
 
         logger.info("🚀 Starting Recommendation Integration...")
         logger.info(f"   Synthesis: {synthesis_path}")
@@ -83,13 +98,15 @@ def main():
         integrator = RecommendationIntegrator(simulator_path, synthesis_path)
         master_recs = integrator.load_master_recommendations()
 
-        total_recs = len(master_recs.get('recommendations', []))
+        total_recs = len(master_recs.get("recommendations", []))
         logger.info(f"   Loaded {total_recs} recommendations from master DB")
 
         if total_recs == 0:
-            logger.warning("⚠️  No recommendations found. Creating sample data for testing...")
+            logger.warning(
+                "⚠️  No recommendations found. Creating sample data for testing..."
+            )
             master_recs = create_sample_recommendations()
-            total_recs = len(master_recs['recommendations'])
+            total_recs = len(master_recs["recommendations"])
             logger.info(f"   Created {total_recs} sample recommendations")
 
         # Step 2: Map recommendations to phases
@@ -110,10 +127,12 @@ def main():
         summary_content = integrator.generate_integration_summary(phase_recs)
 
         # Save summary
-        summary_path = os.path.join(synthesis_path, 'analysis_results', 'integration_summary.md')
+        summary_path = os.path.join(
+            synthesis_path, "analysis_results", "integration_summary.md"
+        )
         os.makedirs(os.path.dirname(summary_path), exist_ok=True)
 
-        with open(summary_path, 'w') as f:
+        with open(summary_path, "w") as f:
             f.write(summary_content)
 
         logger.info(f"   Summary saved to: {summary_path}")
@@ -136,7 +155,7 @@ def main():
             "files_generated": generated_files,
             "recommendations_integrated": total_recommendations,
             "conflicts_detected": 0,
-            "summary_path": summary_path
+            "summary_path": summary_path,
         }
 
     except Exception as e:
@@ -160,7 +179,7 @@ def create_sample_recommendations() -> Dict[str, Any]:
                 "category": "critical",
                 "source_books": ["Sample Book"],
                 "added_date": datetime.now().isoformat(),
-                "reasoning": "Quality checks needed for data integrity"
+                "reasoning": "Quality checks needed for data integrity",
             },
             {
                 "id": "sample_2",
@@ -168,17 +187,21 @@ def create_sample_recommendations() -> Dict[str, Any]:
                 "category": "important",
                 "source_books": ["Sample Book"],
                 "added_date": datetime.now().isoformat(),
-                "reasoning": "Need to train models for prediction"
-            }
+                "reasoning": "Need to train models for prediction",
+            },
         ],
-        "by_category": {"critical": ["sample_1"], "important": ["sample_2"], "nice_to_have": []},
-        "by_book": {"Sample Book": ["sample_1", "sample_2"]}
+        "by_category": {
+            "critical": ["sample_1"],
+            "important": ["sample_2"],
+            "nice_to_have": [],
+        },
+        "by_book": {"Sample Book": ["sample_1", "sample_2"]},
     }
 
 
 if __name__ == "__main__":
     result = main()
-    if isinstance(result, dict) and not result.get('success', False):
+    if isinstance(result, dict) and not result.get("success", False):
         sys.exit(1)
     else:
         sys.exit(0)

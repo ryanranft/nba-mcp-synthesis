@@ -28,7 +28,7 @@ import base64
 import warnings
 
 # Suppress warnings
-warnings.filterwarnings('ignore', category=UserWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +37,10 @@ logger = logging.getLogger(__name__)
 # Data Classes and Enums
 # =============================================================================
 
+
 class UsageEventType(str, Enum):
     """Types of usage events"""
+
     FORMULA_CALCULATION = "formula_calculation"
     FORMULA_COMPARISON = "formula_comparison"
     FORMULA_OPTIMIZATION = "formula_optimization"
@@ -51,6 +53,7 @@ class UsageEventType(str, Enum):
 
 class UserSegment(str, Enum):
     """User segmentation categories"""
+
     BEGINNER = "beginner"
     INTERMEDIATE = "intermediate"
     ADVANCED = "advanced"
@@ -61,6 +64,7 @@ class UserSegment(str, Enum):
 
 class AlertSeverity(str, Enum):
     """Alert severity levels"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -70,6 +74,7 @@ class AlertSeverity(str, Enum):
 @dataclass
 class UsageEvent:
     """Represents a single usage event"""
+
     event_id: str
     user_id: str
     event_type: str
@@ -84,6 +89,7 @@ class UsageEvent:
 @dataclass
 class UsagePattern:
     """Represents a detected usage pattern"""
+
     pattern_id: str
     pattern_type: str
     frequency: int
@@ -98,6 +104,7 @@ class UsagePattern:
 @dataclass
 class UsageInsight:
     """Represents a usage insight"""
+
     insight_id: str
     insight_type: str
     title: str
@@ -112,6 +119,7 @@ class UsageInsight:
 @dataclass
 class UsageAlert:
     """Represents a usage alert"""
+
     alert_id: str
     alert_type: str
     severity: str
@@ -126,6 +134,7 @@ class UsageAlert:
 # =============================================================================
 # Core Formula Usage Analytics Engine
 # =============================================================================
+
 
 class FormulaUsageAnalyticsEngine:
     """Main engine for formula usage analytics"""
@@ -167,19 +176,19 @@ class FormulaUsageAnalyticsEngine:
                 "real_time": 1,  # seconds
                 "hourly": 3600,  # seconds
                 "daily": 86400,  # seconds
-                "weekly": 604800  # seconds
+                "weekly": 604800,  # seconds
             },
             "performance_thresholds": {
                 "fast_execution": 0.1,  # seconds
                 "slow_execution": 1.0,  # seconds
                 "high_error_rate": 0.05,  # 5%
-                "low_success_rate": 0.9  # 90%
+                "low_success_rate": 0.9,  # 90%
             },
             "pattern_detection": {
                 "min_frequency": 5,
                 "confidence_threshold": 0.7,
-                "time_window_hours": 24
-            }
+                "time_window_hours": 24,
+            },
         }
 
     def track_usage_event(
@@ -190,7 +199,7 @@ class FormulaUsageAnalyticsEngine:
         duration: Optional[float] = None,
         success: bool = True,
         error_message: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> str:
         """
         Track a usage event.
@@ -217,7 +226,7 @@ class FormulaUsageAnalyticsEngine:
                 duration=duration,
                 success=success,
                 error_message=error_message,
-                metadata=metadata or {}
+                metadata=metadata or {},
             )
 
             self.usage_events.append(event)
@@ -245,7 +254,7 @@ class FormulaUsageAnalyticsEngine:
         user_segments: Optional[List[str]] = None,
         include_performance_metrics: bool = True,
         include_user_behavior: bool = True,
-        real_time_tracking: bool = False
+        real_time_tracking: bool = False,
     ) -> Dict[str, Any]:
         """
         Analyze usage patterns comprehensively.
@@ -270,11 +279,23 @@ class FormulaUsageAnalyticsEngine:
             # Analyze different aspects
             analysis_results = {
                 "usage_statistics": self._analyze_usage_statistics(filtered_events),
-                "performance_metrics": self._analyze_performance_metrics(filtered_events) if include_performance_metrics else {},
-                "user_behavior": self._analyze_user_behavior(filtered_events) if include_user_behavior else {},
+                "performance_metrics": (
+                    self._analyze_performance_metrics(filtered_events)
+                    if include_performance_metrics
+                    else {}
+                ),
+                "user_behavior": (
+                    self._analyze_user_behavior(filtered_events)
+                    if include_user_behavior
+                    else {}
+                ),
                 "formula_popularity": self._analyze_formula_popularity(filtered_events),
                 "trend_analysis": self._analyze_usage_trends(filtered_events),
-                "pattern_detection": self._detect_advanced_patterns(filtered_events) if filtered_events else []
+                "pattern_detection": (
+                    self._detect_advanced_patterns(filtered_events)
+                    if filtered_events
+                    else []
+                ),
             }
 
             # Generate insights
@@ -289,20 +310,18 @@ class FormulaUsageAnalyticsEngine:
                 "patterns_detected": len(self.usage_patterns),
                 "metadata": {
                     "analysis_timestamp": datetime.now().isoformat(),
-                    "real_time_tracking": real_time_tracking
-                }
+                    "real_time_tracking": real_time_tracking,
+                },
             }
 
-            logger.info(f"Usage pattern analysis completed: {len(insights)} insights generated")
+            logger.info(
+                f"Usage pattern analysis completed: {len(insights)} insights generated"
+            )
             return result
 
         except Exception as e:
             logger.error(f"Usage pattern analysis failed: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "analysis_results": {}
-            }
+            return {"status": "error", "error": str(e), "analysis_results": {}}
 
     def generate_usage_insights(
         self,
@@ -311,7 +330,7 @@ class FormulaUsageAnalyticsEngine:
         include_predictions: bool = True,
         include_comparisons: bool = True,
         confidence_threshold: float = 0.8,
-        max_insights: int = 15
+        max_insights: int = 15,
     ) -> Dict[str, Any]:
         """
         Generate intelligent usage insights.
@@ -344,14 +363,14 @@ class FormulaUsageAnalyticsEngine:
 
             # Filter by confidence threshold
             filtered_insights = [
-                insight for insight in insights
+                insight
+                for insight in insights
                 if insight.confidence >= confidence_threshold
             ]
 
             # Sort by confidence and impact
             filtered_insights.sort(
-                key=lambda x: (x.confidence, self._get_impact_score(x)),
-                reverse=True
+                key=lambda x: (x.confidence, self._get_impact_score(x)), reverse=True
             )
 
             # Limit to max_insights
@@ -364,8 +383,8 @@ class FormulaUsageAnalyticsEngine:
                 "metadata": {
                     "generation_timestamp": datetime.now().isoformat(),
                     "confidence_threshold": confidence_threshold,
-                    "analysis_depth": analysis_depth
-                }
+                    "analysis_depth": analysis_depth,
+                },
             }
 
             logger.info(f"Usage insights generated: {len(final_insights)} insights")
@@ -373,11 +392,7 @@ class FormulaUsageAnalyticsEngine:
 
         except Exception as e:
             logger.error(f"Usage insight generation failed: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "insights": []
-            }
+            return {"status": "error", "error": str(e), "insights": []}
 
     def optimize_usage_based_performance(
         self,
@@ -385,7 +400,7 @@ class FormulaUsageAnalyticsEngine:
         target_metrics: Optional[List[str]] = None,
         optimization_method: str = "guided",
         include_ab_testing: bool = False,
-        optimization_scope: str = "formula"
+        optimization_scope: str = "formula",
     ) -> Dict[str, Any]:
         """
         Optimize system performance based on usage patterns.
@@ -433,20 +448,18 @@ class FormulaUsageAnalyticsEngine:
                 "ab_testing_recommendations": ab_testing_recommendations,
                 "metadata": {
                     "optimization_timestamp": datetime.now().isoformat(),
-                    "optimization_method": optimization_method
-                }
+                    "optimization_method": optimization_method,
+                },
             }
 
-            logger.info(f"Usage-based optimization completed: {len(recommendations)} recommendations")
+            logger.info(
+                f"Usage-based optimization completed: {len(recommendations)} recommendations"
+            )
             return result
 
         except Exception as e:
             logger.error(f"Usage-based optimization failed: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "recommendations": []
-            }
+            return {"status": "error", "error": str(e), "recommendations": []}
 
     def generate_usage_report(
         self,
@@ -455,7 +468,7 @@ class FormulaUsageAnalyticsEngine:
         include_visualizations: bool = True,
         include_recommendations: bool = True,
         include_benchmarks: bool = True,
-        export_format: str = "html"
+        export_format: str = "html",
     ) -> Dict[str, Any]:
         """
         Generate comprehensive usage reports.
@@ -479,8 +492,11 @@ class FormulaUsageAnalyticsEngine:
 
             # Generate report content
             report_content = self._generate_report_content(
-                report_data, report_type, include_visualizations,
-                include_recommendations, include_benchmarks
+                report_data,
+                report_type,
+                include_visualizations,
+                include_recommendations,
+                include_benchmarks,
             )
 
             # Generate visualizations if requested
@@ -497,8 +513,8 @@ class FormulaUsageAnalyticsEngine:
                 "export_format": export_format,
                 "metadata": {
                     "generation_timestamp": datetime.now().isoformat(),
-                    "data_points": len(self.usage_events)
-                }
+                    "data_points": len(self.usage_events),
+                },
             }
 
             logger.info(f"Usage report generated: {report_type} report")
@@ -506,11 +522,7 @@ class FormulaUsageAnalyticsEngine:
 
         except Exception as e:
             logger.error(f"Usage report generation failed: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "report_content": {}
-            }
+            return {"status": "error", "error": str(e), "report_content": {}}
 
     def setup_usage_alerts(
         self,
@@ -518,7 +530,7 @@ class FormulaUsageAnalyticsEngine:
         alert_types: List[str] = None,
         alert_frequency: str = "immediate",
         alert_thresholds: Optional[Dict[str, float]] = None,
-        include_context: bool = True
+        include_context: bool = True,
     ) -> Dict[str, Any]:
         """
         Set up usage-based alerts.
@@ -551,19 +563,21 @@ class FormulaUsageAnalyticsEngine:
                 "thresholds": alert_thresholds or {},
                 "include_context": include_context,
                 "created_at": datetime.now().isoformat(),
-                "active": True
+                "active": True,
             }
 
             # Store alert configuration
-            self.active_alerts.append(UsageAlert(
-                alert_id=alert_setup["alert_id"],
-                alert_type="usage_monitoring",
-                severity="medium",
-                title="Usage Alert Setup",
-                message=f"Alert monitoring setup with {len(validated_conditions)} conditions",
-                conditions_met=[],
-                timestamp=datetime.now()
-            ))
+            self.active_alerts.append(
+                UsageAlert(
+                    alert_id=alert_setup["alert_id"],
+                    alert_type="usage_monitoring",
+                    severity="medium",
+                    title="Usage Alert Setup",
+                    message=f"Alert monitoring setup with {len(validated_conditions)} conditions",
+                    conditions_met=[],
+                    timestamp=datetime.now(),
+                )
+            )
 
             result = {
                 "status": "success",
@@ -571,21 +585,17 @@ class FormulaUsageAnalyticsEngine:
                 "conditions_configured": len(validated_conditions),
                 "alert_types": alert_types,
                 "monitoring_active": True,
-                "metadata": {
-                    "setup_timestamp": datetime.now().isoformat()
-                }
+                "metadata": {"setup_timestamp": datetime.now().isoformat()},
             }
 
-            logger.info(f"Usage alerts setup completed: {len(validated_conditions)} conditions")
+            logger.info(
+                f"Usage alerts setup completed: {len(validated_conditions)} conditions"
+            )
             return result
 
         except Exception as e:
             logger.error(f"Usage alert setup failed: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "alert_setup": {}
-            }
+            return {"status": "error", "error": str(e), "alert_setup": {}}
 
     def create_usage_dashboard(
         self,
@@ -594,7 +604,7 @@ class FormulaUsageAnalyticsEngine:
         refresh_interval: int = 300,
         include_filters: bool = True,
         include_exports: bool = True,
-        customization_options: Optional[Dict[str, Any]] = None
+        customization_options: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         Create interactive usage dashboards.
@@ -628,7 +638,7 @@ class FormulaUsageAnalyticsEngine:
                 "include_filters": include_filters,
                 "include_exports": include_exports,
                 "customization_options": customization_options or {},
-                "created_at": datetime.now().isoformat()
+                "created_at": datetime.now().isoformat(),
             }
 
             # Generate dashboard visualizations
@@ -644,20 +654,18 @@ class FormulaUsageAnalyticsEngine:
                 "sections_count": len(dashboard_sections),
                 "metadata": {
                     "creation_timestamp": datetime.now().isoformat(),
-                    "refresh_interval": refresh_interval
-                }
+                    "refresh_interval": refresh_interval,
+                },
             }
 
-            logger.info(f"Usage dashboard created: {dashboard_type} with {len(dashboard_sections)} sections")
+            logger.info(
+                f"Usage dashboard created: {dashboard_type} with {len(dashboard_sections)} sections"
+            )
             return result
 
         except Exception as e:
             logger.error(f"Usage dashboard creation failed: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "dashboard_config": {}
-            }
+            return {"status": "error", "error": str(e), "dashboard_config": {}}
 
     # Helper methods
     def _filter_events_by_period(self, period: str) -> List[UsageEvent]:
@@ -695,7 +703,9 @@ class FormulaUsageAnalyticsEngine:
             "success_rate": successful_events / total_events if total_events > 0 else 0,
             "unique_users": unique_users,
             "unique_formulas": unique_formulas,
-            "avg_events_per_user": total_events / unique_users if unique_users > 0 else 0
+            "avg_events_per_user": (
+                total_events / unique_users if unique_users > 0 else 0
+            ),
         }
 
     def _analyze_performance_metrics(self, events: List[UsageEvent]) -> Dict[str, Any]:
@@ -714,7 +724,7 @@ class FormulaUsageAnalyticsEngine:
             "min_duration": np.min(durations),
             "max_duration": np.max(durations),
             "fast_executions": len([d for d in durations if d < 0.1]),
-            "slow_executions": len([d for d in durations if d > 1.0])
+            "slow_executions": len([d for d in durations if d > 1.0]),
         }
 
     def _analyze_user_behavior(self, events: List[UsageEvent]) -> Dict[str, Any]:
@@ -730,12 +740,10 @@ class FormulaUsageAnalyticsEngine:
 
         return {
             "most_active_users": sorted(
-                user_activity.items(),
-                key=lambda x: len(x[1]),
-                reverse=True
+                user_activity.items(), key=lambda x: len(x[1]), reverse=True
             )[:5],
             "user_segments": self._analyze_user_segments(user_activity),
-            "session_patterns": self._analyze_session_patterns(user_activity)
+            "session_patterns": self._analyze_session_patterns(user_activity),
         }
 
     def _analyze_formula_popularity(self, events: List[UsageEvent]) -> Dict[str, Any]:
@@ -746,16 +754,16 @@ class FormulaUsageAnalyticsEngine:
         formula_usage = {}
         for event in events:
             if event.formula_id:
-                formula_usage[event.formula_id] = formula_usage.get(event.formula_id, 0) + 1
+                formula_usage[event.formula_id] = (
+                    formula_usage.get(event.formula_id, 0) + 1
+                )
 
         return {
             "most_popular_formulas": sorted(
-                formula_usage.items(),
-                key=lambda x: x[1],
-                reverse=True
+                formula_usage.items(), key=lambda x: x[1], reverse=True
             )[:10],
             "formula_diversity": len(formula_usage),
-            "usage_distribution": formula_usage
+            "usage_distribution": formula_usage,
         }
 
     def _analyze_usage_trends(self, events: List[UsageEvent]) -> Dict[str, Any]:
@@ -771,8 +779,14 @@ class FormulaUsageAnalyticsEngine:
 
         return {
             "hourly_distribution": hourly_usage,
-            "peak_usage_hour": max(hourly_usage.items(), key=lambda x: x[1])[0] if hourly_usage else None,
-            "trend_direction": self._calculate_trend_direction(list(hourly_usage.values()))
+            "peak_usage_hour": (
+                max(hourly_usage.items(), key=lambda x: x[1])[0]
+                if hourly_usage
+                else None
+            ),
+            "trend_direction": self._calculate_trend_direction(
+                list(hourly_usage.values())
+            ),
         }
 
     def _detect_advanced_patterns(self, events: List[UsageEvent]) -> List[UsagePattern]:
@@ -793,7 +807,9 @@ class FormulaUsageAnalyticsEngine:
 
         return patterns
 
-    def _detect_sequential_patterns(self, events: List[UsageEvent]) -> List[UsagePattern]:
+    def _detect_sequential_patterns(
+        self, events: List[UsageEvent]
+    ) -> List[UsagePattern]:
         """Detect sequential formula usage patterns"""
         patterns = []
 
@@ -814,14 +830,16 @@ class FormulaUsageAnalyticsEngine:
 
             # Look for formula sequences
             for i in range(len(user_event_list) - 2):
-                if (user_event_list[i].formula_id and
-                    user_event_list[i+1].formula_id and
-                    user_event_list[i+2].formula_id):
+                if (
+                    user_event_list[i].formula_id
+                    and user_event_list[i + 1].formula_id
+                    and user_event_list[i + 2].formula_id
+                ):
 
                     sequence = [
                         user_event_list[i].formula_id,
-                        user_event_list[i+1].formula_id,
-                        user_event_list[i+2].formula_id
+                        user_event_list[i + 1].formula_id,
+                        user_event_list[i + 2].formula_id,
                     ]
 
                     pattern = UsagePattern(
@@ -831,8 +849,15 @@ class FormulaUsageAnalyticsEngine:
                         confidence=0.8,
                         description=f"Sequential usage pattern: {' -> '.join(sequence)}",
                         formulas_involved=sequence,
-                        user_segments=[self.user_segments.get(user_id, UserSegment.INTERMEDIATE).value],
-                        time_range=(user_event_list[i].timestamp, user_event_list[i+2].timestamp)
+                        user_segments=[
+                            self.user_segments.get(
+                                user_id, UserSegment.INTERMEDIATE
+                            ).value
+                        ],
+                        time_range=(
+                            user_event_list[i].timestamp,
+                            user_event_list[i + 2].timestamp,
+                        ),
                     )
                     patterns.append(pattern)
 
@@ -860,7 +885,7 @@ class FormulaUsageAnalyticsEngine:
                     description=f"Peak usage hour: {peak_hour[0]}:00",
                     formulas_involved=[],
                     user_segments=[],
-                    time_range=(datetime.now() - timedelta(days=1), datetime.now())
+                    time_range=(datetime.now() - timedelta(days=1), datetime.now()),
                 )
                 patterns.append(pattern)
 
@@ -896,14 +921,21 @@ class FormulaUsageAnalyticsEngine:
                     confidence=0.9,
                     description=f"Power user behavior: {total_events} events, {successful_events/total_events:.1%} success rate",
                     formulas_involved=[],
-                    user_segments=[self.user_segments.get(user_id, UserSegment.ADVANCED).value],
-                    time_range=(min(e.timestamp for e in user_event_list), max(e.timestamp for e in user_event_list))
+                    user_segments=[
+                        self.user_segments.get(user_id, UserSegment.ADVANCED).value
+                    ],
+                    time_range=(
+                        min(e.timestamp for e in user_event_list),
+                        max(e.timestamp for e in user_event_list),
+                    ),
                 )
                 patterns.append(pattern)
 
         return patterns
 
-    def _generate_usage_insights(self, analysis_results: Dict[str, Any]) -> List[UsageInsight]:
+    def _generate_usage_insights(
+        self, analysis_results: Dict[str, Any]
+    ) -> List[UsageInsight]:
         """Generate usage insights from analysis results"""
         insights = []
 
@@ -920,7 +952,11 @@ class FormulaUsageAnalyticsEngine:
                         description=f"Average execution time is {avg_duration:.2f}s, which is above optimal threshold",
                         confidence=0.8,
                         impact_level="medium",
-                        recommendations=["Consider formula optimization", "Implement caching", "Review formula complexity"]
+                        recommendations=[
+                            "Consider formula optimization",
+                            "Implement caching",
+                            "Review formula complexity",
+                        ],
                     )
                     insights.append(insight)
 
@@ -938,7 +974,10 @@ class FormulaUsageAnalyticsEngine:
                         description=f"'{top_formula[0]}' is the most popular formula with {top_formula[1]} uses",
                         confidence=0.9,
                         impact_level="low",
-                        recommendations=["Consider promoting similar formulas", "Create related tutorials"]
+                        recommendations=[
+                            "Consider promoting similar formulas",
+                            "Create related tutorials",
+                        ],
                     )
                     insights.append(insight)
 
@@ -949,7 +988,7 @@ class FormulaUsageAnalyticsEngine:
         category: str,
         depth: str,
         include_predictions: bool,
-        include_comparisons: bool
+        include_comparisons: bool,
     ) -> List[UsageInsight]:
         """Generate insights for a specific category"""
         insights = []
@@ -962,7 +1001,10 @@ class FormulaUsageAnalyticsEngine:
                 description="Analysis of how frequently formulas are used",
                 confidence=0.8,
                 impact_level="medium",
-                recommendations=["Optimize popular formulas", "Promote underused formulas"]
+                recommendations=[
+                    "Optimize popular formulas",
+                    "Promote underused formulas",
+                ],
             )
             insights.append(insight)
 
@@ -974,7 +1016,11 @@ class FormulaUsageAnalyticsEngine:
                 description="Recommendations for improving formula performance",
                 confidence=0.7,
                 impact_level="high",
-                recommendations=["Implement caching", "Optimize slow formulas", "Add performance monitoring"]
+                recommendations=[
+                    "Implement caching",
+                    "Optimize slow formulas",
+                    "Add performance monitoring",
+                ],
             )
             insights.append(insight)
 
@@ -986,7 +1032,7 @@ class FormulaUsageAnalyticsEngine:
                 description="Analysis of usage trends over time",
                 confidence=0.6,
                 impact_level="low",
-                recommendations=["Monitor trend changes", "Plan capacity accordingly"]
+                recommendations=["Monitor trend changes", "Plan capacity accordingly"],
             )
             insights.append(insight)
 
@@ -1025,11 +1071,13 @@ class FormulaUsageAnalyticsEngine:
                 title="High Usage Alert",
                 message=f"High usage detected: {len(recent_events)} events in the last hour",
                 conditions_met=["high_usage"],
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
             self.active_alerts.append(alert)
 
-    def _validate_alert_conditions(self, conditions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _validate_alert_conditions(
+        self, conditions: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Validate alert conditions"""
         validated = []
         for condition in conditions:
@@ -1051,10 +1099,14 @@ class FormulaUsageAnalyticsEngine:
             "avg_duration": np.mean(durations) if durations else 0,
             "success_rate": success_rate,
             "total_events": len(recent_events),
-            "performance_score": self._calculate_performance_score(durations, success_rate)
+            "performance_score": self._calculate_performance_score(
+                durations, success_rate
+            ),
         }
 
-    def _calculate_performance_score(self, durations: List[float], success_rate: float) -> float:
+    def _calculate_performance_score(
+        self, durations: List[float], success_rate: float
+    ) -> float:
         """Calculate overall performance score"""
         if not durations:
             return 0.5
@@ -1066,17 +1118,16 @@ class FormulaUsageAnalyticsEngine:
         return (duration_score + success_score) / 2
 
     def _generate_optimization_recommendations(
-        self,
-        focus_area: str,
-        performance_analysis: Dict[str, Any],
-        method: str
+        self, focus_area: str, performance_analysis: Dict[str, Any], method: str
     ) -> List[str]:
         """Generate optimization recommendations"""
         recommendations = []
 
         if focus_area == "performance":
             if performance_analysis.get("avg_duration", 0) > 0.5:
-                recommendations.append("Implement formula caching for frequently used calculations")
+                recommendations.append(
+                    "Implement formula caching for frequently used calculations"
+                )
                 recommendations.append("Optimize slow-performing formulas")
 
         elif focus_area == "usability":
@@ -1084,12 +1135,16 @@ class FormulaUsageAnalyticsEngine:
             recommendations.append("Add formula recommendations based on user behavior")
 
         elif focus_area == "efficiency":
-            recommendations.append("Implement batch processing for multiple calculations")
+            recommendations.append(
+                "Implement batch processing for multiple calculations"
+            )
             recommendations.append("Add formula pre-computation for common scenarios")
 
         return recommendations
 
-    def _generate_ab_testing_recommendations(self, recommendations: List[str]) -> List[Dict[str, Any]]:
+    def _generate_ab_testing_recommendations(
+        self, recommendations: List[str]
+    ) -> List[Dict[str, Any]]:
         """Generate A/B testing recommendations"""
         ab_tests = []
 
@@ -1099,7 +1154,7 @@ class FormulaUsageAnalyticsEngine:
                 "description": f"A/B test for: {rec}",
                 "variants": ["control", "treatment"],
                 "metrics": ["success_rate", "user_satisfaction", "performance"],
-                "duration_weeks": 2
+                "duration_weeks": 2,
             }
             ab_tests.append(ab_test)
 
@@ -1114,7 +1169,7 @@ class FormulaUsageAnalyticsEngine:
             "performance_metrics": self._analyze_performance_metrics(events),
             "user_behavior": self._analyze_user_behavior(events),
             "formula_popularity": self._analyze_formula_popularity(events),
-            "trend_analysis": self._analyze_usage_trends(events)
+            "trend_analysis": self._analyze_usage_trends(events),
         }
 
     def _generate_report_content(
@@ -1123,15 +1178,21 @@ class FormulaUsageAnalyticsEngine:
         report_type: str,
         include_visualizations: bool,
         include_recommendations: bool,
-        include_benchmarks: bool
+        include_benchmarks: bool,
     ) -> Dict[str, Any]:
         """Generate report content"""
         content = {
             "executive_summary": self._generate_executive_summary(data),
             "detailed_analysis": data,
             "visualizations": {} if include_visualizations else None,
-            "recommendations": self._generate_report_recommendations(data) if include_recommendations else None,
-            "benchmarks": self._generate_benchmarks(data) if include_benchmarks else None
+            "recommendations": (
+                self._generate_report_recommendations(data)
+                if include_recommendations
+                else None
+            ),
+            "benchmarks": (
+                self._generate_benchmarks(data) if include_benchmarks else None
+            ),
         }
 
         return content
@@ -1167,7 +1228,9 @@ class FormulaUsageAnalyticsEngine:
                 "target_avg_duration": 0.1,
                 "current_avg_duration": perf_metrics.get("avg_duration", 0),
                 "target_success_rate": 0.99,
-                "current_success_rate": data.get("usage_statistics", {}).get("success_rate", 0)
+                "current_success_rate": data.get("usage_statistics", {}).get(
+                    "success_rate", 0
+                ),
             }
         }
 
@@ -1184,14 +1247,14 @@ class FormulaUsageAnalyticsEngine:
             hours = list(hourly_data.keys())
             counts = list(hourly_data.values())
 
-            ax.plot(hours, counts, marker='o')
+            ax.plot(hours, counts, marker="o")
             ax.set_title("Usage Trends Over Time")
             ax.set_xlabel("Time")
             ax.set_ylabel("Event Count")
 
             # Convert to base64
             buffer = BytesIO()
-            plt.savefig(buffer, format='png', dpi=150, bbox_inches='tight')
+            plt.savefig(buffer, format="png", dpi=150, bbox_inches="tight")
             buffer.seek(0)
             image_base64 = base64.b64encode(buffer.getvalue()).decode()
             plt.close()
@@ -1210,23 +1273,31 @@ class FormulaUsageAnalyticsEngine:
             if section == "usage_stats":
                 dashboard_data[section] = self._analyze_usage_statistics(recent_events)
             elif section == "performance":
-                dashboard_data[section] = self._analyze_performance_metrics(recent_events)
+                dashboard_data[section] = self._analyze_performance_metrics(
+                    recent_events
+                )
             elif section == "trends":
                 dashboard_data[section] = self._analyze_usage_trends(recent_events)
             elif section == "recommendations":
-                dashboard_data[section] = self._generate_report_recommendations({
-                    "usage_statistics": self._analyze_usage_statistics(recent_events),
-                    "performance_metrics": self._analyze_performance_metrics(recent_events)
-                })
+                dashboard_data[section] = self._generate_report_recommendations(
+                    {
+                        "usage_statistics": self._analyze_usage_statistics(
+                            recent_events
+                        ),
+                        "performance_metrics": self._analyze_performance_metrics(
+                            recent_events
+                        ),
+                    }
+                )
             elif section == "alerts":
-                dashboard_data[section] = [asdict(alert) for alert in self.active_alerts[-5:]]
+                dashboard_data[section] = [
+                    asdict(alert) for alert in self.active_alerts[-5:]
+                ]
 
         return dashboard_data
 
     def _generate_dashboard_visualizations(
-        self,
-        dashboard_data: Dict[str, Any],
-        sections: List[str]
+        self, dashboard_data: Dict[str, Any], sections: List[str]
     ) -> Dict[str, str]:
         """Generate dashboard visualizations"""
         visualizations = {}
@@ -1239,24 +1310,30 @@ class FormulaUsageAnalyticsEngine:
 
                 stats = dashboard_data["usage_stats"]
                 labels = ["Successful", "Failed"]
-                sizes = [stats.get("successful_events", 0),
-                        stats.get("total_events", 0) - stats.get("successful_events", 0)]
+                sizes = [
+                    stats.get("successful_events", 0),
+                    stats.get("total_events", 0) - stats.get("successful_events", 0),
+                ]
 
-                ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
+                ax.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
                 ax.set_title("Event Success Rate")
 
                 # Convert to base64
                 buffer = BytesIO()
-                plt.savefig(buffer, format='png', dpi=150, bbox_inches='tight')
+                plt.savefig(buffer, format="png", dpi=150, bbox_inches="tight")
                 buffer.seek(0)
                 image_base64 = base64.b64encode(buffer.getvalue()).decode()
                 plt.close()
 
-                visualizations[f"{section}_chart"] = f"data:image/png;base64,{image_base64}"
+                visualizations[f"{section}_chart"] = (
+                    f"data:image/png;base64,{image_base64}"
+                )
 
         return visualizations
 
-    def _analyze_user_segments(self, user_activity: Dict[str, List[UsageEvent]]) -> Dict[str, int]:
+    def _analyze_user_segments(
+        self, user_activity: Dict[str, List[UsageEvent]]
+    ) -> Dict[str, int]:
         """Analyze user segments"""
         segments = {}
         for user_id, events in user_activity.items():
@@ -1264,18 +1341,22 @@ class FormulaUsageAnalyticsEngine:
             segments[segment.value] = segments.get(segment.value, 0) + 1
         return segments
 
-    def _analyze_session_patterns(self, user_activity: Dict[str, List[UsageEvent]]) -> Dict[str, Any]:
+    def _analyze_session_patterns(
+        self, user_activity: Dict[str, List[UsageEvent]]
+    ) -> Dict[str, Any]:
         """Analyze session patterns"""
         session_patterns = {
             "avg_session_length": 0,
             "avg_events_per_session": 0,
-            "session_frequency": {}
+            "session_frequency": {},
         }
 
         for user_id, events in user_activity.items():
             if len(events) > 1:
                 events.sort(key=lambda x: x.timestamp)
-                session_length = (events[-1].timestamp - events[0].timestamp).total_seconds()
+                session_length = (
+                    events[-1].timestamp - events[0].timestamp
+                ).total_seconds()
                 session_patterns["avg_session_length"] += session_length
                 session_patterns["avg_events_per_session"] += len(events)
 
@@ -1291,8 +1372,8 @@ class FormulaUsageAnalyticsEngine:
             return "insufficient_data"
 
         # Simple trend calculation
-        first_half = values[:len(values)//2]
-        second_half = values[len(values)//2:]
+        first_half = values[: len(values) // 2]
+        second_half = values[len(values) // 2 :]
 
         first_avg = np.mean(first_half) if first_half else 0
         second_avg = np.mean(second_half) if second_half else 0
@@ -1320,7 +1401,7 @@ def track_usage_event(
     duration: Optional[float] = None,
     success: bool = True,
     error_message: Optional[str] = None,
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[Dict[str, Any]] = None,
 ) -> str:
     """
     Track a usage event (standalone function).
@@ -1344,7 +1425,7 @@ def track_usage_event(
         duration=duration,
         success=success,
         error_message=error_message,
-        metadata=metadata
+        metadata=metadata,
     )
 
 
@@ -1354,7 +1435,7 @@ def analyze_usage_patterns(
     user_segments: Optional[List[str]] = None,
     include_performance_metrics: bool = True,
     include_user_behavior: bool = True,
-    real_time_tracking: bool = False
+    real_time_tracking: bool = False,
 ) -> Dict[str, Any]:
     """
     Analyze usage patterns comprehensively (standalone function).
@@ -1376,7 +1457,7 @@ def analyze_usage_patterns(
         user_segments=user_segments,
         include_performance_metrics=include_performance_metrics,
         include_user_behavior=include_user_behavior,
-        real_time_tracking=real_time_tracking
+        real_time_tracking=real_time_tracking,
     )
 
 
@@ -1386,7 +1467,7 @@ def generate_usage_insights(
     include_predictions: bool = True,
     include_comparisons: bool = True,
     confidence_threshold: float = 0.8,
-    max_insights: int = 15
+    max_insights: int = 15,
 ) -> Dict[str, Any]:
     """
     Generate intelligent usage insights (standalone function).
@@ -1408,7 +1489,7 @@ def generate_usage_insights(
         include_predictions=include_predictions,
         include_comparisons=include_comparisons,
         confidence_threshold=confidence_threshold,
-        max_insights=max_insights
+        max_insights=max_insights,
     )
 
 
@@ -1417,7 +1498,7 @@ def optimize_usage_based_performance(
     target_metrics: Optional[List[str]] = None,
     optimization_method: str = "guided",
     include_ab_testing: bool = False,
-    optimization_scope: str = "formula"
+    optimization_scope: str = "formula",
 ) -> Dict[str, Any]:
     """
     Optimize system performance based on usage patterns (standalone function).
@@ -1437,7 +1518,7 @@ def optimize_usage_based_performance(
         target_metrics=target_metrics,
         optimization_method=optimization_method,
         include_ab_testing=include_ab_testing,
-        optimization_scope=optimization_scope
+        optimization_scope=optimization_scope,
     )
 
 
@@ -1447,7 +1528,7 @@ def generate_usage_report(
     include_visualizations: bool = True,
     include_recommendations: bool = True,
     include_benchmarks: bool = True,
-    export_format: str = "html"
+    export_format: str = "html",
 ) -> Dict[str, Any]:
     """
     Generate comprehensive usage reports (standalone function).
@@ -1469,7 +1550,7 @@ def generate_usage_report(
         include_visualizations=include_visualizations,
         include_recommendations=include_recommendations,
         include_benchmarks=include_benchmarks,
-        export_format=export_format
+        export_format=export_format,
     )
 
 
@@ -1478,7 +1559,7 @@ def setup_usage_alerts(
     alert_types: List[str] = None,
     alert_frequency: str = "immediate",
     alert_thresholds: Optional[Dict[str, float]] = None,
-    include_context: bool = True
+    include_context: bool = True,
 ) -> Dict[str, Any]:
     """
     Set up usage-based alerts (standalone function).
@@ -1498,7 +1579,7 @@ def setup_usage_alerts(
         alert_types=alert_types,
         alert_frequency=alert_frequency,
         alert_thresholds=alert_thresholds,
-        include_context=include_context
+        include_context=include_context,
     )
 
 
@@ -1508,7 +1589,7 @@ def create_usage_dashboard(
     refresh_interval: int = 300,
     include_filters: bool = True,
     include_exports: bool = True,
-    customization_options: Optional[Dict[str, Any]] = None
+    customization_options: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Create interactive usage dashboards (standalone function).
@@ -1530,5 +1611,5 @@ def create_usage_dashboard(
         refresh_interval=refresh_interval,
         include_filters=include_filters,
         include_exports=include_exports,
-        customization_options=customization_options
+        customization_options=customization_options,
     )

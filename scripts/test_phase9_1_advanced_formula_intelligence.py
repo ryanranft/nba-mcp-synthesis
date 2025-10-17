@@ -22,7 +22,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, List
 
 # Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from mcp_server.tools.advanced_formula_intelligence import (
     AdvancedFormulaIntelligenceEngine,
@@ -33,7 +33,7 @@ from mcp_server.tools.advanced_formula_intelligence import (
     AnalysisType,
     OptimizationObjective,
     InsightType,
-    FormulaComplexityLevel
+    FormulaComplexityLevel,
 )
 
 
@@ -65,7 +65,7 @@ class Phase91TestSuite:
             self.test_error_handling,
             self.test_integration_with_sports_formulas,
             self.test_performance_benchmarks,
-            self.test_standalone_functions
+            self.test_standalone_functions,
         ]
 
         for test_method in test_methods:
@@ -77,11 +77,9 @@ class Phase91TestSuite:
             except Exception as e:
                 print(f"✗ {test_method.__name__} failed: {e}")
                 print()
-                self.test_results.append({
-                    "test": test_method.__name__,
-                    "status": "failed",
-                    "error": str(e)
-                })
+                self.test_results.append(
+                    {"test": test_method.__name__, "status": "failed", "error": str(e)}
+                )
 
         self.print_summary()
 
@@ -91,19 +89,27 @@ class Phase91TestSuite:
 
         # Test engine initialization
         assert self.engine is not None, "Engine should be initialized"
-        assert hasattr(self.engine, 'formula_database'), "Should have formula database"
-        assert hasattr(self.engine, 'ml_models'), "Should have ML models"
-        assert hasattr(self.engine, 'analysis_history'), "Should have analysis history"
+        assert hasattr(self.engine, "formula_database"), "Should have formula database"
+        assert hasattr(self.engine, "ml_models"), "Should have ML models"
+        assert hasattr(self.engine, "analysis_history"), "Should have analysis history"
 
         # Test formula database loading
         assert len(self.engine.formula_database) > 0, "Should have loaded formulas"
         assert "per" in self.engine.formula_database, "Should have PER formula"
-        assert "true_shooting" in self.engine.formula_database, "Should have TS% formula"
+        assert (
+            "true_shooting" in self.engine.formula_database
+        ), "Should have TS% formula"
 
         # Test ML models initialization
-        assert "performance_predictor" in self.engine.ml_models, "Should have performance predictor"
-        assert "complexity_classifier" in self.engine.ml_models, "Should have complexity classifier"
-        assert "pattern_recognizer" in self.engine.ml_models, "Should have pattern recognizer"
+        assert (
+            "performance_predictor" in self.engine.ml_models
+        ), "Should have performance predictor"
+        assert (
+            "complexity_classifier" in self.engine.ml_models
+        ), "Should have complexity classifier"
+        assert (
+            "pattern_recognizer" in self.engine.ml_models
+        ), "Should have pattern recognizer"
 
         print("  ✓ Engine initialization")
         print("  ✓ Formula database loading")
@@ -117,21 +123,27 @@ class Phase91TestSuite:
         # Test comprehensive analysis
         analysis_result = await self.engine.analyze_formula_intelligence(
             formula_id="per",
-            analysis_types=[AnalysisType.PERFORMANCE, AnalysisType.COMPLEXITY, AnalysisType.ACCURACY],
+            analysis_types=[
+                AnalysisType.PERFORMANCE,
+                AnalysisType.COMPLEXITY,
+                AnalysisType.ACCURACY,
+            ],
             input_data={
                 "points": [25.0, 30.0, 20.0, 35.0, 15.0],
                 "rebounds": [10.0, 8.0, 12.0, 7.0, 5.0],
-                "assists": [8.0, 7.0, 3.0, 10.0, 2.0]
+                "assists": [8.0, 7.0, 3.0, 10.0, 2.0],
             },
             analysis_depth="comprehensive",
             include_optimization=True,
-            include_insights=True
+            include_insights=True,
         )
 
         assert analysis_result["status"] == "success", "Analysis should succeed"
         assert "analysis_summary" in analysis_result, "Should have analysis summary"
         assert "analysis_results" in analysis_result, "Should have analysis results"
-        assert "comprehensive_analysis" in analysis_result, "Should have comprehensive analysis"
+        assert (
+            "comprehensive_analysis" in analysis_result
+        ), "Should have comprehensive analysis"
 
         # Test analysis summary
         summary = analysis_result["analysis_summary"]
@@ -160,26 +172,35 @@ class Phase91TestSuite:
         # Test optimization with multiple objectives
         optimization_result = await self.engine.optimize_formula_intelligence(
             formula_id="per",
-            optimization_objectives=[OptimizationObjective.ACCURACY, OptimizationObjective.SPEED],
+            optimization_objectives=[
+                OptimizationObjective.ACCURACY,
+                OptimizationObjective.SPEED,
+            ],
             input_data={
                 "points": [25.0, 30.0, 20.0],
                 "rebounds": [10.0, 8.0, 12.0],
-                "assists": [8.0, 7.0, 3.0]
+                "assists": [8.0, 7.0, 3.0],
             },
             optimization_method="genetic_algorithm",
             max_iterations=50,
-            target_improvement=0.1
+            target_improvement=0.1,
         )
 
         assert optimization_result["status"] == "success", "Optimization should succeed"
-        assert "optimization_result" in optimization_result, "Should have optimization result"
-        assert "all_optimization_results" in optimization_result, "Should have all results"
+        assert (
+            "optimization_result" in optimization_result
+        ), "Should have optimization result"
+        assert (
+            "all_optimization_results" in optimization_result
+        ), "Should have all results"
 
         # Test optimization result structure
         opt_result = optimization_result["optimization_result"]
         assert "original_formula" in opt_result, "Should have original formula"
         assert "optimized_formula" in opt_result, "Should have optimized formula"
-        assert "improvement_percentage" in opt_result, "Should have improvement percentage"
+        assert (
+            "improvement_percentage" in opt_result
+        ), "Should have improvement percentage"
         assert "optimization_type" in opt_result, "Should have optimization type"
         assert "performance_gains" in opt_result, "Should have performance gains"
         assert "recommendations" in opt_result, "Should have recommendations"
@@ -190,7 +211,7 @@ class Phase91TestSuite:
                 formula_id="true_shooting",
                 optimization_objectives=[OptimizationObjective.SIMPLICITY],
                 optimization_method=method,
-                max_iterations=20
+                max_iterations=20,
             )
 
             assert method_result["status"] == "success", f"Should succeed with {method}"
@@ -210,20 +231,25 @@ class Phase91TestSuite:
             "performance_score": 0.85,
             "complexity_level": "moderate",
             "accuracy_score": 0.78,
-            "optimization_potential": 0.65
+            "optimization_potential": 0.65,
         }
 
         # Test insights generation
         insights_result = await self.engine.generate_intelligent_insights(
             analysis_context=analysis_context,
-            insight_types=[InsightType.PERFORMANCE_TREND, InsightType.OPTIMIZATION_OPPORTUNITY],
+            insight_types=[
+                InsightType.PERFORMANCE_TREND,
+                InsightType.OPTIMIZATION_OPPORTUNITY,
+            ],
             data_context={"sample_data": [1, 2, 3, 4, 5]},
             insight_depth="comprehensive",
             max_insights=5,
-            confidence_threshold=0.7
+            confidence_threshold=0.7,
         )
 
-        assert insights_result["status"] == "success", "Insights generation should succeed"
+        assert (
+            insights_result["status"] == "success"
+        ), "Insights generation should succeed"
         assert "insights_generated" in insights_result, "Should have insights count"
         assert "insights" in insights_result, "Should have insights"
         assert "insight_summary" in insights_result, "Should have insight summary"
@@ -239,14 +265,16 @@ class Phase91TestSuite:
             assert "description" in insight, "Should have description"
             assert "confidence_score" in insight, "Should have confidence score"
             assert "impact_level" in insight, "Should have impact level"
-            assert "actionable_recommendations" in insight, "Should have recommendations"
+            assert (
+                "actionable_recommendations" in insight
+            ), "Should have recommendations"
 
         # Test different insight types
         insight_types = [
             InsightType.CORRELATION_DISCOVERY,
             InsightType.ANOMALY_DETECTION,
             InsightType.PATTERN_RECOGNITION,
-            InsightType.PREDICTIVE_INSIGHT
+            InsightType.PREDICTIVE_INSIGHT,
         ]
 
         for insight_type in insight_types:
@@ -254,10 +282,12 @@ class Phase91TestSuite:
                 analysis_context=analysis_context,
                 insight_types=[insight_type],
                 max_insights=3,
-                confidence_threshold=0.6
+                confidence_threshold=0.6,
             )
 
-            assert type_result["status"] == "success", f"Should succeed for {insight_type.value}"
+            assert (
+                type_result["status"] == "success"
+            ), f"Should succeed for {insight_type.value}"
 
         print("  ✓ Insights generation")
         print("  ✓ Insights structure validation")
@@ -274,14 +304,22 @@ class Phase91TestSuite:
             pattern_types=["linear", "polynomial", "correlation"],
             analysis_depth="comprehensive",
             include_correlations=True,
-            include_optimizations=True
+            include_optimizations=True,
         )
 
         assert pattern_result["status"] == "success", "Pattern discovery should succeed"
-        assert "formulas_analyzed" in pattern_result, "Should have formulas analyzed count"
-        assert "patterns_discovered" in pattern_result, "Should have patterns discovered count"
-        assert "correlations_found" in pattern_result, "Should have correlations found count"
-        assert "cross_formula_patterns" in pattern_result, "Should have cross-formula patterns"
+        assert (
+            "formulas_analyzed" in pattern_result
+        ), "Should have formulas analyzed count"
+        assert (
+            "patterns_discovered" in pattern_result
+        ), "Should have patterns discovered count"
+        assert (
+            "correlations_found" in pattern_result
+        ), "Should have correlations found count"
+        assert (
+            "cross_formula_patterns" in pattern_result
+        ), "Should have cross-formula patterns"
         assert "pattern_summary" in pattern_result, "Should have pattern summary"
 
         # Test pattern summary
@@ -296,10 +334,12 @@ class Phase91TestSuite:
             type_result = await discover_formula_patterns(
                 formula_ids=["per", "true_shooting"],
                 pattern_types=[pattern_type],
-                analysis_depth="basic"
+                analysis_depth="basic",
             )
 
-            assert type_result["status"] == "success", f"Should succeed for {pattern_type}"
+            assert (
+                type_result["status"] == "success"
+            ), f"Should succeed for {pattern_type}"
 
         print("  ✓ Pattern discovery")
         print("  ✓ Cross-formula patterns")
@@ -317,9 +357,9 @@ class Phase91TestSuite:
             input_data={
                 "points": [25.0, 30.0, 20.0, 35.0, 15.0],
                 "rebounds": [10.0, 8.0, 12.0, 7.0, 5.0],
-                "assists": [8.0, 7.0, 3.0, 10.0, 2.0]
+                "assists": [8.0, 7.0, 3.0, 10.0, 2.0],
             },
-            analysis_depth="comprehensive"
+            analysis_depth="comprehensive",
         )
 
         assert perf_result["status"] == "success", "Performance analysis should succeed"
@@ -351,22 +391,37 @@ class Phase91TestSuite:
         complexity_result = await self.engine.analyze_formula_intelligence(
             formula_id="per",
             analysis_types=[AnalysisType.COMPLEXITY],
-            analysis_depth="comprehensive"
+            analysis_depth="comprehensive",
         )
 
-        assert complexity_result["status"] == "success", "Complexity analysis should succeed"
+        assert (
+            complexity_result["status"] == "success"
+        ), "Complexity analysis should succeed"
 
         # Test complexity analysis results
         complexity_analysis = complexity_result["analysis_results"]["complexity"]
-        assert "overall_complexity" in complexity_analysis, "Should have overall complexity"
+        assert (
+            "overall_complexity" in complexity_analysis
+        ), "Should have overall complexity"
         assert "complexity_level" in complexity_analysis, "Should have complexity level"
-        assert "length_complexity" in complexity_analysis, "Should have length complexity"
-        assert "operation_complexity" in complexity_analysis, "Should have operation complexity"
-        assert "variable_complexity" in complexity_analysis, "Should have variable complexity"
+        assert (
+            "length_complexity" in complexity_analysis
+        ), "Should have length complexity"
+        assert (
+            "operation_complexity" in complexity_analysis
+        ), "Should have operation complexity"
+        assert (
+            "variable_complexity" in complexity_analysis
+        ), "Should have variable complexity"
 
         # Test complexity level
         complexity_level = complexity_analysis["complexity_level"]
-        assert complexity_level in ["simple", "moderate", "complex", "very_complex"], "Should have valid complexity level"
+        assert complexity_level in [
+            "simple",
+            "moderate",
+            "complex",
+            "very_complex",
+        ], "Should have valid complexity level"
 
         # Test complexity analysis details
         details = complexity_analysis["analysis_details"]
@@ -385,17 +440,17 @@ class Phase91TestSuite:
 
         # Test invalid formula ID
         invalid_result = await self.engine.analyze_formula_intelligence(
-            formula_id="invalid_formula",
-            analysis_types=[AnalysisType.PERFORMANCE]
+            formula_id="invalid_formula", analysis_types=[AnalysisType.PERFORMANCE]
         )
 
-        assert invalid_result["status"] == "error", "Should handle invalid formula gracefully"
+        assert (
+            invalid_result["status"] == "error"
+        ), "Should handle invalid formula gracefully"
         assert "error" in invalid_result, "Should have error message"
 
         # Test empty analysis types
         empty_result = await self.engine.analyze_formula_intelligence(
-            formula_id="per",
-            analysis_types=[]
+            formula_id="per", analysis_types=[]
         )
 
         # This should still work as it will use default analysis
@@ -403,21 +458,23 @@ class Phase91TestSuite:
 
         # Test invalid optimization objectives
         invalid_opt_result = await self.engine.optimize_formula_intelligence(
-            formula_id="per",
-            optimization_objectives=[]
+            formula_id="per", optimization_objectives=[]
         )
 
         # This should still work as it will use default objectives
-        assert invalid_opt_result["status"] == "success", "Should handle empty objectives"
+        assert (
+            invalid_opt_result["status"] == "success"
+        ), "Should handle empty objectives"
 
         # Test invalid insight types
         invalid_insights_result = await self.engine.generate_intelligent_insights(
-            analysis_context={},
-            insight_types=[]
+            analysis_context={}, insight_types=[]
         )
 
         # This should still work as it will use default insight types
-        assert invalid_insights_result["status"] == "success", "Should handle empty insight types"
+        assert (
+            invalid_insights_result["status"] == "success"
+        ), "Should handle empty insight types"
 
         print("  ✓ Invalid formula handling")
         print("  ✓ Empty analysis types handling")
@@ -430,7 +487,13 @@ class Phase91TestSuite:
         print("Testing integration with sports formulas...")
 
         # Test various sports formulas
-        sports_formulas = ["per", "true_shooting", "usage_rate", "defensive_rating", "pace"]
+        sports_formulas = [
+            "per",
+            "true_shooting",
+            "usage_rate",
+            "defensive_rating",
+            "pace",
+        ]
 
         for formula_id in sports_formulas:
             result = await self.engine.analyze_formula_intelligence(
@@ -438,37 +501,49 @@ class Phase91TestSuite:
                 analysis_types=[AnalysisType.PERFORMANCE, AnalysisType.COMPLEXITY],
                 analysis_depth="comprehensive",
                 include_optimization=True,
-                include_insights=True
+                include_insights=True,
             )
 
             assert result["status"] == "success", f"Should succeed for {formula_id}"
-            assert result["formula_id"] == formula_id, f"Should match formula ID for {formula_id}"
+            assert (
+                result["formula_id"] == formula_id
+            ), f"Should match formula ID for {formula_id}"
 
         # Test optimization for sports formulas
         for formula_id in sports_formulas[:3]:  # Test first 3 formulas
             opt_result = await self.engine.optimize_formula_intelligence(
                 formula_id=formula_id,
-                optimization_objectives=[OptimizationObjective.ACCURACY, OptimizationObjective.SIMPLICITY],
+                optimization_objectives=[
+                    OptimizationObjective.ACCURACY,
+                    OptimizationObjective.SIMPLICITY,
+                ],
                 optimization_method="genetic_algorithm",
-                max_iterations=30
+                max_iterations=30,
             )
 
-            assert opt_result["status"] == "success", f"Should succeed optimization for {formula_id}"
+            assert (
+                opt_result["status"] == "success"
+            ), f"Should succeed optimization for {formula_id}"
 
         # Test insights for sports formulas
         analysis_context = {
             "formula_id": "per",
             "performance_score": 0.85,
-            "complexity_level": "moderate"
+            "complexity_level": "moderate",
         }
 
         insights_result = await self.engine.generate_intelligent_insights(
             analysis_context=analysis_context,
-            insight_types=[InsightType.PERFORMANCE_TREND, InsightType.OPTIMIZATION_OPPORTUNITY],
-            max_insights=5
+            insight_types=[
+                InsightType.PERFORMANCE_TREND,
+                InsightType.OPTIMIZATION_OPPORTUNITY,
+            ],
+            max_insights=5,
         )
 
-        assert insights_result["status"] == "success", "Should generate insights for sports formulas"
+        assert (
+            insights_result["status"] == "success"
+        ), "Should generate insights for sports formulas"
 
         print("  ✓ Multiple sports formulas")
         print("  ✓ Sports formula optimization")
@@ -485,7 +560,7 @@ class Phase91TestSuite:
             await self.engine.analyze_formula_intelligence(
                 formula_id="per",
                 analysis_types=[AnalysisType.PERFORMANCE, AnalysisType.COMPLEXITY],
-                analysis_depth="comprehensive"
+                analysis_depth="comprehensive",
             )
         analysis_time = time.time() - start_time
         print(f"  Formula Analysis: {analysis_time:.2f}s (10 analyses)")
@@ -497,7 +572,7 @@ class Phase91TestSuite:
                 formula_id="true_shooting",
                 optimization_objectives=[OptimizationObjective.ACCURACY],
                 optimization_method="genetic_algorithm",
-                max_iterations=20
+                max_iterations=20,
             )
         optimization_time = time.time() - start_time
         print(f"  Formula Optimization: {optimization_time:.2f}s (5 optimizations)")
@@ -509,7 +584,7 @@ class Phase91TestSuite:
             await self.engine.generate_intelligent_insights(
                 analysis_context=analysis_context,
                 insight_types=[InsightType.PERFORMANCE_TREND],
-                max_insights=3
+                max_insights=3,
             )
         insights_time = time.time() - start_time
         print(f"  Insights Generation: {insights_time:.2f}s (8 generations)")
@@ -519,12 +594,14 @@ class Phase91TestSuite:
         await discover_formula_patterns(
             formula_ids=["per", "true_shooting", "usage_rate"],
             pattern_types=["linear", "correlation"],
-            analysis_depth="comprehensive"
+            analysis_depth="comprehensive",
         )
         pattern_time = time.time() - start_time
         print(f"  Pattern Discovery: {pattern_time:.2f}s (3 formulas)")
 
-        total_benchmark_time = analysis_time + optimization_time + insights_time + pattern_time
+        total_benchmark_time = (
+            analysis_time + optimization_time + insights_time + pattern_time
+        )
         print(f"  Total Benchmark Time: {total_benchmark_time:.2f}s")
 
         # Performance assertions
@@ -543,7 +620,7 @@ class Phase91TestSuite:
         analysis_result = await analyze_formula_intelligence(
             formula_id="per",
             analysis_types=["performance", "complexity"],
-            analysis_depth="comprehensive"
+            analysis_depth="comprehensive",
         )
 
         assert analysis_result["status"] == "success", "Standalone analysis should work"
@@ -552,17 +629,19 @@ class Phase91TestSuite:
         optimization_result = await optimize_formula_intelligence(
             formula_id="true_shooting",
             optimization_objectives=["accuracy", "speed"],
-            optimization_method="genetic_algorithm"
+            optimization_method="genetic_algorithm",
         )
 
-        assert optimization_result["status"] == "success", "Standalone optimization should work"
+        assert (
+            optimization_result["status"] == "success"
+        ), "Standalone optimization should work"
 
         # Test standalone insights generation
         analysis_context = {"formula_id": "per", "performance_score": 0.85}
         insights_result = await generate_intelligent_insights(
             analysis_context=analysis_context,
             insight_types=["performance_trend", "optimization_opportunity"],
-            max_insights=5
+            max_insights=5,
         )
 
         assert insights_result["status"] == "success", "Standalone insights should work"
@@ -570,10 +649,12 @@ class Phase91TestSuite:
         # Test standalone pattern discovery
         pattern_result = await discover_formula_patterns(
             formula_ids=["per", "true_shooting"],
-            pattern_types=["linear", "correlation"]
+            pattern_types=["linear", "correlation"],
         )
 
-        assert pattern_result["status"] == "success", "Standalone pattern discovery should work"
+        assert (
+            pattern_result["status"] == "success"
+        ), "Standalone pattern discovery should work"
 
         print("  ✓ Standalone analysis")
         print("  ✓ Standalone optimization")
@@ -591,17 +672,21 @@ class Phase91TestSuite:
         print("=" * 60)
         print(f"Total test time: {total_time:.2f} seconds")
         print(f"Tests completed: {len(self.test_results) + 11}")  # 11 main tests
-        print(f"Failed tests: {len([r for r in self.test_results if r.get('status') == 'failed'])}")
+        print(
+            f"Failed tests: {len([r for r in self.test_results if r.get('status') == 'failed'])}"
+        )
         print()
 
         if self.test_results:
             print("Failed tests:")
             for result in self.test_results:
-                if result.get('status') == 'failed':
+                if result.get("status") == "failed":
                     print(f"  - {result['test']}: {result['error']}")
             print()
 
-        print("✓ Phase 9.1 Advanced Formula Intelligence Engine implementation completed successfully!")
+        print(
+            "✓ Phase 9.1 Advanced Formula Intelligence Engine implementation completed successfully!"
+        )
         print("✓ All core functionality tested and working")
         print("✓ Ready for production deployment")
 
@@ -614,6 +699,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
-

@@ -14,8 +14,7 @@ from datetime import datetime
 from pathlib import Path
 
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -29,10 +28,10 @@ def mock_test_workflow():
 
     # Load test config
     config_file = "config/books_test_3.json"
-    with open(config_file, 'r') as f:
+    with open(config_file, "r") as f:
         config = json.load(f)
 
-    books = config['books']
+    books = config["books"]
     logger.info(f"Loaded {len(books)} books for test:")
 
     for book in books:
@@ -45,68 +44,68 @@ def mock_test_workflow():
         logger.info(f"\nAnalyzing: {book['title']}")
 
         # Mock recommendations based on book category
-        if book['category'] == 'statistics':
+        if book["category"] == "statistics":
             recs = [
                 {
                     "id": f"{book['id']}_stat_1",
                     "title": "Advanced Statistical Testing Framework",
                     "category": "critical",
-                    "source_books": [book['title']],
+                    "source_books": [book["title"]],
                     "reasoning": f"From {book['title']}: Comprehensive statistical testing",
                     "time_estimate": "2 weeks",
-                    "impact": "HIGH"
+                    "impact": "HIGH",
                 },
                 {
                     "id": f"{book['id']}_stat_2",
                     "title": "Bayesian Analysis Pipeline",
                     "category": "important",
-                    "source_books": [book['title']],
+                    "source_books": [book["title"]],
                     "reasoning": f"From {book['title']}: Bayesian methods for NBA data",
                     "time_estimate": "1 week",
-                    "impact": "MEDIUM"
-                }
+                    "impact": "MEDIUM",
+                },
             ]
-        elif book['category'] == 'basketball_analytics':
+        elif book["category"] == "basketball_analytics":
             recs = [
                 {
                     "id": f"{book['id']}_bball_1",
                     "title": "Advanced Basketball Analytics Framework",
                     "category": "critical",
-                    "source_books": [book['title']],
+                    "source_books": [book["title"]],
                     "reasoning": f"From {book['title']}: Dean Oliver's four factors",
                     "time_estimate": "3 weeks",
-                    "impact": "HIGH"
+                    "impact": "HIGH",
                 },
                 {
                     "id": f"{book['id']}_bball_2",
                     "title": "Player Efficiency Rating System",
                     "category": "important",
-                    "source_books": [book['title']],
+                    "source_books": [book["title"]],
                     "reasoning": f"From {book['title']}: PER calculation and tracking",
                     "time_estimate": "1 week",
-                    "impact": "MEDIUM"
-                }
+                    "impact": "MEDIUM",
+                },
             ]
-        elif book['category'] == 'econometrics':
+        elif book["category"] == "econometrics":
             recs = [
                 {
                     "id": f"{book['id']}_econ_1",
                     "title": "Time Series Analysis for NBA Data",
                     "category": "critical",
-                    "source_books": [book['title']],
+                    "source_books": [book["title"]],
                     "reasoning": f"From {book['title']}: Econometric time series methods",
                     "time_estimate": "2 weeks",
-                    "impact": "HIGH"
+                    "impact": "HIGH",
                 },
                 {
                     "id": f"{book['id']}_econ_2",
                     "title": "Panel Data Processing System",
                     "category": "important",
-                    "source_books": [book['title']],
+                    "source_books": [book["title"]],
                     "reasoning": f"From {book['title']}: Panel data econometrics",
                     "time_estimate": "1.5 weeks",
-                    "impact": "MEDIUM"
-                }
+                    "impact": "MEDIUM",
+                },
             ]
         else:
             recs = []
@@ -125,16 +124,19 @@ def mock_test_workflow():
         5: [],  # Machine Learning Models
         6: [],  # Optional Enhancements
         8: [],  # Recursive Data Discovery
-        9: []   # System Architecture
+        9: [],  # System Architecture
     }
 
     for rec in mock_recommendations:
         # Simple phase mapping based on keywords
-        if 'statistical' in rec['title'].lower() or 'bayesian' in rec['title'].lower():
+        if "statistical" in rec["title"].lower() or "bayesian" in rec["title"].lower():
             phase_mapping[8].append(rec)  # Statistical frameworks
-        elif 'basketball' in rec['title'].lower() or 'player' in rec['title'].lower():
+        elif "basketball" in rec["title"].lower() or "player" in rec["title"].lower():
             phase_mapping[4].append(rec)  # Simulation engine
-        elif 'time series' in rec['title'].lower() or 'panel data' in rec['title'].lower():
+        elif (
+            "time series" in rec["title"].lower()
+            or "panel data" in rec["title"].lower()
+        ):
             phase_mapping[4].append(rec)  # Simulation engine
         else:
             phase_mapping[5].append(rec)  # ML models
@@ -175,7 +177,7 @@ def mock_test_workflow():
         "total_cost": total_cost,
         "phase_distribution": {str(k): len(v) for k, v in phase_mapping.items() if v},
         "recommendations": mock_recommendations,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
     # Save mock results
@@ -183,7 +185,7 @@ def mock_test_workflow():
     output_dir.mkdir(parents=True, exist_ok=True)
 
     results_file = output_dir / "mock_test_results.json"
-    with open(results_file, 'w') as f:
+    with open(results_file, "w") as f:
         json.dump(results, f, indent=2)
 
     logger.info("=" * 80)
@@ -199,16 +201,18 @@ def mock_test_workflow():
     return results
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     results = mock_test_workflow()
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print("SUMMARY OF MOCK TEST")
-    print("="*50)
+    print("=" * 50)
     print(f"✅ Workflow configuration validated")
     print(f"✅ 3 books loaded successfully")
     print(f"✅ Mock analysis completed")
     print(f"✅ {results['recommendations_generated']} recommendations generated")
-    print(f"✅ {results['implementation_files_generated']} implementation files would be created")
+    print(
+        f"✅ {results['implementation_files_generated']} implementation files would be created"
+    )
     print(f"✅ Cost estimate: ${results['total_cost']:.2f}")
     print(f"✅ Results saved to analysis_results/test_3_books/")
     print("\n🚀 READY FOR REAL EXECUTION WITH API KEYS!")
@@ -224,7 +228,3 @@ if __name__ == '__main__':
     print("     --budget 50 \\")
     print("     --output analysis_results/test_3_books/ \\")
     print("     --generate-implementations")
-
-
-
-

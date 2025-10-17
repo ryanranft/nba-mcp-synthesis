@@ -15,12 +15,14 @@ logger = logging.getLogger(__name__)
 
 class Environment(Enum):
     """Deployment environment"""
+
     BLUE = "blue"
     GREEN = "green"
 
 
 class EnvironmentStatus(Enum):
     """Environment status"""
+
     ACTIVE = "active"
     INACTIVE = "inactive"
     TESTING = "testing"
@@ -30,6 +32,7 @@ class EnvironmentStatus(Enum):
 @dataclass
 class EnvironmentConfig:
     """Configuration for a deployment environment"""
+
     name: Environment
     model_id: str
     version: str
@@ -50,15 +53,15 @@ class BlueGreenDeploymentManager:
                 model_id="initial",
                 version="1.0.0",
                 status=EnvironmentStatus.ACTIVE,
-                deployed_at=datetime.utcnow()
+                deployed_at=datetime.utcnow(),
             ),
             Environment.GREEN: EnvironmentConfig(
                 name=Environment.GREEN,
                 model_id="initial",
                 version="1.0.0",
                 status=EnvironmentStatus.INACTIVE,
-                deployed_at=datetime.utcnow()
-            )
+                deployed_at=datetime.utcnow(),
+            ),
         }
         self.active_environment = Environment.BLUE
         self.deployment_history = []
@@ -69,13 +72,13 @@ class BlueGreenDeploymentManager:
 
     def get_inactive_environment(self) -> Environment:
         """Get currently inactive environment"""
-        return Environment.GREEN if self.active_environment == Environment.BLUE else Environment.BLUE
+        return (
+            Environment.GREEN
+            if self.active_environment == Environment.BLUE
+            else Environment.BLUE
+        )
 
-    def deploy_to_inactive(
-        self,
-        model_id: str,
-        version: str
-    ):
+    def deploy_to_inactive(self, model_id: str, version: str):
         """
         Deploy new version to inactive environment.
 
@@ -95,16 +98,12 @@ class BlueGreenDeploymentManager:
             model_id=model_id,
             version=version,
             status=EnvironmentStatus.TESTING,
-            deployed_at=datetime.utcnow()
+            deployed_at=datetime.utcnow(),
         )
 
         logger.info(f"Deployment to {inactive_env.value} complete. Ready for testing.")
 
-    def run_health_check(
-        self,
-        environment: Environment,
-        check_fn: callable
-    ) -> bool:
+    def run_health_check(self, environment: Environment, check_fn: callable) -> bool:
         """
         Run health check on environment.
 
@@ -154,22 +153,22 @@ class BlueGreenDeploymentManager:
             )
 
         # Perform switch
-        logger.info(
-            f"Switching traffic from {old_active.value} to {new_active.value}"
-        )
+        logger.info(f"Switching traffic from {old_active.value} to {new_active.value}")
 
         self.environments[new_active].status = EnvironmentStatus.ACTIVE
         self.environments[old_active].status = EnvironmentStatus.INACTIVE
         self.active_environment = new_active
 
         # Record in history
-        self.deployment_history.append({
-            "timestamp": datetime.utcnow(),
-            "from": old_active.value,
-            "to": new_active.value,
-            "model_id": new_env.model_id,
-            "version": new_env.version
-        })
+        self.deployment_history.append(
+            {
+                "timestamp": datetime.utcnow(),
+                "from": old_active.value,
+                "to": new_active.value,
+                "model_id": new_env.model_id,
+                "version": new_env.version,
+            }
+        )
 
         logger.info(
             f"✅ Traffic switched to {new_active.value} "
@@ -206,7 +205,7 @@ class BlueGreenDeploymentManager:
                 "status": blue_env.status.value,
                 "deployed_at": blue_env.deployed_at.isoformat(),
                 "health_checks_passed": blue_env.health_checks_passed,
-                "health_checks_failed": blue_env.health_checks_failed
+                "health_checks_failed": blue_env.health_checks_failed,
             },
             "green": {
                 "model_id": green_env.model_id,
@@ -214,12 +213,12 @@ class BlueGreenDeploymentManager:
                 "status": green_env.status.value,
                 "deployed_at": green_env.deployed_at.isoformat(),
                 "health_checks_passed": green_env.health_checks_passed,
-                "health_checks_failed": green_env.health_checks_failed
+                "health_checks_failed": green_env.health_checks_failed,
             },
             "deployments": len(self.deployment_history),
             "last_deployment": (
                 self.deployment_history[-1] if self.deployment_history else None
-            )
+            ),
         }
 
 
@@ -250,10 +249,7 @@ if __name__ == "__main__":
     print("DEPLOYING NEW VERSION")
     print("=" * 80)
 
-    manager.deploy_to_inactive(
-        model_id="nba_predictor_v2",
-        version="2.0.0"
-    )
+    manager.deploy_to_inactive(model_id="nba_predictor_v2", version="2.0.0")
 
     print(f"✅ Deployed to {manager.get_inactive_environment().value}")
 
@@ -265,6 +261,7 @@ if __name__ == "__main__":
     def mock_health_check():
         # Simulate health check
         import random
+
         return random.random() > 0.1  # 90% success rate
 
     inactive_env = manager.get_inactive_environment()
@@ -283,8 +280,10 @@ if __name__ == "__main__":
     print(f"\n{inactive.upper()} Environment:")
     print(f"  Model: {status[inactive]['model_id']} v{status[inactive]['version']}")
     print(f"  Status: {status[inactive]['status']}")
-    print(f"  Health Checks: ✅ {status[inactive]['health_checks_passed']} | "
-          f"❌ {status[inactive]['health_checks_failed']}")
+    print(
+        f"  Health Checks: ✅ {status[inactive]['health_checks_passed']} | "
+        f"❌ {status[inactive]['health_checks_failed']}"
+    )
 
     # Switch traffic
     print("\n" + "=" * 80)
@@ -322,4 +321,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("Blue-Green Deployment Demo Complete!")
     print("=" * 80)
-

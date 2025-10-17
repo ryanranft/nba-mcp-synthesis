@@ -20,6 +20,7 @@ try:
     import nltk
     from nltk.tokenize import word_tokenize
     from nltk.tag import pos_tag
+
     NLTK_AVAILABLE = True
 except ImportError:
     NLTK_AVAILABLE = False
@@ -49,47 +50,84 @@ class NaturalLanguageFormulaParser:
     def __init__(self):
         self.sports_variables = {
             # Basic stats
-            'points': 'PTS', 'rebounds': 'REB', 'assists': 'AST',
-            'steals': 'STL', 'blocks': 'BLK', 'turnovers': 'TOV',
-            'field_goals_made': 'FGM', 'field_goals_attempted': 'FGA',
-            'three_pointers_made': '3PM', 'three_pointers_attempted': '3PA',
-            'free_throws_made': 'FTM', 'free_throws_attempted': 'FTA',
-            'minutes_played': 'MP', 'games_played': 'GP',
-
+            "points": "PTS",
+            "rebounds": "REB",
+            "assists": "AST",
+            "steals": "STL",
+            "blocks": "BLK",
+            "turnovers": "TOV",
+            "field_goals_made": "FGM",
+            "field_goals_attempted": "FGA",
+            "three_pointers_made": "3PM",
+            "three_pointers_attempted": "3PA",
+            "free_throws_made": "FTM",
+            "free_throws_attempted": "FTA",
+            "minutes_played": "MP",
+            "games_played": "GP",
             # Advanced metrics
-            'player_efficiency_rating': 'PER', 'true_shooting_percentage': 'TS%',
-            'usage_rate': 'USG%', 'pace': 'PACE', 'offensive_rating': 'ORtg',
-            'defensive_rating': 'DRtg', 'net_rating': 'NetRtg',
-            'win_shares': 'WS', 'value_over_replacement_player': 'VORP',
-            'box_plus_minus': 'BPM', 'game_score': 'GmSc',
-
+            "player_efficiency_rating": "PER",
+            "true_shooting_percentage": "TS%",
+            "usage_rate": "USG%",
+            "pace": "PACE",
+            "offensive_rating": "ORtg",
+            "defensive_rating": "DRtg",
+            "net_rating": "NetRtg",
+            "win_shares": "WS",
+            "value_over_replacement_player": "VORP",
+            "box_plus_minus": "BPM",
+            "game_score": "GmSc",
             # Team stats
-            'team_points': 'Team_PTS', 'team_rebounds': 'Team_REB',
-            'team_assists': 'Team_AST', 'team_minutes': 'Team_MP',
-            'opponent_points': 'Opp_PTS', 'opponent_rebounds': 'Opp_REB',
-            'league_average': 'League_Avg', 'replacement_level': 'Replacement'
+            "team_points": "Team_PTS",
+            "team_rebounds": "Team_REB",
+            "team_assists": "Team_AST",
+            "team_minutes": "Team_MP",
+            "opponent_points": "Opp_PTS",
+            "opponent_rebounds": "Opp_REB",
+            "league_average": "League_Avg",
+            "replacement_level": "Replacement",
         }
 
         self.mathematical_operations = {
-            'plus': '+', 'add': '+', 'addition': '+',
-            'minus': '-', 'subtract': '-', 'subtraction': '-',
-            'times': '*', 'multiply': '*', 'multiplication': '*',
-            'divided by': '/', 'divide': '/', 'division': '/',
-            'to the power of': '**', 'raised to': '**', 'exponent': '**',
-            'squared': '**2', 'cubed': '**3',
-            'square root': 'sqrt', 'root': 'sqrt',
-            'absolute value': 'abs', 'modulus': 'abs'
+            "plus": "+",
+            "add": "+",
+            "addition": "+",
+            "minus": "-",
+            "subtract": "-",
+            "subtraction": "-",
+            "times": "*",
+            "multiply": "*",
+            "multiplication": "*",
+            "divided by": "/",
+            "divide": "/",
+            "division": "/",
+            "to the power of": "**",
+            "raised to": "**",
+            "exponent": "**",
+            "squared": "**2",
+            "cubed": "**3",
+            "square root": "sqrt",
+            "root": "sqrt",
+            "absolute value": "abs",
+            "modulus": "abs",
         }
 
         self.functions = {
-            'maximum': 'max', 'minimum': 'min', 'average': 'mean',
-            'sum': 'sum', 'total': 'sum', 'count': 'count',
-            'logarithm': 'log', 'natural log': 'ln', 'exponential': 'exp',
-            'sine': 'sin', 'cosine': 'cos', 'tangent': 'tan'
+            "maximum": "max",
+            "minimum": "min",
+            "average": "mean",
+            "sum": "sum",
+            "total": "sum",
+            "count": "count",
+            "logarithm": "log",
+            "natural log": "ln",
+            "exponential": "exp",
+            "sine": "sin",
+            "cosine": "cos",
+            "tangent": "tan",
         }
 
-        self.percentage_keywords = ['percent', 'percentage', '%', 'pct']
-        self.fraction_keywords = ['fraction', 'ratio', 'rate', 'per']
+        self.percentage_keywords = ["percent", "percentage", "%", "pct"]
+        self.fraction_keywords = ["fraction", "ratio", "rate", "per"]
 
     def parse_natural_language_formula(self, description: str) -> Dict[str, Any]:
         """
@@ -127,7 +165,7 @@ class NaturalLanguageFormulaParser:
                 "formula_latex": latex_formula,
                 "variables": variables,
                 "validation": validation_result,
-                "status": "success"
+                "status": "success",
             }
 
             logger.info(f"Successfully parsed formula: {formula_expr}")
@@ -143,24 +181,24 @@ class NaturalLanguageFormulaParser:
         cleaned = description.lower()
 
         # Remove extra whitespace
-        cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+        cleaned = re.sub(r"\s+", " ", cleaned).strip()
 
         # Replace common abbreviations
         replacements = {
-            'pts': 'points',
-            'reb': 'rebounds',
-            'ast': 'assists',
-            'stl': 'steals',
-            'blk': 'blocks',
-            'tov': 'turnovers',
-            'fgm': 'field goals made',
-            'fga': 'field goals attempted',
-            '3pm': 'three pointers made',
-            '3pa': 'three pointers attempted',
-            'ftm': 'free throws made',
-            'fta': 'free throws attempted',
-            'mp': 'minutes played',
-            'gp': 'games played'
+            "pts": "points",
+            "reb": "rebounds",
+            "ast": "assists",
+            "stl": "steals",
+            "blk": "blocks",
+            "tov": "turnovers",
+            "fgm": "field goals made",
+            "fga": "field goals attempted",
+            "3pm": "three pointers made",
+            "3pa": "three pointers attempted",
+            "ftm": "free throws made",
+            "fta": "free throws attempted",
+            "mp": "minutes played",
+            "gp": "games played",
         }
 
         for abbrev, full in replacements.items():
@@ -174,27 +212,39 @@ class NaturalLanguageFormulaParser:
         description_lower = description.lower()
 
         # Special handling for common formula types (check first)
-        if 'efficiency' in description_lower and 'rating' in description_lower:
+        if "efficiency" in description_lower and "rating" in description_lower:
             # Player Efficiency Rating typically includes these variables
-            variables = ['PTS', 'REB', 'AST', 'STL', 'BLK', 'FGA', 'FGM', 'FTA', 'FTM', 'TOV', 'MP']
-        elif 'true shooting' in description_lower:
+            variables = [
+                "PTS",
+                "REB",
+                "AST",
+                "STL",
+                "BLK",
+                "FGA",
+                "FGM",
+                "FTA",
+                "FTM",
+                "TOV",
+                "MP",
+            ]
+        elif "true shooting" in description_lower:
             # True shooting percentage
-            variables = ['PTS', 'FGA', 'FTA']
-        elif 'shooting' in description_lower and 'percentage' in description_lower:
+            variables = ["PTS", "FGA", "FTA"]
+        elif "shooting" in description_lower and "percentage" in description_lower:
             # Shooting percentage typically includes these variables
-            variables = ['FGM', 'FGA']
-        elif 'usage' in description_lower and 'rate' in description_lower:
+            variables = ["FGM", "FGA"]
+        elif "usage" in description_lower and "rate" in description_lower:
             # Usage rate typically includes these variables
-            variables = ['FGA', 'FTA', 'TOV', 'MP']
-        elif 'win' in description_lower and 'shares' in description_lower:
+            variables = ["FGA", "FTA", "TOV", "MP"]
+        elif "win" in description_lower and "shares" in description_lower:
             # Win shares typically includes these variables
-            variables = ['PTS', 'REB', 'AST']
-        elif 'assist' in description_lower and 'ratio' in description_lower:
+            variables = ["PTS", "REB", "AST"]
+        elif "assist" in description_lower and "ratio" in description_lower:
             # Assist ratio typically includes these variables
-            variables = ['AST', 'TOV']
-        elif 'field goal' in description_lower:
+            variables = ["AST", "TOV"]
+        elif "field goal" in description_lower:
             # Field goal percentage
-            variables = ['FGM', 'FGA']
+            variables = ["FGM", "FGA"]
 
         # If no special handling matched, try other methods
         if not variables:
@@ -204,18 +254,31 @@ class NaturalLanguageFormulaParser:
                     variables.append(abbrev)
 
             # Look for mathematical variables (single letters)
-            math_vars = re.findall(r'\b[a-z]\b', description)
+            math_vars = re.findall(r"\b[a-z]\b", description)
             for var in math_vars:
-                if var not in ['a', 'an', 'the', 'is', 'of', 'to', 'in', 'on', 'at', 'by', 'for', 'with']:
+                if var not in [
+                    "a",
+                    "an",
+                    "the",
+                    "is",
+                    "of",
+                    "to",
+                    "in",
+                    "on",
+                    "at",
+                    "by",
+                    "for",
+                    "with",
+                ]:
                     if var not in variables:
                         variables.append(var)
 
             # Look for common formula patterns
             patterns = [
-                r'(\w+)\s*(?:per|/)\s*(\w+)',  # "points per game"
-                r'(\w+)\s*rate',  # "usage rate"
-                r'(\w+)\s*percentage',  # "field goal percentage"
-                r'(\w+)\s*ratio',  # "assist ratio"
+                r"(\w+)\s*(?:per|/)\s*(\w+)",  # "points per game"
+                r"(\w+)\s*rate",  # "usage rate"
+                r"(\w+)\s*percentage",  # "field goal percentage"
+                r"(\w+)\s*ratio",  # "assist ratio"
             ]
 
             for pattern in patterns:
@@ -223,8 +286,22 @@ class NaturalLanguageFormulaParser:
                 for match in matches:
                     if isinstance(match, tuple):
                         # Only add variables that are actual basketball terms
-                        basketball_terms = {'points', 'rebounds', 'assists', 'steals', 'blocks', 'turnovers',
-                                           'field', 'goals', 'three', 'pointers', 'free', 'throws', 'minutes', 'games'}
+                        basketball_terms = {
+                            "points",
+                            "rebounds",
+                            "assists",
+                            "steals",
+                            "blocks",
+                            "turnovers",
+                            "field",
+                            "goals",
+                            "three",
+                            "pointers",
+                            "free",
+                            "throws",
+                            "minutes",
+                            "games",
+                        }
                         for m in match:
                             if m.lower() in basketball_terms:
                                 variables.append(m.upper())
@@ -235,12 +312,20 @@ class NaturalLanguageFormulaParser:
             # If still no variables found, try to extract from common basketball terms
             if not variables:
                 basketball_terms = {
-                    'points': 'PTS', 'rebounds': 'REB', 'assists': 'AST',
-                    'steals': 'STL', 'blocks': 'BLK', 'turnovers': 'TOV',
-                    'field goals made': 'FGM', 'field goals attempted': 'FGA',
-                    'three pointers made': '3PM', 'three pointers attempted': '3PA',
-                    'free throws made': 'FTM', 'free throws attempted': 'FTA',
-                    'minutes played': 'MP', 'games played': 'GP'
+                    "points": "PTS",
+                    "rebounds": "REB",
+                    "assists": "AST",
+                    "steals": "STL",
+                    "blocks": "BLK",
+                    "turnovers": "TOV",
+                    "field goals made": "FGM",
+                    "field goals attempted": "FGA",
+                    "three pointers made": "3PM",
+                    "three pointers attempted": "3PA",
+                    "free throws made": "FTM",
+                    "free throws attempted": "FTA",
+                    "minutes played": "MP",
+                    "games played": "GP",
                 }
 
                 for term, abbrev in basketball_terms.items():
@@ -286,43 +371,43 @@ class NaturalLanguageFormulaParser:
     def _handle_percentages(self, expr_str: str) -> str:
         """Handle percentage conversions."""
         # Convert "X percent" to "X/100"
-        expr_str = re.sub(r'(\d+(?:\.\d+)?)\s*percent', r'(\1/100)', expr_str)
-        expr_str = re.sub(r'(\d+(?:\.\d+)?)\s*%', r'(\1/100)', expr_str)
+        expr_str = re.sub(r"(\d+(?:\.\d+)?)\s*percent", r"(\1/100)", expr_str)
+        expr_str = re.sub(r"(\d+(?:\.\d+)?)\s*%", r"(\1/100)", expr_str)
 
         # Convert "percentage of X" to "X/100"
-        expr_str = re.sub(r'percentage\s+of\s+(\w+)', r'(\1/100)', expr_str)
+        expr_str = re.sub(r"percentage\s+of\s+(\w+)", r"(\1/100)", expr_str)
 
         return expr_str
 
     def _handle_fractions(self, expr_str: str) -> str:
         """Handle fraction and ratio conversions."""
         # Convert "X per Y" to "X/Y"
-        expr_str = re.sub(r'(\w+)\s+per\s+(\w+)', r'(\1/\2)', expr_str)
+        expr_str = re.sub(r"(\w+)\s+per\s+(\w+)", r"(\1/\2)", expr_str)
 
         # Convert "X divided by Y" to "X/Y"
-        expr_str = re.sub(r'(\w+)\s+divided\s+by\s+(\w+)', r'(\1/\2)', expr_str)
+        expr_str = re.sub(r"(\w+)\s+divided\s+by\s+(\w+)", r"(\1/\2)", expr_str)
 
         # Convert "ratio of X to Y" to "X/Y"
-        expr_str = re.sub(r'ratio\s+of\s+(\w+)\s+to\s+(\w+)', r'(\1/\2)', expr_str)
+        expr_str = re.sub(r"ratio\s+of\s+(\w+)\s+to\s+(\w+)", r"(\1/\2)", expr_str)
 
         return expr_str
 
     def _handle_sports_patterns(self, expr_str: str, variables: List[str]) -> str:
         """Handle common sports analytics patterns."""
         # Player Efficiency Rating pattern
-        if 'player efficiency rating' in expr_str or 'per' in expr_str:
+        if "player efficiency rating" in expr_str or "per" in expr_str:
             expr_str = self._parse_per_pattern(expr_str)
 
         # True Shooting Percentage pattern
-        if 'true shooting percentage' in expr_str or 'true shooting' in expr_str:
+        if "true shooting percentage" in expr_str or "true shooting" in expr_str:
             expr_str = self._parse_ts_pattern(expr_str)
 
         # Usage Rate pattern
-        if 'usage rate' in expr_str:
+        if "usage rate" in expr_str:
             expr_str = self._parse_usage_rate_pattern(expr_str)
 
         # Win Shares pattern
-        if 'win shares' in expr_str:
+        if "win shares" in expr_str:
             expr_str = self._parse_win_shares_pattern(expr_str)
 
         return expr_str
@@ -348,19 +433,23 @@ class NaturalLanguageFormulaParser:
     def _clean_expression_string(self, expr_str: str) -> str:
         """Clean up the expression string for parsing."""
         # Remove extra spaces around operators
-        expr_str = re.sub(r'\s*([+\-*/])\s*', r'\1', expr_str)
+        expr_str = re.sub(r"\s*([+\-*/])\s*", r"\1", expr_str)
 
         # Ensure proper parentheses
-        expr_str = re.sub(r'(\w+)\s*(\w+)', r'\1 * \2', expr_str)  # Implicit multiplication
+        expr_str = re.sub(
+            r"(\w+)\s*(\w+)", r"\1 * \2", expr_str
+        )  # Implicit multiplication
 
         # Clean up double operators
-        expr_str = re.sub(r'\+\+', '+', expr_str)
-        expr_str = re.sub(r'--', '+', expr_str)
-        expr_str = re.sub(r'\+\-', '-', expr_str)
+        expr_str = re.sub(r"\+\+", "+", expr_str)
+        expr_str = re.sub(r"--", "+", expr_str)
+        expr_str = re.sub(r"\+\-", "-", expr_str)
 
         return expr_str
 
-    def _construct_expression_manually(self, expr_str: str, variables: List[str]) -> sp.Expr:
+    def _construct_expression_manually(
+        self, expr_str: str, variables: List[str]
+    ) -> sp.Expr:
         """Manually construct expression when parsing fails."""
         logger.info(f"Constructing expression manually with variables: {variables}")
 
@@ -373,14 +462,14 @@ class NaturalLanguageFormulaParser:
         else:
             # If no variables found, try to create a simple expression
             # Look for common basketball terms in the original description
-            if 'efficiency' in expr_str.lower():
-                return sp.Symbol('PER')  # Player Efficiency Rating
-            elif 'shooting' in expr_str.lower():
-                return sp.Symbol('FG%')  # Field Goal Percentage
-            elif 'usage' in expr_str.lower():
-                return sp.Symbol('USG%')  # Usage Rate
+            if "efficiency" in expr_str.lower():
+                return sp.Symbol("PER")  # Player Efficiency Rating
+            elif "shooting" in expr_str.lower():
+                return sp.Symbol("FG%")  # Field Goal Percentage
+            elif "usage" in expr_str.lower():
+                return sp.Symbol("USG%")  # Usage Rate
             else:
-                return sp.Symbol('x')  # Default variable
+                return sp.Symbol("x")  # Default variable
 
     def _validate_formula(self, expr: sp.Expr, variables: List[str]) -> Dict[str, Any]:
         """Validate the parsed formula."""
@@ -389,7 +478,7 @@ class NaturalLanguageFormulaParser:
             "errors": [],
             "warnings": [],
             "complexity": self._calculate_complexity(expr),
-            "variable_count": len(variables)
+            "variable_count": len(variables),
         }
 
         # Check if expression is valid
@@ -422,9 +511,7 @@ class NaturalLanguageFormulaParser:
 
 @log_operation("nl_to_formula_parse")
 def parse_natural_language_formula(
-    description: str,
-    context: Optional[str] = None,
-    validate_formula: bool = True
+    description: str, context: Optional[str] = None, validate_formula: bool = True
 ) -> Dict[str, Any]:
     """
     Parse a natural language description into a mathematical formula.
@@ -451,8 +538,7 @@ def parse_natural_language_formula(
         # Add validation if requested
         if validate_formula:
             result["validation"] = parser._validate_formula(
-                parse_expr(result["formula_string"]),
-                result["variables"]
+                parse_expr(result["formula_string"]), result["variables"]
             )
 
         logger.info(f"Successfully parsed formula: {result['formula_string']}")
@@ -465,8 +551,7 @@ def parse_natural_language_formula(
 
 @log_operation("nl_to_formula_suggest")
 def suggest_formula_from_description(
-    description: str,
-    context: Optional[str] = None
+    description: str, context: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Suggest a formula based on natural language description.
@@ -487,69 +572,100 @@ def suggest_formula_from_description(
         "player efficiency rating": {
             "formula": "((PTS + REB + AST + STL + BLK - (FGA - FGM) - (FTA - FTM) - TOV) / MP) * 100",
             "description": "Player Efficiency Rating - comprehensive player performance metric",
-            "variables": ["PTS", "REB", "AST", "STL", "BLK", "FGA", "FGM", "FTA", "FTM", "TOV", "MP"]
+            "variables": [
+                "PTS",
+                "REB",
+                "AST",
+                "STL",
+                "BLK",
+                "FGA",
+                "FGM",
+                "FTA",
+                "FTM",
+                "TOV",
+                "MP",
+            ],
         },
         "true shooting percentage": {
             "formula": "PTS / (2 * (FGA + 0.44 * FTA))",
             "description": "True Shooting Percentage - shooting efficiency including 3-pointers and free throws",
-            "variables": ["PTS", "FGA", "FTA"]
+            "variables": ["PTS", "FGA", "FTA"],
         },
         "usage rate": {
             "formula": "((FGA + 0.44 * FTA + TOV) * (Team_MP / 5)) / (MP * (Team_FGA + 0.44 * Team_FTA + Team_TOV)) * 100",
             "description": "Usage Rate - percentage of team plays used by player",
-            "variables": ["FGA", "FTA", "TOV", "Team_MP", "MP", "Team_FGA", "Team_FTA", "Team_TOV"]
+            "variables": [
+                "FGA",
+                "FTA",
+                "TOV",
+                "Team_MP",
+                "MP",
+                "Team_FGA",
+                "Team_FTA",
+                "Team_TOV",
+            ],
         },
         "win shares": {
             "formula": "((PTS - League_Avg_PTS) + (REB - League_Avg_REB) + (AST - League_Avg_AST)) / 30",
             "description": "Win Shares - player contribution to team wins",
-            "variables": ["PTS", "REB", "AST", "League_Avg_PTS", "League_Avg_REB", "League_Avg_AST"]
+            "variables": [
+                "PTS",
+                "REB",
+                "AST",
+                "League_Avg_PTS",
+                "League_Avg_REB",
+                "League_Avg_AST",
+            ],
         },
         "field goal percentage": {
             "formula": "FGM / FGA",
             "description": "Field Goal Percentage - basic shooting efficiency",
-            "variables": ["FGM", "FGA"]
+            "variables": ["FGM", "FGA"],
         },
         "assist to turnover ratio": {
             "formula": "AST / TOV",
             "description": "Assist to Turnover Ratio - ball handling efficiency",
-            "variables": ["AST", "TOV"]
-        }
+            "variables": ["AST", "TOV"],
+        },
     }
 
     # Find matching formulas
     description_lower = description.lower()
     for formula_name, formula_info in sports_formulas.items():
         if any(keyword in description_lower for keyword in formula_name.split()):
-            suggestions.append({
-                "name": formula_name,
-                "formula": formula_info["formula"],
-                "description": formula_info["description"],
-                "variables": formula_info["variables"],
-                "confidence": 0.8
-            })
+            suggestions.append(
+                {
+                    "name": formula_name,
+                    "formula": formula_info["formula"],
+                    "description": formula_info["description"],
+                    "variables": formula_info["variables"],
+                    "confidence": 0.8,
+                }
+            )
 
     # If no specific matches, provide general suggestions
     if not suggestions:
-        suggestions.append({
-            "name": "basic_efficiency",
-            "formula": "PTS / MP",
-            "description": "Points per minute - basic scoring efficiency",
-            "variables": ["PTS", "MP"],
-            "confidence": 0.5
-        })
+        suggestions.append(
+            {
+                "name": "basic_efficiency",
+                "formula": "PTS / MP",
+                "description": "Points per minute - basic scoring efficiency",
+                "variables": ["PTS", "MP"],
+                "confidence": 0.5,
+            }
+        )
 
     return {
         "description": description,
         "suggestions": suggestions,
         "context": context,
-        "status": "success"
+        "status": "success",
     }
 
 
 @log_operation("nl_to_formula_validate")
 def validate_natural_language_formula(
-    description: str,
-    expected_formula: Optional[str] = None
+    description: str, expected_formula: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Validate a natural language formula description.
@@ -574,7 +690,7 @@ def validate_natural_language_formula(
             "errors": parsed_result["validation"]["errors"],
             "warnings": parsed_result["validation"]["warnings"],
             "complexity": parsed_result["validation"]["complexity"],
-            "variables": parsed_result["variables"]
+            "variables": parsed_result["variables"],
         }
 
         # Compare with expected formula if provided
@@ -597,6 +713,5 @@ def validate_natural_language_formula(
             "description": description,
             "is_valid": False,
             "errors": [str(e)],
-            "status": "error"
+            "status": "error",
         }
-

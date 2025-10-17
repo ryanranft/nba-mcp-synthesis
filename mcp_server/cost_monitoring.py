@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 class CostAlertLevel(Enum):
     """Cost alert severity levels"""
+
     INFO = "info"
     WARNING = "warning"
     CRITICAL = "critical"
@@ -23,6 +24,7 @@ class CostAlertLevel(Enum):
 @dataclass
 class CostMetric:
     """Cost metric for a service"""
+
     service_name: str
     cost_usd: float
     usage_amount: float
@@ -34,6 +36,7 @@ class CostMetric:
 @dataclass
 class Budget:
     """Budget configuration"""
+
     budget_name: str
     monthly_limit_usd: float
     alert_thresholds: List[float]  # e.g., [0.5, 0.8, 1.0] for 50%, 80%, 100%
@@ -56,7 +59,7 @@ class CostMonitoringManager:
         cost_usd: float,
         usage_amount: float,
         usage_unit: str,
-        time_period: str = "hourly"
+        time_period: str = "hourly",
     ):
         """
         Track cost for a service.
@@ -73,11 +76,13 @@ class CostMonitoringManager:
             cost_usd=cost_usd,
             usage_amount=usage_amount,
             usage_unit=usage_unit,
-            time_period=time_period
+            time_period=time_period,
         )
 
         self.cost_history.append(metric)
-        logger.info(f"Cost tracked: {service_name} = ${cost_usd:.2f} ({usage_amount} {usage_unit})")
+        logger.info(
+            f"Cost tracked: {service_name} = ${cost_usd:.2f} ({usage_amount} {usage_unit})"
+        )
 
         # Update budgets
         self._update_budgets(service_name, cost_usd)
@@ -87,7 +92,7 @@ class CostMonitoringManager:
         budget_name: str,
         monthly_limit_usd: float,
         alert_thresholds: List[float],
-        services: List[str]
+        services: List[str],
     ) -> bool:
         """
         Create a new budget.
@@ -105,11 +110,13 @@ class CostMonitoringManager:
             budget_name=budget_name,
             monthly_limit_usd=monthly_limit_usd,
             alert_thresholds=sorted(alert_thresholds),
-            services=services
+            services=services,
         )
 
         self.budgets[budget_name] = budget
-        logger.info(f"Budget '{budget_name}' created: ${monthly_limit_usd}/month for {services}")
+        logger.info(
+            f"Budget '{budget_name}' created: ${monthly_limit_usd}/month for {services}"
+        )
         return True
 
     def _update_budgets(self, service_name: str, cost_usd: float):
@@ -154,7 +161,9 @@ class CostMonitoringManager:
         for metric in self.cost_history:
             metric_time = datetime.fromisoformat(metric.timestamp)
             if metric_time >= month_start:
-                costs[metric.service_name] = costs.get(metric.service_name, 0) + metric.cost_usd
+                costs[metric.service_name] = (
+                    costs.get(metric.service_name, 0) + metric.cost_usd
+                )
 
         return costs
 
@@ -173,9 +182,13 @@ class CostMonitoringManager:
             "current_spend": budget.current_spend,
             "remaining": remaining,
             "spend_percentage": spend_ratio * 100,
-            "status": "CRITICAL" if spend_ratio >= 1.0 else "WARNING" if spend_ratio >= 0.8 else "OK",
+            "status": (
+                "CRITICAL"
+                if spend_ratio >= 1.0
+                else "WARNING" if spend_ratio >= 0.8 else "OK"
+            ),
             "services": budget.services,
-            "alerts_sent": len(budget.alerts_sent)
+            "alerts_sent": len(budget.alerts_sent),
         }
 
     def get_all_budgets_status(self) -> List[Dict[str, Any]]:
@@ -197,20 +210,24 @@ class CostMonitoringManager:
                 daily_costs[day_key] = daily_costs.get(day_key, 0) + metric.cost_usd
 
                 # Service costs
-                service_costs[metric.service_name] = service_costs.get(metric.service_name, 0) + metric.cost_usd
+                service_costs[metric.service_name] = (
+                    service_costs.get(metric.service_name, 0) + metric.cost_usd
+                )
 
         total_cost = sum(daily_costs.values())
         avg_daily_cost = total_cost / days if days > 0 else 0
 
         # Identify top costly services
-        top_services = sorted(service_costs.items(), key=lambda x: x[1], reverse=True)[:5]
+        top_services = sorted(service_costs.items(), key=lambda x: x[1], reverse=True)[
+            :5
+        ]
 
         return {
             "period_days": days,
             "total_cost": total_cost,
             "avg_daily_cost": avg_daily_cost,
             "daily_breakdown": daily_costs,
-            "top_services": dict(top_services)
+            "top_services": dict(top_services),
         }
 
     def generate_cost_optimization_recommendations(self) -> List[str]:
@@ -259,14 +276,14 @@ if __name__ == "__main__":
         budget_name="monthly_infrastructure",
         monthly_limit_usd=1000.0,
         alert_thresholds=[0.5, 0.8, 0.9, 1.0],
-        services=["EC2", "RDS", "S3"]
+        services=["EC2", "RDS", "S3"],
     )
 
     cost_mgr.create_budget(
         budget_name="ml_training",
         monthly_limit_usd=500.0,
         alert_thresholds=[0.75, 1.0],
-        services=["EC2", "SageMaker"]
+        services=["EC2", "SageMaker"],
     )
 
     print("\n✅ Created 2 budgets")
@@ -292,7 +309,9 @@ if __name__ == "__main__":
     for budget_status in cost_mgr.get_all_budgets_status():
         print(f"\n💰 {budget_status['budget_name']}")
         print(f"   Limit: ${budget_status['monthly_limit']:.2f}/month")
-        print(f"   Spent: ${budget_status['current_spend']:.2f} ({budget_status['spend_percentage']:.1f}%)")
+        print(
+            f"   Spent: ${budget_status['current_spend']:.2f} ({budget_status['spend_percentage']:.1f}%)"
+        )
         print(f"   Remaining: ${budget_status['remaining']:.2f}")
         print(f"   Status: {budget_status['status']}")
         print(f"   Alerts Sent: {budget_status['alerts_sent']}")
@@ -306,7 +325,7 @@ if __name__ == "__main__":
     print(f"\nTotal Cost: ${trends['total_cost']:.2f}")
     print(f"Avg Daily Cost: ${trends['avg_daily_cost']:.2f}")
     print(f"\nTop Services:")
-    for service, cost in trends['top_services'].items():
+    for service, cost in trends["top_services"].items():
         print(f"  - {service}: ${cost:.2f}")
 
     # Recommendations
@@ -321,4 +340,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("Cost Monitoring Demo Complete!")
     print("=" * 80)
-

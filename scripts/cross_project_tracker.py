@@ -50,13 +50,15 @@ class CrossProjectTracker:
         shared = self._find_shared_implementations(synthesis_status, simulator_status)
 
         scan_results = {
-            'synthesis': synthesis_status,
-            'simulator': simulator_status,
-            'shared': shared,
-            'scan_date': datetime.now().isoformat()
+            "synthesis": synthesis_status,
+            "simulator": simulator_status,
+            "shared": shared,
+            "scan_date": datetime.now().isoformat(),
         }
 
-        logger.info(f"Scan complete: {synthesis_status['modules']} synthesis modules, {simulator_status['modules']} simulator modules")
+        logger.info(
+            f"Scan complete: {synthesis_status['modules']} synthesis modules, {simulator_status['modules']} simulator modules"
+        )
 
         return scan_results
 
@@ -65,35 +67,37 @@ class CrossProjectTracker:
         logger.info(f"Scanning {project_name} at {project_path}")
 
         status = {
-            'project_name': project_name,
-            'project_path': project_path,
-            'modules': [],
-            'features': [],
-            'files': 0,
-            'recommendations_implemented': 0,
-            'technologies': set(),
-            'last_scan': datetime.now().isoformat()
+            "project_name": project_name,
+            "project_path": project_path,
+            "modules": [],
+            "features": [],
+            "files": 0,
+            "recommendations_implemented": 0,
+            "technologies": set(),
+            "last_scan": datetime.now().isoformat(),
         }
 
         try:
             # Count files
-            status['files'] = self._count_files(project_path)
+            status["files"] = self._count_files(project_path)
 
             # Find modules
-            status['modules'] = self._find_modules(project_path)
+            status["modules"] = self._find_modules(project_path)
 
             # Find features
-            status['features'] = self._find_features(project_path)
+            status["features"] = self._find_features(project_path)
 
             # Find technologies
-            status['technologies'] = self._find_technologies(project_path)
+            status["technologies"] = self._find_technologies(project_path)
 
             # Count implemented recommendations
-            status['recommendations_implemented'] = self._count_implemented_recommendations(project_path)
+            status["recommendations_implemented"] = (
+                self._count_implemented_recommendations(project_path)
+            )
 
         except Exception as e:
             logger.error(f"Error scanning {project_name}: {e}")
-            status['error'] = str(e)
+            status["error"] = str(e)
 
         return status
 
@@ -101,15 +105,24 @@ class CrossProjectTracker:
         """Count files in project with exclusions for performance."""
         try:
             # Use a much simpler approach - just count Python files in top 2 levels
-            result = subprocess.run([
-                'find', project_path,
-                '-maxdepth', '2',  # Only 2 levels deep
-                '-type', 'f',
-                '-name', '*.py'
-            ], capture_output=True, text=True, timeout=5)
+            result = subprocess.run(
+                [
+                    "find",
+                    project_path,
+                    "-maxdepth",
+                    "2",  # Only 2 levels deep
+                    "-type",
+                    "f",
+                    "-name",
+                    "*.py",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
 
             if result.returncode == 0:
-                files = result.stdout.strip().split('\n')
+                files = result.stdout.strip().split("\n")
                 return len([f for f in files if f])  # Filter out empty strings
             else:
                 logger.warning(f"File count failed: {result.stderr}")
@@ -126,18 +139,29 @@ class CrossProjectTracker:
         try:
             for root, dirs, files in os.walk(project_path):
                 # Calculate depth and limit it
-                depth = root[len(project_path):].count(os.sep)
+                depth = root[len(project_path) :].count(os.sep)
                 if depth >= 3:  # Limit to 3 levels deep
                     dirs[:] = []
                     continue
 
                 # Skip hidden directories and common non-module directories
-                dirs[:] = [d for d in dirs if not d.startswith('.') and d not in ['__pycache__', 'node_modules', 'venv', 'env']]
+                dirs[:] = [
+                    d
+                    for d in dirs
+                    if not d.startswith(".")
+                    and d not in ["__pycache__", "node_modules", "venv", "env"]
+                ]
 
                 for file in files:
-                    if file.endswith('.py') and not file.startswith('__'):
-                        module_path = os.path.relpath(os.path.join(root, file), project_path)
-                        module_name = module_path.replace('/', '.').replace('\\', '.').replace('.py', '')
+                    if file.endswith(".py") and not file.startswith("__"):
+                        module_path = os.path.relpath(
+                            os.path.join(root, file), project_path
+                        )
+                        module_name = (
+                            module_path.replace("/", ".")
+                            .replace("\\", ".")
+                            .replace(".py", "")
+                        )
                         modules.append(module_name)
 
             # Limit to reasonable number
@@ -153,25 +177,35 @@ class CrossProjectTracker:
 
         # Look for common feature indicators
         feature_indicators = [
-            'class', 'def', 'function', 'api', 'endpoint', 'service',
-            'model', 'database', 'ml', 'analysis', 'recommendation'
+            "class",
+            "def",
+            "function",
+            "api",
+            "endpoint",
+            "service",
+            "model",
+            "database",
+            "ml",
+            "analysis",
+            "recommendation",
         ]
 
         try:
             for root, dirs, files in os.walk(project_path):
-                dirs[:] = [d for d in dirs if not d.startswith('.')]
+                dirs[:] = [d for d in dirs if not d.startswith(".")]
 
                 for file in files:
-                    if file.endswith('.py'):
+                    if file.endswith(".py"):
                         file_path = os.path.join(root, file)
                         try:
-                            with open(file_path, 'r', encoding='utf-8') as f:
+                            with open(file_path, "r", encoding="utf-8") as f:
                                 content = f.read().lower()
 
                                 # Extract class and function names
                                 import re
-                                classes = re.findall(r'class\s+(\w+)', content)
-                                functions = re.findall(r'def\s+(\w+)', content)
+
+                                classes = re.findall(r"class\s+(\w+)", content)
+                                functions = re.findall(r"def\s+(\w+)", content)
 
                                 features.extend(classes)
                                 features.extend(functions)
@@ -193,26 +227,26 @@ class CrossProjectTracker:
 
         # Check for common technology indicators
         tech_files = {
-            'requirements.txt': 'Python',
-            'package.json': 'Node.js',
-            'Dockerfile': 'Docker',
-            'docker-compose.yml': 'Docker Compose',
-            'terraform': 'Terraform',
-            'kubernetes': 'Kubernetes',
-            'aws': 'AWS',
-            'postgresql': 'PostgreSQL',
-            'redis': 'Redis',
-            'mlflow': 'MLflow',
-            'pandas': 'Pandas',
-            'numpy': 'NumPy',
-            'scikit-learn': 'Scikit-learn',
-            'tensorflow': 'TensorFlow',
-            'pytorch': 'PyTorch'
+            "requirements.txt": "Python",
+            "package.json": "Node.js",
+            "Dockerfile": "Docker",
+            "docker-compose.yml": "Docker Compose",
+            "terraform": "Terraform",
+            "kubernetes": "Kubernetes",
+            "aws": "AWS",
+            "postgresql": "PostgreSQL",
+            "redis": "Redis",
+            "mlflow": "MLflow",
+            "pandas": "Pandas",
+            "numpy": "NumPy",
+            "scikit-learn": "Scikit-learn",
+            "tensorflow": "TensorFlow",
+            "pytorch": "PyTorch",
         }
 
         try:
             for root, dirs, files in os.walk(project_path):
-                dirs[:] = [d for d in dirs if not d.startswith('.')]
+                dirs[:] = [d for d in dirs if not d.startswith(".")]
 
                 for file in files:
                     file_lower = file.lower()
@@ -223,10 +257,10 @@ class CrossProjectTracker:
                             technologies.add(tech_name)
 
                     # Check file content for technology mentions
-                    if file.endswith(('.py', '.md', '.txt', '.json', '.yaml', '.yml')):
+                    if file.endswith((".py", ".md", ".txt", ".json", ".yaml", ".yml")):
                         try:
                             file_path = os.path.join(root, file)
-                            with open(file_path, 'r', encoding='utf-8') as f:
+                            with open(file_path, "r", encoding="utf-8") as f:
                                 content = f.read().lower()
 
                                 for tech_keyword, tech_name in tech_files.items():
@@ -249,18 +283,24 @@ class CrossProjectTracker:
         try:
             # Look for recommendation implementation indicators
             implementation_indicators = [
-                'recommendation', 'implemented', 'completed', 'done',
-                'model versioning', 'data validation', 'mlflow', 'monitoring'
+                "recommendation",
+                "implemented",
+                "completed",
+                "done",
+                "model versioning",
+                "data validation",
+                "mlflow",
+                "monitoring",
             ]
 
             for root, dirs, files in os.walk(project_path):
-                dirs[:] = [d for d in dirs if not d.startswith('.')]
+                dirs[:] = [d for d in dirs if not d.startswith(".")]
 
                 for file in files:
-                    if file.endswith(('.py', '.md')):
+                    if file.endswith((".py", ".md")):
                         try:
                             file_path = os.path.join(root, file)
-                            with open(file_path, 'r', encoding='utf-8') as f:
+                            with open(file_path, "r", encoding="utf-8") as f:
                                 content = f.read().lower()
 
                                 for indicator in implementation_indicators:
@@ -277,37 +317,43 @@ class CrossProjectTracker:
             logger.warning(f"Error counting implemented recommendations: {e}")
             return 0
 
-    def _find_shared_implementations(self, synthesis_status: Dict[str, Any], simulator_status: Dict[str, Any]) -> Dict[str, Any]:
+    def _find_shared_implementations(
+        self, synthesis_status: Dict[str, Any], simulator_status: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Find shared implementations between projects."""
         shared = {
-            'shared_modules': [],
-            'shared_features': [],
-            'shared_technologies': [],
-            'integration_points': []
+            "shared_modules": [],
+            "shared_features": [],
+            "shared_technologies": [],
+            "integration_points": [],
         }
 
         # Find shared technologies
-        synthesis_tech = synthesis_status.get('technologies', set())
-        simulator_tech = simulator_status.get('technologies', set())
-        shared['shared_technologies'] = list(synthesis_tech.intersection(simulator_tech))
+        synthesis_tech = synthesis_status.get("technologies", set())
+        simulator_tech = simulator_status.get("technologies", set())
+        shared["shared_technologies"] = list(
+            synthesis_tech.intersection(simulator_tech)
+        )
 
         # Find shared features
-        synthesis_features = set(synthesis_status.get('features', []))
-        simulator_features = set(simulator_status.get('features', []))
-        shared['shared_features'] = list(synthesis_features.intersection(simulator_features))
+        synthesis_features = set(synthesis_status.get("features", []))
+        simulator_features = set(simulator_status.get("features", []))
+        shared["shared_features"] = list(
+            synthesis_features.intersection(simulator_features)
+        )
 
         # Find integration points
-        integration_keywords = ['mcp', 'api', 'integration', 'shared', 'common']
-        synthesis_modules = synthesis_status.get('modules', [])
-        simulator_modules = simulator_status.get('modules', [])
+        integration_keywords = ["mcp", "api", "integration", "shared", "common"]
+        synthesis_modules = synthesis_status.get("modules", [])
+        simulator_modules = simulator_status.get("modules", [])
 
         for module in synthesis_modules:
             if any(keyword in module.lower() for keyword in integration_keywords):
-                shared['integration_points'].append(f"synthesis:{module}")
+                shared["integration_points"].append(f"synthesis:{module}")
 
         for module in simulator_modules:
             if any(keyword in module.lower() for keyword in integration_keywords):
-                shared['integration_points'].append(f"simulator:{module}")
+                shared["integration_points"].append(f"simulator:{module}")
 
         return shared
 
@@ -321,9 +367,9 @@ class CrossProjectTracker:
         Returns:
             str: Generated report content
         """
-        synthesis = scan_results['synthesis']
-        simulator = scan_results['simulator']
-        shared = scan_results['shared']
+        synthesis = scan_results["synthesis"]
+        simulator = scan_results["simulator"]
+        shared = scan_results["shared"]
 
         content = f"""# Cross-Project Implementation Status
 
@@ -469,28 +515,28 @@ This report tracks implementation status across both NBA MCP Synthesis and NBA S
         if not modules:
             return "- No modules found"
 
-        return '\n'.join(f"- {module}" for module in modules)
+        return "\n".join(f"- {module}" for module in modules)
 
     def _format_feature_list(self, features: List[str]) -> str:
         """Format feature list for display."""
         if not features:
             return "- No features found"
 
-        return '\n'.join(f"- {feature}" for feature in features)
+        return "\n".join(f"- {feature}" for feature in features)
 
     def _format_technology_list(self, technologies: List[str]) -> str:
         """Format technology list for display."""
         if not technologies:
             return "- No shared technologies found"
 
-        return '\n'.join(f"- {tech}" for tech in sorted(technologies))
+        return "\n".join(f"- {tech}" for tech in sorted(technologies))
 
     def _format_integration_points(self, points: List[str]) -> str:
         """Format integration points for display."""
         if not points:
             return "- No integration points found"
 
-        return '\n'.join(f"- {point}" for point in points)
+        return "\n".join(f"- {point}" for point in points)
 
     def _format_status_table(self, scan_results: Dict[str, Any], category: str) -> str:
         """Format status table for recommendations."""
@@ -498,13 +544,15 @@ This report tracks implementation status across both NBA MCP Synthesis and NBA S
         # For now, return placeholder
         return "| TBD | TBD | TBD | TBD |"
 
-    def save_unified_status(self, scan_results: Dict[str, Any], output_path: str) -> None:
+    def save_unified_status(
+        self, scan_results: Dict[str, Any], output_path: str
+    ) -> None:
         """Save unified status report to file."""
         content = self.generate_unified_status(scan_results)
 
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             f.write(content)
 
         logger.info(f"Saved unified status report: {output_path}")
@@ -522,14 +570,18 @@ def test_cross_project_tracker():
     # Create test files
     test_files = [
         (test_synthesis, "requirements.txt", "pandas\nnumpy\nmlflow"),
-        (test_synthesis, "main.py", "class RecommendationSystem:\n    def analyze(self): pass"),
+        (
+            test_synthesis,
+            "main.py",
+            "class RecommendationSystem:\n    def analyze(self): pass",
+        ),
         (test_simulator, "requirements.txt", "pandas\nscikit-learn\naws-sdk"),
         (test_simulator, "model.py", "class MLModel:\n    def train(self): pass"),
     ]
 
     for base_path, filename, content in test_files:
         file_path = os.path.join(base_path, filename)
-        with open(file_path, 'w') as f:
+        with open(file_path, "w") as f:
             f.write(content)
 
     # Test tracker
@@ -539,9 +591,15 @@ def test_cross_project_tracker():
 
     # Scan both projects
     scan_results = tracker.scan_both_projects()
-    print(f"  Synthesis: {scan_results['synthesis']['files']} files, {len(scan_results['synthesis']['modules'])} modules")
-    print(f"  Simulator: {scan_results['simulator']['files']} files, {len(scan_results['simulator']['modules'])} modules")
-    print(f"  Shared technologies: {len(scan_results['shared']['shared_technologies'])}")
+    print(
+        f"  Synthesis: {scan_results['synthesis']['files']} files, {len(scan_results['synthesis']['modules'])} modules"
+    )
+    print(
+        f"  Simulator: {scan_results['simulator']['files']} files, {len(scan_results['simulator']['modules'])} modules"
+    )
+    print(
+        f"  Shared technologies: {len(scan_results['shared']['shared_technologies'])}"
+    )
 
     # Generate unified status
     status_report = tracker.generate_unified_status(scan_results)
@@ -549,6 +607,7 @@ def test_cross_project_tracker():
 
     # Cleanup
     import shutil
+
     shutil.rmtree(test_synthesis)
     shutil.rmtree(test_simulator)
 

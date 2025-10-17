@@ -12,9 +12,9 @@ from datetime import datetime
 # Add project to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-print("="*70)
+print("=" * 70)
 print("NBA MCP Synthesis - Workflow System Test")
-print("="*70)
+print("=" * 70)
 print()
 
 # Test 1: Import all modules
@@ -27,8 +27,9 @@ try:
         ProcessSource,
         get_notifier,
         notify_process_started,
-        notify_process_completed
+        notify_process_completed,
     )
+
     print("   ✅ slack_notifier imported successfully")
 except Exception as e:
     print(f"   ❌ Failed to import slack_notifier: {e}")
@@ -41,8 +42,9 @@ try:
         WorkflowStep,
         StepStatus,
         WorkflowStatus,
-        get_engine
+        get_engine,
     )
+
     print("   ✅ workflow.engine imported successfully")
 except Exception as e:
     print(f"   ❌ Failed to import workflow.engine: {e}")
@@ -53,8 +55,9 @@ try:
         WorkflowTrigger,
         TriggerType,
         TriggerEvent,
-        get_trigger_manager
+        get_trigger_manager,
     )
+
     print("   ✅ workflow.triggers imported successfully")
 except Exception as e:
     print(f"   ❌ Failed to import workflow.triggers: {e}")
@@ -65,8 +68,9 @@ try:
         with_workflow_notifications,
         notify_synthesis_complete,
         notify_mcp_tool_complete,
-        notify_test_complete
+        notify_test_complete,
     )
+
     print("   ✅ workflow_hooks imported successfully")
 except Exception as e:
     print(f"   ❌ Failed to import workflow_hooks: {e}")
@@ -78,7 +82,9 @@ print()
 print("2. Testing Slack notifier creation...")
 try:
     notifier = SlackNotifier()  # Should work even without webhook URL
-    print(f"   ✅ Notifier created (webhook configured: {notifier.webhook_url is not None})")
+    print(
+        f"   ✅ Notifier created (webhook configured: {notifier.webhook_url is not None})"
+    )
 except Exception as e:
     print(f"   ❌ Failed to create notifier: {e}")
     sys.exit(1)
@@ -114,14 +120,16 @@ print("5. Testing YAML workflow loading...")
 yaml_files = [
     "workflows/automated_testing_pipeline.yaml",
     "workflows/nba_data_synthesis.yaml",
-    "workflows/cross_chat_coordination.yaml"
+    "workflows/cross_chat_coordination.yaml",
 ]
 
 for yaml_file in yaml_files:
     try:
         if os.path.exists(yaml_file):
             workflow = engine.load_workflow_from_yaml(yaml_file)
-            print(f"   ✅ Loaded {os.path.basename(yaml_file)}: {len(workflow.steps)} steps")
+            print(
+                f"   ✅ Loaded {os.path.basename(yaml_file)}: {len(workflow.steps)} steps"
+            )
         else:
             print(f"   ⚠️  File not found: {yaml_file}")
     except Exception as e:
@@ -131,6 +139,7 @@ print()
 
 # Test 6: Create and execute simple workflow
 print("6. Testing workflow execution...")
+
 
 async def test_workflow_execution():
     try:
@@ -152,26 +161,26 @@ async def test_workflow_execution():
                     description="First test step",
                     action="test_action",
                     params={"message": "Hello from step 1"},
-                    timeout_seconds=10
+                    timeout_seconds=10,
                 ),
                 WorkflowStep(
                     name="Step 2",
                     description="Second test step",
                     action="test_action",
                     params={"message": "Hello from step 2"},
-                    timeout_seconds=10
+                    timeout_seconds=10,
                 ),
                 WorkflowStep(
                     name="Step 3 (with delay)",
                     description="Built-in delay action",
                     action="delay",
                     params={"seconds": 0.5},
-                    timeout_seconds=10
-                )
+                    timeout_seconds=10,
+                ),
             ],
             source=ProcessSource.WORKFLOW_ENGINE,
             notify_slack=False,  # Disable Slack for test
-            save_state=False     # Disable state saving for test
+            save_state=False,  # Disable state saving for test
         )
 
         # Execute workflow
@@ -195,8 +204,10 @@ async def test_workflow_execution():
     except Exception as e:
         print(f"   ❌ Workflow execution error: {e}")
         import traceback
+
         traceback.print_exc()
         return False
+
 
 # Run async test
 workflow_success = asyncio.run(test_workflow_execution())
@@ -216,11 +227,7 @@ try:
     trigger_mgr.register_trigger(TriggerType.PROCESS_COMPLETE, test_handler)
 
     # Emit test event
-    trigger_mgr.emit_process_complete(
-        "Test Process",
-        "test_source",
-        {"test": "data"}
-    )
+    trigger_mgr.emit_process_complete("Test Process", "test_source", {"test": "data"})
 
     if len(events_received) == 1:
         print(f"   ✅ Event emitted and received successfully")
@@ -236,13 +243,15 @@ print()
 # Test 8: Test decorator
 print("8. Testing workflow decorator...")
 
+
 async def test_decorator():
     try:
+
         @with_workflow_notifications(
             "Test Process",
             ProcessSource.WORKFLOW_ENGINE,
             notify_slack=False,
-            emit_events=True
+            emit_events=True,
         )
         async def test_function(value: int):
             await asyncio.sleep(0.1)
@@ -262,13 +271,14 @@ async def test_decorator():
         print(f"   ❌ Decorator test failed: {e}")
         return False
 
+
 decorator_success = asyncio.run(test_decorator())
 print()
 
 # Summary
-print("="*70)
+print("=" * 70)
 print("Test Summary")
-print("="*70)
+print("=" * 70)
 print()
 
 all_tests_passed = workflow_success and decorator_success

@@ -17,6 +17,7 @@ import aiohttp
 
 # Add project root to path
 import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from mcp_server.connectors.slack_notifier import SlackNotifier
@@ -39,7 +40,7 @@ class LinearClient:
         self.base_url = "https://api.linear.app/graphql"
         self.headers = {
             "Authorization": api_key,  # Linear doesn't use Bearer prefix
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
         logger.info("✅ Linear client initialized")
@@ -65,11 +66,11 @@ class LinearClient:
         }
         """
 
-        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=self._get_ssl_context())) as session:
+        async with aiohttp.ClientSession(
+            connector=aiohttp.TCPConnector(ssl=self._get_ssl_context())
+        ) as session:
             async with session.post(
-                self.base_url,
-                headers=self.headers,
-                json={"query": query}
+                self.base_url, headers=self.headers, json={"query": query}
             ) as response:
                 if response.status == 200:
                     data = await response.json()
@@ -99,15 +100,22 @@ class LinearClient:
 
         variables = {"teamId": team_id}
 
-        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=self._get_ssl_context())) as session:
+        async with aiohttp.ClientSession(
+            connector=aiohttp.TCPConnector(ssl=self._get_ssl_context())
+        ) as session:
             async with session.post(
                 self.base_url,
                 headers=self.headers,
-                json={"query": query, "variables": variables}
+                json={"query": query, "variables": variables},
             ) as response:
                 if response.status == 200:
                     data = await response.json()
-                    projects = data.get("data", {}).get("team", {}).get("projects", {}).get("nodes", [])
+                    projects = (
+                        data.get("data", {})
+                        .get("team", {})
+                        .get("projects", {})
+                        .get("nodes", [])
+                    )
                     logger.info(f"Found {len(projects)} projects for team {team_id}")
                     return projects
                 else:
@@ -121,7 +129,7 @@ class LinearClient:
         team_id: str,
         project_id: Optional[str] = None,
         priority: int = 3,
-        labels: Optional[List[str]] = None
+        labels: Optional[List[str]] = None,
     ) -> Optional[str]:
         """
         Create a Linear issue.
@@ -163,7 +171,7 @@ class LinearClient:
                 "description": description,
                 "teamId": team_id,
                 "priority": priority,
-                "labels": labels_input
+                "labels": labels_input,
             }
         }
 
@@ -171,11 +179,13 @@ class LinearClient:
         if project_id:
             variables["input"]["projectId"] = project_id
 
-        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=self._get_ssl_context())) as session:
+        async with aiohttp.ClientSession(
+            connector=aiohttp.TCPConnector(ssl=self._get_ssl_context())
+        ) as session:
             async with session.post(
                 self.base_url,
                 headers=self.headers,
-                json={"query": mutation, "variables": variables}
+                json={"query": mutation, "variables": variables},
             ) as response:
                 if response.status == 200:
                     data = await response.json()
@@ -196,7 +206,7 @@ class LinearClient:
         self,
         recommendations: List[Dict[str, Any]],
         team_id: str,
-        project_id: Optional[str] = None
+        project_id: Optional[str] = None,
     ) -> List[str]:
         """
         Create multiple Linear issues in batch.
@@ -218,7 +228,7 @@ class LinearClient:
                 priority_map = {
                     "CRITICAL": 1,  # Urgent
                     "IMPORTANT": 2,  # High
-                    "NICE_TO_HAVE": 4  # Low
+                    "NICE_TO_HAVE": 4,  # Low
                 }
                 priority = priority_map.get(rec.get("category", "IMPORTANT"), 3)
 
@@ -226,7 +236,7 @@ class LinearClient:
                 labels = [
                     f"Phase-{rec.get('phase', 'Unknown')}",
                     f"Source-{rec.get('source_book', 'Unknown')}",
-                    rec.get("category", "IMPORTANT")
+                    rec.get("category", "IMPORTANT"),
                 ]
 
                 # Create issue
@@ -236,7 +246,7 @@ class LinearClient:
                     team_id=team_id,
                     project_id=project_id,
                     priority=priority,
-                    labels=labels
+                    labels=labels,
                 )
 
                 if issue_id:
@@ -247,7 +257,9 @@ class LinearClient:
                     await asyncio.sleep(1)
 
             except Exception as e:
-                logger.error(f"Failed to create issue for {rec.get('title', 'Unknown')}: {e}")
+                logger.error(
+                    f"Failed to create issue for {rec.get('title', 'Unknown')}: {e}"
+                )
                 continue
 
         logger.info(f"Created {len(issue_ids)} Linear issues")
@@ -317,26 +329,28 @@ class NotificationManager:
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"*🔄 {stage.replace('_', ' ').title()} Started*\n{details.get('description', '')}"
-                    }
+                        "text": f"*🔄 {stage.replace('_', ' ').title()} Started*\n{details.get('description', '')}",
+                    },
                 }
-            ]
+            ],
         }
 
         if details.get("books_count"):
-            message["blocks"].append({
-                "type": "section",
-                "fields": [
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*Books:* {details['books_count']}"
-                    },
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*Budget:* ${details.get('budget', 0):.2f}"
-                    }
-                ]
-            })
+            message["blocks"].append(
+                {
+                    "type": "section",
+                    "fields": [
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Books:* {details['books_count']}",
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Budget:* ${details.get('budget', 0):.2f}",
+                        },
+                    ],
+                }
+            )
 
         await self.slack.send_notification(message)
 
@@ -349,40 +363,40 @@ class NotificationManager:
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"*✅ {stage.replace('_', ' ').title()} Complete*\n{results.get('description', '')}"
-                    }
+                        "text": f"*✅ {stage.replace('_', ' ').title()} Complete*\n{results.get('description', '')}",
+                    },
                 }
-            ]
+            ],
         }
 
         # Add relevant fields based on stage
         fields = []
         if results.get("recommendations"):
-            fields.append({
-                "type": "mrkdwn",
-                "text": f"*Recommendations:* {results['recommendations']}"
-            })
+            fields.append(
+                {
+                    "type": "mrkdwn",
+                    "text": f"*Recommendations:* {results['recommendations']}",
+                }
+            )
         if results.get("cost"):
-            fields.append({
-                "type": "mrkdwn",
-                "text": f"*Cost:* ${results['cost']:.4f}"
-            })
+            fields.append({"type": "mrkdwn", "text": f"*Cost:* ${results['cost']:.4f}"})
         if results.get("files_generated"):
-            fields.append({
-                "type": "mrkdwn",
-                "text": f"*Files Generated:* {results['files_generated']}"
-            })
+            fields.append(
+                {
+                    "type": "mrkdwn",
+                    "text": f"*Files Generated:* {results['files_generated']}",
+                }
+            )
         if results.get("issues_created"):
-            fields.append({
-                "type": "mrkdwn",
-                "text": f"*Linear Issues:* {results['issues_created']}"
-            })
+            fields.append(
+                {
+                    "type": "mrkdwn",
+                    "text": f"*Linear Issues:* {results['issues_created']}",
+                }
+            )
 
         if fields:
-            message["blocks"].append({
-                "type": "section",
-                "fields": fields
-            })
+            message["blocks"].append({"type": "section", "fields": fields})
 
         await self.slack.send_notification(message)
 
@@ -395,20 +409,16 @@ class NotificationManager:
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"*❌ Error in {stage.replace('_', ' ').title()}*\n```{error}```"
-                    }
+                        "text": f"*❌ Error in {stage.replace('_', ' ').title()}*\n```{error}```",
+                    },
                 }
-            ]
+            ],
         }
 
         await self.slack.send_notification(message)
 
     async def notify_book_analysis_complete(
-        self,
-        book_title: str,
-        recommendations: int,
-        cost: float,
-        time_taken: float
+        self, book_title: str, recommendations: int, cost: float, time_taken: float
     ):
         """Notify when a single book analysis completes."""
         message = {
@@ -418,27 +428,21 @@ class NotificationManager:
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"*📚 Book Analysis Complete*\n*Book:* {book_title}"
-                    }
+                        "text": f"*📚 Book Analysis Complete*\n*Book:* {book_title}",
+                    },
                 },
                 {
                     "type": "section",
                     "fields": [
                         {
                             "type": "mrkdwn",
-                            "text": f"*Recommendations:* {recommendations}"
+                            "text": f"*Recommendations:* {recommendations}",
                         },
-                        {
-                            "type": "mrkdwn",
-                            "text": f"*Cost:* ${cost:.4f}"
-                        },
-                        {
-                            "type": "mrkdwn",
-                            "text": f"*Time:* {time_taken:.1f}s"
-                        }
-                    ]
-                }
-            ]
+                        {"type": "mrkdwn", "text": f"*Cost:* ${cost:.4f}"},
+                        {"type": "mrkdwn", "text": f"*Time:* {time_taken:.1f}s"},
+                    ],
+                },
+            ],
         }
 
         await self.slack.send_notification(message)
@@ -452,46 +456,46 @@ class NotificationManager:
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "*🎉 NBA Book Analysis Workflow Complete!*\nReady for implementation in Cursor"
-                    }
+                        "text": "*🎉 NBA Book Analysis Workflow Complete!*\nReady for implementation in Cursor",
+                    },
                 },
                 {
                     "type": "section",
                     "fields": [
                         {
                             "type": "mrkdwn",
-                            "text": f"*Books Analyzed:* {summary.get('books_analyzed', 0)}"
+                            "text": f"*Books Analyzed:* {summary.get('books_analyzed', 0)}",
                         },
                         {
                             "type": "mrkdwn",
-                            "text": f"*Recommendations:* {summary.get('recommendations_generated', 0)}"
+                            "text": f"*Recommendations:* {summary.get('recommendations_generated', 0)}",
                         },
                         {
                             "type": "mrkdwn",
-                            "text": f"*Total Cost:* ${summary.get('total_cost', 0):.2f}"
+                            "text": f"*Total Cost:* ${summary.get('total_cost', 0):.2f}",
                         },
                         {
                             "type": "mrkdwn",
-                            "text": f"*Files Generated:* {summary.get('files_generated', 0)}"
+                            "text": f"*Files Generated:* {summary.get('files_generated', 0)}",
                         },
                         {
                             "type": "mrkdwn",
-                            "text": f"*Linear Issues:* {summary.get('linear_issues_created', 0)}"
+                            "text": f"*Linear Issues:* {summary.get('linear_issues_created', 0)}",
                         },
                         {
                             "type": "mrkdwn",
-                            "text": f"*Duration:* {summary.get('duration', 0):.1f}s"
-                        }
-                    ]
+                            "text": f"*Duration:* {summary.get('duration', 0):.1f}s",
+                        },
+                    ],
                 },
                 {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "*Next Steps:*\n1. Open `/Users/ryanranft/nba-simulator-aws/docs/phases/` in Cursor\n2. Review generated implementation files\n3. Execute highest priority recommendations\n4. Check Linear for created issues"
-                    }
-                }
-            ]
+                        "text": "*Next Steps:*\n1. Open `/Users/ryanranft/nba-simulator-aws/docs/phases/` in Cursor\n2. Review generated implementation files\n3. Execute highest priority recommendations\n4. Check Linear for created issues",
+                    },
+                },
+            ],
         }
 
         await self.slack.send_notification(message)
@@ -500,30 +504,32 @@ class NotificationManager:
         self,
         recommendations: List[Dict[str, Any]],
         team_id: str,
-        project_id: Optional[str] = None
+        project_id: Optional[str] = None,
     ) -> List[str]:
         """Create Linear issues for all recommendations."""
-        logger.info(f"Creating Linear issues for {len(recommendations)} recommendations...")
+        logger.info(
+            f"Creating Linear issues for {len(recommendations)} recommendations..."
+        )
 
         issue_ids = await self.linear.create_issues_batch(
-            recommendations=recommendations,
-            team_id=team_id,
-            project_id=project_id
+            recommendations=recommendations, team_id=team_id, project_id=project_id
         )
 
         # Notify completion
-        await self.slack.send_notification({
-            "text": f"📋 Created {len(issue_ids)} Linear Issues",
-            "blocks": [
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"*📋 Linear Issues Created*\nCreated {len(issue_ids)} issues in Linear"
+        await self.slack.send_notification(
+            {
+                "text": f"📋 Created {len(issue_ids)} Linear Issues",
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"*📋 Linear Issues Created*\nCreated {len(issue_ids)} issues in Linear",
+                        },
                     }
-                }
-            ]
-        })
+                ],
+            }
+        )
 
         return issue_ids
 
@@ -532,13 +538,17 @@ async def main():
     """Test the notification manager."""
     import argparse
 
-    parser = argparse.ArgumentParser(description='Test notification manager')
-    parser.add_argument('--slack-webhook', required=True, help='Slack webhook URL')
-    parser.add_argument('--linear-api-key', required=True, help='Linear API key')
-    parser.add_argument('--test-slack', action='store_true', help='Test Slack notifications')
-    parser.add_argument('--test-linear', action='store_true', help='Test Linear integration')
-    parser.add_argument('--get-teams', action='store_true', help='Get Linear teams')
-    parser.add_argument('--get-projects', help='Get projects for team ID')
+    parser = argparse.ArgumentParser(description="Test notification manager")
+    parser.add_argument("--slack-webhook", required=True, help="Slack webhook URL")
+    parser.add_argument("--linear-api-key", required=True, help="Linear API key")
+    parser.add_argument(
+        "--test-slack", action="store_true", help="Test Slack notifications"
+    )
+    parser.add_argument(
+        "--test-linear", action="store_true", help="Test Linear integration"
+    )
+    parser.add_argument("--get-teams", action="store_true", help="Get Linear teams")
+    parser.add_argument("--get-projects", help="Get projects for team ID")
 
     args = parser.parse_args()
 
@@ -546,8 +556,12 @@ async def main():
 
     if args.test_slack:
         logger.info("Testing Slack notifications...")
-        await manager.notify_stage_start("test_stage", {"description": "Testing Slack integration"})
-        await manager.notify_stage_complete("test_stage", {"description": "Slack test complete"})
+        await manager.notify_stage_start(
+            "test_stage", {"description": "Testing Slack integration"}
+        )
+        await manager.notify_stage_complete(
+            "test_stage", {"description": "Slack test complete"}
+        )
         logger.info("Slack test complete")
 
     if args.get_teams:
@@ -574,7 +588,7 @@ async def main():
             "source_book": "Test Book",
             "impact": "HIGH",
             "time_estimate": "1 day",
-            "consensus_score": "2/2"
+            "consensus_score": "2/2",
         }
 
         # You'll need to provide team_id and project_id
@@ -582,5 +596,5 @@ async def main():
         print("Run with --get-teams and --get-projects to find these values")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())

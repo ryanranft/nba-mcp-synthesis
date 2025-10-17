@@ -31,7 +31,7 @@ from sympy import symbols, sympify, simplify, expand, factor, diff, integrate
 import warnings
 
 # Suppress warnings
-warnings.filterwarnings('ignore', category=UserWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
 
 logger = logging.getLogger(__name__)
 
@@ -40,8 +40,10 @@ logger = logging.getLogger(__name__)
 # Data Classes and Enums
 # =============================================================================
 
+
 class ErrorType(str, Enum):
     """Types of errors that can be detected"""
+
     SYNTAX = "syntax"
     SEMANTIC = "semantic"
     LOGICAL = "logical"
@@ -54,6 +56,7 @@ class ErrorType(str, Enum):
 
 class SeverityLevel(str, Enum):
     """Severity levels for errors"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -62,6 +65,7 @@ class SeverityLevel(str, Enum):
 
 class CorrectionStrategy(str, Enum):
     """Strategies for error correction"""
+
     AUTOMATIC = "automatic"
     SUGGESTED = "suggested"
     INTERACTIVE = "interactive"
@@ -70,6 +74,7 @@ class CorrectionStrategy(str, Enum):
 @dataclass
 class DetectedError:
     """Represents a detected error"""
+
     error_id: str
     error_type: str
     severity: str
@@ -84,6 +89,7 @@ class DetectedError:
 @dataclass
 class CorrectionSuggestion:
     """Represents a correction suggestion"""
+
     suggestion_id: str
     original_text: str
     corrected_text: str
@@ -97,6 +103,7 @@ class CorrectionSuggestion:
 @dataclass
 class ValidationResult:
     """Represents validation results"""
+
     is_valid: bool
     errors: List[DetectedError]
     warnings: List[str]
@@ -108,6 +115,7 @@ class ValidationResult:
 # =============================================================================
 # Core Intelligent Error Correction Engine
 # =============================================================================
+
 
 class IntelligentErrorCorrectionEngine:
     """Main engine for intelligent error detection and correction"""
@@ -140,60 +148,60 @@ class IntelligentErrorCorrectionEngine:
                 {
                     "pattern": r"(\w+)\s*\(\s*\)\s*$",
                     "description": "Empty function call",
-                    "suggestion": "Add parameters or remove parentheses"
+                    "suggestion": "Add parameters or remove parentheses",
                 },
                 {
                     "pattern": r"(\w+)\s*=\s*=\s*",
                     "description": "Double equals in assignment",
-                    "suggestion": "Use single equals for assignment"
+                    "suggestion": "Use single equals for assignment",
                 },
                 {
                     "pattern": r"[+\-*/]\s*[+\-*/]",
                     "description": "Consecutive operators",
-                    "suggestion": "Check for missing operands"
-                }
+                    "suggestion": "Check for missing operands",
+                },
             ],
             "semantic": [
                 {
                     "pattern": r"(\w+)\s*/\s*0",
                     "description": "Division by zero",
-                    "suggestion": "Add zero check or use different formula"
+                    "suggestion": "Add zero check or use different formula",
                 },
                 {
                     "pattern": r"sqrt\s*\(\s*-\d+",
                     "description": "Square root of negative number",
-                    "suggestion": "Use absolute value or complex numbers"
+                    "suggestion": "Use absolute value or complex numbers",
                 },
                 {
                     "pattern": r"log\s*\(\s*[0-9]*\.?[0-9]*\s*\)",
                     "description": "Logarithm of non-positive number",
-                    "suggestion": "Ensure argument is positive"
-                }
+                    "suggestion": "Ensure argument is positive",
+                },
             ],
             "mathematical": [
                 {
                     "pattern": r"(\w+)\s*\*\s*(\w+)\s*\+\s*(\w+)\s*\*\s*(\w+)",
                     "description": "Potential distributive property",
-                    "suggestion": "Consider factoring: a*b + c*d = (a+c)*(b+d) if applicable"
+                    "suggestion": "Consider factoring: a*b + c*d = (a+c)*(b+d) if applicable",
                 },
                 {
                     "pattern": r"(\w+)\s*\*\s*(\w+)\s*/\s*(\w+)",
                     "description": "Potential simplification",
-                    "suggestion": "Check if terms can be simplified"
-                }
+                    "suggestion": "Check if terms can be simplified",
+                },
             ],
             "domain": [
                 {
                     "pattern": r"(\w+)\s*>\s*100",
                     "description": "Percentage over 100%",
-                    "suggestion": "Check if percentage calculation is correct"
+                    "suggestion": "Check if percentage calculation is correct",
                 },
                 {
                     "pattern": r"(\w+)\s*<\s*0",
                     "description": "Negative value in sports context",
-                    "suggestion": "Verify if negative values are valid"
-                }
-            ]
+                    "suggestion": "Verify if negative values are valid",
+                },
+            ],
         }
 
     def _initialize_domain_knowledge(self):
@@ -207,32 +215,32 @@ class IntelligentErrorCorrectionEngine:
                     "points_per_game": (0.0, 100.0),
                     "rebounds_per_game": (0.0, 30.0),
                     "assists_per_game": (0.0, 20.0),
-                    "minutes_per_game": (0.0, 48.0)
+                    "minutes_per_game": (0.0, 48.0),
                 },
                 "common_formulas": [
                     "points / field_goal_attempts",
                     "rebounds / minutes",
                     "assists / minutes",
-                    "points + rebounds + assists"
+                    "points + rebounds + assists",
                 ],
                 "unit_conversions": {
-                    "minutes": {"seconds": 60, "hours": 1/60},
-                    "feet": {"inches": 12, "meters": 0.3048}
-                }
+                    "minutes": {"seconds": 60, "hours": 1 / 60},
+                    "feet": {"inches": 12, "meters": 0.3048},
+                },
             },
             "statistics": {
                 "valid_ranges": {
                     "correlation": (-1.0, 1.0),
                     "probability": (0.0, 1.0),
-                    "standard_deviation": (0.0, float('inf')),
-                    "variance": (0.0, float('inf'))
+                    "standard_deviation": (0.0, float("inf")),
+                    "variance": (0.0, float("inf")),
                 },
                 "common_formulas": [
                     "mean = sum(values) / count(values)",
                     "variance = sum((x - mean)^2) / n",
-                    "correlation = covariance(x,y) / (std(x) * std(y))"
-                ]
-            }
+                    "correlation = covariance(x,y) / (std(x) * std(y))",
+                ],
+            },
         }
 
     def detect_errors(
@@ -242,7 +250,7 @@ class IntelligentErrorCorrectionEngine:
         error_types: List[str] = None,
         include_suggestions: bool = True,
         confidence_threshold: float = 0.7,
-        domain_context: Optional[str] = None
+        domain_context: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Detect errors in formulas and expressions.
@@ -265,7 +273,7 @@ class IntelligentErrorCorrectionEngine:
                     "status": "error",
                     "error": "Empty formula provided",
                     "errors": [],
-                    "suggestions": []
+                    "suggestions": [],
                 }
 
             logger.info(f"Detecting errors in formula: {input_formula[:50]}...")
@@ -284,7 +292,8 @@ class IntelligentErrorCorrectionEngine:
 
             # Filter by confidence threshold
             filtered_errors = [
-                error for error in detected_errors
+                error
+                for error in detected_errors
                 if error.confidence >= confidence_threshold
             ]
 
@@ -306,27 +315,21 @@ class IntelligentErrorCorrectionEngine:
                     "detection_timestamp": datetime.now().isoformat(),
                     "error_types_checked": error_types,
                     "confidence_threshold": confidence_threshold,
-                    "domain_context": domain_context
-                }
+                    "domain_context": domain_context,
+                },
             }
 
-            logger.info(f"Error detection completed: {len(filtered_errors)} errors found")
+            logger.info(
+                f"Error detection completed: {len(filtered_errors)} errors found"
+            )
             return result
 
         except Exception as e:
             logger.error(f"Error detection failed: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "errors": [],
-                "suggestions": []
-            }
+            return {"status": "error", "error": str(e), "errors": [], "suggestions": []}
 
     def _detect_error_type(
-        self,
-        formula: str,
-        error_type: str,
-        domain_context: Optional[str]
+        self, formula: str, error_type: str, domain_context: Optional[str]
     ) -> List[DetectedError]:
         """Detect specific type of errors"""
         errors = []
@@ -372,24 +375,24 @@ class IntelligentErrorCorrectionEngine:
                         position=(match.start(), match.end()),
                         confidence=0.8,
                         context={"matched_text": match.group()},
-                        suggestions=[pattern_info["suggestion"]]
+                        suggestions=[pattern_info["suggestion"]],
                     )
                     errors.append(error)
 
             # Check for unmatched parentheses
-            if formula.count('(') != formula.count(')'):
+            if formula.count("(") != formula.count(")"):
                 error = DetectedError(
                     error_id=self._generate_error_id(),
                     error_type="syntax",
                     severity="high",
                     message="Unmatched parentheses",
                     confidence=0.9,
-                    suggestions=["Check for missing or extra parentheses"]
+                    suggestions=["Check for missing or extra parentheses"],
                 )
                 errors.append(error)
 
             # Check for invalid characters
-            invalid_chars = re.findall(r'[^a-zA-Z0-9+\-*/().,\s]', formula)
+            invalid_chars = re.findall(r"[^a-zA-Z0-9+\-*/().,\s]", formula)
             if invalid_chars:
                 error = DetectedError(
                     error_id=self._generate_error_id(),
@@ -397,7 +400,7 @@ class IntelligentErrorCorrectionEngine:
                     severity="medium",
                     message=f"Invalid characters found: {invalid_chars}",
                     confidence=0.7,
-                    suggestions=["Remove or replace invalid characters"]
+                    suggestions=["Remove or replace invalid characters"],
                 )
                 errors.append(error)
 
@@ -427,19 +430,19 @@ class IntelligentErrorCorrectionEngine:
                         position=(match.start(), match.end()),
                         confidence=0.9,
                         context={"matched_text": match.group()},
-                        suggestions=[pattern_info["suggestion"]]
+                        suggestions=[pattern_info["suggestion"]],
                     )
                     errors.append(error)
 
             # Check for division by zero
-            if re.search(r'/\s*0', formula):
+            if re.search(r"/\s*0", formula):
                 error = DetectedError(
                     error_id=self._generate_error_id(),
                     error_type="semantic",
                     severity="critical",
                     message="Division by zero detected",
                     confidence=1.0,
-                    suggestions=["Add zero check or use different formula"]
+                    suggestions=["Add zero check or use different formula"],
                 )
                 errors.append(error)
 
@@ -455,19 +458,19 @@ class IntelligentErrorCorrectionEngine:
 
         try:
             # Check for impossible mathematical operations
-            if re.search(r'sqrt\s*\(\s*-\d+', formula):
+            if re.search(r"sqrt\s*\(\s*-\d+", formula):
                 error = DetectedError(
                     error_id=self._generate_error_id(),
                     error_type="logical",
                     severity="high",
                     message="Square root of negative number",
                     confidence=0.9,
-                    suggestions=["Use absolute value or complex numbers"]
+                    suggestions=["Use absolute value or complex numbers"],
                 )
                 errors.append(error)
 
             # Check for logarithm of non-positive numbers
-            if re.search(r'log\s*\(\s*[0-9]*\.?[0-9]*\s*\)', formula):
+            if re.search(r"log\s*\(\s*[0-9]*\.?[0-9]*\s*\)", formula):
                 # This is a simplified check - in practice, you'd need more sophisticated parsing
                 error = DetectedError(
                     error_id=self._generate_error_id(),
@@ -475,7 +478,7 @@ class IntelligentErrorCorrectionEngine:
                     severity="medium",
                     message="Potential logarithm of non-positive number",
                     confidence=0.6,
-                    suggestions=["Ensure logarithm argument is positive"]
+                    suggestions=["Ensure logarithm argument is positive"],
                 )
                 errors.append(error)
 
@@ -505,7 +508,7 @@ class IntelligentErrorCorrectionEngine:
                         position=(match.start(), match.end()),
                         confidence=0.7,
                         context={"matched_text": match.group()},
-                        suggestions=[pattern_info["suggestion"]]
+                        suggestions=[pattern_info["suggestion"]],
                     )
                     errors.append(error)
 
@@ -515,7 +518,9 @@ class IntelligentErrorCorrectionEngine:
             logger.error(f"Mathematical error detection failed: {e}")
             return []
 
-    def _detect_domain_errors(self, formula: str, domain_context: Optional[str]) -> List[DetectedError]:
+    def _detect_domain_errors(
+        self, formula: str, domain_context: Optional[str]
+    ) -> List[DetectedError]:
         """Detect domain-specific errors"""
         errors = []
 
@@ -541,8 +546,12 @@ class IntelligentErrorCorrectionEngine:
                             message=f"{variable} value {value} outside valid range [{min_val}, {max_val}]",
                             position=(match.start(), match.end()),
                             confidence=0.8,
-                            context={"variable": variable, "value": value, "range": (min_val, max_val)},
-                            suggestions=[f"Check if {variable} calculation is correct"]
+                            context={
+                                "variable": variable,
+                                "value": value,
+                                "range": (min_val, max_val),
+                            },
+                            suggestions=[f"Check if {variable} calculation is correct"],
                         )
                         errors.append(error)
 
@@ -559,14 +568,14 @@ class IntelligentErrorCorrectionEngine:
         try:
             # Check for unit mismatches (simplified)
             # In practice, this would require more sophisticated unit analysis
-            if re.search(r'(\w+)\s*\+\s*(\w+)', formula):
+            if re.search(r"(\w+)\s*\+\s*(\w+)", formula):
                 error = DetectedError(
                     error_id=self._generate_error_id(),
                     error_type="unit",
                     severity="low",
                     message="Potential unit mismatch in addition",
                     confidence=0.5,
-                    suggestions=["Verify that both operands have compatible units"]
+                    suggestions=["Verify that both operands have compatible units"],
                 )
                 errors.append(error)
 
@@ -580,7 +589,7 @@ class IntelligentErrorCorrectionEngine:
         self,
         errors: List[DetectedError],
         original_formula: str,
-        domain_context: Optional[str]
+        domain_context: Optional[str],
     ) -> List[CorrectionSuggestion]:
         """Generate correction suggestions for detected errors"""
         suggestions = []
@@ -596,9 +605,10 @@ class IntelligentErrorCorrectionEngine:
                                 original_formula, error, suggestion_text
                             ),
                             explanation=suggestion_text,
-                            confidence=error.confidence * 0.8,  # Slightly lower confidence
+                            confidence=error.confidence
+                            * 0.8,  # Slightly lower confidence
                             strategy="suggested",
-                            metadata={"error_id": error.error_id}
+                            metadata={"error_id": error.error_id},
                         )
                         suggestions.append(suggestion)
 
@@ -609,10 +619,7 @@ class IntelligentErrorCorrectionEngine:
             return []
 
     def _apply_correction(
-        self,
-        formula: str,
-        error: DetectedError,
-        suggestion: str
+        self, formula: str, error: DetectedError, suggestion: str
     ) -> str:
         """Apply a correction to a formula"""
         try:
@@ -623,14 +630,16 @@ class IntelligentErrorCorrectionEngine:
 
             if error.error_type == "syntax":
                 if "double equals" in error.message.lower():
-                    corrected = re.sub(r'(\w+)\s*=\s*=', r'\1 =', corrected)
+                    corrected = re.sub(r"(\w+)\s*=\s*=", r"\1 =", corrected)
                 elif "empty function" in error.message.lower():
-                    corrected = re.sub(r'(\w+)\s*\(\s*\)', r'\1', corrected)
+                    corrected = re.sub(r"(\w+)\s*\(\s*\)", r"\1", corrected)
 
             elif error.error_type == "semantic":
                 if "division by zero" in error.message.lower():
                     # Add a simple zero check
-                    corrected = re.sub(r'(\w+)\s*/\s*0', r'(\1 / (0 + 1e-10))', corrected)
+                    corrected = re.sub(
+                        r"(\w+)\s*/\s*0", r"(\1 / (0 + 1e-10))", corrected
+                    )
 
             return corrected
 
@@ -645,7 +654,7 @@ class IntelligentErrorCorrectionEngine:
         preserve_intent: bool = True,
         validation_level: str = "comprehensive",
         include_explanations: bool = True,
-        max_corrections: int = 5
+        max_corrections: int = 5,
     ) -> Dict[str, Any]:
         """
         Correct detected errors using intelligent strategies.
@@ -662,7 +671,9 @@ class IntelligentErrorCorrectionEngine:
             Dictionary with correction results
         """
         try:
-            logger.info(f"Correcting {len(detected_errors)} errors using {correction_strategy} strategy")
+            logger.info(
+                f"Correcting {len(detected_errors)} errors using {correction_strategy} strategy"
+            )
 
             corrections = []
 
@@ -695,22 +706,22 @@ class IntelligentErrorCorrectionEngine:
                     "correction_timestamp": datetime.now().isoformat(),
                     "strategy_used": correction_strategy,
                     "validation_level": validation_level,
-                    "preserve_intent": preserve_intent
-                }
+                    "preserve_intent": preserve_intent,
+                },
             }
 
-            logger.info(f"Error correction completed: {len(corrections)} corrections applied")
+            logger.info(
+                f"Error correction completed: {len(corrections)} corrections applied"
+            )
             return result
 
         except Exception as e:
             logger.error(f"Error correction failed: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "corrections": []
-            }
+            return {"status": "error", "error": str(e), "corrections": []}
 
-    def _apply_automatic_correction(self, error: DetectedError) -> Optional[CorrectionSuggestion]:
+    def _apply_automatic_correction(
+        self, error: DetectedError
+    ) -> Optional[CorrectionSuggestion]:
         """Apply automatic correction"""
         try:
             # Implement automatic correction logic
@@ -728,7 +739,7 @@ class IntelligentErrorCorrectionEngine:
                 explanation=f"Automatic correction for {error.error_type} error",
                 confidence=0.9,
                 strategy="automatic",
-                metadata={"error_id": error.error_id}
+                metadata={"error_id": error.error_id},
             )
 
             return suggestion
@@ -737,7 +748,9 @@ class IntelligentErrorCorrectionEngine:
             logger.error(f"Automatic correction failed: {e}")
             return None
 
-    def _apply_suggested_correction(self, error: DetectedError) -> Optional[CorrectionSuggestion]:
+    def _apply_suggested_correction(
+        self, error: DetectedError
+    ) -> Optional[CorrectionSuggestion]:
         """Apply suggested correction"""
         try:
             if not error.suggestions:
@@ -756,7 +769,7 @@ class IntelligentErrorCorrectionEngine:
                 explanation=suggestion_text,
                 confidence=error.confidence * 0.8,
                 strategy="suggested",
-                metadata={"error_id": error.error_id}
+                metadata={"error_id": error.error_id},
             )
 
             return suggestion
@@ -765,7 +778,9 @@ class IntelligentErrorCorrectionEngine:
             logger.error(f"Suggested correction failed: {e}")
             return None
 
-    def _apply_interactive_correction(self, error: DetectedError) -> Optional[CorrectionSuggestion]:
+    def _apply_interactive_correction(
+        self, error: DetectedError
+    ) -> Optional[CorrectionSuggestion]:
         """Apply interactive correction"""
         try:
             # For interactive mode, we provide multiple options
@@ -779,8 +794,8 @@ class IntelligentErrorCorrectionEngine:
                 strategy="interactive",
                 metadata={
                     "error_id": error.error_id,
-                    "options": error.suggestions or []
-                }
+                    "options": error.suggestions or [],
+                },
             )
 
             return suggestion
@@ -808,7 +823,7 @@ class IntelligentErrorCorrectionEngine:
                 "is_valid": is_different and syntax_valid,
                 "is_different": is_different,
                 "syntax_valid": syntax_valid,
-                "confidence": correction.confidence
+                "confidence": correction.confidence,
             }
 
         except Exception as e:
@@ -816,7 +831,7 @@ class IntelligentErrorCorrectionEngine:
             return {
                 "correction_id": correction.suggestion_id,
                 "is_valid": False,
-                "error": str(e)
+                "error": str(e),
             }
 
     def validate_formula(
@@ -826,7 +841,7 @@ class IntelligentErrorCorrectionEngine:
         test_data: Optional[Dict[str, List[float]]] = None,
         expected_range: Optional[Dict[str, Tuple[float, float]]] = None,
         domain_constraints: Optional[Dict[str, Any]] = None,
-        include_performance_analysis: bool = False
+        include_performance_analysis: bool = False,
     ) -> Dict[str, Any]:
         """
         Comprehensive formula validation.
@@ -864,7 +879,9 @@ class IntelligentErrorCorrectionEngine:
                     math_errors = self._detect_mathematical_errors(formula_expression)
                     errors.extend(math_errors)
                 elif validation_type == "domain":
-                    domain_errors = self._detect_domain_errors(formula_expression, "basketball")
+                    domain_errors = self._detect_domain_errors(
+                        formula_expression, "basketball"
+                    )
                     errors.extend(domain_errors)
 
             # Test with data if provided
@@ -891,8 +908,8 @@ class IntelligentErrorCorrectionEngine:
                 "metadata": {
                     "validation_timestamp": datetime.now().isoformat(),
                     "validation_types": validation_types,
-                    "has_test_data": test_data is not None
-                }
+                    "has_test_data": test_data is not None,
+                },
             }
 
             logger.info(f"Formula validation completed: {len(errors)} errors found")
@@ -900,17 +917,10 @@ class IntelligentErrorCorrectionEngine:
 
         except Exception as e:
             logger.error(f"Formula validation failed: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "is_valid": False,
-                "errors": []
-            }
+            return {"status": "error", "error": str(e), "is_valid": False, "errors": []}
 
     def _analyze_formula_performance(
-        self,
-        formula: str,
-        test_data: Dict[str, List[float]]
+        self, formula: str, test_data: Dict[str, List[float]]
     ) -> Optional[Dict[str, Any]]:
         """Analyze formula performance with test data"""
         try:
@@ -921,7 +931,7 @@ class IntelligentErrorCorrectionEngine:
                 "execution_time": 0.001,  # Placeholder
                 "memory_usage": "low",
                 "accuracy": 0.95,  # Placeholder
-                "stability": "high"
+                "stability": "high",
             }
 
             return performance_metrics
@@ -945,7 +955,7 @@ def detect_intelligent_errors(
     error_types: List[str] = None,
     include_suggestions: bool = True,
     confidence_threshold: float = 0.7,
-    domain_context: Optional[str] = None
+    domain_context: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Detect errors in formulas and expressions (standalone function).
@@ -967,7 +977,7 @@ def detect_intelligent_errors(
         error_types=error_types,
         include_suggestions=include_suggestions,
         confidence_threshold=confidence_threshold,
-        domain_context=domain_context
+        domain_context=domain_context,
     )
 
 
@@ -977,7 +987,7 @@ def correct_intelligent_errors(
     preserve_intent: bool = True,
     validation_level: str = "comprehensive",
     include_explanations: bool = True,
-    max_corrections: int = 5
+    max_corrections: int = 5,
 ) -> Dict[str, Any]:
     """
     Correct detected errors using intelligent strategies (standalone function).
@@ -999,7 +1009,7 @@ def correct_intelligent_errors(
         preserve_intent=preserve_intent,
         validation_level=validation_level,
         include_explanations=include_explanations,
-        max_corrections=max_corrections
+        max_corrections=max_corrections,
     )
 
 
@@ -1009,7 +1019,7 @@ def validate_formula_comprehensively(
     test_data: Optional[Dict[str, List[float]]] = None,
     expected_range: Optional[Dict[str, Tuple[float, float]]] = None,
     domain_constraints: Optional[Dict[str, Any]] = None,
-    include_performance_analysis: bool = False
+    include_performance_analysis: bool = False,
 ) -> Dict[str, Any]:
     """
     Comprehensive formula validation (standalone function).
@@ -1031,7 +1041,7 @@ def validate_formula_comprehensively(
         test_data=test_data,
         expected_range=expected_range,
         domain_constraints=domain_constraints,
-        include_performance_analysis=include_performance_analysis
+        include_performance_analysis=include_performance_analysis,
     )
 
 
@@ -1041,7 +1051,7 @@ def generate_intelligent_suggestions(
     similar_formulas: Optional[List[str]] = None,
     correction_history: Optional[List[Dict[str, Any]]] = None,
     suggestion_count: int = 3,
-    include_alternatives: bool = True
+    include_alternatives: bool = True,
 ) -> Dict[str, Any]:
     """
     Generate intelligent correction suggestions (standalone function).
@@ -1065,23 +1075,29 @@ def generate_intelligent_suggestions(
             error_type = error_context["error_type"]
 
             if error_type == "syntax":
-                suggestions.extend([
-                    "Check parentheses matching",
-                    "Verify operator usage",
-                    "Review variable names"
-                ])
+                suggestions.extend(
+                    [
+                        "Check parentheses matching",
+                        "Verify operator usage",
+                        "Review variable names",
+                    ]
+                )
             elif error_type == "semantic":
-                suggestions.extend([
-                    "Check for division by zero",
-                    "Verify input ranges",
-                    "Review mathematical operations"
-                ])
+                suggestions.extend(
+                    [
+                        "Check for division by zero",
+                        "Verify input ranges",
+                        "Review mathematical operations",
+                    ]
+                )
             elif error_type == "domain":
-                suggestions.extend([
-                    "Check domain-specific constraints",
-                    "Verify value ranges",
-                    "Review unit consistency"
-                ])
+                suggestions.extend(
+                    [
+                        "Check domain-specific constraints",
+                        "Verify value ranges",
+                        "Review unit consistency",
+                    ]
+                )
 
         # Add user intent-based suggestions
         if user_intent:
@@ -1101,17 +1117,15 @@ def generate_intelligent_suggestions(
             "metadata": {
                 "generation_timestamp": datetime.now().isoformat(),
                 "user_intent": user_intent,
-                "similar_formulas_count": len(similar_formulas) if similar_formulas else 0
-            }
+                "similar_formulas_count": (
+                    len(similar_formulas) if similar_formulas else 0
+                ),
+            },
         }
 
     except Exception as e:
         logger.error(f"Intelligent suggestion generation failed: {e}")
-        return {
-            "status": "error",
-            "error": str(e),
-            "suggestions": []
-        }
+        return {"status": "error", "error": str(e), "suggestions": []}
 
 
 def analyze_error_patterns(
@@ -1120,7 +1134,7 @@ def analyze_error_patterns(
     include_pattern_analysis: bool = True,
     include_statistical_analysis: bool = True,
     include_context_analysis: bool = True,
-    generate_report: bool = False
+    generate_report: bool = False,
 ) -> Dict[str, Any]:
     """
     Comprehensive error analysis (standalone function).
@@ -1141,7 +1155,7 @@ def analyze_error_patterns(
             "pattern_analysis": {},
             "statistical_analysis": {},
             "context_analysis": {},
-            "summary": {}
+            "summary": {},
         }
 
         if isinstance(analysis_input, str):
@@ -1151,7 +1165,7 @@ def analyze_error_patterns(
             if include_pattern_analysis:
                 analysis_results["pattern_analysis"] = {
                     "error_patterns_found": len(errors.get("errors", [])),
-                    "common_patterns": ["syntax", "semantic", "logical"]
+                    "common_patterns": ["syntax", "semantic", "logical"],
                 }
 
             if include_statistical_analysis:
@@ -1159,16 +1173,16 @@ def analyze_error_patterns(
                     "error_distribution": {
                         "syntax": 0.3,
                         "semantic": 0.4,
-                        "logical": 0.3
+                        "logical": 0.3,
                     },
-                    "confidence_scores": [0.7, 0.8, 0.9]
+                    "confidence_scores": [0.7, 0.8, 0.9],
                 }
 
             if include_context_analysis:
                 analysis_results["context_analysis"] = {
                     "formula_complexity": "medium",
                     "domain_context": "basketball",
-                    "error_severity": "medium"
+                    "error_severity": "medium",
                 }
 
         # Generate summary
@@ -1177,7 +1191,7 @@ def analyze_error_patterns(
             "patterns_analyzed": include_pattern_analysis,
             "statistics_included": include_statistical_analysis,
             "context_analyzed": include_context_analysis,
-            "report_generated": generate_report
+            "report_generated": generate_report,
         }
 
         return {
@@ -1185,17 +1199,13 @@ def analyze_error_patterns(
             "analysis_results": analysis_results,
             "metadata": {
                 "analysis_timestamp": datetime.now().isoformat(),
-                "analysis_depth": analysis_depth
-            }
+                "analysis_depth": analysis_depth,
+            },
         }
 
     except Exception as e:
         logger.error(f"Error pattern analysis failed: {e}")
-        return {
-            "status": "error",
-            "error": str(e),
-            "analysis_results": {}
-        }
+        return {"status": "error", "error": str(e), "analysis_results": {}}
 
 
 def learn_from_error_cases(
@@ -1204,7 +1214,7 @@ def learn_from_error_cases(
     update_model: bool = True,
     validation_split: float = 0.2,
     learning_rate: float = 0.01,
-    epochs: int = 10
+    epochs: int = 10,
 ) -> Dict[str, Any]:
     """
     Learn from error cases to improve error detection (standalone function).
@@ -1229,7 +1239,7 @@ def learn_from_error_cases(
             "cases_processed": len(error_cases),
             "model_updated": update_model,
             "accuracy_improvement": 0.05,  # Placeholder
-            "new_patterns_learned": 3  # Placeholder
+            "new_patterns_learned": 3,  # Placeholder
         }
 
         return {
@@ -1239,14 +1249,10 @@ def learn_from_error_cases(
                 "learning_timestamp": datetime.now().isoformat(),
                 "learning_rate": learning_rate,
                 "epochs": epochs,
-                "validation_split": validation_split
-            }
+                "validation_split": validation_split,
+            },
         }
 
     except Exception as e:
         logger.error(f"Error learning failed: {e}")
-        return {
-            "status": "error",
-            "error": str(e),
-            "learning_results": {}
-        }
+        return {"status": "error", "error": str(e), "learning_results": {}}

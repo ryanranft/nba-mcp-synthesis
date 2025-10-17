@@ -27,6 +27,7 @@ from mcp_server.tools.params import QueryDatabaseParams
 @dataclass
 class BenchmarkResult:
     """Result from a benchmark test"""
+
     name: str
     iterations: int
     total_time: float
@@ -52,7 +53,7 @@ class BenchmarkSuite:
         rds_connector,
         query: str,
         iterations: int = 100,
-        name: str = "Query Benchmark"
+        name: str = "Query Benchmark",
     ) -> BenchmarkResult:
         """Benchmark a database query"""
 
@@ -104,7 +105,7 @@ class BenchmarkSuite:
             operations_per_sec=ops_per_sec,
             success_count=success_count,
             failure_count=failure_count,
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
 
         # Print results
@@ -128,7 +129,7 @@ class BenchmarkSuite:
         query: str,
         concurrent_count: int = 10,
         iterations: int = 5,
-        name: str = "Concurrent Query Benchmark"
+        name: str = "Concurrent Query Benchmark",
     ) -> BenchmarkResult:
         """Benchmark concurrent database queries"""
 
@@ -150,8 +151,7 @@ class BenchmarkSuite:
 
             # Create concurrent tasks
             tasks = [
-                rds_connector.execute_query(query)
-                for _ in range(concurrent_count)
+                rds_connector.execute_query(query) for _ in range(concurrent_count)
             ]
 
             # Execute concurrently
@@ -189,7 +189,7 @@ class BenchmarkSuite:
             operations_per_sec=ops_per_sec,
             success_count=success_count,
             failure_count=failure_count,
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
 
         # Print results
@@ -211,12 +211,12 @@ class BenchmarkSuite:
         data = {
             "timestamp": datetime.now().isoformat(),
             "total_benchmarks": len(self.results),
-            "results": [asdict(r) for r in self.results]
+            "results": [asdict(r) for r in self.results],
         }
 
         output_file.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(data, f, indent=2)
 
         print(f"\n💾 Results saved to: {output_file}")
@@ -230,17 +230,19 @@ class BenchmarkSuite:
             "=" * 60,
             f"\nTotal benchmarks: {len(self.results)}",
             f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-            "\n" + "-" * 60
+            "\n" + "-" * 60,
         ]
 
         for i, result in enumerate(self.results, 1):
-            lines.extend([
-                f"\n{i}. {result.name}",
-                f"   Iterations: {result.iterations}",
-                f"   Avg time: {result.avg_time:.4f}s",
-                f"   Ops/sec: {result.operations_per_sec:.2f}",
-                f"   Success rate: {result.success_count}/{result.iterations}"
-            ])
+            lines.extend(
+                [
+                    f"\n{i}. {result.name}",
+                    f"   Iterations: {result.iterations}",
+                    f"   Avg time: {result.avg_time:.4f}s",
+                    f"   Ops/sec: {result.operations_per_sec:.2f}",
+                    f"   Success rate: {result.success_count}/{result.iterations}",
+                ]
+            )
 
         lines.append("\n" + "=" * 60)
 
@@ -269,10 +271,7 @@ async def main():
 
             # Benchmark 1: Simple SELECT query
             await suite.benchmark_query(
-                rds_connector,
-                "SELECT 1 as test",
-                iterations=100,
-                name="Simple SELECT"
+                rds_connector, "SELECT 1 as test", iterations=100, name="Simple SELECT"
             )
 
             # Benchmark 2: Table listing query
@@ -285,7 +284,7 @@ async def main():
                 LIMIT 10
                 """,
                 iterations=50,
-                name="List Tables (LIMIT 10)"
+                name="List Tables (LIMIT 10)",
             )
 
             # Benchmark 3: Schema query
@@ -298,7 +297,7 @@ async def main():
                 LIMIT 20
                 """,
                 iterations=50,
-                name="Schema Query (LIMIT 20)"
+                name="Schema Query (LIMIT 20)",
             )
 
             # Benchmark 4: Concurrent queries
@@ -307,12 +306,15 @@ async def main():
                 "SELECT 1 as test",
                 concurrent_count=10,
                 iterations=10,
-                name="Concurrent Queries (10x10)"
+                name="Concurrent Queries (10x10)",
             )
 
             # Save results
             output_dir = Path("./benchmark_results")
-            output_file = output_dir / f"benchmark_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            output_file = (
+                output_dir
+                / f"benchmark_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            )
             suite.save_results(output_file)
 
             # Print summary
@@ -324,6 +326,7 @@ async def main():
     except Exception as e:
         print(f"\n❌ Benchmark failed: {e}")
         import traceback
+
         traceback.print_exc()
         return 1
 

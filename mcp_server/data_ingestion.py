@@ -1,4 +1,5 @@
 """Data Ingestion Pipeline - CRITICAL 9"""
+
 import requests
 import logging
 from typing import Dict, List, Any, Optional
@@ -13,10 +14,7 @@ class NBADataIngestion:
 
     def __init__(self):
         self.api_base = "https://stats.nba.com/stats"
-        self.headers = {
-            'User-Agent': 'Mozilla/5.0',
-            'Referer': 'https://www.nba.com/'
-        }
+        self.headers = {"User-Agent": "Mozilla/5.0", "Referer": "https://www.nba.com/"}
         self.engine = None
 
     def init_db(self):
@@ -30,10 +28,12 @@ class NBADataIngestion:
 
         # Fetch from NBA API
         url = f"{self.api_base}/leaguegamefinder"
-        params = {'Season': season, 'LeagueID': '00'}
+        params = {"Season": season, "LeagueID": "00"}
 
         try:
-            response = requests.get(url, headers=self.headers, params=params, timeout=30)
+            response = requests.get(
+                url, headers=self.headers, params=params, timeout=30
+            )
             response.raise_for_status()
             data = response.json()
 
@@ -52,10 +52,12 @@ class NBADataIngestion:
         logger.info(f"📥 Ingesting players for season {season}")
 
         url = f"{self.api_base}/commonallplayers"
-        params = {'Season': season, 'LeagueID': '00', 'IsOnlyCurrentSeason': '1'}
+        params = {"Season": season, "LeagueID": "00", "IsOnlyCurrentSeason": "1"}
 
         try:
-            response = requests.get(url, headers=self.headers, params=params, timeout=30)
+            response = requests.get(
+                url, headers=self.headers, params=params, timeout=30
+            )
             response.raise_for_status()
             data = response.json()
 
@@ -73,10 +75,12 @@ class NBADataIngestion:
         logger.info(f"📥 Ingesting player stats for season {season}")
 
         url = f"{self.api_base}/leaguedashplayerstats"
-        params = {'Season': season, 'LeagueID': '00'}
+        params = {"Season": season, "LeagueID": "00"}
 
         try:
-            response = requests.get(url, headers=self.headers, params=params, timeout=30)
+            response = requests.get(
+                url, headers=self.headers, params=params, timeout=30
+            )
             response.raise_for_status()
             data = response.json()
 
@@ -132,14 +136,16 @@ def run_daily_ingestion():
         players_count = ingestion.ingest_players(current_season)
         stats_count = ingestion.ingest_player_stats(current_season)
 
-        logger.info(f"✅ Daily ingestion complete: {games_count} games, {players_count} players, {stats_count} stats")
+        logger.info(
+            f"✅ Daily ingestion complete: {games_count} games, {players_count} players, {stats_count} stats"
+        )
     except Exception as e:
         logger.error(f"❌ Daily ingestion failed: {e}")
         # Send alert
         from mcp_server.alerting import alert, AlertSeverity
+
         alert("Data Ingestion Failed", str(e), AlertSeverity.ERROR)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_daily_ingestion()
-
