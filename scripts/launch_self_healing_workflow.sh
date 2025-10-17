@@ -11,7 +11,7 @@ echo "=================================="
 export GOOGLE_API_KEY="your_google_api_key_here"
 export DEEPSEEK_API_KEY="your_deepseek_api_key_here"
 export ANTHROPIC_API_KEY="your_anthropic_api_key_here"
-export OPENAI_API_KEY="sk-proj-000000000000000000000000000000000000000000000000"
+export OPENAI_API_KEY="your_openai_api_key_here"
 
 echo "🔑 API keys set"
 
