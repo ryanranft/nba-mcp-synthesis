@@ -1,4 +1,5 @@
 """Graceful Degradation - IMPORTANT 3"""
+
 import logging
 from typing import Optional, Any, Callable
 from functools import wraps
@@ -14,7 +15,7 @@ class CircuitBreaker:
         self,
         failure_threshold: int = 5,
         timeout_duration: int = 60,
-        expected_exception: type = Exception
+        expected_exception: type = Exception,
     ):
         self.failure_threshold = failure_threshold
         self.timeout_duration = timeout_duration
@@ -53,19 +54,24 @@ class CircuitBreaker:
 
         if self.failure_count >= self.failure_threshold:
             self.state = "open"
-            logger.error(f"🔴 Circuit breaker OPEN - too many failures ({self.failure_count})")
+            logger.error(
+                f"🔴 Circuit breaker OPEN - too many failures ({self.failure_count})"
+            )
 
     def _should_attempt_reset(self) -> bool:
         """Check if we should try to reset the circuit"""
         if not self.last_failure_time:
             return True
 
-        time_since_failure = (datetime.utcnow() - self.last_failure_time).total_seconds()
+        time_since_failure = (
+            datetime.utcnow() - self.last_failure_time
+        ).total_seconds()
         return time_since_failure >= self.timeout_duration
 
 
 def with_fallback(fallback_func: Callable):
     """Decorator to provide fallback when primary function fails"""
+
     def decorator(func: Callable):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -74,7 +80,9 @@ def with_fallback(fallback_func: Callable):
             except Exception as e:
                 logger.warning(f"⚠️  Primary function failed, using fallback: {e}")
                 return fallback_func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -95,8 +103,8 @@ def query_database(query: str):
     """Query database with fallback to cache"""
     # Simulate database query
     from mcp_server.database import get_database_engine
+
     engine = get_database_engine()
     with engine.connect() as conn:
         result = conn.execute(query)
         return {"source": "database", "data": list(result)}
-

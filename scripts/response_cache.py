@@ -8,6 +8,7 @@ import os
 from typing import Dict, Optional, Any
 from datetime import datetime, timedelta
 
+
 class ResponseCache:
     """Cache LLM responses to save costs during development"""
 
@@ -20,10 +21,10 @@ class ResponseCache:
         """Generate cache key from model, prompt, and parameters"""
         # Include relevant parameters in cache key
         params = {
-            'model': model,
-            'prompt': prompt,
-            'temperature': kwargs.get('temperature', 0.7),
-            'max_tokens': kwargs.get('max_tokens', 1000)
+            "model": model,
+            "prompt": prompt,
+            "temperature": kwargs.get("temperature", 0.7),
+            "max_tokens": kwargs.get("max_tokens", 1000),
         }
 
         content = json.dumps(params, sort_keys=True)
@@ -36,13 +37,13 @@ class ResponseCache:
 
         if os.path.exists(cache_file):
             try:
-                with open(cache_file, 'r') as f:
+                with open(cache_file, "r") as f:
                     data = json.load(f)
 
                 # Check if cache is still valid
-                cache_time = datetime.fromisoformat(data['timestamp'])
+                cache_time = datetime.fromisoformat(data["timestamp"])
                 if datetime.now() - cache_time < timedelta(hours=self.ttl_hours):
-                    return data['response']
+                    return data["response"]
                 else:
                     # Remove expired cache
                     os.remove(cache_file)
@@ -57,14 +58,14 @@ class ResponseCache:
         cache_file = os.path.join(self.cache_dir, f"{key}.json")
 
         cache_data = {
-            'timestamp': datetime.now().isoformat(),
-            'model': model,
-            'response': response,
-            'params': kwargs
+            "timestamp": datetime.now().isoformat(),
+            "model": model,
+            "response": response,
+            "params": kwargs,
         }
 
         try:
-            with open(cache_file, 'w') as f:
+            with open(cache_file, "w") as f:
                 json.dump(cache_data, f, indent=2)
         except Exception as e:
             print(f"Warning: Could not write cache file {cache_file}: {e}")
@@ -78,13 +79,13 @@ class ResponseCache:
         removed_count = 0
 
         for filename in os.listdir(self.cache_dir):
-            if filename.endswith('.json'):
+            if filename.endswith(".json"):
                 filepath = os.path.join(self.cache_dir, filename)
                 try:
-                    with open(filepath, 'r') as f:
+                    with open(filepath, "r") as f:
                         data = json.load(f)
 
-                    cache_time = datetime.fromisoformat(data['timestamp'])
+                    cache_time = datetime.fromisoformat(data["timestamp"])
                     if cache_time < cutoff_time:
                         os.remove(filepath)
                         removed_count += 1
@@ -99,23 +100,19 @@ class ResponseCache:
     def get_cache_stats(self) -> Dict[str, Any]:
         """Get cache statistics"""
         if not os.path.exists(self.cache_dir):
-            return {'total_files': 0, 'total_size_mb': 0}
+            return {"total_files": 0, "total_size_mb": 0}
 
         total_files = 0
         total_size = 0
 
         for filename in os.listdir(self.cache_dir):
-            if filename.endswith('.json'):
+            if filename.endswith(".json"):
                 filepath = os.path.join(self.cache_dir, filename)
                 total_files += 1
                 total_size += os.path.getsize(filepath)
 
         return {
-            'total_files': total_files,
-            'total_size_mb': total_size / (1024 * 1024),
-            'cache_dir': self.cache_dir
+            "total_files": total_files,
+            "total_size_mb": total_size / (1024 * 1024),
+            "cache_dir": self.cache_dir,
         }
-
-
-
-

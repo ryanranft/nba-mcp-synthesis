@@ -11,16 +11,16 @@ from .multi_model_synthesis import (
     extract_code_from_response,
     format_final_output,
     save_synthesis_result,
-    quick_synthesis
+    quick_synthesis,
 )
 
 __all__ = [
-    'MCPClient',
-    'synthesize_with_mcp_context',
-    'detect_query_type',
-    'summarize_context',
-    'extract_code_from_response',
-    'format_final_output',
-    'save_synthesis_result',
-    'quick_synthesis'
+    "MCPClient",
+    "synthesize_with_mcp_context",
+    "detect_query_type",
+    "summarize_context",
+    "extract_code_from_response",
+    "format_final_output",
+    "save_synthesis_result",
+    "quick_synthesis",
 ]

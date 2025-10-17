@@ -28,11 +28,11 @@ from scripts.recursive_book_analysis import BookManager
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler('pdf_to_text_conversion_pymupdf.log')
-    ]
+        logging.FileHandler("pdf_to_text_conversion_pymupdf.log"),
+    ],
 )
 logger = logging.getLogger(__name__)
 
@@ -45,20 +45,20 @@ BOOKS_TO_CONVERT = [
         "id": "sports_analytics",
         "title": "Sports Analytics",
         "pdf_s3_path": "books/Sports_Analytics.pdf",
-        "text_s3_path": "books/Sports_Analytics.txt"
+        "text_s3_path": "books/Sports_Analytics.txt",
     },
     {
         "id": "basketball_beyond_paper",
         "title": "Basketball Beyond Paper",
         "pdf_s3_path": "books/Basketball_Beyond_Paper.pdf",
-        "text_s3_path": "books/Basketball_Beyond_Paper.txt"
+        "text_s3_path": "books/Basketball_Beyond_Paper.txt",
     },
     {
         "id": "midrange_theory",
         "title": "The Midrange Theory",
         "pdf_s3_path": "books/The_Midrange_Theory.pdf",
-        "text_s3_path": "books/The_Midrange_Theory.txt"
-    }
+        "text_s3_path": "books/The_Midrange_Theory.txt",
+    },
 ]
 
 
@@ -66,12 +66,14 @@ def check_pymupdf_dependencies() -> bool:
     """Check if PyMuPDF is available."""
     try:
         import fitz
+
         logger.info("✅ PyMuPDF (fitz) available")
         return True
     except ImportError:
         logger.error("❌ PyMuPDF not available. Installing...")
         try:
             import subprocess
+
             subprocess.check_call([sys.executable, "-m", "pip", "install", "PyMuPDF"])
             logger.info("✅ PyMuPDF installed successfully")
             return True
@@ -80,7 +82,9 @@ def check_pymupdf_dependencies() -> bool:
             return False
 
 
-def extract_pdf_text_with_pymupdf(book_manager: BookManager, pdf_s3_path: str) -> Optional[str]:
+def extract_pdf_text_with_pymupdf(
+    book_manager: BookManager, pdf_s3_path: str
+) -> Optional[str]:
     """
     Download PDF from S3 and extract text content using PyMuPDF.
 
@@ -98,7 +102,7 @@ def extract_pdf_text_with_pymupdf(book_manager: BookManager, pdf_s3_path: str) -
 
         # Download PDF from S3
         response = book_manager.s3_client.get_object(Bucket=S3_BUCKET, Key=pdf_s3_path)
-        pdf_content = response['Body'].read()
+        pdf_content = response["Body"].read()
 
         logger.info(f"📄 PDF downloaded ({len(pdf_content)} bytes)")
 
@@ -124,7 +128,9 @@ def extract_pdf_text_with_pymupdf(book_manager: BookManager, pdf_s3_path: str) -
                     logger.info(f"   Processed {page_num + 1}/{total_pages} pages...")
 
             except Exception as e:
-                logger.warning(f"⚠️ Failed to extract text from page {page_num + 1}: {e}")
+                logger.warning(
+                    f"⚠️ Failed to extract text from page {page_num + 1}: {e}"
+                )
                 continue
 
         pdf_document.close()
@@ -137,7 +143,9 @@ def extract_pdf_text_with_pymupdf(book_manager: BookManager, pdf_s3_path: str) -
         return None
 
 
-def extract_pdf_text_with_ocr_fallback(book_manager: BookManager, pdf_s3_path: str) -> Optional[str]:
+def extract_pdf_text_with_ocr_fallback(
+    book_manager: BookManager, pdf_s3_path: str
+) -> Optional[str]:
     """
     Fallback method using OCR for encrypted PDFs.
 
@@ -157,7 +165,7 @@ def extract_pdf_text_with_ocr_fallback(book_manager: BookManager, pdf_s3_path: s
 
         # Download PDF from S3
         response = book_manager.s3_client.get_object(Bucket=S3_BUCKET, Key=pdf_s3_path)
-        pdf_content = response['Body'].read()
+        pdf_content = response["Body"].read()
 
         # Open PDF with PyMuPDF
         pdf_document = fitz.open(stream=pdf_content, filetype="pdf")
@@ -186,7 +194,9 @@ def extract_pdf_text_with_ocr_fallback(book_manager: BookManager, pdf_s3_path: s
                     text_content += page_text.strip() + "\n\n"
 
                 if (page_num + 1) % 5 == 0:
-                    logger.info(f"   OCR processed {page_num + 1}/{total_pages} pages...")
+                    logger.info(
+                        f"   OCR processed {page_num + 1}/{total_pages} pages..."
+                    )
 
             except Exception as e:
                 logger.warning(f"⚠️ OCR failed on page {page_num + 1}: {e}")
@@ -205,7 +215,9 @@ def extract_pdf_text_with_ocr_fallback(book_manager: BookManager, pdf_s3_path: s
         return None
 
 
-def upload_text_to_s3(book_manager: BookManager, text_content: str, text_s3_path: str) -> bool:
+def upload_text_to_s3(
+    book_manager: BookManager, text_content: str, text_s3_path: str
+) -> bool:
     """
     Upload extracted text to S3.
 
@@ -224,8 +236,8 @@ def upload_text_to_s3(book_manager: BookManager, text_content: str, text_s3_path
         book_manager.s3_client.put_object(
             Bucket=S3_BUCKET,
             Key=text_s3_path,
-            Body=text_content.encode('utf-8'),
-            ContentType='text/plain; charset=utf-8'
+            Body=text_content.encode("utf-8"),
+            ContentType="text/plain; charset=utf-8",
         )
 
         logger.info(f"✅ Text uploaded successfully ({len(text_content)} characters)")
@@ -262,7 +274,9 @@ def convert_book_to_text(book_manager: BookManager, book: Dict) -> bool:
     # If PyMuPDF fails, try OCR fallback
     if not text_content:
         logger.warning(f"⚠️ PyMuPDF failed, trying OCR fallback for: {book['title']}")
-        text_content = extract_pdf_text_with_ocr_fallback(book_manager, book["pdf_s3_path"])
+        text_content = extract_pdf_text_with_ocr_fallback(
+            book_manager, book["pdf_s3_path"]
+        )
 
     if not text_content:
         logger.error(f"❌ Failed to extract text from: {book['title']}")
@@ -291,7 +305,8 @@ def verify_text_uploads(book_manager: BookManager) -> None:
 
 def print_summary(results: Dict) -> None:
     """Print a summary of the conversion process."""
-    logger.info(f"""
+    logger.info(
+        f"""
 ╔══════════════════════════════════════════════════════════════════╗
 ║                    📊 CONVERSION SUMMARY                        ║
 ╚══════════════════════════════════════════════════════════════════╝
@@ -300,19 +315,23 @@ Successful Conversions: {len(results['successful'])}/3
 Failed Conversions: {len(results['failed'])}/3
 
 ✅ Successfully Converted:
-""")
+"""
+    )
 
     for book in results["successful"]:
         logger.info(f"   - {book['title']}")
 
     if results["failed"]:
-        logger.info(f"""
+        logger.info(
+            f"""
 ❌ Failed Conversions:
-""")
+"""
+        )
         for book in results["failed"]:
             logger.info(f"   - {book['title']}")
 
-    logger.info(f"""
+    logger.info(
+        f"""
 📝 Benefits of Text Format:
    - Better mathematical notation readability
    - Faster text processing
@@ -321,7 +340,8 @@ Failed Conversions: {len(results['failed'])}/3
    - No DRM restrictions
 
 ═══════════════════════════════════════════════════════════════════
-""")
+"""
+    )
 
 
 def main():
@@ -337,10 +357,7 @@ def main():
     # Initialize book manager
     book_manager = BookManager(S3_BUCKET)
 
-    results = {
-        "successful": [],
-        "failed": []
-    }
+    results = {"successful": [], "failed": []}
 
     # Convert each book
     for book in BOOKS_TO_CONVERT:
@@ -367,7 +384,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-

@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 
 class Environment(Enum):
     """Deployment environments"""
+
     DEVELOPMENT = "development"
     STAGING = "staging"
     PRODUCTION = "production"
@@ -38,6 +39,7 @@ class Environment(Enum):
 
 class ServiceType(Enum):
     """Kubernetes service types"""
+
     CLUSTER_IP = "ClusterIP"
     NODE_PORT = "NodePort"
     LOAD_BALANCER = "LoadBalancer"
@@ -46,6 +48,7 @@ class ServiceType(Enum):
 @dataclass
 class ResourceRequirements:
     """Pod resource requirements"""
+
     cpu_request: str = "100m"
     cpu_limit: str = "500m"
     memory_request: str = "256Mi"
@@ -55,6 +58,7 @@ class ResourceRequirements:
 @dataclass
 class HealthProbe:
     """Health check configuration"""
+
     path: str = "/health"
     port: int = 8000
     initial_delay_seconds: int = 10
@@ -67,6 +71,7 @@ class HealthProbe:
 @dataclass
 class AutoScalingConfig:
     """Horizontal Pod Autoscaler configuration"""
+
     min_replicas: int = 2
     max_replicas: int = 10
     target_cpu_percentage: int = 70
@@ -76,6 +81,7 @@ class AutoScalingConfig:
 @dataclass
 class IngressConfig:
     """Ingress configuration"""
+
     enabled: bool = False
     host: str = "nba-mcp.example.com"
     path: str = "/"
@@ -86,6 +92,7 @@ class IngressConfig:
 @dataclass
 class KubernetesConfig:
     """Complete Kubernetes deployment configuration"""
+
     app_name: str
     namespace: str = "default"
     image: str = "nba-mcp-server:latest"
@@ -110,122 +117,110 @@ class KubernetesManifestGenerator:
     def generate_deployment(config: KubernetesConfig) -> Dict[str, Any]:
         """Generate Deployment manifest"""
         return {
-            'apiVersion': 'apps/v1',
-            'kind': 'Deployment',
-            'metadata': {
-                'name': config.app_name,
-                'namespace': config.namespace,
-                'labels': {
-                    'app': config.app_name,
-                    'version': 'v1'
-                }
+            "apiVersion": "apps/v1",
+            "kind": "Deployment",
+            "metadata": {
+                "name": config.app_name,
+                "namespace": config.namespace,
+                "labels": {"app": config.app_name, "version": "v1"},
             },
-            'spec': {
-                'replicas': config.replicas,
-                'selector': {
-                    'matchLabels': {
-                        'app': config.app_name
-                    }
-                },
-                'template': {
-                    'metadata': {
-                        'labels': {
-                            'app': config.app_name,
-                            'version': 'v1'
-                        }
-                    },
-                    'spec': {
-                        'containers': [{
-                            'name': config.app_name,
-                            'image': config.image,
-                            'ports': [{
-                                'containerPort': config.container_port,
-                                'protocol': 'TCP'
-                            }],
-                            'env': [
-                                {'name': k, 'value': v}
-                                for k, v in config.env_vars.items()
-                            ] + [
-                                {
-                                    'name': k,
-                                    'valueFrom': {
-                                        'secretKeyRef': {
-                                            'name': f"{config.app_name}-secrets",
-                                            'key': k
-                                        }
+            "spec": {
+                "replicas": config.replicas,
+                "selector": {"matchLabels": {"app": config.app_name}},
+                "template": {
+                    "metadata": {"labels": {"app": config.app_name, "version": "v1"}},
+                    "spec": {
+                        "containers": [
+                            {
+                                "name": config.app_name,
+                                "image": config.image,
+                                "ports": [
+                                    {
+                                        "containerPort": config.container_port,
+                                        "protocol": "TCP",
                                     }
-                                }
-                                for k in config.secrets.keys()
-                            ],
-                            'resources': {
-                                'requests': {
-                                    'cpu': config.resources.cpu_request,
-                                    'memory': config.resources.memory_request
+                                ],
+                                "env": [
+                                    {"name": k, "value": v}
+                                    for k, v in config.env_vars.items()
+                                ]
+                                + [
+                                    {
+                                        "name": k,
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "name": f"{config.app_name}-secrets",
+                                                "key": k,
+                                            }
+                                        },
+                                    }
+                                    for k in config.secrets.keys()
+                                ],
+                                "resources": {
+                                    "requests": {
+                                        "cpu": config.resources.cpu_request,
+                                        "memory": config.resources.memory_request,
+                                    },
+                                    "limits": {
+                                        "cpu": config.resources.cpu_limit,
+                                        "memory": config.resources.memory_limit,
+                                    },
                                 },
-                                'limits': {
-                                    'cpu': config.resources.cpu_limit,
-                                    'memory': config.resources.memory_limit
-                                }
-                            },
-                            'livenessProbe': {
-                                'httpGet': {
-                                    'path': config.liveness_probe.path,
-                                    'port': config.liveness_probe.port
+                                "livenessProbe": {
+                                    "httpGet": {
+                                        "path": config.liveness_probe.path,
+                                        "port": config.liveness_probe.port,
+                                    },
+                                    "initialDelaySeconds": config.liveness_probe.initial_delay_seconds,
+                                    "periodSeconds": config.liveness_probe.period_seconds,
+                                    "timeoutSeconds": config.liveness_probe.timeout_seconds,
+                                    "successThreshold": config.liveness_probe.success_threshold,
+                                    "failureThreshold": config.liveness_probe.failure_threshold,
                                 },
-                                'initialDelaySeconds': config.liveness_probe.initial_delay_seconds,
-                                'periodSeconds': config.liveness_probe.period_seconds,
-                                'timeoutSeconds': config.liveness_probe.timeout_seconds,
-                                'successThreshold': config.liveness_probe.success_threshold,
-                                'failureThreshold': config.liveness_probe.failure_threshold
-                            },
-                            'readinessProbe': {
-                                'httpGet': {
-                                    'path': config.readiness_probe.path,
-                                    'port': config.readiness_probe.port
+                                "readinessProbe": {
+                                    "httpGet": {
+                                        "path": config.readiness_probe.path,
+                                        "port": config.readiness_probe.port,
+                                    },
+                                    "initialDelaySeconds": config.readiness_probe.initial_delay_seconds,
+                                    "periodSeconds": config.readiness_probe.period_seconds,
+                                    "timeoutSeconds": config.readiness_probe.timeout_seconds,
+                                    "successThreshold": config.readiness_probe.success_threshold,
+                                    "failureThreshold": config.readiness_probe.failure_threshold,
                                 },
-                                'initialDelaySeconds': config.readiness_probe.initial_delay_seconds,
-                                'periodSeconds': config.readiness_probe.period_seconds,
-                                'timeoutSeconds': config.readiness_probe.timeout_seconds,
-                                'successThreshold': config.readiness_probe.success_threshold,
-                                'failureThreshold': config.readiness_probe.failure_threshold
                             }
-                        }]
-                    }
+                        ]
+                    },
                 },
-                'strategy': {
-                    'type': 'RollingUpdate',
-                    'rollingUpdate': {
-                        'maxSurge': 1,
-                        'maxUnavailable': 0
-                    }
-                }
-            }
+                "strategy": {
+                    "type": "RollingUpdate",
+                    "rollingUpdate": {"maxSurge": 1, "maxUnavailable": 0},
+                },
+            },
         }
 
     @staticmethod
     def generate_service(config: KubernetesConfig) -> Dict[str, Any]:
         """Generate Service manifest"""
         return {
-            'apiVersion': 'v1',
-            'kind': 'Service',
-            'metadata': {
-                'name': config.app_name,
-                'namespace': config.namespace,
-                'labels': {
-                    'app': config.app_name
-                }
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+                "name": config.app_name,
+                "namespace": config.namespace,
+                "labels": {"app": config.app_name},
             },
-            'spec': {
-                'type': config.service_type.value,
-                'selector': {
-                    'app': config.app_name
-                },
-                'ports': [{
-                    'protocol': 'TCP',
-                    'port': config.service_port,
-                    'targetPort': config.container_port
-                }]
-            }
+            "spec": {
+                "type": config.service_type.value,
+                "selector": {"app": config.app_name},
+                "ports": [
+                    {
+                        "protocol": "TCP",
+                        "port": config.service_port,
+                        "targetPort": config.container_port,
+                    }
+                ],
+            },
         }
 
     @staticmethod
@@ -235,13 +230,13 @@ class KubernetesManifestGenerator:
             return None
 
         return {
-            'apiVersion': 'v1',
-            'kind': 'ConfigMap',
-            'metadata': {
-                'name': f"{config.app_name}-config",
-                'namespace': config.namespace
+            "apiVersion": "v1",
+            "kind": "ConfigMap",
+            "metadata": {
+                "name": f"{config.app_name}-config",
+                "namespace": config.namespace,
             },
-            'data': config.config_map_data
+            "data": config.config_map_data,
         }
 
     @staticmethod
@@ -251,14 +246,14 @@ class KubernetesManifestGenerator:
             return None
 
         return {
-            'apiVersion': 'v1',
-            'kind': 'Secret',
-            'metadata': {
-                'name': f"{config.app_name}-secrets",
-                'namespace': config.namespace
+            "apiVersion": "v1",
+            "kind": "Secret",
+            "metadata": {
+                "name": f"{config.app_name}-secrets",
+                "namespace": config.namespace,
             },
-            'type': 'Opaque',
-            'stringData': config.secrets
+            "type": "Opaque",
+            "stringData": config.secrets,
         }
 
     @staticmethod
@@ -268,43 +263,40 @@ class KubernetesManifestGenerator:
             return None
 
         return {
-            'apiVersion': 'autoscaling/v2',
-            'kind': 'HorizontalPodAutoscaler',
-            'metadata': {
-                'name': config.app_name,
-                'namespace': config.namespace
-            },
-            'spec': {
-                'scaleTargetRef': {
-                    'apiVersion': 'apps/v1',
-                    'kind': 'Deployment',
-                    'name': config.app_name
+            "apiVersion": "autoscaling/v2",
+            "kind": "HorizontalPodAutoscaler",
+            "metadata": {"name": config.app_name, "namespace": config.namespace},
+            "spec": {
+                "scaleTargetRef": {
+                    "apiVersion": "apps/v1",
+                    "kind": "Deployment",
+                    "name": config.app_name,
                 },
-                'minReplicas': config.autoscaling.min_replicas,
-                'maxReplicas': config.autoscaling.max_replicas,
-                'metrics': [
+                "minReplicas": config.autoscaling.min_replicas,
+                "maxReplicas": config.autoscaling.max_replicas,
+                "metrics": [
                     {
-                        'type': 'Resource',
-                        'resource': {
-                            'name': 'cpu',
-                            'target': {
-                                'type': 'Utilization',
-                                'averageUtilization': config.autoscaling.target_cpu_percentage
-                            }
-                        }
+                        "type": "Resource",
+                        "resource": {
+                            "name": "cpu",
+                            "target": {
+                                "type": "Utilization",
+                                "averageUtilization": config.autoscaling.target_cpu_percentage,
+                            },
+                        },
                     },
                     {
-                        'type': 'Resource',
-                        'resource': {
-                            'name': 'memory',
-                            'target': {
-                                'type': 'Utilization',
-                                'averageUtilization': config.autoscaling.target_memory_percentage
-                            }
-                        }
-                    }
-                ]
-            }
+                        "type": "Resource",
+                        "resource": {
+                            "name": "memory",
+                            "target": {
+                                "type": "Utilization",
+                                "averageUtilization": config.autoscaling.target_memory_percentage,
+                            },
+                        },
+                    },
+                ],
+            },
         }
 
     @staticmethod
@@ -314,42 +306,44 @@ class KubernetesManifestGenerator:
             return None
 
         ingress_spec = {
-            'rules': [{
-                'host': config.ingress.host,
-                'http': {
-                    'paths': [{
-                        'path': config.ingress.path,
-                        'pathType': 'Prefix',
-                        'backend': {
-                            'service': {
-                                'name': config.app_name,
-                                'port': {
-                                    'number': config.service_port
-                                }
+            "rules": [
+                {
+                    "host": config.ingress.host,
+                    "http": {
+                        "paths": [
+                            {
+                                "path": config.ingress.path,
+                                "pathType": "Prefix",
+                                "backend": {
+                                    "service": {
+                                        "name": config.app_name,
+                                        "port": {"number": config.service_port},
+                                    }
+                                },
                             }
-                        }
-                    }]
+                        ]
+                    },
                 }
-            }]
+            ]
         }
 
         if config.ingress.tls_enabled:
-            ingress_spec['tls'] = [{
-                'hosts': [config.ingress.host],
-                'secretName': config.ingress.tls_secret_name
-            }]
+            ingress_spec["tls"] = [
+                {
+                    "hosts": [config.ingress.host],
+                    "secretName": config.ingress.tls_secret_name,
+                }
+            ]
 
         return {
-            'apiVersion': 'networking.k8s.io/v1',
-            'kind': 'Ingress',
-            'metadata': {
-                'name': config.app_name,
-                'namespace': config.namespace,
-                'annotations': {
-                    'kubernetes.io/ingress.class': 'nginx'
-                }
+            "apiVersion": "networking.k8s.io/v1",
+            "kind": "Ingress",
+            "metadata": {
+                "name": config.app_name,
+                "namespace": config.namespace,
+                "annotations": {"kubernetes.io/ingress.class": "nginx"},
             },
-            'spec': ingress_spec
+            "spec": ingress_spec,
         }
 
     @staticmethod
@@ -391,45 +385,37 @@ class KubernetesDeploymentManager:
         """Create environment-specific configuration"""
         defaults = {
             Environment.DEVELOPMENT: {
-                'replicas': 1,
-                'resources': ResourceRequirements(
+                "replicas": 1,
+                "resources": ResourceRequirements(
                     cpu_request="50m",
                     cpu_limit="200m",
                     memory_request="128Mi",
-                    memory_limit="256Mi"
-                )
+                    memory_limit="256Mi",
+                ),
             },
             Environment.STAGING: {
-                'replicas': 2,
-                'resources': ResourceRequirements(
+                "replicas": 2,
+                "resources": ResourceRequirements(
                     cpu_request="100m",
                     cpu_limit="500m",
                     memory_request="256Mi",
-                    memory_limit="512Mi"
+                    memory_limit="512Mi",
                 ),
-                'autoscaling': AutoScalingConfig(
-                    min_replicas=2,
-                    max_replicas=5
-                )
+                "autoscaling": AutoScalingConfig(min_replicas=2, max_replicas=5),
             },
             Environment.PRODUCTION: {
-                'replicas': 3,
-                'resources': ResourceRequirements(
+                "replicas": 3,
+                "resources": ResourceRequirements(
                     cpu_request="200m",
                     cpu_limit="1000m",
                     memory_request="512Mi",
-                    memory_limit="1Gi"
+                    memory_limit="1Gi",
                 ),
-                'autoscaling': AutoScalingConfig(
-                    min_replicas=3,
-                    max_replicas=10
+                "autoscaling": AutoScalingConfig(min_replicas=3, max_replicas=10),
+                "ingress": IngressConfig(
+                    enabled=True, host="nba-mcp.example.com", tls_enabled=True
                 ),
-                'ingress': IngressConfig(
-                    enabled=True,
-                    host="nba-mcp.example.com",
-                    tls_enabled=True
-                )
-            }
+            },
         }
 
         # Merge defaults with provided kwargs
@@ -438,7 +424,9 @@ class KubernetesDeploymentManager:
 
         return KubernetesConfig(**merged_config)
 
-    def generate_yaml(self, config: KubernetesConfig, output_file: Optional[str] = None) -> str:
+    def generate_yaml(
+        self, config: KubernetesConfig, output_file: Optional[str] = None
+    ) -> str:
         """Generate YAML manifest file"""
         manifests = KubernetesManifestGenerator.generate_all(config)
 
@@ -450,7 +438,7 @@ class KubernetesDeploymentManager:
         yaml_content = "---\n".join(yaml_docs)
 
         if output_file:
-            with open(output_file, 'w') as f:
+            with open(output_file, "w") as f:
                 f.write(yaml_content)
             logger.info(f"Kubernetes manifests saved to {output_file}")
 
@@ -458,7 +446,9 @@ class KubernetesDeploymentManager:
 
 
 # Example NBA MCP Kubernetes configuration
-def create_nba_mcp_k8s_config(environment: Environment = Environment.PRODUCTION) -> KubernetesConfig:
+def create_nba_mcp_k8s_config(
+    environment: Environment = Environment.PRODUCTION,
+) -> KubernetesConfig:
     """Create Kubernetes config for NBA MCP service"""
     manager = KubernetesDeploymentManager()
 
@@ -471,28 +461,35 @@ def create_nba_mcp_k8s_config(environment: Environment = Environment.PRODUCTION)
         container_port=8000,
         service_type=ServiceType.CLUSTER_IP,
         env_vars={
-            'NBA_MCP_ENV': environment.value,
-            'NBA_MCP_LOG_LEVEL': 'INFO' if environment == Environment.PRODUCTION else 'DEBUG',
-            'PYTHONUNBUFFERED': '1'
+            "NBA_MCP_ENV": environment.value,
+            "NBA_MCP_LOG_LEVEL": (
+                "INFO" if environment == Environment.PRODUCTION else "DEBUG"
+            ),
+            "PYTHONUNBUFFERED": "1",
         },
         secrets={
-            'DB_PASSWORD': 'your-db-password',
-            'API_KEY': 'your-api-key',
-            'JWT_SECRET': 'your-jwt-secret'
+            "DB_PASSWORD": "your-db-password",
+            "API_KEY": "your-api-key",
+            "JWT_SECRET": "your-jwt-secret",
         },
         config_map_data={
-            'app.conf': 'max_connections=1000\ntimeout=30',
-            'database.conf': 'pool_size=10\npool_timeout=5'
-        }
+            "app.conf": "max_connections=1000\ntimeout=30",
+            "database.conf": "pool_size=10\npool_timeout=5",
+        },
     )
 
 
 if __name__ == "__main__":
     import os
+
     logging.basicConfig(level=logging.INFO)
 
     # Generate manifests for all environments
-    environments = [Environment.DEVELOPMENT, Environment.STAGING, Environment.PRODUCTION]
+    environments = [
+        Environment.DEVELOPMENT,
+        Environment.STAGING,
+        Environment.PRODUCTION,
+    ]
 
     os.makedirs("k8s/manifests", exist_ok=True)
 
@@ -507,4 +504,3 @@ if __name__ == "__main__":
 
         print(f"Generated {output_file}")
         print(f"Manifests:\n{yaml_content[:500]}...")  # Print first 500 chars
-

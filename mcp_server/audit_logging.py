@@ -39,6 +39,7 @@ logger = logging.getLogger(__name__)
 
 class AuditAction(Enum):
     """Audit action types"""
+
     CREATE = "create"
     READ = "read"
     UPDATE = "update"
@@ -53,6 +54,7 @@ class AuditAction(Enum):
 
 class AuditSeverity(Enum):
     """Audit log severity"""
+
     INFO = "info"
     WARNING = "warning"
     ERROR = "error"
@@ -62,6 +64,7 @@ class AuditSeverity(Enum):
 @dataclass
 class AuditEntry:
     """Single audit log entry"""
+
     audit_id: str
     timestamp: datetime
     user_id: str
@@ -102,9 +105,9 @@ class AuditEntry:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         data = asdict(self)
-        data['timestamp'] = self.timestamp.isoformat()
-        data['action'] = self.action.value
-        data['severity'] = self.severity.value
+        data["timestamp"] = self.timestamp.isoformat()
+        data["action"] = self.action.value
+        data["severity"] = self.severity.value
         return data
 
     def to_json(self) -> str:
@@ -148,7 +151,7 @@ class AuditLogger:
         changes: Optional[Dict[str, Any]] = None,
         tenant_id: Optional[str] = None,
         correlation_id: Optional[str] = None,
-        tags: Optional[List[str]] = None
+        tags: Optional[List[str]] = None,
     ) -> AuditEntry:
         """Create audit log entry"""
 
@@ -174,7 +177,7 @@ class AuditLogger:
             tenant_id=tenant_id,
             correlation_id=correlation_id,
             tags=tags or [],
-            previous_hash=previous_hash
+            previous_hash=previous_hash,
         )
 
         with self._lock:
@@ -186,7 +189,9 @@ class AuditLogger:
             self.logs_by_action[action_key] = self.logs_by_action.get(action_key, 0) + 1
             self.logs_by_user[user_id] = self.logs_by_user.get(user_id, 0) + 1
 
-        logger.info(f"Audit log created: {entry.audit_id} - {user_id} {action.value} {resource_type}/{resource_id}")
+        logger.info(
+            f"Audit log created: {entry.audit_id} - {user_id} {action.value} {resource_type}/{resource_id}"
+        )
         return entry
 
     def query(
@@ -200,7 +205,7 @@ class AuditLogger:
         end_time: Optional[datetime] = None,
         severity: Optional[AuditSeverity] = None,
         tags: Optional[List[str]] = None,
-        limit: int = 100
+        limit: int = 100,
     ) -> List[AuditEntry]:
         """Query audit logs"""
         with self._lock:
@@ -280,36 +285,31 @@ class AuditLogger:
             resources[entry.resource_type] = resources.get(entry.resource_type, 0) + 1
 
         return {
-            'user_id': user_id,
-            'total_actions': len(entries),
-            'actions_by_type': actions,
-            'resources_accessed': resources,
-            'first_activity': entries[-1].timestamp.isoformat() if entries else None,
-            'last_activity': entries[0].timestamp.isoformat() if entries else None
+            "user_id": user_id,
+            "total_actions": len(entries),
+            "actions_by_type": actions,
+            "resources_accessed": resources,
+            "first_activity": entries[-1].timestamp.isoformat() if entries else None,
+            "last_activity": entries[0].timestamp.isoformat() if entries else None,
         }
 
     def get_compliance_report(
-        self,
-        start_time: datetime,
-        end_time: datetime,
-        tenant_id: Optional[str] = None
+        self, start_time: datetime, end_time: datetime, tenant_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """Generate compliance report"""
         entries = self.query(
-            start_time=start_time,
-            end_time=end_time,
-            tenant_id=tenant_id
+            start_time=start_time, end_time=end_time, tenant_id=tenant_id
         )
 
         # Data access summary
         data_access = [
-            e for e in entries
-            if e.action in [AuditAction.READ, AuditAction.EXPORT]
+            e for e in entries if e.action in [AuditAction.READ, AuditAction.EXPORT]
         ]
 
         # Data modification summary
         data_modifications = [
-            e for e in entries
+            e
+            for e in entries
             if e.action in [AuditAction.CREATE, AuditAction.UPDATE, AuditAction.DELETE]
         ]
 
@@ -323,32 +323,29 @@ class AuditLogger:
             by_severity[sev] = by_severity.get(sev, 0) + 1
 
         return {
-            'period': {
-                'start': start_time.isoformat(),
-                'end': end_time.isoformat()
-            },
-            'tenant_id': tenant_id,
-            'total_events': len(entries),
-            'unique_users': len(unique_users),
-            'data_access_count': len(data_access),
-            'data_modification_count': len(data_modifications),
-            'by_severity': by_severity,
-            'chain_integrity_verified': self.verify_chain_integrity()
+            "period": {"start": start_time.isoformat(), "end": end_time.isoformat()},
+            "tenant_id": tenant_id,
+            "total_events": len(entries),
+            "unique_users": len(unique_users),
+            "data_access_count": len(data_access),
+            "data_modification_count": len(data_modifications),
+            "by_severity": by_severity,
+            "chain_integrity_verified": self.verify_chain_integrity(),
         }
 
     def export_logs(
         self,
         filepath: str,
         start_time: Optional[datetime] = None,
-        end_time: Optional[datetime] = None
+        end_time: Optional[datetime] = None,
     ) -> int:
         """Export audit logs to file"""
         entries = self.query(start_time=start_time, end_time=end_time, limit=10000)
 
         try:
-            with open(filepath, 'w') as f:
+            with open(filepath, "w") as f:
                 for entry in entries:
-                    f.write(entry.to_json() + '\n')
+                    f.write(entry.to_json() + "\n")
 
             logger.info(f"Exported {len(entries)} audit logs to {filepath}")
             return len(entries)
@@ -360,33 +357,28 @@ class AuditLogger:
         """Get audit logging statistics"""
         with self._lock:
             return {
-                'total_logs': self.total_logs,
-                'current_buffer_size': len(self.logs),
-                'by_action': dict(self.logs_by_action),
-                'top_users': sorted(
-                    self.logs_by_user.items(),
-                    key=lambda x: x[1],
-                    reverse=True
+                "total_logs": self.total_logs,
+                "current_buffer_size": len(self.logs),
+                "by_action": dict(self.logs_by_action),
+                "top_users": sorted(
+                    self.logs_by_user.items(), key=lambda x: x[1], reverse=True
                 )[:10],
-                'chain_integrity_enabled': self.enable_chain_integrity
+                "chain_integrity_enabled": self.enable_chain_integrity,
             }
 
 
 # Decorators for automatic audit logging
-def audit_operation(
-    action: AuditAction,
-    resource_type: str,
-    audit_logger: AuditLogger
-):
+def audit_operation(action: AuditAction, resource_type: str, audit_logger: AuditLogger):
     """Decorator to automatically audit operations"""
+
     def decorator(func):
         def wrapper(*args, **kwargs):
             # Execute function
             result = func(*args, **kwargs)
 
             # Extract audit info from kwargs
-            user_id = kwargs.get('user_id', 'system')
-            resource_id = kwargs.get('resource_id', 'unknown')
+            user_id = kwargs.get("user_id", "system")
+            resource_id = kwargs.get("resource_id", "unknown")
 
             # Log audit entry
             audit_logger.log(
@@ -394,11 +386,13 @@ def audit_operation(
                 action=action,
                 resource_type=resource_type,
                 resource_id=str(resource_id),
-                details={'function': func.__name__}
+                details={"function": func.__name__},
             )
 
             return result
+
         return wrapper
+
     return decorator
 
 
@@ -436,7 +430,7 @@ if __name__ == "__main__":
         resource_id="session_456",
         ip_address="192.168.1.100",
         user_agent="Mozilla/5.0...",
-        tags=["authentication"]
+        tags=["authentication"],
     )
 
     # Data access
@@ -445,8 +439,8 @@ if __name__ == "__main__":
         action=AuditAction.READ,
         resource_type="player",
         resource_id="23",
-        details={'player_name': 'LeBron James'},
-        tags=["data_access"]
+        details={"player_name": "LeBron James"},
+        tags=["data_access"],
     )
 
     # Data update
@@ -455,11 +449,8 @@ if __name__ == "__main__":
         action=AuditAction.UPDATE,
         resource_type="player_stats",
         resource_id="23",
-        changes={
-            'before': {'ppg': 25.0},
-            'after': {'ppg': 25.5}
-        },
-        tags=["data_modification"]
+        changes={"before": {"ppg": 25.0}, "after": {"ppg": 25.5}},
+        tags=["data_modification"],
     )
 
     # Admin action
@@ -469,8 +460,8 @@ if __name__ == "__main__":
         resource_type="system",
         resource_id="settings",
         severity=AuditSeverity.WARNING,
-        details={'action': 'changed_rate_limit'},
-        tags=["admin", "security"]
+        details={"action": "changed_rate_limit"},
+        tags=["admin", "security"],
     )
 
     # Data export (sensitive)
@@ -480,8 +471,8 @@ if __name__ == "__main__":
         resource_type="player_data",
         resource_id="bulk_export_001",
         severity=AuditSeverity.WARNING,
-        details={'format': 'csv', 'record_count': 1000},
-        tags=["data_export", "compliance"]
+        details={"format": "csv", "record_count": 1000},
+        tags=["data_export", "compliance"],
     )
 
     # Query logs
@@ -509,8 +500,7 @@ if __name__ == "__main__":
     # Compliance report
     print("\n--- Compliance Report ---")
     report = audit.get_compliance_report(
-        start_time=datetime.now() - timedelta(hours=1),
-        end_time=datetime.now()
+        start_time=datetime.now() - timedelta(hours=1), end_time=datetime.now()
     )
     print(f"Total events: {report['total_events']}")
     print(f"Unique users: {report['unique_users']}")
@@ -531,4 +521,3 @@ if __name__ == "__main__":
     print(f"Top users: {dict(stats['top_users'][:3])}")
 
     print("\n=== Demo Complete ===")
-

@@ -23,10 +23,10 @@ from mcp_server.config import MCPConfig
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
 
 def main():
     """Upload algebraic proof textbooks to S3."""
@@ -46,14 +46,14 @@ def main():
             "local_path": "/Users/ryanranft/Downloads/Book-of-proof-Richard-Hammack.pdf",
             "s3_path": "books/Book_of_Proof_Richard_Hammack.pdf",
             "title": "Book of Proof",
-            "author": "Richard Hammack"
+            "author": "Richard Hammack",
         },
         {
             "local_path": "/Users/ryanranft/Downloads/Mathematics for Computer Science Eric Lehman.pdf",
             "s3_path": "books/Mathematics_for_Computer_Science_Eric_Lehman.pdf",
             "title": "Mathematics for Computer Science",
-            "author": "Eric Lehman"
-        }
+            "author": "Eric Lehman",
+        },
     ]
 
     # Check if local files exist
@@ -103,10 +103,7 @@ def main():
         logger.error("❌ Some uploads failed. Check the logs above for details.")
         return False
 
+
 if __name__ == "__main__":
     success = main()
     sys.exit(0 if success else 1)
-
-
-
-

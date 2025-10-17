@@ -19,8 +19,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from scripts.resilient_book_analyzer import ResilientBookAnalyzer
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 class SimplifiedRecursiveAnalyzer:
     """Simplified recursive analyzer using only working APIs."""
@@ -31,10 +34,10 @@ class SimplifiedRecursiveAnalyzer:
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         # Load configuration
-        with open(config_file, 'r') as f:
+        with open(config_file, "r") as f:
             self.config = json.load(f)
 
-        self.books = self.config.get('books', [])
+        self.books = self.config.get("books", [])
         logger.info(f"📚 Loaded {len(self.books)} books from config")
 
         # Initialize analyzer
@@ -47,52 +50,54 @@ class SimplifiedRecursiveAnalyzer:
     def _load_master_recommendations(self) -> Dict[str, Any]:
         """Load existing master recommendations."""
         if self.master_recs_file.exists():
-            with open(self.master_recs_file, 'r') as f:
+            with open(self.master_recs_file, "r") as f:
                 data = json.load(f)
                 # Ensure required keys exist
-                if 'total_cost' not in data:
-                    data['total_cost'] = 0.0
-                if 'total_books' not in data:
-                    data['total_books'] = 0
+                if "total_cost" not in data:
+                    data["total_cost"] = 0.0
+                if "total_books" not in data:
+                    data["total_books"] = 0
                 return data
         else:
             return {
-                'recommendations': [],
-                'total_cost': 0.0,
-                'total_books': 0,
-                'last_updated': None
+                "recommendations": [],
+                "total_cost": 0.0,
+                "total_books": 0,
+                "last_updated": None,
             }
 
     def _save_master_recommendations(self):
         """Save master recommendations to file."""
-        self.master_recommendations['last_updated'] = datetime.now().isoformat()
-        with open(self.master_recs_file, 'w') as f:
+        self.master_recommendations["last_updated"] = datetime.now().isoformat()
+        with open(self.master_recs_file, "w") as f:
             json.dump(self.master_recommendations, f, indent=2)
 
     async def analyze_book(self, book: Dict[str, Any]) -> bool:
         """Analyze a single book."""
-        book_title = book.get('title', 'Unknown')
+        book_title = book.get("title", "Unknown")
         logger.info(f"📖 Analyzing: {book_title}")
 
         try:
             # Run analysis with timeout
             result = await asyncio.wait_for(
                 self.analyzer.analyze_book(book),
-                timeout=300  # 5 minute timeout per book
+                timeout=300,  # 5 minute timeout per book
             )
 
             if result.success:
                 # Add recommendations to master list
                 for rec in result.recommendations:
-                    rec['book_title'] = book_title
-                    rec['analysis_date'] = datetime.now().isoformat()
-                    self.master_recommendations['recommendations'].append(rec)
+                    rec["book_title"] = book_title
+                    rec["analysis_date"] = datetime.now().isoformat()
+                    self.master_recommendations["recommendations"].append(rec)
 
                 # Update totals
-                self.master_recommendations['total_cost'] += result.total_cost
-                self.master_recommendations['total_books'] += 1
+                self.master_recommendations["total_cost"] += result.total_cost
+                self.master_recommendations["total_books"] += 1
 
-                logger.info(f"✅ {book_title}: {len(result.recommendations)} recommendations, ${result.total_cost:.4f}")
+                logger.info(
+                    f"✅ {book_title}: {len(result.recommendations)} recommendations, ${result.total_cost:.4f}"
+                )
                 return True
             else:
                 logger.error(f"❌ {book_title}: Analysis failed - {result.error}")
@@ -107,9 +112,9 @@ class SimplifiedRecursiveAnalyzer:
 
     async def _run_multi_pass_deployment(self):
         """Run multi-pass deployment after all books analyzed."""
-        logger.info("\n" + "="*60)
+        logger.info("\n" + "=" * 60)
         logger.info("🔄 Starting Multi-Pass Deployment")
-        logger.info("="*60)
+        logger.info("=" * 60)
 
         try:
             from multi_pass_book_deployment import MultiPassOrchestrator
@@ -158,23 +163,30 @@ class SimplifiedRecursiveAnalyzer:
         logger.info(f"✅ Successful: {successful}")
         logger.info(f"❌ Failed: {failed}")
         logger.info(f"💰 Total cost: ${self.master_recommendations['total_cost']:.4f}")
-        logger.info(f"📋 Total recommendations: {len(self.master_recommendations['recommendations'])}")
+        logger.info(
+            f"📋 Total recommendations: {len(self.master_recommendations['recommendations'])}"
+        )
 
         # NEW: Trigger multi-pass deployment
         if successful > 0:
             logger.info("\n🚀 Triggering multi-pass deployment...")
             deployment_success = await self._run_multi_pass_deployment()
             if deployment_success:
-                logger.info("✅ Complete workflow finished: Books analyzed → Recommendations integrated → Implementation files generated")
+                logger.info(
+                    "✅ Complete workflow finished: Books analyzed → Recommendations integrated → Implementation files generated"
+                )
             else:
-                logger.warning("⚠️ Multi-pass deployment had issues, but book analysis completed")
+                logger.warning(
+                    "⚠️ Multi-pass deployment had issues, but book analysis completed"
+                )
+
 
 async def main():
     """Main function."""
-    parser = argparse.ArgumentParser(description='Simplified Resilient Book Analysis')
-    parser.add_argument('--config', required=True, help='Configuration file path')
-    parser.add_argument('--output-dir', required=True, help='Output directory')
-    parser.add_argument('--book', help='Analyze specific book by title')
+    parser = argparse.ArgumentParser(description="Simplified Resilient Book Analysis")
+    parser.add_argument("--config", required=True, help="Configuration file path")
+    parser.add_argument("--output-dir", required=True, help="Output directory")
+    parser.add_argument("--book", help="Analyze specific book by title")
 
     args = parser.parse_args()
 
@@ -182,7 +194,7 @@ async def main():
 
     if args.book:
         # Analyze specific book
-        book = next((b for b in analyzer.books if b.get('title') == args.book), None)
+        book = next((b for b in analyzer.books if b.get("title") == args.book), None)
         if book:
             await analyzer.analyze_book(book)
             analyzer._save_master_recommendations()
@@ -191,6 +203,7 @@ async def main():
     else:
         # Analyze all books
         await analyzer.analyze_all_books()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

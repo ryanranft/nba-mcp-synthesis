@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class PredictionLog:
     """Single prediction log entry"""
+
     prediction_id: str
     model_id: str
     model_version: str
@@ -51,7 +52,7 @@ class PredictionLogger:
         self.stats = {
             "total_predictions": 0,
             "predictions_by_model": {},
-            "predictions_by_hour": {}
+            "predictions_by_hour": {},
         }
 
     def log_prediction(
@@ -65,7 +66,7 @@ class PredictionLogger:
         latency_ms: Optional[float] = None,
         user_id: Optional[str] = None,
         session_id: Optional[str] = None,
-        metadata: Optional[Dict] = None
+        metadata: Optional[Dict] = None,
     ) -> PredictionLog:
         """
         Log a prediction.
@@ -95,7 +96,7 @@ class PredictionLogger:
             latency_ms=latency_ms,
             user_id=user_id,
             session_id=session_id,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
         # Add to buffer
@@ -103,12 +104,14 @@ class PredictionLogger:
 
         # Update statistics
         self.stats["total_predictions"] += 1
-        self.stats["predictions_by_model"][model_id] = \
+        self.stats["predictions_by_model"][model_id] = (
             self.stats["predictions_by_model"].get(model_id, 0) + 1
+        )
 
         hour = datetime.utcnow().strftime("%Y-%m-%d %H:00")
-        self.stats["predictions_by_hour"][hour] = \
+        self.stats["predictions_by_hour"][hour] = (
             self.stats["predictions_by_hour"].get(hour, 0) + 1
+        )
 
         # Flush buffer if full
         if len(self.buffer) >= self.buffer_size:
@@ -127,10 +130,10 @@ class PredictionLogger:
         log_file = self.storage_path / f"predictions_{date_str}.jsonl"
 
         # Append to JSONL file
-        with open(log_file, 'a') as f:
+        with open(log_file, "a") as f:
             for log_entry in self.buffer:
                 json_line = json.dumps(asdict(log_entry))
-                f.write(json_line + '\n')
+                f.write(json_line + "\n")
 
         logger.info(f"Flushed {len(self.buffer)} predictions to {log_file}")
         self.buffer.clear()
@@ -141,7 +144,7 @@ class PredictionLogger:
         user_id: Optional[str] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
-        limit: int = 100
+        limit: int = 100,
     ) -> List[PredictionLog]:
         """
         Query prediction logs.
@@ -160,7 +163,7 @@ class PredictionLogger:
 
         # Iterate through log files
         for log_file in sorted(self.storage_path.glob("predictions_*.jsonl")):
-            with open(log_file, 'r') as f:
+            with open(log_file, "r") as f:
                 for line in f:
                     if len(results) >= limit:
                         break
@@ -190,12 +193,11 @@ class PredictionLogger:
         return {
             "total_predictions": self.stats["total_predictions"],
             "predictions_by_model": self.stats["predictions_by_model"],
-            "predictions_by_hour": dict(sorted(
-                self.stats["predictions_by_hour"].items(),
-                reverse=True
-            )[:24]),  # Last 24 hours
+            "predictions_by_hour": dict(
+                sorted(self.stats["predictions_by_hour"].items(), reverse=True)[:24]
+            ),  # Last 24 hours
             "buffer_size": len(self.buffer),
-            "storage_path": str(self.storage_path)
+            "storage_path": str(self.storage_path),
         }
 
 
@@ -225,7 +227,7 @@ if __name__ == "__main__":
             latency_ms=random.uniform(10, 100),
             user_id=f"user_{random.randint(1, 10)}",
             session_id=f"session_{random.randint(1, 20)}",
-            metadata={"source": "api", "region": "us-east-1"}
+            metadata={"source": "api", "region": "us-east-1"},
         )
 
     print(f"\n✅ Logged {pred_logger.stats['total_predictions']} predictions")
@@ -241,11 +243,11 @@ if __name__ == "__main__":
     print(f"Buffer Size: {stats['buffer_size']}")
 
     print("\nPredictions by Model:")
-    for model, count in stats['predictions_by_model'].items():
+    for model, count in stats["predictions_by_model"].items():
         print(f"  - {model}: {count}")
 
     print("\nPredictions by Hour (last 24h):")
-    for hour, count in list(stats['predictions_by_hour'].items())[:5]:
+    for hour, count in list(stats["predictions_by_hour"].items())[:5]:
         print(f"  - {hour}: {count}")
 
     # Flush remaining
@@ -259,10 +261,11 @@ if __name__ == "__main__":
     results = pred_logger.query_predictions(model_id="model_v1", limit=5)
     print(f"\nFound {len(results)} predictions for model_v1 (showing 5):")
     for result in results:
-        print(f"  - {result.prediction_id}: prediction={result.prediction}, "
-              f"confidence={result.confidence:.2f}, latency={result.latency_ms:.1f}ms")
+        print(
+            f"  - {result.prediction_id}: prediction={result.prediction}, "
+            f"confidence={result.confidence:.2f}, latency={result.latency_ms:.1f}ms"
+        )
 
     print("\n" + "=" * 80)
     print("Prediction Logging Demo Complete!")
     print("=" * 80)
-

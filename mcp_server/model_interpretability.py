@@ -24,7 +24,7 @@ class LocalInterpreter:
         predict_fn: Callable,
         feature_names: List[str],
         num_samples: int = 1000,
-        num_features: int = 5
+        num_features: int = 5,
     ) -> Dict[str, Any]:
         """
         Explain a prediction using local linear approximation.
@@ -39,7 +39,9 @@ class LocalInterpreter:
         Returns:
             Explanation dictionary
         """
-        logger.info(f"Generating explanation for instance with {len(instance)} features")
+        logger.info(
+            f"Generating explanation for instance with {len(instance)} features"
+        )
 
         # Get original prediction
         original_pred = predict_fn([instance])[0]
@@ -50,10 +52,7 @@ class LocalInterpreter:
 
         for _ in range(num_samples):
             # Perturb instance
-            perturbed = [
-                feat + random.gauss(0, abs(feat) * 0.1)
-                for feat in instance
-            ]
+            perturbed = [feat + random.gauss(0, abs(feat) * 0.1) for feat in instance]
             samples.append(perturbed)
             predictions.append(predict_fn([perturbed])[0])
 
@@ -64,9 +63,7 @@ class LocalInterpreter:
 
         # Get top features
         top_features = sorted(
-            feature_importance.items(),
-            key=lambda x: abs(x[1]),
-            reverse=True
+            feature_importance.items(), key=lambda x: abs(x[1]), reverse=True
         )[:num_features]
 
         explanation = {
@@ -74,7 +71,9 @@ class LocalInterpreter:
             "prediction": original_pred,
             "feature_importance": dict(top_features),
             "num_samples": num_samples,
-            "interpretation": self._generate_interpretation(top_features, original_pred)
+            "interpretation": self._generate_interpretation(
+                top_features, original_pred
+            ),
         }
 
         logger.info(f"Generated explanation with {len(top_features)} top features")
@@ -86,7 +85,7 @@ class LocalInterpreter:
         instance: List[float],
         samples: List[List[float]],
         predictions: List[float],
-        feature_names: List[str]
+        feature_names: List[str],
     ) -> Dict[str, float]:
         """Fit local linear model"""
         # Simplified linear regression using correlations
@@ -119,7 +118,7 @@ class LocalInterpreter:
         sum_y2 = sum(yi * yi for yi in y)
 
         numerator = n * sum_xy - sum_x * sum_y
-        denominator = ((n * sum_x2 - sum_x ** 2) * (n * sum_y2 - sum_y ** 2)) ** 0.5
+        denominator = ((n * sum_x2 - sum_x**2) * (n * sum_y2 - sum_y**2)) ** 0.5
 
         if denominator == 0:
             return 0.0
@@ -127,9 +126,7 @@ class LocalInterpreter:
         return numerator / denominator
 
     def _generate_interpretation(
-        self,
-        top_features: List[tuple],
-        prediction: float
+        self, top_features: List[tuple], prediction: float
     ) -> str:
         """Generate human-readable interpretation"""
         positive = [f for f, imp in top_features if imp > 0]
@@ -155,7 +152,7 @@ class CounterfactualGenerator:
         target_class: Any,
         feature_names: List[str],
         max_changes: int = 3,
-        max_iterations: int = 100
+        max_iterations: int = 100,
     ) -> Dict[str, Any]:
         """
         Generate counterfactual explanation.
@@ -174,12 +171,14 @@ class CounterfactualGenerator:
         logger.info(f"Generating counterfactual for target class: {target_class}")
 
         best_counterfactual = None
-        best_distance = float('inf')
+        best_distance = float("inf")
 
         for _ in range(max_iterations):
             # Random feature changes
             counterfactual = instance.copy()
-            changed_features = random.sample(range(len(instance)), min(max_changes, len(instance)))
+            changed_features = random.sample(
+                range(len(instance)), min(max_changes, len(instance))
+            )
 
             for idx in changed_features:
                 # Perturb feature
@@ -190,7 +189,9 @@ class CounterfactualGenerator:
 
             if abs(pred - target_class) < 0.1:  # Close enough
                 # Calculate distance
-                distance = sum((a - b) ** 2 for a, b in zip(instance, counterfactual)) ** 0.5
+                distance = (
+                    sum((a - b) ** 2 for a, b in zip(instance, counterfactual)) ** 0.5
+                )
 
                 if distance < best_distance:
                     best_distance = distance
@@ -202,7 +203,7 @@ class CounterfactualGenerator:
                     "feature": feature_names[i],
                     "original": instance[i],
                     "counterfactual": best_counterfactual[i],
-                    "change": best_counterfactual[i] - instance[i]
+                    "change": best_counterfactual[i] - instance[i],
                 }
                 for i in range(len(instance))
                 if abs(best_counterfactual[i] - instance[i]) > 0.01
@@ -213,13 +214,15 @@ class CounterfactualGenerator:
                 "counterfactual": best_counterfactual,
                 "changes": changes,
                 "distance": best_distance,
-                "interpretation": f"To achieve {target_class}, change: " +
-                                ", ".join(f"{c['feature']} by {c['change']:.2f}" for c in changes[:3])
+                "interpretation": f"To achieve {target_class}, change: "
+                + ", ".join(
+                    f"{c['feature']} by {c['change']:.2f}" for c in changes[:3]
+                ),
             }
         else:
             return {
                 "found": False,
-                "message": f"Could not find counterfactual for target {target_class}"
+                "message": f"Could not find counterfactual for target {target_class}",
             }
 
 
@@ -254,13 +257,13 @@ if __name__ == "__main__":
         predict_fn=mock_predict,
         feature_names=feature_names,
         num_samples=500,
-        num_features=4
+        num_features=4,
     )
 
     print(f"\nOriginal Instance: {dict(zip(feature_names, instance))}")
     print(f"Prediction: {explanation['prediction']:.3f}")
     print(f"\nFeature Importance:")
-    for feat, imp in explanation['feature_importance'].items():
+    for feat, imp in explanation["feature_importance"].items():
         sign = "+" if imp > 0 else ""
         print(f"  {feat:15} {sign}{imp:.3f}")
 
@@ -278,16 +281,18 @@ if __name__ == "__main__":
         target_class=10.0,
         feature_names=feature_names,
         max_changes=2,
-        max_iterations=200
+        max_iterations=200,
     )
 
-    if cf['found']:
+    if cf["found"]:
         print(f"\n✅ Found counterfactual!")
         print(f"Distance: {cf['distance']:.2f}")
         print(f"\nChanges needed:")
-        for change in cf['changes']:
-            print(f"  {change['feature']:15} {change['original']:.2f} → "
-                  f"{change['counterfactual']:.2f} ({change['change']:+.2f})")
+        for change in cf["changes"]:
+            print(
+                f"  {change['feature']:15} {change['original']:.2f} → "
+                f"{change['counterfactual']:.2f} ({change['change']:+.2f})"
+            )
         print(f"\n{cf['interpretation']}")
     else:
         print(f"\n❌ {cf['message']}")
@@ -295,4 +300,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("Model Interpretability Demo Complete!")
     print("=" * 80)
-

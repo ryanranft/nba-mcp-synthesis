@@ -21,10 +21,13 @@ from typing import Dict, Any, List
 import statistics
 
 # Add the project root to the Python path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
 
 from mcp.server.fastmcp import FastMCP, Context
 from mcp_server.fastmcp_server import mcp as nba_mcp_server
+
 
 class TestPerformanceBenchmarks(unittest.TestCase):
     """Test cases for performance benchmarks"""
@@ -35,20 +38,38 @@ class TestPerformanceBenchmarks(unittest.TestCase):
 
         # Test data
         self.test_player_stats = {
-            'PTS': 25.0, 'FGM': 10.0, 'FGA': 20.0, '3PM': 3.0, '3PA': 8.0,
-            'FTM': 2.0, 'FTA': 3.0, 'REB': 8.0, 'AST': 6.0, 'STL': 2.0,
-            'BLK': 1.0, 'TOV': 3.0, 'PF': 2.0, 'MP': 35.0, 'TM_MP': 240.0,
-            'TM_FGA': 90.0, 'TM_FTA': 25.0, 'TM_TOV': 12.0, 'TM_FGM': 35.0,
-            'TM_REB': 45.0, 'OPP_REB': 42.0, 'OPP_POSS': 100.0, 'OPP_2PA': 50.0
+            "PTS": 25.0,
+            "FGM": 10.0,
+            "FGA": 20.0,
+            "3PM": 3.0,
+            "3PA": 8.0,
+            "FTM": 2.0,
+            "FTA": 3.0,
+            "REB": 8.0,
+            "AST": 6.0,
+            "STL": 2.0,
+            "BLK": 1.0,
+            "TOV": 3.0,
+            "PF": 2.0,
+            "MP": 35.0,
+            "TM_MP": 240.0,
+            "TM_FGA": 90.0,
+            "TM_FTA": 25.0,
+            "TM_TOV": 12.0,
+            "TM_FGM": 35.0,
+            "TM_REB": 45.0,
+            "OPP_REB": 42.0,
+            "OPP_POSS": 100.0,
+            "OPP_2PA": 50.0,
         }
 
         # Performance thresholds (in seconds)
         self.thresholds = {
             "algebra_sports_formula": 0.1,  # 100ms
-            "algebra_simplify": 0.05,       # 50ms
+            "algebra_simplify": 0.05,  # 50ms
             "formula_identify_type": 0.05,  # 50ms
-            "formula_builder_validate": 0.1, # 100ms
-            "analyze_formula_structure": 0.1, # 100ms
+            "formula_builder_validate": 0.1,  # 100ms
+            "analyze_formula_structure": 0.1,  # 100ms
             "convert_latex_to_sympy": 0.2,  # 200ms
         }
 
@@ -62,7 +83,12 @@ class TestPerformanceBenchmarks(unittest.TestCase):
 
             result_tuple = await self.mcp_server.call_tool(
                 "algebra_sports_formula",
-                {"params": {"formula_name": "true_shooting", "stats": self.test_player_stats}}
+                {
+                    "params": {
+                        "formula_name": "true_shooting",
+                        "stats": self.test_player_stats,
+                    }
+                },
             )
             result = result_tuple[1]
 
@@ -86,7 +112,11 @@ class TestPerformanceBenchmarks(unittest.TestCase):
 
         # Check against threshold
         threshold = self.thresholds["algebra_sports_formula"]
-        self.assertLess(avg_time, threshold, f"Average time {avg_time:.4f}s exceeds threshold {threshold}s")
+        self.assertLess(
+            avg_time,
+            threshold,
+            f"Average time {avg_time:.4f}s exceeds threshold {threshold}s",
+        )
 
         return {
             "tool": "algebra_sports_formula",
@@ -96,7 +126,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
             "max_time": max_time,
             "min_time": min_time,
             "threshold": threshold,
-            "passed": avg_time < threshold
+            "passed": avg_time < threshold,
         }
 
     async def benchmark_formula_validation(self):
@@ -108,7 +138,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
             "PTS / (2 * (FGA + 0.44 * FTA))",
             "(FGM + 0.5 * 3PM) / FGA",
             "((FGA + 0.44 * FTA + TOV) * (TM_MP / 5)) / (MP * (TM_FGA + 0.44 * TM_FTA + TM_TOV)) * 100",
-            "FGM * 85.910 + STL * 53.897 + 3PM * 51.757 + FTM * 46.845 + BLK * 39.190 + OREB * 39.190 + AST * 34.677 + DREB * 14.707 - PF * 17.174 - (FTA - FTM) * 20.091 - (FGA - FGM) * 39.190 - TOV * 53.897"
+            "FGM * 85.910 + STL * 53.897 + 3PM * 51.757 + FTM * 46.845 + BLK * 39.190 + OREB * 39.190 + AST * 34.677 + DREB * 14.707 - PF * 17.174 - (FTA - FTM) * 20.091 - (FGA - FGM) * 39.190 - TOV * 53.897",
         ]
 
         for formula in test_formulas:
@@ -117,7 +147,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
 
                 result_tuple = await self.mcp_server.call_tool(
                     "formula_builder_validate",
-                    {"params": {"formula": formula, "validation_level": "semantic"}}
+                    {"params": {"formula": formula, "validation_level": "semantic"}},
                 )
                 result = result_tuple[1]
 
@@ -141,7 +171,11 @@ class TestPerformanceBenchmarks(unittest.TestCase):
 
         # Check against threshold
         threshold = self.thresholds["formula_builder_validate"]
-        self.assertLess(avg_time, threshold, f"Average time {avg_time:.4f}s exceeds threshold {threshold}s")
+        self.assertLess(
+            avg_time,
+            threshold,
+            f"Average time {avg_time:.4f}s exceeds threshold {threshold}s",
+        )
 
         return {
             "tool": "formula_builder_validate",
@@ -151,7 +185,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
             "max_time": max_time,
             "min_time": min_time,
             "threshold": threshold,
-            "passed": avg_time < threshold
+            "passed": avg_time < threshold,
         }
 
     async def benchmark_formula_intelligence(self):
@@ -163,7 +197,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
             "PTS / (2 * (FGA + 0.44 * FTA))",
             "(FGM + 0.5 * 3PM) / FGA",
             "ORtg - DRtg",
-            "((FGA + 0.44 * FTA + TOV) * (TM_MP / 5)) / (MP * (TM_FGA + 0.44 * TM_FTA + TM_TOV)) * 100"
+            "((FGA + 0.44 * FTA + TOV) * (TM_MP / 5)) / (MP * (TM_FGA + 0.44 * TM_FTA + TM_TOV)) * 100",
         ]
 
         for formula in test_formulas:
@@ -171,8 +205,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
                 start_time = time.time()
 
                 result_tuple = await self.mcp_server.call_tool(
-                    "formula_identify_type",
-                    {"params": {"formula": formula}}
+                    "formula_identify_type", {"params": {"formula": formula}}
                 )
                 result = result_tuple[1]
 
@@ -196,7 +229,11 @@ class TestPerformanceBenchmarks(unittest.TestCase):
 
         # Check against threshold
         threshold = self.thresholds["formula_identify_type"]
-        self.assertLess(avg_time, threshold, f"Average time {avg_time:.4f}s exceeds threshold {threshold}s")
+        self.assertLess(
+            avg_time,
+            threshold,
+            f"Average time {avg_time:.4f}s exceeds threshold {threshold}s",
+        )
 
         return {
             "tool": "formula_identify_type",
@@ -206,7 +243,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
             "max_time": max_time,
             "min_time": min_time,
             "threshold": threshold,
-            "passed": avg_time < threshold
+            "passed": avg_time < threshold,
         }
 
     async def benchmark_formula_extraction(self):
@@ -218,7 +255,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
             "PTS / (2 * (FGA + 0.44 * FTA))",
             "(FGM + 0.5 * 3PM) / FGA",
             "((FGA + 0.44 * FTA + TOV) * (TM_MP / 5)) / (MP * (TM_FGA + 0.44 * TM_FTA + TM_TOV)) * 100",
-            "FGM * 85.910 + STL * 53.897 + 3PM * 51.757 + FTM * 46.845 + BLK * 39.190 + OREB * 39.190 + AST * 34.677 + DREB * 14.707 - PF * 17.174 - (FTA - FTM) * 20.091 - (FGA - FGM) * 39.190 - TOV * 53.897"
+            "FGM * 85.910 + STL * 53.897 + 3PM * 51.757 + FTM * 46.845 + BLK * 39.190 + OREB * 39.190 + AST * 34.677 + DREB * 14.707 - PF * 17.174 - (FTA - FTM) * 20.091 - (FGA - FGM) * 39.190 - TOV * 53.897",
         ]
 
         for formula in test_formulas:
@@ -226,8 +263,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
                 start_time = time.time()
 
                 result_tuple = await self.mcp_server.call_tool(
-                    "analyze_formula_structure",
-                    {"params": {"formula": formula}}
+                    "analyze_formula_structure", {"params": {"formula": formula}}
                 )
                 result = result_tuple[1]
 
@@ -251,7 +287,11 @@ class TestPerformanceBenchmarks(unittest.TestCase):
 
         # Check against threshold
         threshold = self.thresholds["analyze_formula_structure"]
-        self.assertLess(avg_time, threshold, f"Average time {avg_time:.4f}s exceeds threshold {threshold}s")
+        self.assertLess(
+            avg_time,
+            threshold,
+            f"Average time {avg_time:.4f}s exceeds threshold {threshold}s",
+        )
 
         return {
             "tool": "analyze_formula_structure",
@@ -261,7 +301,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
             "max_time": max_time,
             "min_time": min_time,
             "threshold": threshold,
-            "passed": avg_time < threshold
+            "passed": avg_time < threshold,
         }
 
     async def benchmark_latex_conversion(self):
@@ -273,7 +313,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
             r"\frac{PTS}{2 \cdot (FGA + 0.44 \cdot FTA)}",
             r"\frac{FGM + 0.5 \cdot 3PM}{FGA}",
             r"ORtg - DRtg",
-            r"\frac{(FGA + 0.44 \cdot FTA + TOV) \cdot \frac{TM\_MP}{5}}{MP \cdot (TM\_FGA + 0.44 \cdot TM\_FTA + TM\_TOV)} \cdot 100"
+            r"\frac{(FGA + 0.44 \cdot FTA + TOV) \cdot \frac{TM\_MP}{5}}{MP \cdot (TM\_FGA + 0.44 \cdot TM\_FTA + TM\_TOV)} \cdot 100",
         ]
 
         for latex_formula in latex_formulas:
@@ -282,7 +322,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
 
                 result_tuple = await self.mcp_server.call_tool(
                     "convert_latex_to_sympy",
-                    {"params": {"latex_formula": latex_formula}}
+                    {"params": {"latex_formula": latex_formula}},
                 )
                 result = result_tuple[1]
 
@@ -306,7 +346,11 @@ class TestPerformanceBenchmarks(unittest.TestCase):
 
         # Check against threshold
         threshold = self.thresholds["convert_latex_to_sympy"]
-        self.assertLess(avg_time, threshold, f"Average time {avg_time:.4f}s exceeds threshold {threshold}s")
+        self.assertLess(
+            avg_time,
+            threshold,
+            f"Average time {avg_time:.4f}s exceeds threshold {threshold}s",
+        )
 
         return {
             "tool": "convert_latex_to_sympy",
@@ -316,7 +360,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
             "max_time": max_time,
             "min_time": min_time,
             "threshold": threshold,
-            "passed": avg_time < threshold
+            "passed": avg_time < threshold,
         }
 
     async def benchmark_memory_usage(self):
@@ -329,7 +373,12 @@ class TestPerformanceBenchmarks(unittest.TestCase):
         for _ in range(operations):
             result_tuple = await self.mcp_server.call_tool(
                 "algebra_sports_formula",
-                {"params": {"formula_name": "true_shooting", "stats": self.test_player_stats}}
+                {
+                    "params": {
+                        "formula_name": "true_shooting",
+                        "stats": self.test_player_stats,
+                    }
+                },
             )
             result = result_tuple[1]
             self.assertTrue(result["success"])
@@ -348,22 +397,32 @@ class TestPerformanceBenchmarks(unittest.TestCase):
         print(f"  Peak memory: {peak_mb:.2f} MB")
 
         # Check memory usage is reasonable (less than 100MB for 50 operations)
-        self.assertLess(current_mb, 100, f"Current memory usage {current_mb:.2f} MB exceeds 100MB")
-        self.assertLess(peak_mb, 200, f"Peak memory usage {peak_mb:.2f} MB exceeds 200MB")
+        self.assertLess(
+            current_mb, 100, f"Current memory usage {current_mb:.2f} MB exceeds 100MB"
+        )
+        self.assertLess(
+            peak_mb, 200, f"Peak memory usage {peak_mb:.2f} MB exceeds 200MB"
+        )
 
         return {
             "operations": operations,
             "current_memory_mb": current_mb,
             "peak_memory_mb": peak_mb,
-            "passed": current_mb < 100 and peak_mb < 200
+            "passed": current_mb < 100 and peak_mb < 200,
         }
 
     async def benchmark_concurrent_operations(self):
         """Benchmark concurrent operations"""
+
         async def single_operation():
             result_tuple = await self.mcp_server.call_tool(
                 "algebra_sports_formula",
-                {"params": {"formula_name": "true_shooting", "stats": self.test_player_stats}}
+                {
+                    "params": {
+                        "formula_name": "true_shooting",
+                        "stats": self.test_player_stats,
+                    }
+                },
             )
             return result_tuple[1]
 
@@ -387,13 +446,17 @@ class TestPerformanceBenchmarks(unittest.TestCase):
         print(f"  Average time per operation: {total_time / concurrent_count:.4f}s")
 
         # Should complete in reasonable time
-        self.assertLess(total_time, 5.0, f"Total time {total_time:.4f}s exceeds 5s for {concurrent_count} operations")
+        self.assertLess(
+            total_time,
+            5.0,
+            f"Total time {total_time:.4f}s exceeds 5s for {concurrent_count} operations",
+        )
 
         return {
             "concurrent_count": concurrent_count,
             "total_time": total_time,
             "avg_time_per_operation": total_time / concurrent_count,
-            "passed": total_time < 5.0
+            "passed": total_time < 5.0,
         }
 
     async def run_all_benchmarks(self):
@@ -421,7 +484,9 @@ class TestPerformanceBenchmarks(unittest.TestCase):
 
         for tool_name, result in results.items():
             status = "PASS" if result["passed"] else "FAIL"
-            print(f"{tool_name:20} | {status:4} | {result.get('avg_time', result.get('total_time', 0)):.4f}s")
+            print(
+                f"{tool_name:20} | {status:4} | {result.get('avg_time', result.get('total_time', 0)):.4f}s"
+            )
             if result["passed"]:
                 passed_count += 1
 
@@ -431,6 +496,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
         print(f"{'='*60}")
 
         return results
+
 
 class TestScalabilityBenchmarks(unittest.TestCase):
     """Test cases for scalability benchmarks"""
@@ -445,13 +511,29 @@ class TestScalabilityBenchmarks(unittest.TestCase):
         large_dataset = []
         for i in range(100):
             stats = {
-                'PTS': 20.0 + i * 0.1, 'FGM': 8.0 + i * 0.05, 'FGA': 18.0 + i * 0.1,
-                '3PM': 2.0 + i * 0.02, '3PA': 6.0 + i * 0.05, 'FTM': 2.0 + i * 0.01,
-                'FTA': 3.0 + i * 0.02, 'REB': 6.0 + i * 0.03, 'AST': 5.0 + i * 0.02,
-                'STL': 1.0 + i * 0.01, 'BLK': 0.5 + i * 0.005, 'TOV': 2.0 + i * 0.01,
-                'PF': 2.0 + i * 0.01, 'MP': 30.0 + i * 0.1, 'TM_MP': 240.0,
-                'TM_FGA': 90.0, 'TM_FTA': 25.0, 'TM_TOV': 12.0, 'TM_FGM': 35.0,
-                'TM_REB': 45.0, 'OPP_REB': 42.0, 'OPP_POSS': 100.0, 'OPP_2PA': 50.0
+                "PTS": 20.0 + i * 0.1,
+                "FGM": 8.0 + i * 0.05,
+                "FGA": 18.0 + i * 0.1,
+                "3PM": 2.0 + i * 0.02,
+                "3PA": 6.0 + i * 0.05,
+                "FTM": 2.0 + i * 0.01,
+                "FTA": 3.0 + i * 0.02,
+                "REB": 6.0 + i * 0.03,
+                "AST": 5.0 + i * 0.02,
+                "STL": 1.0 + i * 0.01,
+                "BLK": 0.5 + i * 0.005,
+                "TOV": 2.0 + i * 0.01,
+                "PF": 2.0 + i * 0.01,
+                "MP": 30.0 + i * 0.1,
+                "TM_MP": 240.0,
+                "TM_FGA": 90.0,
+                "TM_FTA": 25.0,
+                "TM_TOV": 12.0,
+                "TM_FGM": 35.0,
+                "TM_REB": 45.0,
+                "OPP_REB": 42.0,
+                "OPP_POSS": 100.0,
+                "OPP_2PA": 50.0,
             }
             large_dataset.append(stats)
 
@@ -461,7 +543,7 @@ class TestScalabilityBenchmarks(unittest.TestCase):
         for stats in large_dataset:
             result_tuple = await self.mcp_server.call_tool(
                 "algebra_sports_formula",
-                {"params": {"formula_name": "true_shooting", "stats": stats}}
+                {"params": {"formula_name": "true_shooting", "stats": stats}},
             )
             result = result_tuple[1]
             self.assertTrue(result["success"])
@@ -475,13 +557,17 @@ class TestScalabilityBenchmarks(unittest.TestCase):
         print(f"  Average time per record: {total_time / len(large_dataset):.4f}s")
 
         # Should process 100 records in reasonable time
-        self.assertLess(total_time, 10.0, f"Total time {total_time:.4f}s exceeds 10s for {len(large_dataset)} records")
+        self.assertLess(
+            total_time,
+            10.0,
+            f"Total time {total_time:.4f}s exceeds 10s for {len(large_dataset)} records",
+        )
 
         return {
             "dataset_size": len(large_dataset),
             "total_time": total_time,
             "avg_time_per_record": total_time / len(large_dataset),
-            "passed": total_time < 10.0
+            "passed": total_time < 10.0,
         }
 
     async def test_complex_formula_performance(self):
@@ -490,15 +576,30 @@ class TestScalabilityBenchmarks(unittest.TestCase):
             "FGM * 85.910 + STL * 53.897 + 3PM * 51.757 + FTM * 46.845 + BLK * 39.190 + OREB * 39.190 + AST * 34.677 + DREB * 14.707 - PF * 17.174 - (FTA - FTM) * 20.091 - (FGA - FGM) * 39.190 - TOV * 53.897",
             "((FGA + 0.44 * FTA + TOV) * (TM_MP / 5)) / (MP * (TM_FGA + 0.44 * TM_FTA + TM_TOV)) * 100",
             "(AST * (TM_MP / 5)) / (MP * (TM_FGM - FGM)) * 100",
-            "(REB * (TM_MP / 5)) / (MP * (TM_REB + OPP_REB)) * 100"
+            "(REB * (TM_MP / 5)) / (MP * (TM_REB + OPP_REB)) * 100",
         ]
 
         stats = {
-            'FGM': 10.0, 'STL': 2.0, '3PM': 3.0, 'FTM': 5.0, 'BLK': 1.0,
-            'OREB': 2.0, 'AST': 8.0, 'DREB': 6.0, 'PF': 3.0, 'FTA': 6.0,
-            'FGA': 18.0, 'TOV': 3.0, 'MP': 35.0, 'TM_MP': 240.0, 'TM_FGA': 90.0,
-            'TM_FTA': 25.0, 'TM_TOV': 12.0, 'TM_FGM': 35.0, 'TM_REB': 45.0,
-            'OPP_REB': 42.0
+            "FGM": 10.0,
+            "STL": 2.0,
+            "3PM": 3.0,
+            "FTM": 5.0,
+            "BLK": 1.0,
+            "OREB": 2.0,
+            "AST": 8.0,
+            "DREB": 6.0,
+            "PF": 3.0,
+            "FTA": 6.0,
+            "FGA": 18.0,
+            "TOV": 3.0,
+            "MP": 35.0,
+            "TM_MP": 240.0,
+            "TM_FGA": 90.0,
+            "TM_FTA": 25.0,
+            "TM_TOV": 12.0,
+            "TM_FGM": 35.0,
+            "TM_REB": 45.0,
+            "OPP_REB": 42.0,
         }
 
         times = []
@@ -508,7 +609,7 @@ class TestScalabilityBenchmarks(unittest.TestCase):
 
             result_tuple = await self.mcp_server.call_tool(
                 "formula_builder_validate",
-                {"params": {"formula": formula, "validation_level": "semantic"}}
+                {"params": {"formula": formula, "validation_level": "semantic"}},
             )
             result = result_tuple[1]
 
@@ -526,19 +627,20 @@ class TestScalabilityBenchmarks(unittest.TestCase):
         print(f"  Max time: {max_time:.4f}s")
 
         # Complex formulas should still complete in reasonable time
-        self.assertLess(avg_time, 0.5, f"Average time {avg_time:.4f}s exceeds 0.5s for complex formulas")
+        self.assertLess(
+            avg_time,
+            0.5,
+            f"Average time {avg_time:.4f}s exceeds 0.5s for complex formulas",
+        )
 
         return {
             "formulas_tested": len(complex_formulas),
             "avg_time": avg_time,
             "max_time": max_time,
-            "passed": avg_time < 0.5
+            "passed": avg_time < 0.5,
         }
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     # Run the tests
     unittest.main(verbosity=2)
-
-
-
-

@@ -2,11 +2,14 @@
 Simplified Secrets Manager for NBA MCP Synthesis
 Works with centralized secrets loaded via loader scripts
 """
+
 import os
 import logging
 from typing import Dict, Any, Optional
+from mcp_server.env_helper import get_hierarchical_env
 
 logger = logging.getLogger(__name__)
+
 
 def get_database_config() -> Dict[str, Any]:
     """
@@ -17,18 +20,27 @@ def get_database_config() -> Dict[str, Any]:
         Database connection parameters
     """
     config = {
-        'host': os.getenv('DB_HOST', 'localhost'),
-        'user': os.getenv('DB_USER', 'postgres'),
-        'password': os.getenv('DB_PASSWORD', ''),
-        'database': os.getenv('DB_NAME', 'nba_stats'),
-        'port': int(os.getenv('DB_PORT', 5432))
+        "host": get_hierarchical_env("DB_HOST", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+        or "localhost",
+        "user": get_hierarchical_env("DB_USER", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+        or "postgres",
+        "password": get_hierarchical_env("DB_PASSWORD", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+        or "",
+        "database": get_hierarchical_env("DB_NAME", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+        or "nba_stats",
+        "port": int(
+            get_hierarchical_env("DB_PORT", "NBA_MCP_SYNTHESIS", "WORKFLOW") or "5432"
+        ),
     }
 
     # Verify critical database variables are loaded
-    if not config['password']:
-        logger.warning("DB_PASSWORD not found in environment. Check if secrets were loaded.")
+    if not config["password"]:
+        logger.warning(
+            "DB_PASSWORD not found in environment. Check if secrets were loaded."
+        )
 
     return config
+
 
 def get_s3_bucket() -> str:
     """
@@ -38,12 +50,16 @@ def get_s3_bucket() -> str:
     Returns:
         S3 bucket name
     """
-    bucket = os.getenv('S3_BUCKET', 'nba-mcp-books-20251011')
+    bucket = (
+        get_hierarchical_env("S3_BUCKET", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+        or "nba-mcp-books-20251011"
+    )
 
-    if not bucket:
-        logger.warning("S3_BUCKET not found in environment. Check if secrets were loaded.")
+    if not bucket or bucket == "nba-mcp-books-20251011":
+        logger.warning("S3_BUCKET not found in environment. Using default.")
 
     return bucket
+
 
 def get_api_key(provider: str) -> Optional[str]:
     """
@@ -56,10 +72,10 @@ def get_api_key(provider: str) -> Optional[str]:
         API key or None if not found
     """
     key_map = {
-        'google': 'GOOGLE_API_KEY',
-        'deepseek': 'DEEPSEEK_API_KEY',
-        'anthropic': 'ANTHROPIC_API_KEY',
-        'openai': 'OPENAI_API_KEY'
+        "google": "GOOGLE_API_KEY",
+        "deepseek": "DEEPSEEK_API_KEY",
+        "anthropic": "ANTHROPIC_API_KEY",
+        "openai": "OPENAI_API_KEY",
     }
 
     env_var = key_map.get(provider.lower())
@@ -69,9 +85,12 @@ def get_api_key(provider: str) -> Optional[str]:
 
     api_key = os.getenv(env_var)
     if not api_key:
-        logger.warning(f"{env_var} not found in environment. Check if secrets were loaded.")
+        logger.warning(
+            f"{env_var} not found in environment. Check if secrets were loaded."
+        )
 
     return api_key
+
 
 def get_slack_config() -> Dict[str, str]:
     """
@@ -81,9 +100,10 @@ def get_slack_config() -> Dict[str, str]:
         Dictionary with Slack webhook URL and channel
     """
     return {
-        'webhook_url': os.getenv('SLACK_WEBHOOK_URL', ''),
-        'channel': os.getenv('SLACK_CHANNEL', '#nba-simulator-notifications')
+        "webhook_url": os.getenv("SLACK_WEBHOOK_URL", ""),
+        "channel": os.getenv("SLACK_CHANNEL", "#nba-simulator-notifications"),
     }
+
 
 def get_linear_config() -> Dict[str, str]:
     """
@@ -93,10 +113,11 @@ def get_linear_config() -> Dict[str, str]:
         Dictionary with Linear API key, team ID, and project ID
     """
     return {
-        'api_key': os.getenv('LINEAR_API_KEY', ''),
-        'team_id': os.getenv('LINEAR_TEAM_ID', ''),
-        'project_id': os.getenv('LINEAR_PROJECT_ID', '')
+        "api_key": os.getenv("LINEAR_API_KEY", ""),
+        "team_id": os.getenv("LINEAR_TEAM_ID", ""),
+        "project_id": os.getenv("LINEAR_PROJECT_ID", ""),
     }
+
 
 def verify_secrets_loaded() -> bool:
     """
@@ -106,10 +127,10 @@ def verify_secrets_loaded() -> bool:
         True if all critical secrets are present
     """
     critical_vars = [
-        'GOOGLE_API_KEY',
-        'DEEPSEEK_API_KEY',
-        'ANTHROPIC_API_KEY',
-        'OPENAI_API_KEY'
+        "GOOGLE_API_KEY",
+        "DEEPSEEK_API_KEY",
+        "ANTHROPIC_API_KEY",
+        "OPENAI_API_KEY",
     ]
 
     missing = []
@@ -126,4 +147,3 @@ def verify_secrets_loaded() -> bool:
 
     logger.info("✅ All critical secrets verified")
     return True
-

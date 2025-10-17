@@ -18,14 +18,17 @@ from mcp_server.env_helper import get_hierarchical_env
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class GeminiResponse:
     """Response from Gemini API"""
+
     content: str
     tokens_used: int
     cost: float
     processing_time: float
     model_used: str
+
 
 class GoogleModel:
     """Google Gemini model for book analysis"""
@@ -40,16 +43,20 @@ class GoogleModel:
         """
         # Try new naming convention first, then fallback to old
         if api_key is None:
-            api_key = get_hierarchical_env("GOOGLE_API_KEY", "NBA_MCP_SYNTHESIS", "WORKFLOW")
-        
+            api_key = get_hierarchical_env(
+                "GOOGLE_API_KEY", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+            )
+
         if not api_key:
             raise ValueError("GOOGLE_API_KEY environment variable is not set")
-            
+
         self.api_key = api_key
         # Try new naming convention first, then fallback to old
-        self.model_name = (model_name or 
-                          get_hierarchical_env("GOOGLE_MODEL", "NBA_MCP_SYNTHESIS", "WORKFLOW") or
-                          "gemini-2.0-flash-exp")  # Fallback to default
+        self.model_name = (
+            model_name
+            or get_hierarchical_env("GOOGLE_MODEL", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+            or "gemini-2.0-flash-exp"
+        )  # Fallback to default
         self.model = None
         self._setup_model()
 
@@ -71,8 +78,7 @@ class GoogleModel:
             }
 
             self.model = genai.GenerativeModel(
-                model_name=self.model_name,
-                safety_settings=safety_settings
+                model_name=self.model_name, safety_settings=safety_settings
             )
 
             logger.info(f"✅ Google Gemini {self.model_name} initialized")
@@ -81,7 +87,9 @@ class GoogleModel:
             logger.error(f"❌ Failed to initialize Google Gemini: {str(e)}")
             raise
 
-    async def analyze_book_content(self, book_content: str, book_metadata: Dict[str, Any]) -> GeminiResponse:
+    async def analyze_book_content(
+        self, book_content: str, book_metadata: Dict[str, Any]
+    ) -> GeminiResponse:
         """
         Analyze book content using Gemini
 
@@ -98,7 +106,9 @@ class GoogleModel:
             # Create analysis prompt optimized for Gemini's capabilities
             prompt = self._create_book_analysis_prompt(book_content, book_metadata)
 
-            logger.info(f"📖 Analyzing book with Gemini: {book_metadata.get('title', 'Unknown')}")
+            logger.info(
+                f"📖 Analyzing book with Gemini: {book_metadata.get('title', 'Unknown')}"
+            )
             logger.info(f"📊 Content length: {len(book_content):,} characters")
 
             # Generate response
@@ -127,7 +137,7 @@ class GoogleModel:
                 "content": response.text,
                 "processing_time": processing_time,
                 "model_used": self.model_name,
-                "raw_recommendations": recommendations  # Add this for compatibility
+                "raw_recommendations": recommendations,  # Add this for compatibility
             }
 
         except Exception as e:
@@ -138,14 +148,16 @@ class GoogleModel:
                 "cost": 0.0,
                 "tokens_input_estimate": 0,
                 "tokens_output_estimate": 0,
-                "recommendations": []
+                "recommendations": [],
             }
 
-    def _create_book_analysis_prompt(self, book_content: str, book_metadata: Dict[str, Any]) -> str:
+    def _create_book_analysis_prompt(
+        self, book_content: str, book_metadata: Dict[str, Any]
+    ) -> str:
         """Create optimized prompt for Gemini book analysis"""
 
-        title = book_metadata.get('title', 'Unknown')
-        author = book_metadata.get('author', 'Unknown')
+        title = book_metadata.get("title", "Unknown")
+        author = book_metadata.get("author", "Unknown")
 
         prompt = f"""You are an expert technical analyst specializing in extracting actionable recommendations from technical books for software development projects.
 
@@ -241,11 +253,8 @@ Begin your analysis now:"""
             # Use asyncio to run the synchronous Gemini call with timeout
             loop = asyncio.get_event_loop()
             response = await asyncio.wait_for(
-                loop.run_in_executor(
-                    None,
-                    lambda: self.model.generate_content(prompt)
-                ),
-                timeout=60  # 1 minute timeout for individual API call
+                loop.run_in_executor(None, lambda: self.model.generate_content(prompt)),
+                timeout=60,  # 1 minute timeout for individual API call
             )
             return response
         except asyncio.TimeoutError:
@@ -272,7 +281,9 @@ Begin your analysis now:"""
 
         return input_cost + output_cost
 
-    async def extract_recommendations_from_response(self, response: GeminiResponse) -> List[Dict[str, Any]]:
+    async def extract_recommendations_from_response(
+        self, response: GeminiResponse
+    ) -> List[Dict[str, Any]]:
         """
         Extract structured recommendations from Gemini response
 
@@ -287,8 +298,8 @@ Begin your analysis now:"""
             content = response.content.strip()
 
             # Find JSON array in the response
-            json_start = content.find('[')
-            json_end = content.rfind(']') + 1
+            json_start = content.find("[")
+            json_end = content.rfind("]") + 1
 
             if json_start == -1 or json_end == 0:
                 logger.warning("No JSON array found in Gemini response")
@@ -303,9 +314,13 @@ Begin your analysis now:"""
                 if self._validate_recommendation(rec):
                     cleaned_recommendations.append(rec)
                 else:
-                    logger.warning(f"Skipping invalid recommendation: {rec.get('title', 'Unknown')}")
+                    logger.warning(
+                        f"Skipping invalid recommendation: {rec.get('title', 'Unknown')}"
+                    )
 
-            logger.info(f"✅ Extracted {len(cleaned_recommendations)} valid recommendations from Gemini")
+            logger.info(
+                f"✅ Extracted {len(cleaned_recommendations)} valid recommendations from Gemini"
+            )
             return cleaned_recommendations
 
         except json.JSONDecodeError as e:
@@ -318,7 +333,7 @@ Begin your analysis now:"""
 
     def _validate_recommendation(self, rec: Dict[str, Any]) -> bool:
         """Validate recommendation structure"""
-        required_fields = ['title', 'description', 'priority', 'time_estimate']
+        required_fields = ["title", "description", "priority", "time_estimate"]
         return all(field in rec for field in required_fields)
 
     async def health_check(self) -> bool:
@@ -346,7 +361,7 @@ Begin your analysis now:"""
             import re
 
             # Try to find JSON blocks in the response
-            json_pattern = r'```json\s*(\[.*?\])\s*```'
+            json_pattern = r"```json\s*(\[.*?\])\s*```"
             json_matches = re.findall(json_pattern, response_text, re.DOTALL)
 
             if json_matches:
@@ -359,7 +374,7 @@ Begin your analysis now:"""
                         continue
 
             # Try to find JSON array without code blocks
-            json_pattern = r'\[.*?\]'
+            json_pattern = r"\[.*?\]"
             json_matches = re.findall(json_pattern, response_text, re.DOTALL)
 
             for json_str in json_matches:
@@ -371,15 +386,15 @@ Begin your analysis now:"""
                     continue
 
             # Try to find JSON object with recommendations field
-            json_pattern = r'```json\s*(\{.*?\})\s*```'
+            json_pattern = r"```json\s*(\{.*?\})\s*```"
             json_matches = re.findall(json_pattern, response_text, re.DOTALL)
 
             if json_matches:
                 for json_str in json_matches:
                     try:
                         data = json.loads(json_str)
-                        if 'recommendations' in data:
-                            return data['recommendations']
+                        if "recommendations" in data:
+                            return data["recommendations"]
                     except json.JSONDecodeError:
                         continue
 
@@ -390,8 +405,8 @@ Begin your analysis now:"""
             for json_str in json_matches:
                 try:
                     data = json.loads(json_str)
-                    if 'recommendations' in data:
-                        return data['recommendations']
+                    if "recommendations" in data:
+                        return data["recommendations"]
                 except json.JSONDecodeError:
                     continue
 
@@ -400,5 +415,7 @@ Begin your analysis now:"""
             return []
 
         except Exception as e:
-            logger.error(f"❌ Failed to extract recommendations from Gemini response: {str(e)}")
+            logger.error(
+                f"❌ Failed to extract recommendations from Gemini response: {str(e)}"
+            )
             return []

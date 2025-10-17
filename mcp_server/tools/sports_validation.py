@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 class StatType(Enum):
     """Types of sports statistics"""
+
     PERCENTAGE = "percentage"  # 0.0 to 1.0
     RATE = "rate"  # Per game, per 100 possessions, etc.
     COUNT = "count"  # Raw numbers
@@ -23,10 +24,13 @@ class StatType(Enum):
 
 class ValidationError(Exception):
     """Custom exception for validation errors"""
+
     pass
 
 
-def validate_sports_stat(stat_name: str, value: Any, stat_type: StatType = StatType.COUNT) -> bool:
+def validate_sports_stat(
+    stat_name: str, value: Any, stat_type: StatType = StatType.COUNT
+) -> bool:
     """
     Validate a sports statistic value.
 
@@ -47,15 +51,21 @@ def validate_sports_stat(stat_name: str, value: Any, stat_type: StatType = StatT
     try:
         float_value = float(value)
     except (ValueError, TypeError):
-        raise ValidationError(f"{stat_name} must be a number, got {type(value).__name__}")
+        raise ValidationError(
+            f"{stat_name} must be a number, got {type(value).__name__}"
+        )
 
     if stat_type == StatType.PERCENTAGE:
         if not (0.0 <= float_value <= 1.0):
-            raise ValidationError(f"{stat_name} must be between 0.0 and 1.0 (percentage), got {float_value}")
+            raise ValidationError(
+                f"{stat_name} must be between 0.0 and 1.0 (percentage), got {float_value}"
+            )
 
     elif stat_type == StatType.MINUTES:
         if not (0.0 <= float_value <= 48.0):
-            raise ValidationError(f"{stat_name} must be between 0.0 and 48.0 minutes, got {float_value}")
+            raise ValidationError(
+                f"{stat_name} must be between 0.0 and 48.0 minutes, got {float_value}"
+            )
 
     elif stat_type == StatType.COUNT:
         if float_value < 0:
@@ -72,7 +82,9 @@ def validate_sports_stat(stat_name: str, value: Any, stat_type: StatType = StatT
     return True
 
 
-def validate_formula_inputs(formula_name: str, variables: Dict[str, Any]) -> Dict[str, Any]:
+def validate_formula_inputs(
+    formula_name: str, variables: Dict[str, Any]
+) -> Dict[str, Any]:
     """
     Validate inputs for a specific sports formula.
 
@@ -89,97 +101,140 @@ def validate_formula_inputs(formula_name: str, variables: Dict[str, Any]) -> Dic
     # Define validation rules for each formula
     validation_rules = {
         "per": {
-            "FGM": StatType.COUNT, "STL": StatType.COUNT, "3PM": StatType.COUNT,
-            "FTM": StatType.COUNT, "BLK": StatType.COUNT, "OREB": StatType.COUNT,
-            "AST": StatType.COUNT, "DREB": StatType.COUNT, "PF": StatType.COUNT,
-            "FTA": StatType.COUNT, "FGA": StatType.COUNT, "TOV": StatType.COUNT,
-            "MP": StatType.MINUTES
+            "FGM": StatType.COUNT,
+            "STL": StatType.COUNT,
+            "3PM": StatType.COUNT,
+            "FTM": StatType.COUNT,
+            "BLK": StatType.COUNT,
+            "OREB": StatType.COUNT,
+            "AST": StatType.COUNT,
+            "DREB": StatType.COUNT,
+            "PF": StatType.COUNT,
+            "FTA": StatType.COUNT,
+            "FGA": StatType.COUNT,
+            "TOV": StatType.COUNT,
+            "MP": StatType.MINUTES,
         },
         "true_shooting": {
-            "PTS": StatType.COUNT, "FGA": StatType.COUNT, "FTA": StatType.COUNT
+            "PTS": StatType.COUNT,
+            "FGA": StatType.COUNT,
+            "FTA": StatType.COUNT,
         },
         "usage_rate": {
-            "FGA": StatType.COUNT, "FTA": StatType.COUNT, "TOV": StatType.COUNT,
-            "TM_MP": StatType.MINUTES, "MP": StatType.MINUTES,
-            "TM_FGA": StatType.COUNT, "TM_FTA": StatType.COUNT, "TM_TOV": StatType.COUNT
+            "FGA": StatType.COUNT,
+            "FTA": StatType.COUNT,
+            "TOV": StatType.COUNT,
+            "TM_MP": StatType.MINUTES,
+            "MP": StatType.MINUTES,
+            "TM_FGA": StatType.COUNT,
+            "TM_FTA": StatType.COUNT,
+            "TM_TOV": StatType.COUNT,
         },
         "four_factors_shooting": {
-            "FGM": StatType.COUNT, "3PM": StatType.COUNT, "FGA": StatType.COUNT
+            "FGM": StatType.COUNT,
+            "3PM": StatType.COUNT,
+            "FGA": StatType.COUNT,
         },
         "four_factors_turnovers": {
-            "TOV": StatType.COUNT, "FGA": StatType.COUNT, "FTA": StatType.COUNT
+            "TOV": StatType.COUNT,
+            "FGA": StatType.COUNT,
+            "FTA": StatType.COUNT,
         },
         "pace": {
-            "TM_POSS": StatType.COUNT, "OPP_POSS": StatType.COUNT, "TM_MP": StatType.MINUTES
+            "TM_POSS": StatType.COUNT,
+            "OPP_POSS": StatType.COUNT,
+            "TM_MP": StatType.MINUTES,
         },
         "vorp": {
-            "BPM": StatType.RATING, "POSS_PCT": StatType.PERCENTAGE, "TEAM_GAMES": StatType.COUNT
+            "BPM": StatType.RATING,
+            "POSS_PCT": StatType.PERCENTAGE,
+            "TEAM_GAMES": StatType.COUNT,
         },
         "ws_per_48": {
-            "WS": StatType.RATE, "TEAM_GAMES": StatType.COUNT, "MP": StatType.MINUTES
+            "WS": StatType.RATE,
+            "TEAM_GAMES": StatType.COUNT,
+            "MP": StatType.MINUTES,
         },
         "game_score": {
-            "PTS": StatType.COUNT, "FGM": StatType.COUNT, "FGA": StatType.COUNT,
-            "FTA": StatType.COUNT, "FTM": StatType.COUNT, "OREB": StatType.COUNT,
-            "DREB": StatType.COUNT, "STL": StatType.COUNT, "AST": StatType.COUNT,
-            "BLK": StatType.COUNT, "PF": StatType.COUNT, "TOV": StatType.COUNT
+            "PTS": StatType.COUNT,
+            "FGM": StatType.COUNT,
+            "FGA": StatType.COUNT,
+            "FTA": StatType.COUNT,
+            "FTM": StatType.COUNT,
+            "OREB": StatType.COUNT,
+            "DREB": StatType.COUNT,
+            "STL": StatType.COUNT,
+            "AST": StatType.COUNT,
+            "BLK": StatType.COUNT,
+            "PF": StatType.COUNT,
+            "TOV": StatType.COUNT,
         },
         "pie": {
-            "PTS": StatType.COUNT, "FGM": StatType.COUNT, "FTM": StatType.COUNT,
-            "FGA": StatType.COUNT, "FTA": StatType.COUNT, "DREB": StatType.COUNT,
-            "OREB": StatType.COUNT, "AST": StatType.COUNT, "STL": StatType.COUNT,
-            "BLK": StatType.COUNT, "PF": StatType.COUNT, "TOV": StatType.COUNT,
-            "GmPTS": StatType.COUNT, "GmFGM": StatType.COUNT, "GmFTM": StatType.COUNT,
-            "GmFGA": StatType.COUNT, "GmFTA": StatType.COUNT, "GmDREB": StatType.COUNT,
-            "GmOREB": StatType.COUNT, "GmAST": StatType.COUNT, "GmSTL": StatType.COUNT,
-            "GmBLK": StatType.COUNT, "GmPF": StatType.COUNT, "GmTOV": StatType.COUNT
+            "PTS": StatType.COUNT,
+            "FGM": StatType.COUNT,
+            "FTM": StatType.COUNT,
+            "FGA": StatType.COUNT,
+            "FTA": StatType.COUNT,
+            "DREB": StatType.COUNT,
+            "OREB": StatType.COUNT,
+            "AST": StatType.COUNT,
+            "STL": StatType.COUNT,
+            "BLK": StatType.COUNT,
+            "PF": StatType.COUNT,
+            "TOV": StatType.COUNT,
+            "GmPTS": StatType.COUNT,
+            "GmFGM": StatType.COUNT,
+            "GmFTM": StatType.COUNT,
+            "GmFGA": StatType.COUNT,
+            "GmFTA": StatType.COUNT,
+            "GmDREB": StatType.COUNT,
+            "GmOREB": StatType.COUNT,
+            "GmAST": StatType.COUNT,
+            "GmSTL": StatType.COUNT,
+            "GmBLK": StatType.COUNT,
+            "GmPF": StatType.COUNT,
+            "GmTOV": StatType.COUNT,
         },
-        "corner_3pt_pct": {
-            "Corner_3PM": StatType.COUNT, "Corner_3PA": StatType.COUNT
-        },
-        "rim_fg_pct": {
-            "Rim_FGM": StatType.COUNT, "Rim_FGA": StatType.COUNT
-        },
+        "corner_3pt_pct": {"Corner_3PM": StatType.COUNT, "Corner_3PA": StatType.COUNT},
+        "rim_fg_pct": {"Rim_FGM": StatType.COUNT, "Rim_FGA": StatType.COUNT},
         "midrange_efficiency": {
-            "Midrange_FGM": StatType.COUNT, "Midrange_FGA": StatType.COUNT
+            "Midrange_FGM": StatType.COUNT,
+            "Midrange_FGA": StatType.COUNT,
         },
-        "catch_and_shoot_pct": {
-            "C&S_FGM": StatType.COUNT, "C&S_FGA": StatType.COUNT
-        },
+        "catch_and_shoot_pct": {"C&S_FGM": StatType.COUNT, "C&S_FGA": StatType.COUNT},
         "defensive_win_shares": {
-            "DRtg": StatType.RATING, "MP": StatType.MINUTES, "TEAM_PACE": StatType.RATE
+            "DRtg": StatType.RATING,
+            "MP": StatType.MINUTES,
+            "TEAM_PACE": StatType.RATE,
         },
         "steal_percentage": {
-            "STL": StatType.COUNT, "TM_MP": StatType.MINUTES, "MP": StatType.MINUTES, "OPP_POSS": StatType.COUNT
+            "STL": StatType.COUNT,
+            "TM_MP": StatType.MINUTES,
+            "MP": StatType.MINUTES,
+            "OPP_POSS": StatType.COUNT,
         },
         "block_percentage": {
-            "BLK": StatType.COUNT, "TM_MP": StatType.MINUTES, "MP": StatType.MINUTES, "OPP_2PA": StatType.COUNT
+            "BLK": StatType.COUNT,
+            "TM_MP": StatType.MINUTES,
+            "MP": StatType.MINUTES,
+            "OPP_2PA": StatType.COUNT,
         },
-        "defensive_rating": {
-            "OPP_PTS": StatType.COUNT, "OPP_POSS": StatType.COUNT
-        },
-        "net_rating": {
-            "ORtg": StatType.RATING, "DRtg": StatType.RATING
-        },
-        "offensive_efficiency": {
-            "PTS": StatType.COUNT, "POSS": StatType.COUNT
-        },
-        "defensive_efficiency": {
-            "OPP_PTS": StatType.COUNT, "OPP_POSS": StatType.COUNT
-        },
-        "pace_factor": {
-            "PACE": StatType.RATE, "League_Avg_Pace": StatType.RATE
-        },
+        "defensive_rating": {"OPP_PTS": StatType.COUNT, "OPP_POSS": StatType.COUNT},
+        "net_rating": {"ORtg": StatType.RATING, "DRtg": StatType.RATING},
+        "offensive_efficiency": {"PTS": StatType.COUNT, "POSS": StatType.COUNT},
+        "defensive_efficiency": {"OPP_PTS": StatType.COUNT, "OPP_POSS": StatType.COUNT},
+        "pace_factor": {"PACE": StatType.RATE, "League_Avg_Pace": StatType.RATE},
         "clutch_performance": {
-            "Clutch_PTS": StatType.COUNT, "Clutch_AST": StatType.COUNT,
-            "Clutch_REB": StatType.COUNT, "Clutch_MIN": StatType.MINUTES
+            "Clutch_PTS": StatType.COUNT,
+            "Clutch_AST": StatType.COUNT,
+            "Clutch_REB": StatType.COUNT,
+            "Clutch_MIN": StatType.MINUTES,
         },
         "on_off_differential": {
-            "Team_ORtg_On": StatType.RATING, "Team_ORtg_Off": StatType.RATING
+            "Team_ORtg_On": StatType.RATING,
+            "Team_ORtg_Off": StatType.RATING,
         },
-        "plus_minus_per_100": {
-            "Plus_Minus": StatType.RATING, "MP": StatType.MINUTES
-        }
+        "plus_minus_per_100": {"Plus_Minus": StatType.RATING, "MP": StatType.MINUTES},
     }
 
     if formula_name not in validation_rules:
@@ -198,7 +253,9 @@ def validate_formula_inputs(formula_name: str, variables: Dict[str, Any]) -> Dic
                 logger.error(f"Validation failed for {formula_name}.{var_name}: {e}")
                 raise ValidationError(f"Invalid input for {var_name}: {e}")
         else:
-            logger.warning(f"No validation rule for variable {var_name} in formula {formula_name}")
+            logger.warning(
+                f"No validation rule for variable {var_name} in formula {formula_name}"
+            )
             validated_vars[var_name] = var_value
 
     return validated_vars
@@ -239,7 +296,9 @@ def suggest_fixes_for_error(error_message: str, formula_name: str) -> List[str]:
 
     # Formula-specific suggestions
     if formula_name == "per":
-        suggestions.append("PER requires all 13 variables: FGM, STL, 3PM, FTM, BLK, OREB, AST, DREB, PF, FTA, FGA, TOV, MP")
+        suggestions.append(
+            "PER requires all 13 variables: FGM, STL, 3PM, FTM, BLK, OREB, AST, DREB, PF, FTA, FGA, TOV, MP"
+        )
         suggestions.append("Ensure MP (minutes played) > 0")
 
     elif formula_name == "true_shooting":
@@ -253,7 +312,9 @@ def suggest_fixes_for_error(error_message: str, formula_name: str) -> List[str]:
     return suggestions
 
 
-def validate_formula_consistency(formula_name: str, variables: Dict[str, Any]) -> List[str]:
+def validate_formula_consistency(
+    formula_name: str, variables: Dict[str, Any]
+) -> List[str]:
     """
     Check for logical consistency in formula inputs.
 
@@ -297,9 +358,15 @@ def validate_formula_consistency(formula_name: str, variables: Dict[str, Any]) -
             warnings.append("TS% calculation requires FGA + 0.44*FTA > 0")
 
     elif formula_name == "usage_rate":
-        team_total = variables.get("TM_FGA", 0) + 0.44 * variables.get("TM_FTA", 0) + variables.get("TM_TOV", 0)
+        team_total = (
+            variables.get("TM_FGA", 0)
+            + 0.44 * variables.get("TM_FTA", 0)
+            + variables.get("TM_TOV", 0)
+        )
         if team_total == 0:
-            warnings.append("Usage Rate calculation requires team total possessions > 0")
+            warnings.append(
+                "Usage Rate calculation requires team total possessions > 0"
+            )
 
     return warnings
 
@@ -328,12 +395,12 @@ def get_formula_requirements(formula_name: str) -> Dict[str, str]:
             "FTA": "Free Throw Attempts",
             "FGA": "Field Goal Attempts",
             "TOV": "Turnovers",
-            "MP": "Minutes Played"
+            "MP": "Minutes Played",
         },
         "true_shooting": {
             "PTS": "Points Scored",
             "FGA": "Field Goal Attempts",
-            "FTA": "Free Throw Attempts"
+            "FTA": "Free Throw Attempts",
         },
         "usage_rate": {
             "FGA": "Player Field Goal Attempts",
@@ -343,12 +410,12 @@ def get_formula_requirements(formula_name: str) -> Dict[str, str]:
             "MP": "Player Minutes Played",
             "TM_FGA": "Team Field Goal Attempts",
             "TM_FTA": "Team Free Throw Attempts",
-            "TM_TOV": "Team Turnovers"
+            "TM_TOV": "Team Turnovers",
         },
         "vorp": {
             "BPM": "Box Plus/Minus",
             "POSS_PCT": "Possession Percentage (0.0-1.0)",
-            "TEAM_GAMES": "Team Games Played"
+            "TEAM_GAMES": "Team Games Played",
         },
         "game_score": {
             "PTS": "Points",
@@ -362,12 +429,8 @@ def get_formula_requirements(formula_name: str) -> Dict[str, str]:
             "AST": "Assists",
             "BLK": "Blocks",
             "PF": "Personal Fouls",
-            "TOV": "Turnovers"
-        }
+            "TOV": "Turnovers",
+        },
     }
 
     return requirements.get(formula_name, {})
-
-
-
-

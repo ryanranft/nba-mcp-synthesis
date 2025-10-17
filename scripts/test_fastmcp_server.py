@@ -15,6 +15,7 @@ from mcp_server.fastmcp_lifespan import nba_lifespan
 from mcp_server.fastmcp_settings import NBAMCPSettings
 from mcp_server.tools.params import QueryDatabaseParams, ListTablesParams
 
+
 async def test_fastmcp():
     """Test FastMCP server components"""
 
@@ -66,13 +67,15 @@ async def test_fastmcp():
             print("Test 4: List Tables")
             print("-" * 60)
 
-            result = await rds_connector.execute_query("""
+            result = await rds_connector.execute_query(
+                """
                 SELECT table_schema, table_name
                 FROM information_schema.tables
                 WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
                 ORDER BY table_schema, table_name
                 LIMIT 5
-            """)
+            """
+            )
 
             print(f"✅ Tables listed (first 5):")
             for row in result:
@@ -107,9 +110,7 @@ async def test_fastmcp():
             glue_connector = context["glue_connector"]
 
             try:
-                tables = await asyncio.to_thread(
-                    glue_connector.list_tables
-                )
+                tables = await asyncio.to_thread(glue_connector.list_tables)
                 print(f"✅ Glue catalog accessible")
                 print(f"   Found {len(tables)} tables")
             except Exception as e:
@@ -126,6 +127,7 @@ async def test_fastmcp():
         print(f"❌ Error: {e}")
         print("=" * 60)
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -157,7 +159,9 @@ async def test_pydantic_validation():
     print("Test 2: SQL Injection Attempt (should be blocked)")
     print("-" * 60)
     try:
-        params = QueryDatabaseParams(sql_query="SELECT * FROM players; DROP TABLE players;")
+        params = QueryDatabaseParams(
+            sql_query="SELECT * FROM players; DROP TABLE players;"
+        )
         print(f"❌ SQL injection not blocked!")
     except Exception as e:
         print(f"✅ SQL injection blocked: {type(e).__name__}")

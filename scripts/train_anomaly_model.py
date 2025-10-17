@@ -17,7 +17,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from monitoring.anomaly_detector import AnomalyDetectionSystem
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -35,7 +37,7 @@ def load_historical_metrics(metrics_file: str) -> Dict[str, List[float]]:
         logger.error(f"Metrics file not found: {metrics_file}")
         return {}
 
-    with open(metrics_file, 'r') as f:
+    with open(metrics_file, "r") as f:
         data = json.load(f)
 
     return data
@@ -58,8 +60,7 @@ def generate_sample_metrics() -> Dict[str, List[float]]:
 
 
 def train_models(
-    historical_metrics: Dict[str, List[float]],
-    output_dir: str
+    historical_metrics: Dict[str, List[float]], output_dir: str
 ) -> AnomalyDetectionSystem:
     """
     Train anomaly detection models
@@ -73,13 +74,13 @@ def train_models(
     """
     logger.info("Initializing anomaly detection system...")
     detector = AnomalyDetectionSystem(
-        enable_statistical=True,
-        enable_timeseries=True,
-        models_dir=output_dir
+        enable_statistical=True, enable_timeseries=True, models_dir=output_dir
     )
 
     # Train with historical data
-    logger.info(f"Training with historical data for {len(historical_metrics)} metrics...")
+    logger.info(
+        f"Training with historical data for {len(historical_metrics)} metrics..."
+    )
 
     for metric_name, values in historical_metrics.items():
         logger.info(f"  Training {metric_name}: {len(values)} data points")
@@ -102,8 +103,7 @@ def train_models(
 
 
 def validate_models(
-    detector: AnomalyDetectionSystem,
-    validation_metrics: Dict[str, List[float]]
+    detector: AnomalyDetectionSystem, validation_metrics: Dict[str, List[float]]
 ) -> Dict[str, int]:
     """
     Validate trained models with validation data
@@ -130,7 +130,9 @@ def validate_models(
         anomaly_counts[metric_name] = anomaly_count
 
         anomaly_rate = (anomaly_count / len(values)) * 100 if values else 0
-        logger.info(f"  {metric_name}: {anomaly_count}/{len(values)} anomalies ({anomaly_rate:.1f}%)")
+        logger.info(
+            f"  {metric_name}: {anomaly_count}/{len(values)} anomalies ({anomaly_rate:.1f}%)"
+        )
 
     return anomaly_counts
 
@@ -138,31 +140,27 @@ def validate_models(
 def main():
     parser = argparse.ArgumentParser(description="Train anomaly detection models")
     parser.add_argument(
-        "--metrics-file",
-        help="JSON file with historical metrics",
-        default=None
+        "--metrics-file", help="JSON file with historical metrics", default=None
     )
     parser.add_argument(
         "--output-dir",
         help="Directory to save trained models",
-        default="monitoring/models"
+        default="monitoring/models",
     )
     parser.add_argument(
         "--use-sample-data",
         action="store_true",
-        help="Use generated sample data for testing"
+        help="Use generated sample data for testing",
     )
     parser.add_argument(
-        "--validate",
-        action="store_true",
-        help="Run validation after training"
+        "--validate", action="store_true", help="Run validation after training"
     )
 
     args = parser.parse_args()
 
-    print("="*70)
+    print("=" * 70)
     print("NBA MCP Synthesis - Anomaly Detection Model Training")
-    print("="*70)
+    print("=" * 70)
     print()
 
     # Load or generate metrics
@@ -196,7 +194,7 @@ def main():
         anomaly_counts = validate_models(detector, validation_metrics)
 
     print()
-    print("="*70)
+    print("=" * 70)
     print("✅ Model training complete!")
     print()
     print(f"Models saved to: {args.output_dir}")
@@ -205,7 +203,7 @@ def main():
     print("  from monitoring.anomaly_detector import get_anomaly_detector")
     print("  detector = get_anomaly_detector()")
     print("  detector.load_baselines()")
-    print("="*70)
+    print("=" * 70)
 
 
 if __name__ == "__main__":

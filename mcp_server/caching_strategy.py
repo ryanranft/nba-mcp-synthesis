@@ -1,4 +1,5 @@
 """Advanced Caching Strategy - IMPORTANT 20"""
+
 import redis
 import json
 import logging
@@ -22,12 +23,7 @@ class RedisCache:
             port: Redis port
             db: Redis database number
         """
-        self.client = redis.Redis(
-            host=host,
-            port=port,
-            db=db,
-            decode_responses=True
-        )
+        self.client = redis.Redis(host=host, port=port, db=db, decode_responses=True)
         logger.info(f"✅ Connected to Redis: {host}:{port}/{db}")
 
     def get(self, key: str) -> Optional[Any]:
@@ -43,12 +39,7 @@ class RedisCache:
             logger.error(f"❌ Cache get error: {e}")
             return None
 
-    def set(
-        self,
-        key: str,
-        value: Any,
-        ttl: Optional[int] = None
-    ) -> bool:
+    def set(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
         """
         Set value in cache
 
@@ -126,11 +117,7 @@ def cache_key(*args, **kwargs) -> str:
     return hashlib.md5(key_data.encode()).hexdigest()
 
 
-def cached(
-    ttl: int = 300,
-    key_prefix: str = "",
-    use_kwargs: bool = True
-):
+def cached(ttl: int = 300, key_prefix: str = "", use_kwargs: bool = True):
     """
     Decorator to cache function results
 
@@ -144,6 +131,7 @@ def cached(
         def get_player_stats(player_id: int):
             ...
     """
+
     def decorator(func: Callable):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -171,6 +159,7 @@ def cached(
             return result
 
         return wrapper
+
     return decorator
 
 
@@ -183,6 +172,7 @@ def cache_invalidate(key_pattern: str):
         def update_player_stats(player_id: int, stats: dict):
             ...
     """
+
     def decorator(func: Callable):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -196,6 +186,7 @@ def cache_invalidate(key_pattern: str):
             return result
 
         return wrapper
+
     return decorator
 
 
@@ -205,12 +196,7 @@ class CacheManager:
     def __init__(self, cache: RedisCache):
         self.cache = cache
 
-    def get_or_set(
-        self,
-        key: str,
-        factory: Callable,
-        ttl: Optional[int] = None
-    ) -> Any:
+    def get_or_set(self, key: str, factory: Callable, ttl: Optional[int] = None) -> Any:
         """
         Get from cache or execute factory function
 
@@ -281,7 +267,7 @@ class CacheManager:
                 "misses": int(info.get("keyspace_misses", 0)),
                 "hit_rate": self._calculate_hit_rate(info),
                 "keys": self.cache.client.dbsize(),
-                "memory_used": info.get("used_memory_human", "N/A")
+                "memory_used": info.get("used_memory_human", "N/A"),
             }
         except Exception as e:
             logger.error(f"❌ Error getting cache stats: {e}")
@@ -309,10 +295,11 @@ def get_cache() -> RedisCache:
     global _cache
     if _cache is None:
         import os
+
         _cache = RedisCache(
             host=os.getenv("REDIS_HOST", "localhost"),
             port=int(os.getenv("REDIS_PORT", 6379)),
-            db=int(os.getenv("REDIS_DB", 0))
+            db=int(os.getenv("REDIS_DB", 0)),
         )
     return _cache
 
@@ -339,11 +326,13 @@ if __name__ == "__main__":
     def get_player_stats(player_id: int):
         # Simulate expensive database query
         import time
+
         time.sleep(0.5)
         return {"player_id": player_id, "points": 25, "assists": 7}
 
     # First call - cache miss (slow)
     import time
+
     start = time.time()
     stats = get_player_stats(123)
     print(f"First call: {time.time() - start:.2f}s - {stats}")
@@ -357,4 +346,3 @@ if __name__ == "__main__":
     manager = get_cache_manager()
     stats = manager.get_stats()
     print(f"Cache stats: {stats}")
-

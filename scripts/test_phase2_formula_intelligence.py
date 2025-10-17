@@ -20,11 +20,13 @@ from mcp_server.tools.formula_intelligence import (
     identify_formula_type,
     suggest_tools,
     map_variables,
-    analyze_formula
+    analyze_formula,
 )
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -39,7 +41,7 @@ def test_formula_intelligence():
         "USG% = ((FGA + 0.44 * FTA + TOV) * (TM_MP / 5)) / (MP * (TM_FGA + 0.44 * TM_FTA + TM_TOV)) * 100",
         "eFG% = (FGM + 0.5 * 3PM) / FGA",
         "VORP = (BPM - (-2.0)) * (POSS_PCT / 100) * (TEAM_GAMES / 82)",
-        "Net Rating = ORtg - DRtg"
+        "Net Rating = ORtg - DRtg",
     ]
 
     intelligence = FormulaIntelligence()
@@ -55,7 +57,9 @@ def test_formula_intelligence():
 
             # Test tool suggestions
             suggested_tools = suggest_tools(formula)
-            logger.info(f"✅ Suggested tools: {[tool.value for tool in suggested_tools]}")
+            logger.info(
+                f"✅ Suggested tools: {[tool.value for tool in suggested_tools]}"
+            )
 
             # Test variable mapping
             mapped_vars = map_variables(formula)
@@ -64,7 +68,9 @@ def test_formula_intelligence():
             # Test comprehensive analysis
             analysis = analyze_formula(formula)
             logger.info(f"✅ Complexity score: {analysis.complexity_score:.2f}")
-            logger.info(f"✅ Insights: {analysis.insights[:2]}")  # Show first 2 insights
+            logger.info(
+                f"✅ Insights: {analysis.insights[:2]}"
+            )  # Show first 2 insights
 
         except Exception as e:
             logger.error(f"❌ Error analyzing formula: {e}")
@@ -78,21 +84,26 @@ def test_formula_intelligence():
         ("VORP = (BPM - (-2.0)) * (POSS_PCT / 100) * (TEAM_GAMES / 82)", "composite"),
         ("Net Rating = ORtg - DRtg", "differential"),
         ("FG% = FGM / FGA", "percentage"),
-        ("PTS = 25", "count")
+        ("PTS = 25", "count"),
     ]
 
     for formula, expected_type in type_tests:
         formula_type, confidence = identify_formula_type(formula)
         status = "✅" if formula_type.value == expected_type else "❌"
-        logger.info(f"{status} {formula[:30]}... -> {formula_type.value} (expected: {expected_type})")
+        logger.info(
+            f"{status} {formula[:30]}... -> {formula_type.value} (expected: {expected_type})"
+        )
 
     logger.info("\n🔧 Testing Tool Suggestions")
 
     # Test tool suggestions for different contexts
     context_tests = [
         ("PER = (FGM * 85.910 + ...) / MP", "Should suggest solve, differentiate"),
-        ("TS% = PTS / (2 * (FGA + 0.44 * FTA))", "Should suggest simplify, sports_formula"),
-        ("Net Rating = ORtg - DRtg", "Should suggest solve_system, matrix_ops")
+        (
+            "TS% = PTS / (2 * (FGA + 0.44 * FTA))",
+            "Should suggest simplify, sports_formula",
+        ),
+        ("Net Rating = ORtg - DRtg", "Should suggest solve_system, matrix_ops"),
     ]
 
     for formula, expected in context_tests:
@@ -107,7 +118,7 @@ def test_formula_intelligence():
     mapping_tests = [
         "PER = (FGM * 85.910 + STL * 53.897 + 3PM * 51.757 + FTM * 46.845 + BLK * 39.190 + OREB * 39.190 + AST * 34.677 + DREB * 14.707 - PF * 17.174 - (FTA - FTM) * 20.091 - (FGA - FGM) * 39.190 - TOV * 53.897) * (1 / MP)",
         "TS% = PTS / (2 * (FGA + 0.44 * FTA))",
-        "USG% = ((FGA + 0.44 * FTA + TOV) * (TM_MP / 5)) / (MP * (TM_FGA + 0.44 * TM_FTA + TM_TOV)) * 100"
+        "USG% = ((FGA + 0.44 * FTA + TOV) * (TM_MP / 5)) / (MP * (TM_FGA + 0.44 * TM_FTA + TM_TOV)) * 100",
     ]
 
     for formula in mapping_tests:
@@ -121,7 +132,7 @@ def test_formula_intelligence():
     # Test comprehensive analysis
     comprehensive_tests = [
         "PER = (FGM * 85.910 + STL * 53.897 + 3PM * 51.757 + FTM * 46.845 + BLK * 39.190 + OREB * 39.190 + AST * 34.677 + DREB * 14.707 - PF * 17.174 - (FTA - FTM) * 20.091 - (FGA - FGM) * 39.190 - TOV * 53.897) * (1 / MP)",
-        "TS% = PTS / (2 * (FGA + 0.44 * FTA))"
+        "TS% = PTS / (2 * (FGA + 0.44 * FTA))",
     ]
 
     for formula in comprehensive_tests:
@@ -139,7 +150,7 @@ def test_formula_intelligence():
     recommendation_tests = [
         ("PER = (FGM * 85.910 + ...) / MP", "player analysis"),
         ("Net Rating = ORtg - DRtg", "team comparison"),
-        ("TS% = PTS / (2 * (FGA + 0.44 * FTA))", "optimization")
+        ("TS% = PTS / (2 * (FGA + 0.44 * FTA))", "optimization"),
     ]
 
     for formula, context in recommendation_tests:
@@ -160,7 +171,7 @@ def test_sports_validation():
         validate_formula_inputs,
         suggest_fixes_for_error,
         validate_formula_consistency,
-        get_formula_requirements
+        get_formula_requirements,
     )
 
     # Test formula input validation
@@ -169,24 +180,52 @@ def test_sports_validation():
     test_cases = [
         {
             "formula": "per",
-            "variables": {"FGM": 8, "STL": 2, "3PM": 3, "FTM": 4, "BLK": 1, "OREB": 2, "AST": 5, "DREB": 6, "PF": 3, "FTA": 5, "FGA": 15, "TOV": 2, "MP": 35},
-            "expected": "valid"
+            "variables": {
+                "FGM": 8,
+                "STL": 2,
+                "3PM": 3,
+                "FTM": 4,
+                "BLK": 1,
+                "OREB": 2,
+                "AST": 5,
+                "DREB": 6,
+                "PF": 3,
+                "FTA": 5,
+                "FGA": 15,
+                "TOV": 2,
+                "MP": 35,
+            },
+            "expected": "valid",
         },
         {
             "formula": "per",
-            "variables": {"FGM": -1, "STL": 2, "3PM": 3, "FTM": 4, "BLK": 1, "OREB": 2, "AST": 5, "DREB": 6, "PF": 3, "FTA": 5, "FGA": 15, "TOV": 2, "MP": 35},
-            "expected": "invalid (negative FGM)"
+            "variables": {
+                "FGM": -1,
+                "STL": 2,
+                "3PM": 3,
+                "FTM": 4,
+                "BLK": 1,
+                "OREB": 2,
+                "AST": 5,
+                "DREB": 6,
+                "PF": 3,
+                "FTA": 5,
+                "FGA": 15,
+                "TOV": 2,
+                "MP": 35,
+            },
+            "expected": "invalid (negative FGM)",
         },
         {
             "formula": "true_shooting",
             "variables": {"PTS": 25, "FGA": 15, "FTA": 5},
-            "expected": "valid"
+            "expected": "valid",
         },
         {
             "formula": "true_shooting",
             "variables": {"PTS": 25, "FGA": 0, "FTA": 0},
-            "expected": "valid (but may cause division by zero)"
-        }
+            "expected": "valid (but may cause division by zero)",
+        },
     ]
 
     for i, test_case in enumerate(test_cases, 1):
@@ -195,11 +234,13 @@ def test_sports_validation():
         logger.info(f"Expected: {test_case['expected']}")
 
         try:
-            validated = validate_formula_inputs(test_case['formula'], test_case['variables'])
+            validated = validate_formula_inputs(
+                test_case["formula"], test_case["variables"]
+            )
             logger.info(f"✅ Validation passed: {validated}")
         except Exception as e:
             logger.info(f"❌ Validation failed: {e}")
-            suggestions = suggest_fixes_for_error(str(e), test_case['formula'])
+            suggestions = suggest_fixes_for_error(str(e), test_case["formula"])
             logger.info(f"💡 Suggestions: {suggestions}")
 
     # Test consistency validation
@@ -208,17 +249,26 @@ def test_sports_validation():
     consistency_tests = [
         {
             "formula": "per",
-            "variables": {"FGM": 8, "FGA": 15, "FTM": 4, "FTA": 5, "3PM": 3, "MP": 35}
+            "variables": {"FGM": 8, "FGA": 15, "FTM": 4, "FTA": 5, "3PM": 3, "MP": 35},
         },
         {
             "formula": "per",
-            "variables": {"FGM": 20, "FGA": 15, "FTM": 4, "FTA": 5, "3PM": 3, "MP": 35}  # FGM > FGA
-        }
+            "variables": {
+                "FGM": 20,
+                "FGA": 15,
+                "FTM": 4,
+                "FTA": 5,
+                "3PM": 3,
+                "MP": 35,
+            },  # FGM > FGA
+        },
     ]
 
     for i, test_case in enumerate(consistency_tests, 1):
         logger.info(f"\n📋 Consistency Test {i}: {test_case['formula']}")
-        warnings = validate_formula_consistency(test_case['formula'], test_case['variables'])
+        warnings = validate_formula_consistency(
+            test_case["formula"], test_case["variables"]
+        )
         if warnings:
             logger.info(f"⚠️ Warnings: {warnings}")
         else:
@@ -248,7 +298,9 @@ def main():
         logger.info("\n" + "=" * 60)
         logger.info("🎉 All Phase 2 Tests Completed Successfully!")
         logger.info("\n📋 Summary of New Capabilities:")
-        logger.info("   ✅ Formula type identification (efficiency, rate, composite, etc.)")
+        logger.info(
+            "   ✅ Formula type identification (efficiency, rate, composite, etc.)"
+        )
         logger.info("   ✅ Intelligent tool suggestions based on formula type")
         logger.info("   ✅ Variable mapping from book notation to standard format")
         logger.info("   ✅ Unit consistency validation")
@@ -266,7 +318,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-

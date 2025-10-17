@@ -11,19 +11,24 @@ from typing import Dict, List, Any, Optional
 from enum import Enum
 from dataclasses import dataclass
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
+
 class CircuitState(Enum):
-    CLOSED = "closed"      # Normal operation
-    OPEN = "open"          # Circuit is open, failing fast
+    CLOSED = "closed"  # Normal operation
+    OPEN = "open"  # Circuit is open, failing fast
     HALF_OPEN = "half_open"  # Testing if service is back
+
 
 @dataclass
 class CircuitBreakerConfig:
     failure_threshold: int = 3
     recovery_timeout: int = 60  # seconds
     success_threshold: int = 2
+
 
 class CircuitBreaker:
     """Circuit breaker implementation for API calls."""
@@ -43,11 +48,15 @@ class CircuitBreaker:
             return True
         elif self.state == CircuitState.OPEN:
             # Check if recovery timeout has passed
-            if self.last_failure_time and \
-               time.time() - self.last_failure_time >= self.config.recovery_timeout:
+            if (
+                self.last_failure_time
+                and time.time() - self.last_failure_time >= self.config.recovery_timeout
+            ):
                 self.state = CircuitState.HALF_OPEN
                 self.success_count = 0
-                logger.info(f"🔄 Circuit breaker {self.name} transitioning to HALF_OPEN")
+                logger.info(
+                    f"🔄 Circuit breaker {self.name} transitioning to HALF_OPEN"
+                )
                 return True
             return False
         elif self.state == CircuitState.HALF_OPEN:
@@ -63,7 +72,9 @@ class CircuitBreaker:
             self.success_count += 1
             if self.success_count >= self.config.success_threshold:
                 self.state = CircuitState.CLOSED
-                logger.info(f"✅ Circuit breaker {self.name} closed - service recovered")
+                logger.info(
+                    f"✅ Circuit breaker {self.name} closed - service recovered"
+                )
         elif self.state == CircuitState.CLOSED:
             # Reset success count on successful calls
             self.success_count = 0
@@ -81,64 +92,77 @@ class CircuitBreaker:
     def get_state_info(self) -> Dict[str, Any]:
         """Get current circuit breaker state information."""
         return {
-            'name': self.name,
-            'state': self.state.value,
-            'failure_count': self.failure_count,
-            'success_count': self.success_count,
-            'last_failure_time': self.last_failure_time,
-            'last_success_time': self.last_success_time,
-            'can_execute': self.can_execute()
+            "name": self.name,
+            "state": self.state.value,
+            "failure_count": self.failure_count,
+            "success_count": self.success_count,
+            "last_failure_time": self.last_failure_time,
+            "last_success_time": self.last_success_time,
+            "can_execute": self.can_execute(),
         }
+
 
 class ResilientAPIManager:
     """Manages API calls with circuit breaker pattern."""
 
     def __init__(self):
         self.circuit_breakers = {
-            'google': CircuitBreaker('Google Gemini'),
-            'deepseek': CircuitBreaker('DeepSeek'),
-            'claude': CircuitBreaker('Claude'),
-            'gpt4': CircuitBreaker('GPT-4')
+            "google": CircuitBreaker("Google Gemini"),
+            "deepseek": CircuitBreaker("DeepSeek"),
+            "claude": CircuitBreaker("Claude"),
+            "gpt4": CircuitBreaker("GPT-4"),
         }
 
         # Track which APIs are known to be broken
         self.broken_apis = set()
 
-    async def execute_with_circuit_breaker(self, api_name: str, coro_func, *args, **kwargs) -> Dict[str, Any]:
+    async def execute_with_circuit_breaker(
+        self, api_name: str, coro_func, *args, **kwargs
+    ) -> Dict[str, Any]:
         """Execute API call with circuit breaker protection."""
         circuit = self.circuit_breakers.get(api_name)
 
         if not circuit:
             logger.error(f"❌ No circuit breaker found for {api_name}")
-            return {'success': False, 'error': f'No circuit breaker for {api_name}'}
+            return {"success": False, "error": f"No circuit breaker for {api_name}"}
 
         # Check if API is known to be broken
         if api_name in self.broken_apis:
             logger.warning(f"⚠️ Skipping {api_name} - known to be broken")
-            return {'success': False, 'error': f'{api_name} is known to be broken', 'skipped': True}
+            return {
+                "success": False,
+                "error": f"{api_name} is known to be broken",
+                "skipped": True,
+            }
 
         # Check circuit breaker state
         if not circuit.can_execute():
             logger.warning(f"⚠️ Circuit breaker {api_name} is OPEN - skipping")
-            return {'success': False, 'error': f'{api_name} circuit breaker is open', 'skipped': True}
+            return {
+                "success": False,
+                "error": f"{api_name} circuit breaker is open",
+                "skipped": True,
+            }
 
         try:
             logger.info(f"🔄 Executing {api_name} API call...")
             result = await coro_func(*args, **kwargs)
 
-            if result.get('success', False):
+            if result.get("success", False):
                 circuit.on_success()
                 logger.info(f"✅ {api_name} API call succeeded")
                 return result
             else:
                 circuit.on_failure()
-                logger.warning(f"⚠️ {api_name} API call failed: {result.get('error', 'Unknown error')}")
+                logger.warning(
+                    f"⚠️ {api_name} API call failed: {result.get('error', 'Unknown error')}"
+                )
                 return result
 
         except Exception as e:
             circuit.on_failure()
             logger.error(f"❌ {api_name} API call exception: {str(e)}")
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     def mark_api_broken(self, api_name: str):
         """Mark an API as permanently broken."""
@@ -160,15 +184,14 @@ class ResilientAPIManager:
                 working.append(api_name)
         return working
 
+
 # Global circuit breaker manager
 circuit_manager = ResilientAPIManager()
 
 # Mark known broken APIs based on debug results
-circuit_manager.mark_api_broken('claude')  # Method signature issues
-circuit_manager.mark_api_broken('gpt4')    # Missing methods
+circuit_manager.mark_api_broken("claude")  # Method signature issues
+circuit_manager.mark_api_broken("gpt4")  # Missing methods
 
 logger.info("🛡️ Circuit breaker system initialized")
 logger.info(f"✅ Working APIs: {circuit_manager.get_working_apis()}")
 logger.info(f"🚫 Broken APIs: {list(circuit_manager.broken_apis)}")
-
-

@@ -16,8 +16,11 @@ from mcp_server.tools.logger_config import log_operation
 # Correlation Analysis
 # =============================================================================
 
+
 @log_operation("stats_correlation")
-def calculate_correlation(x: List[Union[int, float]], y: List[Union[int, float]]) -> float:
+def calculate_correlation(
+    x: List[Union[int, float]], y: List[Union[int, float]]
+) -> float:
     """
     Calculate Pearson correlation coefficient between two variables.
 
@@ -48,24 +51,16 @@ def calculate_correlation(x: List[Union[int, float]], y: List[Union[int, float]]
         -1.0  # Perfect negative correlation
     """
     if not x or not y:
-        raise ValidationError(
-            "Both lists must be non-empty",
-            "x or y",
-            None
-        )
+        raise ValidationError("Both lists must be non-empty", "x or y", None)
 
     if len(x) != len(y):
         raise ValidationError(
-            f"Lists must have same length: x={len(x)}, y={len(y)}",
-            "x, y",
-            None
+            f"Lists must have same length: x={len(x)}, y={len(y)}", "x, y", None
         )
 
     if len(x) < 2:
         raise ValidationError(
-            "Need at least 2 data points for correlation",
-            "x, y",
-            len(x)
+            "Need at least 2 data points for correlation", "x, y", len(x)
         )
 
     n = len(x)
@@ -97,9 +92,7 @@ def calculate_correlation(x: List[Union[int, float]], y: List[Union[int, float]]
 
 @log_operation("stats_covariance")
 def calculate_covariance(
-    x: List[Union[int, float]],
-    y: List[Union[int, float]],
-    sample: bool = True
+    x: List[Union[int, float]], y: List[Union[int, float]], sample: bool = True
 ) -> float:
     """
     Calculate covariance between two variables.
@@ -123,24 +116,16 @@ def calculate_covariance(
         2.5
     """
     if not x or not y:
-        raise ValidationError(
-            "Both lists must be non-empty",
-            "x or y",
-            None
-        )
+        raise ValidationError("Both lists must be non-empty", "x or y", None)
 
     if len(x) != len(y):
         raise ValidationError(
-            f"Lists must have same length: x={len(x)}, y={len(y)}",
-            "x, y",
-            None
+            f"Lists must have same length: x={len(x)}, y={len(y)}", "x, y", None
         )
 
     if sample and len(x) < 2:
         raise ValidationError(
-            "Sample covariance requires at least 2 data points",
-            "x, y",
-            len(x)
+            "Sample covariance requires at least 2 data points", "x, y", len(x)
         )
 
     n = len(x)
@@ -155,7 +140,9 @@ def calculate_covariance(
 
 
 @log_operation("stats_correlation_matrix")
-def calculate_correlation_matrix(data: Dict[str, List[Union[int, float]]]) -> Dict[str, Dict[str, float]]:
+def calculate_correlation_matrix(
+    data: Dict[str, List[Union[int, float]]],
+) -> Dict[str, Dict[str, float]]:
     """
     Calculate correlation matrix for multiple variables.
 
@@ -176,19 +163,13 @@ def calculate_correlation_matrix(data: Dict[str, List[Union[int, float]]]) -> Di
         0.98  # Strong positive correlation
     """
     if not data:
-        raise ValidationError(
-            "Data dictionary cannot be empty",
-            "data",
-            None
-        )
+        raise ValidationError("Data dictionary cannot be empty", "data", None)
 
     # Validate all lists have same length
     lengths = [len(values) for values in data.values()]
     if len(set(lengths)) > 1:
         raise ValidationError(
-            "All variables must have same number of observations",
-            "data",
-            lengths
+            "All variables must have same number of observations", "data", lengths
         )
 
     matrix = {}
@@ -212,10 +193,10 @@ def calculate_correlation_matrix(data: Dict[str, List[Union[int, float]]]) -> Di
 # Regression Analysis
 # =============================================================================
 
+
 @log_operation("stats_linear_regression")
 def calculate_linear_regression(
-    x: List[Union[int, float]],
-    y: List[Union[int, float]]
+    x: List[Union[int, float]], y: List[Union[int, float]]
 ) -> Dict[str, Any]:
     """
     Perform simple linear regression (y = mx + b).
@@ -248,24 +229,16 @@ def calculate_linear_regression(
         1.0  # Perfect fit
     """
     if not x or not y:
-        raise ValidationError(
-            "Both lists must be non-empty",
-            "x or y",
-            None
-        )
+        raise ValidationError("Both lists must be non-empty", "x or y", None)
 
     if len(x) != len(y):
         raise ValidationError(
-            f"Lists must have same length: x={len(x)}, y={len(y)}",
-            "x, y",
-            None
+            f"Lists must have same length: x={len(x)}, y={len(y)}", "x, y", None
         )
 
     if len(x) < 2:
         raise ValidationError(
-            "Need at least 2 data points for regression",
-            "x, y",
-            len(x)
+            "Need at least 2 data points for regression", "x, y", len(x)
         )
 
     n = len(x)
@@ -278,9 +251,7 @@ def calculate_linear_regression(
 
     if denominator == 0:
         raise ValidationError(
-            "X variable has no variance (all values are the same)",
-            "x",
-            x
+            "X variable has no variance (all values are the same)", "x", x
         )
 
     slope = numerator / denominator
@@ -301,15 +272,13 @@ def calculate_linear_regression(
         "slope": round(slope, 4),
         "intercept": round(intercept, 4),
         "r_squared": round(r_squared, 4),
-        "equation": equation
+        "equation": equation,
     }
 
 
 @log_operation("stats_predict")
 def predict_values(
-    slope: float,
-    intercept: float,
-    x_values: List[Union[int, float]]
+    slope: float, intercept: float, x_values: List[Union[int, float]]
 ) -> List[float]:
     """
     Make predictions using linear regression model.
@@ -330,9 +299,7 @@ def predict_values(
     """
     if not x_values:
         raise ValidationError(
-            "Must provide at least one x value to predict",
-            "x_values",
-            None
+            "Must provide at least one x value to predict", "x_values", None
         )
 
     predictions = [slope * x + intercept for x in x_values]
@@ -345,7 +312,7 @@ def calculate_r_squared(
     x: List[Union[int, float]],
     y: List[Union[int, float]],
     slope: float,
-    intercept: float
+    intercept: float,
 ) -> float:
     """
     Calculate R² (coefficient of determination).
@@ -375,11 +342,7 @@ def calculate_r_squared(
         1.0  # Perfect fit
     """
     if len(x) != len(y):
-        raise ValidationError(
-            "Lists must have same length",
-            "x, y",
-            None
-        )
+        raise ValidationError("Lists must have same length", "x, y", None)
 
     n = len(y)
     mean_y = sum(y) / n
@@ -408,6 +371,7 @@ def calculate_r_squared(
 # =============================================================================
 # Utility Functions
 # =============================================================================
+
 
 def check_dependencies():
     """

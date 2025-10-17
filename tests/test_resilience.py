@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 # Import resilience module
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from synthesis.resilience import (
@@ -25,13 +26,14 @@ from synthesis.resilience import (
     RateLimiter,
     get_circuit_breaker,
     with_mcp_retry,
-    with_mcp_circuit_breaker
+    with_mcp_circuit_breaker,
 )
 
 
 # ==============================================================================
 # Circuit Breaker Tests
 # ==============================================================================
+
 
 class TestCircuitBreaker:
     """Test circuit breaker functionality"""
@@ -96,7 +98,7 @@ class TestCircuitBreaker:
             name="test",
             failure_threshold=2,
             success_threshold=2,
-            timeout=1  # 1 second timeout
+            timeout=1,  # 1 second timeout
         )
 
         @cb.call
@@ -131,11 +133,7 @@ class TestCircuitBreaker:
     @pytest.mark.asyncio
     async def test_circuit_breaker_half_open_reopens_on_failure(self):
         """Test circuit breaker reopens if HALF_OPEN call fails"""
-        cb = CircuitBreaker(
-            name="test",
-            failure_threshold=2,
-            timeout=1
-        )
+        cb = CircuitBreaker(name="test", failure_threshold=2, timeout=1)
 
         @cb.call
         async def func(should_fail=False):
@@ -185,6 +183,7 @@ class TestCircuitBreaker:
 # ==============================================================================
 # Retry with Backoff Tests
 # ==============================================================================
+
 
 class TestRetryWithBackoff:
     """Test retry with exponential backoff"""
@@ -249,10 +248,7 @@ class TestRetryWithBackoff:
         call_count = 0
 
         @retry_with_backoff(
-            max_retries=3,
-            base_delay=0.1,
-            exponential_base=2.0,
-            jitter=False
+            max_retries=3, base_delay=0.1, exponential_base=2.0, jitter=False
         )
         async def track_delays():
             nonlocal call_count
@@ -266,12 +262,14 @@ class TestRetryWithBackoff:
         await track_delays()
 
         # Calculate actual delays
-        actual_delays = [delays[i] - delays[i-1] for i in range(1, len(delays))]
+        actual_delays = [delays[i] - delays[i - 1] for i in range(1, len(delays))]
 
         # Expected delays: 0.1, 0.2, 0.4
         expected = [0.1, 0.2, 0.4]
         for actual, expected_val in zip(actual_delays, expected):
-            assert abs(actual - expected_val) < 0.25  # 250ms tolerance for CI/CD variability
+            assert (
+                abs(actual - expected_val) < 0.25
+            )  # 250ms tolerance for CI/CD variability
 
     @pytest.mark.asyncio
     async def test_retry_max_delay_cap(self):
@@ -283,7 +281,7 @@ class TestRetryWithBackoff:
             base_delay=1.0,
             max_delay=2.0,
             exponential_base=2.0,
-            jitter=False
+            jitter=False,
         )
         async def capped_delays():
             nonlocal call_count
@@ -306,9 +304,7 @@ class TestRetryWithBackoff:
         call_count = 0
 
         @retry_with_backoff(
-            max_retries=3,
-            base_delay=0.05,
-            retry_on=(ConnectionError, TimeoutError)
+            max_retries=3, base_delay=0.05, retry_on=(ConnectionError, TimeoutError)
         )
         async def specific_errors():
             nonlocal call_count
@@ -330,6 +326,7 @@ class TestRetryWithBackoff:
 # Retry Async (Functional) Tests
 # ==============================================================================
 
+
 class TestRetryAsync:
     """Test functional retry wrapper"""
 
@@ -350,16 +347,11 @@ class TestRetryAsync:
     @pytest.mark.asyncio
     async def test_retry_async_with_args(self):
         """Test retry_async with arguments"""
+
         async def func(a, b, c=None):
             return f"{a}-{b}-{c}"
 
-        result = await retry_async(
-            func,
-            "arg1",
-            "arg2",
-            c="kwarg",
-            max_retries=2
-        )
+        result = await retry_async(func, "arg1", "arg2", c="kwarg", max_retries=2)
         assert result == "arg1-arg2-kwarg"
 
     @pytest.mark.asyncio
@@ -381,6 +373,7 @@ class TestRetryAsync:
 # ==============================================================================
 # Connection Pool Tests
 # ==============================================================================
+
 
 class TestConnectionPool:
     """Test connection pool functionality"""
@@ -485,6 +478,7 @@ class TestConnectionPool:
 # Rate Limiter Tests
 # ==============================================================================
 
+
 class TestRateLimiter:
     """Test token bucket rate limiter"""
 
@@ -566,6 +560,7 @@ class TestRateLimiter:
 # Global Circuit Breaker Tests
 # ==============================================================================
 
+
 class TestGlobalCircuitBreakers:
     """Test global circuit breaker registry"""
 
@@ -585,6 +580,7 @@ class TestGlobalCircuitBreakers:
 # ==============================================================================
 # Decorator Helper Tests
 # ==============================================================================
+
 
 class TestDecoratorHelpers:
     """Test convenience decorator helpers"""
@@ -639,6 +635,7 @@ class TestDecoratorHelpers:
 # ==============================================================================
 # Integration Tests
 # ==============================================================================
+
 
 class TestIntegration:
     """Test combined resilience features"""

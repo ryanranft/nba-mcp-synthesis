@@ -42,6 +42,7 @@ logger = logging.getLogger(__name__)
 
 class TaskStatus(Enum):
     """Task execution status"""
+
     PENDING = "pending"
     QUEUED = "queued"
     RUNNING = "running"
@@ -53,6 +54,7 @@ class TaskStatus(Enum):
 
 class TaskPriority(Enum):
     """Task priority levels"""
+
     LOW = 3
     NORMAL = 2
     HIGH = 1
@@ -62,6 +64,7 @@ class TaskPriority(Enum):
 @dataclass
 class TaskResult:
     """Task execution result"""
+
     task_id: str
     status: TaskStatus
     result: Any = None
@@ -74,6 +77,7 @@ class TaskResult:
 @dataclass
 class Task:
     """Task definition"""
+
     task_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     name: str = "unnamed_task"
     func: Optional[Callable] = None
@@ -97,18 +101,22 @@ class Task:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary (excluding func)"""
         data = asdict(self)
-        data['func'] = self.func.__name__ if self.func else None
-        data['priority'] = self.priority.value
-        data['status'] = self.status.value
-        data['created_at'] = self.created_at.isoformat()
-        data['started_at'] = self.started_at.isoformat() if self.started_at else None
-        data['completed_at'] = self.completed_at.isoformat() if self.completed_at else None
-        data['scheduled_at'] = self.scheduled_at.isoformat() if self.scheduled_at else None
+        data["func"] = self.func.__name__ if self.func else None
+        data["priority"] = self.priority.value
+        data["status"] = self.status.value
+        data["created_at"] = self.created_at.isoformat()
+        data["started_at"] = self.started_at.isoformat() if self.started_at else None
+        data["completed_at"] = (
+            self.completed_at.isoformat() if self.completed_at else None
+        )
+        data["scheduled_at"] = (
+            self.scheduled_at.isoformat() if self.scheduled_at else None
+        )
         if self.result:
-            data['result'] = {
-                'status': self.result.status.value,
-                'execution_time_seconds': self.result.execution_time_seconds,
-                'attempts': self.result.attempts
+            data["result"] = {
+                "status": self.result.status.value,
+                "execution_time_seconds": self.result.execution_time_seconds,
+                "attempts": self.result.attempts,
             }
         return data
 
@@ -124,8 +132,7 @@ class TaskQueue:
 
     def __init__(self, max_size: int = 1000):
         self._queues: Dict[TaskPriority, queue.PriorityQueue] = {
-            priority: queue.PriorityQueue(maxsize=max_size)
-            for priority in TaskPriority
+            priority: queue.PriorityQueue(maxsize=max_size) for priority in TaskPriority
         }
         self._pending_tasks: Dict[str, Task] = {}
         self._completed_tasks: Dict[str, Task] = {}
@@ -140,16 +147,16 @@ class TaskQueue:
 
             try:
                 # Add to priority queue (priority, timestamp, task_id)
-                self._queues[task.priority].put_nowait((
-                    task.priority.value,
-                    task.created_at.timestamp(),
-                    task.task_id
-                ))
+                self._queues[task.priority].put_nowait(
+                    (task.priority.value, task.created_at.timestamp(), task.task_id)
+                )
 
                 self._pending_tasks[task.task_id] = task
                 task.status = TaskStatus.QUEUED
 
-                logger.info(f"Enqueued task {task.task_id} with priority {task.priority.name}")
+                logger.info(
+                    f"Enqueued task {task.task_id} with priority {task.priority.name}"
+                )
                 return True
 
             except queue.Full:
@@ -170,11 +177,9 @@ class TaskQueue:
                     else:
                         # Re-enqueue if not ready
                         if task:
-                            self._queues[priority].put_nowait((
-                                priority.value,
-                                task.created_at.timestamp(),
-                                task_id
-                            ))
+                            self._queues[priority].put_nowait(
+                                (priority.value, task.created_at.timestamp(), task_id)
+                            )
 
             except queue.Empty:
                 continue
@@ -213,8 +218,7 @@ class TaskQueue:
     def get_queue_size(self) -> Dict[str, int]:
         """Get size of each priority queue"""
         return {
-            priority.name: self._queues[priority].qsize()
-            for priority in TaskPriority
+            priority.name: self._queues[priority].qsize() for priority in TaskPriority
         }
 
     def get_pending_tasks(self) -> List[Task]:
@@ -240,7 +244,9 @@ class TaskWorker:
         task.started_at = datetime.now()
         task.attempts += 1
 
-        logger.info(f"Worker {self.worker_id} executing task {task.task_id} (attempt {task.attempts})")
+        logger.info(
+            f"Worker {self.worker_id} executing task {task.task_id} (attempt {task.attempts})"
+        )
 
         try:
             # Execute task function
@@ -257,14 +263,16 @@ class TaskWorker:
                 result=result_value,
                 execution_time_seconds=execution_time,
                 attempts=task.attempts,
-                completed_at=datetime.now()
+                completed_at=datetime.now(),
             )
 
             task.status = TaskStatus.SUCCESS
             task.completed_at = datetime.now()
             task.result = result
 
-            logger.info(f"Task {task.task_id} completed successfully in {execution_time:.2f}s")
+            logger.info(
+                f"Task {task.task_id} completed successfully in {execution_time:.2f}s"
+            )
             return result
 
         except Exception as e:
@@ -274,10 +282,14 @@ class TaskWorker:
             # Check if we should retry
             if task.attempts < task.max_retries:
                 task.status = TaskStatus.RETRYING
-                logger.warning(f"Task {task.task_id} failed (attempt {task.attempts}/{task.max_retries}): {e}")
+                logger.warning(
+                    f"Task {task.task_id} failed (attempt {task.attempts}/{task.max_retries}): {e}"
+                )
 
                 # Re-enqueue with delay
-                task.scheduled_at = datetime.now() + timedelta(seconds=task.retry_delay_seconds)
+                task.scheduled_at = datetime.now() + timedelta(
+                    seconds=task.retry_delay_seconds
+                )
                 self.task_queue.enqueue(task)
 
                 result = TaskResult(
@@ -285,12 +297,14 @@ class TaskWorker:
                     status=TaskStatus.RETRYING,
                     error=error_msg,
                     execution_time_seconds=execution_time,
-                    attempts=task.attempts
+                    attempts=task.attempts,
                 )
             else:
                 task.status = TaskStatus.FAILED
                 task.completed_at = datetime.now()
-                logger.error(f"Task {task.task_id} failed permanently after {task.attempts} attempts: {e}")
+                logger.error(
+                    f"Task {task.task_id} failed permanently after {task.attempts} attempts: {e}"
+                )
 
                 result = TaskResult(
                     task_id=task.task_id,
@@ -298,7 +312,7 @@ class TaskWorker:
                     error=error_msg,
                     execution_time_seconds=execution_time,
                     attempts=task.attempts,
-                    completed_at=datetime.now()
+                    completed_at=datetime.now(),
                 )
 
             task.result = result
@@ -318,7 +332,11 @@ class TaskWorker:
                     self._execute_task(task)
 
                     # Move to completed
-                    if task.status in [TaskStatus.SUCCESS, TaskStatus.FAILED, TaskStatus.CANCELLED]:
+                    if task.status in [
+                        TaskStatus.SUCCESS,
+                        TaskStatus.FAILED,
+                        TaskStatus.CANCELLED,
+                    ]:
                         self.task_queue.complete_task(task)
 
                     self._current_task = None
@@ -350,9 +368,9 @@ class TaskWorker:
     def get_status(self) -> Dict[str, Any]:
         """Get worker status"""
         return {
-            'worker_id': self.worker_id,
-            'running': self._running,
-            'current_task': self._current_task.task_id if self._current_task else None
+            "worker_id": self.worker_id,
+            "running": self._running,
+            "current_task": self._current_task.task_id if self._current_task else None,
         }
 
 
@@ -389,12 +407,7 @@ class TaskManager:
 
     def submit(self, func: Callable, *args, **kwargs) -> str:
         """Submit a task for execution"""
-        task = Task(
-            name=func.__name__,
-            func=func,
-            args=args,
-            kwargs=kwargs
-        )
+        task = Task(name=func.__name__, func=func, args=args, kwargs=kwargs)
 
         if self.task_queue.enqueue(task):
             return task.task_id
@@ -419,10 +432,10 @@ class TaskManager:
     def get_stats(self) -> Dict[str, Any]:
         """Get queue statistics"""
         return {
-            'num_workers': len(self.workers),
-            'queue_sizes': self.task_queue.get_queue_size(),
-            'pending_tasks': len(self.task_queue.get_pending_tasks()),
-            'workers': [w.get_status() for w in self.workers]
+            "num_workers": len(self.workers),
+            "queue_sizes": self.task_queue.get_queue_size(),
+            "pending_tasks": len(self.task_queue.get_pending_tasks()),
+            "workers": [w.get_status() for w in self.workers],
         }
 
 
@@ -451,11 +464,7 @@ if __name__ == "__main__":
         """Simulate stats calculation"""
         time.sleep(2)  # Simulate work
         ppg = games * 1.5
-        return {
-            'player': player_name,
-            'games': games,
-            'ppg': ppg
-        }
+        return {"player": player_name, "games": games, "ppg": ppg}
 
     def failing_task():
         """Task that fails"""
@@ -479,18 +488,14 @@ if __name__ == "__main__":
         name="urgent_calculation",
         func=calculate_player_stats,
         args=("Stephen Curry", 70),
-        priority=TaskPriority.HIGH
+        priority=TaskPriority.HIGH,
     )
     manager.submit_task(high_priority_task)
     task_ids.append(high_priority_task.task_id)
     print(f"Submitted high priority task: {high_priority_task.task_id}")
 
     # Failing task with retries
-    failing_task_obj = Task(
-        name="failing_task",
-        func=failing_task,
-        max_retries=2
-    )
+    failing_task_obj = Task(name="failing_task", func=failing_task, max_retries=2)
     manager.submit_task(failing_task_obj)
     task_ids.append(failing_task_obj.task_id)
     print(f"Submitted failing task: {failing_task_obj.task_id}")
@@ -507,8 +512,10 @@ if __name__ == "__main__":
             print(f"\nTask {task_id[:8]}:")
             print(f"  Status: {status['status']}")
             print(f"  Attempts: {status.get('attempts', 0)}")
-            if status.get('result'):
-                print(f"  Execution Time: {status['result'].get('execution_time_seconds', 0):.2f}s")
+            if status.get("result"):
+                print(
+                    f"  Execution Time: {status['result'].get('execution_time_seconds', 0):.2f}s"
+                )
 
     # Stats
     print("\n--- Queue Statistics ---")
@@ -521,4 +528,3 @@ if __name__ == "__main__":
     manager.stop()
 
     print("\n=== Demo Complete ===")
-

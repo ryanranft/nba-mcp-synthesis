@@ -19,8 +19,10 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class DocumentationType(Enum):
     """Types of documentation that can be generated"""
+
     USER_GUIDE = "user_guide"
     API_DOCUMENTATION = "api_documentation"
     TUTORIAL = "tutorial"
@@ -30,24 +32,30 @@ class DocumentationType(Enum):
     TROUBLESHOOTING = "troubleshooting"
     EXAMPLES = "examples"
 
+
 class TrainingLevel(Enum):
     """Training difficulty levels"""
+
     BEGINNER = "beginner"
     INTERMEDIATE = "intermediate"
     ADVANCED = "advanced"
     EXPERT = "expert"
 
+
 class ContentFormat(Enum):
     """Content output formats"""
+
     MARKDOWN = "markdown"
     HTML = "html"
     PDF = "pdf"
     JSON = "json"
     RESTRUCTURED_TEXT = "rst"
 
+
 @dataclass
 class DocumentationSection:
     """Individual documentation section"""
+
     section_id: str
     title: str
     content: str
@@ -58,9 +66,11 @@ class DocumentationSection:
     estimated_time: int = 0  # minutes
     last_updated: datetime = None
 
+
 @dataclass
 class TutorialStep:
     """Individual tutorial step"""
+
     step_id: str
     title: str
     description: str
@@ -69,9 +79,11 @@ class TutorialStep:
     hints: List[str] = None
     verification: str = None
 
+
 @dataclass
 class TrainingModule:
     """Training module structure"""
+
     module_id: str
     title: str
     description: str
@@ -83,9 +95,11 @@ class TrainingModule:
     learning_objectives: List[str]
     assessment_questions: List[str]
 
+
 @dataclass
 class DocumentationProject:
     """Complete documentation project"""
+
     project_id: str
     title: str
     description: str
@@ -94,6 +108,7 @@ class DocumentationProject:
     sections: List[DocumentationSection]
     generated_at: datetime
     output_formats: List[ContentFormat]
+
 
 class DocumentationGenerator:
     """Main documentation and training generator"""
@@ -124,7 +139,7 @@ class DocumentationGenerator:
             "api_docs": self._get_api_docs_template(),
             "tutorial": self._get_tutorial_template(),
             "quick_start": self._get_quick_start_template(),
-            "training_module": self._get_training_module_template()
+            "training_module": self._get_training_module_template(),
         }
         return templates
 
@@ -284,12 +299,12 @@ class DocumentationGenerator:
                 advanced_features=advanced_features,
                 examples=examples,
                 troubleshooting=troubleshooting,
-                support=support
+                support=support,
             )
 
             # Save to file
             output_file = self.output_dir / f"{guide_id}_user_guide.md"
-            with open(output_file, 'w', encoding='utf-8') as f:
+            with open(output_file, "w", encoding="utf-8") as f:
                 f.write(content)
 
             result = {
@@ -299,7 +314,7 @@ class DocumentationGenerator:
                 "output_file": str(output_file),
                 "content_length": len(content),
                 "sections": 6,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
             self.generated_docs[guide_id] = result
@@ -310,7 +325,9 @@ class DocumentationGenerator:
             logger.error(f"Error generating user guide: {e}")
             return {"status": "error", "message": str(e)}
 
-    def generate_api_documentation(self, title: str, description: str) -> Dict[str, Any]:
+    def generate_api_documentation(
+        self, title: str, description: str
+    ) -> Dict[str, Any]:
         """
         Generate comprehensive API documentation
 
@@ -343,12 +360,12 @@ class DocumentationGenerator:
                 response_formats=response_formats,
                 error_handling=error_handling,
                 rate_limiting=rate_limiting,
-                examples=examples
+                examples=examples,
             )
 
             # Save to file
             output_file = self.output_dir / f"{api_id}_api_docs.md"
-            with open(output_file, 'w', encoding='utf-8') as f:
+            with open(output_file, "w", encoding="utf-8") as f:
                 f.write(content)
 
             result = {
@@ -358,7 +375,7 @@ class DocumentationGenerator:
                 "output_file": str(output_file),
                 "content_length": len(content),
                 "endpoints_count": self._count_endpoints(),
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
             self.generated_docs[api_id] = result
@@ -369,7 +386,9 @@ class DocumentationGenerator:
             logger.error(f"Error generating API documentation: {e}")
             return {"status": "error", "message": str(e)}
 
-    def generate_tutorial(self, title: str, level: TrainingLevel, objectives: List[str]) -> Dict[str, Any]:
+    def generate_tutorial(
+        self, title: str, level: TrainingLevel, objectives: List[str]
+    ) -> Dict[str, Any]:
         """
         Generate interactive tutorial
 
@@ -397,12 +416,12 @@ class DocumentationGenerator:
                 objectives="\n".join(f"- {obj}" for obj in objectives),
                 steps=steps,
                 verification=verification,
-                next_steps=next_steps
+                next_steps=next_steps,
             )
 
             # Save to file
             output_file = self.output_dir / f"{tutorial_id}_tutorial.md"
-            with open(output_file, 'w', encoding='utf-8') as f:
+            with open(output_file, "w", encoding="utf-8") as f:
                 f.write(content)
 
             result = {
@@ -414,7 +433,7 @@ class DocumentationGenerator:
                 "content_length": len(content),
                 "steps_count": len(steps.split("##")),
                 "objectives_count": len(objectives),
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
             self.generated_docs[tutorial_id] = result
@@ -450,12 +469,12 @@ class DocumentationGenerator:
                 installation=installation,
                 basic_usage=basic_usage,
                 first_example=first_example,
-                next_steps=next_steps
+                next_steps=next_steps,
             )
 
             # Save to file
             output_file = self.output_dir / f"{quickstart_id}_quickstart.md"
-            with open(output_file, 'w', encoding='utf-8') as f:
+            with open(output_file, "w", encoding="utf-8") as f:
                 f.write(content)
 
             result = {
@@ -465,7 +484,7 @@ class DocumentationGenerator:
                 "output_file": str(output_file),
                 "content_length": len(content),
                 "sections": 4,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
             self.generated_docs[quickstart_id] = result
@@ -476,7 +495,9 @@ class DocumentationGenerator:
             logger.error(f"Error generating quick start guide: {e}")
             return {"status": "error", "message": str(e)}
 
-    def create_training_module(self, title: str, description: str, level: TrainingLevel) -> Dict[str, Any]:
+    def create_training_module(
+        self, title: str, description: str, level: TrainingLevel
+    ) -> Dict[str, Any]:
         """
         Create comprehensive training module
 
@@ -510,7 +531,7 @@ class DocumentationGenerator:
                 prerequisites=prerequisites,
                 estimated_duration=duration,
                 learning_objectives=objectives,
-                assessment_questions=assessment
+                assessment_questions=assessment,
             )
 
             # Generate module documentation
@@ -522,12 +543,12 @@ class DocumentationGenerator:
                 duration=duration,
                 content=content,
                 assessment="\n".join(f"- {q}" for q in assessment),
-                resources=resources
+                resources=resources,
             )
 
             # Save to file
             output_file = self.output_dir / f"{module_id}_training_module.md"
-            with open(output_file, 'w', encoding='utf-8') as f:
+            with open(output_file, "w", encoding="utf-8") as f:
                 f.write(module_content)
 
             result = {
@@ -540,7 +561,7 @@ class DocumentationGenerator:
                 "objectives_count": len(objectives),
                 "prerequisites_count": len(prerequisites),
                 "assessment_questions": len(assessment),
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
             self.training_modules[module_id] = module
@@ -551,7 +572,9 @@ class DocumentationGenerator:
             logger.error(f"Error creating training module: {e}")
             return {"status": "error", "message": str(e)}
 
-    def generate_comprehensive_documentation(self, project_title: str) -> Dict[str, Any]:
+    def generate_comprehensive_documentation(
+        self, project_title: str
+    ) -> Dict[str, Any]:
         """
         Generate comprehensive documentation project
 
@@ -565,34 +588,46 @@ class DocumentationGenerator:
             project_id = f"project_{uuid.uuid4().hex[:8]}"
 
             # Generate all documentation types
-            user_guide = self.generate_user_guide(f"{project_title} User Guide", "Comprehensive user guide")
-            api_docs = self.generate_api_documentation(f"{project_title} API Documentation", "Complete API reference")
+            user_guide = self.generate_user_guide(
+                f"{project_title} User Guide", "Comprehensive user guide"
+            )
+            api_docs = self.generate_api_documentation(
+                f"{project_title} API Documentation", "Complete API reference"
+            )
             quickstart = self.generate_quick_start_guide(f"{project_title} Quick Start")
 
             # Generate tutorials for different levels
             beginner_tutorial = self.generate_tutorial(
                 f"{project_title} Beginner Tutorial",
                 TrainingLevel.BEGINNER,
-                ["Understand basic concepts", "Learn fundamental operations", "Complete first examples"]
+                [
+                    "Understand basic concepts",
+                    "Learn fundamental operations",
+                    "Complete first examples",
+                ],
             )
 
             intermediate_tutorial = self.generate_tutorial(
                 f"{project_title} Intermediate Tutorial",
                 TrainingLevel.INTERMEDIATE,
-                ["Master advanced features", "Understand complex operations", "Build sophisticated solutions"]
+                [
+                    "Master advanced features",
+                    "Understand complex operations",
+                    "Build sophisticated solutions",
+                ],
             )
 
             # Create training modules
             beginner_module = self.create_training_module(
                 f"{project_title} Beginner Training",
                 "Comprehensive beginner training module",
-                TrainingLevel.BEGINNER
+                TrainingLevel.BEGINNER,
             )
 
             advanced_module = self.create_training_module(
                 f"{project_title} Advanced Training",
                 "Advanced training for experienced users",
-                TrainingLevel.ADVANCED
+                TrainingLevel.ADVANCED,
             )
 
             # Create project summary
@@ -604,13 +639,13 @@ class DocumentationGenerator:
                 modules=[beginner_module, advanced_module],
                 sections=[],
                 generated_at=datetime.now(),
-                output_formats=[ContentFormat.MARKDOWN, ContentFormat.HTML]
+                output_formats=[ContentFormat.MARKDOWN, ContentFormat.HTML],
             )
 
             # Generate project index
             index_content = self._generate_project_index(project)
             index_file = self.output_dir / f"{project_id}_index.md"
-            with open(index_file, 'w', encoding='utf-8') as f:
+            with open(index_file, "w", encoding="utf-8") as f:
                 f.write(index_content)
 
             result = {
@@ -625,10 +660,10 @@ class DocumentationGenerator:
                     "beginner_tutorial": beginner_tutorial,
                     "intermediate_tutorial": intermediate_tutorial,
                     "beginner_module": beginner_module,
-                    "advanced_module": advanced_module
+                    "advanced_module": advanced_module,
                 },
                 "total_files": 8,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
             logger.info(f"Generated comprehensive documentation project: {project_id}")
@@ -1097,26 +1132,26 @@ console.log(`TS%: ${result.data.ts_percentage.toFixed(3)}`);
             TrainingLevel.BEGINNER: [
                 "Basic understanding of basketball statistics",
                 "Familiarity with web APIs",
-                "Basic programming knowledge"
+                "Basic programming knowledge",
             ],
             TrainingLevel.INTERMEDIATE: [
                 "Experience with NBA analytics",
                 "Python programming skills",
                 "Understanding of statistical concepts",
-                "API integration experience"
+                "API integration experience",
             ],
             TrainingLevel.ADVANCED: [
                 "Advanced NBA analytics knowledge",
                 "Expert Python programming",
                 "Machine learning experience",
-                "Production system experience"
+                "Production system experience",
             ],
             TrainingLevel.EXPERT: [
                 "Professional NBA analytics experience",
                 "System architecture knowledge",
                 "Performance optimization expertise",
-                "Enterprise deployment experience"
-            ]
+                "Enterprise deployment experience",
+            ],
         }
 
         prereq_list = prerequisites.get(level, prerequisites[TrainingLevel.BEGINNER])
@@ -1416,26 +1451,26 @@ This example shows how to:
                 "Understand NBA analytics fundamentals",
                 "Learn basic formula calculations",
                 "Master data access and retrieval",
-                "Create simple analysis reports"
+                "Create simple analysis reports",
             ],
             TrainingLevel.INTERMEDIATE: [
                 "Master advanced formula calculations",
                 "Implement statistical analysis",
                 "Build API integrations",
-                "Create interactive visualizations"
+                "Create interactive visualizations",
             ],
             TrainingLevel.ADVANCED: [
                 "Design system architectures",
                 "Implement machine learning models",
                 "Optimize performance and scalability",
-                "Deploy production systems"
+                "Deploy production systems",
             ],
             TrainingLevel.EXPERT: [
                 "Lead technical initiatives",
                 "Design enterprise solutions",
                 "Drive innovation and research",
-                "Mentor and develop teams"
-            ]
+                "Mentor and develop teams",
+            ],
         }
 
         return objectives.get(level, objectives[TrainingLevel.BEGINNER])
@@ -1446,7 +1481,7 @@ This example shows how to:
             TrainingLevel.BEGINNER: 120,  # 2 hours
             TrainingLevel.INTERMEDIATE: 240,  # 4 hours
             TrainingLevel.ADVANCED: 480,  # 8 hours
-            TrainingLevel.EXPERT: 720  # 12 hours
+            TrainingLevel.EXPERT: 720,  # 12 hours
         }
 
         return durations.get(level, durations[TrainingLevel.BEGINNER])
@@ -1523,26 +1558,26 @@ This example shows how to:
                 "What is Player Efficiency Rating and how is it calculated?",
                 "How do you retrieve player data from the database?",
                 "What are the key components of True Shooting Percentage?",
-                "How do you handle errors in formula calculations?"
+                "How do you handle errors in formula calculations?",
             ],
             TrainingLevel.INTERMEDIATE: [
                 "How do you optimize database queries for performance?",
                 "What are the best practices for API error handling?",
                 "How do you implement caching for frequently accessed data?",
-                "What statistical methods are most appropriate for NBA analysis?"
+                "What statistical methods are most appropriate for NBA analysis?",
             ],
             TrainingLevel.ADVANCED: [
                 "How do you design a scalable architecture for NBA analytics?",
                 "What machine learning algorithms are best for player prediction?",
                 "How do you implement real-time data processing?",
-                "What are the key considerations for production deployment?"
+                "What are the key considerations for production deployment?",
             ],
             TrainingLevel.EXPERT: [
                 "How do you design enterprise-grade NBA analytics platforms?",
                 "What are the emerging trends in sports analytics technology?",
                 "How do you lead technical teams in NBA analytics projects?",
-                "What are the ethical considerations in sports data analysis?"
-            ]
+                "What are the ethical considerations in sports data analysis?",
+            ],
         }
 
         return questions.get(level, questions[TrainingLevel.BEGINNER])
@@ -1621,7 +1656,7 @@ This example shows how to:
         """List all generated files"""
         files = []
         for doc_id, doc_info in self.generated_docs.items():
-            if 'output_file' in doc_info:
+            if "output_file" in doc_info:
                 files.append(f"- {doc_info['title']}: `{doc_info['output_file']}`")
 
         return "\n".join(files) if files else "No files generated yet"
@@ -1630,7 +1665,9 @@ This example shows how to:
         """Count API endpoints"""
         return 20  # Estimated number of endpoints
 
-    def export_documentation(self, format_type: ContentFormat, doc_id: str) -> Dict[str, Any]:
+    def export_documentation(
+        self, format_type: ContentFormat, doc_id: str
+    ) -> Dict[str, Any]:
         """
         Export documentation in specified format
 
@@ -1643,33 +1680,39 @@ This example shows how to:
         """
         try:
             if doc_id not in self.generated_docs:
-                return {"status": "error", "message": f"Documentation {doc_id} not found"}
+                return {
+                    "status": "error",
+                    "message": f"Documentation {doc_id} not found",
+                }
 
             doc_info = self.generated_docs[doc_id]
-            input_file = doc_info.get('output_file')
+            input_file = doc_info.get("output_file")
 
             if not input_file or not os.path.exists(input_file):
                 return {"status": "error", "message": "Source file not found"}
 
             # Read source content
-            with open(input_file, 'r', encoding='utf-8') as f:
+            with open(input_file, "r", encoding="utf-8") as f:
                 content = f.read()
 
             # Convert to target format
             if format_type == ContentFormat.HTML:
                 output_content = self._convert_to_html(content)
-                output_file = input_file.replace('.md', '.html')
+                output_file = input_file.replace(".md", ".html")
             elif format_type == ContentFormat.PDF:
                 output_content = self._convert_to_pdf(content)
-                output_file = input_file.replace('.md', '.pdf')
+                output_file = input_file.replace(".md", ".pdf")
             elif format_type == ContentFormat.JSON:
                 output_content = self._convert_to_json(content)
-                output_file = input_file.replace('.md', '.json')
+                output_file = input_file.replace(".md", ".json")
             else:
-                return {"status": "error", "message": f"Format {format_type.value} not supported"}
+                return {
+                    "status": "error",
+                    "message": f"Format {format_type.value} not supported",
+                }
 
             # Save converted content
-            with open(output_file, 'w', encoding='utf-8') as f:
+            with open(output_file, "w", encoding="utf-8") as f:
                 f.write(output_content)
 
             result = {
@@ -1678,7 +1721,7 @@ This example shows how to:
                 "format": format_type.value,
                 "output_file": output_file,
                 "content_length": len(output_content),
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
             logger.info(f"Exported documentation {doc_id} to {format_type.value}")
@@ -1692,11 +1735,11 @@ This example shows how to:
         """Convert markdown to HTML"""
         # Simple markdown to HTML conversion
         html_content = markdown_content
-        html_content = html_content.replace('# ', '<h1>').replace('\n', '</h1>\n', 1)
-        html_content = html_content.replace('## ', '<h2>').replace('\n', '</h2>\n')
-        html_content = html_content.replace('### ', '<h3>').replace('\n', '</h3>\n')
-        html_content = html_content.replace('**', '<strong>').replace('**', '</strong>')
-        html_content = html_content.replace('*', '<em>').replace('*', '</em>')
+        html_content = html_content.replace("# ", "<h1>").replace("\n", "</h1>\n", 1)
+        html_content = html_content.replace("## ", "<h2>").replace("\n", "</h2>\n")
+        html_content = html_content.replace("### ", "<h3>").replace("\n", "</h3>\n")
+        html_content = html_content.replace("**", "<strong>").replace("**", "</strong>")
+        html_content = html_content.replace("*", "<em>").replace("*", "</em>")
 
         return f"""<!DOCTYPE html>
 <html>
@@ -1717,37 +1760,42 @@ This example shows how to:
     def _convert_to_pdf(self, markdown_content: str) -> str:
         """Convert markdown to PDF (simplified)"""
         # In a real implementation, this would use a library like weasyprint or reportlab
-        return f"PDF conversion not implemented. Content length: {len(markdown_content)}"
+        return (
+            f"PDF conversion not implemented. Content length: {len(markdown_content)}"
+        )
 
     def _convert_to_json(self, markdown_content: str) -> str:
         """Convert markdown to JSON"""
         import json
 
         # Simple conversion to JSON structure
-        lines = markdown_content.split('\n')
+        lines = markdown_content.split("\n")
         sections = []
         current_section = {"title": "", "content": ""}
 
         for line in lines:
-            if line.startswith('#'):
+            if line.startswith("#"):
                 if current_section["title"]:
                     sections.append(current_section)
-                current_section = {"title": line.strip('# '), "content": ""}
+                current_section = {"title": line.strip("# "), "content": ""}
             else:
                 current_section["content"] += line + "\n"
 
         if current_section["title"]:
             sections.append(current_section)
 
-        return json.dumps({
-            "documentation": {
-                "sections": sections,
-                "metadata": {
-                    "generated_at": datetime.now().isoformat(),
-                    "total_sections": len(sections)
+        return json.dumps(
+            {
+                "documentation": {
+                    "sections": sections,
+                    "metadata": {
+                        "generated_at": datetime.now().isoformat(),
+                        "total_sections": len(sections),
+                    },
                 }
-            }
-        }, indent=2)
+            },
+            indent=2,
+        )
 
     def get_documentation_status(self) -> Dict[str, Any]:
         """
@@ -1764,11 +1812,13 @@ This example shows how to:
             "available_formats": [fmt.value for fmt in ContentFormat],
             "generated_docs": list(self.generated_docs.keys()),
             "training_modules": list(self.training_modules.keys()),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
+
 
 # Global generator instance
 _global_generator: Optional[DocumentationGenerator] = None
+
 
 def get_documentation_generator() -> DocumentationGenerator:
     """Get global documentation generator instance"""
@@ -1777,16 +1827,19 @@ def get_documentation_generator() -> DocumentationGenerator:
         _global_generator = DocumentationGenerator()
     return _global_generator
 
+
 # Standalone functions for MCP integration
 def generate_user_guide(title: str, description: str) -> Dict[str, Any]:
     """Generate comprehensive user guide"""
     generator = get_documentation_generator()
     return generator.generate_user_guide(title, description)
 
+
 def generate_api_documentation(title: str, description: str) -> Dict[str, Any]:
     """Generate comprehensive API documentation"""
     generator = get_documentation_generator()
     return generator.generate_api_documentation(title, description)
+
 
 def generate_tutorial(title: str, level: str, objectives: List[str]) -> Dict[str, Any]:
     """Generate interactive tutorial"""
@@ -1797,10 +1850,12 @@ def generate_tutorial(title: str, level: str, objectives: List[str]) -> Dict[str
     except ValueError:
         return {"status": "error", "message": f"Invalid training level: {level}"}
 
+
 def generate_quick_start_guide(title: str) -> Dict[str, Any]:
     """Generate quick start guide"""
     generator = get_documentation_generator()
     return generator.generate_quick_start_guide(title)
+
 
 def create_training_module(title: str, description: str, level: str) -> Dict[str, Any]:
     """Create comprehensive training module"""
@@ -1811,10 +1866,12 @@ def create_training_module(title: str, description: str, level: str) -> Dict[str
     except ValueError:
         return {"status": "error", "message": f"Invalid training level: {level}"}
 
+
 def generate_comprehensive_documentation(project_title: str) -> Dict[str, Any]:
     """Generate comprehensive documentation project"""
     generator = get_documentation_generator()
     return generator.generate_comprehensive_documentation(project_title)
+
 
 def export_documentation(format_type: str, doc_id: str) -> Dict[str, Any]:
     """Export documentation in specified format"""
@@ -1825,10 +1882,8 @@ def export_documentation(format_type: str, doc_id: str) -> Dict[str, Any]:
     except ValueError:
         return {"status": "error", "message": f"Invalid format type: {format_type}"}
 
+
 def get_documentation_status() -> Dict[str, Any]:
     """Get documentation generation status"""
     generator = get_documentation_generator()
     return generator.get_documentation_status()
-
-
-

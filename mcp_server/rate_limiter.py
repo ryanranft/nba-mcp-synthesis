@@ -1,4 +1,5 @@
 """Rate limiting using Redis"""
+
 import time
 from typing import Optional
 from functools import wraps
@@ -19,12 +20,7 @@ class RateLimiter:
         self.redis = redis_client
         self.store = _rate_limit_store if not redis_client else None
 
-    def is_allowed(
-        self,
-        key: str,
-        max_requests: int,
-        window_seconds: int
-    ) -> bool:
+    def is_allowed(self, key: str, max_requests: int, window_seconds: int) -> bool:
         """
         Check if request is allowed
 
@@ -46,7 +42,9 @@ class RateLimiter:
             # Use in-memory (dev only)
             return self._check_memory(key, max_requests, window_start, now)
 
-    def _check_memory(self, key: str, max_requests: int, window_start: float, now: float) -> bool:
+    def _check_memory(
+        self, key: str, max_requests: int, window_start: float, now: float
+    ) -> bool:
         """In-memory rate limiting (not production-ready)"""
         if key not in self.store:
             self.store[key] = []
@@ -63,7 +61,9 @@ class RateLimiter:
         self.store[key].append(now)
         return True
 
-    def _check_redis(self, key: str, max_requests: int, window_start: float, now: float) -> bool:
+    def _check_redis(
+        self, key: str, max_requests: int, window_start: float, now: float
+    ) -> bool:
         """Redis-based rate limiting (production)"""
         # Redis sorted set implementation
         redis_key = f"ratelimit:{key}"
@@ -110,17 +110,21 @@ def rate_limit(max_requests: int = 100, window_seconds: int = 60):
         def my_endpoint(user_id):
             ...
     """
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             # Extract user identifier from args/kwargs
-            user_id = kwargs.get('user_id') or (args[0] if args else 'anonymous')
+            user_id = kwargs.get("user_id") or (args[0] if args else "anonymous")
 
             limiter = get_rate_limiter()
             if not limiter.is_allowed(str(user_id), max_requests, window_seconds):
-                raise PermissionError(f"Rate limit exceeded: {max_requests} requests per {window_seconds}s")
+                raise PermissionError(
+                    f"Rate limit exceeded: {max_requests} requests per {window_seconds}s"
+                )
 
             return func(*args, **kwargs)
-        return wrapper
-    return decorator
 
+        return wrapper
+
+    return decorator

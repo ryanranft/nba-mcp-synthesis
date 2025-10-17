@@ -70,6 +70,70 @@ This runs 5 comprehensive tests showing:
 
 **Cost:** ~$0.04 total for all tests
 
+## Security
+
+This project implements comprehensive security scanning to prevent secrets in commits and ensure data privacy:
+
+- ✅ **Pre-commit Hooks**: detect-secrets + git-secrets + bandit (local protection)
+- ✅ **CI/CD Scanning**: Bandit + Trivy + trufflehog (automated pipeline)
+- ✅ **Secrets Management**: Hierarchical + unified_secrets_manager.py
+- ✅ **S3 Public Access Validation**: Automated bucket/object privacy checks
+- ✅ **Permission Auditing**: Automated file permission checks
+
+### Setup Security Tools
+
+```bash
+# Install all security scanning tools
+./scripts/setup_security_scanning.sh
+
+# Test installation
+python scripts/test_security_scanning.py
+
+# Run validation
+python scripts/validate_secrets_security.py
+```
+
+### What Gets Scanned
+
+**Pre-commit (local)**:
+- API key patterns (AWS, Google, OpenAI, Anthropic, DeepSeek)
+- Hardcoded passwords and tokens
+- Python security issues (bandit)
+- Code formatting (black)
+
+**CI/CD (GitHub Actions)**:
+- Full git history scanning (trufflehog)
+- Dependency vulnerabilities (Trivy)
+- Custom pattern matching (git-secrets)
+- S3 bucket and object public access (boto3)
+
+**S3 Security (automated)**:
+- Bucket PublicAccessBlock configuration
+- Bucket ACLs (no public grants)
+- Bucket policies (no wildcard principals)
+- Object ACLs for all books/datasets
+
+### Quick Security Check
+
+```bash
+# Before committing
+pre-commit run --all-files
+
+# Check for hardcoded secrets
+python scripts/validate_secrets_security.py
+
+# Check for hardcoded secrets AND S3 public access
+python scripts/validate_secrets_security.py --check-s3
+
+# Check S3 buckets only
+python scripts/validate_s3_public_access.py --fail-on-public
+
+# Audit permissions
+./scripts/audit_secret_permissions.sh
+```
+
+See [Security Scanning Guide](docs/SECURITY_SCANNING_GUIDE.md) for detailed documentation.
+
 ### Option 2: Claude Desktop Integration
 
 ```bash

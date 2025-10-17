@@ -25,17 +25,35 @@ from dataclasses import dataclass, asdict
 from enum import Enum
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV, RandomizedSearchCV
-from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, VotingRegressor, VotingClassifier
+from sklearn.model_selection import (
+    train_test_split,
+    cross_val_score,
+    GridSearchCV,
+    RandomizedSearchCV,
+)
+from sklearn.ensemble import (
+    RandomForestRegressor,
+    RandomForestClassifier,
+    VotingRegressor,
+    VotingClassifier,
+)
 from sklearn.linear_model import LinearRegression, LogisticRegression, Ridge, Lasso
 from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
 from sklearn.svm import SVR, SVC
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import (
+    mean_squared_error,
+    mean_absolute_error,
+    r2_score,
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+)
 from sklearn.preprocessing import StandardScaler
 import warnings
 
 # Suppress sklearn warnings
-warnings.filterwarnings('ignore', category=UserWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
 
 logger = logging.getLogger(__name__)
 
@@ -44,8 +62,10 @@ logger = logging.getLogger(__name__)
 # Data Classes and Enums
 # =============================================================================
 
+
 class ModelType(str, Enum):
     """Types of predictive models"""
+
     REGRESSION = "regression"
     CLASSIFICATION = "classification"
     TIME_SERIES = "time_series"
@@ -54,6 +74,7 @@ class ModelType(str, Enum):
 
 class PredictionType(str, Enum):
     """Types of predictions"""
+
     SINGLE = "single"
     BATCH = "batch"
     PROBABILITY = "probability"
@@ -61,6 +82,7 @@ class PredictionType(str, Enum):
 
 class EnsembleMethod(str, Enum):
     """Ensemble methods"""
+
     VOTING = "voting"
     BAGGING = "bagging"
     BOOSTING = "boosting"
@@ -69,6 +91,7 @@ class EnsembleMethod(str, Enum):
 
 class OptimizationMethod(str, Enum):
     """Hyperparameter optimization methods"""
+
     GRID_SEARCH = "grid_search"
     RANDOM_SEARCH = "random_search"
     BAYESIAN = "bayesian"
@@ -78,6 +101,7 @@ class OptimizationMethod(str, Enum):
 @dataclass
 class ModelInfo:
     """Information about a trained model"""
+
     model_id: str
     model_type: str
     target_variable: str
@@ -92,6 +116,7 @@ class ModelInfo:
 @dataclass
 class PredictionResult:
     """Result of a prediction"""
+
     predicted_value: float
     confidence_interval: Optional[Tuple[float, float]] = None
     feature_importance: Optional[Dict[str, float]] = None
@@ -102,6 +127,7 @@ class PredictionResult:
 @dataclass
 class TimeSeriesPrediction:
     """Time series prediction result"""
+
     time_step: int
     predicted_value: float
     confidence_interval: Optional[Tuple[float, float]] = None
@@ -112,6 +138,7 @@ class TimeSeriesPrediction:
 @dataclass
 class EnsembleInfo:
     """Information about an ensemble model"""
+
     ensemble_id: str
     ensemble_method: str
     base_models: List[str]
@@ -125,6 +152,7 @@ class EnsembleInfo:
 # =============================================================================
 # Core Predictive Analytics Engine
 # =============================================================================
+
 
 class PredictiveAnalyticsEngine:
     """Main engine for predictive analytics operations"""
@@ -145,7 +173,12 @@ class PredictiveAnalyticsEngine:
         """Generate a unique ensemble ID"""
         return f"ensemble_{uuid.uuid4().hex[:8]}"
 
-    def _prepare_data(self, data: Dict[str, List[float]], target_variable: str, feature_variables: List[str]) -> Tuple[np.ndarray, np.ndarray]:
+    def _prepare_data(
+        self,
+        data: Dict[str, List[float]],
+        target_variable: str,
+        feature_variables: List[str],
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """Prepare data for model training"""
         try:
             # Convert to DataFrame for easier manipulation
@@ -165,30 +198,38 @@ class PredictiveAnalyticsEngine:
             logger.error(f"Data preparation failed: {e}")
             raise ValueError(f"Data preparation failed: {e}")
 
-    def _get_model_class(self, model_type: str, model_parameters: Optional[Dict[str, Any]] = None) -> Any:
+    def _get_model_class(
+        self, model_type: str, model_parameters: Optional[Dict[str, Any]] = None
+    ) -> Any:
         """Get the appropriate model class based on type"""
         if model_type == "regression":
             # Default to Random Forest for regression
             params = model_parameters or {}
             return RandomForestRegressor(
-                n_estimators=params.get('n_estimators', 100),
-                max_depth=params.get('max_depth', None),
-                min_samples_split=params.get('min_samples_split', 2),
-                random_state=42
+                n_estimators=params.get("n_estimators", 100),
+                max_depth=params.get("max_depth", None),
+                min_samples_split=params.get("min_samples_split", 2),
+                random_state=42,
             )
         elif model_type == "classification":
             # Default to Random Forest for classification
             params = model_parameters or {}
             return RandomForestClassifier(
-                n_estimators=params.get('n_estimators', 100),
-                max_depth=params.get('max_depth', None),
-                min_samples_split=params.get('min_samples_split', 2),
-                random_state=42
+                n_estimators=params.get("n_estimators", 100),
+                max_depth=params.get("max_depth", None),
+                min_samples_split=params.get("min_samples_split", 2),
+                random_state=42,
             )
         else:
             raise ValueError(f"Unsupported model type: {model_type}")
 
-    def _calculate_metrics(self, y_true: np.ndarray, y_pred: np.ndarray, metrics: List[str], model_type: str) -> Dict[str, float]:
+    def _calculate_metrics(
+        self,
+        y_true: np.ndarray,
+        y_pred: np.ndarray,
+        metrics: List[str],
+        model_type: str,
+    ) -> Dict[str, float]:
         """Calculate performance metrics"""
         results = {}
 
@@ -208,13 +249,19 @@ class PredictiveAnalyticsEngine:
                     results["accuracy"] = accuracy_score(y_true, y_pred_binary)
                 elif metric == "precision" and model_type == "classification":
                     y_pred_binary = (y_pred > 0.5).astype(int)
-                    results["precision"] = precision_score(y_true, y_pred_binary, average='binary', zero_division=0)
+                    results["precision"] = precision_score(
+                        y_true, y_pred_binary, average="binary", zero_division=0
+                    )
                 elif metric == "recall" and model_type == "classification":
                     y_pred_binary = (y_pred > 0.5).astype(int)
-                    results["recall"] = recall_score(y_true, y_pred_binary, average='binary', zero_division=0)
+                    results["recall"] = recall_score(
+                        y_true, y_pred_binary, average="binary", zero_division=0
+                    )
                 elif metric == "f1" and model_type == "classification":
                     y_pred_binary = (y_pred > 0.5).astype(int)
-                    results["f1"] = f1_score(y_true, y_pred_binary, average='binary', zero_division=0)
+                    results["f1"] = f1_score(
+                        y_true, y_pred_binary, average="binary", zero_division=0
+                    )
             except Exception as e:
                 logger.warning(f"Failed to calculate metric {metric}: {e}")
                 results[metric] = 0.0
@@ -231,7 +278,7 @@ class PredictiveAnalyticsEngine:
         validation_split: float = 0.2,
         model_parameters: Optional[Dict[str, Any]] = None,
         cross_validation_folds: int = 5,
-        performance_metrics: List[str] = None
+        performance_metrics: List[str] = None,
     ) -> Dict[str, Any]:
         """
         Train a predictive model.
@@ -254,10 +301,14 @@ class PredictiveAnalyticsEngine:
             logger.info(f"Training {model_type} model for {target_variable}")
 
             if performance_metrics is None:
-                performance_metrics = ["mse", "r2"] if model_type == "regression" else ["accuracy", "f1"]
+                performance_metrics = (
+                    ["mse", "r2"] if model_type == "regression" else ["accuracy", "f1"]
+                )
 
             # Prepare training data
-            X_train, y_train = self._prepare_data(training_data, target_variable, feature_variables)
+            X_train, y_train = self._prepare_data(
+                training_data, target_variable, feature_variables
+            )
 
             # Split data if no test data provided
             if test_data is None:
@@ -267,7 +318,9 @@ class PredictiveAnalyticsEngine:
             else:
                 X_train_split = X_train
                 y_train_split = y_train
-                X_val, y_val = self._prepare_data(test_data, target_variable, feature_variables)
+                X_val, y_val = self._prepare_data(
+                    test_data, target_variable, feature_variables
+                )
 
             # Get model class and train
             model_class = self._get_model_class(model_type, model_parameters)
@@ -278,11 +331,21 @@ class PredictiveAnalyticsEngine:
             y_pred_val = model_class.predict(X_val)
 
             # Calculate metrics
-            train_metrics = self._calculate_metrics(y_train_split, y_pred_train, performance_metrics, model_type)
-            val_metrics = self._calculate_metrics(y_val, y_pred_val, performance_metrics, model_type)
+            train_metrics = self._calculate_metrics(
+                y_train_split, y_pred_train, performance_metrics, model_type
+            )
+            val_metrics = self._calculate_metrics(
+                y_val, y_pred_val, performance_metrics, model_type
+            )
 
             # Cross-validation
-            cv_scores = cross_val_score(model_class, X_train, y_train, cv=cross_validation_folds, scoring='r2' if model_type == 'regression' else 'accuracy')
+            cv_scores = cross_val_score(
+                model_class,
+                X_train,
+                y_train,
+                cv=cross_validation_folds,
+                scoring="r2" if model_type == "regression" else "accuracy",
+            )
 
             # Generate model ID and store model
             model_id = self._generate_model_id()
@@ -295,7 +358,7 @@ class PredictiveAnalyticsEngine:
                 training_data_size=len(X_train),
                 created_at=datetime.now(),
                 performance_metrics=val_metrics,
-                model_parameters=model_parameters or {}
+                model_parameters=model_parameters or {},
             )
 
             self.models[model_id] = model_info
@@ -315,8 +378,8 @@ class PredictiveAnalyticsEngine:
                     "training_samples": len(X_train_split),
                     "validation_samples": len(X_val),
                     "feature_count": len(feature_variables),
-                    "model_parameters": model_parameters or {}
-                }
+                    "model_parameters": model_parameters or {},
+                },
             }
 
             logger.info(f"Model training completed: {model_id}")
@@ -324,11 +387,7 @@ class PredictiveAnalyticsEngine:
 
         except Exception as e:
             logger.error(f"Model training failed: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "model_id": None
-            }
+            return {"status": "error", "error": str(e), "model_id": None}
 
     def make_prediction(
         self,
@@ -337,7 +396,7 @@ class PredictiveAnalyticsEngine:
         prediction_type: str = "single",
         confidence_interval: Optional[float] = None,
         include_feature_importance: bool = False,
-        include_prediction_explanation: bool = False
+        include_prediction_explanation: bool = False,
     ) -> Dict[str, Any]:
         """
         Make predictions using a trained model.
@@ -365,11 +424,18 @@ class PredictiveAnalyticsEngine:
             # Prepare input data
             if prediction_type == "single":
                 # Single prediction
-                X = np.array([[input_features[var] for var in model_info.feature_variables]])
+                X = np.array(
+                    [[input_features[var] for var in model_info.feature_variables]]
+                )
             elif prediction_type == "batch":
                 # Batch prediction
                 batch_size = len(next(iter(input_features.values())))
-                X = np.array([[input_features[var][i] for var in model_info.feature_variables] for i in range(batch_size)])
+                X = np.array(
+                    [
+                        [input_features[var][i] for var in model_info.feature_variables]
+                        for i in range(batch_size)
+                    ]
+                )
             else:
                 raise ValueError(f"Unsupported prediction type: {prediction_type}")
 
@@ -393,11 +459,18 @@ class PredictiveAnalyticsEngine:
                 if confidence_interval:
                     # Simple confidence interval calculation (placeholder)
                     margin = abs(pred_value) * 0.1  # 10% margin
-                    result.confidence_interval = (float(pred_value - margin), float(pred_value + margin))
+                    result.confidence_interval = (
+                        float(pred_value - margin),
+                        float(pred_value + margin),
+                    )
 
                 # Add feature importance if requested
-                if include_feature_importance and hasattr(model, 'feature_importances_'):
-                    importance_dict = dict(zip(model_info.feature_variables, model.feature_importances_))
+                if include_feature_importance and hasattr(
+                    model, "feature_importances_"
+                ):
+                    importance_dict = dict(
+                        zip(model_info.feature_variables, model.feature_importances_)
+                    )
                     result.feature_importance = importance_dict
 
                 # Add prediction explanation if requested
@@ -415,17 +488,13 @@ class PredictiveAnalyticsEngine:
                     "prediction_count": batch_size,
                     "model_type": model_info.model_type,
                     "target_variable": model_info.target_variable,
-                    "feature_variables": model_info.feature_variables
-                }
+                    "feature_variables": model_info.feature_variables,
+                },
             }
 
         except Exception as e:
             logger.error(f"Prediction failed: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "predictions": []
-            }
+            return {"status": "error", "error": str(e), "predictions": []}
 
     def evaluate_model_performance(
         self,
@@ -436,7 +505,7 @@ class PredictiveAnalyticsEngine:
         include_feature_importance: bool = True,
         include_residual_analysis: bool = False,
         confidence_level: float = 0.95,
-        cv_folds: int = 5
+        cv_folds: int = 5,
     ) -> Dict[str, Any]:
         """
         Evaluate model performance.
@@ -463,16 +532,26 @@ class PredictiveAnalyticsEngine:
             model = model_info.model_object
 
             if evaluation_metrics is None:
-                evaluation_metrics = ["mse", "r2"] if model_info.model_type == "regression" else ["accuracy", "f1"]
+                evaluation_metrics = (
+                    ["mse", "r2"]
+                    if model_info.model_type == "regression"
+                    else ["accuracy", "f1"]
+                )
 
             # Prepare evaluation data
-            X_eval, y_eval = self._prepare_data(evaluation_data, model_info.target_variable, model_info.feature_variables)
+            X_eval, y_eval = self._prepare_data(
+                evaluation_data,
+                model_info.target_variable,
+                model_info.feature_variables,
+            )
 
             # Make predictions
             y_pred = model.predict(X_eval)
 
             # Calculate performance metrics
-            performance_metrics = self._calculate_metrics(y_eval, y_pred, evaluation_metrics, model_info.model_type)
+            performance_metrics = self._calculate_metrics(
+                y_eval, y_pred, evaluation_metrics, model_info.model_type
+            )
 
             # Cross-validation if requested
             cv_results = {}
@@ -480,27 +559,41 @@ class PredictiveAnalyticsEngine:
                 # Ensure we have enough samples for cross-validation
                 min_samples = max(2, cv_folds)
                 if len(X_eval) >= min_samples:
-                    cv_scores = cross_val_score(model, X_eval, y_eval, cv=cv_folds, scoring='r2' if model_info.model_type == 'regression' else 'accuracy')
+                    cv_scores = cross_val_score(
+                        model,
+                        X_eval,
+                        y_eval,
+                        cv=cv_folds,
+                        scoring=(
+                            "r2"
+                            if model_info.model_type == "regression"
+                            else "accuracy"
+                        ),
+                    )
                     cv_results = {
                         "cv_scores": cv_scores.tolist(),
                         "cv_mean": float(cv_scores.mean()),
                         "cv_std": float(cv_scores.std()),
-                        "cv_folds": cv_folds
+                        "cv_folds": cv_folds,
                     }
                 else:
-                    logger.warning(f"Insufficient samples ({len(X_eval)}) for {cv_folds}-fold cross-validation")
+                    logger.warning(
+                        f"Insufficient samples ({len(X_eval)}) for {cv_folds}-fold cross-validation"
+                    )
                     cv_results = {
                         "cv_scores": [],
                         "cv_mean": 0.0,
                         "cv_std": 0.0,
                         "cv_folds": cv_folds,
-                        "warning": f"Insufficient samples for {cv_folds}-fold CV"
+                        "warning": f"Insufficient samples for {cv_folds}-fold CV",
                     }
 
             # Feature importance if requested
             feature_importance = {}
-            if include_feature_importance and hasattr(model, 'feature_importances_'):
-                feature_importance = dict(zip(model_info.feature_variables, model.feature_importances_))
+            if include_feature_importance and hasattr(model, "feature_importances_"):
+                feature_importance = dict(
+                    zip(model_info.feature_variables, model.feature_importances_)
+                )
 
             # Residual analysis if requested
             residual_analysis = {}
@@ -509,7 +602,10 @@ class PredictiveAnalyticsEngine:
                 residual_analysis = {
                     "residual_mean": float(np.mean(residuals)),
                     "residual_std": float(np.std(residuals)),
-                    "residual_range": [float(np.min(residuals)), float(np.max(residuals))]
+                    "residual_range": [
+                        float(np.min(residuals)),
+                        float(np.max(residuals)),
+                    ],
                 }
 
             return {
@@ -522,17 +618,13 @@ class PredictiveAnalyticsEngine:
                 "evaluation_summary": {
                     "evaluation_samples": len(X_eval),
                     "confidence_level": confidence_level,
-                    "metrics_calculated": evaluation_metrics
-                }
+                    "metrics_calculated": evaluation_metrics,
+                },
             }
 
         except Exception as e:
             logger.error(f"Model evaluation failed: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "performance_metrics": {}
-            }
+            return {"status": "error", "error": str(e), "performance_metrics": {}}
 
     def predict_time_series(
         self,
@@ -543,7 +635,7 @@ class PredictiveAnalyticsEngine:
         seasonal_period: Optional[int] = None,
         trend_type: str = "linear",
         include_confidence_intervals: bool = True,
-        confidence_level: float = 0.95
+        confidence_level: float = 0.95,
     ) -> Dict[str, Any]:
         """
         Predict future values in time series data.
@@ -562,7 +654,9 @@ class PredictiveAnalyticsEngine:
             Dictionary with time series predictions
         """
         try:
-            logger.info(f"Predicting {prediction_horizon} steps ahead for {target_variable}")
+            logger.info(
+                f"Predicting {prediction_horizon} steps ahead for {target_variable}"
+            )
 
             # Extract time series
             if target_variable not in time_series_data:
@@ -592,7 +686,9 @@ class PredictiveAnalyticsEngine:
 
             for i in range(1, prediction_horizon + 1):
                 # Simple prediction based on trend
-                predicted_value = trend_intercept + trend_slope * (len(time_series) + i - 1)
+                predicted_value = trend_intercept + trend_slope * (
+                    len(time_series) + i - 1
+                )
 
                 # Add some randomness to make it more realistic
                 noise = np.random.normal(0, np.std(time_series) * 0.1)
@@ -602,7 +698,7 @@ class PredictiveAnalyticsEngine:
                     time_step=len(time_series) + i,
                     predicted_value=float(predicted_value),
                     trend=trend_type,
-                    seasonality=seasonal_period
+                    seasonality=seasonal_period,
                 )
 
                 # Add confidence interval if requested
@@ -610,7 +706,7 @@ class PredictiveAnalyticsEngine:
                     margin = abs(predicted_value) * 0.15  # 15% margin
                     prediction.confidence_interval = (
                         float(predicted_value - margin),
-                        float(predicted_value + margin)
+                        float(predicted_value + margin),
                     )
 
                 predictions.append(asdict(prediction))
@@ -625,17 +721,13 @@ class PredictiveAnalyticsEngine:
                     "data_length": len(time_series),
                     "trend_type": trend_type,
                     "seasonal_period": seasonal_period,
-                    "confidence_level": confidence_level
-                }
+                    "confidence_level": confidence_level,
+                },
             }
 
         except Exception as e:
             logger.error(f"Time series prediction failed: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "predictions": []
-            }
+            return {"status": "error", "error": str(e), "predictions": []}
 
     def create_ensemble_model(
         self,
@@ -645,7 +737,7 @@ class PredictiveAnalyticsEngine:
         weights: Optional[List[float]] = None,
         meta_model_type: Optional[str] = None,
         cross_validation_folds: int = 5,
-        include_model_performance: bool = True
+        include_model_performance: bool = True,
     ) -> Dict[str, Any]:
         """
         Create an ensemble model.
@@ -663,7 +755,9 @@ class PredictiveAnalyticsEngine:
             Dictionary with ensemble model information
         """
         try:
-            logger.info(f"Creating {ensemble_method} ensemble with {len(base_models)} models")
+            logger.info(
+                f"Creating {ensemble_method} ensemble with {len(base_models)} models"
+            )
 
             # Validate base models
             for model_id in base_models:
@@ -684,25 +778,41 @@ class PredictiveAnalyticsEngine:
             if ensemble_method == "voting":
                 if model_type == "regression":
                     ensemble_model = VotingRegressor(
-                        [(f"model_{i}", info.model_object) for i, info in enumerate(base_model_infos)],
-                        weights=weights
+                        [
+                            (f"model_{i}", info.model_object)
+                            for i, info in enumerate(base_model_infos)
+                        ],
+                        weights=weights,
                     )
                 else:
                     ensemble_model = VotingClassifier(
-                        [(f"model_{i}", info.model_object) for i, info in enumerate(base_model_infos)],
+                        [
+                            (f"model_{i}", info.model_object)
+                            for i, info in enumerate(base_model_infos)
+                        ],
                         voting=voting_type,
-                        weights=weights
+                        weights=weights,
                     )
             else:
                 # For other ensemble methods, we'll use a simple voting approach
                 # In a real implementation, you would implement bagging, boosting, stacking
-                ensemble_model = VotingRegressor(
-                    [(f"model_{i}", info.model_object) for i, info in enumerate(base_model_infos)],
-                    weights=weights
-                ) if model_type == "regression" else VotingClassifier(
-                    [(f"model_{i}", info.model_object) for i, info in enumerate(base_model_infos)],
-                    voting=voting_type,
-                    weights=weights
+                ensemble_model = (
+                    VotingRegressor(
+                        [
+                            (f"model_{i}", info.model_object)
+                            for i, info in enumerate(base_model_infos)
+                        ],
+                        weights=weights,
+                    )
+                    if model_type == "regression"
+                    else VotingClassifier(
+                        [
+                            (f"model_{i}", info.model_object)
+                            for i, info in enumerate(base_model_infos)
+                        ],
+                        voting=voting_type,
+                        weights=weights,
+                    )
                 )
 
             # Generate ensemble ID and store
@@ -715,7 +825,7 @@ class PredictiveAnalyticsEngine:
                 weights=weights,
                 meta_model_type=meta_model_type,
                 created_at=datetime.now(),
-                performance_metrics={}
+                performance_metrics={},
             )
 
             self.ensembles[ensemble_id] = ensemble_info
@@ -727,7 +837,7 @@ class PredictiveAnalyticsEngine:
                     model_info = self.models[model_id]
                     ensemble_performance[f"model_{i}"] = {
                         "model_id": model_id,
-                        "performance_metrics": model_info.performance_metrics
+                        "performance_metrics": model_info.performance_metrics,
                     }
 
             return {
@@ -741,17 +851,13 @@ class PredictiveAnalyticsEngine:
                     "weights": weights,
                     "meta_model_type": meta_model_type,
                     "cross_validation_folds": cross_validation_folds,
-                    "created_at": ensemble_info.created_at.isoformat()
-                }
+                    "created_at": ensemble_info.created_at.isoformat(),
+                },
             }
 
         except Exception as e:
             logger.error(f"Ensemble model creation failed: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "ensemble_id": None
-            }
+            return {"status": "error", "error": str(e), "ensemble_id": None}
 
     def optimize_model_hyperparameters(
         self,
@@ -762,7 +868,7 @@ class PredictiveAnalyticsEngine:
         max_iterations: int = 100,
         cv_folds: int = 5,
         n_jobs: int = 1,
-        random_seed: Optional[int] = None
+        random_seed: Optional[int] = None,
     ) -> Dict[str, Any]:
         """
         Optimize model hyperparameters.
@@ -794,13 +900,13 @@ class PredictiveAnalyticsEngine:
                     parameter_grid = {
                         "n_estimators": [50, 100, 200],
                         "max_depth": [3, 5, 7, None],
-                        "min_samples_split": [2, 5, 10]
+                        "min_samples_split": [2, 5, 10],
                     }
                 else:
                     parameter_grid = {
                         "n_estimators": [50, 100, 200],
                         "max_depth": [3, 5, 7, None],
-                        "min_samples_split": [2, 5, 10]
+                        "min_samples_split": [2, 5, 10],
                     }
 
             # Get the base model class
@@ -813,7 +919,7 @@ class PredictiveAnalyticsEngine:
                     parameter_grid,
                     cv=cv_folds,
                     scoring=optimization_metric,
-                    n_jobs=n_jobs
+                    n_jobs=n_jobs,
                 )
             elif optimization_method == "random_search":
                 optimizer = RandomizedSearchCV(
@@ -823,10 +929,12 @@ class PredictiveAnalyticsEngine:
                     cv=cv_folds,
                     scoring=optimization_metric,
                     n_jobs=n_jobs,
-                    random_state=random_seed or 42
+                    random_state=random_seed or 42,
                 )
             else:
-                raise ValueError(f"Unsupported optimization method: {optimization_method}")
+                raise ValueError(
+                    f"Unsupported optimization method: {optimization_method}"
+                )
 
             # We need training data to optimize - this is a limitation of the current implementation
             # In a real implementation, you would store the training data with the model
@@ -847,22 +955,21 @@ class PredictiveAnalyticsEngine:
                 "optimization_method": optimization_method,
                 "optimization_result": {
                     "best_parameters": best_parameters,
-                    "best_score": model_info.performance_metrics.get(optimization_metric, 0.0) + improvement_score,
+                    "best_score": model_info.performance_metrics.get(
+                        optimization_metric, 0.0
+                    )
+                    + improvement_score,
                     "improvement_score": improvement_score,
                     "optimization_time": 0.0,  # Placeholder
-                    "iterations_completed": min(max_iterations, len(parameter_grid))
+                    "iterations_completed": min(max_iterations, len(parameter_grid)),
                 },
                 "parameter_grid": parameter_grid,
-                "optimization_metric": optimization_metric
+                "optimization_metric": optimization_metric,
             }
 
         except Exception as e:
             logger.error(f"Hyperparameter optimization failed: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "optimization_result": {}
-            }
+            return {"status": "error", "error": str(e), "optimization_result": {}}
 
 
 # =============================================================================
@@ -877,6 +984,7 @@ _global_engine = PredictiveAnalyticsEngine()
 # Standalone Functions
 # =============================================================================
 
+
 def train_predictive_model(
     model_type: str,
     target_variable: str,
@@ -886,7 +994,7 @@ def train_predictive_model(
     validation_split: float = 0.2,
     model_parameters: Optional[Dict[str, Any]] = None,
     cross_validation_folds: int = 5,
-    performance_metrics: List[str] = None
+    performance_metrics: List[str] = None,
 ) -> Dict[str, Any]:
     """
     Train a predictive model (standalone function).
@@ -914,7 +1022,7 @@ def train_predictive_model(
         validation_split=validation_split,
         model_parameters=model_parameters,
         cross_validation_folds=cross_validation_folds,
-        performance_metrics=performance_metrics
+        performance_metrics=performance_metrics,
     )
 
 
@@ -924,7 +1032,7 @@ def make_prediction(
     prediction_type: str = "single",
     confidence_interval: Optional[float] = None,
     include_feature_importance: bool = False,
-    include_prediction_explanation: bool = False
+    include_prediction_explanation: bool = False,
 ) -> Dict[str, Any]:
     """
     Make predictions using a trained model (standalone function).
@@ -946,7 +1054,7 @@ def make_prediction(
         prediction_type=prediction_type,
         confidence_interval=confidence_interval,
         include_feature_importance=include_feature_importance,
-        include_prediction_explanation=include_prediction_explanation
+        include_prediction_explanation=include_prediction_explanation,
     )
 
 
@@ -958,7 +1066,7 @@ def evaluate_model_performance(
     include_feature_importance: bool = True,
     include_residual_analysis: bool = False,
     confidence_level: float = 0.95,
-    cv_folds: int = 5
+    cv_folds: int = 5,
 ) -> Dict[str, Any]:
     """
     Evaluate model performance (standalone function).
@@ -984,7 +1092,7 @@ def evaluate_model_performance(
         include_feature_importance=include_feature_importance,
         include_residual_analysis=include_residual_analysis,
         confidence_level=confidence_level,
-        cv_folds=cv_folds
+        cv_folds=cv_folds,
     )
 
 
@@ -996,7 +1104,7 @@ def predict_time_series(
     seasonal_period: Optional[int] = None,
     trend_type: str = "linear",
     include_confidence_intervals: bool = True,
-    confidence_level: float = 0.95
+    confidence_level: float = 0.95,
 ) -> Dict[str, Any]:
     """
     Predict future values in time series data (standalone function).
@@ -1022,7 +1130,7 @@ def predict_time_series(
         seasonal_period=seasonal_period,
         trend_type=trend_type,
         include_confidence_intervals=include_confidence_intervals,
-        confidence_level=confidence_level
+        confidence_level=confidence_level,
     )
 
 
@@ -1033,7 +1141,7 @@ def create_ensemble_model(
     weights: Optional[List[float]] = None,
     meta_model_type: Optional[str] = None,
     cross_validation_folds: int = 5,
-    include_model_performance: bool = True
+    include_model_performance: bool = True,
 ) -> Dict[str, Any]:
     """
     Create an ensemble model (standalone function).
@@ -1057,7 +1165,7 @@ def create_ensemble_model(
         weights=weights,
         meta_model_type=meta_model_type,
         cross_validation_folds=cross_validation_folds,
-        include_model_performance=include_model_performance
+        include_model_performance=include_model_performance,
     )
 
 
@@ -1069,7 +1177,7 @@ def optimize_model_hyperparameters(
     max_iterations: int = 100,
     cv_folds: int = 5,
     n_jobs: int = 1,
-    random_seed: Optional[int] = None
+    random_seed: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
     Optimize model hyperparameters (standalone function).
@@ -1095,5 +1203,5 @@ def optimize_model_hyperparameters(
         max_iterations=max_iterations,
         cv_folds=cv_folds,
         n_jobs=n_jobs,
-        random_seed=random_seed
+        random_seed=random_seed,
     )

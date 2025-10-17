@@ -10,6 +10,7 @@ import asyncio
 import json
 from pathlib import Path
 
+
 # Example usage of your MCP tools
 async def analyze_basketball_book():
     """Analyze a basketball analytics book"""
@@ -54,6 +55,7 @@ async def analyze_basketball_book():
 
     print("🎉 Book analysis complete!")
 
+
 if __name__ == "__main__":
     print("🚀 NBA MCP Book Analysis Example")
     print("=" * 50)
@@ -76,6 +78,3 @@ if __name__ == "__main__":
     print("• formula_categorize - Categorize formulas")
     print()
     print("🎯 Your NBA MCP system is ready for book analysis!")
-
-
-

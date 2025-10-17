@@ -11,6 +11,7 @@ Date: October 13, 2025
 
 import sys
 import os
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import asyncio
@@ -19,8 +20,11 @@ import logging
 from typing import Dict, List, Any
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 class TestFormulaDependencyGraph(unittest.TestCase):
 
@@ -38,7 +42,7 @@ class TestFormulaDependencyGraph(unittest.TestCase):
             result = formula_dependency_graph.create_formula_dependency_graph(
                 formulas=None,  # Let it get formulas from algebra_helper
                 analyze_dependencies=True,
-                include_custom_formulas=True
+                include_custom_formulas=True,
             )
 
             logger.info(f"✓ Dependency graph created successfully")
@@ -48,15 +52,29 @@ class TestFormulaDependencyGraph(unittest.TestCase):
 
             # Basic validation
             self.assertGreater(len(result.nodes), 0, "Should have at least one node")
-            self.assertGreaterEqual(len(result.dependencies), 0, "Should have zero or more dependencies")
-            self.assertGreater(len(result.categories), 0, "Should have at least one category")
+            self.assertGreaterEqual(
+                len(result.dependencies), 0, "Should have zero or more dependencies"
+            )
+            self.assertGreater(
+                len(result.categories), 0, "Should have at least one category"
+            )
 
             # Check node structure
             for formula_id, node in result.nodes.items():
                 self.assertIsNotNone(node.name, f"Node {formula_id} should have a name")
-                self.assertIsNotNone(node.formula, f"Node {formula_id} should have a formula")
-                self.assertIsInstance(node.variables, list, f"Node {formula_id} variables should be a list")
-                self.assertGreaterEqual(node.complexity_score, 1, f"Node {formula_id} should have complexity >= 1")
+                self.assertIsNotNone(
+                    node.formula, f"Node {formula_id} should have a formula"
+                )
+                self.assertIsInstance(
+                    node.variables,
+                    list,
+                    f"Node {formula_id} variables should be a list",
+                )
+                self.assertGreaterEqual(
+                    node.complexity_score,
+                    1,
+                    f"Node {formula_id} should have complexity >= 1",
+                )
 
             logger.info("✓ Dependency graph creation test passed")
 
@@ -75,7 +93,7 @@ class TestFormulaDependencyGraph(unittest.TestCase):
             graph = formula_dependency_graph.create_formula_dependency_graph(
                 formulas=None,  # Let it get formulas from algebra_helper
                 analyze_dependencies=True,
-                include_custom_formulas=True
+                include_custom_formulas=True,
             )
 
             # Test visualization
@@ -85,7 +103,7 @@ class TestFormulaDependencyGraph(unittest.TestCase):
                 show_labels=True,
                 node_size=1000,
                 edge_width=1.0,
-                save_path=None  # Don't save for test
+                save_path=None,  # Don't save for test
             )
 
             logger.info(f"✓ Graph visualization created successfully")
@@ -94,9 +112,13 @@ class TestFormulaDependencyGraph(unittest.TestCase):
             logger.info(f"  Statistics: {result['statistics']}")
 
             # Basic validation
-            self.assertEqual(result['status'], 'success', "Visualization should succeed")
-            self.assertTrue(result['visualization_created'], "Visualization should be created")
-            self.assertIn('statistics', result, "Should include statistics")
+            self.assertEqual(
+                result["status"], "success", "Visualization should succeed"
+            )
+            self.assertTrue(
+                result["visualization_created"], "Visualization should be created"
+            )
+            self.assertIn("statistics", result, "Should include statistics")
 
             logger.info("✓ Dependency graph visualization test passed")
 
@@ -115,7 +137,7 @@ class TestFormulaDependencyGraph(unittest.TestCase):
             graph = formula_dependency_graph.create_formula_dependency_graph(
                 formulas=None,  # Let it get formulas from algebra_helper
                 analyze_dependencies=True,
-                include_custom_formulas=True
+                include_custom_formulas=True,
             )
 
             # Get two formulas to test path finding
@@ -128,7 +150,7 @@ class TestFormulaDependencyGraph(unittest.TestCase):
                     graph=graph,
                     source_formula=source_formula,
                     target_formula=target_formula,
-                    max_depth=3
+                    max_depth=3,
                 )
 
                 logger.info(f"✓ Dependency path finding completed")
@@ -138,14 +160,26 @@ class TestFormulaDependencyGraph(unittest.TestCase):
                 logger.info(f"  Status: {result['status']}")
 
                 # Basic validation
-                self.assertEqual(result['status'], 'success', "Path finding should succeed")
-                self.assertGreaterEqual(result['total_paths'], 0, "Should have zero or more paths")
-                self.assertEqual(result['source_formula'], source_formula, "Source should match")
-                self.assertEqual(result['target_formula'], target_formula, "Target should match")
+                self.assertEqual(
+                    result["status"], "success", "Path finding should succeed"
+                )
+                self.assertGreaterEqual(
+                    result["total_paths"], 0, "Should have zero or more paths"
+                )
+                self.assertEqual(
+                    result["source_formula"], source_formula, "Source should match"
+                )
+                self.assertEqual(
+                    result["target_formula"], target_formula, "Target should match"
+                )
 
-                if result['total_paths'] > 0:
-                    self.assertIn('strongest_path', result, "Should have strongest path")
-                    logger.info(f"  Strongest path: {result['strongest_path']['description']}")
+                if result["total_paths"] > 0:
+                    self.assertIn(
+                        "strongest_path", result, "Should have strongest path"
+                    )
+                    logger.info(
+                        f"  Strongest path: {result['strongest_path']['description']}"
+                    )
 
                 logger.info("✓ Dependency path finding test passed")
             else:
@@ -166,43 +200,65 @@ class TestFormulaDependencyGraph(unittest.TestCase):
             graph = formula_dependency_graph.create_formula_dependency_graph(
                 formulas=None,  # Let it get formulas from algebra_helper
                 analyze_dependencies=True,
-                include_custom_formulas=True
+                include_custom_formulas=True,
             )
 
             # Test global complexity analysis
             result = formula_dependency_graph.analyze_formula_complexity(
-                graph=graph,
-                formula_id=None  # Analyze all formulas
+                graph=graph, formula_id=None  # Analyze all formulas
             )
 
             logger.info(f"✓ Global complexity analysis completed")
             logger.info(f"  Status: {result['status']}")
             logger.info(f"  Total formulas: {result['analysis']['total_formulas']}")
-            logger.info(f"  Average complexity: {result['analysis']['average_complexity']:.2f}")
+            logger.info(
+                f"  Average complexity: {result['analysis']['average_complexity']:.2f}"
+            )
             logger.info(f"  Max complexity: {result['analysis']['max_complexity']}")
 
             # Basic validation
-            self.assertEqual(result['status'], 'success', "Complexity analysis should succeed")
-            self.assertGreater(result['analysis']['total_formulas'], 0, "Should have formulas")
-            self.assertGreaterEqual(result['analysis']['average_complexity'], 1, "Average complexity should be >= 1")
+            self.assertEqual(
+                result["status"], "success", "Complexity analysis should succeed"
+            )
+            self.assertGreater(
+                result["analysis"]["total_formulas"], 0, "Should have formulas"
+            )
+            self.assertGreaterEqual(
+                result["analysis"]["average_complexity"],
+                1,
+                "Average complexity should be >= 1",
+            )
 
             # Test specific formula analysis if we have formulas
-            if result['analysis']['total_formulas'] > 0:
+            if result["analysis"]["total_formulas"] > 0:
                 formula_ids = list(graph.nodes.keys())
                 test_formula = formula_ids[0]
 
                 specific_result = formula_dependency_graph.analyze_formula_complexity(
-                    graph=graph,
-                    formula_id=test_formula
+                    graph=graph, formula_id=test_formula
                 )
 
                 logger.info(f"✓ Specific formula analysis completed for {test_formula}")
-                logger.info(f"  Formula name: {specific_result['analysis']['formula_name']}")
-                logger.info(f"  Complexity score: {specific_result['analysis']['complexity_score']}")
-                logger.info(f"  Formula type: {specific_result['analysis']['formula_type']}")
+                logger.info(
+                    f"  Formula name: {specific_result['analysis']['formula_name']}"
+                )
+                logger.info(
+                    f"  Complexity score: {specific_result['analysis']['complexity_score']}"
+                )
+                logger.info(
+                    f"  Formula type: {specific_result['analysis']['formula_type']}"
+                )
 
-                self.assertEqual(specific_result['status'], 'success', "Specific analysis should succeed")
-                self.assertEqual(specific_result['analysis']['formula_id'], test_formula, "Formula ID should match")
+                self.assertEqual(
+                    specific_result["status"],
+                    "success",
+                    "Specific analysis should succeed",
+                )
+                self.assertEqual(
+                    specific_result["analysis"]["formula_id"],
+                    test_formula,
+                    "Formula ID should match",
+                )
 
             logger.info("✓ Formula complexity analysis test passed")
 
@@ -221,14 +277,12 @@ class TestFormulaDependencyGraph(unittest.TestCase):
             graph = formula_dependency_graph.create_formula_dependency_graph(
                 formulas=None,  # Let it get formulas from algebra_helper
                 analyze_dependencies=True,
-                include_custom_formulas=True
+                include_custom_formulas=True,
             )
 
             # Test JSON export
             result = formula_dependency_graph.export_dependency_graph(
-                graph=graph,
-                format="json",
-                include_visualization=False
+                graph=graph, format="json", include_visualization=False
             )
 
             logger.info(f"✓ Graph export completed")
@@ -238,17 +292,21 @@ class TestFormulaDependencyGraph(unittest.TestCase):
             logger.info(f"  Dependency count: {result['dependency_count']}")
 
             # Basic validation
-            self.assertEqual(result['status'], 'success', "Export should succeed")
-            self.assertEqual(result['export_format'], 'json', "Export format should be JSON")
-            self.assertGreater(result['node_count'], 0, "Should have nodes")
-            self.assertGreaterEqual(result['dependency_count'], 0, "Should have zero or more dependencies")
-            self.assertIn('export_data', result, "Should include export data")
+            self.assertEqual(result["status"], "success", "Export should succeed")
+            self.assertEqual(
+                result["export_format"], "json", "Export format should be JSON"
+            )
+            self.assertGreater(result["node_count"], 0, "Should have nodes")
+            self.assertGreaterEqual(
+                result["dependency_count"], 0, "Should have zero or more dependencies"
+            )
+            self.assertIn("export_data", result, "Should include export data")
 
             # Check export data structure
-            export_data = result['export_data']
-            self.assertIn('metadata', export_data, "Should have metadata")
-            self.assertIn('nodes', export_data, "Should have nodes")
-            self.assertIn('dependencies', export_data, "Should have dependencies")
+            export_data = result["export_data"]
+            self.assertIn("metadata", export_data, "Should have metadata")
+            self.assertIn("nodes", export_data, "Should have nodes")
+            self.assertIn("dependencies", export_data, "Should have dependencies")
 
             logger.info("✓ Dependency graph export test passed")
 
@@ -267,29 +325,29 @@ class TestFormulaDependencyGraph(unittest.TestCase):
             graph = formula_dependency_graph.create_formula_dependency_graph(
                 formulas=None,  # Let it get formulas from algebra_helper
                 analyze_dependencies=True,
-                include_custom_formulas=True
+                include_custom_formulas=True,
             )
 
             # Scenario 1: Find most complex formulas
             complexity_result = formula_dependency_graph.analyze_formula_complexity(
-                graph=graph,
-                formula_id=None
+                graph=graph, formula_id=None
             )
 
-            most_complex = complexity_result['analysis']['most_complex_formulas']
+            most_complex = complexity_result["analysis"]["most_complex_formulas"]
             logger.info(f"✓ Most complex formulas identified:")
             for i, formula in enumerate(most_complex[:3], 1):
-                logger.info(f"  {i}. {formula['name']} (complexity: {formula['complexity']})")
+                logger.info(
+                    f"  {i}. {formula['name']} (complexity: {formula['complexity']})"
+                )
 
             # Scenario 2: Analyze specific formula dependencies
             if len(graph.nodes) > 0:
                 test_formula = list(graph.nodes.keys())[0]
                 specific_analysis = formula_dependency_graph.analyze_formula_complexity(
-                    graph=graph,
-                    formula_id=test_formula
+                    graph=graph, formula_id=test_formula
                 )
 
-                analysis = specific_analysis['analysis']
+                analysis = specific_analysis["analysis"]
                 logger.info(f"✓ Formula analysis for {test_formula}:")
                 logger.info(f"  Name: {analysis['formula_name']}")
                 logger.info(f"  Type: {analysis['formula_type']}")
@@ -298,9 +356,7 @@ class TestFormulaDependencyGraph(unittest.TestCase):
 
             # Scenario 3: Export for external analysis
             export_result = formula_dependency_graph.export_dependency_graph(
-                graph=graph,
-                format="json",
-                include_visualization=True
+                graph=graph, format="json", include_visualization=True
             )
 
             logger.info(f"✓ Graph exported for external analysis")
@@ -337,5 +393,5 @@ async def run_all_tests():
     logger.info("=" * 70 + "\n")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(run_all_tests())

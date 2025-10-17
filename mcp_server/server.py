@@ -20,53 +20,48 @@ from mcp.server import Server
 from mcp.types import Tool, TextContent, ImageContent, Resource
 
 try:
-    from .tools import (
-        DatabaseTools,
-        S3Tools,
-        GlueTools,
-        FileTools,
-        ActionTools
-    )
+    from .tools import DatabaseTools, S3Tools, GlueTools, FileTools, ActionTools
     from .config import MCPConfig
-    from .connectors import (
-        RDSConnector,
-        S3Connector,
-        GlueConnector,
-        SlackNotifier
-    )
+    from .connectors import RDSConnector, S3Connector, GlueConnector, SlackNotifier
     from .security import SecurityManager, SecurityConfig
-    from .logging_config import setup_logging, get_logger, RequestContext, PerformanceLogger
+    from .logging_config import (
+        setup_logging,
+        get_logger,
+        RequestContext,
+        PerformanceLogger,
+    )
     from .unified_configuration_manager import UnifiedConfigurationManager
+    from .env_helper import get_hierarchical_env
 except ImportError:
     # Fallback for when running as standalone script
-    from tools import (
-        DatabaseTools,
-        S3Tools,
-        GlueTools,
-        FileTools,
-        ActionTools
-    )
+    from tools import DatabaseTools, S3Tools, GlueTools, FileTools, ActionTools
     from config import MCPConfig
-    from connectors import (
-        RDSConnector,
-        S3Connector,
-        GlueConnector,
-        SlackNotifier
-    )
+    from connectors import RDSConnector, S3Connector, GlueConnector, SlackNotifier
     from security import SecurityManager, SecurityConfig
-    from logging_config import setup_logging, get_logger, RequestContext, PerformanceLogger
+    from logging_config import (
+        setup_logging,
+        get_logger,
+        RequestContext,
+        PerformanceLogger,
+    )
     from unified_configuration_manager import UnifiedConfigurationManager
+    from env_helper import get_hierarchical_env
 
 # Load environment variables (for backward compatibility)
 load_dotenv()
 
 # Setup structured logging
 setup_logging(
-    log_level=os.getenv('MCP_LOG_LEVEL', 'INFO'),
-    log_dir=os.getenv('MCP_LOG_DIR', 'logs'),
-    enable_json=os.getenv('MCP_LOG_JSON', 'true').lower() == 'true',
+    log_level=get_hierarchical_env("MCP_LOG_LEVEL", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+    or "INFO",
+    log_dir=get_hierarchical_env("MCP_LOG_DIR", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+    or "logs",
+    enable_json=(
+        get_hierarchical_env("MCP_LOG_JSON", "NBA_MCP_SYNTHESIS", "WORKFLOW") or "true"
+    ).lower()
+    == "true",
     enable_console=True,
-    enable_file=True
+    enable_file=True,
 )
 logger = get_logger(__name__)
 
@@ -77,16 +72,28 @@ class NBAMCPServer:
     Provides tools to access RDS, S3, Glue, and project files
     """
 
-    def __init__(self, config: Optional[MCPConfig] = None, project: str = 'nba-mcp-synthesis', context: str = 'production'):
+    def __init__(
+        self,
+        config: Optional[MCPConfig] = None,
+        project: str = "nba-mcp-synthesis",
+        context: str = "production",
+    ):
         """Initialize MCP server with unified configuration system"""
         # Load secrets using hierarchical loader
         logger.info(f"Loading secrets for project={project}, context={context}")
         try:
-            result = subprocess.run([
-                sys.executable,
-                "/Users/ryanranft/load_env_hierarchical.py",
-                project, "NBA", context
-            ], capture_output=True, text=True, check=True)
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "/Users/ryanranft/load_env_hierarchical.py",
+                    project,
+                    "NBA",
+                    context,
+                ],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
 
             logger.info("✅ Secrets loaded successfully")
         except subprocess.CalledProcessError as e:
@@ -116,8 +123,7 @@ class NBAMCPServer:
         # Initialize security manager
         security_config = SecurityConfig()
         self.security_manager = SecurityManager(
-            security_config,
-            project_root=self.config.project_root
+            security_config, project_root=self.config.project_root
         )
 
         # Initialize connectors
@@ -140,21 +146,19 @@ class NBAMCPServer:
                 port=self.config.rds_port,
                 database=self.config.rds_database,
                 username=self.config.rds_username,
-                password=self.config.rds_password
+                password=self.config.rds_password,
             )
             logger.info("RDS connector initialized")
 
             # S3
             self.s3_connector = S3Connector(
-                bucket_name=self.config.s3_bucket,
-                region=self.config.s3_region
+                bucket_name=self.config.s3_bucket, region=self.config.s3_region
             )
             logger.info("S3 connector initialized")
 
             # AWS Glue
             self.glue_connector = GlueConnector(
-                database=self.config.glue_database,
-                region=self.config.glue_region
+                database=self.config.glue_database, region=self.config.glue_region
             )
             logger.info("Glue connector initialized")
 
@@ -179,8 +183,10 @@ class NBAMCPServer:
         self.file_tools = FileTools(self.config.project_root)
         self.action_tools = ActionTools(
             project_root=self.config.project_root,
-            synthesis_output_dir=os.path.join(self.config.project_root, "synthesis_outputs"),
-            slack_notifier=self.slack_notifier
+            synthesis_output_dir=os.path.join(
+                self.config.project_root, "synthesis_outputs"
+            ),
+            slack_notifier=self.slack_notifier,
         )
 
         logger.info("MCP tools initialized")
@@ -218,24 +224,24 @@ class NBAMCPServer:
             client_id = arguments.get("_client_id", "default_client")
 
             # Use request context for tracking and performance measurement
-            with RequestContext(logger, f"tool_call:{name}", client_id=client_id) as ctx:
+            with RequestContext(
+                logger, f"tool_call:{name}", client_id=client_id
+            ) as ctx:
                 # Security validation
                 valid, error_message = await self.security_manager.validate_request(
-                    client_id=client_id,
-                    tool_name=name,
-                    arguments=arguments
+                    client_id=client_id, tool_name=name, arguments=arguments
                 )
 
                 if not valid:
                     logger.warning(
                         f"Security validation failed",
-                        extra={"tool": name, "reason": error_message}
+                        extra={"tool": name, "reason": error_message},
                     )
                     return {
                         "success": False,
                         "error": f"Security validation failed: {error_message}",
                         "tool": name,
-                        "timestamp": datetime.now().isoformat()
+                        "timestamp": datetime.now().isoformat(),
                     }
 
                 try:
@@ -250,7 +256,11 @@ class NBAMCPServer:
                             result = await self.glue_tools.execute(name, arguments)
                         elif name.startswith("read_") or name.startswith("search_"):
                             result = await self.file_tools.execute(name, arguments)
-                        elif name in ["save_to_project", "log_synthesis_result", "send_notification"]:
+                        elif name in [
+                            "save_to_project",
+                            "log_synthesis_result",
+                            "send_notification",
+                        ]:
                             result = await self.action_tools.execute(name, arguments)
                         else:
                             raise ValueError(f"Unknown tool: {name}")
@@ -260,13 +270,15 @@ class NBAMCPServer:
                         f"Tool executed successfully",
                         extra={
                             "tool": name,
-                            "result_size": len(str(result)) if result else 0
-                        }
+                            "result_size": len(str(result)) if result else 0,
+                        },
                     )
 
                     # Notify on success if configured
                     if self.slack_notifier and self.config.notify_on_success:
-                        await self._notify_tool_execution(name, arguments, result, success=True)
+                        await self._notify_tool_execution(
+                            name, arguments, result, success=True
+                        )
 
                     return result
 
@@ -277,20 +289,22 @@ class NBAMCPServer:
                         extra={
                             "tool": name,
                             "error_type": type(e).__name__,
-                            "error_message": str(e)
+                            "error_message": str(e),
                         },
-                        exc_info=True
+                        exc_info=True,
                     )
 
                     # Notify on error
                     if self.slack_notifier:
-                        await self._notify_tool_execution(name, arguments, str(e), success=False)
+                        await self._notify_tool_execution(
+                            name, arguments, str(e), success=False
+                        )
 
                     return {
                         "success": False,
                         "error": str(e),
                         "tool": name,
-                        "timestamp": datetime.now().isoformat()
+                        "timestamp": datetime.now().isoformat(),
                     }
 
         @self.server.list_resources()
@@ -299,41 +313,45 @@ class NBAMCPServer:
             resources = []
 
             # Add database resource
-            resources.append(Resource(
-                uri=f"postgresql://{self.config.rds_host}/{self.config.rds_database}",
-                name="NBA Simulator Database",
-                description="PostgreSQL database with game data, player stats, and more"
-            ))
+            resources.append(
+                Resource(
+                    uri=f"postgresql://{self.config.rds_host}/{self.config.rds_database}",
+                    name="NBA Simulator Database",
+                    description="PostgreSQL database with game data, player stats, and more",
+                )
+            )
 
             # Add S3 resource
-            resources.append(Resource(
-                uri=f"s3://{self.config.s3_bucket}",
-                name="NBA Data Lake",
-                description="S3 bucket with 146K+ game JSON files and raw data"
-            ))
+            resources.append(
+                Resource(
+                    uri=f"s3://{self.config.s3_bucket}",
+                    name="NBA Data Lake",
+                    description="S3 bucket with 146K+ game JSON files and raw data",
+                )
+            )
 
             # Add Glue catalog
-            resources.append(Resource(
-                uri=f"glue://{self.config.glue_database}",
-                name="NBA Data Catalog",
-                description="AWS Glue catalog with table schemas and metadata"
-            ))
+            resources.append(
+                Resource(
+                    uri=f"glue://{self.config.glue_database}",
+                    name="NBA Data Catalog",
+                    description="AWS Glue catalog with table schemas and metadata",
+                )
+            )
 
             # Add project directory
-            resources.append(Resource(
-                uri=f"file://{self.config.project_root}",
-                name="NBA Simulator Project",
-                description="Local project files and code"
-            ))
+            resources.append(
+                Resource(
+                    uri=f"file://{self.config.project_root}",
+                    name="NBA Simulator Project",
+                    description="Local project files and code",
+                )
+            )
 
             return resources
 
     async def _notify_tool_execution(
-        self,
-        tool_name: str,
-        arguments: Dict,
-        result: Any,
-        success: bool
+        self, tool_name: str, arguments: Dict, result: Any, success: bool
     ):
         """Send Slack notification for tool execution"""
         if not self.slack_notifier:
@@ -350,33 +368,26 @@ class NBAMCPServer:
                         "type": "header",
                         "text": {
                             "type": "plain_text",
-                            "text": f"{emoji} MCP Tool Execution"
-                        }
+                            "text": f"{emoji} MCP Tool Execution",
+                        },
                     },
                     {
                         "type": "section",
                         "fields": [
-                            {
-                                "type": "mrkdwn",
-                                "text": f"*Tool:*\n{tool_name}"
-                            },
-                            {
-                                "type": "mrkdwn",
-                                "text": f"*Status:*\n{status.title()}"
-                            }
-                        ]
-                    }
-                ]
+                            {"type": "mrkdwn", "text": f"*Tool:*\n{tool_name}"},
+                            {"type": "mrkdwn", "text": f"*Status:*\n{status.title()}"},
+                        ],
+                    },
+                ],
             }
 
             if not success:
-                message["blocks"].append({
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"*Error:*\n```{result}```"
+                message["blocks"].append(
+                    {
+                        "type": "section",
+                        "text": {"type": "mrkdwn", "text": f"*Error:*\n```{result}```"},
                     }
-                })
+                )
 
             await self.slack_notifier.send_notification(message)
 
@@ -396,9 +407,7 @@ class NBAMCPServer:
 
         async with stdio_server() as (read_stream, write_stream):
             await self.server.run(
-                read_stream,
-                write_stream,
-                self.server.create_initialization_options()
+                read_stream, write_stream, self.server.create_initialization_options()
             )
 
     async def _test_connections(self):
@@ -407,19 +416,16 @@ class NBAMCPServer:
 
         # Test RDS
         try:
-            await self.database_tools.execute("query_rds_database", {
-                "sql_query": "SELECT 1"
-            })
+            await self.database_tools.execute(
+                "query_rds_database", {"sql_query": "SELECT 1"}
+            )
             logger.info("✅ RDS connection successful")
         except Exception as e:
             logger.error(f"❌ RDS connection failed: {e}")
 
         # Test S3
         try:
-            await self.s3_tools.execute("list_s3_files", {
-                "prefix": "",
-                "max_keys": 1
-            })
+            await self.s3_tools.execute("list_s3_files", {"prefix": "", "max_keys": 1})
             logger.info("✅ S3 connection successful")
         except Exception as e:
             logger.error(f"❌ S3 connection failed: {e}")

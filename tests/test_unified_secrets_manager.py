@@ -10,8 +10,9 @@ from unittest.mock import Mock, patch, MagicMock, mock_open
 from mcp_server.unified_secrets_manager import (
     UnifiedSecretsManager,
     get_secrets_manager,
-    load_secrets_hierarchical
+    load_secrets_hierarchical,
 )
+
 
 class TestUnifiedSecretsManager:
     """Test UnifiedSecretsManager class"""
@@ -34,15 +35,19 @@ class TestUnifiedSecretsManager:
         secret_dir.mkdir(parents=True)
 
         # Create test secret files
-        (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_google_key")
-        (secret_dir / "ANTHROPIC_API_KEY_TEST_PROJECT_TEST.env").write_text("test_anthropic_key")
+        (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text(
+            "test_google_key"
+        )
+        (secret_dir / "ANTHROPIC_API_KEY_TEST_PROJECT_TEST.env").write_text(
+            "test_anthropic_key"
+        )
 
         # Test loading secrets
         result = sm._load_secrets_from_files(str(secret_dir))
 
         assert result == {
             "GOOGLE_API_KEY_TEST_PROJECT_TEST": "test_google_key",
-            "ANTHROPIC_API_KEY_TEST_PROJECT_TEST": "test_anthropic_key"
+            "ANTHROPIC_API_KEY_TEST_PROJECT_TEST": "test_anthropic_key",
         }
 
     def test_context_detection(self):
@@ -50,43 +55,51 @@ class TestUnifiedSecretsManager:
         sm = UnifiedSecretsManager()
 
         # Test CI/CD detection
-        with patch.dict(os.environ, {'CI': 'true'}):
+        with patch.dict(os.environ, {"CI": "true"}):
             context = sm._detect_context()
-            assert context == 'test'
+            assert context == "test"
 
         # Test Docker detection
-        with patch.dict(os.environ, {'DOCKER_CONTAINER': 'true'}):
+        with patch.dict(os.environ, {"DOCKER_CONTAINER": "true"}):
             context = sm._detect_context()
-            assert context == 'production'
+            assert context == "production"
 
         # Test development detection
-        with patch.dict(os.environ, {'USER': 'developer'}):
+        with patch.dict(os.environ, {"USER": "developer"}):
             context = sm._detect_context()
-            assert context == 'development'
+            assert context == "development"
 
     def test_naming_convention_validation(self):
         """Test naming convention validation"""
         sm = UnifiedSecretsManager()
 
         # Valid names
-        assert sm._is_valid_naming_convention("GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW")
-        assert sm._is_valid_naming_convention("DB_PASSWORD_NBA_MCP_SYNTHESIS_DEVELOPMENT")
-        assert sm._is_valid_naming_convention("SLACK_WEBHOOK_URL_BIG_CAT_BETS_GLOBAL_WORKFLOW")
+        assert sm._is_valid_naming_convention(
+            "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW"
+        )
+        assert sm._is_valid_naming_convention(
+            "DB_PASSWORD_NBA_MCP_SYNTHESIS_DEVELOPMENT"
+        )
+        assert sm._is_valid_naming_convention(
+            "SLACK_WEBHOOK_URL_BIG_CAT_BETS_GLOBAL_WORKFLOW"
+        )
 
         # Invalid names
         assert not sm._is_valid_naming_convention("GOOGLE_API_KEY")
         assert not sm._is_valid_naming_convention("INVALID_NAME")
-        assert not sm._is_valid_naming_convention("GOOGLE_KEY_NBA_WORKFLOW")  # Missing resource type
+        assert not sm._is_valid_naming_convention(
+            "GOOGLE_KEY_NBA_WORKFLOW"
+        )  # Missing resource type
 
     def test_aws_fallback(self):
         """Test AWS Secrets Manager fallback"""
         sm = UnifiedSecretsManager()
 
         # Mock AWS client
-        with patch('boto3.client') as mock_boto:
+        with patch("boto3.client") as mock_boto:
             mock_client = MagicMock()
             mock_client.get_secret_value.return_value = {
-                'SecretString': '{"GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key"}'
+                "SecretString": '{"GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key"}'
             }
             mock_boto.return_value = mock_client
 
@@ -96,7 +109,7 @@ class TestUnifiedSecretsManager:
     def test_hierarchical_loading(self):
         """Test hierarchical secret loading"""
         # Mock the hierarchical loader
-        with patch('subprocess.run') as mock_run:
+        with patch("subprocess.run") as mock_run:
             mock_run.return_value.returncode = 0
             mock_run.return_value.stdout = "Secrets loaded successfully"
 
@@ -116,14 +129,16 @@ class TestUnifiedSecretsManager:
         sm = UnifiedSecretsManager()
         sm.secrets = {
             "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key",
-            "DB_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW": "test_password"
+            "DB_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW": "test_password",
         }
 
         sm._create_aliases()
 
         assert "GOOGLE_API_KEY" in sm.aliases
         assert "DB_PASSWORD" in sm.aliases
-        assert sm.aliases["GOOGLE_API_KEY"] == "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW"
+        assert (
+            sm.aliases["GOOGLE_API_KEY"] == "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW"
+        )
 
     def test_load_secrets(self, temp_secrets_dir):
         """Test loading secrets with project, sport, and context"""
@@ -135,7 +150,7 @@ class TestUnifiedSecretsManager:
         (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         # Mock the directory structure
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             sm.load_secrets("test_project", "TEST", "test")
 
             assert sm.project == "test_project"
@@ -148,7 +163,7 @@ class TestUnifiedSecretsManager:
         sm = UnifiedSecretsManager()
         sm.secrets = {
             "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key",
-            "DB_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW": "test_password"
+            "DB_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW": "test_password",
         }
 
         all_secrets = sm.get_all_secrets()
@@ -161,7 +176,7 @@ class TestUnifiedSecretsManager:
         sm = UnifiedSecretsManager()
         sm.aliases = {
             "GOOGLE_API_KEY": "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW",
-            "DB_PASSWORD": "DB_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW"
+            "DB_PASSWORD": "DB_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW",
         }
 
         all_aliases = sm.get_aliases()
@@ -175,7 +190,7 @@ class TestUnifiedSecretsManager:
         sm.secrets = {
             "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key",
             "ANTHROPIC_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key",
-            "DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key"
+            "DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key",
         }
 
         # Test with valid secrets
@@ -190,11 +205,11 @@ class TestUnifiedSecretsManager:
         sm = UnifiedSecretsManager()
         sm.secrets = {
             "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key",
-            "DB_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW": "test_password"
+            "DB_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW": "test_password",
         }
         sm.aliases = {
             "GOOGLE_API_KEY": "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW",
-            "DB_PASSWORD": "DB_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW"
+            "DB_PASSWORD": "DB_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW",
         }
 
         output_file = Path(temp_secrets_dir) / "exported_secrets.env"
@@ -231,7 +246,7 @@ class TestUnifiedSecretsManager:
         (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         # Mock the directory structure
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             sm.reload_secrets()
 
             assert "GOOGLE_API_KEY_TEST_PROJECT_TEST" in sm.secrets
@@ -242,12 +257,12 @@ class TestUnifiedSecretsManager:
         sm = UnifiedSecretsManager()
 
         # Test with invalid project
-        with patch('os.path.exists', return_value=False):
+        with patch("os.path.exists", return_value=False):
             result = sm.load_secrets("invalid_project", "INVALID", "invalid")
             assert result is False
 
         # Test with invalid context
-        with patch('os.path.exists', return_value=False):
+        with patch("os.path.exists", return_value=False):
             result = sm.load_secrets("test_project", "TEST", "invalid")
             assert result is False
 
@@ -262,7 +277,7 @@ class TestUnifiedSecretsManager:
         (secret_dir / "ANTHROPIC_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         # Mock the directory structure
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             sm.load_secrets("test_project", "TEST", "test")
 
             assert sm.project == "test_project"
@@ -271,4 +286,3 @@ class TestUnifiedSecretsManager:
             assert len(sm.secrets) == 2
             assert len(sm.aliases) == 2
             assert sm.validate_secrets() is True
-

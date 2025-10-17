@@ -1,4 +1,5 @@
 """Structured Logging - IMPORTANT 16"""
+
 import logging
 import json
 from typing import Dict, Any
@@ -54,16 +55,32 @@ class JSONFormatter(logging.Formatter):
             "message": record.getMessage(),
             "module": record.module,
             "function": record.funcName,
-            "line": record.lineno
+            "line": record.lineno,
         }
 
         # Add extra fields
-        if hasattr(record, '__dict__'):
+        if hasattr(record, "__dict__"):
             for key, value in record.__dict__.items():
-                if key not in ['name', 'msg', 'args', 'created', 'filename', 'funcName',
-                              'levelname', 'levelno', 'lineno', 'module', 'msecs',
-                              'message', 'pathname', 'process', 'processName',
-                              'relativeCreated', 'thread', 'threadName']:
+                if key not in [
+                    "name",
+                    "msg",
+                    "args",
+                    "created",
+                    "filename",
+                    "funcName",
+                    "levelname",
+                    "levelno",
+                    "lineno",
+                    "module",
+                    "msecs",
+                    "message",
+                    "pathname",
+                    "process",
+                    "processName",
+                    "relativeCreated",
+                    "thread",
+                    "threadName",
+                ]:
                     log_data[key] = value
 
         # Add exception info if present
@@ -90,4 +107,3 @@ if __name__ == "__main__":
     logger = get_logger()
     logger.info("System started", user_id="user123", action="login")
     logger.error("Database connection failed", service="rds", error_code=500)
-

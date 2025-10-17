@@ -47,7 +47,7 @@ class IdempotencyKeyStore:
             self.store[key] = {
                 "result": result,
                 "created_at": datetime.utcnow().isoformat(),
-                "metadata": metadata or {}
+                "metadata": metadata or {},
             }
 
     def delete(self, key: str):
@@ -61,8 +61,10 @@ class IdempotencyKeyStore:
         with self.lock:
             now = datetime.utcnow()
             expired_keys = [
-                key for key, entry in self.store.items()
-                if now - datetime.fromisoformat(entry["created_at"]) > timedelta(seconds=self.ttl_seconds)
+                key
+                for key, entry in self.store.items()
+                if now - datetime.fromisoformat(entry["created_at"])
+                > timedelta(seconds=self.ttl_seconds)
             ]
             for key in expired_keys:
                 del self.store[key]
@@ -87,6 +89,7 @@ def idempotent(ttl_seconds: int = 86400):
             # Process payment
             return {"transaction_id": "tx123"}
     """
+
     def decorator(func: Callable):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -96,7 +99,9 @@ def idempotent(ttl_seconds: int = 86400):
             # Check if result already exists
             cached = _idempotency_store.get(key)
             if cached:
-                logger.info(f"Idempotent call to {func.__name__}: returning cached result")
+                logger.info(
+                    f"Idempotent call to {func.__name__}: returning cached result"
+                )
                 return cached["result"]
 
             # Execute function
@@ -104,14 +109,19 @@ def idempotent(ttl_seconds: int = 86400):
             result = func(*args, **kwargs)
 
             # Store result
-            _idempotency_store.set(key, result, {
-                "function": func.__name__,
-                "executed_at": datetime.utcnow().isoformat()
-            })
+            _idempotency_store.set(
+                key,
+                result,
+                {
+                    "function": func.__name__,
+                    "executed_at": datetime.utcnow().isoformat(),
+                },
+            )
 
             return result
 
         return wrapper
+
     return decorator
 
 
@@ -122,11 +132,7 @@ class IdempotentOperationManager:
         self.store = IdempotencyKeyStore()
 
     def execute_once(
-        self,
-        operation_id: str,
-        operation_func: Callable,
-        *args,
-        **kwargs
+        self, operation_id: str, operation_func: Callable, *args, **kwargs
     ) -> Any:
         """
         Execute an operation once, even if called multiple times.
@@ -142,7 +148,9 @@ class IdempotentOperationManager:
         # Check if already executed
         cached = self.store.get(operation_id)
         if cached:
-            logger.info(f"Operation '{operation_id}' already executed, returning cached result")
+            logger.info(
+                f"Operation '{operation_id}' already executed, returning cached result"
+            )
             return cached["result"]
 
         # Execute operation
@@ -150,10 +158,14 @@ class IdempotentOperationManager:
         result = operation_func(*args, **kwargs)
 
         # Store result
-        self.store.set(operation_id, result, {
-            "operation_id": operation_id,
-            "executed_at": datetime.utcnow().isoformat()
-        })
+        self.store.set(
+            operation_id,
+            result,
+            {
+                "operation_id": operation_id,
+                "executed_at": datetime.utcnow().isoformat(),
+            },
+        )
 
         return result
 
@@ -187,13 +199,16 @@ if __name__ == "__main__":
     def create_payment(user_id: int, amount: float):
         """Simulate payment creation"""
         import random
+
         transaction_id = f"tx_{random.randint(1000, 9999)}"
-        logger.info(f"Processing payment: user={user_id}, amount=${amount}, tx_id={transaction_id}")
+        logger.info(
+            f"Processing payment: user={user_id}, amount=${amount}, tx_id={transaction_id}"
+        )
         return {
             "transaction_id": transaction_id,
             "user_id": user_id,
             "amount": amount,
-            "status": "completed"
+            "status": "completed",
         }
 
     # First call - executes
@@ -207,7 +222,9 @@ if __name__ == "__main__":
     print(f"Result: {result2}")
 
     # Verify same transaction_id
-    print(f"\nTransaction IDs match: {result1['transaction_id'] == result2['transaction_id']}")
+    print(
+        f"\nTransaction IDs match: {result1['transaction_id'] == result2['transaction_id']}"
+    )
 
     # Example 2: Using IdempotentOperationManager
     print("\n" + "=" * 80)
@@ -219,27 +236,24 @@ if __name__ == "__main__":
     def send_notification(user_id: int, message: str):
         """Simulate sending notification"""
         logger.info(f"Sending notification to user {user_id}: {message}")
-        return {"notification_id": f"notif_{user_id}", "sent_at": datetime.utcnow().isoformat()}
+        return {
+            "notification_id": f"notif_{user_id}",
+            "sent_at": datetime.utcnow().isoformat(),
+        }
 
     operation_id = "send_welcome_email_user_456"
 
     # First execution
     print(f"\nExecuting operation '{operation_id}':")
     result1 = manager.execute_once(
-        operation_id,
-        send_notification,
-        user_id=456,
-        message="Welcome to NBA MCP!"
+        operation_id, send_notification, user_id=456, message="Welcome to NBA MCP!"
     )
     print(f"Result: {result1}")
 
     # Second execution (idempotent)
     print(f"\nRe-executing operation '{operation_id}':")
     result2 = manager.execute_once(
-        operation_id,
-        send_notification,
-        user_id=456,
-        message="Welcome to NBA MCP!"
+        operation_id, send_notification, user_id=456, message="Welcome to NBA MCP!"
     )
     print(f"Result: {result2}")
 
@@ -256,14 +270,10 @@ if __name__ == "__main__":
 
     manager.clear_operation(operation_id)
     result3 = manager.execute_once(
-        operation_id,
-        send_notification,
-        user_id=456,
-        message="Welcome to NBA MCP!"
+        operation_id, send_notification, user_id=456, message="Welcome to NBA MCP!"
     )
     print(f"Result after clear: {result3}")
 
     print("\n" + "=" * 80)
     print("Idempotency Demo Complete!")
     print("=" * 80)
-

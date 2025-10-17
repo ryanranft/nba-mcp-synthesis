@@ -34,8 +34,7 @@ import subprocess
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -50,7 +49,7 @@ class WorkflowOrchestrator:
         config_file: str,
         budget: float,
         output_dir: str,
-        generate_implementations: bool = True
+        generate_implementations: bool = True,
     ):
         """
         Initialize orchestrator.
@@ -88,10 +87,10 @@ class WorkflowOrchestrator:
         logger.info("Checking API keys...")
 
         required_keys = [
-            'GOOGLE_API_KEY',
-            'DEEPSEEK_API_KEY',
-            'ANTHROPIC_API_KEY',
-            'OPENAI_API_KEY'
+            "GOOGLE_API_KEY",
+            "DEEPSEEK_API_KEY",
+            "ANTHROPIC_API_KEY",
+            "OPENAI_API_KEY",
         ]
 
         missing_keys = []
@@ -112,10 +111,10 @@ class WorkflowOrchestrator:
         logger.info(f"Checking budget: ${self.budget:.2f}")
 
         # Load books to analyze
-        with open(self.config_file, 'r') as f:
+        with open(self.config_file, "r") as f:
             config = json.load(f)
 
-        num_books = len(config.get('books', []))
+        num_books = len(config.get("books", []))
 
         # Estimate cost per book: $3.60-10.30
         min_cost = num_books * 3.60
@@ -125,11 +124,15 @@ class WorkflowOrchestrator:
         logger.info(f"Estimated cost: ${min_cost:.2f} - ${max_cost:.2f}")
 
         if self.budget < min_cost:
-            logger.error(f"Budget ${self.budget:.2f} is below minimum estimated cost ${min_cost:.2f}")
+            logger.error(
+                f"Budget ${self.budget:.2f} is below minimum estimated cost ${min_cost:.2f}"
+            )
             return False
 
         if self.budget < max_cost:
-            logger.warning(f"Budget ${self.budget:.2f} may be insufficient (max estimate: ${max_cost:.2f})")
+            logger.warning(
+                f"Budget ${self.budget:.2f} may be insufficient (max estimate: ${max_cost:.2f})"
+            )
             logger.warning("Workflow may stop early if budget is exceeded")
 
         logger.info("✅ Budget check passed")
@@ -153,11 +156,13 @@ class WorkflowOrchestrator:
         try:
             # Run recursive book analysis script
             cmd = [
-                'python3',
-                'scripts/recursive_book_analysis.py',
-                '--config', self.config_file,
-                '--output-dir', str(self.output_dir),
-                '--all'
+                "python3",
+                "scripts/recursive_book_analysis.py",
+                "--config",
+                self.config_file,
+                "--output-dir",
+                str(self.output_dir),
+                "--all",
             ]
 
             logger.info(f"Running: {' '.join(cmd)}")
@@ -166,7 +171,7 @@ class WorkflowOrchestrator:
                 cmd,
                 capture_output=True,
                 text=True,
-                cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
             )
 
             if result.returncode != 0:
@@ -176,12 +181,14 @@ class WorkflowOrchestrator:
             logger.info("✅ Book analysis complete")
 
             # Parse results
-            master_recs_file = self.output_dir / 'master_recommendations.json'
+            master_recs_file = self.output_dir / "master_recommendations.json"
             if master_recs_file.exists():
-                with open(master_recs_file, 'r') as f:
+                with open(master_recs_file, "r") as f:
                     data = json.load(f)
-                self.recommendations_generated = len(data.get('recommendations', []))
-                logger.info(f"Generated {self.recommendations_generated} recommendations")
+                self.recommendations_generated = len(data.get("recommendations", []))
+                logger.info(
+                    f"Generated {self.recommendations_generated} recommendations"
+                )
 
             return True
 
@@ -198,10 +205,12 @@ class WorkflowOrchestrator:
         try:
             # Run integration script
             cmd = [
-                'python3',
-                'scripts/integrate_recommendations.py',
-                '--synthesis-path', '/Users/ryanranft/nba-mcp-synthesis',
-                '--simulator-path', '/Users/ryanranft/nba-simulator-aws'
+                "python3",
+                "scripts/integrate_recommendations.py",
+                "--synthesis-path",
+                "/Users/ryanranft/nba-mcp-synthesis",
+                "--simulator-path",
+                "/Users/ryanranft/nba-simulator-aws",
             ]
 
             logger.info(f"Running: {' '.join(cmd)}")
@@ -210,7 +219,7 @@ class WorkflowOrchestrator:
                 cmd,
                 capture_output=True,
                 text=True,
-                cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
             )
 
             if result.returncode != 0:
@@ -237,12 +246,16 @@ class WorkflowOrchestrator:
         try:
             # Run implementation generator
             cmd = [
-                'python3',
-                'scripts/generate_implementation_files.py',
-                '--recommendations', str(self.output_dir / 'master_recommendations.json'),
-                '--output-base', '/Users/ryanranft/nba-simulator-aws/docs/phases',
-                '--templates-dir', 'templates',
-                '--mcp-server', 'http://localhost:8000'
+                "python3",
+                "scripts/generate_implementation_files.py",
+                "--recommendations",
+                str(self.output_dir / "master_recommendations.json"),
+                "--output-base",
+                "/Users/ryanranft/nba-simulator-aws/docs/phases",
+                "--templates-dir",
+                "templates",
+                "--mcp-server",
+                "http://localhost:8000",
             ]
 
             logger.info(f"Running: {' '.join(cmd)}")
@@ -251,7 +264,7 @@ class WorkflowOrchestrator:
                 cmd,
                 capture_output=True,
                 text=True,
-                cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
             )
 
             if result.returncode != 0:
@@ -261,11 +274,13 @@ class WorkflowOrchestrator:
                 logger.info("✅ Implementation files generated")
 
             # Parse results
-            summary_file = Path('/Users/ryanranft/nba-mcp-synthesis/implementation_generation_summary.json')
+            summary_file = Path(
+                "/Users/ryanranft/nba-mcp-synthesis/implementation_generation_summary.json"
+            )
             if summary_file.exists():
-                with open(summary_file, 'r') as f:
+                with open(summary_file, "r") as f:
                     data = json.load(f)
-                self.files_generated = data.get('total_files_generated', 0)
+                self.files_generated = data.get("total_files_generated", 0)
                 logger.info(f"Generated {self.files_generated} implementation files")
 
             return True
@@ -357,8 +372,8 @@ class WorkflowOrchestrator:
 *Generated by Complete Workflow Orchestrator*
 """
 
-            report_file = self.output_dir / 'complete_workflow_report.md'
-            with open(report_file, 'w') as f:
+            report_file = self.output_dir / "complete_workflow_report.md"
+            with open(report_file, "w") as f:
                 f.write(report)
 
             logger.info(f"✅ Report saved to: {report_file}")
@@ -392,7 +407,9 @@ class WorkflowOrchestrator:
 
             # Phase 3: Implementation Generation
             if not await self.generate_implementation_files():
-                logger.warning("Implementation generation had issues, but continuing...")
+                logger.warning(
+                    "Implementation generation had issues, but continuing..."
+                )
 
             # Phase 4: Final Report
             if not await self.generate_final_report():
@@ -420,34 +437,29 @@ class WorkflowOrchestrator:
 async def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description='Launch complete book analysis to implementation workflow'
+        description="Launch complete book analysis to implementation workflow"
     )
     parser.add_argument(
-        '--config',
-        default='config/books_to_analyze_all_ai_ml.json',
-        help='Path to books configuration file'
+        "--config",
+        default="config/books_to_analyze_all_ai_ml.json",
+        help="Path to books configuration file",
     )
     parser.add_argument(
-        '--budget',
-        type=float,
-        default=410.0,
-        help='Maximum budget in USD'
+        "--budget", type=float, default=410.0, help="Maximum budget in USD"
     )
     parser.add_argument(
-        '--output',
-        default='analysis_results/',
-        help='Output directory for results'
+        "--output", default="analysis_results/", help="Output directory for results"
     )
     parser.add_argument(
-        '--generate-implementations',
-        action='store_true',
+        "--generate-implementations",
+        action="store_true",
         default=True,
-        help='Generate implementation files (default: True)'
+        help="Generate implementation files (default: True)",
     )
     parser.add_argument(
-        '--no-implementations',
-        action='store_true',
-        help='Skip implementation file generation'
+        "--no-implementations",
+        action="store_true",
+        help="Skip implementation file generation",
     )
 
     args = parser.parse_args()
@@ -459,7 +471,7 @@ async def main():
         config_file=args.config,
         budget=args.budget,
         output_dir=args.output,
-        generate_implementations=generate_impl
+        generate_implementations=generate_impl,
     )
 
     success = await orchestrator.run()
@@ -467,10 +479,5 @@ async def main():
     sys.exit(0 if success else 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())
-
-
-
-
-

@@ -10,6 +10,7 @@ import subprocess
 import sys
 from mcp_server.fastmcp_server import mcp
 
+
 async def main():
     print("NBA MCP Server - Tool Verification")
     print("=" * 40)
@@ -19,11 +20,18 @@ async def main():
     # Load secrets using hierarchical loader
     print("Loading secrets...")
     try:
-        result = subprocess.run([
-            sys.executable,
-            "/Users/ryanranft/load_env_hierarchical.py",
-            "nba-mcp-synthesis", "NBA", "production"
-        ], capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            [
+                sys.executable,
+                "/Users/ryanranft/load_env_hierarchical.py",
+                "nba-mcp-synthesis",
+                "NBA",
+                "production",
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
 
         print("✅ Secrets loaded successfully")
     except subprocess.CalledProcessError as e:
@@ -47,9 +55,6 @@ async def main():
 
     print("\n🎉 MCP Server is ready!")
 
+
 if __name__ == "__main__":
     asyncio.run(main())
-
-
-
-

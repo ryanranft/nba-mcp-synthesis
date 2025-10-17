@@ -16,10 +16,10 @@ from mcp_server.tools.logger_config import log_operation
 # Moving Averages
 # =============================================================================
 
+
 @log_operation("stats_moving_average")
 def calculate_moving_average(
-    data: List[Union[int, float]],
-    window: int = 3
+    data: List[Union[int, float]], window: int = 3
 ) -> List[Optional[float]]:
     """
     Calculate simple moving average (SMA).
@@ -39,24 +39,16 @@ def calculate_moving_average(
         [None, None, 12.0, 14.0, 16.0, 18.0]
     """
     if not data:
-        raise ValidationError(
-            "Data cannot be empty",
-            "data",
-            None
-        )
+        raise ValidationError("Data cannot be empty", "data", None)
 
     if window < 1:
-        raise ValidationError(
-            "Window size must be at least 1",
-            "window",
-            window
-        )
+        raise ValidationError("Window size must be at least 1", "window", window)
 
     if window > len(data):
         raise ValidationError(
             f"Window ({window}) cannot be larger than data length ({len(data)})",
             "window",
-            window
+            window,
         )
 
     result = []
@@ -67,7 +59,7 @@ def calculate_moving_average(
             result.append(None)
         else:
             # Calculate average of window
-            window_data = data[i - window + 1:i + 1]
+            window_data = data[i - window + 1 : i + 1]
             avg = sum(window_data) / window
             result.append(round(avg, 2))
 
@@ -76,8 +68,7 @@ def calculate_moving_average(
 
 @log_operation("stats_exponential_moving_average")
 def calculate_exponential_moving_average(
-    data: List[Union[int, float]],
-    alpha: float = 0.3
+    data: List[Union[int, float]], alpha: float = 0.3
 ) -> List[float]:
     """
     Calculate exponential moving average (EMA).
@@ -100,17 +91,11 @@ def calculate_exponential_moving_average(
         [10.0, 10.6, 11.62, 12.93, 14.45]
     """
     if not data:
-        raise ValidationError(
-            "Data cannot be empty",
-            "data",
-            None
-        )
+        raise ValidationError("Data cannot be empty", "data", None)
 
     if not 0 < alpha <= 1:
         raise ValidationError(
-            "Alpha must be between 0 and 1 (exclusive of 0)",
-            "alpha",
-            alpha
+            "Alpha must be between 0 and 1 (exclusive of 0)", "alpha", alpha
         )
 
     result = []
@@ -126,6 +111,7 @@ def calculate_exponential_moving_average(
 # =============================================================================
 # Trend Analysis
 # =============================================================================
+
 
 @log_operation("stats_trend_detection")
 def detect_trend(data: List[Union[int, float]]) -> Dict[str, Any]:
@@ -153,18 +139,10 @@ def detect_trend(data: List[Union[int, float]]) -> Dict[str, Any]:
         }
     """
     if not data:
-        raise ValidationError(
-            "Data cannot be empty",
-            "data",
-            None
-        )
+        raise ValidationError("Data cannot be empty", "data", None)
 
     if len(data) < 2:
-        return {
-            "trend": "stable",
-            "slope": 0.0,
-            "confidence": 0.0
-        }
+        return {"trend": "stable", "slope": 0.0, "confidence": 0.0}
 
     # Use time index as x-axis
     x = list(range(len(data)))
@@ -207,17 +185,12 @@ def detect_trend(data: List[Union[int, float]]) -> Dict[str, Any]:
     else:
         trend = "stable"
 
-    return {
-        "trend": trend,
-        "slope": round(slope, 4),
-        "confidence": round(r_squared, 4)
-    }
+    return {"trend": trend, "slope": round(slope, 4), "confidence": round(r_squared, 4)}
 
 
 @log_operation("stats_percent_change")
 def calculate_percent_change(
-    current: Union[int, float],
-    previous: Union[int, float]
+    current: Union[int, float], previous: Union[int, float]
 ) -> float:
     """
     Calculate percentage change from previous to current value.
@@ -243,9 +216,7 @@ def calculate_percent_change(
     """
     if previous == 0:
         raise ValidationError(
-            "Previous value cannot be zero (would divide by zero)",
-            "previous",
-            previous
+            "Previous value cannot be zero (would divide by zero)", "previous", previous
         )
 
     change = ((current - previous) / abs(previous)) * 100
@@ -255,9 +226,7 @@ def calculate_percent_change(
 
 @log_operation("stats_growth_rate")
 def calculate_growth_rate(
-    start_value: Union[int, float],
-    end_value: Union[int, float],
-    periods: int
+    start_value: Union[int, float], end_value: Union[int, float], periods: int
 ) -> float:
     """
     Calculate compound annual/period growth rate (CAGR).
@@ -278,24 +247,14 @@ def calculate_growth_rate(
     """
     if start_value <= 0:
         raise ValidationError(
-            "Start value must be positive",
-            "start_value",
-            start_value
+            "Start value must be positive", "start_value", start_value
         )
 
     if end_value <= 0:
-        raise ValidationError(
-            "End value must be positive",
-            "end_value",
-            end_value
-        )
+        raise ValidationError("End value must be positive", "end_value", end_value)
 
     if periods <= 0:
-        raise ValidationError(
-            "Periods must be positive",
-            "periods",
-            periods
-        )
+        raise ValidationError("Periods must be positive", "periods", periods)
 
     # CAGR = (end/start)^(1/periods) - 1
     ratio = end_value / start_value
@@ -329,11 +288,7 @@ def calculate_volatility(data: List[Union[int, float]]) -> float:
         24.19  # High volatility (unstable)
     """
     if not data:
-        raise ValidationError(
-            "Data cannot be empty",
-            "data",
-            None
-        )
+        raise ValidationError("Data cannot be empty", "data", None)
 
     if len(data) < 2:
         return 0.0
@@ -343,9 +298,7 @@ def calculate_volatility(data: List[Union[int, float]]) -> float:
 
     if mean == 0:
         raise ValidationError(
-            "Cannot calculate volatility when mean is zero",
-            "data",
-            mean
+            "Cannot calculate volatility when mean is zero", "data", mean
         )
 
     # Calculate standard deviation
@@ -361,6 +314,7 @@ def calculate_volatility(data: List[Union[int, float]]) -> float:
 # =============================================================================
 # Utility Functions
 # =============================================================================
+
 
 def check_dependencies():
     """

@@ -27,15 +27,16 @@ logger = get_logger(__name__)
 
 class TestColors:
     """ANSI color codes for terminal output"""
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
 
 
 def print_header(message: str):
@@ -69,13 +70,16 @@ def print_warning(message: str):
 # EPUB Tests
 # =============================================================================
 
+
 async def test_epub_dependencies():
     """Test 1: Check EPUB dependencies"""
     print_header("Test 1: EPUB Dependencies Check")
 
     try:
         epub_helper.check_dependencies()
-        print_success("All EPUB dependencies available (ebooklib, beautifulsoup4, html2text)")
+        print_success(
+            "All EPUB dependencies available (ebooklib, beautifulsoup4, html2text)"
+        )
         return True
     except ImportError as e:
         print_error(f"Missing dependencies: {e}")
@@ -97,12 +101,14 @@ async def test_epub_metadata(epub_path: str):
 
         print_success("Metadata extracted successfully")
         print(f"  Title: {metadata.get('title', 'N/A')}")
-        print(f"  Author(s): {', '.join(metadata.get('creator', [])) if metadata.get('creator') else 'N/A'}")
+        print(
+            f"  Author(s): {', '.join(metadata.get('creator', [])) if metadata.get('creator') else 'N/A'}"
+        )
         print(f"  Publisher: {metadata.get('publisher', 'N/A')}")
         print(f"  Language: {metadata.get('language', 'N/A')}")
         print(f"  Date: {metadata.get('date', 'N/A')}")
 
-        if metadata.get('subject'):
+        if metadata.get("subject"):
             print(f"  Subjects: {', '.join(metadata.get('subject', []))}")
 
         return True
@@ -166,9 +172,9 @@ async def test_epub_chapter_extraction(epub_path: str):
 
         # Test different formats
         formats = {
-            'html': epub_helper.extract_chapter_html,
-            'markdown': epub_helper.extract_chapter_markdown,
-            'text': epub_helper.extract_chapter_plain_text
+            "html": epub_helper.extract_chapter_html,
+            "markdown": epub_helper.extract_chapter_markdown,
+            "text": epub_helper.extract_chapter_plain_text,
         }
 
         for format_name, extract_func in formats.items():
@@ -176,7 +182,7 @@ async def test_epub_chapter_extraction(epub_path: str):
             print_success(f"{format_name.upper()}: {len(content)} characters")
 
             # Show preview (first 200 chars)
-            preview = content[:200].replace('\n', ' ')
+            preview = content[:200].replace("\n", " ")
             print(f"  Preview: {preview}...")
 
         return True
@@ -189,13 +195,16 @@ async def test_epub_chapter_extraction(epub_path: str):
 # PDF Tests
 # =============================================================================
 
+
 async def test_pdf_dependencies():
     """Test 5: Check PDF dependencies"""
     print_header("Test 5: PDF Dependencies Check")
 
     try:
         pdf_helper.check_dependencies()
-        print_success("All PDF dependencies available (PyMuPDF, beautifulsoup4, html2text)")
+        print_success(
+            "All PDF dependencies available (PyMuPDF, beautifulsoup4, html2text)"
+        )
         return True
     except ImportError as e:
         print_error(f"Missing dependencies: {e}")
@@ -223,7 +232,7 @@ async def test_pdf_metadata(pdf_path: str):
         print(f"  Pages: {metadata.get('page_count', 0)}")
         print(f"  Has TOC: {'Yes' if metadata.get('has_toc') else 'No'}")
 
-        if metadata.get('has_toc'):
+        if metadata.get("has_toc"):
             print(f"  TOC Entries: {metadata.get('toc_entries', 0)}")
 
         return True
@@ -276,9 +285,9 @@ async def test_pdf_page_extraction(pdf_path: str):
     try:
         # Test different formats for first page
         formats = {
-            'text': pdf_helper.extract_page_text,
-            'html': pdf_helper.extract_page_html,
-            'markdown': pdf_helper.extract_page_markdown
+            "text": pdf_helper.extract_page_text,
+            "html": pdf_helper.extract_page_html,
+            "markdown": pdf_helper.extract_page_markdown,
         }
 
         print_info("Extracting first page (page 0)")
@@ -288,7 +297,7 @@ async def test_pdf_page_extraction(pdf_path: str):
             print_success(f"{format_name.upper()}: {len(content)} characters")
 
             # Show preview (first 200 chars)
-            preview = content[:200].replace('\n', ' ')
+            preview = content[:200].replace("\n", " ")
             print(f"  Preview: {preview}...")
 
         return True
@@ -309,11 +318,11 @@ async def test_pdf_page_range(pdf_path: str):
     try:
         print_info("Extracting pages 0-2")
 
-        content = pdf_helper.extract_page_range(pdf_path, 0, 2, 'text')
+        content = pdf_helper.extract_page_range(pdf_path, 0, 2, "text")
         print_success(f"Extracted 3 pages: {len(content)} characters")
 
         # Test page break detection
-        if '---' in content or '\n\n\n' in content:
+        if "---" in content or "\n\n\n" in content:
             print_info("Page breaks detected in content")
 
         return True
@@ -340,8 +349,8 @@ async def test_pdf_search(pdf_path: str, query: str = "the"):
 
         # Show first 3 matches
         for i, result in enumerate(results[:3]):
-            page = result['page']
-            context = result['context'].replace('\n', ' ')
+            page = result["page"]
+            context = result["context"].replace("\n", " ")
             print(f"  Match {i+1} (page {page}): ...{context}...")
 
         if len(results) > 3:
@@ -356,6 +365,7 @@ async def test_pdf_search(pdf_path: str, query: str = "the"):
 # =============================================================================
 # Main Test Runner
 # =============================================================================
+
 
 async def run_all_tests():
     """Run all EPUB and PDF tests"""
@@ -466,7 +476,9 @@ async def interactive_demo():
                 await test_pdf_toc(pdf_path)
                 await test_pdf_page_extraction(pdf_path)
 
-                search_query = input("Enter search query (or press Enter to skip): ").strip()
+                search_query = input(
+                    "Enter search query (or press Enter to skip): "
+                ).strip()
                 if search_query:
                     await test_pdf_search(pdf_path, search_query)
             else:
@@ -488,7 +500,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Test EPUB and PDF features")
-    parser.add_argument('--demo', action='store_true', help='Run interactive demo')
+    parser.add_argument("--demo", action="store_true", help="Run interactive demo")
     args = parser.parse_args()
 
     if args.demo:

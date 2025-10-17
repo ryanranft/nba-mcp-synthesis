@@ -26,8 +26,7 @@ import re
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -60,16 +59,16 @@ class MCPImplementationGenerator:
         """Load all templates from templates directory."""
         templates = {}
         template_files = {
-            'python': 'implementation_script.py.template',
-            'test': 'test_script.py.template',
-            'sql': 'sql_migration.sql.template',
-            'cloudformation': 'cloudformation.yaml.template'
+            "python": "implementation_script.py.template",
+            "test": "test_script.py.template",
+            "sql": "sql_migration.sql.template",
+            "cloudformation": "cloudformation.yaml.template",
         }
 
         for key, filename in template_files.items():
             template_path = self.templates_dir / filename
             if template_path.exists():
-                with open(template_path, 'r') as f:
+                with open(template_path, "r") as f:
                     templates[key] = f.read()
                 logger.info(f"Loaded template: {key}")
             else:
@@ -114,10 +113,10 @@ class MCPImplementationGenerator:
     def _generate_mock_context(self, rec: Dict[str, Any]) -> Dict[str, Any]:
         """Generate mock database context for testing."""
         return {
-            'tables': ['games', 'players', 'teams', 'player_stats'],
-            'relevant_tables': self._identify_relevant_tables(rec),
-            'sample_data': {},
-            's3_resources': []
+            "tables": ["games", "players", "teams", "player_stats"],
+            "relevant_tables": self._identify_relevant_tables(rec),
+            "sample_data": {},
+            "s3_resources": [],
         }
 
     def _identify_relevant_tables(self, rec: Dict[str, Any]) -> List[str]:
@@ -125,13 +124,13 @@ class MCPImplementationGenerator:
         rec_text = f"{rec['title']} {rec.get('reasoning', '')}".lower()
 
         table_keywords = {
-            'games': ['game', 'match', 'simulation'],
-            'players': ['player', 'athlete'],
-            'teams': ['team', 'franchise'],
-            'player_stats': ['stats', 'statistics', 'metrics', 'performance'],
-            'betting_odds': ['betting', 'odds', 'gambling'],
-            'features': ['feature', 'engineering'],
-            'models': ['model', 'ml', 'machine learning', 'prediction']
+            "games": ["game", "match", "simulation"],
+            "players": ["player", "athlete"],
+            "teams": ["team", "franchise"],
+            "player_stats": ["stats", "statistics", "metrics", "performance"],
+            "betting_odds": ["betting", "odds", "gambling"],
+            "features": ["feature", "engineering"],
+            "models": ["model", "ml", "machine learning", "prediction"],
         }
 
         relevant = []
@@ -139,33 +138,47 @@ class MCPImplementationGenerator:
             if any(kw in rec_text for kw in keywords):
                 relevant.append(table)
 
-        return relevant if relevant else ['games', 'players']
+        return relevant if relevant else ["games", "players"]
 
     def _to_class_name(self, title: str) -> str:
         """Convert recommendation title to Python class name."""
         # Remove special characters and convert to PascalCase
-        words = re.sub(r'[^a-zA-Z0-9\s]', '', title).split()
-        return ''.join(word.capitalize() for word in words)
+        words = re.sub(r"[^a-zA-Z0-9\s]", "", title).split()
+        return "".join(word.capitalize() for word in words)
 
     def _to_snake_case(self, title: str) -> str:
         """Convert recommendation title to snake_case."""
         # Remove special characters and convert to snake_case
-        words = re.sub(r'[^a-zA-Z0-9\s]', '', title).lower().split()
-        return '_'.join(words)
+        words = re.sub(r"[^a-zA-Z0-9\s]", "", title).lower().split()
+        return "_".join(words)
 
     def _determine_file_types(self, rec: Dict[str, Any]) -> List[str]:
         """Determine which file types to generate based on recommendation."""
         rec_text = f"{rec['title']} {rec.get('reasoning', '')}".lower()
 
-        file_types = ['python', 'test']  # Always generate Python and tests
+        file_types = ["python", "test"]  # Always generate Python and tests
 
         # Add SQL if database-related
-        if any(kw in rec_text for kw in ['database', 'table', 'schema', 'sql', 'migration', 'data']):
-            file_types.append('sql')
+        if any(
+            kw in rec_text
+            for kw in ["database", "table", "schema", "sql", "migration", "data"]
+        ):
+            file_types.append("sql")
 
         # Add CloudFormation if infrastructure-related
-        if any(kw in rec_text for kw in ['infrastructure', 'aws', 'deployment', 'lambda', 's3', 'rds', 'cloudformation']):
-            file_types.append('cloudformation')
+        if any(
+            kw in rec_text
+            for kw in [
+                "infrastructure",
+                "aws",
+                "deployment",
+                "lambda",
+                "s3",
+                "rds",
+                "cloudformation",
+            ]
+        ):
+            file_types.append("cloudformation")
 
         return file_types
 
@@ -185,41 +198,51 @@ class MCPImplementationGenerator:
         # Phase-specific subdirectory mappings
         phase_subdirs = {
             1: {
-                '1.1_data_validation': ['validation', 'statistical', 'hypothesis'],
-                '1.2_quality_checks': ['quality', 'econometric', 'checks']
+                "1.1_data_validation": ["validation", "statistical", "hypothesis"],
+                "1.2_quality_checks": ["quality", "econometric", "checks"],
             },
             2: {
-                '2.1_feature_engineering': ['feature', 'engineering'],
-                '2.2_statistical_pipelines': ['statistical', 'pipeline'],
-                '2.3_data_processing': ['processing', 'etl', 'transformation']
+                "2.1_feature_engineering": ["feature", "engineering"],
+                "2.2_statistical_pipelines": ["statistical", "pipeline"],
+                "2.3_data_processing": ["processing", "etl", "transformation"],
             },
-            3: {
-                '3.1_database_monitoring': ['database', 'monitoring', 'dashboard']
-            },
-            4: {
-                '4.1_simulation_data': ['simulation', 'panel', 'temporal']
-            },
+            3: {"3.1_database_monitoring": ["database", "monitoring", "dashboard"]},
+            4: {"4.1_simulation_data": ["simulation", "panel", "temporal"]},
             5: {
-                '5.1_feature_engineering': ['feature', 'engineering'],
-                '5.2_model_management': ['model', 'versioning', 'registry', 'mlflow'],
-                '5.3_model_operations': ['deployment', 'serving', 'inference', 'retraining'],
-                '5.4_model_analysis': ['analysis', 'explainability', 'shap', 'interpretability'],
-                '5.5_experimentation': ['experiment', 'a/b test', 'testing']
+                "5.1_feature_engineering": ["feature", "engineering"],
+                "5.2_model_management": ["model", "versioning", "registry", "mlflow"],
+                "5.3_model_operations": [
+                    "deployment",
+                    "serving",
+                    "inference",
+                    "retraining",
+                ],
+                "5.4_model_analysis": [
+                    "analysis",
+                    "explainability",
+                    "shap",
+                    "interpretability",
+                ],
+                "5.5_experimentation": ["experiment", "a/b test", "testing"],
             },
             6: {
-                '6.1_monitoring_dashboards': ['monitoring', 'dashboard', 'observability'],
-                '6.2_experiment_tracking': ['experiment', 'tracking', 'mlflow']
+                "6.1_monitoring_dashboards": [
+                    "monitoring",
+                    "dashboard",
+                    "observability",
+                ],
+                "6.2_experiment_tracking": ["experiment", "tracking", "mlflow"],
             },
             8: {
-                '8.1_statistical_frameworks': ['statistical', 'framework', 'bayesian'],
-                '8.2_data_analysis': ['analysis', 'time series', 'econometric'],
-                '8.3_model_validation': ['validation', 'testing'],
-                '8.4_reporting_dashboards': ['reporting', 'dashboard', 'visualization']
+                "8.1_statistical_frameworks": ["statistical", "framework", "bayesian"],
+                "8.2_data_analysis": ["analysis", "time series", "econometric"],
+                "8.3_model_validation": ["validation", "testing"],
+                "8.4_reporting_dashboards": ["reporting", "dashboard", "visualization"],
             },
             9: {
-                '9.1_deployment_strategies': ['deployment', 'shadow', 'strategy'],
-                '9.2_system_monitoring': ['system', 'monitoring', 'infrastructure']
-            }
+                "9.1_deployment_strategies": ["deployment", "shadow", "strategy"],
+                "9.2_system_monitoring": ["system", "monitoring", "infrastructure"],
+            },
         }
 
         if phase not in phase_subdirs:
@@ -245,14 +268,12 @@ class MCPImplementationGenerator:
             result = result.replace(placeholder, str(value))
 
         # Remove unreplaced placeholders (optional sections)
-        result = re.sub(r'\{\{[^}]+\}\}', '# TODO: Implement this section', result)
+        result = re.sub(r"\{\{[^}]+\}\}", "# TODO: Implement this section", result)
 
         return result
 
     async def generate_files_for_recommendation(
-        self,
-        rec: Dict[str, Any],
-        phase: int
+        self, rec: Dict[str, Any], phase: int
     ) -> Dict[str, List[str]]:
         """
         Generate all implementation files for a recommendation.
@@ -288,70 +309,72 @@ class MCPImplementationGenerator:
         output_dir.mkdir(parents=True, exist_ok=True)
 
         # Prepare template context
-        class_name = self._to_class_name(rec['title'])
-        snake_name = self._to_snake_case(rec['title'])
+        class_name = self._to_class_name(rec["title"])
+        snake_name = self._to_snake_case(rec["title"])
 
         context = {
-            'rec_id': rec['id'],
-            'rec_title': rec['title'],
-            'class_name': class_name,
-            'priority': rec.get('category', 'unknown').upper(),
-            'source_book': ', '.join(rec.get('source_books', ['Unknown'])),
-            'description': rec.get('reasoning', 'No description available'),
-            'expected_impact': rec.get('impact', 'MEDIUM'),
-            'time_estimate': rec.get('time_estimate', '1 week'),
-            'generated_date': datetime.now().isoformat(),
-            'table_name': db_context.get('relevant_tables', ['data'])[0],
-            'setup_logic': 'pass  # TODO: Implement setup',
-            'prerequisite_validation': 'pass  # TODO: Validate prerequisites',
-            'main_logic': 'pass  # TODO: Implement main logic',
-            'results_dict': '',
-            'cleanup_logic': 'pass  # TODO: Implement cleanup',
-            'test_config': '',
-            'specific_tests': '',
-            'cleanup_verification': 'pass',
-            'integration_config': '',
-            'e2e_verification': 'pass',
-            'integration_tests': '',
-            'migration_up_logic': '-- TODO: Add migration logic',
-            'migration_down_logic': '-- TODO: Add rollback logic',
-            'migration_version': datetime.now().strftime('%Y%m%d%H%M%S'),
-            'prerequisites': '-- None',
-            'post_migration_steps': '-- None',
-            'migration_file': f"{snake_name}_migration",
-            'parameters': '# TODO: Add parameters',
-            'resources': '# TODO: Add resources',
-            'outputs': '# TODO: Add outputs',
-            'bucket_suffix': snake_name,
-            'function_name': snake_name,
-            'policy_name': f"{class_name}Policy"
+            "rec_id": rec["id"],
+            "rec_title": rec["title"],
+            "class_name": class_name,
+            "priority": rec.get("category", "unknown").upper(),
+            "source_book": ", ".join(rec.get("source_books", ["Unknown"])),
+            "description": rec.get("reasoning", "No description available"),
+            "expected_impact": rec.get("impact", "MEDIUM"),
+            "time_estimate": rec.get("time_estimate", "1 week"),
+            "generated_date": datetime.now().isoformat(),
+            "table_name": db_context.get("relevant_tables", ["data"])[0],
+            "setup_logic": "pass  # TODO: Implement setup",
+            "prerequisite_validation": "pass  # TODO: Validate prerequisites",
+            "main_logic": "pass  # TODO: Implement main logic",
+            "results_dict": "",
+            "cleanup_logic": "pass  # TODO: Implement cleanup",
+            "test_config": "",
+            "specific_tests": "",
+            "cleanup_verification": "pass",
+            "integration_config": "",
+            "e2e_verification": "pass",
+            "integration_tests": "",
+            "migration_up_logic": "-- TODO: Add migration logic",
+            "migration_down_logic": "-- TODO: Add rollback logic",
+            "migration_version": datetime.now().strftime("%Y%m%d%H%M%S"),
+            "prerequisites": "-- None",
+            "post_migration_steps": "-- None",
+            "migration_file": f"{snake_name}_migration",
+            "parameters": "# TODO: Add parameters",
+            "resources": "# TODO: Add resources",
+            "outputs": "# TODO: Add outputs",
+            "bucket_suffix": snake_name,
+            "function_name": snake_name,
+            "policy_name": f"{class_name}Policy",
         }
 
         # Generate each file type
         for file_type in file_types:
             try:
-                if file_type == 'python':
+                if file_type == "python":
                     filename = f"implement_{rec['id']}.py"
-                    content = self._render_template(self.templates['python'], context)
-                elif file_type == 'test':
+                    content = self._render_template(self.templates["python"], context)
+                elif file_type == "test":
                     filename = f"test_{rec['id']}.py"
-                    content = self._render_template(self.templates['test'], context)
-                elif file_type == 'sql':
+                    content = self._render_template(self.templates["test"], context)
+                elif file_type == "sql":
                     filename = f"{rec['id']}_migration.sql"
-                    content = self._render_template(self.templates['sql'], context)
-                elif file_type == 'cloudformation':
+                    content = self._render_template(self.templates["sql"], context)
+                elif file_type == "cloudformation":
                     filename = f"{rec['id']}_infrastructure.yaml"
-                    content = self._render_template(self.templates['cloudformation'], context)
+                    content = self._render_template(
+                        self.templates["cloudformation"], context
+                    )
                 else:
                     continue
 
                 # Write file
                 file_path = output_dir / filename
-                with open(file_path, 'w') as f:
+                with open(file_path, "w") as f:
                     f.write(content)
 
                 # Make Python files executable
-                if file_type in ['python', 'test']:
+                if file_type in ["python", "test"]:
                     os.chmod(file_path, 0o755)
 
                 generated_files.append(str(file_path))
@@ -364,9 +387,11 @@ class MCPImplementationGenerator:
 
         # Generate IMPLEMENTATION_GUIDE.md
         try:
-            guide_content = self._generate_implementation_guide(rec, generated_files, phase, subdir)
+            guide_content = self._generate_implementation_guide(
+                rec, generated_files, phase, subdir
+            )
             guide_path = output_dir / f"{rec['id']}_IMPLEMENTATION_GUIDE.md"
-            with open(guide_path, 'w') as f:
+            with open(guide_path, "w") as f:
                 f.write(guide_content)
             generated_files.append(str(guide_path))
             logger.info(f"  ✅ Generated: IMPLEMENTATION_GUIDE.md")
@@ -374,11 +399,11 @@ class MCPImplementationGenerator:
             errors.append(f"Failed to generate implementation guide: {e}")
 
         return {
-            'generated_files': generated_files,
-            'errors': errors,
-            'recommendation_id': rec['id'],
-            'phase': phase,
-            'subdirectory': subdir
+            "generated_files": generated_files,
+            "errors": errors,
+            "recommendation_id": rec["id"],
+            "phase": phase,
+            "subdirectory": subdir,
         }
 
     def _generate_implementation_guide(
@@ -386,7 +411,7 @@ class MCPImplementationGenerator:
         rec: Dict[str, Any],
         generated_files: List[str],
         phase: int,
-        subdir: Optional[str]
+        subdir: Optional[str],
     ) -> str:
         """Generate implementation guide markdown."""
         guide = f"""# Implementation Guide: {rec['title']}
@@ -505,8 +530,7 @@ If issues occur:
         return guide
 
     async def generate_for_all_recommendations(
-        self,
-        recommendations_file: str
+        self, recommendations_file: str
     ) -> Dict[str, Any]:
         """
         Generate implementation files for all recommendations.
@@ -522,10 +546,10 @@ If issues occur:
         logger.info("=" * 80)
 
         # Load recommendations
-        with open(recommendations_file, 'r') as f:
+        with open(recommendations_file, "r") as f:
             data = json.load(f)
 
-        recommendations = data.get('recommendations', [])
+        recommendations = data.get("recommendations", [])
         logger.info(f"Loaded {len(recommendations)} recommendations")
 
         # Check MCP server
@@ -534,6 +558,7 @@ If issues occur:
         # Import phase mapper
         sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
         from phase_mapper import PhaseMapper
+
         phase_mapper = PhaseMapper()
 
         # Generate files for each recommendation
@@ -548,20 +573,22 @@ If issues occur:
             for phase in phases:
                 result = await self.generate_files_for_recommendation(rec, phase)
                 results.append(result)
-                total_files += len(result['generated_files'])
-                total_errors += len(result['errors'])
+                total_files += len(result["generated_files"])
+                total_errors += len(result["errors"])
 
         summary = {
-            'total_recommendations': len(recommendations),
-            'total_files_generated': total_files,
-            'total_errors': total_errors,
-            'results': results,
-            'timestamp': datetime.now().isoformat()
+            "total_recommendations": len(recommendations),
+            "total_files_generated": total_files,
+            "total_errors": total_errors,
+            "results": results,
+            "timestamp": datetime.now().isoformat(),
         }
 
         # Save summary
-        summary_file = self.output_base.parent / 'implementation_generation_summary.json'
-        with open(summary_file, 'w') as f:
+        summary_file = (
+            self.output_base.parent / "implementation_generation_summary.json"
+        )
+        with open(summary_file, "w") as f:
             json.dump(summary, f, indent=2)
 
         logger.info("=" * 80)
@@ -578,27 +605,37 @@ async def main():
     """Main entry point."""
     import argparse
 
-    parser = argparse.ArgumentParser(description='Generate implementation files from book recommendations')
-    parser.add_argument('--recommendations', default='analysis_results/master_recommendations.json',
-                        help='Path to master recommendations file')
-    parser.add_argument('--output-base', default='/Users/ryanranft/nba-simulator-aws/docs/phases',
-                        help='Base directory for generated files')
-    parser.add_argument('--templates-dir', default='templates',
-                        help='Directory containing templates')
-    parser.add_argument('--mcp-server', default='http://localhost:8000',
-                        help='MCP server URL')
+    parser = argparse.ArgumentParser(
+        description="Generate implementation files from book recommendations"
+    )
+    parser.add_argument(
+        "--recommendations",
+        default="analysis_results/master_recommendations.json",
+        help="Path to master recommendations file",
+    )
+    parser.add_argument(
+        "--output-base",
+        default="/Users/ryanranft/nba-simulator-aws/docs/phases",
+        help="Base directory for generated files",
+    )
+    parser.add_argument(
+        "--templates-dir", default="templates", help="Directory containing templates"
+    )
+    parser.add_argument(
+        "--mcp-server", default="http://localhost:8000", help="MCP server URL"
+    )
 
     args = parser.parse_args()
 
     generator = MCPImplementationGenerator(
         mcp_server_url=args.mcp_server,
         output_base=args.output_base,
-        templates_dir=args.templates_dir
+        templates_dir=args.templates_dir,
     )
 
     summary = await generator.generate_for_all_recommendations(args.recommendations)
 
-    if summary['total_errors'] > 0:
+    if summary["total_errors"] > 0:
         logger.warning(f"⚠️  Completed with {summary['total_errors']} errors")
         sys.exit(1)
     else:
@@ -606,10 +643,5 @@ async def main():
         sys.exit(0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())
-
-
-
-
-

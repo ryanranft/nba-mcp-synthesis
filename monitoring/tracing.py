@@ -21,6 +21,7 @@ try:
     from opentelemetry.trace import Status, StatusCode
     from opentelemetry.instrumentation.requests import RequestsInstrumentor
     from opentelemetry.instrumentation.asyncio import AsyncioInstrumentor
+
     TRACING_AVAILABLE = True
 except ImportError:
     TRACING_AVAILABLE = False
@@ -38,7 +39,7 @@ class TracingConfig:
         service_name: str = "nba-mcp-synthesis",
         jaeger_host: str = "localhost",
         jaeger_port: int = 6831,
-        enabled: bool = True
+        enabled: bool = True,
     ):
         self.service_name = service_name
         self.jaeger_host = jaeger_host
@@ -66,11 +67,13 @@ class DistributedTracer:
         """Initialize OpenTelemetry tracing"""
         try:
             # Create resource with service info
-            resource = Resource.create({
-                "service.name": self.config.service_name,
-                "service.version": "1.0.0",
-                "deployment.environment": os.getenv("ENVIRONMENT", "development")
-            })
+            resource = Resource.create(
+                {
+                    "service.name": self.config.service_name,
+                    "service.version": "1.0.0",
+                    "deployment.environment": os.getenv("ENVIRONMENT", "development"),
+                }
+            )
 
             # Create tracer provider
             self.provider = TracerProvider(resource=resource)
@@ -95,7 +98,9 @@ class DistributedTracer:
             RequestsInstrumentor().instrument()
             AsyncioInstrumentor().instrument()
 
-            logger.info(f"✅ Distributed tracing initialized (Jaeger: {self.config.jaeger_host}:{self.config.jaeger_port})")
+            logger.info(
+                f"✅ Distributed tracing initialized (Jaeger: {self.config.jaeger_host}:{self.config.jaeger_port})"
+            )
 
         except Exception as e:
             logger.error(f"Failed to initialize tracing: {e}")
@@ -105,7 +110,7 @@ class DistributedTracer:
         self,
         name: str,
         attributes: Optional[Dict[str, Any]] = None,
-        parent_context: Optional[Any] = None
+        parent_context: Optional[Any] = None,
     ):
         """
         Create a new span
@@ -123,9 +128,7 @@ class DistributedTracer:
 
         try:
             span = self.tracer.start_span(
-                name,
-                context=parent_context,
-                attributes=attributes or {}
+                name, context=parent_context, attributes=attributes or {}
             )
             return span
         except Exception as e:
@@ -135,7 +138,7 @@ class DistributedTracer:
     def trace_function(
         self,
         span_name: Optional[str] = None,
-        attributes: Optional[Dict[str, Any]] = None
+        attributes: Optional[Dict[str, Any]] = None,
     ):
         """
         Decorator to trace a function
@@ -149,6 +152,7 @@ class DistributedTracer:
             async def my_function(arg1, arg2):
                 return result
         """
+
         def decorator(func):
             @wraps(func)
             async def async_wrapper(*args, **kwargs):
@@ -165,14 +169,12 @@ class DistributedTracer:
                 with self.create_span(name, attrs) as span:
                     try:
                         result = await func(*args, **kwargs)
-                        if hasattr(span, 'set_status'):
+                        if hasattr(span, "set_status"):
                             span.set_status(Status(StatusCode.OK))
                         return result
                     except Exception as e:
-                        if hasattr(span, 'set_status'):
-                            span.set_status(
-                                Status(StatusCode.ERROR, str(e))
-                            )
+                        if hasattr(span, "set_status"):
+                            span.set_status(Status(StatusCode.ERROR, str(e)))
                             span.set_attribute("exception.type", type(e).__name__)
                             span.set_attribute("exception.message", str(e))
                         raise
@@ -191,14 +193,12 @@ class DistributedTracer:
                 with self.create_span(name, attrs) as span:
                     try:
                         result = func(*args, **kwargs)
-                        if hasattr(span, 'set_status'):
+                        if hasattr(span, "set_status"):
                             span.set_status(Status(StatusCode.OK))
                         return result
                     except Exception as e:
-                        if hasattr(span, 'set_status'):
-                            span.set_status(
-                                Status(StatusCode.ERROR, str(e))
-                            )
+                        if hasattr(span, "set_status"):
+                            span.set_status(Status(StatusCode.ERROR, str(e)))
                             span.set_attribute("exception.type", type(e).__name__)
                             span.set_attribute("exception.message", str(e))
                         raise
@@ -278,7 +278,7 @@ def get_tracer() -> DistributedTracer:
             service_name=os.getenv("TRACING_SERVICE_NAME", "nba-mcp-synthesis"),
             jaeger_host=os.getenv("JAEGER_HOST", "localhost"),
             jaeger_port=int(os.getenv("JAEGER_PORT", "6831")),
-            enabled=os.getenv("TRACING_ENABLED", "true").lower() == "true"
+            enabled=os.getenv("TRACING_ENABLED", "true").lower() == "true",
         )
         _tracer_instance = DistributedTracer(config)
 
@@ -318,23 +318,23 @@ class traced_span:
 
     def __enter__(self):
         self.span = self.tracer.create_span(self.name, self.attributes)
-        if hasattr(self.span, '__enter__'):
+        if hasattr(self.span, "__enter__"):
             return self.span.__enter__()
         return self
 
     def __exit__(self, *args):
-        if hasattr(self.span, '__exit__'):
+        if hasattr(self.span, "__exit__"):
             return self.span.__exit__(*args)
         return False
 
     def set_attribute(self, key: str, value: Any):
         """Set attribute on the span"""
-        if self.span and hasattr(self.span, 'set_attribute'):
+        if self.span and hasattr(self.span, "set_attribute"):
             self.span.set_attribute(key, value)
 
     def add_event(self, name: str, **attributes):
         """Add event to the span"""
-        if self.span and hasattr(self.span, 'add_event'):
+        if self.span and hasattr(self.span, "add_event"):
             self.span.add_event(name, attributes)
 
 
@@ -342,9 +342,9 @@ class traced_span:
 if __name__ == "__main__":
     import sys
 
-    print("="*70)
+    print("=" * 70)
     print("NBA MCP Synthesis - Distributed Tracing Test")
-    print("="*70)
+    print("=" * 70)
     print()
 
     if not TRACING_AVAILABLE:
@@ -399,11 +399,11 @@ if __name__ == "__main__":
     # Shutdown
     tracer.shutdown()
 
-    print("="*70)
+    print("=" * 70)
     print("✅ Tracing test complete!")
     print()
     print("To view traces:")
     print("1. Start Jaeger: docker-compose -f docker-compose.jaeger.yml up -d")
     print("2. Open: http://localhost:16686")
     print("3. Select service: nba-mcp-synthesis")
-    print("="*70)
+    print("=" * 70)

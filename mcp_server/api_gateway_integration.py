@@ -38,6 +38,7 @@ logger = logging.getLogger(__name__)
 
 class GatewayType(Enum):
     """Supported API gateway types"""
+
     KONG = "kong"
     AWS_API_GATEWAY = "aws_api_gateway"
     TYK = "tyk"
@@ -46,6 +47,7 @@ class GatewayType(Enum):
 
 class AuthType(Enum):
     """Authentication types"""
+
     JWT = "jwt"
     OAUTH2 = "oauth2"
     API_KEY = "api_key"
@@ -56,6 +58,7 @@ class AuthType(Enum):
 @dataclass
 class RateLimitConfig:
     """Rate limiting configuration"""
+
     requests_per_second: int = 100
     burst_size: int = 200
     limit_by: str = "ip"  # ip, user, api_key
@@ -64,6 +67,7 @@ class RateLimitConfig:
 @dataclass
 class CacheConfig:
     """Response caching configuration"""
+
     enabled: bool = True
     ttl_seconds: int = 300
     cache_key_include: List[str] = field(default_factory=lambda: ["path", "query"])
@@ -72,6 +76,7 @@ class CacheConfig:
 @dataclass
 class CircuitBreakerConfig:
     """Circuit breaker configuration"""
+
     enabled: bool = True
     failure_threshold: int = 5
     success_threshold: int = 2
@@ -81,6 +86,7 @@ class CircuitBreakerConfig:
 @dataclass
 class Route:
     """API route definition"""
+
     path: str
     methods: List[str]
     upstream_url: str
@@ -96,6 +102,7 @@ class Route:
 @dataclass
 class Service:
     """Service definition"""
+
     name: str
     protocol: str = "http"
     host: str = "localhost"
@@ -110,6 +117,7 @@ class Service:
 @dataclass
 class APIGatewayConfig:
     """Complete API gateway configuration"""
+
     name: str
     services: List[Service]
     routes: List[Route]
@@ -128,31 +136,31 @@ class KongConfigGenerator:
     def generate_service(service: Service) -> Dict[str, Any]:
         """Generate Kong service configuration"""
         return {
-            'name': service.name,
-            'protocol': service.protocol,
-            'host': service.host,
-            'port': service.port,
-            'path': service.path,
-            'retries': service.retries,
-            'connect_timeout': service.connect_timeout,
-            'write_timeout': service.write_timeout,
-            'read_timeout': service.read_timeout
+            "name": service.name,
+            "protocol": service.protocol,
+            "host": service.host,
+            "port": service.port,
+            "path": service.path,
+            "retries": service.retries,
+            "connect_timeout": service.connect_timeout,
+            "write_timeout": service.write_timeout,
+            "read_timeout": service.read_timeout,
         }
 
     @staticmethod
     def generate_route(route: Route, service_name: str) -> Dict[str, Any]:
         """Generate Kong route configuration"""
         config = {
-            'name': f"{service_name}_{route.path.replace('/', '_')}",
-            'paths': [route.path],
-            'methods': route.methods,
-            'strip_path': route.strip_path,
-            'preserve_host': route.preserve_host,
-            'service': {'name': service_name}
+            "name": f"{service_name}_{route.path.replace('/', '_')}",
+            "paths": [route.path],
+            "methods": route.methods,
+            "strip_path": route.strip_path,
+            "preserve_host": route.preserve_host,
+            "service": {"name": service_name},
         }
 
         if route.tags:
-            config['tags'] = route.tags
+            config["tags"] = route.tags
 
         return config
 
@@ -163,56 +171,64 @@ class KongConfigGenerator:
 
         # Rate limiting plugin
         if route.rate_limit:
-            plugins.append({
-                'name': 'rate-limiting',
-                'config': {
-                    'second': route.rate_limit.requests_per_second,
-                    'policy': 'local',
-                    'limit_by': route.rate_limit.limit_by
+            plugins.append(
+                {
+                    "name": "rate-limiting",
+                    "config": {
+                        "second": route.rate_limit.requests_per_second,
+                        "policy": "local",
+                        "limit_by": route.rate_limit.limit_by,
+                    },
                 }
-            })
+            )
 
         # Response caching plugin
         if route.cache and route.cache.enabled:
-            plugins.append({
-                'name': 'proxy-cache',
-                'config': {
-                    'strategy': 'memory',
-                    'cache_ttl': route.cache.ttl_seconds,
-                    'cache_control': True
+            plugins.append(
+                {
+                    "name": "proxy-cache",
+                    "config": {
+                        "strategy": "memory",
+                        "cache_ttl": route.cache.ttl_seconds,
+                        "cache_control": True,
+                    },
                 }
-            })
+            )
 
         # Authentication plugin
         if route.auth != AuthType.NONE:
             if route.auth == AuthType.JWT:
-                plugins.append({'name': 'jwt'})
+                plugins.append({"name": "jwt"})
             elif route.auth == AuthType.API_KEY:
-                plugins.append({
-                    'name': 'key-auth',
-                    'config': {
-                        'key_names': ['apikey', 'X-API-Key']
+                plugins.append(
+                    {
+                        "name": "key-auth",
+                        "config": {"key_names": ["apikey", "X-API-Key"]},
                     }
-                })
+                )
             elif route.auth == AuthType.OAUTH2:
-                plugins.append({
-                    'name': 'oauth2',
-                    'config': {
-                        'scopes': ['read', 'write'],
-                        'mandatory_scope': True
+                plugins.append(
+                    {
+                        "name": "oauth2",
+                        "config": {
+                            "scopes": ["read", "write"],
+                            "mandatory_scope": True,
+                        },
                     }
-                })
+                )
 
         # Circuit breaker plugin
         if route.circuit_breaker and route.circuit_breaker.enabled:
-            plugins.append({
-                'name': 'circuit-breaker',
-                'config': {
-                    'failure_threshold': route.circuit_breaker.failure_threshold,
-                    'success_threshold': route.circuit_breaker.success_threshold,
-                    'timeout': route.circuit_breaker.timeout_seconds
+            plugins.append(
+                {
+                    "name": "circuit-breaker",
+                    "config": {
+                        "failure_threshold": route.circuit_breaker.failure_threshold,
+                        "success_threshold": route.circuit_breaker.success_threshold,
+                        "timeout": route.circuit_breaker.timeout_seconds,
+                    },
                 }
-            })
+            )
 
         return plugins
 
@@ -220,15 +236,15 @@ class KongConfigGenerator:
     def generate_complete_config(config: APIGatewayConfig) -> Dict[str, Any]:
         """Generate complete Kong configuration"""
         kong_config = {
-            '_format_version': '2.1',
-            'services': [],
-            'routes': [],
-            'plugins': []
+            "_format_version": "2.1",
+            "services": [],
+            "routes": [],
+            "plugins": [],
         }
 
         # Generate services
         for service in config.services:
-            kong_config['services'].append(
+            kong_config["services"].append(
                 KongConfigGenerator.generate_service(service)
             )
 
@@ -236,43 +252,44 @@ class KongConfigGenerator:
         for service in config.services:
             for route in config.routes:
                 kong_route = KongConfigGenerator.generate_route(route, service.name)
-                kong_config['routes'].append(kong_route)
+                kong_config["routes"].append(kong_route)
 
                 # Add route-specific plugins
                 route_plugins = KongConfigGenerator.generate_plugins(route)
                 for plugin in route_plugins:
-                    plugin['route'] = kong_route['name']
-                    kong_config['plugins'].append(plugin)
+                    plugin["route"] = kong_route["name"]
+                    kong_config["plugins"].append(plugin)
 
         # Global plugins
         if config.global_rate_limit:
-            kong_config['plugins'].append({
-                'name': 'rate-limiting',
-                'config': {
-                    'second': config.global_rate_limit.requests_per_second,
-                    'policy': 'local',
-                    'limit_by': config.global_rate_limit.limit_by
+            kong_config["plugins"].append(
+                {
+                    "name": "rate-limiting",
+                    "config": {
+                        "second": config.global_rate_limit.requests_per_second,
+                        "policy": "local",
+                        "limit_by": config.global_rate_limit.limit_by,
+                    },
                 }
-            })
+            )
 
         if config.cors_enabled:
-            kong_config['plugins'].append({
-                'name': 'cors',
-                'config': {
-                    'origins': config.cors_origins,
-                    'methods': ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-                    'headers': ['Accept', 'Content-Type', 'Authorization'],
-                    'credentials': True
+            kong_config["plugins"].append(
+                {
+                    "name": "cors",
+                    "config": {
+                        "origins": config.cors_origins,
+                        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+                        "headers": ["Accept", "Content-Type", "Authorization"],
+                        "credentials": True,
+                    },
                 }
-            })
+            )
 
         if config.logging_enabled:
-            kong_config['plugins'].append({
-                'name': 'file-log',
-                'config': {
-                    'path': '/var/log/kong/access.log'
-                }
-            })
+            kong_config["plugins"].append(
+                {"name": "file-log", "config": {"path": "/var/log/kong/access.log"}}
+            )
 
         return kong_config
 
@@ -284,66 +301,61 @@ class AWSAPIGatewayConfigGenerator:
     def generate_openapi_spec(config: APIGatewayConfig) -> Dict[str, Any]:
         """Generate OpenAPI 3.0 spec for AWS API Gateway"""
         spec = {
-            'openapi': '3.0.0',
-            'info': {
-                'title': config.name,
-                'version': '1.0.0'
-            },
-            'servers': [
+            "openapi": "3.0.0",
+            "info": {"title": config.name, "version": "1.0.0"},
+            "servers": [
                 {
-                    'url': f"https://{service.host}:{service.port}{service.path}",
-                    'description': service.name
+                    "url": f"https://{service.host}:{service.port}{service.path}",
+                    "description": service.name,
                 }
                 for service in config.services
             ],
-            'paths': {},
-            'components': {
-                'securitySchemes': {}
-            }
+            "paths": {},
+            "components": {"securitySchemes": {}},
         }
 
         # Add authentication schemes
         if config.global_auth == AuthType.JWT:
-            spec['components']['securitySchemes']['jwt'] = {
-                'type': 'http',
-                'scheme': 'bearer',
-                'bearerFormat': 'JWT'
+            spec["components"]["securitySchemes"]["jwt"] = {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
             }
         elif config.global_auth == AuthType.API_KEY:
-            spec['components']['securitySchemes']['apiKey'] = {
-                'type': 'apiKey',
-                'name': 'x-api-key',
-                'in': 'header'
+            spec["components"]["securitySchemes"]["apiKey"] = {
+                "type": "apiKey",
+                "name": "x-api-key",
+                "in": "header",
             }
 
         # Add paths
         for route in config.routes:
-            if route.path not in spec['paths']:
-                spec['paths'][route.path] = {}
+            if route.path not in spec["paths"]:
+                spec["paths"][route.path] = {}
 
             for method in route.methods:
                 method_lower = method.lower()
-                spec['paths'][route.path][method_lower] = {
-                    'summary': f"{method} {route.path}",
-                    'responses': {
-                        '200': {
-                            'description': 'Successful response'
-                        }
+                spec["paths"][route.path][method_lower] = {
+                    "summary": f"{method} {route.path}",
+                    "responses": {"200": {"description": "Successful response"}},
+                    "x-amazon-apigateway-integration": {
+                        "uri": route.upstream_url,
+                        "type": "http_proxy",
+                        "httpMethod": method,
+                        "connectionType": "INTERNET",
                     },
-                    'x-amazon-apigateway-integration': {
-                        'uri': route.upstream_url,
-                        'type': 'http_proxy',
-                        'httpMethod': method,
-                        'connectionType': 'INTERNET'
-                    }
                 }
 
                 # Add security requirement
                 if route.auth != AuthType.NONE:
                     if route.auth == AuthType.JWT:
-                        spec['paths'][route.path][method_lower]['security'] = [{'jwt': []}]
+                        spec["paths"][route.path][method_lower]["security"] = [
+                            {"jwt": []}
+                        ]
                     elif route.auth == AuthType.API_KEY:
-                        spec['paths'][route.path][method_lower]['security'] = [{'apiKey': []}]
+                        spec["paths"][route.path][method_lower]["security"] = [
+                            {"apiKey": []}
+                        ]
 
         return spec
 
@@ -377,7 +389,7 @@ class APIGatewayManager:
     def save_config(self, config: APIGatewayConfig, output_file: str) -> None:
         """Generate and save configuration to file"""
         config_content = self.generate_config(config)
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             f.write(config_content)
         logger.info(f"Configuration saved to {output_file}")
 
@@ -392,7 +404,7 @@ def create_nba_mcp_gateway() -> APIGatewayConfig:
         host="nba-mcp.internal",
         port=8000,
         path="/",
-        retries=3
+        retries=3,
     )
 
     # Define routes
@@ -404,7 +416,7 @@ def create_nba_mcp_gateway() -> APIGatewayConfig:
             rate_limit=RateLimitConfig(requests_per_second=100, burst_size=200),
             cache=CacheConfig(enabled=True, ttl_seconds=300),
             auth=AuthType.API_KEY,
-            tags=["players"]
+            tags=["players"],
         ),
         Route(
             path="/api/v1/games",
@@ -413,7 +425,7 @@ def create_nba_mcp_gateway() -> APIGatewayConfig:
             rate_limit=RateLimitConfig(requests_per_second=50),
             cache=CacheConfig(enabled=True, ttl_seconds=60),
             auth=AuthType.NONE,
-            tags=["games"]
+            tags=["games"],
         ),
         Route(
             path="/api/v1/predictions",
@@ -422,10 +434,9 @@ def create_nba_mcp_gateway() -> APIGatewayConfig:
             rate_limit=RateLimitConfig(requests_per_second=10),
             auth=AuthType.JWT,
             circuit_breaker=CircuitBreakerConfig(
-                failure_threshold=5,
-                timeout_seconds=60
+                failure_threshold=5, timeout_seconds=60
             ),
-            tags=["predictions", "ml"]
+            tags=["predictions", "ml"],
         ),
         Route(
             path="/api/v1/stats",
@@ -434,8 +445,8 @@ def create_nba_mcp_gateway() -> APIGatewayConfig:
             rate_limit=RateLimitConfig(requests_per_second=200),
             cache=CacheConfig(enabled=True, ttl_seconds=600),
             auth=AuthType.NONE,
-            tags=["stats"]
-        )
+            tags=["stats"],
+        ),
     ]
 
     return APIGatewayConfig(
@@ -447,12 +458,13 @@ def create_nba_mcp_gateway() -> APIGatewayConfig:
         cors_enabled=True,
         cors_origins=["https://nba-mcp.example.com", "https://dashboard.nba-mcp.com"],
         logging_enabled=True,
-        monitoring_enabled=True
+        monitoring_enabled=True,
     )
 
 
 if __name__ == "__main__":
     import os
+
     logging.basicConfig(level=logging.INFO)
 
     # Create NBA MCP gateway configuration
@@ -475,4 +487,3 @@ if __name__ == "__main__":
     print(aws_config[:500] + "...\n")
 
     print("\nConfigurations saved to config/api_gateway/")
-

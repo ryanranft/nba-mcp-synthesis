@@ -13,13 +13,14 @@ from enum import Enum
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class CircuitState(Enum):
     """Circuit breaker states"""
-    CLOSED = "closed"      # Normal operation
-    OPEN = "open"          # Failures detected, blocking calls
+
+    CLOSED = "closed"  # Normal operation
+    OPEN = "open"  # Failures detected, blocking calls
     HALF_OPEN = "half_open"  # Testing if service recovered
 
 
@@ -34,7 +35,7 @@ class CircuitBreaker:
         failure_threshold: int = 5,
         success_threshold: int = 2,
         timeout: int = 60,
-        name: str = "default"
+        name: str = "default",
     ):
         """
         Initialize circuit breaker
@@ -64,7 +65,9 @@ class CircuitBreaker:
             if self.state == CircuitState.OPEN:
                 if self._should_attempt_reset():
                     self.state = CircuitState.HALF_OPEN
-                    logger.info(f"Circuit breaker [{self.name}] entering HALF_OPEN state")
+                    logger.info(
+                        f"Circuit breaker [{self.name}] entering HALF_OPEN state"
+                    )
                 else:
                     raise CircuitBreakerOpenError(
                         f"Circuit breaker [{self.name}] is OPEN. "
@@ -118,7 +121,9 @@ class CircuitBreaker:
             # Failed during test - reopen circuit
             self.state = CircuitState.OPEN
             self.success_count = 0
-            logger.warning(f"Circuit breaker [{self.name}] reopened - service still failing")
+            logger.warning(
+                f"Circuit breaker [{self.name}] reopened - service still failing"
+            )
 
         elif self.failure_count >= self.failure_threshold:
             # Too many failures - open circuit
@@ -139,6 +144,7 @@ class CircuitBreaker:
 
 class CircuitBreakerOpenError(Exception):
     """Raised when circuit breaker is open"""
+
     pass
 
 
@@ -148,7 +154,7 @@ def retry_with_backoff(
     max_delay: float = 60.0,
     exponential_base: float = 2.0,
     jitter: bool = True,
-    retry_on: tuple = (Exception,)
+    retry_on: tuple = (Exception,),
 ):
     """
     Decorator for retrying async functions with exponential backoff
@@ -194,11 +200,12 @@ def retry_with_backoff(
                         raise
 
                     # Calculate delay with exponential backoff
-                    delay = min(base_delay * (exponential_base ** attempt), max_delay)
+                    delay = min(base_delay * (exponential_base**attempt), max_delay)
 
                     # Add jitter
                     if jitter:
                         import random
+
                         delay = delay * (0.5 + random.random())
 
                     logger.warning(
@@ -222,7 +229,7 @@ async def retry_async(
     *args,
     max_retries: int = 3,
     base_delay: float = 1.0,
-    **kwargs
+    **kwargs,
 ) -> T:
     """
     Functional retry wrapper (without decorator)
@@ -250,7 +257,7 @@ async def retry_async(
             if attempt >= max_retries:
                 raise
 
-            delay = base_delay * (2 ** attempt)
+            delay = base_delay * (2**attempt)
             logger.warning(
                 f"Attempt {attempt + 1} failed: {e}. Retrying in {delay}s..."
             )
@@ -320,7 +327,7 @@ class ConnectionPool:
         """Close all connections in pool"""
         async with self.lock:
             for conn in self.connections:
-                if hasattr(conn, 'close'):
+                if hasattr(conn, "close"):
                     try:
                         await conn.close()
                     except:
@@ -364,10 +371,7 @@ class RateLimiter:
             elapsed = now - self.last_update
 
             # Add new tokens based on elapsed time
-            self.tokens = min(
-                self.capacity,
-                self.tokens + elapsed * self.rate
-            )
+            self.tokens = min(self.capacity, self.tokens + elapsed * self.rate)
             self.last_update = now
 
             # Try to consume tokens
@@ -421,11 +425,13 @@ def with_mcp_retry(func: Callable[..., Awaitable[T]]) -> Callable[..., Awaitable
         max_retries=3,
         base_delay=1.0,
         max_delay=30.0,
-        retry_on=(ConnectionError, TimeoutError, OSError)
+        retry_on=(ConnectionError, TimeoutError, OSError),
     )(func)
 
 
-def with_mcp_circuit_breaker(func: Callable[..., Awaitable[T]]) -> Callable[..., Awaitable[T]]:
+def with_mcp_circuit_breaker(
+    func: Callable[..., Awaitable[T]],
+) -> Callable[..., Awaitable[T]]:
     """Decorator for MCP operations with circuit breaker"""
     cb = get_circuit_breaker("mcp_server", failure_threshold=5, timeout=60)
     return cb.call(func)

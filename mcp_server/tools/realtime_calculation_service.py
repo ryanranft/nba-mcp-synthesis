@@ -31,7 +31,7 @@ import queue
 import warnings
 
 # Suppress warnings
-warnings.filterwarnings('ignore', category=UserWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
 
 logger = logging.getLogger(__name__)
 
@@ -40,8 +40,10 @@ logger = logging.getLogger(__name__)
 # Data Classes and Enums
 # =============================================================================
 
+
 class DataSourceType(str, Enum):
     """Types of data sources"""
+
     NBA_API = "nba_api"
     LIVE_STREAM = "live_stream"
     DATABASE = "database"
@@ -51,6 +53,7 @@ class DataSourceType(str, Enum):
 
 class CalculationStatus(str, Enum):
     """Status of calculations"""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -60,6 +63,7 @@ class CalculationStatus(str, Enum):
 
 class BatchStatus(str, Enum):
     """Status of batch operations"""
+
     QUEUED = "queued"
     PROCESSING = "processing"
     COMPLETED = "completed"
@@ -69,6 +73,7 @@ class BatchStatus(str, Enum):
 
 class SyncFrequency(str, Enum):
     """Data synchronization frequencies"""
+
     REAL_TIME = "real_time"
     SECOND = "second"
     MINUTE = "minute"
@@ -79,6 +84,7 @@ class SyncFrequency(str, Enum):
 @dataclass
 class LiveDataPoint:
     """Represents a single live data point"""
+
     data_id: str
     source: str
     timestamp: datetime
@@ -90,6 +96,7 @@ class LiveDataPoint:
 @dataclass
 class CalculationTask:
     """Represents a calculation task"""
+
     task_id: str
     formula_id: str
     input_data: Dict[str, Any]
@@ -105,6 +112,7 @@ class CalculationTask:
 @dataclass
 class BatchJob:
     """Represents a batch processing job"""
+
     job_id: str
     job_type: str
     data_source: str
@@ -123,6 +131,7 @@ class BatchJob:
 @dataclass
 class DataSyncConfig:
     """Configuration for data synchronization"""
+
     sync_id: str
     source: str
     target: str
@@ -136,6 +145,7 @@ class DataSyncConfig:
 # =============================================================================
 # Core Real-Time Calculation Service
 # =============================================================================
+
 
 class RealTimeCalculationService:
     """Main service for real-time calculations and data processing"""
@@ -157,7 +167,7 @@ class RealTimeCalculationService:
             "average_calculation_time": 0.0,
             "data_points_processed": 0,
             "batch_jobs_completed": 0,
-            "sync_operations": 0
+            "sync_operations": 0,
         }
 
         # Initialize service configurations
@@ -189,8 +199,8 @@ class RealTimeCalculationService:
                 "second": 1,
                 "minute": 60,
                 "hour": 3600,
-                "day": 86400
-            }
+                "day": 86400,
+            },
         }
 
     async def start_service(self) -> Dict[str, Any]:
@@ -220,10 +230,12 @@ class RealTimeCalculationService:
                 "active_workers": 3,
                 "websocket_port": self.service_configs["websocket_port"],
                 "metadata": {
-                    "max_concurrent_calculations": self.service_configs["max_concurrent_calculations"],
+                    "max_concurrent_calculations": self.service_configs[
+                        "max_concurrent_calculations"
+                    ],
                     "batch_size": self.service_configs["batch_size"],
-                    "cache_ttl": self.service_configs["cache_ttl_seconds"]
-                }
+                    "cache_ttl": self.service_configs["cache_ttl_seconds"],
+                },
             }
 
             logger.info("✓ Real-Time Calculation Service started successfully")
@@ -231,11 +243,7 @@ class RealTimeCalculationService:
 
         except Exception as e:
             logger.error(f"Failed to start service: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "service_started": False
-            }
+            return {"status": "error", "error": str(e), "service_started": False}
 
     async def stop_service(self) -> Dict[str, Any]:
         """
@@ -261,7 +269,7 @@ class RealTimeCalculationService:
                 "status": "success",
                 "service_stopped": True,
                 "shutdown_timestamp": datetime.now().isoformat(),
-                "final_metrics": self.performance_metrics
+                "final_metrics": self.performance_metrics,
             }
 
             logger.info("✓ Real-Time Calculation Service stopped successfully")
@@ -269,11 +277,7 @@ class RealTimeCalculationService:
 
         except Exception as e:
             logger.error(f"Failed to stop service: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "service_stopped": False
-            }
+            return {"status": "error", "error": str(e), "service_stopped": False}
 
     async def calculate_formula_realtime(
         self,
@@ -281,7 +285,7 @@ class RealTimeCalculationService:
         input_data: Dict[str, Any],
         use_live_data: bool = True,
         cache_result: bool = True,
-        timeout_seconds: int = 30
+        timeout_seconds: int = 30,
     ) -> Dict[str, Any]:
         """
         Calculate a formula with real-time data.
@@ -309,7 +313,7 @@ class RealTimeCalculationService:
                 input_data=input_data,
                 status=CalculationStatus.PENDING,
                 created_at=datetime.now(),
-                metadata={"use_live_data": use_live_data, "cache_result": cache_result}
+                metadata={"use_live_data": use_live_data, "cache_result": cache_result},
             )
 
             # Get live data if requested
@@ -321,7 +325,9 @@ class RealTimeCalculationService:
             task.status = CalculationStatus.RUNNING
             task.started_at = datetime.now()
 
-            result = await self._perform_calculation(formula_id, input_data, timeout_seconds)
+            result = await self._perform_calculation(
+                formula_id, input_data, timeout_seconds
+            )
 
             task.status = CalculationStatus.COMPLETED
             task.completed_at = datetime.now()
@@ -345,11 +351,13 @@ class RealTimeCalculationService:
                 "cached": cache_result,
                 "metadata": {
                     "calculation_timestamp": datetime.now().isoformat(),
-                    "input_data_keys": list(input_data.keys())
-                }
+                    "input_data_keys": list(input_data.keys()),
+                },
             }
 
-            logger.info(f"✓ Real-time calculation completed: {formula_id} in {calculation_time:.3f}s")
+            logger.info(
+                f"✓ Real-time calculation completed: {formula_id} in {calculation_time:.3f}s"
+            )
             return result_dict
 
         except Exception as e:
@@ -358,7 +366,7 @@ class RealTimeCalculationService:
                 "status": "error",
                 "error": str(e),
                 "formula_id": formula_id,
-                "task_id": task_id if 'task_id' in locals() else None
+                "task_id": task_id if "task_id" in locals() else None,
             }
 
     async def process_batch_calculations(
@@ -367,7 +375,7 @@ class RealTimeCalculationService:
         batch_data: List[Dict[str, Any]],
         batch_size: int = 1000,
         use_parallel_processing: bool = True,
-        progress_callback: Optional[Callable] = None
+        progress_callback: Optional[Callable] = None,
     ) -> Dict[str, Any]:
         """
         Process batch calculations for large datasets.
@@ -386,7 +394,9 @@ class RealTimeCalculationService:
             job_id = self._generate_job_id()
             start_time = time.time()
 
-            logger.info(f"Starting batch processing: {formula_id} with {len(batch_data)} items")
+            logger.info(
+                f"Starting batch processing: {formula_id} with {len(batch_data)} items"
+            )
 
             # Create batch job
             job = BatchJob(
@@ -398,7 +408,7 @@ class RealTimeCalculationService:
                 processed_items=0,
                 failed_items=0,
                 created_at=datetime.now(),
-                metadata={"formula_id": formula_id, "batch_size": batch_size}
+                metadata={"formula_id": formula_id, "batch_size": batch_size},
             )
 
             self.batch_jobs[job_id] = job
@@ -409,12 +419,16 @@ class RealTimeCalculationService:
             job.started_at = datetime.now()
 
             for i in range(0, len(batch_data), batch_size):
-                batch_chunk = batch_data[i:i + batch_size]
+                batch_chunk = batch_data[i : i + batch_size]
 
                 if use_parallel_processing:
-                    batch_results = await self._process_batch_parallel(formula_id, batch_chunk)
+                    batch_results = await self._process_batch_parallel(
+                        formula_id, batch_chunk
+                    )
                 else:
-                    batch_results = await self._process_batch_sequential(formula_id, batch_chunk)
+                    batch_results = await self._process_batch_sequential(
+                        formula_id, batch_chunk
+                    )
 
                 results.extend(batch_results)
                 job.processed_items += len(batch_chunk)
@@ -444,11 +458,13 @@ class RealTimeCalculationService:
                 "metadata": {
                     "batch_size": batch_size,
                     "parallel_processing": use_parallel_processing,
-                    "completion_timestamp": datetime.now().isoformat()
-                }
+                    "completion_timestamp": datetime.now().isoformat(),
+                },
             }
 
-            logger.info(f"✓ Batch processing completed: {job_id} in {processing_time:.3f}s")
+            logger.info(
+                f"✓ Batch processing completed: {job_id} in {processing_time:.3f}s"
+            )
             return result_dict
 
         except Exception as e:
@@ -457,7 +473,7 @@ class RealTimeCalculationService:
                 "status": "error",
                 "error": str(e),
                 "formula_id": formula_id,
-                "job_id": job_id if 'job_id' in locals() else None
+                "job_id": job_id if "job_id" in locals() else None,
             }
 
     async def sync_live_data(
@@ -465,7 +481,7 @@ class RealTimeCalculationService:
         data_source: str,
         sync_frequency: str = "minute",
         data_types: List[str] = None,
-        auto_start: bool = True
+        auto_start: bool = True,
     ) -> Dict[str, Any]:
         """
         Set up live data synchronization.
@@ -491,9 +507,14 @@ class RealTimeCalculationService:
                 target="live_cache",
                 frequency=sync_frequency,
                 last_sync=None,
-                next_sync=datetime.now() + timedelta(seconds=self.service_configs["sync_intervals"].get(sync_frequency, 60)),
+                next_sync=datetime.now()
+                + timedelta(
+                    seconds=self.service_configs["sync_intervals"].get(
+                        sync_frequency, 60
+                    )
+                ),
                 is_active=auto_start,
-                metadata={"data_types": data_types or []}
+                metadata={"data_types": data_types or []},
             )
 
             self.data_sync_configs[sync_id] = sync_config
@@ -509,10 +530,10 @@ class RealTimeCalculationService:
                 "sync_frequency": sync_frequency,
                 "data_types": data_types or [],
                 "auto_started": auto_start,
-                "next_sync": sync_config.next_sync.isoformat() if sync_config.next_sync else None,
-                "metadata": {
-                    "sync_timestamp": datetime.now().isoformat()
-                }
+                "next_sync": (
+                    sync_config.next_sync.isoformat() if sync_config.next_sync else None
+                ),
+                "metadata": {"sync_timestamp": datetime.now().isoformat()},
             }
 
             logger.info(f"✓ Live data sync configured: {sync_id}")
@@ -520,11 +541,7 @@ class RealTimeCalculationService:
 
         except Exception as e:
             logger.error(f"Live data sync setup failed: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "data_source": data_source
-            }
+            return {"status": "error", "error": str(e), "data_source": data_source}
 
     async def get_service_status(self) -> Dict[str, Any]:
         """
@@ -534,9 +551,24 @@ class RealTimeCalculationService:
             Dictionary with service status information
         """
         try:
-            active_calculations = len([task for task in self.calculation_queue.queue if hasattr(task, 'status') and task.status == CalculationStatus.RUNNING])
-            active_batch_jobs = len([job for job in self.batch_jobs.values() if job.status == BatchStatus.PROCESSING])
-            active_syncs = len([sync for sync in self.data_sync_configs.values() if sync.is_active])
+            active_calculations = len(
+                [
+                    task
+                    for task in self.calculation_queue.queue
+                    if hasattr(task, "status")
+                    and task.status == CalculationStatus.RUNNING
+                ]
+            )
+            active_batch_jobs = len(
+                [
+                    job
+                    for job in self.batch_jobs.values()
+                    if job.status == BatchStatus.PROCESSING
+                ]
+            )
+            active_syncs = len(
+                [sync for sync in self.data_sync_configs.values() if sync.is_active]
+            )
 
             status = {
                 "status": "success",
@@ -549,19 +581,15 @@ class RealTimeCalculationService:
                 "websocket_connections": len(self.active_connections),
                 "metadata": {
                     "status_timestamp": datetime.now().isoformat(),
-                    "uptime": time.time() - getattr(self, 'start_time', time.time())
-                }
+                    "uptime": time.time() - getattr(self, "start_time", time.time()),
+                },
             }
 
             return status
 
         except Exception as e:
             logger.error(f"Failed to get service status: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "service_running": False
-            }
+            return {"status": "error", "error": str(e), "service_running": False}
 
     async def optimize_performance(self) -> Dict[str, Any]:
         """
@@ -592,21 +620,17 @@ class RealTimeCalculationService:
                 "optimizations_applied": len(optimizations),
                 "optimizations": optimizations,
                 "performance_improvement": self._calculate_performance_improvement(),
-                "metadata": {
-                    "optimization_timestamp": datetime.now().isoformat()
-                }
+                "metadata": {"optimization_timestamp": datetime.now().isoformat()},
             }
 
-            logger.info(f"✓ Performance optimization completed: {len(optimizations)} optimizations applied")
+            logger.info(
+                f"✓ Performance optimization completed: {len(optimizations)} optimizations applied"
+            )
             return result
 
         except Exception as e:
             logger.error(f"Performance optimization failed: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "optimizations_applied": 0
-            }
+            return {"status": "error", "error": str(e), "optimizations_applied": 0}
 
     # Helper methods
     async def _get_live_data_for_formula(self, formula_id: str) -> Dict[str, Any]:
@@ -627,7 +651,9 @@ class RealTimeCalculationService:
             logger.error(f"Failed to get live data: {e}")
             return {}
 
-    async def _perform_calculation(self, formula_id: str, input_data: Dict[str, Any], timeout: int) -> Any:
+    async def _perform_calculation(
+        self, formula_id: str, input_data: Dict[str, Any], timeout: int
+    ) -> Any:
         """Perform the actual formula calculation"""
         try:
             # This would integrate with the actual formula calculation engine
@@ -647,7 +673,9 @@ class RealTimeCalculationService:
                 points = input_data.get("points", 0)
                 fga = input_data.get("fga", 1)
                 fta = input_data.get("fta", 0)
-                return points / (2 * (fga + 0.44 * fta)) if (fga + 0.44 * fta) > 0 else 0
+                return (
+                    points / (2 * (fga + 0.44 * fta)) if (fga + 0.44 * fta) > 0 else 0
+                )
 
             else:
                 # Generic calculation
@@ -667,17 +695,21 @@ class RealTimeCalculationService:
                 timestamp=datetime.now(),
                 data_type="calculation_result",
                 value=result,
-                metadata={"task_id": task_id}
+                metadata={"task_id": task_id},
             )
         except Exception as e:
             logger.error(f"Failed to cache result: {e}")
 
-    async def _process_batch_parallel(self, formula_id: str, batch_chunk: List[Dict[str, Any]]) -> List[Any]:
+    async def _process_batch_parallel(
+        self, formula_id: str, batch_chunk: List[Dict[str, Any]]
+    ) -> List[Any]:
         """Process batch chunk in parallel"""
         try:
             tasks = []
             for data_item in batch_chunk:
-                task = asyncio.create_task(self._perform_calculation(formula_id, data_item, 30))
+                task = asyncio.create_task(
+                    self._perform_calculation(formula_id, data_item, 30)
+                )
                 tasks.append(task)
 
             results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -690,7 +722,9 @@ class RealTimeCalculationService:
             logger.error(f"Parallel batch processing failed: {e}")
             return []
 
-    async def _process_batch_sequential(self, formula_id: str, batch_chunk: List[Dict[str, Any]]) -> List[Any]:
+    async def _process_batch_sequential(
+        self, formula_id: str, batch_chunk: List[Dict[str, Any]]
+    ) -> List[Any]:
         """Process batch chunk sequentially"""
         try:
             results = []
@@ -721,7 +755,9 @@ class RealTimeCalculationService:
             # Update sync timestamps
             sync_config.last_sync = datetime.now()
             sync_config.next_sync = datetime.now() + timedelta(
-                seconds=self.service_configs["sync_intervals"].get(sync_config.frequency, 60)
+                seconds=self.service_configs["sync_intervals"].get(
+                    sync_config.frequency, 60
+                )
             )
 
             self.performance_metrics["sync_operations"] += 1
@@ -732,6 +768,7 @@ class RealTimeCalculationService:
     async def _start_websocket_server(self):
         """Start WebSocket server for real-time updates"""
         try:
+
             async def websocket_handler(websocket, path):
                 connection_id = str(uuid.uuid4())
                 self.active_connections[connection_id] = websocket
@@ -748,9 +785,7 @@ class RealTimeCalculationService:
                         del self.active_connections[connection_id]
 
             self.websocket_server = await websockets.serve(
-                websocket_handler,
-                "localhost",
-                self.service_configs["websocket_port"]
+                websocket_handler, "localhost", self.service_configs["websocket_port"]
             )
 
         except Exception as e:
@@ -767,7 +802,9 @@ class RealTimeCalculationService:
 
             elif message_type == "unsubscribe":
                 # Unsubscribe from updates
-                await self._unsubscribe_from_updates(connection_id, data.get("topics", []))
+                await self._unsubscribe_from_updates(
+                    connection_id, data.get("topics", [])
+                )
 
         except Exception as e:
             logger.error(f"WebSocket message handling failed: {e}")
@@ -787,7 +824,11 @@ class RealTimeCalculationService:
         while self.is_running:
             try:
                 for sync_id, sync_config in self.data_sync_configs.items():
-                    if sync_config.is_active and sync_config.next_sync and sync_config.next_sync <= datetime.now():
+                    if (
+                        sync_config.is_active
+                        and sync_config.next_sync
+                        and sync_config.next_sync <= datetime.now()
+                    ):
                         await self._start_data_sync(sync_id)
 
                 await asyncio.sleep(1)  # Check every second
@@ -835,8 +876,8 @@ class RealTimeCalculationService:
         total_calculations = self.performance_metrics["calculations_performed"]
         current_avg = self.performance_metrics["average_calculation_time"]
         self.performance_metrics["average_calculation_time"] = (
-            (current_avg * (total_calculations - 1) + calculation_time) / total_calculations
-        )
+            current_avg * (total_calculations - 1) + calculation_time
+        ) / total_calculations
 
     async def _optimize_cache(self) -> Dict[str, Any]:
         """Optimize cache performance"""
@@ -844,7 +885,9 @@ class RealTimeCalculationService:
             # Remove expired cache entries
             expired_keys = []
             for key, data_point in self.live_data_cache.items():
-                if datetime.now() - data_point.timestamp > timedelta(seconds=self.service_configs["cache_ttl_seconds"]):
+                if datetime.now() - data_point.timestamp > timedelta(
+                    seconds=self.service_configs["cache_ttl_seconds"]
+                ):
                     expired_keys.append(key)
 
             for key in expired_keys:
@@ -853,7 +896,7 @@ class RealTimeCalculationService:
             return {
                 "type": "cache_optimization",
                 "expired_entries_removed": len(expired_keys),
-                "cache_size": len(self.live_data_cache)
+                "cache_size": len(self.live_data_cache),
             }
 
         except Exception as e:
@@ -874,13 +917,13 @@ class RealTimeCalculationService:
                 return {
                     "type": "batch_optimization",
                     "batch_size_increased": True,
-                    "new_batch_size": new_batch_size
+                    "new_batch_size": new_batch_size,
                 }
 
             return {
                 "type": "batch_optimization",
                 "batch_size_increased": False,
-                "current_batch_size": current_batch_size
+                "current_batch_size": current_batch_size,
             }
 
         except Exception as e:
@@ -894,7 +937,10 @@ class RealTimeCalculationService:
             optimizations = []
 
             for sync_id, sync_config in self.data_sync_configs.items():
-                if sync_config.frequency == "real_time" and self.performance_metrics["sync_operations"] > 1000:
+                if (
+                    sync_config.frequency == "real_time"
+                    and self.performance_metrics["sync_operations"] > 1000
+                ):
                     # Reduce frequency if too many sync operations
                     sync_config.frequency = "second"
                     optimizations.append(f"Reduced sync frequency for {sync_id}")
@@ -902,7 +948,7 @@ class RealTimeCalculationService:
             return {
                 "type": "sync_optimization",
                 "optimizations_applied": len(optimizations),
-                "details": optimizations
+                "details": optimizations,
             }
 
         except Exception as e:
@@ -921,7 +967,9 @@ class RealTimeCalculationService:
                 improvement_factor *= 1.2
 
             # Factor in cache efficiency
-            cache_efficiency = len(self.live_data_cache) / max(1, self.performance_metrics["calculations_performed"])
+            cache_efficiency = len(self.live_data_cache) / max(
+                1, self.performance_metrics["calculations_performed"]
+            )
             if cache_efficiency > 0.5:
                 improvement_factor *= 1.1
 
@@ -965,7 +1013,7 @@ async def calculate_formula_realtime(
     input_data: Dict[str, Any],
     use_live_data: bool = True,
     cache_result: bool = True,
-    timeout_seconds: int = 30
+    timeout_seconds: int = 30,
 ) -> Dict[str, Any]:
     """
     Calculate a formula with real-time data (standalone function).
@@ -985,7 +1033,7 @@ async def calculate_formula_realtime(
         input_data=input_data,
         use_live_data=use_live_data,
         cache_result=cache_result,
-        timeout_seconds=timeout_seconds
+        timeout_seconds=timeout_seconds,
     )
 
 
@@ -994,7 +1042,7 @@ async def process_batch_calculations(
     batch_data: List[Dict[str, Any]],
     batch_size: int = 1000,
     use_parallel_processing: bool = True,
-    progress_callback: Optional[Callable] = None
+    progress_callback: Optional[Callable] = None,
 ) -> Dict[str, Any]:
     """
     Process batch calculations for large datasets (standalone function).
@@ -1014,7 +1062,7 @@ async def process_batch_calculations(
         batch_data=batch_data,
         batch_size=batch_size,
         use_parallel_processing=use_parallel_processing,
-        progress_callback=progress_callback
+        progress_callback=progress_callback,
     )
 
 
@@ -1022,7 +1070,7 @@ async def sync_live_data(
     data_source: str,
     sync_frequency: str = "minute",
     data_types: List[str] = None,
-    auto_start: bool = True
+    auto_start: bool = True,
 ) -> Dict[str, Any]:
     """
     Set up live data synchronization (standalone function).
@@ -1040,7 +1088,7 @@ async def sync_live_data(
         data_source=data_source,
         sync_frequency=sync_frequency,
         data_types=data_types,
-        auto_start=auto_start
+        auto_start=auto_start,
     )
 
 
@@ -1062,6 +1110,3 @@ async def optimize_realtime_performance() -> Dict[str, Any]:
         Dictionary with optimization results
     """
     return await _global_realtime_service.optimize_performance()
-
-
-

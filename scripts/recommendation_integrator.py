@@ -36,24 +36,27 @@ class RecommendationIntegrator:
     def load_master_recommendations(self) -> Dict[str, Any]:
         """Load all recommendations from master DB."""
         master_file = os.path.join(
-            self.synthesis_path,
-            'analysis_results/master_recommendations.json'
+            self.synthesis_path, "analysis_results/master_recommendations.json"
         )
 
         if not os.path.exists(master_file):
             logger.warning(f"Master recommendations file not found: {master_file}")
-            return {'recommendations': [], 'by_category': {}, 'by_book': {}}
+            return {"recommendations": [], "by_category": {}, "by_book": {}}
 
         try:
-            with open(master_file, 'r') as f:
+            with open(master_file, "r") as f:
                 data = json.load(f)
-            logger.info(f"Loaded {len(data.get('recommendations', []))} recommendations from master DB")
+            logger.info(
+                f"Loaded {len(data.get('recommendations', []))} recommendations from master DB"
+            )
             return data
         except Exception as e:
             logger.error(f"Error loading master recommendations: {e}")
-            return {'recommendations': [], 'by_category': {}, 'by_book': {}}
+            return {"recommendations": [], "by_category": {}, "by_book": {}}
 
-    def create_phase_recommendations(self, recommendations: Dict[str, Any]) -> Dict[int, List[Dict[str, Any]]]:
+    def create_phase_recommendations(
+        self, recommendations: Dict[str, Any]
+    ) -> Dict[int, List[Dict[str, Any]]]:
         """
         Organize recommendations by phase.
 
@@ -65,7 +68,7 @@ class RecommendationIntegrator:
         """
         phase_recs = {i: [] for i in range(10)}
 
-        for rec in recommendations.get('recommendations', []):
+        for rec in recommendations.get("recommendations", []):
             phases = self.phase_mapper.map_recommendation_to_phase(rec)
             for phase in phases:
                 phase_recs[phase].append(rec)
@@ -80,7 +83,9 @@ class RecommendationIntegrator:
 
         return phase_recs
 
-    def generate_phase_enhancement_docs(self, phase_recs: Dict[int, List[Dict[str, Any]]]) -> List[str]:
+    def generate_phase_enhancement_docs(
+        self, phase_recs: Dict[int, List[Dict[str, Any]]]
+    ) -> List[str]:
         """
         Generate enhancement documents for each phase.
 
@@ -98,7 +103,7 @@ class RecommendationIntegrator:
 
             output_path = os.path.join(
                 self.simulator_path,
-                f'docs/phases/phase_{phase_num}/RECOMMENDATIONS_FROM_BOOKS.md'
+                f"docs/phases/phase_{phase_num}/RECOMMENDATIONS_FROM_BOOKS.md",
             )
 
             content = self._format_phase_recommendations(phase_num, recs)
@@ -106,7 +111,7 @@ class RecommendationIntegrator:
             # Ensure directory exists
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-            with open(output_path, 'w') as f:
+            with open(output_path, "w") as f:
                 f.write(content)
 
             generated_files.append(output_path)
@@ -114,11 +119,13 @@ class RecommendationIntegrator:
 
         return generated_files
 
-    def _format_phase_recommendations(self, phase_num: int, recs: List[Dict[str, Any]]) -> str:
+    def _format_phase_recommendations(
+        self, phase_num: int, recs: List[Dict[str, Any]]
+    ) -> str:
         """Format recommendations for phase document."""
-        critical = [r for r in recs if r.get('category') == 'critical']
-        important = [r for r in recs if r.get('category') == 'important']
-        nice = [r for r in recs if r.get('category') == 'nice_to_have']
+        critical = [r for r in recs if r.get("category") == "critical"]
+        important = [r for r in recs if r.get("category") == "important"]
+        nice = [r for r in recs if r.get("category") == "nice_to_have"]
 
         phase_desc = self.phase_mapper.get_phase_description(phase_num)
 
@@ -214,13 +221,14 @@ The following books contributed recommendations to this phase:
 
         formatted = []
         for i, rec in enumerate(recs, 1):
-            title = rec.get('title', 'Untitled Recommendation')
-            source_books = rec.get('source_books', ['Unknown'])
-            added_date = rec.get('added_date', 'Unknown')
-            rec_id = rec.get('id', f'rec_{i}')
-            reasoning = rec.get('reasoning', '')
+            title = rec.get("title", "Untitled Recommendation")
+            source_books = rec.get("source_books", ["Unknown"])
+            added_date = rec.get("added_date", "Unknown")
+            rec_id = rec.get("id", f"rec_{i}")
+            reasoning = rec.get("reasoning", "")
 
-            formatted.append(f"""### {i}. {title}
+            formatted.append(
+                f"""### {i}. {title}
 
 **Source Books:** {', '.join(source_books)}
 **Added:** {added_date}
@@ -228,9 +236,10 @@ The following books contributed recommendations to this phase:
 
 {reasoning if reasoning else 'No additional reasoning provided.'}
 
-""")
+"""
+            )
 
-        return '\n'.join(formatted)
+        return "\n".join(formatted)
 
     def _get_phase_keywords(self, phase_num: int) -> str:
         """Get keywords for a phase as formatted list."""
@@ -240,13 +249,13 @@ The following books contributed recommendations to this phase:
 
         # Format as bullet list, limiting to first 10 keywords
         limited_keywords = keywords[:10]
-        return '\n'.join(f"- {keyword}" for keyword in limited_keywords)
+        return "\n".join(f"- {keyword}" for keyword in limited_keywords)
 
     def _get_source_books(self, recs: List[Dict[str, Any]]) -> str:
         """Get unique source books from recommendations."""
         books = set()
         for rec in recs:
-            source_books = rec.get('source_books', [])
+            source_books = rec.get("source_books", [])
             if isinstance(source_books, list):
                 books.update(source_books)
             else:
@@ -255,9 +264,11 @@ The following books contributed recommendations to this phase:
         if not books:
             return "- No source books identified"
 
-        return '\n'.join(f"- {book}" for book in sorted(books))
+        return "\n".join(f"- {book}" for book in sorted(books))
 
-    def generate_integration_summary(self, phase_recs: Dict[int, List[Dict[str, Any]]]) -> str:
+    def generate_integration_summary(
+        self, phase_recs: Dict[int, List[Dict[str, Any]]]
+    ) -> str:
         """
         Generate a summary of the integration process.
 
@@ -307,7 +318,7 @@ This summary reports the results of integrating book recommendations into the NB
 """
 
         for phase_num in range(10):
-            count = stats['phase_distribution'].get(phase_num, 0)
+            count = stats["phase_distribution"].get(phase_num, 0)
             status = "✅ Generated" if count > 0 else "⏸️ No recommendations"
             phase_desc = self.phase_mapper.get_phase_description(phase_num)
             content += f"| {phase_num} | {count} | {status} |\n"
@@ -321,7 +332,7 @@ This summary reports the results of integrating book recommendations into the NB
 
 """
 
-        for phase_num, count in stats['phase_distribution'].items():
+        for phase_num, count in stats["phase_distribution"].items():
             if count > 0:
                 content += f"- **Phase {phase_num}:** `docs/phases/phase_{phase_num}/RECOMMENDATIONS_FROM_BOOKS.md`\n"
 
@@ -415,7 +426,7 @@ def test_recommendation_integrator():
                 "category": "critical",
                 "source_books": ["Test Book"],
                 "added_date": datetime.now().isoformat(),
-                "reasoning": "Quality checks needed for data integrity"
+                "reasoning": "Quality checks needed for data integrity",
             },
             {
                 "id": "test_2",
@@ -423,15 +434,21 @@ def test_recommendation_integrator():
                 "category": "important",
                 "source_books": ["Test Book"],
                 "added_date": datetime.now().isoformat(),
-                "reasoning": "Need to train models for prediction"
-            }
+                "reasoning": "Need to train models for prediction",
+            },
         ],
-        "by_category": {"critical": ["test_1"], "important": ["test_2"], "nice_to_have": []},
-        "by_book": {"Test Book": ["test_1", "test_2"]}
+        "by_category": {
+            "critical": ["test_1"],
+            "important": ["test_2"],
+            "nice_to_have": [],
+        },
+        "by_book": {"Test Book": ["test_1", "test_2"]},
     }
 
-    master_file = os.path.join(test_synthesis, "analysis_results", "master_recommendations.json")
-    with open(master_file, 'w') as f:
+    master_file = os.path.join(
+        test_synthesis, "analysis_results", "master_recommendations.json"
+    )
+    with open(master_file, "w") as f:
         json.dump(test_recommendations, f, indent=2)
 
     # Test integrator
@@ -457,6 +474,7 @@ def test_recommendation_integrator():
 
     # Cleanup
     import shutil
+
     shutil.rmtree(test_simulator)
     shutil.rmtree(test_synthesis)
 

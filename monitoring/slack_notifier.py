@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 class ProcessStatus(Enum):
     """Process lifecycle statuses"""
+
     STARTED = "started"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
@@ -30,6 +31,7 @@ class ProcessStatus(Enum):
 
 class ProcessSource(Enum):
     """Source of the process"""
+
     CLAUDE_CODE = "claude_code"
     PYCHARM = "pycharm"
     MCP_SERVER = "mcp_server"
@@ -41,6 +43,7 @@ class ProcessSource(Enum):
 @dataclass
 class ProcessEvent:
     """Represents a process lifecycle event"""
+
     process_id: str
     process_name: str
     status: ProcessStatus
@@ -58,13 +61,14 @@ class ProcessEvent:
             "source": self.source.value,
             "timestamp": self.timestamp,
             "metadata": self.metadata,
-            "thread_ts": self.thread_ts
+            "thread_ts": self.thread_ts,
         }
 
 
 @dataclass
 class WorkflowAction:
     """Action that can be triggered from Slack"""
+
     action_id: str
     action_name: str
     workflow_id: str
@@ -75,7 +79,7 @@ class SlackNotifier:
     """Enhanced Slack notifier for workflow automation"""
 
     def __init__(self, webhook_url: Optional[str] = None):
-        self.webhook_url = webhook_url or os.getenv('SLACK_WEBHOOK_URL')
+        self.webhook_url = webhook_url or os.getenv("SLACK_WEBHOOK_URL")
         self.process_threads: Dict[str, str] = {}  # process_id -> thread_ts
         self.pending_actions: Dict[str, WorkflowAction] = {}
 
@@ -88,7 +92,7 @@ class SlackNotifier:
             ProcessStatus.FAILED: "❌",
             ProcessStatus.PENDING_APPROVAL: "⏸️",
             ProcessStatus.APPROVED: "👍",
-            ProcessStatus.REJECTED: "👎"
+            ProcessStatus.REJECTED: "👎",
         }
         return emoji_map.get(status, "ℹ️")
 
@@ -101,7 +105,7 @@ class SlackNotifier:
             ProcessStatus.FAILED: "#FF0000",
             ProcessStatus.PENDING_APPROVAL: "#FFA500",
             ProcessStatus.APPROVED: "#00C853",
-            ProcessStatus.REJECTED: "#FF0000"
+            ProcessStatus.REJECTED: "#FF0000",
         }
         return color_map.get(status, "#808080")
 
@@ -113,7 +117,7 @@ class SlackNotifier:
             ProcessSource.MCP_SERVER: "🔌",
             ProcessSource.WEB_CHAT: "🌐",
             ProcessSource.API: "🔗",
-            ProcessSource.WORKFLOW_ENGINE: "⚙️"
+            ProcessSource.WORKFLOW_ENGINE: "⚙️",
         }
         return icon_map.get(source, "📋")
 
@@ -121,7 +125,7 @@ class SlackNotifier:
         self,
         event: ProcessEvent,
         next_steps: Optional[List[str]] = None,
-        enable_actions: bool = False
+        enable_actions: bool = False,
     ) -> Optional[str]:
         """
         Send process lifecycle notification to Slack
@@ -144,26 +148,18 @@ class SlackNotifier:
 
         # Build message fields
         fields = [
-            {
-                "title": "Process",
-                "value": event.process_name,
-                "short": True
-            },
+            {"title": "Process", "value": event.process_name, "short": True},
             {
                 "title": "Status",
                 "value": f"{emoji} {event.status.value.replace('_', ' ').title()}",
-                "short": True
+                "short": True,
             },
             {
                 "title": "Source",
                 "value": f"{source_icon} {event.source.value.replace('_', ' ').title()}",
-                "short": True
+                "short": True,
             },
-            {
-                "title": "Process ID",
-                "value": event.process_id,
-                "short": True
-            }
+            {"title": "Process ID", "value": event.process_id, "short": True},
         ]
 
         # Add metadata fields
@@ -172,11 +168,13 @@ class SlackNotifier:
                 # Skip large values
                 if isinstance(value, str) and len(value) > 200:
                     value = value[:197] + "..."
-                fields.append({
-                    "title": key.replace('_', ' ').title(),
-                    "value": str(value),
-                    "short": len(str(value)) < 40
-                })
+                fields.append(
+                    {
+                        "title": key.replace("_", " ").title(),
+                        "value": str(value),
+                        "short": len(str(value)) < 40,
+                    }
+                )
 
         # Build attachment
         attachment = {
@@ -184,22 +182,20 @@ class SlackNotifier:
             "title": f"{emoji} {event.process_name}",
             "fields": fields,
             "footer": "NBA MCP Synthesis - Workflow Automation",
-            "ts": int(datetime.fromisoformat(event.timestamp).timestamp())
+            "ts": int(datetime.fromisoformat(event.timestamp).timestamp()),
         }
 
         # Add next steps if provided
         if next_steps:
             next_steps_text = "\n".join([f"• {step}" for step in next_steps])
-            attachment["fields"].append({
-                "title": "Next Steps",
-                "value": next_steps_text,
-                "short": False
-            })
+            attachment["fields"].append(
+                {"title": "Next Steps", "value": next_steps_text, "short": False}
+            )
 
         # Build message
         message = {
             "text": f"{emoji} Process Update: {event.process_name}",
-            "attachments": [attachment]
+            "attachments": [attachment],
         }
 
         # Add to thread if this process has one
@@ -212,18 +208,16 @@ class SlackNotifier:
         # Note: Interactive actions require Slack App with proper OAuth
         # For webhook-based notifications, we include action suggestions in text
         if enable_actions and event.status == ProcessStatus.PENDING_APPROVAL:
-            attachment["fields"].append({
-                "title": "Actions Available",
-                "value": "Reply to this thread with:\n• `approve` - Approve and continue\n• `reject` - Reject and halt\n• `retry` - Retry the process",
-                "short": False
-            })
+            attachment["fields"].append(
+                {
+                    "title": "Actions Available",
+                    "value": "Reply to this thread with:\n• `approve` - Approve and continue\n• `reject` - Reject and halt\n• `retry` - Retry the process",
+                    "short": False,
+                }
+            )
 
         try:
-            response = requests.post(
-                self.webhook_url,
-                json=message,
-                timeout=10
-            )
+            response = requests.post(self.webhook_url, json=message, timeout=10)
 
             if response.status_code == 200:
                 logger.info(f"✅ Sent Slack notification for {event.process_id}")
@@ -236,7 +230,9 @@ class SlackNotifier:
                     return thread_ts
                 return self.process_threads.get(event.process_id)
             else:
-                logger.error(f"Failed to send Slack notification: {response.status_code}")
+                logger.error(
+                    f"Failed to send Slack notification: {response.status_code}"
+                )
                 return None
 
         except Exception as e:
@@ -249,7 +245,7 @@ class SlackNotifier:
         workflow_name: str,
         duration_seconds: float,
         steps_completed: int,
-        results: Optional[Dict] = None
+        results: Optional[Dict] = None,
     ) -> bool:
         """Send workflow completion notification"""
 
@@ -257,30 +253,20 @@ class SlackNotifier:
         color = "#00C853"
 
         fields = [
-            {
-                "title": "Workflow",
-                "value": workflow_name,
-                "short": True
-            },
-            {
-                "title": "Duration",
-                "value": f"{duration_seconds:.1f}s",
-                "short": True
-            },
-            {
-                "title": "Steps Completed",
-                "value": str(steps_completed),
-                "short": True
-            }
+            {"title": "Workflow", "value": workflow_name, "short": True},
+            {"title": "Duration", "value": f"{duration_seconds:.1f}s", "short": True},
+            {"title": "Steps Completed", "value": str(steps_completed), "short": True},
         ]
 
         if results:
             for key, value in results.items():
-                fields.append({
-                    "title": key.replace('_', ' ').title(),
-                    "value": str(value),
-                    "short": len(str(value)) < 40
-                })
+                fields.append(
+                    {
+                        "title": key.replace("_", " ").title(),
+                        "value": str(value),
+                        "short": len(str(value)) < 40,
+                    }
+                )
 
         message = {
             "text": f"{emoji} Workflow Complete: {workflow_name}",
@@ -290,9 +276,9 @@ class SlackNotifier:
                     "title": f"{emoji} Workflow Complete: {workflow_name}",
                     "fields": fields,
                     "footer": "NBA MCP Synthesis - Workflow Automation",
-                    "ts": int(datetime.now().timestamp())
+                    "ts": int(datetime.now().timestamp()),
                 }
-            ]
+            ],
         }
 
         # Add to thread if exists
@@ -312,7 +298,7 @@ class SlackNotifier:
         workflow_name: str,
         error_message: str,
         failed_step: str,
-        duration_seconds: float
+        duration_seconds: float,
     ) -> bool:
         """Send workflow failure notification"""
 
@@ -326,26 +312,18 @@ class SlackNotifier:
                     "color": color,
                     "title": f"{emoji} Workflow Failed: {workflow_name}",
                     "fields": [
-                        {
-                            "title": "Failed Step",
-                            "value": failed_step,
-                            "short": True
-                        },
+                        {"title": "Failed Step", "value": failed_step, "short": True},
                         {
                             "title": "Duration",
                             "value": f"{duration_seconds:.1f}s",
-                            "short": True
+                            "short": True,
                         },
-                        {
-                            "title": "Error",
-                            "value": error_message,
-                            "short": False
-                        }
+                        {"title": "Error", "value": error_message, "short": False},
                     ],
                     "footer": "NBA MCP Synthesis - Workflow Automation",
-                    "ts": int(datetime.now().timestamp())
+                    "ts": int(datetime.now().timestamp()),
                 }
-            ]
+            ],
         }
 
         # Add to thread if exists
@@ -364,7 +342,7 @@ class SlackNotifier:
         process_id: str,
         process_name: str,
         description: str,
-        timeout_minutes: int = 60
+        timeout_minutes: int = 60,
     ) -> bool:
         """Request approval for a process"""
 
@@ -374,19 +352,16 @@ class SlackNotifier:
             status=ProcessStatus.PENDING_APPROVAL,
             source=ProcessSource.WORKFLOW_ENGINE,
             timestamp=datetime.now().isoformat(),
-            metadata={
-                "description": description,
-                "timeout_minutes": timeout_minutes
-            }
+            metadata={"description": description, "timeout_minutes": timeout_minutes},
         )
 
         thread_ts = self.notify_process_event(
             event,
             next_steps=[
                 "Review the request details",
-                "Reply with 'approve' to continue or 'reject' to halt"
+                "Reply with 'approve' to continue or 'reject' to halt",
             ],
-            enable_actions=True
+            enable_actions=True,
         )
 
         return thread_ts is not None
@@ -413,11 +388,12 @@ def get_notifier() -> SlackNotifier:
 
 # Convenience functions
 
+
 def notify_process_started(
     process_id: str,
     process_name: str,
     source: ProcessSource,
-    metadata: Optional[Dict] = None
+    metadata: Optional[Dict] = None,
 ) -> Optional[str]:
     """Notify that a process has started"""
     notifier = get_notifier()
@@ -427,7 +403,7 @@ def notify_process_started(
         status=ProcessStatus.STARTED,
         source=source,
         timestamp=datetime.now().isoformat(),
-        metadata=metadata or {}
+        metadata=metadata or {},
     )
     return notifier.notify_process_event(event)
 
@@ -437,7 +413,7 @@ def notify_process_progress(
     process_name: str,
     source: ProcessSource,
     progress_message: str,
-    metadata: Optional[Dict] = None
+    metadata: Optional[Dict] = None,
 ) -> Optional[str]:
     """Notify about process progress"""
     notifier = get_notifier()
@@ -447,7 +423,7 @@ def notify_process_progress(
         status=ProcessStatus.IN_PROGRESS,
         source=source,
         timestamp=datetime.now().isoformat(),
-        metadata={**(metadata or {}), "progress": progress_message}
+        metadata={**(metadata or {}), "progress": progress_message},
     )
     return notifier.notify_process_event(event)
 
@@ -457,7 +433,7 @@ def notify_process_completed(
     process_name: str,
     source: ProcessSource,
     results: Optional[Dict] = None,
-    next_steps: Optional[List[str]] = None
+    next_steps: Optional[List[str]] = None,
 ) -> Optional[str]:
     """Notify that a process has completed"""
     notifier = get_notifier()
@@ -467,7 +443,7 @@ def notify_process_completed(
         status=ProcessStatus.COMPLETED,
         source=source,
         timestamp=datetime.now().isoformat(),
-        metadata=results or {}
+        metadata=results or {},
     )
     return notifier.notify_process_event(event, next_steps=next_steps)
 
@@ -477,7 +453,7 @@ def notify_process_failed(
     process_name: str,
     source: ProcessSource,
     error_message: str,
-    metadata: Optional[Dict] = None
+    metadata: Optional[Dict] = None,
 ) -> Optional[str]:
     """Notify that a process has failed"""
     notifier = get_notifier()
@@ -487,7 +463,7 @@ def notify_process_failed(
         status=ProcessStatus.FAILED,
         source=source,
         timestamp=datetime.now().isoformat(),
-        metadata={**(metadata or {}), "error": error_message}
+        metadata={**(metadata or {}), "error": error_message},
     )
     return notifier.notify_process_event(event)
 
@@ -497,9 +473,9 @@ if __name__ == "__main__":
     import sys
     import uuid
 
-    print("="*60)
+    print("=" * 60)
     print("NBA MCP Synthesis - Slack Notifier Test")
-    print("="*60)
+    print("=" * 60)
     print()
 
     notifier = SlackNotifier()
@@ -524,7 +500,7 @@ if __name__ == "__main__":
         process_id,
         "Test NBA Analysis",
         ProcessSource.CLAUDE_CODE,
-        {"query": "Analyze Lakers performance in 2023"}
+        {"query": "Analyze Lakers performance in 2023"},
     )
     print(f"   ✅ Sent (thread: {thread_ts})")
 
@@ -535,7 +511,7 @@ if __name__ == "__main__":
         "Test NBA Analysis",
         ProcessSource.CLAUDE_CODE,
         "Retrieved 50 games from database",
-        {"games_found": 50}
+        {"games_found": 50},
     )
     print("   ✅ Sent")
 
@@ -546,7 +522,11 @@ if __name__ == "__main__":
         "Test NBA Analysis",
         ProcessSource.CLAUDE_CODE,
         {"games_analyzed": 50, "win_rate": "68%"},
-        ["Review the analysis results", "Share with team", "Schedule follow-up analysis"]
+        [
+            "Review the analysis results",
+            "Share with team",
+            "Schedule follow-up analysis",
+        ],
     )
     print("   ✅ Sent")
 
@@ -557,12 +537,12 @@ if __name__ == "__main__":
         "Automated Testing Pipeline",
         45.3,
         5,
-        {"tests_passed": 71, "coverage": "98.6%"}
+        {"tests_passed": 71, "coverage": "98.6%"},
     )
     print("   ✅ Sent")
 
     print()
-    print("="*60)
+    print("=" * 60)
     print("✅ All test notifications sent!")
     print("Check your Slack channel to verify.")
-    print("="*60)
+    print("=" * 60)

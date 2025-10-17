@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class PerformanceMetrics:
     """Model performance metrics"""
+
     accuracy: float
     precision: float
     recall: float
@@ -33,13 +34,14 @@ class PerformanceMetrics:
             "f1_score": self.f1_score,
             "inference_time_ms": self.inference_time_ms,
             "throughput_qps": self.throughput_qps,
-            "memory_usage_mb": self.memory_usage_mb
+            "memory_usage_mb": self.memory_usage_mb,
         }
 
 
 @dataclass
 class PerformanceTest:
     """Single performance test configuration"""
+
     test_name: str
     model_name: str
     test_data_size: int
@@ -56,9 +58,7 @@ class ModelPerformanceTester:
         self.test_results: List[PerformanceTest] = []
 
     def calculate_metrics(
-        self,
-        y_true: np.ndarray,
-        y_pred: np.ndarray
+        self, y_true: np.ndarray, y_pred: np.ndarray
     ) -> Tuple[float, float, float, float]:
         """
         Calculate accuracy, precision, recall, F1.
@@ -79,7 +79,11 @@ class ModelPerformanceTester:
         accuracy = (tp + tn) / (tp + tn + fp + fn) if (tp + tn + fp + fn) > 0 else 0
         precision = tp / (tp + fp) if (tp + fp) > 0 else 0
         recall = tp / (tp + fn) if (tp + fn) > 0 else 0
-        f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+        f1 = (
+            2 * (precision * recall) / (precision + recall)
+            if (precision + recall) > 0
+            else 0
+        )
 
         return accuracy, precision, recall, f1
 
@@ -88,7 +92,7 @@ class ModelPerformanceTester:
         model: Any,
         X_test: np.ndarray,
         y_test: np.ndarray,
-        min_accuracy: float = 0.80
+        min_accuracy: float = 0.80,
     ) -> PerformanceTest:
         """
         Test model accuracy meets minimum threshold.
@@ -105,7 +109,7 @@ class ModelPerformanceTester:
         test = PerformanceTest(
             test_name="accuracy_threshold",
             model_name=str(type(model).__name__),
-            test_data_size=len(X_test)
+            test_data_size=len(X_test),
         )
 
         try:
@@ -119,7 +123,7 @@ class ModelPerformanceTester:
                 f1_score=f1,
                 inference_time_ms=0,
                 throughput_qps=0,
-                memory_usage_mb=0
+                memory_usage_mb=0,
             )
             test.passed = accuracy >= min_accuracy
 
@@ -140,7 +144,7 @@ class ModelPerformanceTester:
         model: Any,
         X_test: np.ndarray,
         max_latency_ms: float = 100.0,
-        n_iterations: int = 100
+        n_iterations: int = 100,
     ) -> PerformanceTest:
         """
         Test model inference latency.
@@ -157,7 +161,7 @@ class ModelPerformanceTester:
         test = PerformanceTest(
             test_name="inference_latency",
             model_name=str(type(model).__name__),
-            test_data_size=len(X_test)
+            test_data_size=len(X_test),
         )
 
         try:
@@ -179,7 +183,7 @@ class ModelPerformanceTester:
                 f1_score=0,
                 inference_time_ms=avg_latency,
                 throughput_qps=0,
-                memory_usage_mb=0
+                memory_usage_mb=0,
             )
             test.passed = avg_latency <= max_latency_ms
 
@@ -201,7 +205,7 @@ class ModelPerformanceTester:
         model: Any,
         X_test: np.ndarray,
         min_qps: float = 100.0,
-        duration_seconds: float = 5.0
+        duration_seconds: float = 5.0,
     ) -> PerformanceTest:
         """
         Test model throughput (queries per second).
@@ -218,7 +222,7 @@ class ModelPerformanceTester:
         test = PerformanceTest(
             test_name="throughput",
             model_name=str(type(model).__name__),
-            test_data_size=len(X_test)
+            test_data_size=len(X_test),
         )
 
         try:
@@ -239,7 +243,7 @@ class ModelPerformanceTester:
                 f1_score=0,
                 inference_time_ms=0,
                 throughput_qps=qps,
-                memory_usage_mb=0
+                memory_usage_mb=0,
             )
             test.passed = qps >= min_qps
 
@@ -256,10 +260,7 @@ class ModelPerformanceTester:
         return test
 
     def test_consistency(
-        self,
-        model: Any,
-        X_test: np.ndarray,
-        n_runs: int = 10
+        self, model: Any, X_test: np.ndarray, n_runs: int = 10
     ) -> PerformanceTest:
         """
         Test model prediction consistency across multiple runs.
@@ -275,7 +276,7 @@ class ModelPerformanceTester:
         test = PerformanceTest(
             test_name="prediction_consistency",
             model_name=str(type(model).__name__),
-            test_data_size=len(X_test)
+            test_data_size=len(X_test),
         )
 
         try:
@@ -303,10 +304,7 @@ class ModelPerformanceTester:
         return test
 
     def run_comprehensive_test_suite(
-        self,
-        model: Any,
-        X_test: np.ndarray,
-        y_test: np.ndarray
+        self, model: Any, X_test: np.ndarray, y_test: np.ndarray
     ) -> Dict[str, Any]:
         """
         Run comprehensive performance test suite.
@@ -343,10 +341,10 @@ class ModelPerformanceTester:
                     "test_name": t.test_name,
                     "passed": t.passed,
                     "metrics": t.metrics.to_dict() if t.metrics else None,
-                    "error": t.error
+                    "error": t.error,
                 }
                 for t in self.test_results
-            ]
+            ],
         }
 
         logger.info(
@@ -387,4 +385,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("Model Performance Testing Complete!")
     print("=" * 80)
-

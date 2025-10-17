@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 class CacheTier(Enum):
     """Cache tier levels"""
+
     L1_MEMORY = "l1_memory"
     L2_REDIS = "l2_redis"
     L3_CDN = "l3_cdn"
@@ -40,6 +41,7 @@ class CacheTier(Enum):
 
 class CacheEvictionPolicy(Enum):
     """Cache eviction strategies"""
+
     LRU = "lru"  # Least Recently Used
     LFU = "lfu"  # Least Frequently Used
     FIFO = "fifo"  # First In First Out
@@ -49,6 +51,7 @@ class CacheEvictionPolicy(Enum):
 @dataclass
 class CacheMetrics:
     """Cache performance metrics"""
+
     hits: int = 0
     misses: int = 0
     writes: int = 0
@@ -87,7 +90,10 @@ class LRUCache:
                 return None
 
             # Check TTL
-            if self.ttl_seconds and time.time() - self.timestamps[key] > self.ttl_seconds:
+            if (
+                self.ttl_seconds
+                and time.time() - self.timestamps[key] > self.ttl_seconds
+            ):
                 self.delete(key)
                 self.metrics.misses += 1
                 return None
@@ -139,9 +145,14 @@ class LRUCache:
 class RedisCache:
     """Redis distributed cache (L2)"""
 
-    def __init__(self, host: str = 'localhost', port: int = 6379,
-                 db: int = 0, password: Optional[str] = None,
-                 compress: bool = True):
+    def __init__(
+        self,
+        host: str = "localhost",
+        port: int = 6379,
+        db: int = 0,
+        password: Optional[str] = None,
+        compress: bool = True,
+    ):
         self.host = host
         self.port = port
         self.db = db
@@ -155,12 +166,13 @@ class RedisCache:
         """Connect to Redis"""
         try:
             import redis
+
             self.client = redis.Redis(
                 host=self.host,
                 port=self.port,
                 db=self.db,
                 password=self.password,
-                decode_responses=False  # We'll handle encoding
+                decode_responses=False,  # We'll handle encoding
             )
             self.client.ping()
             logger.info(f"Connected to Redis at {self.host}:{self.port}")
@@ -254,14 +266,16 @@ class MultiTierCache:
     L1 (Memory) -> L2 (Redis) -> Origin
     """
 
-    def __init__(self,
-                 l1_enabled: bool = True,
-                 l1_max_size: int = 1000,
-                 l1_ttl_seconds: Optional[int] = 300,
-                 l2_enabled: bool = False,
-                 l2_host: str = 'localhost',
-                 l2_port: int = 6379,
-                 l2_ttl_seconds: Optional[int] = 3600):
+    def __init__(
+        self,
+        l1_enabled: bool = True,
+        l1_max_size: int = 1000,
+        l1_ttl_seconds: Optional[int] = 300,
+        l2_enabled: bool = False,
+        l2_host: str = "localhost",
+        l2_port: int = 6379,
+        l2_ttl_seconds: Optional[int] = 3600,
+    ):
 
         self.l1_enabled = l1_enabled
         self.l2_enabled = l2_enabled
@@ -341,9 +355,9 @@ class MultiTierCache:
         """Get metrics from all cache tiers"""
         metrics = {}
         if self.l1_enabled:
-            metrics['l1'] = self.l1_cache.metrics
+            metrics["l1"] = self.l1_cache.metrics
         if self.l2_enabled:
-            metrics['l2'] = self.l2_cache.metrics
+            metrics["l2"] = self.l2_cache.metrics
         return metrics
 
     def warm_cache(self, key_value_pairs: List[tuple]) -> None:
@@ -366,7 +380,9 @@ def cache_key(*args, **kwargs) -> str:
     return hashlib.md5(key_str.encode()).hexdigest()
 
 
-def cached(cache: MultiTierCache, ttl_seconds: Optional[int] = None, key_prefix: str = ""):
+def cached(
+    cache: MultiTierCache, ttl_seconds: Optional[int] = None, key_prefix: str = ""
+):
     """
     Decorator for caching function results
 
@@ -376,6 +392,7 @@ def cached(cache: MultiTierCache, ttl_seconds: Optional[int] = None, key_prefix:
             # Expensive computation
             return stats
     """
+
     def decorator(func: Callable):
         def wrapper(*args, **kwargs):
             # Generate cache key
@@ -390,7 +407,9 @@ def cached(cache: MultiTierCache, ttl_seconds: Optional[int] = None, key_prefix:
             result = func(*args, **kwargs)
             cache.set(key, result)
             return result
+
         return wrapper
+
     return decorator
 
 
@@ -406,7 +425,7 @@ def get_cache() -> MultiTierCache:
             l1_enabled=True,
             l1_max_size=1000,
             l1_ttl_seconds=300,
-            l2_enabled=False  # Enable with Redis configuration
+            l2_enabled=False,  # Enable with Redis configuration
         )
     return _global_cache
 
@@ -420,7 +439,7 @@ if __name__ == "__main__":
         l1_enabled=True,
         l1_max_size=100,
         l1_ttl_seconds=60,
-        l2_enabled=False  # Set to True if Redis is available
+        l2_enabled=False,  # Set to True if Redis is available
     )
 
     # Basic operations
@@ -460,4 +479,3 @@ if __name__ == "__main__":
 
     stats2 = get_game_stats(12345)
     print(f"Second call (cached): {stats2}")
-

@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class TuningResult:
     """Result from hyperparameter tuning"""
+
     params: Dict[str, Any]
     score: float
     timestamp: datetime = field(default_factory=datetime.utcnow)
@@ -35,7 +36,7 @@ class HyperparameterTuner:
         param_grid: Dict[str, List[Any]],
         train_fn: Callable,
         eval_fn: Callable,
-        maximize: bool = True
+        maximize: bool = True,
     ) -> TuningResult:
         """
         Perform grid search over hyperparameters.
@@ -71,9 +72,7 @@ class HyperparameterTuner:
                 score = eval_fn(model)
 
                 result = TuningResult(
-                    params=params.copy(),
-                    score=score,
-                    metadata={"iteration": i}
+                    params=params.copy(), score=score, metadata={"iteration": i}
                 )
 
                 self.results.append(result)
@@ -104,7 +103,7 @@ class HyperparameterTuner:
         train_fn: Callable,
         eval_fn: Callable,
         n_iterations: int = 20,
-        maximize: bool = True
+        maximize: bool = True,
     ) -> TuningResult:
         """
         Perform random search over hyperparameters.
@@ -140,9 +139,7 @@ class HyperparameterTuner:
                 score = eval_fn(model)
 
                 result = TuningResult(
-                    params=params.copy(),
-                    score=score,
-                    metadata={"iteration": i + 1}
+                    params=params.copy(), score=score, metadata={"iteration": i + 1}
                 )
 
                 self.results.append(result)
@@ -184,7 +181,9 @@ class HyperparameterTuner:
             "worst_score": min(scores),
             "mean_score": sum(scores) / len(scores),
             "score_range": max(scores) - min(scores),
-            "best_params": sorted(self.results, key=lambda r: r.score, reverse=True)[0].params
+            "best_params": sorted(self.results, key=lambda r: r.score, reverse=True)[
+                0
+            ].params,
         }
 
 
@@ -221,7 +220,7 @@ if __name__ == "__main__":
     param_grid = {
         "n_estimators": [50, 100, 200],
         "max_depth": [5, 10, 15],
-        "min_samples_split": [2, 5, 10]
+        "min_samples_split": [2, 5, 10],
     }
 
     print(f"\nSearching over {len(param_grid)} parameters...")
@@ -230,7 +229,7 @@ if __name__ == "__main__":
         param_grid=param_grid,
         train_fn=train_model,
         eval_fn=evaluate_model,
-        maximize=True
+        maximize=True,
     )
 
     print(f"\n✅ Grid Search Complete")
@@ -247,7 +246,7 @@ if __name__ == "__main__":
     param_distributions = {
         "n_estimators": (10, 300),
         "max_depth": (3, 20),
-        "min_samples_split": (2, 20)
+        "min_samples_split": (2, 20),
     }
 
     print(f"\nPerforming 15 random samples...")
@@ -257,7 +256,7 @@ if __name__ == "__main__":
         train_fn=train_model,
         eval_fn=evaluate_model,
         n_iterations=15,
-        maximize=True
+        maximize=True,
     )
 
     print(f"\n✅ Random Search Complete")
@@ -298,4 +297,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("Hyperparameter Tuning Demo Complete!")
     print("=" * 80)
-

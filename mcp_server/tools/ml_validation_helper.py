@@ -16,26 +16,37 @@ from functools import wraps
 
 def log_operation(operation_name: str):
     """Decorator for structured logging of operations"""
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             try:
                 result = func(*args, **kwargs)
-                print(json.dumps({
-                    "operation": operation_name,
-                    "status": "success",
-                    "function": func.__name__
-                }))
+                print(
+                    json.dumps(
+                        {
+                            "operation": operation_name,
+                            "status": "success",
+                            "function": func.__name__,
+                        }
+                    )
+                )
                 return result
             except Exception as e:
-                print(json.dumps({
-                    "operation": operation_name,
-                    "status": "error",
-                    "function": func.__name__,
-                    "error": str(e)
-                }))
+                print(
+                    json.dumps(
+                        {
+                            "operation": operation_name,
+                            "status": "error",
+                            "function": func.__name__,
+                            "error": str(e),
+                        }
+                    )
+                )
                 raise
+
         return wrapper
+
     return decorator
 
 
@@ -43,12 +54,13 @@ def log_operation(operation_name: str):
 # Cross-Validation Tools
 # ============================================================================
 
+
 @log_operation("ml_k_fold_split")
 def k_fold_split(
     n_samples: int,
     n_folds: int = 5,
     shuffle: bool = True,
-    random_seed: Optional[int] = None
+    random_seed: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
     Generate K-fold cross-validation splits.
@@ -111,13 +123,15 @@ def k_fold_split(
         # Train indices (all other folds)
         train_indices = indices[:start_idx] + indices[end_idx:]
 
-        folds.append({
-            "fold": fold_idx,
-            "train_indices": train_indices,
-            "test_indices": test_indices,
-            "train_size": len(train_indices),
-            "test_size": len(test_indices)
-        })
+        folds.append(
+            {
+                "fold": fold_idx,
+                "train_indices": train_indices,
+                "test_indices": test_indices,
+                "train_size": len(train_indices),
+                "test_size": len(test_indices),
+            }
+        )
 
         start_idx = end_idx
 
@@ -129,7 +143,7 @@ def k_fold_split(
         "n_folds": n_folds,
         "n_samples": n_samples,
         "fold_sizes": fold_sizes,
-        "shuffled": shuffle
+        "shuffled": shuffle,
     }
 
 
@@ -138,7 +152,7 @@ def stratified_k_fold_split(
     y: List[Any],
     n_folds: int = 5,
     shuffle: bool = True,
-    random_seed: Optional[int] = None
+    random_seed: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
     Generate stratified K-fold cross-validation splits.
@@ -189,7 +203,9 @@ def stratified_k_fold_split(
     # Verify each class has enough samples
     for label, indices in class_indices.items():
         if len(indices) < n_folds:
-            raise ValueError(f"Class '{label}' has only {len(indices)} samples, need at least {n_folds}")
+            raise ValueError(
+                f"Class '{label}' has only {len(indices)} samples, need at least {n_folds}"
+            )
 
     # Create folds by distributing each class
     folds = [[] for _ in range(n_folds)]
@@ -212,16 +228,20 @@ def stratified_k_fold_split(
 
         # Calculate class distribution in this fold
         test_labels = [y[idx] for idx in test_indices]
-        test_class_counts = {label: test_labels.count(label) for label in set(test_labels)}
+        test_class_counts = {
+            label: test_labels.count(label) for label in set(test_labels)
+        }
 
-        result_folds.append({
-            "fold": fold_idx,
-            "train_indices": train_indices,
-            "test_indices": test_indices,
-            "train_size": len(train_indices),
-            "test_size": len(test_indices),
-            "test_class_distribution": test_class_counts
-        })
+        result_folds.append(
+            {
+                "fold": fold_idx,
+                "train_indices": train_indices,
+                "test_indices": test_indices,
+                "train_size": len(train_indices),
+                "test_size": len(test_indices),
+                "test_class_distribution": test_class_counts,
+            }
+        )
 
         class_distribution.append(test_class_counts)
 
@@ -231,7 +251,7 @@ def stratified_k_fold_split(
         "n_samples": len(y),
         "class_distribution": class_distribution,
         "classes": list(class_indices.keys()),
-        "shuffled": shuffle
+        "shuffled": shuffle,
     }
 
 
@@ -242,7 +262,7 @@ def cross_validate(
     cv_strategy: str = "k-fold",
     n_folds: int = 5,
     shuffle: bool = True,
-    random_seed: Optional[int] = None
+    random_seed: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
     Perform cross-validation (simplified version for scoring only).
@@ -278,20 +298,16 @@ def cross_validate(
     # Generate fold splits
     if cv_strategy == "k-fold":
         fold_result = k_fold_split(
-            n_samples=len(X),
-            n_folds=n_folds,
-            shuffle=shuffle,
-            random_seed=random_seed
+            n_samples=len(X), n_folds=n_folds, shuffle=shuffle, random_seed=random_seed
         )
     elif cv_strategy == "stratified":
         fold_result = stratified_k_fold_split(
-            y=y,
-            n_folds=n_folds,
-            shuffle=shuffle,
-            random_seed=random_seed
+            y=y, n_folds=n_folds, shuffle=shuffle, random_seed=random_seed
         )
     else:
-        raise ValueError(f"Unknown cv_strategy: {cv_strategy}. Use 'k-fold' or 'stratified'")
+        raise ValueError(
+            f"Unknown cv_strategy: {cv_strategy}. Use 'k-fold' or 'stratified'"
+        )
 
     # Create X and y splits for each fold
     X_folds = []
@@ -306,20 +322,22 @@ def cross_validate(
         y_train = [y[i] for i in train_idx]
         y_test = [y[i] for i in test_idx]
 
-        X_folds.append({
-            "fold": fold["fold"],
-            "X_train": X_train,
-            "X_test": X_test,
-            "y_train": y_train,
-            "y_test": y_test
-        })
+        X_folds.append(
+            {
+                "fold": fold["fold"],
+                "X_train": X_train,
+                "X_test": X_test,
+                "y_train": y_train,
+                "y_test": y_test,
+            }
+        )
 
     return {
         "folds": fold_result["folds"],
         "X_folds": X_folds,
         "cv_strategy": cv_strategy,
         "n_folds": n_folds,
-        "n_samples": len(X)
+        "n_samples": len(X),
     }
 
 
@@ -327,11 +345,10 @@ def cross_validate(
 # Model Comparison Tools
 # ============================================================================
 
+
 @log_operation("ml_compare_models")
 def compare_models(
-    models: List[Dict[str, Any]],
-    y_true: List[Any],
-    metrics: Optional[List[str]] = None
+    models: List[Dict[str, Any]], y_true: List[Any], metrics: Optional[List[str]] = None
 ) -> Dict[str, Any]:
     """
     Compare multiple models side-by-side.
@@ -419,10 +436,12 @@ def compare_models(
     for metric in metrics:
         if metric == "training_time":
             # Lower is better
-            sorted_results = sorted(results, key=lambda x: x.get(metric, float('inf')))
+            sorted_results = sorted(results, key=lambda x: x.get(metric, float("inf")))
         else:
             # Higher is better
-            sorted_results = sorted(results, key=lambda x: x.get(metric, 0), reverse=True)
+            sorted_results = sorted(
+                results, key=lambda x: x.get(metric, 0), reverse=True
+            )
 
         rankings[metric] = [r["name"] for r in sorted_results]
 
@@ -433,22 +452,24 @@ def compare_models(
             best_model = ranking[0]
             best_counts[best_model] = best_counts.get(best_model, 0) + 1
 
-    overall_best = max(best_counts.items(), key=lambda x: x[1])[0] if best_counts else results[0]["name"]
+    overall_best = (
+        max(best_counts.items(), key=lambda x: x[1])[0]
+        if best_counts
+        else results[0]["name"]
+    )
 
     return {
         "models": results,
         "rankings": rankings,
         "overall_best": overall_best,
         "num_models": len(models),
-        "metrics_compared": metrics
+        "metrics_compared": metrics,
     }
 
 
 @log_operation("ml_paired_ttest")
 def paired_ttest(
-    scores_a: List[float],
-    scores_b: List[float],
-    alpha: float = 0.05
+    scores_a: List[float], scores_b: List[float], alpha: float = 0.05
 ) -> Dict[str, Any]:
     """
     Statistical comparison of two models using paired t-test.
@@ -480,7 +501,9 @@ def paired_ttest(
         raise ValueError("scores_a and scores_b cannot be empty")
 
     if len(scores_a) != len(scores_b):
-        raise ValueError(f"scores must have same length: {len(scores_a)} vs {len(scores_b)}")
+        raise ValueError(
+            f"scores must have same length: {len(scores_a)} vs {len(scores_b)}"
+        )
 
     n = len(scores_a)
 
@@ -515,6 +538,7 @@ def paired_ttest(
         # P(Z > z) for two-tailed test
         # Using approximation: P(Z > z) ≈ 0.5 * erfc(z/sqrt(2))
         from math import erfc
+
         p_value = erfc(z / math.sqrt(2))
     else:
         # Use simplified t-distribution approximation
@@ -532,10 +556,19 @@ def paired_ttest(
         else:
             t_critical_05 = 2.042
 
-        p_value = 0.001 if t_abs > t_critical_05 * 2 else \
-                  0.01 if t_abs > t_critical_05 * 1.5 else \
-                  0.05 if t_abs > t_critical_05 else \
-                  0.10 if t_abs > t_critical_05 * 0.7 else 0.20
+        p_value = (
+            0.001
+            if t_abs > t_critical_05 * 2
+            else (
+                0.01
+                if t_abs > t_critical_05 * 1.5
+                else (
+                    0.05
+                    if t_abs > t_critical_05
+                    else 0.10 if t_abs > t_critical_05 * 0.7 else 0.20
+                )
+            )
+        )
 
     # Confidence interval (95%)
     t_critical = 1.96 if df > 30 else 2.042  # Approximate
@@ -557,18 +590,22 @@ def paired_ttest(
         "confidence_interval": {
             "lower": ci_lower,
             "upper": ci_upper,
-            "confidence_level": 0.95
+            "confidence_level": 0.95,
         },
-        "interpretation": _interpret_ttest(p_value, alpha, mean_diff)
+        "interpretation": _interpret_ttest(p_value, alpha, mean_diff),
     }
 
 
 def _interpret_ttest(p_value: float, alpha: float, mean_diff: float) -> str:
     """Interpret t-test results"""
     if p_value >= alpha:
-        return f"Not significant (p={p_value:.3f} >= α={alpha}): No evidence of difference"
+        return (
+            f"Not significant (p={p_value:.3f} >= α={alpha}): No evidence of difference"
+        )
     else:
-        direction = "Model A performs better" if mean_diff > 0 else "Model B performs better"
+        direction = (
+            "Model A performs better" if mean_diff > 0 else "Model B performs better"
+        )
         return f"Significant (p={p_value:.3f} < α={alpha}): {direction}"
 
 
@@ -576,10 +613,10 @@ def _interpret_ttest(p_value: float, alpha: float, mean_diff: float) -> str:
 # Hyperparameter Tuning
 # ============================================================================
 
+
 @log_operation("ml_grid_search")
 def grid_search(
-    param_grid: Dict[str, List[Any]],
-    n_combinations: Optional[int] = None
+    param_grid: Dict[str, List[Any]], n_combinations: Optional[int] = None
 ) -> Dict[str, Any]:
     """
     Generate parameter combinations for grid search.
@@ -650,5 +687,5 @@ def grid_search(
         "total_combinations": total_combinations,
         "combinations_tested": len(param_combinations),
         "param_grid": param_grid,
-        "param_names": param_names
+        "param_names": param_names,
     }

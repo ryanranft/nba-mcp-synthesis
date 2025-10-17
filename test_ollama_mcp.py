@@ -11,8 +11,9 @@ from openai import OpenAI
 # Connect to Ollama's OpenAI-compatible endpoint
 ollama = OpenAI(
     base_url="http://34.226.246.126:11434/v1",
-    api_key="ollama"  # Ollama doesn't need a real key
+    api_key="ollama",  # Ollama doesn't need a real key
 )
+
 
 async def test_ollama_connection():
     """Test basic Ollama connectivity."""
@@ -21,12 +22,14 @@ async def test_ollama_connection():
     try:
         response = ollama.chat.completions.create(
             model="qwen2.5-coder:32b",
-            messages=[{
-                "role": "user",
-                "content": "Say 'Hello! I am running on Ollama locally.' in one sentence."
-            }],
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Say 'Hello! I am running on Ollama locally.' in one sentence.",
+                }
+            ],
             temperature=0.7,
-            max_tokens=100
+            max_tokens=100,
         )
 
         print(f"✅ Ollama Response: {response.choices[0].message.content}\n")
@@ -35,12 +38,14 @@ async def test_ollama_connection():
         print(f"❌ Ollama connection failed: {e}\n")
         return False
 
+
 async def test_mcp_server():
     """Test MCP server availability."""
     print("🔍 Testing MCP Server...")
 
     try:
         from mcp_server.fastmcp_server import mcp
+
         tools = await mcp.list_tools()
         print(f"✅ MCP Server has {len(tools)} tools available")
         print(f"   Sample tools: {', '.join([t.name for t in tools[:5]])}\n")
@@ -49,6 +54,7 @@ async def test_mcp_server():
         print(f"❌ MCP server test failed: {e}\n")
         return False
 
+
 async def demonstrate_integration():
     """Demonstrate Ollama with MCP context."""
     print("🎯 Demonstrating Ollama + MCP Integration...")
@@ -56,6 +62,7 @@ async def demonstrate_integration():
 
     # Get MCP tools
     from mcp_server.fastmcp_server import mcp
+
     tools = await mcp.list_tools()
 
     # Create a context-rich prompt
@@ -74,7 +81,7 @@ Answer briefly in 2-3 sentences."""
             model="qwen2.5-coder:32b",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
-            max_tokens=200
+            max_tokens=200,
         )
 
         print(f"\n📝 Ollama's Response:")
@@ -84,6 +91,7 @@ Answer briefly in 2-3 sentences."""
     except Exception as e:
         print(f"❌ Integration test failed: {e}\n")
         return False
+
 
 async def main():
     """Run all tests."""
@@ -123,9 +131,6 @@ async def main():
     else:
         print("⚠️  Some tests failed. Check the errors above.")
 
+
 if __name__ == "__main__":
     asyncio.run(main())
-
-
-
-

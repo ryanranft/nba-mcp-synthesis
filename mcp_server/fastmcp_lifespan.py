@@ -8,12 +8,7 @@ from typing import Any, Dict
 import logging
 
 # Import connectors
-from .connectors import (
-    RDSConnector,
-    S3Connector,
-    GlueConnector,
-    SlackNotifier
-)
+from .connectors import RDSConnector, S3Connector, GlueConnector, SlackNotifier
 from .config import MCPConfig
 
 logger = logging.getLogger(__name__)
@@ -47,7 +42,7 @@ async def nba_lifespan(app):
             port=config.rds_port,
             database=config.rds_database,
             username=config.rds_username,
-            password=config.rds_password
+            password=config.rds_password,
         )
         logger.info("✅ RDS connector initialized")
     except Exception as e:
@@ -58,8 +53,7 @@ async def nba_lifespan(app):
     logger.info("☁️  Initializing S3 client...")
     try:
         s3_connector = S3Connector(
-            bucket_name=config.s3_bucket,
-            region=config.s3_region
+            bucket_name=config.s3_bucket, region=config.s3_region
         )
         logger.info("✅ S3 connector initialized")
     except Exception as e:
@@ -70,8 +64,7 @@ async def nba_lifespan(app):
     logger.info("📚 Initializing Glue client...")
     try:
         glue_connector = GlueConnector(
-            database=config.glue_database,
-            region=config.glue_region
+            database=config.glue_database, region=config.glue_region
         )
         logger.info("✅ Glue connector initialized")
     except Exception as e:
@@ -83,9 +76,7 @@ async def nba_lifespan(app):
     if config.slack_webhook_url:
         logger.info("💬 Initializing Slack notifier...")
         try:
-            slack_notifier = SlackNotifier(
-                webhook_url=config.slack_webhook_url
-            )
+            slack_notifier = SlackNotifier(webhook_url=config.slack_webhook_url)
             logger.info("✅ Slack notifier initialized")
         except Exception as e:
             logger.warning(f"⚠️  Failed to initialize Slack notifier: {e}")
@@ -97,7 +88,7 @@ async def nba_lifespan(app):
         "s3_connector": s3_connector,
         "glue_connector": glue_connector,
         "slack_notifier": slack_notifier,
-        "config": config
+        "config": config,
     }
 
     logger.info("✅ NBA MCP Server ready!")
@@ -113,21 +104,21 @@ async def nba_lifespan(app):
         logger.info("🛑 Shutting down NBA MCP Server...")
 
         # Close connectors (if they have close methods)
-        if hasattr(rds_connector, 'close'):
+        if hasattr(rds_connector, "close"):
             try:
                 await rds_connector.close()
                 logger.info("✅ RDS connector closed")
             except Exception as e:
                 logger.error(f"❌ Error closing RDS connector: {e}")
 
-        if hasattr(s3_connector, 'close'):
+        if hasattr(s3_connector, "close"):
             try:
                 await s3_connector.close()
                 logger.info("✅ S3 connector closed")
             except Exception as e:
                 logger.error(f"❌ Error closing S3 connector: {e}")
 
-        if hasattr(glue_connector, 'close'):
+        if hasattr(glue_connector, "close"):
             try:
                 await glue_connector.close()
                 logger.info("✅ Glue connector closed")

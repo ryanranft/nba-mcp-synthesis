@@ -23,7 +23,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from mcp_server.tools.documentation_training import (
     DocumentationGenerator,
@@ -34,7 +34,7 @@ from mcp_server.tools.documentation_training import (
     create_training_module,
     generate_comprehensive_documentation,
     export_documentation,
-    get_documentation_status
+    get_documentation_status,
 )
 
 
@@ -65,7 +65,7 @@ def test_documentation_system():
     try:
         result = generate_user_guide(
             title="NBA Analytics User Guide",
-            description="Comprehensive guide for NBA analytics tools and formulas"
+            description="Comprehensive guide for NBA analytics tools and formulas",
         )
 
         print("✓ User guide generated successfully")
@@ -83,7 +83,7 @@ def test_documentation_system():
     try:
         result = generate_api_documentation(
             title="NBA MCP Server API Reference",
-            description="Complete API reference for NBA MCP Server"
+            description="Complete API reference for NBA MCP Server",
         )
 
         print("✓ API documentation generated successfully")
@@ -105,8 +105,8 @@ def test_documentation_system():
             objectives=[
                 "Understand basic NBA statistics",
                 "Learn to use formula tools",
-                "Create your first analysis"
-            ]
+                "Create your first analysis",
+            ],
         )
 
         print("✓ Tutorial generated successfully")
@@ -122,9 +122,7 @@ def test_documentation_system():
     print("-" * 60)
 
     try:
-        result = generate_quick_start_guide(
-            title="NBA Analytics Quick Start"
-        )
+        result = generate_quick_start_guide(title="NBA Analytics Quick Start")
 
         print("✓ Quick start guide generated successfully")
         print(f"  - QuickStart ID: {result.get('quickstart_id', 'N/A')}")
@@ -142,7 +140,7 @@ def test_documentation_system():
         result = create_training_module(
             title="Advanced NBA Analytics",
             description="Comprehensive training on advanced NBA analytics techniques",
-            level="advanced"
+            level="advanced",
         )
 
         print("✓ Training module created successfully")
@@ -175,10 +173,7 @@ def test_documentation_system():
     print("-" * 60)
 
     try:
-        result = export_documentation(
-            format_type="html",
-            doc_id="test_doc_001"
-        )
+        result = export_documentation(format_type="html", doc_id="test_doc_001")
 
         print("✓ Documentation export successful")
         print(f"  - Status: {result.get('status', 'N/A')}")
@@ -220,7 +215,7 @@ def test_standalone_functions():
         ("training_material", "Training Material"),
         ("quick_start", "Quick Start"),
         ("troubleshooting", "Troubleshooting"),
-        ("examples", "Examples")
+        ("examples", "Examples"),
     ]
 
     for doc_type, doc_name in doc_types:
@@ -228,30 +223,30 @@ def test_standalone_functions():
             if doc_type == "user_guide":
                 result = generate_user_guide(
                     title=f"Test {doc_name}",
-                    description=f"Test {doc_name} for NBA analytics"
+                    description=f"Test {doc_name} for NBA analytics",
                 )
             elif doc_type == "api_documentation":
                 result = generate_api_documentation(
                     title=f"Test {doc_name}",
-                    description=f"Test {doc_name} for NBA analytics"
+                    description=f"Test {doc_name} for NBA analytics",
                 )
             elif doc_type == "tutorial":
                 result = generate_tutorial(
                     title=f"Test {doc_name}",
                     level="beginner",
-                    objectives=["Learn basics", "Practice examples"]
+                    objectives=["Learn basics", "Practice examples"],
                 )
             elif doc_type == "quick_start":
-                result = generate_quick_start_guide(
-                    title=f"Test {doc_name}"
-                )
+                result = generate_quick_start_guide(title=f"Test {doc_name}")
             else:
                 result = generate_user_guide(
                     title=f"Test {doc_name}",
-                    description=f"Test {doc_name} for NBA analytics"
+                    description=f"Test {doc_name} for NBA analytics",
                 )
 
-            print(f"✓ {doc_name} generated: {result.get('guide_id', result.get('api_id', result.get('tutorial_id', result.get('quickstart_id', 'N/A'))))}")
+            print(
+                f"✓ {doc_name} generated: {result.get('guide_id', result.get('api_id', result.get('tutorial_id', result.get('quickstart_id', 'N/A'))))}"
+            )
         except Exception as e:
             print(f"✗ {doc_name} generation failed: {e}")
 
@@ -264,7 +259,10 @@ def test_error_handling():
     # Test invalid parameters
     test_cases = [
         ("Empty title", lambda: generate_user_guide("", "Test")),
-        ("Invalid level", lambda: generate_tutorial("Test Tutorial", "invalid", ["test"])),
+        (
+            "Invalid level",
+            lambda: generate_tutorial("Test Tutorial", "invalid", ["test"]),
+        ),
         ("Invalid format", lambda: export_documentation("invalid", "test")),
     ]
 
@@ -290,20 +288,20 @@ def test_integration_scenarios():
         # Generate user guide
         user_guide = generate_user_guide(
             title="NBA Analytics Complete Guide",
-            description="Complete guide for NBA analytics"
+            description="Complete guide for NBA analytics",
         )
 
         # Generate API docs
         api_docs = generate_api_documentation(
             title="NBA MCP API Reference",
-            description="API reference for NBA MCP Server"
+            description="API reference for NBA MCP Server",
         )
 
         # Create tutorial
         tutorial = generate_tutorial(
             title="NBA Analytics Tutorial",
             level="intermediate",
-            objectives=["Learn NBA metrics", "Use analytics tools"]
+            objectives=["Learn NBA metrics", "Use analytics tools"],
         )
 
         # Generate comprehensive documentation
@@ -326,10 +324,7 @@ def test_integration_scenarios():
         formats = ["html", "json", "rst"]
 
         for fmt in formats:
-            result = export_documentation(
-                format_type=fmt,
-                doc_id="test_multi_format"
-            )
+            result = export_documentation(format_type=fmt, doc_id="test_multi_format")
             print(f"✓ {fmt.upper()} export: {result.get('status', 'N/A')}")
 
     except Exception as e:
@@ -350,7 +345,7 @@ def test_performance_benchmarks():
         for i in range(5):
             result = generate_user_guide(
                 title=f"Performance Test Guide {i+1}",
-                description=f"Performance test guide {i+1}"
+                description=f"Performance test guide {i+1}",
             )
             results.append(result)
 
@@ -385,6 +380,7 @@ def main():
     except Exception as e:
         print(f"\nTest suite failed with error: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 

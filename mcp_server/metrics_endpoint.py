@@ -6,7 +6,13 @@ Expose application metrics for Prometheus scraping
 import time
 import logging
 from typing import Dict, Any
-from prometheus_client import Counter, Histogram, Gauge, start_http_server, generate_latest
+from prometheus_client import (
+    Counter,
+    Histogram,
+    Gauge,
+    start_http_server,
+    generate_latest,
+)
 from flask import Flask, Response, request
 import threading
 import os
@@ -15,88 +21,61 @@ logger = logging.getLogger(__name__)
 
 # Prometheus metrics
 REQUEST_COUNT = Counter(
-    'http_requests_total',
-    'Total HTTP requests',
-    ['method', 'endpoint', 'status']
+    "http_requests_total", "Total HTTP requests", ["method", "endpoint", "status"]
 )
 
 REQUEST_DURATION = Histogram(
-    'http_request_duration_seconds',
-    'HTTP request duration in seconds',
-    ['method', 'endpoint']
+    "http_request_duration_seconds",
+    "HTTP request duration in seconds",
+    ["method", "endpoint"],
 )
 
 SECRET_LOADING_TIME = Histogram(
-    'secret_loading_duration_seconds',
-    'Time taken to load secrets',
-    ['secret_type']
+    "secret_loading_duration_seconds", "Time taken to load secrets", ["secret_type"]
 )
 
-API_CALL_COUNT = Counter(
-    'api_calls_total',
-    'Total API calls',
-    ['provider', 'status']
-)
+API_CALL_COUNT = Counter("api_calls_total", "Total API calls", ["provider", "status"])
 
 API_CALL_DURATION = Histogram(
-    'api_call_duration_seconds',
-    'API call duration in seconds',
-    ['provider']
+    "api_call_duration_seconds", "API call duration in seconds", ["provider"]
 )
 
 DATABASE_QUERY_COUNT = Counter(
-    'database_queries_total',
-    'Total database queries',
-    ['operation', 'status']
+    "database_queries_total", "Total database queries", ["operation", "status"]
 )
 
 DATABASE_QUERY_DURATION = Histogram(
-    'database_query_duration_seconds',
-    'Database query duration in seconds',
-    ['operation']
+    "database_query_duration_seconds",
+    "Database query duration in seconds",
+    ["operation"],
 )
 
 S3_OPERATION_COUNT = Counter(
-    's3_operations_total',
-    'Total S3 operations',
-    ['operation', 'status']
+    "s3_operations_total", "Total S3 operations", ["operation", "status"]
 )
 
 S3_OPERATION_DURATION = Histogram(
-    's3_operation_duration_seconds',
-    'S3 operation duration in seconds',
-    ['operation']
+    "s3_operation_duration_seconds", "S3 operation duration in seconds", ["operation"]
 )
 
 ACTIVE_CONNECTIONS = Gauge(
-    'active_connections',
-    'Number of active connections',
-    ['connection_type']
+    "active_connections", "Number of active connections", ["connection_type"]
 )
 
 SECRET_VALIDATION_FAILURES = Counter(
-    'secret_validation_failures_total',
-    'Total secret validation failures',
-    ['secret_name', 'validation_type']
+    "secret_validation_failures_total",
+    "Total secret validation failures",
+    ["secret_name", "validation_type"],
 )
 
 SECRET_REFRESH_COUNT = Counter(
-    'secret_refresh_total',
-    'Total secret refreshes',
-    ['secret_name', 'status']
+    "secret_refresh_total", "Total secret refreshes", ["secret_name", "status"]
 )
 
-MEMORY_USAGE = Gauge(
-    'memory_usage_bytes',
-    'Memory usage in bytes',
-    ['component']
-)
+MEMORY_USAGE = Gauge("memory_usage_bytes", "Memory usage in bytes", ["component"])
 
-CPU_USAGE = Gauge(
-    'cpu_usage_percent',
-    'CPU usage percentage',
-    ['component']
-)
+CPU_USAGE = Gauge("cpu_usage_percent", "CPU usage percentage", ["component"])
+
 
 class MetricsCollector:
     """Collect and expose application metrics"""
@@ -109,20 +88,20 @@ class MetricsCollector:
     def _setup_routes(self):
         """Setup Flask routes for metrics"""
 
-        @self.app.route('/metrics')
+        @self.app.route("/metrics")
         def metrics():
             """Prometheus metrics endpoint"""
-            return Response(generate_latest(), mimetype='text/plain')
+            return Response(generate_latest(), mimetype="text/plain")
 
-        @self.app.route('/health')
+        @self.app.route("/health")
         def health():
             """Health check endpoint"""
-            return {'status': 'healthy', 'timestamp': time.time()}
+            return {"status": "healthy", "timestamp": time.time()}
 
-        @self.app.route('/')
+        @self.app.route("/")
         def root():
             """Root endpoint"""
-            return {'service': 'nba-mcp-synthesis-metrics', 'version': '1.0.0'}
+            return {"service": "nba-mcp-synthesis-metrics", "version": "1.0.0"}
 
     def start(self):
         """Start the metrics server"""
@@ -133,8 +112,8 @@ class MetricsCollector:
             # Start Flask app in a separate thread
             flask_thread = threading.Thread(
                 target=self.app.run,
-                kwargs={'host': '0.0.0.0', 'port': self.port, 'debug': False},
-                daemon=True
+                kwargs={"host": "0.0.0.0", "port": self.port, "debug": False},
+                daemon=True,
             )
             flask_thread.start()
 
@@ -172,7 +151,9 @@ class MetricsCollector:
 
     def record_secret_validation_failure(self, secret_name: str, validation_type: str):
         """Record secret validation failure"""
-        SECRET_VALIDATION_FAILURES.labels(secret_name=secret_name, validation_type=validation_type).inc()
+        SECRET_VALIDATION_FAILURES.labels(
+            secret_name=secret_name, validation_type=validation_type
+        ).inc()
 
     def record_secret_refresh(self, secret_name: str, status: str):
         """Record secret refresh"""
@@ -186,22 +167,26 @@ class MetricsCollector:
         """Set CPU usage"""
         CPU_USAGE.labels(component=component).set(usage_percent)
 
+
 # Global metrics collector instance
 metrics_collector = MetricsCollector()
+
 
 def get_metrics_collector() -> MetricsCollector:
     """Get the global metrics collector instance"""
     return metrics_collector
 
+
 def start_metrics_server():
     """Start the metrics server"""
     metrics_collector.start()
+
 
 if __name__ == "__main__":
     # Configure logging
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
     # Start metrics server
@@ -213,4 +198,3 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         logger.info("Metrics server stopped")
-

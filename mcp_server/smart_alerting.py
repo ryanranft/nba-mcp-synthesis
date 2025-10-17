@@ -40,6 +40,7 @@ logger = logging.getLogger(__name__)
 
 class AlertSeverity(Enum):
     """Alert severity levels"""
+
     INFO = 1
     WARNING = 2
     ERROR = 3
@@ -48,6 +49,7 @@ class AlertSeverity(Enum):
 
 class AlertStatus(Enum):
     """Alert status"""
+
     ACTIVE = "active"
     ACKNOWLEDGED = "acknowledged"
     RESOLVED = "resolved"
@@ -57,6 +59,7 @@ class AlertStatus(Enum):
 @dataclass
 class Alert:
     """Alert definition"""
+
     alert_id: str
     title: str
     description: str
@@ -89,6 +92,7 @@ class Alert:
 @dataclass
 class AlertRule:
     """Alert rule definition"""
+
     rule_id: str
     metric_name: str
     condition: Callable[[float], bool]
@@ -119,7 +123,7 @@ class DynamicThreshold:
         # Calculate mean and std dev
         mean = sum(self.history) / len(self.history)
         variance = sum((x - mean) ** 2 for x in self.history) / len(self.history)
-        std_dev = variance ** 0.5
+        std_dev = variance**0.5
 
         # Upper threshold = mean + (sensitivity * std_dev)
         threshold = mean + (self.sensitivity * std_dev)
@@ -161,8 +165,7 @@ class AlertDeduplicator:
             # Cleanup old entries
             cutoff = datetime.now() - timedelta(seconds=self.window_seconds * 2)
             self.recent_alerts = {
-                fp: ts for fp, ts in self.recent_alerts.items()
-                if ts > cutoff
+                fp: ts for fp, ts in self.recent_alerts.items() if ts > cutoff
             }
 
             return True
@@ -181,10 +184,7 @@ class AlertCorrelator:
         with self._lock:
             # Clean old alerts
             cutoff = datetime.now() - timedelta(seconds=self.correlation_window)
-            self.recent_alerts = [
-                a for a in self.recent_alerts
-                if a.timestamp > cutoff
-            ]
+            self.recent_alerts = [a for a in self.recent_alerts if a.timestamp > cutoff]
 
             # Check for correlation
             for existing_alert in self.recent_alerts:
@@ -207,7 +207,7 @@ class AlertCorrelator:
             return True
 
         # Similar metric names
-        if alert1.metric_name.split('_')[0] == alert2.metric_name.split('_')[0]:
+        if alert1.metric_name.split("_")[0] == alert2.metric_name.split("_")[0]:
             return True
 
         # Common tags
@@ -230,7 +230,7 @@ class PriorityCalculator:
             AlertSeverity.INFO: 10,
             AlertSeverity.WARNING: 30,
             AlertSeverity.ERROR: 60,
-            AlertSeverity.CRITICAL: 90
+            AlertSeverity.CRITICAL: 90,
         }
         score = severity_scores[alert.severity]
 
@@ -245,10 +245,10 @@ class PriorityCalculator:
             score += 5
 
         # Tag-based priority
-        if 'production' in alert.tags.values():
+        if "production" in alert.tags.values():
             score += 10
 
-        if 'customer_facing' in alert.tags.values():
+        if "customer_facing" in alert.tags.values():
             score += 10
 
         return min(score, 100)
@@ -261,9 +261,7 @@ class AlertEscalator:
         self.escalation_rules: Dict[str, List[Dict[str, Any]]] = {}
 
     def add_escalation_rule(
-        self,
-        severity: AlertSeverity,
-        levels: List[Dict[str, Any]]
+        self, severity: AlertSeverity, levels: List[Dict[str, Any]]
     ) -> None:
         """
         Add escalation rule
@@ -278,17 +276,15 @@ class AlertEscalator:
         self.escalation_rules[severity.name] = levels
 
     def get_notification_targets(
-        self,
-        alert: Alert,
-        time_active_seconds: int
+        self, alert: Alert, time_active_seconds: int
     ) -> List[str]:
         """Get who should be notified based on escalation"""
         levels = self.escalation_rules.get(alert.severity.name, [])
 
         targets = set()
         for level in levels:
-            if time_active_seconds >= level['delay_seconds']:
-                targets.update(level['notify'])
+            if time_active_seconds >= level["delay_seconds"]:
+                targets.update(level["notify"])
 
         return list(targets)
 
@@ -323,15 +319,11 @@ class SmartAlertingSystem:
         logger.info(f"Added alert rule: {rule.rule_id}")
 
     def add_dynamic_threshold_metric(
-        self,
-        metric_name: str,
-        window_size: int = 100,
-        sensitivity: float = 2.0
+        self, metric_name: str, window_size: int = 100, sensitivity: float = 2.0
     ) -> None:
         """Add metric with dynamic threshold"""
         self.dynamic_thresholds[metric_name] = DynamicThreshold(
-            window_size=window_size,
-            sensitivity=sensitivity
+            window_size=window_size, sensitivity=sensitivity
         )
 
     def check_metric(
@@ -339,7 +331,7 @@ class SmartAlertingSystem:
         metric_name: str,
         value: float,
         source: str = "system",
-        tags: Optional[Dict[str, str]] = None
+        tags: Optional[Dict[str, str]] = None,
     ) -> Optional[Alert]:
         """Check metric value against rules"""
 
@@ -360,30 +352,26 @@ class SmartAlertingSystem:
 
             if rule.metric_name == metric_name:
                 if rule.condition(value):
-                    return self._create_alert_from_rule(
-                        rule, value, source, tags
-                    )
+                    return self._create_alert_from_rule(rule, value, source, tags)
 
         return None
 
     def _create_alert_from_rule(
-        self,
-        rule: AlertRule,
-        value: float,
-        source: str,
-        tags: Optional[Dict[str, str]]
+        self, rule: AlertRule, value: float, source: str, tags: Optional[Dict[str, str]]
     ) -> Optional[Alert]:
         """Create alert from rule"""
         alert = Alert(
             alert_id=f"alert_{int(time.time() * 1000)}",
             title=rule.title_template.format(metric=rule.metric_name, value=value),
-            description=rule.description_template.format(metric=rule.metric_name, value=value),
+            description=rule.description_template.format(
+                metric=rule.metric_name, value=value
+            ),
             severity=rule.severity,
             metric_name=rule.metric_name,
             metric_value=value,
             threshold=0.0,  # TODO: Extract from condition
             source=source,
-            tags=tags or {}
+            tags=tags or {},
         )
 
         return self._process_alert(alert)
@@ -394,7 +382,7 @@ class SmartAlertingSystem:
         value: float,
         threshold: float,
         source: str,
-        tags: Optional[Dict[str, str]]
+        tags: Optional[Dict[str, str]],
     ) -> Optional[Alert]:
         """Create alert from dynamic threshold"""
         alert = Alert(
@@ -406,7 +394,7 @@ class SmartAlertingSystem:
             metric_value=value,
             threshold=threshold,
             source=source,
-            tags=tags or {}
+            tags=tags or {},
         )
 
         return self._process_alert(alert)
@@ -466,9 +454,7 @@ class SmartAlertingSystem:
             return False
 
     def get_active_alerts(
-        self,
-        severity: Optional[AlertSeverity] = None,
-        min_priority: float = 0.0
+        self, severity: Optional[AlertSeverity] = None, min_priority: float = 0.0
     ) -> List[Alert]:
         """Get active alerts"""
         with self._lock:
@@ -493,16 +479,17 @@ class SmartAlertingSystem:
                 active_by_severity[alert.severity.name] += 1
 
             return {
-                'total_alerts': self.total_alerts,
-                'suppressed_alerts': self.suppressed_alerts,
-                'suppression_rate': (
+                "total_alerts": self.total_alerts,
+                "suppressed_alerts": self.suppressed_alerts,
+                "suppression_rate": (
                     self.suppressed_alerts / self.total_alerts * 100
-                    if self.total_alerts > 0 else 0
+                    if self.total_alerts > 0
+                    else 0
                 ),
-                'active_alerts': len(self.active_alerts),
-                'active_by_severity': dict(active_by_severity),
-                'rules_configured': len(self.rules),
-                'dynamic_thresholds': len(self.dynamic_thresholds)
+                "active_alerts": len(self.active_alerts),
+                "active_by_severity": dict(active_by_severity),
+                "rules_configured": len(self.rules),
+                "dynamic_thresholds": len(self.dynamic_thresholds),
             }
 
 
@@ -516,20 +503,20 @@ if __name__ == "__main__":
 
     # Add static rule
     print("--- Adding Alert Rules ---\n")
-    alerting.add_rule(AlertRule(
-        rule_id="high_cpu",
-        metric_name="cpu_usage",
-        condition=lambda x: x > 80.0,
-        severity=AlertSeverity.WARNING,
-        title_template="High CPU usage: {value}%",
-        description_template="CPU usage ({value}%) exceeded threshold on {metric}"
-    ))
+    alerting.add_rule(
+        AlertRule(
+            rule_id="high_cpu",
+            metric_name="cpu_usage",
+            condition=lambda x: x > 80.0,
+            severity=AlertSeverity.WARNING,
+            title_template="High CPU usage: {value}%",
+            description_template="CPU usage ({value}%) exceeded threshold on {metric}",
+        )
+    )
 
     # Add dynamic threshold
     alerting.add_dynamic_threshold_metric(
-        "response_time_ms",
-        window_size=50,
-        sensitivity=2.0
+        "response_time_ms", window_size=50, sensitivity=2.0
     )
 
     print("✓ Rules configured\n")
@@ -537,24 +524,36 @@ if __name__ == "__main__":
     # Simulate normal response times
     print("--- Learning Normal Behavior ---")
     for i in range(30):
-        alerting.check_metric("response_time_ms", 100 + (i % 10) * 5, tags={'env': 'prod'})
+        alerting.check_metric(
+            "response_time_ms", 100 + (i % 10) * 5, tags={"env": "prod"}
+        )
     print("✓ Baseline established\n")
 
     # Trigger alerts
     print("--- Triggering Alerts ---\n")
 
     # Static rule alert
-    alert1 = alerting.check_metric("cpu_usage", 85.0, source="server-01", tags={'env': 'prod'})
+    alert1 = alerting.check_metric(
+        "cpu_usage", 85.0, source="server-01", tags={"env": "prod"}
+    )
     if alert1:
-        print(f"✓ Alert created: {alert1.title} (priority: {alert1.priority_score:.1f})")
+        print(
+            f"✓ Alert created: {alert1.title} (priority: {alert1.priority_score:.1f})"
+        )
 
     # Dynamic threshold alert
-    alert2 = alerting.check_metric("response_time_ms", 250.0, source="api", tags={'env': 'prod'})
+    alert2 = alerting.check_metric(
+        "response_time_ms", 250.0, source="api", tags={"env": "prod"}
+    )
     if alert2:
-        print(f"✓ Alert created: {alert2.title} (priority: {alert2.priority_score:.1f})")
+        print(
+            f"✓ Alert created: {alert2.title} (priority: {alert2.priority_score:.1f})"
+        )
 
     # Duplicate (should be suppressed)
-    alert3 = alerting.check_metric("cpu_usage", 86.0, source="server-01", tags={'env': 'prod'})
+    alert3 = alerting.check_metric(
+        "cpu_usage", 86.0, source="server-01", tags={"env": "prod"}
+    )
     if not alert3:
         print("✓ Duplicate alert suppressed")
 
@@ -562,15 +561,18 @@ if __name__ == "__main__":
     print("\n--- Active Alerts ---")
     active = alerting.get_active_alerts(min_priority=30)
     for alert in active:
-        print(f"  - [{alert.severity.name}] {alert.title} (priority: {alert.priority_score:.1f})")
+        print(
+            f"  - [{alert.severity.name}] {alert.title} (priority: {alert.priority_score:.1f})"
+        )
 
     # Statistics
     print("\n--- Alerting Statistics ---")
     stats = alerting.get_stats()
     print(f"Total alerts: {stats['total_alerts']}")
-    print(f"Suppressed: {stats['suppressed_alerts']} ({stats['suppression_rate']:.1f}%)")
+    print(
+        f"Suppressed: {stats['suppressed_alerts']} ({stats['suppression_rate']:.1f}%)"
+    )
     print(f"Active: {stats['active_alerts']}")
     print(f"By severity: {stats['active_by_severity']}")
 
     print("\n=== Demo Complete ===")
-

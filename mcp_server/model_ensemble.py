@@ -23,7 +23,7 @@ class EnsemblePredictor:
         model_id: str,
         predict_fn: Callable,
         weight: float = 1.0,
-        metadata: Optional[Dict] = None
+        metadata: Optional[Dict] = None,
     ):
         """
         Add model to ensemble.
@@ -37,16 +37,12 @@ class EnsemblePredictor:
         self.models[model_id] = {
             "predict_fn": predict_fn,
             "weight": weight,
-            "metadata": metadata or {}
+            "metadata": metadata or {},
         }
 
         logger.info(f"Added model {model_id} with weight {weight}")
 
-    def predict_voting(
-        self,
-        inputs: Any,
-        voting_type: str = "hard"
-    ) -> Dict[str, Any]:
+    def predict_voting(self, inputs: Any, voting_type: str = "hard") -> Dict[str, Any]:
         """
         Voting ensemble prediction.
 
@@ -61,10 +57,7 @@ class EnsemblePredictor:
 
         for model_id, model_info in self.models.items():
             pred = model_info["predict_fn"](inputs)
-            predictions[model_id] = {
-                "prediction": pred,
-                "weight": model_info["weight"]
-            }
+            predictions[model_id] = {"prediction": pred, "weight": model_info["weight"]}
 
         if voting_type == "hard":
             # Majority vote
@@ -73,8 +66,7 @@ class EnsemblePredictor:
         else:
             # Weighted average
             weighted_sum = sum(
-                p["prediction"] * p["weight"]
-                for p in predictions.values()
+                p["prediction"] * p["weight"] for p in predictions.values()
             )
             total_weight = sum(p["weight"] for p in predictions.values())
             final_pred = weighted_sum / total_weight if total_weight > 0 else 0
@@ -85,13 +77,11 @@ class EnsemblePredictor:
                 k: v["prediction"] for k, v in predictions.items()
             },
             "voting_type": voting_type,
-            "num_models": len(self.models)
+            "num_models": len(self.models),
         }
 
     def predict_stacking(
-        self,
-        inputs: Any,
-        meta_learner_fn: Callable
+        self, inputs: Any, meta_learner_fn: Callable
     ) -> Dict[str, Any]:
         """
         Stacking ensemble prediction.
@@ -116,13 +106,10 @@ class EnsemblePredictor:
             "ensemble_prediction": final_pred,
             "base_predictions": base_predictions,
             "method": "stacking",
-            "num_models": len(self.models)
+            "num_models": len(self.models),
         }
 
-    def predict_boosting_style(
-        self,
-        inputs: Any
-    ) -> Dict[str, Any]:
+    def predict_boosting_style(self, inputs: Any) -> Dict[str, Any]:
         """
         Boosting-style sequential prediction.
 
@@ -147,7 +134,7 @@ class EnsemblePredictor:
             "ensemble_prediction": final_pred,
             "individual_predictions": predictions,
             "weights": weights,
-            "method": "boosting_style"
+            "method": "boosting_style",
         }
 
     def get_ensemble_stats(self) -> Dict[str, Any]:
@@ -156,7 +143,11 @@ class EnsemblePredictor:
             "num_models": len(self.models),
             "models": list(self.models.keys()),
             "total_weight": sum(m["weight"] for m in self.models.values()),
-            "avg_weight": statistics.mean(m["weight"] for m in self.models.values()) if self.models else 0
+            "avg_weight": (
+                statistics.mean(m["weight"] for m in self.models.values())
+                if self.models
+                else 0
+            ),
         }
 
 
@@ -182,8 +173,12 @@ if __name__ == "__main__":
     print("=" * 80)
 
     ensemble = EnsemblePredictor()
-    ensemble.add_model("random_forest", model_a, weight=1.0, metadata={"accuracy": 0.85})
-    ensemble.add_model("gradient_boost", model_b, weight=1.2, metadata={"accuracy": 0.88})
+    ensemble.add_model(
+        "random_forest", model_a, weight=1.0, metadata={"accuracy": 0.85}
+    )
+    ensemble.add_model(
+        "gradient_boost", model_b, weight=1.2, metadata={"accuracy": 0.88}
+    )
     ensemble.add_model("neural_net", model_c, weight=0.8, metadata={"accuracy": 0.82})
 
     print(f"✅ Created ensemble with {len(ensemble.models)} models")
@@ -200,7 +195,7 @@ if __name__ == "__main__":
     print(f"\nInputs: {test_inputs}")
     print(f"Ensemble Prediction: {result_voting['ensemble_prediction']:.3f}")
     print(f"Individual Predictions:")
-    for model, pred in result_voting['individual_predictions'].items():
+    for model, pred in result_voting["individual_predictions"].items():
         print(f"  {model}: {pred:.3f}")
 
     # Boosting style
@@ -223,7 +218,9 @@ if __name__ == "__main__":
 
     result_stacking = ensemble.predict_stacking(test_inputs, meta_learner)
     print(f"\nEnsemble Prediction: {result_stacking['ensemble_prediction']:.3f}")
-    print(f"Base Predictions: {[f'{p:.3f}' for p in result_stacking['base_predictions']]}")
+    print(
+        f"Base Predictions: {[f'{p:.3f}' for p in result_stacking['base_predictions']]}"
+    )
 
     # Ensemble stats
     print("\n" + "=" * 80)
@@ -238,4 +235,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("Model Ensemble Demo Complete!")
     print("=" * 80)
-

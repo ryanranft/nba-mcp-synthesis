@@ -37,6 +37,7 @@ logger = logging.getLogger(__name__)
 
 class VersionStatus(Enum):
     """API version status"""
+
     DEVELOPMENT = "development"
     BETA = "beta"
     STABLE = "stable"
@@ -47,6 +48,7 @@ class VersionStatus(Enum):
 @dataclass
 class APIVersion:
     """API version definition"""
+
     version: str  # e.g., "1.0", "2.1", "3.0-beta"
     status: VersionStatus
     release_date: datetime
@@ -82,17 +84,19 @@ class APIVersion:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'version': self.version,
-            'status': self.status.value,
-            'release_date': self.release_date.isoformat(),
-            'deprecation_date': self.deprecation_date.isoformat() if self.deprecation_date else None,
-            'sunset_date': self.sunset_date.isoformat() if self.sunset_date else None,
-            'days_until_sunset': self.days_until_sunset(),
-            'is_active': self.is_active(),
-            'is_deprecated': self.is_deprecated(),
-            'changelog': self.changelog,
-            'breaking_changes': self.breaking_changes,
-            'migration_guide_url': self.migration_guide_url
+            "version": self.version,
+            "status": self.status.value,
+            "release_date": self.release_date.isoformat(),
+            "deprecation_date": (
+                self.deprecation_date.isoformat() if self.deprecation_date else None
+            ),
+            "sunset_date": self.sunset_date.isoformat() if self.sunset_date else None,
+            "days_until_sunset": self.days_until_sunset(),
+            "is_active": self.is_active(),
+            "is_deprecated": self.is_deprecated(),
+            "changelog": self.changelog,
+            "breaking_changes": self.breaking_changes,
+            "migration_guide_url": self.migration_guide_url,
         }
 
 
@@ -101,7 +105,9 @@ class VersionRouter:
 
     def __init__(self):
         self.versions: Dict[str, APIVersion] = {}
-        self.handlers: Dict[str, Dict[str, Callable]] = {}  # {version: {endpoint: handler}}
+        self.handlers: Dict[str, Dict[str, Callable]] = (
+            {}
+        )  # {version: {endpoint: handler}}
         self.default_version: Optional[str] = None
 
     def register_version(self, version: APIVersion) -> None:
@@ -113,14 +119,11 @@ class VersionRouter:
         if version.status == VersionStatus.STABLE and not self.default_version:
             self.default_version = version.version
 
-        logger.info(f"Registered API version: {version.version} ({version.status.value})")
+        logger.info(
+            f"Registered API version: {version.version} ({version.status.value})"
+        )
 
-    def register_endpoint(
-        self,
-        version: str,
-        endpoint: str,
-        handler: Callable
-    ) -> None:
+    def register_endpoint(self, version: str, endpoint: str, handler: Callable) -> None:
         """Register endpoint handler for specific version"""
         if version not in self.versions:
             raise ValueError(f"Version {version} not registered")
@@ -135,7 +138,8 @@ class VersionRouter:
     def get_latest_stable_version(self) -> Optional[str]:
         """Get latest stable version"""
         stable_versions = [
-            v for v in self.versions.values()
+            v
+            for v in self.versions.values()
             if v.status == VersionStatus.STABLE and v.is_active()
         ]
 
@@ -146,12 +150,7 @@ class VersionRouter:
         latest = max(stable_versions, key=lambda v: v.release_date)
         return latest.version
 
-    def route(
-        self,
-        endpoint: str,
-        version: Optional[str] = None,
-        **kwargs
-    ) -> Any:
+    def route(self, endpoint: str, version: Optional[str] = None, **kwargs) -> Any:
         """Route request to appropriate version handler"""
         # Determine version
         if not version:
@@ -182,22 +181,24 @@ class VersionRouter:
     def list_versions(self, include_inactive: bool = False) -> List[Dict[str, Any]]:
         """List all API versions"""
         versions = [
-            v for v in self.versions.values()
-            if include_inactive or v.is_active()
+            v for v in self.versions.values() if include_inactive or v.is_active()
         ]
         return [v.to_dict() for v in versions]
 
 
 def version(version_string: str):
     """Decorator to mark endpoint with version"""
+
     def decorator(func: Callable):
         func._api_version = version_string
         return func
+
     return decorator
 
 
 def deprecated(sunset_date: Optional[datetime] = None, message: Optional[str] = None):
     """Decorator to mark endpoint as deprecated"""
+
     def decorator(func: Callable):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -213,13 +214,15 @@ def deprecated(sunset_date: Optional[datetime] = None, message: Optional[str] = 
 
             # Add deprecation header to response (if response object exists)
             result = func(*args, **kwargs)
-            if hasattr(result, 'headers'):
-                result.headers['X-API-Deprecated'] = 'true'
+            if hasattr(result, "headers"):
+                result.headers["X-API-Deprecated"] = "true"
                 if sunset_date:
-                    result.headers['X-API-Sunset-Date'] = sunset_date.isoformat()
+                    result.headers["X-API-Sunset-Date"] = sunset_date.isoformat()
 
             return result
+
         return wrapper
+
     return decorator
 
 
@@ -231,9 +234,9 @@ class VersionNegotiator:
 
     def negotiate_from_url(self, url: str) -> Optional[str]:
         """Extract version from URL path (e.g., /api/v2/players)"""
-        parts = url.split('/')
+        parts = url.split("/")
         for part in parts:
-            if part.startswith('v') and part[1:].replace('.', '').isdigit():
+            if part.startswith("v") and part[1:].replace(".", "").isdigit():
                 version = part[1:]  # Remove 'v' prefix
                 if self.router.get_version(version):
                     return version
@@ -241,20 +244,20 @@ class VersionNegotiator:
 
     def negotiate_from_header(self, headers: Dict[str, str]) -> Optional[str]:
         """Extract version from headers (e.g., Accept: application/vnd.nba.v2+json)"""
-        accept_header = headers.get('Accept', '')
+        accept_header = headers.get("Accept", "")
 
         # Look for version in accept header
-        if 'vnd.nba.' in accept_header:
-            parts = accept_header.split('vnd.nba.')
+        if "vnd.nba." in accept_header:
+            parts = accept_header.split("vnd.nba.")
             if len(parts) > 1:
-                version_part = parts[1].split('+')[0]  # e.g., "v2"
-                if version_part.startswith('v'):
+                version_part = parts[1].split("+")[0]  # e.g., "v2"
+                if version_part.startswith("v"):
                     version = version_part[1:]
                     if self.router.get_version(version):
                         return version
 
         # Check X-API-Version header
-        version_header = headers.get('X-API-Version')
+        version_header = headers.get("X-API-Version")
         if version_header and self.router.get_version(version_header):
             return version_header
 
@@ -264,7 +267,7 @@ class VersionNegotiator:
         self,
         url: Optional[str] = None,
         headers: Optional[Dict[str, str]] = None,
-        default: Optional[str] = None
+        default: Optional[str] = None,
     ) -> str:
         """Negotiate version from multiple sources"""
         # Try URL first
@@ -283,7 +286,11 @@ class VersionNegotiator:
         if default:
             return default
 
-        return self.router.get_latest_stable_version() or self.router.default_version or '1.0'
+        return (
+            self.router.get_latest_stable_version()
+            or self.router.default_version
+            or "1.0"
+        )
 
 
 # NBA MCP API Versions
@@ -301,10 +308,10 @@ def create_nba_api_versions() -> VersionRouter:
         changelog=[
             "Initial release",
             "Basic player and game endpoints",
-            "Simple statistics calculations"
+            "Simple statistics calculations",
         ],
         breaking_changes=[],
-        migration_guide_url="https://docs.nba-mcp.com/migration/v1-to-v2"
+        migration_guide_url="https://docs.nba-mcp.com/migration/v1-to-v2",
     )
     router.register_version(v1)
 
@@ -319,14 +326,14 @@ def create_nba_api_versions() -> VersionRouter:
             "Added ML-powered predictions",
             "Advanced analytics endpoints",
             "Real-time stats streaming",
-            "Improved error handling"
+            "Improved error handling",
         ],
         breaking_changes=[
             "Changed response format for /players endpoint",
             "Removed deprecated /stats/simple endpoint",
-            "Updated authentication mechanism"
+            "Updated authentication mechanism",
         ],
-        migration_guide_url="https://docs.nba-mcp.com/migration/v1-to-v2"
+        migration_guide_url="https://docs.nba-mcp.com/migration/v1-to-v2",
     )
     router.register_version(v2)
 
@@ -341,14 +348,14 @@ def create_nba_api_versions() -> VersionRouter:
             "GraphQL support",
             "WebSocket for real-time updates",
             "Advanced ML models (PER, BPM)",
-            "Multi-tenant support"
+            "Multi-tenant support",
         ],
         breaking_changes=[
             "New authentication flow",
             "Pagination changes",
-            "Rate limiting updates"
+            "Rate limiting updates",
         ],
-        migration_guide_url="https://docs.nba-mcp.com/migration/v2-to-v3"
+        migration_guide_url="https://docs.nba-mcp.com/migration/v2-to-v3",
     )
     router.register_version(v3)
 
@@ -367,9 +374,9 @@ if __name__ == "__main__":
     @version("1.0")
     def get_player_v1(player_id: int):
         return {
-            'player_id': player_id,
-            'name': 'LeBron James',
-            'ppg': 25.0  # Simple format
+            "player_id": player_id,
+            "name": "LeBron James",
+            "ppg": 25.0,  # Simple format
         }
 
     router.register_endpoint("1.0", "get_player", get_player_v1)
@@ -378,19 +385,10 @@ if __name__ == "__main__":
     @version("2.0")
     def get_player_v2(player_id: int):
         return {
-            'player_id': player_id,
-            'personal': {
-                'name': 'LeBron James',
-                'team': 'Lakers'
-            },
-            'stats': {
-                'ppg': 25.0,
-                'rpg': 8.0,
-                'apg': 7.0
-            },
-            'predictions': {
-                'next_game_performance': 'excellent'
-            }
+            "player_id": player_id,
+            "personal": {"name": "LeBron James", "team": "Lakers"},
+            "stats": {"ppg": 25.0, "rpg": 8.0, "apg": 7.0},
+            "predictions": {"next_game_performance": "excellent"},
         }
 
     router.register_endpoint("2.0", "get_player", get_player_v2)
@@ -411,7 +409,7 @@ if __name__ == "__main__":
         print(f"\nVersion {version_info['version']}:")
         print(f"  Status: {version_info['status']}")
         print(f"  Deprecated: {version_info['is_deprecated']}")
-        if version_info['days_until_sunset']:
+        if version_info["days_until_sunset"]:
             print(f"  Days until sunset: {version_info['days_until_sunset']}")
         print(f"  Changelog: {', '.join(version_info['changelog'][:2])}")
 
@@ -425,7 +423,7 @@ if __name__ == "__main__":
     print(f"Version from URL '{url}': {negotiated_version}")
 
     # From headers
-    headers = {'Accept': 'application/vnd.nba.v2+json'}
+    headers = {"Accept": "application/vnd.nba.v2+json"}
     negotiated_version = negotiator.negotiate(headers=headers)
     print(f"Version from headers: {negotiated_version}")
 
@@ -437,8 +435,7 @@ if __name__ == "__main__":
     print("\n--- Deprecation Warning ---")
 
     @deprecated(
-        sunset_date=datetime(2025, 12, 31),
-        message="Use /v2/players/{id} instead"
+        sunset_date=datetime(2025, 12, 31), message="Use /v2/players/{id} instead"
     )
     def old_endpoint():
         return {"data": "old format"}
@@ -447,4 +444,3 @@ if __name__ == "__main__":
     print(f"Old endpoint result: {result}")
 
     print("\n=== Demo Complete ===")
-

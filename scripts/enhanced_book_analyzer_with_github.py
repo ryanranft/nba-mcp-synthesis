@@ -55,32 +55,61 @@ class EnhancedBookAnalyzer:
             "handson-ml3": {
                 "s3_path": "textbook-code/machine-learning/handson-ml3_complete.txt",
                 "textbook_match": "Hands-On_Machine_Learning_with_Scikit-Learn_Keras_and_Tensorflow_-_Aurelien_Geron.pdf",
-                "key_concepts": ["scikit-learn", "tensorflow", "keras", "ml-pipelines", "feature-engineering"],
-                "priority": "critical"
+                "key_concepts": [
+                    "scikit-learn",
+                    "tensorflow",
+                    "keras",
+                    "ml-pipelines",
+                    "feature-engineering",
+                ],
+                "priority": "critical",
             },
             "pyprobml": {
                 "s3_path": "textbook-code/machine-learning/pyprobml_complete.txt",
                 "textbook_match": "ML Machine Learning-A Probabilistic Perspective.pdf",
-                "key_concepts": ["bayesian-methods", "probabilistic-models", "vae", "gan", "graphical-models"],
-                "priority": "critical"
+                "key_concepts": [
+                    "bayesian-methods",
+                    "probabilistic-models",
+                    "vae",
+                    "gan",
+                    "graphical-models",
+                ],
+                "priority": "critical",
             },
             "d2l-en": {
                 "s3_path": "textbook-code/interactive-deep-learning/d2l-en_complete.txt",
                 "textbook_match": "General deep learning textbooks",
-                "key_concepts": ["pytorch", "tensorflow", "mxnet", "neural-networks", "deep-learning"],
-                "priority": "critical"
+                "key_concepts": [
+                    "pytorch",
+                    "tensorflow",
+                    "mxnet",
+                    "neural-networks",
+                    "deep-learning",
+                ],
+                "priority": "critical",
             },
             "fastbook": {
                 "s3_path": "textbook-code/practical-deep-learning/fastbook_complete.txt",
                 "textbook_match": "General deep learning and practical ML books",
-                "key_concepts": ["fastai", "practical-deep-learning", "transfer-learning", "computer-vision"],
-                "priority": "critical"
+                "key_concepts": [
+                    "fastai",
+                    "practical-deep-learning",
+                    "transfer-learning",
+                    "computer-vision",
+                ],
+                "priority": "critical",
             },
             "PythonDataScienceHandbook": {
                 "s3_path": "textbook-code/data-science-fundamentals/PythonDataScienceHandbook_complete.txt",
                 "textbook_match": "Python Data Science Handbook.pdf",
-                "key_concepts": ["pandas", "numpy", "matplotlib", "data-manipulation", "visualization"],
-                "priority": "critical"
+                "key_concepts": [
+                    "pandas",
+                    "numpy",
+                    "matplotlib",
+                    "data-manipulation",
+                    "visualization",
+                ],
+                "priority": "critical",
             },
             # Add more mappings as needed...
         }
@@ -89,21 +118,30 @@ class EnhancedBookAnalyzer:
         """Load textbook to GitHub repository mappings."""
         return {
             "Hands-On_Machine_Learning_with_Scikit-Learn_Keras_and_Tensorflow_-_Aurelien_Geron.pdf": [
-                "handson-ml3", "PythonDataScienceHandbook"
+                "handson-ml3",
+                "PythonDataScienceHandbook",
             ],
             "ML Machine Learning-A Probabilistic Perspective.pdf": [
-                "pyprobml", "BDA_py_demos"
+                "pyprobml",
+                "BDA_py_demos",
             ],
             "Deep Learning by Ian Goodfellow, Yoshua Bengio, Aaron Courville.pdf": [
-                "d2l-en", "fastbook", "deepLearningBook-Notes"
+                "d2l-en",
+                "fastbook",
+                "deepLearningBook-Notes",
             ],
             "Python Data Science Handbook.pdf": [
-                "PythonDataScienceHandbook", "handson-ml3"
+                "PythonDataScienceHandbook",
+                "handson-ml3",
             ],
             # Add more mappings...
         }
 
-    async def analyze_book_with_github_integration(self, book: Dict[str, Any], existing_recommendations: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+    async def analyze_book_with_github_integration(
+        self,
+        book: Dict[str, Any],
+        existing_recommendations: Optional[List[Dict[str, Any]]] = None,
+    ) -> Dict[str, Any]:
         """
         Enhanced book analysis with GitHub repository integration.
 
@@ -118,7 +156,9 @@ class EnhancedBookAnalyzer:
 
         # Step 1: Standard 4-model analysis
         logger.info("📖 Step 1: Running standard 4-model analysis...")
-        standard_result = await self.four_model_analyzer.analyze_book(book, existing_recommendations)
+        standard_result = await self.four_model_analyzer.analyze_book(
+            book, existing_recommendations
+        )
 
         # Step 2: Identify key concepts from book analysis
         logger.info("🔍 Step 2: Identifying key concepts...")
@@ -140,7 +180,7 @@ class EnhancedBookAnalyzer:
 
         # Step 6: Compile final result
         result = {
-            "book_title": book.get('title', 'Unknown'),
+            "book_title": book.get("title", "Unknown"),
             "analysis_timestamp": datetime.now().isoformat(),
             "standard_analysis": standard_result,
             "key_concepts": key_concepts,
@@ -149,10 +189,12 @@ class EnhancedBookAnalyzer:
             "enhanced_recommendations": enhanced_recommendations,
             "total_cost": standard_result.total_cost,
             "total_tokens": standard_result.total_tokens,
-            "total_time": standard_result.total_time
+            "total_time": standard_result.total_time,
         }
 
-        logger.info(f"✅ Enhanced analysis complete: {len(enhanced_recommendations)} enhanced recommendations")
+        logger.info(
+            f"✅ Enhanced analysis complete: {len(enhanced_recommendations)} enhanced recommendations"
+        )
         return result
 
     async def _extract_key_concepts(self, book: Dict, analysis_result) -> List[str]:
@@ -162,48 +204,56 @@ class EnhancedBookAnalyzer:
         concepts = []
 
         # Extract from book title and analysis
-        title = book.get('title', '').lower()
-        if 'machine learning' in title:
-            concepts.extend(['machine-learning', 'algorithms', 'supervised-learning'])
-        if 'deep learning' in title:
-            concepts.extend(['deep-learning', 'neural-networks', 'cnn', 'rnn'])
-        if 'statistics' in title:
-            concepts.extend(['statistics', 'regression', 'classification'])
-        if 'bayesian' in title:
-            concepts.extend(['bayesian', 'probabilistic-models', 'inference'])
+        title = book.get("title", "").lower()
+        if "machine learning" in title:
+            concepts.extend(["machine-learning", "algorithms", "supervised-learning"])
+        if "deep learning" in title:
+            concepts.extend(["deep-learning", "neural-networks", "cnn", "rnn"])
+        if "statistics" in title:
+            concepts.extend(["statistics", "regression", "classification"])
+        if "bayesian" in title:
+            concepts.extend(["bayesian", "probabilistic-models", "inference"])
 
         return list(set(concepts))
 
-    async def _find_relevant_repositories(self, book: Dict, key_concepts: List[str]) -> List[Dict]:
+    async def _find_relevant_repositories(
+        self, book: Dict, key_concepts: List[str]
+    ) -> List[Dict]:
         """Find GitHub repositories relevant to the book and concepts."""
         relevant_repos = []
 
         # Find repos by textbook match
-        book_title = book.get('title', '')
+        book_title = book.get("title", "")
         matched_repos = self.textbook_mappings.get(book_title, [])
 
         for repo_name in matched_repos:
             if repo_name in self.github_repos:
-                relevant_repos.append({
-                    "name": repo_name,
-                    "metadata": self.github_repos[repo_name],
-                    "match_reason": "textbook_match"
-                })
+                relevant_repos.append(
+                    {
+                        "name": repo_name,
+                        "metadata": self.github_repos[repo_name],
+                        "match_reason": "textbook_match",
+                    }
+                )
 
         # Find repos by concept overlap
         for repo_name, repo_data in self.github_repos.items():
-            concept_overlap = set(key_concepts) & set(repo_data.get('key_concepts', []))
+            concept_overlap = set(key_concepts) & set(repo_data.get("key_concepts", []))
             if concept_overlap:
-                relevant_repos.append({
-                    "name": repo_name,
-                    "metadata": repo_data,
-                    "match_reason": "concept_overlap",
-                    "overlapping_concepts": list(concept_overlap)
-                })
+                relevant_repos.append(
+                    {
+                        "name": repo_name,
+                        "metadata": repo_data,
+                        "match_reason": "concept_overlap",
+                        "overlapping_concepts": list(concept_overlap),
+                    }
+                )
 
         return relevant_repos
 
-    async def _extract_code_examples(self, relevant_repos: List[Dict], key_concepts: List[str]) -> List[Dict]:
+    async def _extract_code_examples(
+        self, relevant_repos: List[Dict], key_concepts: List[str]
+    ) -> List[Dict]:
         """Extract relevant code examples from GitHub repositories."""
         code_examples = []
 
@@ -223,12 +273,14 @@ class EnhancedBookAnalyzer:
                 examples = await self._search_code_examples(repo_content, key_concepts)
 
                 if examples:
-                    code_examples.append({
-                        "repository": repo_name,
-                        "s3_path": s3_path,
-                        "examples": examples,
-                        "match_reason": repo["match_reason"]
-                    })
+                    code_examples.append(
+                        {
+                            "repository": repo_name,
+                            "s3_path": s3_path,
+                            "examples": examples,
+                            "match_reason": repo["match_reason"],
+                        }
+                    )
 
             except Exception as e:
                 logger.error(f"Failed to extract code examples from {repo_name}: {e}")
@@ -241,23 +293,29 @@ class EnhancedBookAnalyzer:
         # For now, return a placeholder
         return f"Repository content from {s3_path}"
 
-    async def _search_code_examples(self, repo_content: str, key_concepts: List[str]) -> List[Dict]:
+    async def _search_code_examples(
+        self, repo_content: str, key_concepts: List[str]
+    ) -> List[Dict]:
         """Search for code examples relevant to key concepts."""
         examples = []
 
         # This would implement actual code search logic
         # For now, return placeholder examples
         for concept in key_concepts:
-            examples.append({
-                "concept": concept,
-                "code_snippet": f"# Example implementation of {concept}\n# Code would be extracted from repository",
-                "file_path": f"example_{concept}.py",
-                "description": f"Implementation example for {concept}"
-            })
+            examples.append(
+                {
+                    "concept": concept,
+                    "code_snippet": f"# Example implementation of {concept}\n# Code would be extracted from repository",
+                    "file_path": f"example_{concept}.py",
+                    "description": f"Implementation example for {concept}",
+                }
+            )
 
         return examples
 
-    async def _generate_enhanced_recommendations(self, standard_result, code_examples: List[Dict], key_concepts: List[str]) -> List[Dict]:
+    async def _generate_enhanced_recommendations(
+        self, standard_result, code_examples: List[Dict], key_concepts: List[str]
+    ) -> List[Dict]:
         """Generate enhanced recommendations with code examples."""
         enhanced_recommendations = []
 
@@ -269,18 +327,25 @@ class EnhancedBookAnalyzer:
             relevant_examples = []
             for example_group in code_examples:
                 for example in example_group["examples"]:
-                    if any(concept in rec.get('description', '').lower() for concept in example["concept"].split('-')):
-                        relevant_examples.append({
-                            "repository": example_group["repository"],
-                            "code_snippet": example["code_snippet"],
-                            "file_path": example["file_path"],
-                            "description": example["description"]
-                        })
+                    if any(
+                        concept in rec.get("description", "").lower()
+                        for concept in example["concept"].split("-")
+                    ):
+                        relevant_examples.append(
+                            {
+                                "repository": example_group["repository"],
+                                "code_snippet": example["code_snippet"],
+                                "file_path": example["file_path"],
+                                "description": example["description"],
+                            }
+                        )
 
             # Add code examples to recommendation
             if relevant_examples:
                 enhanced_rec["code_examples"] = relevant_examples
-                enhanced_rec["implementation_guidance"] = f"See {len(relevant_examples)} code examples from GitHub repositories"
+                enhanced_rec["implementation_guidance"] = (
+                    f"See {len(relevant_examples)} code examples from GitHub repositories"
+                )
 
             enhanced_recommendations.append(enhanced_rec)
 
@@ -300,7 +365,7 @@ class GitHubIntegratedWorkflow:
     def _load_config(self) -> Dict:
         """Load books configuration."""
         if os.path.exists(self.config_path):
-            with open(self.config_path, 'r') as f:
+            with open(self.config_path, "r") as f:
                 return json.load(f)
         return {"books": [], "metadata": {}}
 
@@ -315,32 +380,44 @@ class GitHubIntegratedWorkflow:
             try:
                 logger.info(f"📖 Analyzing: {book.get('title', 'Unknown')}")
 
-                result = await self.enhanced_analyzer.analyze_book_with_github_integration(book)
+                result = (
+                    await self.enhanced_analyzer.analyze_book_with_github_integration(
+                        book
+                    )
+                )
                 results.append(result)
 
                 # Save individual result
                 output_file = f"analysis_results/enhanced_{book.get('id', 'unknown')}_analysis.json"
                 os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
-                with open(output_file, 'w') as f:
+                with open(output_file, "w") as f:
                     json.dump(result, f, indent=2)
 
                 logger.info(f"✅ Analysis complete: {book.get('title', 'Unknown')}")
 
             except Exception as e:
-                logger.error(f"❌ Analysis failed for {book.get('title', 'Unknown')}: {e}")
+                logger.error(
+                    f"❌ Analysis failed for {book.get('title', 'Unknown')}: {e}"
+                )
 
         # Save master results
         master_file = "analysis_results/enhanced_master_analysis.json"
-        with open(master_file, 'w') as f:
-            json.dump({
-                "timestamp": datetime.now().isoformat(),
-                "total_books": len(books),
-                "successful_analyses": len(results),
-                "results": results
-            }, f, indent=2)
+        with open(master_file, "w") as f:
+            json.dump(
+                {
+                    "timestamp": datetime.now().isoformat(),
+                    "total_books": len(books),
+                    "successful_analyses": len(results),
+                    "results": results,
+                },
+                f,
+                indent=2,
+            )
 
-        logger.info(f"🎉 Enhanced analysis complete: {len(results)}/{len(books)} books analyzed")
+        logger.info(
+            f"🎉 Enhanced analysis complete: {len(results)}/{len(books)} books analyzed"
+        )
         return True
 
 
@@ -352,13 +429,12 @@ async def main():
     success = await workflow.run_enhanced_analysis()
 
     if success:
-        print("✅ Enhanced book analysis with GitHub integration completed successfully!")
+        print(
+            "✅ Enhanced book analysis with GitHub integration completed successfully!"
+        )
     else:
         print("❌ Enhanced book analysis failed")
 
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
-

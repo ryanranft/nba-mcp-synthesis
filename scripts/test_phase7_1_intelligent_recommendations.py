@@ -17,7 +17,7 @@ import time
 from typing import Dict, Any, List
 
 # Add the project root to the Python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from mcp_server.tools.intelligent_recommendations import (
     IntelligentRecommendationEngine,
@@ -29,7 +29,7 @@ from mcp_server.tools.intelligent_recommendations import (
     RecommendationContext,
     UserContext,
     UserExpertiseLevel,
-    RecommendationType
+    RecommendationType,
 )
 
 
@@ -39,7 +39,9 @@ class Phase71TestSuite(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures"""
         self.engine = IntelligentRecommendationEngine()
-        print(f"✓ Test suite initialized with {len(self.engine.formula_database)} formulas")
+        print(
+            f"✓ Test suite initialized with {len(self.engine.formula_database)} formulas"
+        )
 
     def test_intelligent_recommendations_basic(self):
         """Test basic intelligent recommendations"""
@@ -48,13 +50,11 @@ class Phase71TestSuite(unittest.TestCase):
         # Test context-aware recommendations
         context = RecommendationContext(
             user_query="I want to analyze player shooting efficiency",
-            analysis_type="shooting"
+            analysis_type="shooting",
         )
 
         recommendations = self.engine.get_intelligent_recommendations(
-            context,
-            max_recommendations=3,
-            confidence_threshold=0.5
+            context, max_recommendations=3, confidence_threshold=0.5
         )
 
         self.assertIsInstance(recommendations, list)
@@ -81,7 +81,7 @@ class Phase71TestSuite(unittest.TestCase):
             available_variables=["FGM", "FGA", "3PM", "3PA", "FTM", "FTA", "PTS"],
             target_metric="shooting_efficiency",
             formula_complexity="moderate",
-            max_suggestions=3
+            max_suggestions=3,
         )
 
         self.assertIsInstance(suggestions, list)
@@ -105,10 +105,10 @@ class Phase71TestSuite(unittest.TestCase):
             user_query="I need to compare defensive performance between teams",
             session_history=[
                 {"formula_id": "defensive_rating", "timestamp": "2024-01-01"},
-                {"formula_id": "steal_pct", "timestamp": "2024-01-01"}
+                {"formula_id": "steal_pct", "timestamp": "2024-01-01"},
             ],
             current_analysis="team comparison",
-            user_expertise_level="intermediate"
+            user_expertise_level="intermediate",
         )
 
         self.assertIsInstance(analysis, dict)
@@ -132,7 +132,7 @@ class Phase71TestSuite(unittest.TestCase):
             prediction_target="team_wins",
             historical_data_description="Team performance data including offensive and defensive ratings",
             prediction_horizon="medium_term",
-            confidence_level=0.95
+            confidence_level=0.95,
         )
 
         self.assertIsInstance(recommendations, list)
@@ -155,7 +155,7 @@ class Phase71TestSuite(unittest.TestCase):
             formula_expression="FGM / FGA",
             expected_result=0.5,
             input_values={"FGM": 10, "FGA": 20},
-            error_tolerance=0.01
+            error_tolerance=0.01,
         )
 
         self.assertIsInstance(valid_analysis, dict)
@@ -169,7 +169,7 @@ class Phase71TestSuite(unittest.TestCase):
             formula_expression="FGM // FGA",  # Invalid integer division
             expected_result=0.5,
             input_values={"FGM": 10, "FGA": 20},
-            error_tolerance=0.01
+            error_tolerance=0.01,
         )
 
         self.assertTrue(invalid_analysis["has_errors"])
@@ -186,7 +186,7 @@ class Phase71TestSuite(unittest.TestCase):
         result = get_intelligent_recommendations(
             context="Analyze player efficiency",
             analysis_type="efficiency",
-            max_recommendations=3
+            max_recommendations=3,
         )
 
         self.assertIsInstance(result, dict)
@@ -198,7 +198,7 @@ class Phase71TestSuite(unittest.TestCase):
         suggestions = suggest_formulas_from_data_patterns(
             data_description="Player statistics",
             available_variables=["PTS", "REB", "AST"],
-            max_suggestions=2
+            max_suggestions=2,
         )
 
         self.assertIsInstance(suggestions, dict)
@@ -207,8 +207,7 @@ class Phase71TestSuite(unittest.TestCase):
 
         # Test analyze_user_context_for_recommendations
         context_analysis = analyze_user_context_for_recommendations(
-            user_query="Compare team performance",
-            user_expertise_level="advanced"
+            user_query="Compare team performance", user_expertise_level="advanced"
         )
 
         self.assertIsInstance(context_analysis, dict)
@@ -218,7 +217,7 @@ class Phase71TestSuite(unittest.TestCase):
         # Test get_predictive_analytics_recommendations
         predictive_recs = get_predictive_analytics_recommendations(
             prediction_target="player_performance",
-            historical_data_description="Player stats over multiple seasons"
+            historical_data_description="Player stats over multiple seasons",
         )
 
         self.assertIsInstance(predictive_recs, dict)
@@ -227,8 +226,7 @@ class Phase71TestSuite(unittest.TestCase):
 
         # Test detect_and_correct_formula_errors
         error_analysis = detect_and_correct_formula_errors(
-            formula_expression="PTS / GAMES",
-            input_values={"PTS": 100, "GAMES": 10}
+            formula_expression="PTS / GAMES", input_values={"PTS": 100, "GAMES": 10}
         )
 
         self.assertIsInstance(error_analysis, dict)
@@ -244,31 +242,37 @@ class Phase71TestSuite(unittest.TestCase):
         # Test shooting analysis recommendations
         shooting_context = RecommendationContext(
             user_query="I want to analyze 3-point shooting performance",
-            analysis_type="shooting"
+            analysis_type="shooting",
         )
 
         shooting_recs = self.engine.get_intelligent_recommendations(
-            shooting_context,
-            max_recommendations=5
+            shooting_context, max_recommendations=5
         )
 
         # Check that shooting-related formulas are recommended
-        shooting_formulas = [rec for rec in shooting_recs if "shooting" in rec.recommendation_type.value or "3pt" in rec.formula_id.lower()]
+        shooting_formulas = [
+            rec
+            for rec in shooting_recs
+            if "shooting" in rec.recommendation_type.value
+            or "3pt" in rec.formula_id.lower()
+        ]
         self.assertGreater(len(shooting_formulas), 0)
 
         # Test defensive analysis recommendations
         defensive_context = RecommendationContext(
-            user_query="Analyze team defensive performance",
-            analysis_type="defensive"
+            user_query="Analyze team defensive performance", analysis_type="defensive"
         )
 
         defensive_recs = self.engine.get_intelligent_recommendations(
-            defensive_context,
-            max_recommendations=5
+            defensive_context, max_recommendations=5
         )
 
         # Check that defensive formulas are recommended
-        defensive_formulas = [rec for rec in defensive_recs if "defensive" in rec.recommendation_type.value]
+        defensive_formulas = [
+            rec
+            for rec in defensive_recs
+            if "defensive" in rec.recommendation_type.value
+        ]
         self.assertGreater(len(defensive_formulas), 0)
 
         print("✓ Recommendation quality test passed")
@@ -280,12 +284,11 @@ class Phase71TestSuite(unittest.TestCase):
         # Test beginner recommendations
         beginner_context = RecommendationContext(
             user_query="Simple player analysis",
-            user_context=UserContext(expertise_level=UserExpertiseLevel.BEGINNER)
+            user_context=UserContext(expertise_level=UserExpertiseLevel.BEGINNER),
         )
 
         beginner_recs = self.engine.get_intelligent_recommendations(
-            beginner_context,
-            max_recommendations=3
+            beginner_context, max_recommendations=3
         )
 
         # Check that simple formulas are recommended for beginners
@@ -295,12 +298,11 @@ class Phase71TestSuite(unittest.TestCase):
         # Test expert recommendations
         expert_context = RecommendationContext(
             user_query="Advanced analytics analysis",
-            user_context=UserContext(expertise_level=UserExpertiseLevel.EXPERT)
+            user_context=UserContext(expertise_level=UserExpertiseLevel.EXPERT),
         )
 
         expert_recs = self.engine.get_intelligent_recommendations(
-            expert_context,
-            max_recommendations=3
+            expert_context, max_recommendations=3
         )
 
         # Check that complex formulas are recommended for experts
@@ -317,13 +319,17 @@ class Phase71TestSuite(unittest.TestCase):
 
         # Test bulk recommendations
         contexts = [
-            RecommendationContext(user_query=f"Analysis {i}", analysis_type="efficiency")
+            RecommendationContext(
+                user_query=f"Analysis {i}", analysis_type="efficiency"
+            )
             for i in range(10)
         ]
 
         all_recommendations = []
         for context in contexts:
-            recs = self.engine.get_intelligent_recommendations(context, max_recommendations=3)
+            recs = self.engine.get_intelligent_recommendations(
+                context, max_recommendations=3
+            )
             all_recommendations.extend(recs)
 
         bulk_time = time.time() - start_time
@@ -332,8 +338,19 @@ class Phase71TestSuite(unittest.TestCase):
         search_start = time.time()
         search_result = suggest_formulas_from_data_patterns(
             data_description="Comprehensive player statistics",
-            available_variables=["PTS", "REB", "AST", "STL", "BLK", "TOV", "FGM", "FGA", "FTM", "FTA"],
-            max_suggestions=5
+            available_variables=[
+                "PTS",
+                "REB",
+                "AST",
+                "STL",
+                "BLK",
+                "TOV",
+                "FGM",
+                "FGA",
+                "FTM",
+                "FTA",
+            ],
+            max_suggestions=5,
         )
         search_time = time.time() - search_start
 
@@ -341,24 +358,22 @@ class Phase71TestSuite(unittest.TestCase):
         self.assertLess(search_time, 2.0)  # Search should complete within 2 seconds
         self.assertGreater(len(all_recommendations), 0)
 
-        print(f"✓ Performance test passed (bulk: {bulk_time:.2f}s, search: {search_time:.2f}s)")
+        print(
+            f"✓ Performance test passed (bulk: {bulk_time:.2f}s, search: {search_time:.2f}s)"
+        )
 
     def test_error_handling(self):
         """Test error handling and edge cases"""
         print("Testing error handling...")
 
         # Test with empty context
-        empty_result = get_intelligent_recommendations(
-            context="",
-            analysis_type="all"
-        )
+        empty_result = get_intelligent_recommendations(context="", analysis_type="all")
 
         self.assertEqual(empty_result["status"], "error")
 
         # Test with invalid analysis type
         invalid_result = get_intelligent_recommendations(
-            context="Test analysis",
-            analysis_type="invalid_type"
+            context="Test analysis", analysis_type="invalid_type"
         )
 
         # Should still work but with default behavior
@@ -366,9 +381,7 @@ class Phase71TestSuite(unittest.TestCase):
 
         # Test with no available variables
         no_vars_result = suggest_formulas_from_data_patterns(
-            data_description="Test data",
-            available_variables=[],
-            max_suggestions=3
+            data_description="Test data", available_variables=[], max_suggestions=3
         )
 
         self.assertEqual(no_vars_result["status"], "error")
@@ -387,11 +400,12 @@ class Phase71TestSuite(unittest.TestCase):
 
         # Test that recommendations use actual formulas
         context = RecommendationContext(
-            user_query="Player efficiency analysis",
-            analysis_type="efficiency"
+            user_query="Player efficiency analysis", analysis_type="efficiency"
         )
 
-        recommendations = self.engine.get_intelligent_recommendations(context, max_recommendations=5)
+        recommendations = self.engine.get_intelligent_recommendations(
+            context, max_recommendations=5
+        )
 
         for rec in recommendations:
             self.assertIn(rec.formula_id, self.engine.formula_database)
@@ -422,7 +436,9 @@ def run_tests():
     print(f"Tests run: {result.testsRun}")
     print(f"Failures: {len(result.failures)}")
     print(f"Errors: {len(result.errors)}")
-    print(f"Success rate: {((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100):.1f}%")
+    print(
+        f"Success rate: {((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100):.1f}%"
+    )
 
     if result.failures:
         print("\nFAILURES:")
@@ -435,7 +451,9 @@ def run_tests():
             print(f"- {test}: {traceback}")
 
     if result.wasSuccessful():
-        print("\n🎉 ALL TESTS PASSED! Phase 7.1 Intelligent Formula Recommendations is working correctly.")
+        print(
+            "\n🎉 ALL TESTS PASSED! Phase 7.1 Intelligent Formula Recommendations is working correctly."
+        )
     else:
         print(f"\n❌ {len(result.failures + result.errors)} test(s) failed.")
 
@@ -445,6 +463,3 @@ def run_tests():
 if __name__ == "__main__":
     success = run_tests()
     sys.exit(0 if success else 1)
-
-
-

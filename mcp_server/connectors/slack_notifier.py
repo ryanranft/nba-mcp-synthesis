@@ -33,7 +33,7 @@ class SlackNotifier:
                 response = await client.post(
                     self.webhook_url,
                     json=message,
-                    headers={"Content-Type": "application/json"}
+                    headers={"Content-Type": "application/json"},
                 )
 
             if response.status_code == 200:
@@ -53,7 +53,7 @@ class SlackNotifier:
         models_used: list,
         execution_time: float,
         tokens_used: int,
-        success: bool = True
+        success: bool = True,
     ) -> bool:
         """Send synthesis completion notification"""
 
@@ -67,40 +67,31 @@ class SlackNotifier:
                     "type": "header",
                     "text": {
                         "type": "plain_text",
-                        "text": f"{emoji} Synthesis {status.title()}"
-                    }
+                        "text": f"{emoji} Synthesis {status.title()}",
+                    },
                 },
                 {
                     "type": "section",
                     "fields": [
+                        {"type": "mrkdwn", "text": f"*Operation:*\n{operation}"},
                         {
                             "type": "mrkdwn",
-                            "text": f"*Operation:*\n{operation}"
+                            "text": f"*Models:*\n{', '.join(models_used)}",
                         },
-                        {
-                            "type": "mrkdwn",
-                            "text": f"*Models:*\n{', '.join(models_used)}"
-                        },
-                        {
-                            "type": "mrkdwn",
-                            "text": f"*Time:*\n{execution_time:.2f}s"
-                        },
-                        {
-                            "type": "mrkdwn",
-                            "text": f"*Tokens:*\n{tokens_used:,}"
-                        }
-                    ]
+                        {"type": "mrkdwn", "text": f"*Time:*\n{execution_time:.2f}s"},
+                        {"type": "mrkdwn", "text": f"*Tokens:*\n{tokens_used:,}"},
+                    ],
                 },
                 {
                     "type": "context",
                     "elements": [
                         {
                             "type": "mrkdwn",
-                            "text": f"_Timestamp: {datetime.now().isoformat()}_"
+                            "text": f"_Timestamp: {datetime.now().isoformat()}_",
                         }
-                    ]
-                }
-            ]
+                    ],
+                },
+            ],
         }
 
         return await self.send_notification(message)
@@ -108,41 +99,35 @@ class SlackNotifier:
     async def notify_workflow_start(self, config: Dict[str, Any]) -> bool:
         """Notify workflow started"""
         try:
-            books_count = len(config.get('books', []))
-            budget = config.get('budget', 0)
+            books_count = len(config.get("books", []))
+            budget = config.get("budget", 0)
 
             message = {
                 "text": f"🚀 Book Analysis Workflow Started - {books_count} books, ${budget:.2f} budget",
                 "blocks": [
                     {
                         "type": "header",
-                        "text": {
-                            "type": "plain_text",
-                            "text": "🚀 Workflow Started"
-                        }
+                        "text": {"type": "plain_text", "text": "🚀 Workflow Started"},
                     },
                     {
                         "type": "section",
                         "fields": [
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Books to Analyze:*\n{books_count}"
+                                "text": f"*Books to Analyze:*\n{books_count}",
+                            },
+                            {"type": "mrkdwn", "text": f"*Budget:*\n${budget:.2f}"},
+                            {
+                                "type": "mrkdwn",
+                                "text": f"*Start Time:*\n{datetime.now().strftime('%H:%M:%S')}",
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Budget:*\n${budget:.2f}"
+                                "text": f"*Estimated Duration:*\n{books_count * 4} minutes",
                             },
-                            {
-                                "type": "mrkdwn",
-                                "text": f"*Start Time:*\n{datetime.now().strftime('%H:%M:%S')}"
-                            },
-                            {
-                                "type": "mrkdwn",
-                                "text": f"*Estimated Duration:*\n{books_count * 4} minutes"
-                            }
-                        ]
-                    }
-                ]
+                        ],
+                    },
+                ],
             }
 
             return await self.send_notification(message)
@@ -152,11 +137,7 @@ class SlackNotifier:
             return False
 
     async def notify_book_analysis_complete(
-        self,
-        book: str,
-        recommendations: int,
-        cost: float,
-        time_taken: float = 0.0
+        self, book: str, recommendations: int, cost: float, time_taken: float = 0.0
     ) -> bool:
         """Notify single book analysis complete"""
         try:
@@ -166,25 +147,16 @@ class SlackNotifier:
                     {
                         "type": "section",
                         "fields": [
+                            {"type": "mrkdwn", "text": f"*Book:*\n{book}"},
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Book:*\n{book}"
+                                "text": f"*Recommendations:*\n{recommendations}",
                             },
-                            {
-                                "type": "mrkdwn",
-                                "text": f"*Recommendations:*\n{recommendations}"
-                            },
-                            {
-                                "type": "mrkdwn",
-                                "text": f"*Cost:*\n${cost:.4f}"
-                            },
-                            {
-                                "type": "mrkdwn",
-                                "text": f"*Time:*\n{time_taken:.1f}s"
-                            }
-                        ]
+                            {"type": "mrkdwn", "text": f"*Cost:*\n${cost:.4f}"},
+                            {"type": "mrkdwn", "text": f"*Time:*\n{time_taken:.1f}s"},
+                        ],
                     }
-                ]
+                ],
             }
 
             return await self.send_notification(message)
@@ -198,7 +170,7 @@ class SlackNotifier:
         phases_updated: int,
         files_generated: int,
         total_recommendations: int = 0,
-        total_cost: float = 0.0
+        total_cost: float = 0.0,
     ) -> bool:
         """Notify integration phase complete"""
         try:
@@ -210,23 +182,23 @@ class SlackNotifier:
                         "fields": [
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Phases Updated:*\n{phases_updated}"
+                                "text": f"*Phases Updated:*\n{phases_updated}",
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Files Generated:*\n{files_generated}"
+                                "text": f"*Files Generated:*\n{files_generated}",
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Total Recommendations:*\n{total_recommendations}"
+                                "text": f"*Total Recommendations:*\n{total_recommendations}",
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Total Cost:*\n${total_cost:.4f}"
-                            }
-                        ]
+                                "text": f"*Total Cost:*\n${total_cost:.4f}",
+                            },
+                        ],
                     }
-                ]
+                ],
             }
 
             return await self.send_notification(message)
@@ -238,62 +210,57 @@ class SlackNotifier:
     async def notify_workflow_complete(self, summary: Dict[str, Any]) -> bool:
         """Notify entire workflow complete"""
         try:
-            total_books = summary.get('books_analyzed', 0)
-            total_recommendations = summary.get('recommendations_generated', 0)
-            total_cost = summary.get('total_cost', 0.0)
-            files_generated = summary.get('files_generated', 0)
-            linear_issues = summary.get('linear_issues_created', 0)
+            total_books = summary.get("books_analyzed", 0)
+            total_recommendations = summary.get("recommendations_generated", 0)
+            total_cost = summary.get("total_cost", 0.0)
+            files_generated = summary.get("files_generated", 0)
+            linear_issues = summary.get("linear_issues_created", 0)
 
             message = {
                 "text": f"✅ Workflow Complete: {total_books} books, {total_recommendations} recommendations, {files_generated} files",
                 "blocks": [
                     {
                         "type": "header",
-                        "text": {
-                            "type": "plain_text",
-                            "text": "✅ Workflow Complete!"
-                        }
+                        "text": {"type": "plain_text", "text": "✅ Workflow Complete!"},
                     },
                     {
                         "type": "section",
                         "fields": [
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Total Books:*\n{total_books}"
+                                "text": f"*Total Books:*\n{total_books}",
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Total Recommendations:*\n{total_recommendations}"
+                                "text": f"*Total Recommendations:*\n{total_recommendations}",
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Total Cost:*\n${total_cost:.4f}"
+                                "text": f"*Total Cost:*\n${total_cost:.4f}",
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Files Generated:*\n{files_generated}"
+                                "text": f"*Files Generated:*\n{files_generated}",
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Linear Issues:*\n{linear_issues}"
+                                "text": f"*Linear Issues:*\n{linear_issues}",
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Completed:*\n{datetime.now().strftime('%H:%M:%S')}"
-                            }
-                        ]
+                                "text": f"*Completed:*\n{datetime.now().strftime('%H:%M:%S')}",
+                            },
+                        ],
                     },
-                    {
-                        "type": "divider"
-                    },
+                    {"type": "divider"},
                     {
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": "🎯 *Ready for Implementation*\n\nAll files have been generated in your NBA Simulator AWS project. Check Linear for issue tracking and implementation priority."
-                        }
-                    }
-                ]
+                            "text": "🎯 *Ready for Implementation*\n\nAll files have been generated in your NBA Simulator AWS project. Check Linear for issue tracking and implementation priority.",
+                        },
+                    },
+                ],
             }
 
             return await self.send_notification(message)
@@ -307,7 +274,7 @@ class SlackNotifier:
         tool_name: str,
         success: bool,
         execution_time: float,
-        error: Optional[str] = None
+        error: Optional[str] = None,
     ) -> bool:
         """Send MCP tool execution notification"""
 
@@ -318,24 +285,23 @@ class SlackNotifier:
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"{emoji} *MCP Tool:* `{tool_name}`\n*Status:* {'Success' if success else 'Failed'}\n*Time:* {execution_time:.3f}s"
-                }
+                    "text": f"{emoji} *MCP Tool:* `{tool_name}`\n*Status:* {'Success' if success else 'Failed'}\n*Time:* {execution_time:.3f}s",
+                },
             }
         ]
 
         if error:
-            blocks.append({
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"*Error:*\n```{error[:200]}```"
+            blocks.append(
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"*Error:*\n```{error[:200]}```",
+                    },
                 }
-            })
+            )
 
-        message = {
-            "text": f"MCP Tool: {tool_name}",
-            "blocks": blocks
-        }
+        message = {"text": f"MCP Tool: {tool_name}", "blocks": blocks}
 
         return await self.send_notification(message)
 
@@ -344,7 +310,7 @@ class SlackNotifier:
         total_syntheses: int,
         total_tools_called: int,
         total_tokens: int,
-        errors_count: int
+        errors_count: int,
     ) -> bool:
         """Send daily summary notification"""
 
@@ -353,45 +319,31 @@ class SlackNotifier:
             "blocks": [
                 {
                     "type": "header",
-                    "text": {
-                        "type": "plain_text",
-                        "text": "📊 Daily Summary"
-                    }
+                    "text": {"type": "plain_text", "text": "📊 Daily Summary"},
                 },
                 {
                     "type": "section",
                     "fields": [
+                        {"type": "mrkdwn", "text": f"*Syntheses:*\n{total_syntheses}"},
                         {
                             "type": "mrkdwn",
-                            "text": f"*Syntheses:*\n{total_syntheses}"
+                            "text": f"*Tools Called:*\n{total_tools_called}",
                         },
-                        {
-                            "type": "mrkdwn",
-                            "text": f"*Tools Called:*\n{total_tools_called}"
-                        },
-                        {
-                            "type": "mrkdwn",
-                            "text": f"*Tokens Used:*\n{total_tokens:,}"
-                        },
-                        {
-                            "type": "mrkdwn",
-                            "text": f"*Errors:*\n{errors_count}"
-                        }
-                    ]
+                        {"type": "mrkdwn", "text": f"*Tokens Used:*\n{total_tokens:,}"},
+                        {"type": "mrkdwn", "text": f"*Errors:*\n{errors_count}"},
+                    ],
                 },
-                {
-                    "type": "divider"
-                },
+                {"type": "divider"},
                 {
                     "type": "context",
                     "elements": [
                         {
                             "type": "mrkdwn",
-                            "text": f"_Report generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}_"
+                            "text": f"_Report generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}_",
                         }
-                    ]
-                }
-            ]
+                    ],
+                },
+            ],
         }
 
         return await self.send_notification(message)
@@ -399,41 +351,35 @@ class SlackNotifier:
     async def notify_workflow_start(self, config: Dict[str, Any]) -> bool:
         """Notify workflow started"""
         try:
-            books_count = len(config.get('books', []))
-            budget = config.get('budget', 0)
+            books_count = len(config.get("books", []))
+            budget = config.get("budget", 0)
 
             message = {
                 "text": f"🚀 Book Analysis Workflow Started - {books_count} books, ${budget:.2f} budget",
                 "blocks": [
                     {
                         "type": "header",
-                        "text": {
-                            "type": "plain_text",
-                            "text": "🚀 Workflow Started"
-                        }
+                        "text": {"type": "plain_text", "text": "🚀 Workflow Started"},
                     },
                     {
                         "type": "section",
                         "fields": [
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Books to Analyze:*\n{books_count}"
+                                "text": f"*Books to Analyze:*\n{books_count}",
+                            },
+                            {"type": "mrkdwn", "text": f"*Budget:*\n${budget:.2f}"},
+                            {
+                                "type": "mrkdwn",
+                                "text": f"*Start Time:*\n{datetime.now().strftime('%H:%M:%S')}",
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Budget:*\n${budget:.2f}"
+                                "text": f"*Estimated Duration:*\n{books_count * 4} minutes",
                             },
-                            {
-                                "type": "mrkdwn",
-                                "text": f"*Start Time:*\n{datetime.now().strftime('%H:%M:%S')}"
-                            },
-                            {
-                                "type": "mrkdwn",
-                                "text": f"*Estimated Duration:*\n{books_count * 4} minutes"
-                            }
-                        ]
-                    }
-                ]
+                        ],
+                    },
+                ],
             }
 
             return await self.send_notification(message)
@@ -443,11 +389,7 @@ class SlackNotifier:
             return False
 
     async def notify_book_analysis_complete(
-        self,
-        book: str,
-        recommendations: int,
-        cost: float,
-        time_taken: float = 0.0
+        self, book: str, recommendations: int, cost: float, time_taken: float = 0.0
     ) -> bool:
         """Notify single book analysis complete"""
         try:
@@ -457,25 +399,16 @@ class SlackNotifier:
                     {
                         "type": "section",
                         "fields": [
+                            {"type": "mrkdwn", "text": f"*Book:*\n{book}"},
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Book:*\n{book}"
+                                "text": f"*Recommendations:*\n{recommendations}",
                             },
-                            {
-                                "type": "mrkdwn",
-                                "text": f"*Recommendations:*\n{recommendations}"
-                            },
-                            {
-                                "type": "mrkdwn",
-                                "text": f"*Cost:*\n${cost:.4f}"
-                            },
-                            {
-                                "type": "mrkdwn",
-                                "text": f"*Time:*\n{time_taken:.1f}s"
-                            }
-                        ]
+                            {"type": "mrkdwn", "text": f"*Cost:*\n${cost:.4f}"},
+                            {"type": "mrkdwn", "text": f"*Time:*\n{time_taken:.1f}s"},
+                        ],
                     }
-                ]
+                ],
             }
 
             return await self.send_notification(message)
@@ -489,7 +422,7 @@ class SlackNotifier:
         phases_updated: int,
         files_generated: int,
         total_recommendations: int = 0,
-        total_cost: float = 0.0
+        total_cost: float = 0.0,
     ) -> bool:
         """Notify integration phase complete"""
         try:
@@ -501,23 +434,23 @@ class SlackNotifier:
                         "fields": [
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Phases Updated:*\n{phases_updated}"
+                                "text": f"*Phases Updated:*\n{phases_updated}",
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Files Generated:*\n{files_generated}"
+                                "text": f"*Files Generated:*\n{files_generated}",
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Total Recommendations:*\n{total_recommendations}"
+                                "text": f"*Total Recommendations:*\n{total_recommendations}",
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Total Cost:*\n${total_cost:.4f}"
-                            }
-                        ]
+                                "text": f"*Total Cost:*\n${total_cost:.4f}",
+                            },
+                        ],
                     }
-                ]
+                ],
             }
 
             return await self.send_notification(message)
@@ -529,62 +462,57 @@ class SlackNotifier:
     async def notify_workflow_complete(self, summary: Dict[str, Any]) -> bool:
         """Notify entire workflow complete"""
         try:
-            total_books = summary.get('books_analyzed', 0)
-            total_recommendations = summary.get('recommendations_generated', 0)
-            total_cost = summary.get('total_cost', 0.0)
-            files_generated = summary.get('files_generated', 0)
-            linear_issues = summary.get('linear_issues_created', 0)
+            total_books = summary.get("books_analyzed", 0)
+            total_recommendations = summary.get("recommendations_generated", 0)
+            total_cost = summary.get("total_cost", 0.0)
+            files_generated = summary.get("files_generated", 0)
+            linear_issues = summary.get("linear_issues_created", 0)
 
             message = {
                 "text": f"✅ Workflow Complete: {total_books} books, {total_recommendations} recommendations, {files_generated} files",
                 "blocks": [
                     {
                         "type": "header",
-                        "text": {
-                            "type": "plain_text",
-                            "text": "✅ Workflow Complete!"
-                        }
+                        "text": {"type": "plain_text", "text": "✅ Workflow Complete!"},
                     },
                     {
                         "type": "section",
                         "fields": [
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Total Books:*\n{total_books}"
+                                "text": f"*Total Books:*\n{total_books}",
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Total Recommendations:*\n{total_recommendations}"
+                                "text": f"*Total Recommendations:*\n{total_recommendations}",
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Total Cost:*\n${total_cost:.4f}"
+                                "text": f"*Total Cost:*\n${total_cost:.4f}",
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Files Generated:*\n{files_generated}"
+                                "text": f"*Files Generated:*\n{files_generated}",
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Linear Issues:*\n{linear_issues}"
+                                "text": f"*Linear Issues:*\n{linear_issues}",
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Completed:*\n{datetime.now().strftime('%H:%M:%S')}"
-                            }
-                        ]
+                                "text": f"*Completed:*\n{datetime.now().strftime('%H:%M:%S')}",
+                            },
+                        ],
                     },
-                    {
-                        "type": "divider"
-                    },
+                    {"type": "divider"},
                     {
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": "🎯 *Ready for Implementation*\n\nAll files have been generated in your NBA Simulator AWS project. Check Linear for issue tracking and implementation priority."
-                        }
-                    }
-                ]
+                            "text": "🎯 *Ready for Implementation*\n\nAll files have been generated in your NBA Simulator AWS project. Check Linear for issue tracking and implementation priority.",
+                        },
+                    },
+                ],
             }
 
             return await self.send_notification(message)

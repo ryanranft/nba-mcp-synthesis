@@ -12,9 +12,10 @@ from unittest.mock import Mock, patch, MagicMock
 from mcp_server.unified_secrets_manager import (
     UnifiedSecretsManager,
     get_secrets_manager,
-    load_secrets_hierarchical
+    load_secrets_hierarchical,
 )
 from mcp_server.unified_configuration_manager import UnifiedConfigurationManager
+
 
 class TestSecretsManagerIntegration:
     """Integration tests for secrets manager"""
@@ -29,7 +30,7 @@ class TestSecretsManagerIntegration:
         (secret_dir / "DEEPSEEK_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         # Mock the directory structure
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             sm = UnifiedSecretsManager()
             sm.load_secrets("test_project", "TEST", "test")
 
@@ -48,7 +49,7 @@ class TestSecretsManagerIntegration:
         (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         # Mock the hierarchical loader
-        with patch('subprocess.run') as mock_run:
+        with patch("subprocess.run") as mock_run:
             mock_run.return_value.returncode = 0
             mock_run.return_value.stdout = "Secrets loaded successfully"
 
@@ -65,7 +66,7 @@ class TestSecretsManagerIntegration:
         (secret_dir / "DEEPSEEK_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         # Mock the directory structure
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             config = UnifiedConfigurationManager("test_project", "test")
 
             assert config.project == "test_project"
@@ -80,7 +81,7 @@ class TestSecretsManagerIntegration:
         (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         # Mock the directory structure
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             sm = UnifiedSecretsManager()
             sm.load_secrets("test_project", "TEST", "test")
 
@@ -93,7 +94,7 @@ class TestSecretsManagerIntegration:
         sm = UnifiedSecretsManager()
 
         # Test with missing secrets directory
-        with patch('os.path.exists', return_value=False):
+        with patch("os.path.exists", return_value=False):
             result = sm.load_secrets("invalid_project", "INVALID", "invalid")
             assert result is False
 
@@ -102,7 +103,7 @@ class TestSecretsManagerIntegration:
         secret_dir.mkdir(parents=True)
         (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             sm.load_secrets("test_project", "TEST", "test")
 
             # Should have partial secrets
@@ -116,10 +117,12 @@ class TestSecretsManagerIntegration:
         secret_dir.mkdir(parents=True)
 
         for i in range(100):
-            (secret_dir / f"TEST_SECRET_{i}_TEST_PROJECT_TEST.env").write_text(f"test_value_{i}")
+            (secret_dir / f"TEST_SECRET_{i}_TEST_PROJECT_TEST.env").write_text(
+                f"test_value_{i}"
+            )
 
         # Mock the directory structure
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             sm = UnifiedSecretsManager()
             sm.load_secrets("test_project", "TEST", "test")
 
@@ -139,7 +142,7 @@ class TestSecretsManagerIntegration:
         results = []
 
         def load_secrets():
-            with patch('os.path.exists', return_value=True):
+            with patch("os.path.exists", return_value=True):
                 sm = UnifiedSecretsManager()
                 result = sm.load_secrets("test_project", "TEST", "test")
                 results.append(result)
@@ -173,10 +176,12 @@ class TestSecretsManagerIntegration:
         secret_dir.mkdir(parents=True)
 
         for i in range(1000):
-            (secret_dir / f"TEST_SECRET_{i}_TEST_PROJECT_TEST.env").write_text(f"test_value_{i}")
+            (secret_dir / f"TEST_SECRET_{i}_TEST_PROJECT_TEST.env").write_text(
+                f"test_value_{i}"
+            )
 
         # Mock the directory structure
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             sm = UnifiedSecretsManager()
             sm.load_secrets("test_project", "TEST", "test")
 
@@ -199,7 +204,7 @@ class TestSecretsManagerIntegration:
         assert (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").exists()
 
         # Test reading from file system
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             sm = UnifiedSecretsManager()
             sm.load_secrets("test_project", "TEST", "test")
 
@@ -210,10 +215,10 @@ class TestSecretsManagerIntegration:
         sm = UnifiedSecretsManager()
 
         # Mock AWS client
-        with patch('boto3.client') as mock_boto:
+        with patch("boto3.client") as mock_boto:
             mock_client = MagicMock()
             mock_client.get_secret_value.return_value = {
-                'SecretString': '{"GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key"}'
+                "SecretString": '{"GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key"}'
             }
             mock_boto.return_value = mock_client
 
@@ -238,7 +243,7 @@ class TestSecretsManagerIntegration:
         (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         # Mock the directory structure
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             sm = UnifiedSecretsManager()
             sm.load_secrets("test_project", "TEST", "test")
 
@@ -249,4 +254,3 @@ class TestSecretsManagerIntegration:
             # Verify logging worked
             assert len(sm.secrets) == 1
             assert len(sm.aliases) == 1
-

@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class CanaryMetrics:
     """Metrics for canary deployment"""
+
     model_id: str
     requests: int = 0
     errors: int = 0
@@ -40,7 +41,7 @@ class CanaryDeploymentManager:
         initial_traffic_percent: float = 5.0,
         max_traffic_percent: float = 50.0,
         increment_step: float = 5.0,
-        increment_interval_minutes: int = 30
+        increment_interval_minutes: int = 30,
     ):
         """
         Start canary deployment.
@@ -61,7 +62,7 @@ class CanaryDeploymentManager:
             "increment_interval_minutes": increment_interval_minutes,
             "started_at": datetime.utcnow(),
             "last_increment": datetime.utcnow(),
-            "status": "active"
+            "status": "active",
         }
 
         # Initialize metrics
@@ -73,11 +74,7 @@ class CanaryDeploymentManager:
             f"({initial_traffic_percent}% initial traffic)"
         )
 
-    def route_request(
-        self,
-        stable_model_id: str,
-        request_id: str
-    ) -> str:
+    def route_request(self, stable_model_id: str, request_id: str) -> str:
         """
         Determine which model should handle the request.
 
@@ -114,11 +111,14 @@ class CanaryDeploymentManager:
             # Check canary health before incrementing
             canary_healthy = self._is_canary_healthy(stable_model_id)
 
-            if canary_healthy and config["current_traffic_percent"] < config["max_traffic_percent"]:
+            if (
+                canary_healthy
+                and config["current_traffic_percent"] < config["max_traffic_percent"]
+            ):
                 old_percent = config["current_traffic_percent"]
                 config["current_traffic_percent"] = min(
                     config["current_traffic_percent"] + config["increment_step"],
-                    config["max_traffic_percent"]
+                    config["max_traffic_percent"],
                 )
                 config["last_increment"] = now
 
@@ -161,19 +161,16 @@ class CanaryDeploymentManager:
 
         # Check latency (canary should not exceed stable by >20%)
         if stable_metrics.avg_latency_ms > 0:
-            latency_ratio = canary_metrics.avg_latency_ms / stable_metrics.avg_latency_ms
+            latency_ratio = (
+                canary_metrics.avg_latency_ms / stable_metrics.avg_latency_ms
+            )
             if latency_ratio > 1.2:
                 logger.warning(f"Canary latency too high: {latency_ratio:.2f}x")
                 return False
 
         return True
 
-    def record_request(
-        self,
-        model_id: str,
-        success: bool,
-        latency_ms: float
-    ):
+    def record_request(self, model_id: str, success: bool, latency_ms: float):
         """
         Record request metrics.
 
@@ -193,8 +190,8 @@ class CanaryDeploymentManager:
 
         # Update average latency
         metrics.avg_latency_ms = (
-            (metrics.avg_latency_ms * (metrics.requests - 1) + latency_ms) / metrics.requests
-        )
+            metrics.avg_latency_ms * (metrics.requests - 1) + latency_ms
+        ) / metrics.requests
 
         # Update error rate
         metrics.error_rate = (metrics.errors / metrics.requests) * 100
@@ -227,14 +224,18 @@ class CanaryDeploymentManager:
             "stable_metrics": {
                 "requests": stable_metrics.requests if stable_metrics else 0,
                 "error_rate": stable_metrics.error_rate if stable_metrics else 0,
-                "avg_latency_ms": stable_metrics.avg_latency_ms if stable_metrics else 0
+                "avg_latency_ms": (
+                    stable_metrics.avg_latency_ms if stable_metrics else 0
+                ),
             },
             "canary_metrics": {
                 "requests": canary_metrics.requests if canary_metrics else 0,
                 "error_rate": canary_metrics.error_rate if canary_metrics else 0,
-                "avg_latency_ms": canary_metrics.avg_latency_ms if canary_metrics else 0
+                "avg_latency_ms": (
+                    canary_metrics.avg_latency_ms if canary_metrics else 0
+                ),
             },
-            "healthy": self._is_canary_healthy(stable_model_id)
+            "healthy": self._is_canary_healthy(stable_model_id),
         }
 
     def rollback_canary(self, stable_model_id: str):
@@ -287,7 +288,7 @@ if __name__ == "__main__":
         initial_traffic_percent=10.0,
         max_traffic_percent=50.0,
         increment_step=10.0,
-        increment_interval_minutes=1  # Fast for demo
+        increment_interval_minutes=1,  # Fast for demo
     )
 
     print("✅ Canary deployment started at 10% traffic")
@@ -340,7 +341,7 @@ if __name__ == "__main__":
     print("PROMOTION DECISION")
     print("=" * 80)
 
-    if status['healthy']:
+    if status["healthy"]:
         print("✅ Canary is healthy and ready for more traffic")
     else:
         print("⚠️  Canary needs attention or rollback")
@@ -348,4 +349,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("Canary Deployment Demo Complete!")
     print("=" * 80)
-

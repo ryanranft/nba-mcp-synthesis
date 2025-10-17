@@ -21,7 +21,9 @@ import logging
 from datetime import datetime
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -48,7 +50,7 @@ class BookResultsOrganizer:
             "books_organized": 0,
             "directories_created": [],
             "files_moved": [],
-            "errors": []
+            "errors": [],
         }
 
         # Create base books directory
@@ -56,25 +58,37 @@ class BookResultsOrganizer:
 
         for book in books_config:
             try:
-                book_id = book.get("id", self._generate_book_id(book.get("title", "unknown")))
+                book_id = book.get(
+                    "id", self._generate_book_id(book.get("title", "unknown"))
+                )
                 book_result = self.organize_single_book(book_id, book)
 
                 if book_result["success"]:
                     results["books_organized"] += 1
-                    results["directories_created"].extend(book_result["directories_created"])
+                    results["directories_created"].extend(
+                        book_result["directories_created"]
+                    )
                     results["files_moved"].extend(book_result["files_moved"])
                 else:
-                    results["errors"].append(f"Failed to organize {book_id}: {book_result['error']}")
+                    results["errors"].append(
+                        f"Failed to organize {book_id}: {book_result['error']}"
+                    )
 
             except Exception as e:
-                error_msg = f"Error organizing book {book.get('id', 'unknown')}: {str(e)}"
+                error_msg = (
+                    f"Error organizing book {book.get('id', 'unknown')}: {str(e)}"
+                )
                 logger.error(error_msg)
                 results["errors"].append(error_msg)
 
-        logger.info(f"Organization complete: {results['books_organized']} books organized")
+        logger.info(
+            f"Organization complete: {results['books_organized']} books organized"
+        )
         return results
 
-    def organize_single_book(self, book_id: str, book_metadata: Dict[str, Any]) -> Dict[str, Any]:
+    def organize_single_book(
+        self, book_id: str, book_metadata: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """
         Organize results for a single book.
 
@@ -91,7 +105,7 @@ class BookResultsOrganizer:
             "success": False,
             "directories_created": [],
             "files_moved": [],
-            "error": None
+            "error": None,
         }
 
         try:
@@ -106,10 +120,14 @@ class BookResultsOrganizer:
 
             # Load master recommendations to find book-specific ones
             master_recs = self._load_master_recommendations()
-            book_recommendations = self._filter_book_recommendations(master_recs, book_id)
+            book_recommendations = self._filter_book_recommendations(
+                master_recs, book_id
+            )
 
             # Generate book README
-            self._generate_book_readme(book_dir, book_id, book_metadata, book_recommendations)
+            self._generate_book_readme(
+                book_dir, book_id, book_metadata, book_recommendations
+            )
 
             # Generate tier files (Critical/Important)
             self._generate_tier_files(book_dir, book_recommendations)
@@ -131,7 +149,13 @@ class BookResultsOrganizer:
 
     def _generate_book_id(self, title: str) -> str:
         """Generate a book ID from the title."""
-        return title.lower().replace(" ", "_").replace("-", "_").replace(":", "").replace(",", "")
+        return (
+            title.lower()
+            .replace(" ", "_")
+            .replace("-", "_")
+            .replace(":", "")
+            .replace(",", "")
+        )
 
     def _load_master_recommendations(self) -> List[Dict[str, Any]]:
         """Load master recommendations from JSON file."""
@@ -142,49 +166,66 @@ class BookResultsOrganizer:
             return []
 
         try:
-            with open(master_file, 'r', encoding='utf-8') as f:
+            with open(master_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 return data.get("recommendations", [])
         except Exception as e:
             logger.error(f"Error loading master recommendations: {str(e)}")
             return []
 
-    def _filter_book_recommendations(self, all_recommendations: List[Dict[str, Any]], book_id: str) -> List[Dict[str, Any]]:
+    def _filter_book_recommendations(
+        self, all_recommendations: List[Dict[str, Any]], book_id: str
+    ) -> List[Dict[str, Any]]:
         """Filter recommendations that belong to a specific book."""
         book_recommendations = []
 
         for rec in all_recommendations:
             # Check if recommendation is from this book
             source_books = rec.get("source_books", "")
-            if book_id in source_books.lower() or book_id.replace("_", " ") in source_books.lower():
+            if (
+                book_id in source_books.lower()
+                or book_id.replace("_", " ") in source_books.lower()
+            ):
                 book_recommendations.append(rec)
 
         return book_recommendations
 
-    def _generate_book_readme(self, book_dir: Path, book_id: str, book_metadata: Dict[str, Any], recommendations: List[Dict[str, Any]]) -> None:
+    def _generate_book_readme(
+        self,
+        book_dir: Path,
+        book_id: str,
+        book_metadata: Dict[str, Any],
+        recommendations: List[Dict[str, Any]],
+    ) -> None:
         """Generate NBA-style README.md for the book."""
         try:
             # Count recommendations by priority
-            critical_count = len([r for r in recommendations if r.get('priority') == 'CRITICAL'])
-            important_count = len([r for r in recommendations if r.get('priority') == 'IMPORTANT'])
-            nice_to_have_count = len([r for r in recommendations if r.get('priority') == 'NICE-TO-HAVE'])
+            critical_count = len(
+                [r for r in recommendations if r.get("priority") == "CRITICAL"]
+            )
+            important_count = len(
+                [r for r in recommendations if r.get("priority") == "IMPORTANT"]
+            )
+            nice_to_have_count = len(
+                [r for r in recommendations if r.get("priority") == "NICE-TO-HAVE"]
+            )
 
             # Count by phase
             phase_counts = {}
             for rec in recommendations:
-                phase = rec.get('mapped_phase', 'Unknown')
+                phase = rec.get("mapped_phase", "Unknown")
                 phase_counts[phase] = phase_counts.get(phase, 0) + 1
 
             phase_breakdown = ""
             for phase_num in sorted(phase_counts.keys()):
-                if phase_num != 'Unknown':
+                if phase_num != "Unknown":
                     phase_breakdown += f"- Phase {phase_num}: {phase_counts[phase_num]} recommendations\n"
 
             # Calculate total hours
             total_hours = 0
             for rec in recommendations:
-                time_est = rec.get('time_estimate', '0 hours')
-                if 'hours' in time_est:
+                time_est = rec.get("time_estimate", "0 hours")
+                if "hours" in time_est:
                     try:
                         hours = int(time_est.split()[0])
                         total_hours += hours
@@ -196,17 +237,17 @@ class BookResultsOrganizer:
             total_cost = 0.0
             if cost_file.exists():
                 try:
-                    with open(cost_file, 'r') as f:
+                    with open(cost_file, "r") as f:
                         cost_data = json.load(f)
-                        total_cost = cost_data.get('total_cost', 0.0)
+                        total_cost = cost_data.get("total_cost", 0.0)
                 except:
                     pass
 
             # Template context
             context = {
-                "book_title": book_metadata.get('title', 'Unknown'),
+                "book_title": book_metadata.get("title", "Unknown"),
                 "book_id": book_id,
-                "book_author": book_metadata.get('author', 'Unknown'),
+                "book_author": book_metadata.get("author", "Unknown"),
                 "analysis_date": datetime.now().strftime("%Y-%m-%d"),
                 "total_recommendations": len(recommendations),
                 "critical_count": critical_count,
@@ -224,7 +265,7 @@ class BookResultsOrganizer:
                 "contribution_2": "Improved data processing",
                 "contribution_3": "Better monitoring and validation",
                 "prerequisite_books_if_any": "None",
-                "cost_impact": f"${total_cost:.2f} analysis cost"
+                "cost_impact": f"${total_cost:.2f} analysis cost",
             }
 
             # Render template
@@ -232,14 +273,19 @@ class BookResultsOrganizer:
 
             # Write README.md
             readme_file = book_dir / "README.md"
-            readme_file.write_text(readme_content, encoding='utf-8')
+            readme_file.write_text(readme_content, encoding="utf-8")
 
             logger.info(f"Generated NBA-style README: {readme_file}")
 
         except Exception as e:
             logger.error(f"Error generating book README: {str(e)}")
 
-    def _build_book_readme_content(self, book_id: str, book_metadata: Dict[str, Any], recommendations: List[Dict[str, Any]]) -> str:
+    def _build_book_readme_content(
+        self,
+        book_id: str,
+        book_metadata: Dict[str, Any],
+        recommendations: List[Dict[str, Any]],
+    ) -> str:
         """Build the content for the book README file."""
         title = book_metadata.get("title", book_id.replace("_", " ").title())
         author = book_metadata.get("author", "Unknown")
@@ -348,7 +394,9 @@ This directory contains the complete analysis results for "{title}" including:
 
         return content
 
-    def _generate_recommendations_file(self, book_dir: Path, recommendations: List[Dict[str, Any]]) -> None:
+    def _generate_recommendations_file(
+        self, book_dir: Path, recommendations: List[Dict[str, Any]]
+    ) -> None:
         """Generate RECOMMENDATIONS.md file with all recommendations for this book."""
         if not recommendations:
             logger.warning(f"No recommendations found for book in {book_dir}")
@@ -395,12 +443,14 @@ This directory contains the complete analysis results for "{title}" including:
                     content += "---\n\n"
 
         recommendations_file = book_dir / "RECOMMENDATIONS.md"
-        with open(recommendations_file, 'w', encoding='utf-8') as f:
+        with open(recommendations_file, "w", encoding="utf-8") as f:
             f.write(content)
 
         logger.info(f"Generated RECOMMENDATIONS.md for {book_dir.name}")
 
-    def _organize_recommendations_by_phase(self, by_phase_dir: Path, recommendations: List[Dict[str, Any]]) -> None:
+    def _organize_recommendations_by_phase(
+        self, by_phase_dir: Path, recommendations: List[Dict[str, Any]]
+    ) -> None:
         """Organize recommendations into phase-specific files."""
         if not recommendations:
             return
@@ -418,7 +468,9 @@ This directory contains the complete analysis results for "{title}" including:
         for phase, phase_recs in phase_groups.items():
             self._generate_phase_recommendations_file(by_phase_dir, phase, phase_recs)
 
-    def _generate_phase_recommendations_file(self, by_phase_dir: Path, phase: int, recommendations: List[Dict[str, Any]]) -> None:
+    def _generate_phase_recommendations_file(
+        self, by_phase_dir: Path, phase: int, recommendations: List[Dict[str, Any]]
+    ) -> None:
         """Generate a phase-specific recommendations file."""
         content = f"""# Phase {phase} - Book Recommendations
 
@@ -459,7 +511,7 @@ This directory contains the complete analysis results for "{title}" including:
                     content += "---\n\n"
 
         phase_file = by_phase_dir / f"PHASE_{phase}_RECOMMENDATIONS.md"
-        with open(phase_file, 'w', encoding='utf-8') as f:
+        with open(phase_file, "w", encoding="utf-8") as f:
             f.write(content)
 
         logger.info(f"Generated phase {phase} recommendations file")
@@ -470,7 +522,7 @@ This directory contains the complete analysis results for "{title}" including:
         analysis_files = [
             f"{book_id}_analysis_report.md",
             f"{book_id}_final_recommendations.md",
-            f"{book_id}_convergence_tracker.json"
+            f"{book_id}_convergence_tracker.json",
         ]
 
         for filename in analysis_files:
@@ -480,37 +532,49 @@ This directory contains the complete analysis results for "{title}" including:
                 shutil.move(str(source_file), str(dest_file))
                 logger.info(f"Moved {filename} to {book_dir}")
 
-    def _generate_tier_files(self, book_dir: Path, book_recommendations: List[Dict[str, Any]]) -> None:
+    def _generate_tier_files(
+        self, book_dir: Path, book_recommendations: List[Dict[str, Any]]
+    ) -> None:
         """Generate CRITICAL_RECOMMENDATIONS.md and IMPORTANT_RECOMMENDATIONS.md files."""
         try:
             # Separate by priority
-            critical_recs = [r for r in book_recommendations if r.get('priority') == 'CRITICAL']
-            important_recs = [r for r in book_recommendations if r.get('priority') == 'IMPORTANT']
+            critical_recs = [
+                r for r in book_recommendations if r.get("priority") == "CRITICAL"
+            ]
+            important_recs = [
+                r for r in book_recommendations if r.get("priority") == "IMPORTANT"
+            ]
 
             # Generate Critical file
             if critical_recs:
-                critical_content = self._generate_tier_content(critical_recs, "Critical", "book_tier_critical")
+                critical_content = self._generate_tier_content(
+                    critical_recs, "Critical", "book_tier_critical"
+                )
                 critical_file = book_dir / "CRITICAL_RECOMMENDATIONS.md"
-                critical_file.write_text(critical_content, encoding='utf-8')
+                critical_file.write_text(critical_content, encoding="utf-8")
                 logger.info(f"Generated critical recommendations: {critical_file}")
 
             # Generate Important file
             if important_recs:
-                important_content = self._generate_tier_content(important_recs, "Important", "book_tier_important")
+                important_content = self._generate_tier_content(
+                    important_recs, "Important", "book_tier_important"
+                )
                 important_file = book_dir / "IMPORTANT_RECOMMENDATIONS.md"
-                important_file.write_text(important_content, encoding='utf-8')
+                important_file.write_text(important_content, encoding="utf-8")
                 logger.info(f"Generated important recommendations: {important_file}")
 
         except Exception as e:
             logger.error(f"Error generating tier files: {str(e)}")
 
-    def _generate_tier_content(self, recommendations: List[Dict[str, Any]], tier_name: str, template_name: str) -> str:
+    def _generate_tier_content(
+        self, recommendations: List[Dict[str, Any]], tier_name: str, template_name: str
+    ) -> str:
         """Generate content for tier files (Critical/Important)."""
         # Calculate hours
         total_hours = 0
         for rec in recommendations:
-            time_est = rec.get('time_estimate', '0 hours')
-            if 'hours' in time_est:
+            time_est = rec.get("time_estimate", "0 hours")
+            if "hours" in time_est:
                 try:
                     hours = int(time_est.split()[0])
                     total_hours += hours
@@ -521,13 +585,23 @@ This directory contains the complete analysis results for "{title}" including:
         recs_content = ""
         for i, rec in enumerate(recommendations, 1):
             recs_content += f"### {i}. {rec.get('title', 'Unknown')}\n\n"
-            recs_content += f"**Coverage:** {rec.get('mapped_phase', 'Multiple')} phases\n"
-            recs_content += f"**Estimated Time:** {rec.get('time_estimate', 'Unknown')}\n"
+            recs_content += (
+                f"**Coverage:** {rec.get('mapped_phase', 'Multiple')} phases\n"
+            )
+            recs_content += (
+                f"**Estimated Time:** {rec.get('time_estimate', 'Unknown')}\n"
+            )
             recs_content += f"**Priority:** {rec.get('priority', 'Unknown')}\n\n"
             recs_content += f"#### Implementation:\n"
-            recs_content += f"- **Description:** {rec.get('description', 'No description')}\n"
-            recs_content += f"- **Why It's Critical:** {rec.get('impact', 'High impact')}\n"
-            recs_content += f"- **Impact:** {rec.get('impact', 'Significant improvement')}\n\n"
+            recs_content += (
+                f"- **Description:** {rec.get('description', 'No description')}\n"
+            )
+            recs_content += (
+                f"- **Why It's Critical:** {rec.get('impact', 'High impact')}\n"
+            )
+            recs_content += (
+                f"- **Impact:** {rec.get('impact', 'Significant improvement')}\n\n"
+            )
             recs_content += f"**Key Requirements:**\n"
             recs_content += f"1. Implementation planning\n"
             recs_content += f"2. Resource allocation\n"
@@ -542,17 +616,23 @@ This directory contains the complete analysis results for "{title}" including:
         total_tokens = 0
         if cost_file.exists():
             try:
-                with open(cost_file, 'r') as f:
+                with open(cost_file, "r") as f:
                     cost_data = json.load(f)
-                    analysis_cost = cost_data.get('total_cost', 0.0)
+                    analysis_cost = cost_data.get("total_cost", 0.0)
                     # Estimate processing time and tokens
                     processing_time = len(recommendations) * 30  # 30s per rec estimate
-                    total_tokens = len(recommendations) * 2000   # 2000 tokens per rec estimate
+                    total_tokens = (
+                        len(recommendations) * 2000
+                    )  # 2000 tokens per rec estimate
             except:
                 pass
 
         context = {
-            "book_title": recommendations[0].get('source_book_title', 'Unknown') if recommendations else 'Unknown',
+            "book_title": (
+                recommendations[0].get("source_book_title", "Unknown")
+                if recommendations
+                else "Unknown"
+            ),
             f"{tier_name.lower()}_count": len(recommendations),
             f"{tier_name.lower()}_hours": total_hours,
             f"{tier_name.lower()}_recommendations_content": recs_content,
@@ -570,7 +650,7 @@ This directory contains the complete analysis results for "{title}" including:
             "key_capability_1": "Enhanced system reliability",
             "key_capability_2": "Improved performance",
             "key_capability_3": "Better monitoring",
-            "any_prerequisites": "None"
+            "any_prerequisites": "None",
         }
 
         return self._render_template(template_name, context)
@@ -580,9 +660,17 @@ def main():
     """Main function to organize book results."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Organize book analysis results into structured directories")
-    parser.add_argument("--config", default="config/books_to_analyze.json", help="Path to books configuration file")
-    parser.add_argument("--base-path", default="analysis_results", help="Base path for analysis results")
+    parser = argparse.ArgumentParser(
+        description="Organize book analysis results into structured directories"
+    )
+    parser.add_argument(
+        "--config",
+        default="config/books_to_analyze.json",
+        help="Path to books configuration file",
+    )
+    parser.add_argument(
+        "--base-path", default="analysis_results", help="Base path for analysis results"
+    )
     parser.add_argument("--book-id", help="Organize specific book by ID")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
 
@@ -593,7 +681,7 @@ def main():
 
     # Load books configuration
     try:
-        with open(args.config, 'r', encoding='utf-8') as f:
+        with open(args.config, "r", encoding="utf-8") as f:
             config_data = json.load(f)
             books_config = config_data.get("books", [])
     except Exception as e:
@@ -605,7 +693,9 @@ def main():
 
     if args.book_id:
         # Organize specific book
-        book_config = next((book for book in books_config if book.get("id") == args.book_id), None)
+        book_config = next(
+            (book for book in books_config if book.get("id") == args.book_id), None
+        )
         if not book_config:
             logger.error(f"Book with ID '{args.book_id}' not found in configuration")
             return 1

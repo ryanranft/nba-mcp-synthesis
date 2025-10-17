@@ -35,17 +35,19 @@ import atexit
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler('/tmp/secrets_health_monitor.log'),
-        logging.StreamHandler()
-    ]
+        logging.FileHandler("/tmp/secrets_health_monitor.log"),
+        logging.StreamHandler(),
+    ],
 )
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class HealthCheckResult:
     """Result of a health check operation"""
+
     service: str
     status: str  # 'healthy', 'warning', 'critical', 'unknown'
     response_time_ms: float
@@ -59,9 +61,11 @@ class HealthCheckResult:
         if self.metadata is None:
             self.metadata = {}
 
+
 @dataclass
 class SecretValidationResult:
     """Result of secret validation"""
+
     secret_name: str
     is_valid: bool
     validation_type: str  # 'format', 'connectivity', 'strength'
@@ -72,9 +76,11 @@ class SecretValidationResult:
         if self.timestamp is None:
             self.timestamp = datetime.now()
 
+
 @dataclass
 class MetricsSnapshot:
     """Snapshot of current metrics"""
+
     timestamp: datetime
     total_secrets: int
     healthy_secrets: int
@@ -84,6 +90,7 @@ class MetricsSnapshot:
     api_connectivity_score: float
     overall_health_score: float
     uptime_seconds: float
+
 
 class SecretsValidator:
     """Enhanced secrets validation with comprehensive checks"""
@@ -98,15 +105,16 @@ class SecretsValidator:
 
         # Service-specific validation patterns
         patterns = {
-            'google': r'^AIza[0-9A-Za-z-_]{35}$',
-            'openai': r'^sk-[A-Za-z0-9]{48}$',
-            'anthropic': r'^sk-ant-api[0-9]{2}-[A-Za-z0-9-_]{100,}$',
-            'deepseek': r'^sk-[a-f0-9]{32}$',
-            'linear': r'^lin_api_[A-Za-z0-9]{32}$'
+            "google": r"^AIza[0-9A-Za-z-_]{35}$",
+            "openai": r"^sk-[A-Za-z0-9]{48}$",
+            "anthropic": r"^sk-ant-api[0-9]{2}-[A-Za-z0-9-_]{100,}$",
+            "deepseek": r"^sk-[a-f0-9]{32}$",
+            "linear": r"^lin_api_[A-Za-z0-9]{32}$",
         }
 
         if service.lower() in patterns:
             import re
+
             if not re.match(patterns[service.lower()], api_key):
                 return False, f"Invalid {service} API key format"
 
@@ -127,10 +135,10 @@ class SecretsValidator:
 
         url = url.strip()
 
-        if not url.startswith(('http://', 'https://')):
+        if not url.startswith(("http://", "https://")):
             return False, "Webhook URL must start with http:// or https://"
 
-        if 'hooks.slack.com' not in url and 'webhook' not in url.lower():
+        if "hooks.slack.com" not in url and "webhook" not in url.lower():
             return False, "Webhook URL should contain 'hooks.slack.com' or 'webhook'"
 
         return True, "Valid webhook URL"
@@ -144,12 +152,14 @@ class SecretsValidator:
         uuid_str = uuid_str.strip()
 
         import re
-        uuid_pattern = r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+
+        uuid_pattern = r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
 
         if not re.match(uuid_pattern, uuid_str, re.IGNORECASE):
             return False, "Invalid UUID format"
 
         return True, "Valid UUID"
+
 
 class APIConnectivityChecker:
     """Enhanced API connectivity checker with comprehensive monitoring"""
@@ -157,9 +167,7 @@ class APIConnectivityChecker:
     def __init__(self, timeout: int = 10):
         self.timeout = timeout
         self.session = requests.Session()
-        self.session.headers.update({
-            'User-Agent': 'SecretsHealthMonitor/1.0'
-        })
+        self.session.headers.update({"User-Agent": "SecretsHealthMonitor/1.0"})
 
     def check_google_api(self, api_key: str) -> HealthCheckResult:
         """Check Google API connectivity"""
@@ -167,7 +175,9 @@ class APIConnectivityChecker:
 
         try:
             # Test with a simple API call
-            url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
+            url = (
+                f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
+            )
             response = self.session.get(url, timeout=self.timeout)
 
             response_time = (time.time() - start_time) * 1000
@@ -177,7 +187,7 @@ class APIConnectivityChecker:
                     service="Google API",
                     status="healthy",
                     response_time_ms=response_time,
-                    metadata={"status_code": response.status_code}
+                    metadata={"status_code": response.status_code},
                 )
             elif response.status_code == 403:
                 return HealthCheckResult(
@@ -185,7 +195,7 @@ class APIConnectivityChecker:
                     status="critical",
                     response_time_ms=response_time,
                     error_message="API key invalid or quota exceeded",
-                    metadata={"status_code": response.status_code}
+                    metadata={"status_code": response.status_code},
                 )
             else:
                 return HealthCheckResult(
@@ -193,7 +203,7 @@ class APIConnectivityChecker:
                     status="warning",
                     response_time_ms=response_time,
                     error_message=f"Unexpected status code: {response.status_code}",
-                    metadata={"status_code": response.status_code}
+                    metadata={"status_code": response.status_code},
                 )
 
         except requests.exceptions.Timeout:
@@ -201,14 +211,14 @@ class APIConnectivityChecker:
                 service="Google API",
                 status="critical",
                 response_time_ms=(time.time() - start_time) * 1000,
-                error_message="Request timeout"
+                error_message="Request timeout",
             )
         except requests.exceptions.RequestException as e:
             return HealthCheckResult(
                 service="Google API",
                 status="critical",
                 response_time_ms=(time.time() - start_time) * 1000,
-                error_message=f"Request failed: {str(e)}"
+                error_message=f"Request failed: {str(e)}",
             )
 
     def check_openai_api(self, api_key: str) -> HealthCheckResult:
@@ -227,7 +237,7 @@ class APIConnectivityChecker:
                     service="OpenAI API",
                     status="healthy",
                     response_time_ms=response_time,
-                    metadata={"status_code": response.status_code}
+                    metadata={"status_code": response.status_code},
                 )
             elif response.status_code == 401:
                 return HealthCheckResult(
@@ -235,7 +245,7 @@ class APIConnectivityChecker:
                     status="critical",
                     response_time_ms=response_time,
                     error_message="API key invalid",
-                    metadata={"status_code": response.status_code}
+                    metadata={"status_code": response.status_code},
                 )
             else:
                 return HealthCheckResult(
@@ -243,7 +253,7 @@ class APIConnectivityChecker:
                     status="warning",
                     response_time_ms=response_time,
                     error_message=f"Unexpected status code: {response.status_code}",
-                    metadata={"status_code": response.status_code}
+                    metadata={"status_code": response.status_code},
                 )
 
         except requests.exceptions.Timeout:
@@ -251,14 +261,14 @@ class APIConnectivityChecker:
                 service="OpenAI API",
                 status="critical",
                 response_time_ms=(time.time() - start_time) * 1000,
-                error_message="Request timeout"
+                error_message="Request timeout",
             )
         except requests.exceptions.RequestException as e:
             return HealthCheckResult(
                 service="OpenAI API",
                 status="critical",
                 response_time_ms=(time.time() - start_time) * 1000,
-                error_message=f"Request failed: {str(e)}"
+                error_message=f"Request failed: {str(e)}",
             )
 
     def check_slack_webhook(self, webhook_url: str) -> HealthCheckResult:
@@ -270,10 +280,12 @@ class APIConnectivityChecker:
             test_payload = {
                 "text": "🔍 Secrets Health Monitor - Test Message",
                 "username": "Secrets Monitor",
-                "icon_emoji": ":shield:"
+                "icon_emoji": ":shield:",
             }
 
-            response = self.session.post(webhook_url, json=test_payload, timeout=self.timeout)
+            response = self.session.post(
+                webhook_url, json=test_payload, timeout=self.timeout
+            )
             response_time = (time.time() - start_time) * 1000
 
             if response.status_code == 200:
@@ -281,7 +293,7 @@ class APIConnectivityChecker:
                     service="Slack Webhook",
                     status="healthy",
                     response_time_ms=response_time,
-                    metadata={"status_code": response.status_code}
+                    metadata={"status_code": response.status_code},
                 )
             else:
                 return HealthCheckResult(
@@ -289,7 +301,7 @@ class APIConnectivityChecker:
                     status="warning",
                     response_time_ms=response_time,
                     error_message=f"Unexpected status code: {response.status_code}",
-                    metadata={"status_code": response.status_code}
+                    metadata={"status_code": response.status_code},
                 )
 
         except requests.exceptions.Timeout:
@@ -297,15 +309,16 @@ class APIConnectivityChecker:
                 service="Slack Webhook",
                 status="critical",
                 response_time_ms=(time.time() - start_time) * 1000,
-                error_message="Request timeout"
+                error_message="Request timeout",
             )
         except requests.exceptions.RequestException as e:
             return HealthCheckResult(
                 service="Slack Webhook",
                 status="critical",
                 response_time_ms=(time.time() - start_time) * 1000,
-                error_message=f"Request failed: {str(e)}"
+                error_message=f"Request failed: {str(e)}",
             )
+
 
 class MetricsCollector:
     """Collects and analyzes metrics from health checks"""
@@ -345,7 +358,7 @@ class MetricsCollector:
                     avg_response_time_ms=0.0,
                     api_connectivity_score=0.0,
                     overall_health_score=0.0,
-                    uptime_seconds=uptime
+                    uptime_seconds=uptime,
                 )
 
             # Count statuses
@@ -357,14 +370,22 @@ class MetricsCollector:
                 response_times.append(check.response_time_ms)
 
             # Calculate scores
-            healthy_count = status_counts.get('healthy', 0)
-            warning_count = status_counts.get('warning', 0)
-            critical_count = status_counts.get('critical', 0)
+            healthy_count = status_counts.get("healthy", 0)
+            warning_count = status_counts.get("warning", 0)
+            critical_count = status_counts.get("critical", 0)
 
-            api_connectivity_score = (healthy_count / total_checks) * 100 if total_checks > 0 else 0
-            overall_health_score = ((healthy_count + warning_count * 0.5) / total_checks) * 100 if total_checks > 0 else 0
+            api_connectivity_score = (
+                (healthy_count / total_checks) * 100 if total_checks > 0 else 0
+            )
+            overall_health_score = (
+                ((healthy_count + warning_count * 0.5) / total_checks) * 100
+                if total_checks > 0
+                else 0
+            )
 
-            avg_response_time = sum(response_times) / len(response_times) if response_times else 0.0
+            avg_response_time = (
+                sum(response_times) / len(response_times) if response_times else 0.0
+            )
 
             return MetricsSnapshot(
                 timestamp=now,
@@ -375,14 +396,16 @@ class MetricsCollector:
                 avg_response_time_ms=avg_response_time,
                 api_connectivity_score=api_connectivity_score,
                 overall_health_score=overall_health_score,
-                uptime_seconds=uptime
+                uptime_seconds=uptime,
             )
 
     def get_health_trends(self, hours: int = 24) -> Dict[str, Any]:
         """Get health trends over specified hours"""
         with self.lock:
             cutoff_time = datetime.now() - timedelta(hours=hours)
-            recent_checks = [check for check in self.health_history if check.timestamp >= cutoff_time]
+            recent_checks = [
+                check for check in self.health_history if check.timestamp >= cutoff_time
+            ]
 
             if not recent_checks:
                 return {"trend": "no_data", "message": "No recent health checks"}
@@ -393,7 +416,7 @@ class MetricsCollector:
                 status_counts[check.status] += 1
 
             total_recent = len(recent_checks)
-            healthy_ratio = status_counts.get('healthy', 0) / total_recent
+            healthy_ratio = status_counts.get("healthy", 0) / total_recent
 
             if healthy_ratio >= 0.9:
                 trend = "excellent"
@@ -408,8 +431,9 @@ class MetricsCollector:
                 "trend": trend,
                 "healthy_ratio": healthy_ratio,
                 "total_checks": total_recent,
-                "status_breakdown": dict(status_counts)
+                "status_breakdown": dict(status_counts),
             }
+
 
 class SlackNotifier:
     """Enhanced Slack notification system with rich formatting"""
@@ -419,7 +443,9 @@ class SlackNotifier:
         self.channel = channel
         self.session = requests.Session()
 
-    def send_health_alert(self, metrics: MetricsSnapshot, critical_issues: List[str] = None):
+    def send_health_alert(
+        self, metrics: MetricsSnapshot, critical_issues: List[str] = None
+    ):
         """Send health alert to Slack"""
         if not critical_issues:
             critical_issues = []
@@ -448,47 +474,49 @@ class SlackNotifier:
                         {
                             "title": "Overall Health Score",
                             "value": f"{metrics.overall_health_score:.1f}%",
-                            "short": True
+                            "short": True,
                         },
                         {
                             "title": "API Connectivity",
                             "value": f"{metrics.api_connectivity_score:.1f}%",
-                            "short": True
+                            "short": True,
                         },
                         {
                             "title": "Healthy Secrets",
                             "value": f"{metrics.healthy_secrets}/{metrics.total_secrets}",
-                            "short": True
+                            "short": True,
                         },
                         {
                             "title": "Avg Response Time",
                             "value": f"{metrics.avg_response_time_ms:.1f}ms",
-                            "short": True
+                            "short": True,
                         },
                         {
                             "title": "Uptime",
                             "value": f"{metrics.uptime_seconds/3600:.1f} hours",
-                            "short": True
+                            "short": True,
                         },
                         {
                             "title": "Last Check",
                             "value": metrics.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
-                            "short": True
-                        }
+                            "short": True,
+                        },
                     ],
                     "footer": "Secrets Health Monitor",
-                    "ts": int(metrics.timestamp.timestamp())
+                    "ts": int(metrics.timestamp.timestamp()),
                 }
-            ]
+            ],
         }
 
         # Add critical issues if any
         if critical_issues:
-            message["attachments"][0]["fields"].append({
-                "title": "Critical Issues",
-                "value": "\n".join([f"• {issue}" for issue in critical_issues]),
-                "short": False
-            })
+            message["attachments"][0]["fields"].append(
+                {
+                    "title": "Critical Issues",
+                    "value": "\n".join([f"• {issue}" for issue in critical_issues]),
+                    "short": False,
+                }
+            )
 
         try:
             response = self.session.post(self.webhook_url, json=message, timeout=10)
@@ -499,7 +527,9 @@ class SlackNotifier:
         except Exception as e:
             logger.error(f"Error sending Slack alert: {e}")
 
-    def send_secret_validation_alert(self, validation_results: List[SecretValidationResult]):
+    def send_secret_validation_alert(
+        self, validation_results: List[SecretValidationResult]
+    ):
         """Send secret validation alert to Slack"""
         failed_validations = [r for r in validation_results if not r.is_valid]
 
@@ -517,17 +547,21 @@ class SlackNotifier:
                     "fields": [
                         {
                             "title": "Failed Validations",
-                            "value": "\n".join([
-                                f"• {r.secret_name}: {r.error_message or 'Unknown error'}"
-                                for r in failed_validations[:10]  # Limit to 10 for readability
-                            ]),
-                            "short": False
+                            "value": "\n".join(
+                                [
+                                    f"• {r.secret_name}: {r.error_message or 'Unknown error'}"
+                                    for r in failed_validations[
+                                        :10
+                                    ]  # Limit to 10 for readability
+                                ]
+                            ),
+                            "short": False,
                         }
                     ],
                     "footer": "Secrets Health Monitor",
-                    "ts": int(datetime.now().timestamp())
+                    "ts": int(datetime.now().timestamp()),
                 }
-            ]
+            ],
         }
 
         try:
@@ -535,9 +569,12 @@ class SlackNotifier:
             if response.status_code == 200:
                 logger.info("Secret validation alert sent to Slack successfully")
             else:
-                logger.warning(f"Failed to send Slack validation alert: {response.status_code}")
+                logger.warning(
+                    f"Failed to send Slack validation alert: {response.status_code}"
+                )
         except Exception as e:
             logger.error(f"Error sending Slack validation alert: {e}")
+
 
 class SecretsHealthMonitor:
     """Main secrets health monitoring system"""
@@ -556,9 +593,31 @@ class SecretsHealthMonitor:
         self._load_secrets()
 
         # Setup Slack notifier if webhook is available
-        slack_webhook = os.getenv(f"SLACK_WEBHOOK_URL_{self.project.upper().replace('-', '_')}_{self.context.upper()}")
+        slack_webhook = (
+            os.getenv(
+                f"SLACK_WEBHOOK_URL_{self.project.upper().replace('-', '_')}_{self.context.upper()}"
+            )
+            or os.getenv(
+                f"SLACK_WEBHOOK_URL_{self.project.upper().replace('-', '_')}_DEVELOPMENT"
+            )
+            or os.getenv(
+                f"SLACK_WEBHOOK_URL_{self.project.upper().replace('-', '_')}_TEST"
+            )
+            or os.getenv("SLACK_WEBHOOK_URL")
+        )  # Fallback to old name
         if slack_webhook:
-            slack_channel = os.getenv(f"SLACK_CHANNEL_{self.project.upper().replace('-', '_')}_{self.context.upper()}", "#nba-simulator-notifications")
+            slack_channel = (
+                os.getenv(
+                    f"SLACK_CHANNEL_{self.project.upper().replace('-', '_')}_{self.context.upper()}"
+                )
+                or os.getenv(
+                    f"SLACK_CHANNEL_{self.project.upper().replace('-', '_')}_DEVELOPMENT"
+                )
+                or os.getenv(
+                    f"SLACK_CHANNEL_{self.project.upper().replace('-', '_')}_TEST"
+                )
+                or os.getenv("SLACK_CHANNEL", "#nba-simulator-notifications")
+            )  # Fallback to old name
             self.slack_notifier = SlackNotifier(slack_webhook, slack_channel)
 
         # Setup graceful shutdown
@@ -574,7 +633,7 @@ class SecretsHealthMonitor:
                 from mcp_server.unified_secrets_manager import load_secrets_hierarchical
             except ImportError:
                 # Fallback: try to load from the project directory
-                sys.path.insert(0, '/Users/ryanranft/nba-mcp-synthesis')
+                sys.path.insert(0, "/Users/ryanranft/nba-mcp-synthesis")
                 from mcp_server.unified_secrets_manager import load_secrets_hierarchical
 
             # Load secrets and set environment variables
@@ -608,8 +667,12 @@ class SecretsHealthMonitor:
 
         # Get all environment variables that look like secrets
         secret_patterns = [
-            'GOOGLE_API_KEY', 'OPENAI_API_KEY', 'ANTHROPIC_API_KEY',
-            'DEEPSEEK_API_KEY', 'LINEAR_API_KEY', 'SLACK_WEBHOOK_URL'
+            "GOOGLE_API_KEY",
+            "OPENAI_API_KEY",
+            "ANTHROPIC_API_KEY",
+            "DEEPSEEK_API_KEY",
+            "LINEAR_API_KEY",
+            "SLACK_WEBHOOK_URL",
         ]
 
         for pattern in secret_patterns:
@@ -618,23 +681,31 @@ class SecretsHealthMonitor:
 
             if secret_value:
                 # Format validation
-                if 'API_KEY' in pattern:
-                    service = pattern.replace('_API_KEY', '').lower()
-                    is_valid, error_msg = self.validator.validate_api_key_format(secret_value, service)
-                    results.append(SecretValidationResult(
-                        secret_name=env_var_name,
-                        is_valid=is_valid,
-                        validation_type="format",
-                        error_message=error_msg if not is_valid else None
-                    ))
-                elif 'WEBHOOK_URL' in pattern:
-                    is_valid, error_msg = self.validator.validate_webhook_url(secret_value)
-                    results.append(SecretValidationResult(
-                        secret_name=env_var_name,
-                        is_valid=is_valid,
-                        validation_type="format",
-                        error_message=error_msg if not is_valid else None
-                    ))
+                if "API_KEY" in pattern:
+                    service = pattern.replace("_API_KEY", "").lower()
+                    is_valid, error_msg = self.validator.validate_api_key_format(
+                        secret_value, service
+                    )
+                    results.append(
+                        SecretValidationResult(
+                            secret_name=env_var_name,
+                            is_valid=is_valid,
+                            validation_type="format",
+                            error_message=error_msg if not is_valid else None,
+                        )
+                    )
+                elif "WEBHOOK_URL" in pattern:
+                    is_valid, error_msg = self.validator.validate_webhook_url(
+                        secret_value
+                    )
+                    results.append(
+                        SecretValidationResult(
+                            secret_name=env_var_name,
+                            is_valid=is_valid,
+                            validation_type="format",
+                            error_message=error_msg if not is_valid else None,
+                        )
+                    )
 
         return results
 
@@ -643,21 +714,54 @@ class SecretsHealthMonitor:
         results = []
 
         # Check Google API
-        google_api_key = os.getenv(f"GOOGLE_API_KEY_{self.project.upper().replace('-', '_')}_{self.context.upper()}")
+        google_api_key = (
+            os.getenv(
+                f"GOOGLE_API_KEY_{self.project.upper().replace('-', '_')}_{self.context.upper()}"
+            )
+            or os.getenv(
+                f"GOOGLE_API_KEY_{self.project.upper().replace('-', '_')}_DEVELOPMENT"
+            )
+            or os.getenv(
+                f"GOOGLE_API_KEY_{self.project.upper().replace('-', '_')}_TEST"
+            )
+            or os.getenv("GOOGLE_API_KEY")
+        )  # Fallback to old name
         if google_api_key:
             result = self.api_checker.check_google_api(google_api_key)
             results.append(result)
             self.metrics_collector.add_health_check(result)
 
         # Check OpenAI API
-        openai_api_key = os.getenv(f"OPENAI_API_KEY_{self.project.upper().replace('-', '_')}_{self.context.upper()}")
+        openai_api_key = (
+            os.getenv(
+                f"OPENAI_API_KEY_{self.project.upper().replace('-', '_')}_{self.context.upper()}"
+            )
+            or os.getenv(
+                f"OPENAI_API_KEY_{self.project.upper().replace('-', '_')}_DEVELOPMENT"
+            )
+            or os.getenv(
+                f"OPENAI_API_KEY_{self.project.upper().replace('-', '_')}_TEST"
+            )
+            or os.getenv("OPENAI_API_KEY")
+        )  # Fallback to old name
         if openai_api_key:
             result = self.api_checker.check_openai_api(openai_api_key)
             results.append(result)
             self.metrics_collector.add_health_check(result)
 
         # Check Slack webhook
-        slack_webhook = os.getenv(f"SLACK_WEBHOOK_URL_{self.project.upper().replace('-', '_')}_{self.context.upper()}")
+        slack_webhook = (
+            os.getenv(
+                f"SLACK_WEBHOOK_URL_{self.project.upper().replace('-', '_')}_{self.context.upper()}"
+            )
+            or os.getenv(
+                f"SLACK_WEBHOOK_URL_{self.project.upper().replace('-', '_')}_DEVELOPMENT"
+            )
+            or os.getenv(
+                f"SLACK_WEBHOOK_URL_{self.project.upper().replace('-', '_')}_TEST"
+            )
+            or os.getenv("SLACK_WEBHOOK_URL")
+        )  # Fallback to old name
         if slack_webhook:
             result = self.api_checker.check_slack_webhook(slack_webhook)
             results.append(result)
@@ -673,12 +777,12 @@ class SecretsHealthMonitor:
 
         self.monitoring_active = True
         self.monitor_thread = threading.Thread(
-            target=self._monitoring_loop,
-            args=(interval_seconds,),
-            daemon=True
+            target=self._monitoring_loop, args=(interval_seconds,), daemon=True
         )
         self.monitor_thread.start()
-        logger.info(f"Started secrets health monitoring (interval: {interval_seconds}s)")
+        logger.info(
+            f"Started secrets health monitoring (interval: {interval_seconds}s)"
+        )
 
     def stop_monitoring(self):
         """Stop continuous monitoring"""
@@ -708,13 +812,19 @@ class SecretsHealthMonitor:
 
                     # Check for critical health issues
                     for result in health_results:
-                        if result.status == 'critical':
-                            critical_issues.append(f"{result.service}: {result.error_message}")
+                        if result.status == "critical":
+                            critical_issues.append(
+                                f"{result.service}: {result.error_message}"
+                            )
 
                     # Check for validation failures
-                    failed_validations = [r for r in validation_results if not r.is_valid]
+                    failed_validations = [
+                        r for r in validation_results if not r.is_valid
+                    ]
                     for validation in failed_validations:
-                        critical_issues.append(f"Secret validation failed: {validation.secret_name}")
+                        critical_issues.append(
+                            f"Secret validation failed: {validation.secret_name}"
+                        )
 
                     # Send alert if there are critical issues or if health score is low
                     if critical_issues or metrics.overall_health_score < 70:
@@ -722,12 +832,16 @@ class SecretsHealthMonitor:
 
                     # Send validation alert if there are failures
                     if failed_validations:
-                        self.slack_notifier.send_secret_validation_alert(failed_validations)
+                        self.slack_notifier.send_secret_validation_alert(
+                            failed_validations
+                        )
 
                 # Log metrics
-                logger.info(f"Health Score: {metrics.overall_health_score:.1f}%, "
-                           f"API Connectivity: {metrics.api_connectivity_score:.1f}%, "
-                           f"Response Time: {metrics.avg_response_time_ms:.1f}ms")
+                logger.info(
+                    f"Health Score: {metrics.overall_health_score:.1f}%, "
+                    f"API Connectivity: {metrics.api_connectivity_score:.1f}%, "
+                    f"Response Time: {metrics.avg_response_time_ms:.1f}ms"
+                )
 
             except Exception as e:
                 logger.error(f"Error in monitoring loop: {e}")
@@ -746,8 +860,9 @@ class SecretsHealthMonitor:
             "context": self.context,
             "metrics": asdict(metrics),
             "trends": trends,
-            "monitoring_active": self.monitoring_active
+            "monitoring_active": self.monitoring_active,
         }
+
 
 def main():
     """Main entry point for secrets health monitor"""
@@ -755,10 +870,18 @@ def main():
 
     parser = argparse.ArgumentParser(description="Secrets Health Monitor")
     parser.add_argument("--project", default="nba-mcp-synthesis", help="Project name")
-    parser.add_argument("--context", default="WORKFLOW", help="Context (WORKFLOW/development/test)")
-    parser.add_argument("--interval", type=int, default=300, help="Monitoring interval in seconds")
-    parser.add_argument("--once", action="store_true", help="Run once instead of continuous monitoring")
-    parser.add_argument("--report", action="store_true", help="Generate health report and exit")
+    parser.add_argument(
+        "--context", default="WORKFLOW", help="Context (WORKFLOW/development/test)"
+    )
+    parser.add_argument(
+        "--interval", type=int, default=300, help="Monitoring interval in seconds"
+    )
+    parser.add_argument(
+        "--once", action="store_true", help="Run once instead of continuous monitoring"
+    )
+    parser.add_argument(
+        "--report", action="store_true", help="Generate health report and exit"
+    )
 
     args = parser.parse_args()
 
@@ -779,8 +902,12 @@ def main():
 
         print(f"\n📊 Health Check Results:")
         for result in health_results:
-            status_emoji = {"healthy": "✅", "warning": "⚠️", "critical": "❌"}.get(result.status, "❓")
-            print(f"  {status_emoji} {result.service}: {result.status} ({result.response_time_ms:.1f}ms)")
+            status_emoji = {"healthy": "✅", "warning": "⚠️", "critical": "❌"}.get(
+                result.status, "❓"
+            )
+            print(
+                f"  {status_emoji} {result.service}: {result.status} ({result.response_time_ms:.1f}ms)"
+            )
             if result.error_message:
                 print(f"    Error: {result.error_message}")
 
@@ -799,7 +926,9 @@ def main():
 
     else:
         # Start continuous monitoring
-        print(f"🚀 Starting continuous monitoring for {args.project} ({args.context})...")
+        print(
+            f"🚀 Starting continuous monitoring for {args.project} ({args.context})..."
+        )
         monitor.start_monitoring(args.interval)
 
         try:
@@ -809,6 +938,7 @@ def main():
         except KeyboardInterrupt:
             print("\n🛑 Stopping monitoring...")
             monitor.stop_monitoring()
+
 
 if __name__ == "__main__":
     main()

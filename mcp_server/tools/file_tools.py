@@ -28,7 +28,9 @@ class FileTools:
         if not self.project_root.exists():
             logger.warning(f"Project root does not exist: {project_root}")
 
-    def _validate_path(self, file_path: str) -> tuple[bool, Optional[Path], Optional[str]]:
+    def _validate_path(
+        self, file_path: str
+    ) -> tuple[bool, Optional[Path], Optional[str]]:
         """
         Validate file path to prevent path traversal attacks.
 
@@ -57,9 +59,7 @@ class FileTools:
             return False, None, f"Invalid path: {str(e)}"
 
     async def read_project_file(
-        self,
-        file_path: str,
-        max_lines: int = 500
+        self, file_path: str, max_lines: int = 500
     ) -> Dict[str, Any]:
         """
         Read a file from the project directory.
@@ -76,18 +76,14 @@ class FileTools:
             is_valid, path, error = self._validate_path(file_path)
             if not is_valid:
                 logger.warning(f"Invalid path access attempt: {file_path}")
-                return {
-                    "success": False,
-                    "error": error,
-                    "file_path": file_path
-                }
+                return {"success": False, "error": error, "file_path": file_path}
 
             # Check if file exists
             if not path.exists():
                 return {
                     "success": False,
                     "error": f"File not found: {file_path}",
-                    "file_path": str(path)
+                    "file_path": str(path),
                 }
 
             # Check if it's a file (not directory)
@@ -95,7 +91,7 @@ class FileTools:
                 return {
                     "success": False,
                     "error": f"Not a file: {file_path}",
-                    "file_path": str(path)
+                    "file_path": str(path),
                 }
 
             # Get file stats
@@ -105,18 +101,18 @@ class FileTools:
             # Read file content
             logger.info(f"Reading file: {path} (max_lines={max_lines})")
 
-            with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+            with open(path, "r", encoding="utf-8", errors="ignore") as f:
                 lines = []
                 for i, line in enumerate(f):
                     if i >= max_lines:
                         break
-                    lines.append(line.rstrip('\n'))
+                    lines.append(line.rstrip("\n"))
 
-                content = '\n'.join(lines)
+                content = "\n".join(lines)
                 total_lines = i + 1
 
             # Check if file was truncated
-            with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+            with open(path, "r", encoding="utf-8", errors="ignore") as f:
                 actual_lines = sum(1 for _ in f)
 
             truncated = actual_lines > max_lines
@@ -130,22 +126,18 @@ class FileTools:
                 "total_lines": actual_lines,
                 "truncated": truncated,
                 "file_size": file_size,
-                "extension": path.suffix
+                "extension": path.suffix,
             }
 
         except Exception as e:
             logger.error(f"Error reading file: {e}", exc_info=True)
-            return {
-                "success": False,
-                "error": str(e),
-                "file_path": file_path
-            }
+            return {"success": False, "error": str(e), "file_path": file_path}
 
     async def search_project_files(
         self,
         pattern: str,
         file_types: List[str] = [".py", ".sql"],
-        max_results: int = 50
+        max_results: int = 50,
     ) -> Dict[str, Any]:
         """
         Search for files in the project directory.
@@ -166,7 +158,12 @@ class FileTools:
             # Walk through project directory
             for root, dirs, files in os.walk(self.project_root):
                 # Skip hidden directories and common excludes
-                dirs[:] = [d for d in dirs if not d.startswith('.') and d not in ['__pycache__', 'node_modules', 'venv', '.git']]
+                dirs[:] = [
+                    d
+                    for d in dirs
+                    if not d.startswith(".")
+                    and d not in ["__pycache__", "node_modules", "venv", ".git"]
+                ]
 
                 for file in files:
                     # Check if file matches pattern
@@ -177,14 +174,20 @@ class FileTools:
                             file_path = Path(root) / file
                             stats = file_path.stat()
 
-                            matching_files.append({
-                                "path": str(file_path),
-                                "relative_path": str(file_path.relative_to(self.project_root)),
-                                "name": file,
-                                "size": stats.st_size,
-                                "modified": datetime.fromtimestamp(stats.st_mtime).isoformat(),
-                                "extension": file_ext
-                            })
+                            matching_files.append(
+                                {
+                                    "path": str(file_path),
+                                    "relative_path": str(
+                                        file_path.relative_to(self.project_root)
+                                    ),
+                                    "name": file,
+                                    "size": stats.st_size,
+                                    "modified": datetime.fromtimestamp(
+                                        stats.st_mtime
+                                    ).isoformat(),
+                                    "extension": file_ext,
+                                }
+                            )
 
                             # Stop if max results reached
                             if len(matching_files) >= max_results:
@@ -201,16 +204,12 @@ class FileTools:
                 "file_types": file_types,
                 "file_count": len(matching_files),
                 "files": matching_files,
-                "truncated": len(matching_files) >= max_results
+                "truncated": len(matching_files) >= max_results,
             }
 
         except Exception as e:
             logger.error(f"Error searching files: {e}", exc_info=True)
-            return {
-                "success": False,
-                "error": str(e),
-                "pattern": pattern
-            }
+            return {"success": False, "error": str(e), "pattern": pattern}
 
     async def get_file_summary(self, file_path: str) -> Dict[str, Any]:
         """
@@ -226,18 +225,14 @@ class FileTools:
             # Validate path
             is_valid, path, error = self._validate_path(file_path)
             if not is_valid:
-                return {
-                    "success": False,
-                    "error": error,
-                    "file_path": file_path
-                }
+                return {"success": False, "error": error, "file_path": file_path}
 
             # Check if file exists
             if not path.exists():
                 return {
                     "success": False,
                     "error": f"File not found: {file_path}",
-                    "file_path": str(path)
+                    "file_path": str(path),
                 }
 
             # Check if it's a file
@@ -245,7 +240,7 @@ class FileTools:
                 return {
                     "success": False,
                     "error": f"Not a file: {file_path}",
-                    "file_path": str(path)
+                    "file_path": str(path),
                 }
 
             # Get file stats
@@ -254,7 +249,7 @@ class FileTools:
             # Count lines for text files
             line_count = None
             try:
-                with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+                with open(path, "r", encoding="utf-8", errors="ignore") as f:
                     line_count = sum(1 for _ in f)
             except:
                 pass  # Not a text file or unreadable
@@ -271,22 +266,15 @@ class FileTools:
                 "modified": datetime.fromtimestamp(stats.st_mtime).isoformat(),
                 "accessed": datetime.fromtimestamp(stats.st_atime).isoformat(),
                 "line_count": line_count,
-                "is_text": line_count is not None
+                "is_text": line_count is not None,
             }
 
         except Exception as e:
             logger.error(f"Error getting file summary: {e}", exc_info=True)
-            return {
-                "success": False,
-                "error": str(e),
-                "file_path": file_path
-            }
+            return {"success": False, "error": str(e), "file_path": file_path}
 
     async def list_directory(
-        self,
-        dir_path: str = "",
-        recursive: bool = False,
-        max_depth: int = 2
+        self, dir_path: str = "", recursive: bool = False, max_depth: int = 2
     ) -> Dict[str, Any]:
         """
         List contents of a directory in the project.
@@ -303,18 +291,14 @@ class FileTools:
             # Validate path
             is_valid, path, error = self._validate_path(dir_path if dir_path else ".")
             if not is_valid:
-                return {
-                    "success": False,
-                    "error": error,
-                    "dir_path": dir_path
-                }
+                return {"success": False, "error": error, "dir_path": dir_path}
 
             # Check if directory exists
             if not path.exists():
                 return {
                     "success": False,
                     "error": f"Directory not found: {dir_path}",
-                    "dir_path": str(path)
+                    "dir_path": str(path),
                 }
 
             # Check if it's a directory
@@ -322,7 +306,7 @@ class FileTools:
                 return {
                     "success": False,
                     "error": f"Not a directory: {dir_path}",
-                    "dir_path": str(path)
+                    "dir_path": str(path),
                 }
 
             logger.info(f"Listing directory: {path} (recursive={recursive})")
@@ -340,50 +324,71 @@ class FileTools:
                         continue
 
                     # Skip hidden directories
-                    dirs[:] = [d for d in dirs if not d.startswith('.') and d not in ['__pycache__', 'node_modules', 'venv', '.git']]
+                    dirs[:] = [
+                        d
+                        for d in dirs
+                        if not d.startswith(".")
+                        and d not in ["__pycache__", "node_modules", "venv", ".git"]
+                    ]
 
                     for d in dirs:
                         dir_full_path = Path(root) / d
-                        directories.append({
-                            "path": str(dir_full_path),
-                            "relative_path": str(dir_full_path.relative_to(self.project_root)),
-                            "name": d,
-                            "depth": depth + 1
-                        })
+                        directories.append(
+                            {
+                                "path": str(dir_full_path),
+                                "relative_path": str(
+                                    dir_full_path.relative_to(self.project_root)
+                                ),
+                                "name": d,
+                                "depth": depth + 1,
+                            }
+                        )
 
                     for f in filenames:
-                        if not f.startswith('.'):
+                        if not f.startswith("."):
                             file_full_path = Path(root) / f
                             stats = file_full_path.stat()
-                            files.append({
-                                "path": str(file_full_path),
-                                "relative_path": str(file_full_path.relative_to(self.project_root)),
-                                "name": f,
-                                "size": stats.st_size,
-                                "extension": Path(f).suffix,
-                                "depth": depth + 1
-                            })
+                            files.append(
+                                {
+                                    "path": str(file_full_path),
+                                    "relative_path": str(
+                                        file_full_path.relative_to(self.project_root)
+                                    ),
+                                    "name": f,
+                                    "size": stats.st_size,
+                                    "extension": Path(f).suffix,
+                                    "depth": depth + 1,
+                                }
+                            )
             else:
                 # Non-recursive listing
                 for item in path.iterdir():
-                    if item.name.startswith('.'):
+                    if item.name.startswith("."):
                         continue
 
                     if item.is_dir():
-                        directories.append({
-                            "path": str(item),
-                            "relative_path": str(item.relative_to(self.project_root)),
-                            "name": item.name
-                        })
+                        directories.append(
+                            {
+                                "path": str(item),
+                                "relative_path": str(
+                                    item.relative_to(self.project_root)
+                                ),
+                                "name": item.name,
+                            }
+                        )
                     else:
                         stats = item.stat()
-                        files.append({
-                            "path": str(item),
-                            "relative_path": str(item.relative_to(self.project_root)),
-                            "name": item.name,
-                            "size": stats.st_size,
-                            "extension": item.suffix
-                        })
+                        files.append(
+                            {
+                                "path": str(item),
+                                "relative_path": str(
+                                    item.relative_to(self.project_root)
+                                ),
+                                "name": item.name,
+                                "size": stats.st_size,
+                                "extension": item.suffix,
+                            }
+                        )
 
             return {
                 "success": True,
@@ -393,13 +398,9 @@ class FileTools:
                 "directory_count": len(directories),
                 "files": files,
                 "directories": directories,
-                "recursive": recursive
+                "recursive": recursive,
             }
 
         except Exception as e:
             logger.error(f"Error listing directory: {e}", exc_info=True)
-            return {
-                "success": False,
-                "error": str(e),
-                "dir_path": dir_path
-            }
+            return {"success": False, "error": str(e), "dir_path": dir_path}

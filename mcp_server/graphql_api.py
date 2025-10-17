@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class Player:
     """Player model"""
+
     id: int
     name: str
     team: str
@@ -46,6 +47,7 @@ class Player:
 @dataclass
 class Team:
     """Team model"""
+
     id: int
     name: str
     city: str
@@ -59,6 +61,7 @@ class Team:
 @dataclass
 class Game:
     """Game model"""
+
     id: int
     date: datetime
     home_team: Team
@@ -261,7 +264,7 @@ class GraphQLResolvers:
         after: Optional[str] = None,
         team: Optional[str] = None,
         position: Optional[str] = None,
-        order_by: Optional[str] = None
+        order_by: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Resolve players with pagination and filtering"""
         # Build query
@@ -278,10 +281,10 @@ class GraphQLResolvers:
 
         # Ordering
         order_map = {
-            'PPG_DESC': 'ppg DESC',
-            'PPG_ASC': 'ppg ASC',
-            'NAME_ASC': 'name ASC',
-            'NAME_DESC': 'name DESC'
+            "PPG_DESC": "ppg DESC",
+            "PPG_ASC": "ppg ASC",
+            "NAME_ASC": "name ASC",
+            "NAME_DESC": "name DESC",
         }
         if order_by and order_by in order_map:
             query += f" ORDER BY {order_map[order_by]}"
@@ -300,23 +303,17 @@ class GraphQLResolvers:
         if has_next_page:
             players = players[:first]
 
-        edges = [
-            {
-                'cursor': str(player.id),
-                'node': player
-            }
-            for player in players
-        ]
+        edges = [{"cursor": str(player.id), "node": player} for player in players]
 
         return {
-            'edges': edges,
-            'pageInfo': {
-                'hasNextPage': has_next_page,
-                'hasPreviousPage': after is not None,
-                'startCursor': edges[0]['cursor'] if edges else None,
-                'endCursor': edges[-1]['cursor'] if edges else None
+            "edges": edges,
+            "pageInfo": {
+                "hasNextPage": has_next_page,
+                "hasPreviousPage": after is not None,
+                "startCursor": edges[0]["cursor"] if edges else None,
+                "endCursor": edges[-1]["cursor"] if edges else None,
             },
-            'totalCount': await self._count_players(team, position)
+            "totalCount": await self._count_players(team, position),
         }
 
     async def resolve_team(self, info, id: str) -> Optional[Team]:
@@ -325,10 +322,7 @@ class GraphQLResolvers:
         return await team_loader.load(int(id))
 
     async def resolve_teams(
-        self,
-        info,
-        conference: Optional[str] = None,
-        division: Optional[str] = None
+        self, info, conference: Optional[str] = None, division: Optional[str] = None
     ) -> List[Team]:
         """Resolve teams with filtering"""
         query = "SELECT * FROM teams WHERE 1=1"
@@ -352,9 +346,9 @@ class GraphQLResolvers:
     async def resolve_search(self, info, query: str) -> Dict[str, Any]:
         """Search across players, teams, and games"""
         results = {
-            'players': await self._search_players(query),
-            'teams': await self._search_teams(query),
-            'games': await self._search_games(query)
+            "players": await self._search_players(query),
+            "teams": await self._search_teams(query),
+            "games": await self._search_games(query),
         }
         return results
 
@@ -366,10 +360,7 @@ class GraphQLResolvers:
         return await team_loader.load_by_name(player.team)
 
     async def resolve_player_stats(
-        self,
-        player: Player,
-        info,
-        season: Optional[int] = None
+        self, player: Player, info, season: Optional[int] = None
     ) -> Dict[str, Any]:
         """Resolve player stats for a season"""
         if not season:
@@ -378,10 +369,7 @@ class GraphQLResolvers:
         return await self._get_player_stats(player.id, season)
 
     async def resolve_team_players(
-        self,
-        team: Team,
-        info,
-        position: Optional[str] = None
+        self, team: Team, info, position: Optional[str] = None
     ) -> List[Player]:
         """Resolve players for a team"""
         query = "SELECT * FROM players WHERE team = ?"
@@ -396,10 +384,7 @@ class GraphQLResolvers:
     # Mutation Resolvers
 
     async def resolve_update_player_stats(
-        self,
-        info,
-        player_id: str,
-        stats: Dict[str, int]
+        self, info, player_id: str, stats: Dict[str, int]
     ) -> Player:
         """Update player stats"""
         await self._update_player_stats(int(player_id), stats)
@@ -408,18 +393,10 @@ class GraphQLResolvers:
         return await player_loader.load(int(player_id))
 
     async def resolve_update_game_score(
-        self,
-        info,
-        game_id: str,
-        home_score: int,
-        away_score: int
+        self, info, game_id: str, home_score: int, away_score: int
     ) -> Game:
         """Update game score"""
-        await self._update_game_score(
-            int(game_id),
-            home_score,
-            away_score
-        )
+        await self._update_game_score(int(game_id), home_score, away_score)
 
         # Notify subscribers
         await self._publish_game_update(int(game_id))
@@ -432,24 +409,27 @@ class GraphQLResolvers:
 
     def _get_player_loader(self):
         """Get or create player DataLoader"""
-        if 'player' not in self.data_loaders:
+        if "player" not in self.data_loaders:
             from dataloader import DataLoader
-            self.data_loaders['player'] = DataLoader(self._batch_load_players)
-        return self.data_loaders['player']
+
+            self.data_loaders["player"] = DataLoader(self._batch_load_players)
+        return self.data_loaders["player"]
 
     def _get_team_loader(self):
         """Get or create team DataLoader"""
-        if 'team' not in self.data_loaders:
+        if "team" not in self.data_loaders:
             from dataloader import DataLoader
-            self.data_loaders['team'] = DataLoader(self._batch_load_teams)
-        return self.data_loaders['team']
+
+            self.data_loaders["team"] = DataLoader(self._batch_load_teams)
+        return self.data_loaders["team"]
 
     def _get_game_loader(self):
         """Get or create game DataLoader"""
-        if 'game' not in self.data_loaders:
+        if "game" not in self.data_loaders:
             from dataloader import DataLoader
-            self.data_loaders['game'] = DataLoader(self._batch_load_games)
-        return self.data_loaders['game']
+
+            self.data_loaders["game"] = DataLoader(self._batch_load_games)
+        return self.data_loaders["game"]
 
     async def _batch_load_players(self, ids: List[int]) -> List[Optional[Player]]:
         """Batch load players by IDs"""
@@ -481,9 +461,7 @@ class GraphQLResolvers:
         return []
 
     async def _count_players(
-        self,
-        team: Optional[str] = None,
-        position: Optional[str] = None
+        self, team: Optional[str] = None, position: Optional[str] = None
     ) -> int:
         """Count players with filters"""
         # Mock implementation
@@ -493,11 +471,11 @@ class GraphQLResolvers:
         """Get player stats for season"""
         # Mock implementation
         return {
-            'season': season,
-            'gamesPlayed': 82,
-            'points': 2100,
-            'rebounds': 650,
-            'assists': 450
+            "season": season,
+            "gamesPlayed": 82,
+            "points": 2100,
+            "rebounds": 650,
+            "assists": 450,
         }
 
     async def _update_player_stats(self, player_id: int, stats: Dict[str, int]) -> None:
@@ -505,10 +483,7 @@ class GraphQLResolvers:
         logger.info(f"Updating stats for player {player_id}: {stats}")
 
     async def _update_game_score(
-        self,
-        game_id: int,
-        home_score: int,
-        away_score: int
+        self, game_id: int, home_score: int, away_score: int
     ) -> None:
         """Update game score"""
         logger.info(f"Updating game {game_id}: {home_score}-{away_score}")
@@ -548,12 +523,12 @@ class GraphQLServer:
 
             # Create GraphQL endpoint
             app.add_url_rule(
-                '/graphql',
+                "/graphql",
                 view_func=GraphQLView.as_view(
-                    'graphql',
+                    "graphql",
                     schema=self.schema,
-                    graphiql=True  # Enable GraphiQL interface
-                )
+                    graphiql=True,  # Enable GraphiQL interface
+                ),
             )
 
             return app
@@ -607,4 +582,3 @@ if __name__ == "__main__":
     }
     """
     print(example_mutation)
-

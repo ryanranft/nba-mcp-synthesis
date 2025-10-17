@@ -24,7 +24,7 @@ class BookProcessingError(Exception):
         message: str,
         file_path: str,
         operation: str,
-        original_error: Optional[Exception] = None
+        original_error: Optional[Exception] = None,
     ):
         self.message = message
         self.file_path = file_path
@@ -49,6 +49,7 @@ class EpubProcessingError(BookProcessingError):
     - Chapter extraction fails
     - Invalid EPUB structure
     """
+
     pass
 
 
@@ -62,6 +63,7 @@ class PdfProcessingError(BookProcessingError):
     - Page/chapter extraction fails
     - Invalid PDF structure
     """
+
     pass
 
 
@@ -75,6 +77,7 @@ class S3AccessError(BookProcessingError):
     - Network errors
     - Bucket not accessible
     """
+
     pass
 
 
@@ -87,6 +90,7 @@ class ChunkingError(BookProcessingError):
     - Chunk number out of range
     - Content cannot be chunked
     """
+
     pass
 
 
@@ -125,7 +129,7 @@ class RateLimitError(Exception):
         message: str,
         max_requests: int,
         per_seconds: int,
-        retry_after: Optional[int] = None
+        retry_after: Optional[int] = None,
     ):
         self.message = message
         self.max_requests = max_requests
@@ -148,7 +152,12 @@ class ValidationError(Exception):
     - Parameters out of range
     """
 
-    def __init__(self, message: str, field_name: Optional[str] = None, value: Optional[any] = None):
+    def __init__(
+        self,
+        message: str,
+        field_name: Optional[str] = None,
+        value: Optional[any] = None,
+    ):
         self.message = message
         self.field_name = field_name
         self.value = value
@@ -170,32 +179,28 @@ def file_not_found_error(file_path: str, operation: str) -> BookProcessingError:
         f"File not found: {file_path}",
         file_path,
         operation,
-        FileNotFoundError(file_path)
+        FileNotFoundError(file_path),
     )
 
 
-def invalid_format_error(file_path: str, operation: str, expected_format: str) -> BookProcessingError:
+def invalid_format_error(
+    file_path: str, operation: str, expected_format: str
+) -> BookProcessingError:
     """Create an error for invalid file format"""
     return BookProcessingError(
-        f"Invalid format. Expected: {expected_format}",
-        file_path,
-        operation
+        f"Invalid format. Expected: {expected_format}", file_path, operation
     )
 
 
 def chapter_not_found_error(file_path: str, chapter_id: str) -> BookProcessingError:
     """Create an error for chapter not found"""
     return BookProcessingError(
-        f"Chapter '{chapter_id}' not found",
-        file_path,
-        "chapter_extraction"
+        f"Chapter '{chapter_id}' not found", file_path, "chapter_extraction"
     )
 
 
 def s3_bucket_error(bucket: str, key: str, operation: str) -> S3AccessError:
     """Create an S3 bucket access error"""
     return S3AccessError(
-        f"Cannot access S3 bucket: {bucket}",
-        f"s3://{bucket}/{key}",
-        operation
+        f"Cannot access S3 bucket: {bucket}", f"s3://{bucket}/{key}", operation
     )

@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class FeatureDefinition:
     """Definition of a feature"""
+
     feature_id: str
     name: str
     description: str
@@ -33,6 +34,7 @@ class FeatureDefinition:
 @dataclass
 class FeatureSet:
     """Collection of related features"""
+
     feature_set_id: str
     name: str
     description: str
@@ -58,7 +60,9 @@ class FeatureStore:
 
         self.features: Dict[str, FeatureDefinition] = {}
         self.feature_sets: Dict[str, FeatureSet] = {}
-        self.feature_values: Dict[str, Dict[str, Any]] = {}  # {entity_id: {feature_id: value}}
+        self.feature_values: Dict[str, Dict[str, Any]] = (
+            {}
+        )  # {entity_id: {feature_id: value}}
 
         self._load_store()
 
@@ -66,7 +70,7 @@ class FeatureStore:
         """Load feature store from disk"""
         features_file = self.store_path / "features.json"
         if features_file.exists():
-            with open(features_file, 'r') as f:
+            with open(features_file, "r") as f:
                 data = json.load(f)
                 for feat_id, feat_data in data.items():
                     self.features[feat_id] = FeatureDefinition(
@@ -79,7 +83,7 @@ class FeatureStore:
                         created_at=datetime.fromisoformat(feat_data["created_at"]),
                         created_by=feat_data["created_by"],
                         version=feat_data["version"],
-                        tags=feat_data.get("tags", {})
+                        tags=feat_data.get("tags", {}),
                     )
             logger.info(f"Loaded {len(self.features)} features from store")
 
@@ -98,10 +102,10 @@ class FeatureStore:
                 "created_at": feat.created_at.isoformat(),
                 "created_by": feat.created_by,
                 "version": feat.version,
-                "tags": feat.tags
+                "tags": feat.tags,
             }
 
-        with open(features_file, 'w') as f:
+        with open(features_file, "w") as f:
             json.dump(data, f, indent=2)
 
         logger.debug(f"Saved {len(self.features)} features to store")
@@ -115,7 +119,7 @@ class FeatureStore:
         source_table: Optional[str] = None,
         transformation: Optional[str] = None,
         created_by: str = "system",
-        tags: Optional[Dict[str, str]] = None
+        tags: Optional[Dict[str, str]] = None,
     ) -> FeatureDefinition:
         """
         Register a new feature.
@@ -141,7 +145,7 @@ class FeatureStore:
             source_table=source_table,
             transformation=transformation,
             created_by=created_by,
-            tags=tags or {}
+            tags=tags or {},
         )
 
         self.features[feature_id] = feature
@@ -158,7 +162,7 @@ class FeatureStore:
         description: str,
         feature_ids: List[str],
         created_by: str = "system",
-        tags: Optional[Dict[str, str]] = None
+        tags: Optional[Dict[str, str]] = None,
     ) -> FeatureSet:
         """
         Create a feature set.
@@ -187,7 +191,7 @@ class FeatureStore:
             created_at=datetime.utcnow(),
             created_by=created_by,
             version="1.0.0",
-            tags=tags or {}
+            tags=tags or {},
         )
 
         self.feature_sets[feature_set_id] = feature_set
@@ -198,11 +202,7 @@ class FeatureStore:
 
         return feature_set
 
-    def write_features(
-        self,
-        entity_id: str,
-        features: Dict[str, Any]
-    ):
+    def write_features(self, entity_id: str, features: Dict[str, Any]):
         """
         Write feature values for an entity.
 
@@ -224,9 +224,7 @@ class FeatureStore:
         logger.debug(f"Wrote {len(features)} features for entity {entity_id}")
 
     def read_features(
-        self,
-        entity_ids: List[str],
-        feature_ids: Optional[List[str]] = None
+        self, entity_ids: List[str], feature_ids: Optional[List[str]] = None
     ) -> Dict[str, Dict[str, Any]]:
         """
         Read features for entities.
@@ -261,9 +259,7 @@ class FeatureStore:
         return result
 
     def read_feature_set(
-        self,
-        entity_ids: List[str],
-        feature_set_id: str
+        self, entity_ids: List[str], feature_set_id: str
     ) -> Dict[str, Dict[str, Any]]:
         """
         Read a feature set for entities.
@@ -285,7 +281,7 @@ class FeatureStore:
         self,
         name_pattern: Optional[str] = None,
         data_type: Optional[str] = None,
-        tags: Optional[Dict[str, str]] = None
+        tags: Optional[Dict[str, str]] = None,
     ) -> List[FeatureDefinition]:
         """
         Search for features.
@@ -324,7 +320,7 @@ class FeatureStore:
             "total_features": len(self.features),
             "total_feature_sets": len(self.feature_sets),
             "total_entities": len(self.feature_values),
-            "by_data_type": type_counts
+            "by_data_type": type_counts,
         }
 
 
@@ -348,7 +344,7 @@ if __name__ == "__main__":
         data_type="float",
         source_table="player_stats",
         transformation="AVG(points)",
-        tags={"category": "scoring"}
+        tags={"category": "scoring"},
     )
 
     store.register_feature(
@@ -358,7 +354,7 @@ if __name__ == "__main__":
         data_type="float",
         source_table="player_stats",
         transformation="AVG(assists)",
-        tags={"category": "playmaking"}
+        tags={"category": "playmaking"},
     )
 
     store.register_feature(
@@ -368,7 +364,7 @@ if __name__ == "__main__":
         data_type="float",
         source_table="player_stats",
         transformation="AVG(rebounds)",
-        tags={"category": "rebounding"}
+        tags={"category": "rebounding"},
     )
 
     print("✅ Registered 3 features")
@@ -383,7 +379,7 @@ if __name__ == "__main__":
         name="Player Basic Stats",
         description="Basic player performance statistics",
         feature_ids=["player_ppg", "player_apg", "player_rpg"],
-        tags={"category": "basic_stats"}
+        tags={"category": "basic_stats"},
     )
 
     print("✅ Created feature set with 3 features")
@@ -395,20 +391,12 @@ if __name__ == "__main__":
 
     store.write_features(
         entity_id="player_123",
-        features={
-            "player_ppg": 25.3,
-            "player_apg": 8.1,
-            "player_rpg": 7.4
-        }
+        features={"player_ppg": 25.3, "player_apg": 8.1, "player_rpg": 7.4},
     )
 
     store.write_features(
         entity_id="player_456",
-        features={
-            "player_ppg": 18.7,
-            "player_apg": 3.2,
-            "player_rpg": 9.5
-        }
+        features={"player_ppg": 18.7, "player_apg": 3.2, "player_rpg": 9.5},
     )
 
     print("✅ Wrote features for 2 players")
@@ -419,8 +407,7 @@ if __name__ == "__main__":
     print("=" * 80)
 
     features = store.read_feature_set(
-        entity_ids=["player_123", "player_456"],
-        feature_set_id="player_basic_stats"
+        entity_ids=["player_123", "player_456"], feature_set_id="player_basic_stats"
     )
 
     for entity_id, feats in features.items():
@@ -449,7 +436,7 @@ if __name__ == "__main__":
     print(f"Total Feature Sets: {stats['total_feature_sets']}")
     print(f"Total Entities: {stats['total_entities']}")
     print(f"\nBy Data Type:")
-    for dtype, count in stats['by_data_type'].items():
+    for dtype, count in stats["by_data_type"].items():
         print(f"  - {dtype}: {count}")
 
     print("\n" + "=" * 80)

@@ -1,9 +1,15 @@
 """Tests for authentication and authorization"""
+
 import pytest
 from datetime import datetime, timedelta
 from mcp_server.auth import (
-    JWTAuth, APIKeyAuth, Authorization, Role,
-    get_jwt_auth, get_api_key_auth, authenticate_request
+    JWTAuth,
+    APIKeyAuth,
+    Authorization,
+    Role,
+    get_jwt_auth,
+    get_api_key_auth,
+    authenticate_request,
 )
 
 
@@ -62,7 +68,7 @@ class TestJWTAuth:
         token = auth.create_token(
             "user123",
             Role.USER,
-            custom_claims={"team": "Lakers", "permissions": ["read", "write"]}
+            custom_claims={"team": "Lakers", "permissions": ["read", "write"]},
         )
         payload = auth.verify_token(token)
 
@@ -221,6 +227,5 @@ class TestAuthenticateRequest:
         assert result is None
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
-
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

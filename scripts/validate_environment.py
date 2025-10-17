@@ -28,6 +28,7 @@ console = Console()
 
 class ValidationStatus(Enum):
     """Status of validation check"""
+
     PASS = "✅"
     FAIL = "❌"
     WARN = "⚠️"
@@ -37,6 +38,7 @@ class ValidationStatus(Enum):
 @dataclass
 class ValidationResult:
     """Result of a validation check"""
+
     category: str
     check: str
     status: ValidationStatus
@@ -58,10 +60,11 @@ class EnvironmentValidator:
 
     def validate_all(self) -> bool:
         """Run all validation checks"""
-        console.print(Panel.fit(
-            "NBA MCP Synthesis - Environment Validation",
-            style="bold white on blue"
-        ))
+        console.print(
+            Panel.fit(
+                "NBA MCP Synthesis - Environment Validation", style="bold white on blue"
+            )
+        )
 
         # Run all checks
         self.check_required_env_vars()
@@ -100,31 +103,37 @@ class EnvironmentValidator:
             value = get_hierarchical_env(var, "NBA_MCP_SYNTHESIS", "WORKFLOW")
 
             if not value:
-                self.results.append(ValidationResult(
-                    category="Environment Variables",
-                    check=f"{var}",
-                    status=ValidationStatus.FAIL,
-                    message=f"Missing {description}",
-                    required=True
-                ))
+                self.results.append(
+                    ValidationResult(
+                        category="Environment Variables",
+                        check=f"{var}",
+                        status=ValidationStatus.FAIL,
+                        message=f"Missing {description}",
+                        required=True,
+                    )
+                )
             elif value.startswith("your_") or value == "your-":
-                self.results.append(ValidationResult(
-                    category="Environment Variables",
-                    check=f"{var}",
-                    status=ValidationStatus.FAIL,
-                    message=f"Placeholder value detected",
-                    required=True
-                ))
+                self.results.append(
+                    ValidationResult(
+                        category="Environment Variables",
+                        check=f"{var}",
+                        status=ValidationStatus.FAIL,
+                        message=f"Placeholder value detected",
+                        required=True,
+                    )
+                )
             else:
                 # Mask sensitive values
                 display_value = value[:8] + "***" if len(value) > 8 else "***"
-                self.results.append(ValidationResult(
-                    category="Environment Variables",
-                    check=f"{var}",
-                    status=ValidationStatus.PASS,
-                    message=f"Set ({display_value})",
-                    required=True
-                ))
+                self.results.append(
+                    ValidationResult(
+                        category="Environment Variables",
+                        check=f"{var}",
+                        status=ValidationStatus.PASS,
+                        message=f"Set ({display_value})",
+                        required=True,
+                    )
+                )
 
     def check_optional_env_vars(self):
         """Check optional environment variables"""
@@ -142,195 +151,262 @@ class EnvironmentValidator:
             value = get_hierarchical_env(var, "NBA_MCP_SYNTHESIS", "WORKFLOW")
 
             if not value:
-                self.results.append(ValidationResult(
-                    category="Optional Variables",
-                    check=f"{var}",
-                    status=ValidationStatus.SKIP,
-                    message=f"Not set (optional)",
-                    required=False
-                ))
+                self.results.append(
+                    ValidationResult(
+                        category="Optional Variables",
+                        check=f"{var}",
+                        status=ValidationStatus.SKIP,
+                        message=f"Not set (optional)",
+                        required=False,
+                    )
+                )
             else:
-                self.results.append(ValidationResult(
-                    category="Optional Variables",
-                    check=f"{var}",
-                    status=ValidationStatus.PASS,
-                    message=f"Set",
-                    required=False
-                ))
+                self.results.append(
+                    ValidationResult(
+                        category="Optional Variables",
+                        check=f"{var}",
+                        status=ValidationStatus.PASS,
+                        message=f"Set",
+                        required=False,
+                    )
+                )
 
     def check_aws_credentials(self):
         """Verify AWS credentials are valid"""
         try:
-            sts = boto3.client('sts')
+            sts = boto3.client("sts")
             identity = sts.get_caller_identity()
 
-            self.results.append(ValidationResult(
-                category="AWS Credentials",
-                check="AWS Authentication",
-                status=ValidationStatus.PASS,
-                message=f"Valid (Account: {identity['Account']})",
-                required=True
-            ))
+            self.results.append(
+                ValidationResult(
+                    category="AWS Credentials",
+                    check="AWS Authentication",
+                    status=ValidationStatus.PASS,
+                    message=f"Valid (Account: {identity['Account']})",
+                    required=True,
+                )
+            )
         except Exception as e:
-            self.results.append(ValidationResult(
-                category="AWS Credentials",
-                check="AWS Authentication",
-                status=ValidationStatus.FAIL,
-                message=f"Invalid: {str(e)}",
-                required=True
-            ))
+            self.results.append(
+                ValidationResult(
+                    category="AWS Credentials",
+                    check="AWS Authentication",
+                    status=ValidationStatus.FAIL,
+                    message=f"Invalid: {str(e)}",
+                    required=True,
+                )
+            )
 
     def check_database_connection(self):
         """Test database connectivity"""
         try:
             conn = psycopg2.connect(
-                host=get_hierarchical_env('RDS_HOST', "NBA_MCP_SYNTHESIS", "WORKFLOW"),
-                port=get_hierarchical_env('RDS_PORT', "NBA_MCP_SYNTHESIS", "WORKFLOW") or 5432,
-                database=get_hierarchical_env('RDS_DATABASE', "NBA_MCP_SYNTHESIS", "WORKFLOW"),
-                user=get_hierarchical_env('RDS_USERNAME', "NBA_MCP_SYNTHESIS", "WORKFLOW"),
-                password=get_hierarchical_env('RDS_PASSWORD', "NBA_MCP_SYNTHESIS", "WORKFLOW"),
-                connect_timeout=10
+                host=get_hierarchical_env("RDS_HOST", "NBA_MCP_SYNTHESIS", "WORKFLOW"),
+                port=get_hierarchical_env("RDS_PORT", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+                or 5432,
+                database=get_hierarchical_env(
+                    "RDS_DATABASE", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+                ),
+                user=get_hierarchical_env(
+                    "RDS_USERNAME", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+                ),
+                password=get_hierarchical_env(
+                    "RDS_PASSWORD", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+                ),
+                connect_timeout=10,
             )
 
             # Test query
             cursor = conn.cursor()
-            cursor.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public'")
+            cursor.execute(
+                "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public'"
+            )
             table_count = cursor.fetchone()[0]
 
             cursor.close()
             conn.close()
 
-            self.results.append(ValidationResult(
-                category="Database",
-                check="PostgreSQL Connection",
-                status=ValidationStatus.PASS,
-                message=f"Connected ({table_count} tables found)",
-                required=True
-            ))
+            self.results.append(
+                ValidationResult(
+                    category="Database",
+                    check="PostgreSQL Connection",
+                    status=ValidationStatus.PASS,
+                    message=f"Connected ({table_count} tables found)",
+                    required=True,
+                )
+            )
         except Exception as e:
-            self.results.append(ValidationResult(
-                category="Database",
-                check="PostgreSQL Connection",
-                status=ValidationStatus.FAIL,
-                message=f"Failed: {str(e)[:50]}...",
-                required=True
-            ))
+            self.results.append(
+                ValidationResult(
+                    category="Database",
+                    check="PostgreSQL Connection",
+                    status=ValidationStatus.FAIL,
+                    message=f"Failed: {str(e)[:50]}...",
+                    required=True,
+                )
+            )
 
     def check_s3_access(self):
         """Test S3 bucket access"""
         try:
-            s3 = boto3.client('s3', region_name=get_hierarchical_env('S3_REGION', "NBA_MCP_SYNTHESIS", "WORKFLOW") or 'us-east-1')
-            bucket = get_hierarchical_env('S3_BUCKET', "NBA_MCP_SYNTHESIS", "WORKFLOW")
+            s3 = boto3.client(
+                "s3",
+                region_name=get_hierarchical_env(
+                    "S3_REGION", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+                )
+                or "us-east-1",
+            )
+            bucket = get_hierarchical_env("S3_BUCKET", "NBA_MCP_SYNTHESIS", "WORKFLOW")
 
             # Try to list objects (limit 1)
             response = s3.list_objects_v2(Bucket=bucket, MaxKeys=1)
 
-            object_count = response.get('KeyCount', 0)
+            object_count = response.get("KeyCount", 0)
 
-            self.results.append(ValidationResult(
-                category="AWS S3",
-                check="S3 Bucket Access",
-                status=ValidationStatus.PASS,
-                message=f"Accessible (bucket: {bucket})",
-                required=True
-            ))
+            self.results.append(
+                ValidationResult(
+                    category="AWS S3",
+                    check="S3 Bucket Access",
+                    status=ValidationStatus.PASS,
+                    message=f"Accessible (bucket: {bucket})",
+                    required=True,
+                )
+            )
         except Exception as e:
-            self.results.append(ValidationResult(
-                category="AWS S3",
-                check="S3 Bucket Access",
-                status=ValidationStatus.FAIL,
-                message=f"Failed: {str(e)[:50]}...",
-                required=True
-            ))
+            self.results.append(
+                ValidationResult(
+                    category="AWS S3",
+                    check="S3 Bucket Access",
+                    status=ValidationStatus.FAIL,
+                    message=f"Failed: {str(e)[:50]}...",
+                    required=True,
+                )
+            )
 
     def check_glue_access(self):
         """Test AWS Glue access"""
-        glue_db = get_hierarchical_env('GLUE_DATABASE', "NBA_MCP_SYNTHESIS", "WORKFLOW")
+        glue_db = get_hierarchical_env("GLUE_DATABASE", "NBA_MCP_SYNTHESIS", "WORKFLOW")
 
         if not glue_db:
-            self.results.append(ValidationResult(
-                category="AWS Glue",
-                check="Glue Database",
-                status=ValidationStatus.SKIP,
-                message="Not configured (optional)",
-                required=False
-            ))
+            self.results.append(
+                ValidationResult(
+                    category="AWS Glue",
+                    check="Glue Database",
+                    status=ValidationStatus.SKIP,
+                    message="Not configured (optional)",
+                    required=False,
+                )
+            )
             return
 
         try:
-            glue = boto3.client('glue', region_name=get_hierarchical_env('GLUE_REGION', "NBA_MCP_SYNTHESIS", "WORKFLOW") or 'us-east-1')
+            glue = boto3.client(
+                "glue",
+                region_name=get_hierarchical_env(
+                    "GLUE_REGION", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+                )
+                or "us-east-1",
+            )
             response = glue.get_database(Name=glue_db)
 
             # Count tables
             tables_response = glue.get_tables(DatabaseName=glue_db)
-            table_count = len(tables_response.get('TableList', []))
+            table_count = len(tables_response.get("TableList", []))
 
-            self.results.append(ValidationResult(
-                category="AWS Glue",
-                check="Glue Database",
-                status=ValidationStatus.PASS,
-                message=f"Accessible ({table_count} tables)",
-                required=False
-            ))
+            self.results.append(
+                ValidationResult(
+                    category="AWS Glue",
+                    check="Glue Database",
+                    status=ValidationStatus.PASS,
+                    message=f"Accessible ({table_count} tables)",
+                    required=False,
+                )
+            )
         except Exception as e:
-            self.results.append(ValidationResult(
-                category="AWS Glue",
-                check="Glue Database",
-                status=ValidationStatus.WARN,
-                message=f"Failed: {str(e)[:50]}...",
-                required=False
-            ))
+            self.results.append(
+                ValidationResult(
+                    category="AWS Glue",
+                    check="Glue Database",
+                    status=ValidationStatus.WARN,
+                    message=f"Failed: {str(e)[:50]}...",
+                    required=False,
+                )
+            )
 
     def check_api_keys(self):
         """Validate API keys for AI models"""
         # DeepSeek
-        deepseek_key = get_hierarchical_env('DEEPSEEK_API_KEY', "NBA_MCP_SYNTHESIS", "WORKFLOW")
-        if deepseek_key and len(deepseek_key) > 10 and not deepseek_key.startswith('your_'):
-            self.results.append(ValidationResult(
-                category="API Keys",
-                check="DeepSeek API Key",
-                status=ValidationStatus.PASS,
-                message=f"Set ({deepseek_key[:8]}***)",
-                required=True
-            ))
+        deepseek_key = get_hierarchical_env(
+            "DEEPSEEK_API_KEY", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+        )
+        if (
+            deepseek_key
+            and len(deepseek_key) > 10
+            and not deepseek_key.startswith("your_")
+        ):
+            self.results.append(
+                ValidationResult(
+                    category="API Keys",
+                    check="DeepSeek API Key",
+                    status=ValidationStatus.PASS,
+                    message=f"Set ({deepseek_key[:8]}***)",
+                    required=True,
+                )
+            )
         else:
-            self.results.append(ValidationResult(
-                category="API Keys",
-                check="DeepSeek API Key",
-                status=ValidationStatus.FAIL,
-                message="Invalid or missing",
-                required=True
-            ))
+            self.results.append(
+                ValidationResult(
+                    category="API Keys",
+                    check="DeepSeek API Key",
+                    status=ValidationStatus.FAIL,
+                    message="Invalid or missing",
+                    required=True,
+                )
+            )
 
         # Anthropic
-        anthropic_key = get_hierarchical_env('ANTHROPIC_API_KEY', "NBA_MCP_SYNTHESIS", "WORKFLOW")
-        if anthropic_key and len(anthropic_key) > 10 and not anthropic_key.startswith('your_'):
-            self.results.append(ValidationResult(
-                category="API Keys",
-                check="Anthropic API Key",
-                status=ValidationStatus.PASS,
-                message=f"Set ({anthropic_key[:8]}***)",
-                required=True
-            ))
+        anthropic_key = get_hierarchical_env(
+            "ANTHROPIC_API_KEY", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+        )
+        if (
+            anthropic_key
+            and len(anthropic_key) > 10
+            and not anthropic_key.startswith("your_")
+        ):
+            self.results.append(
+                ValidationResult(
+                    category="API Keys",
+                    check="Anthropic API Key",
+                    status=ValidationStatus.PASS,
+                    message=f"Set ({anthropic_key[:8]}***)",
+                    required=True,
+                )
+            )
         else:
-            self.results.append(ValidationResult(
-                category="API Keys",
-                check="Anthropic API Key",
-                status=ValidationStatus.FAIL,
-                message="Invalid or missing",
-                required=True
-            ))
+            self.results.append(
+                ValidationResult(
+                    category="API Keys",
+                    check="Anthropic API Key",
+                    status=ValidationStatus.FAIL,
+                    message="Invalid or missing",
+                    required=True,
+                )
+            )
 
         # Ollama (optional)
-        ollama_host = get_hierarchical_env('OLLAMA_HOST', "NBA_MCP_SYNTHESIS", "WORKFLOW")
+        ollama_host = get_hierarchical_env(
+            "OLLAMA_HOST", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+        )
         if ollama_host:
-            self.results.append(ValidationResult(
-                category="API Keys",
-                check="Ollama Server",
-                status=ValidationStatus.PASS,
-                message=f"Configured ({ollama_host})",
-                required=False
-            ))
+            self.results.append(
+                ValidationResult(
+                    category="API Keys",
+                    check="Ollama Server",
+                    status=ValidationStatus.PASS,
+                    message=f"Configured ({ollama_host})",
+                    required=False,
+                )
+            )
 
     def check_project_directories(self):
         """Check required directories exist"""
@@ -344,41 +420,49 @@ class EnvironmentValidator:
             dir_path = Path(dir_name)
 
             if dir_path.exists():
-                self.results.append(ValidationResult(
-                    category="Directories",
-                    check=dir_name,
-                    status=ValidationStatus.PASS,
-                    message=f"Exists",
-                    required=required
-                ))
+                self.results.append(
+                    ValidationResult(
+                        category="Directories",
+                        check=dir_name,
+                        status=ValidationStatus.PASS,
+                        message=f"Exists",
+                        required=required,
+                    )
+                )
             else:
                 # Try to create if required
                 if required:
                     try:
                         dir_path.mkdir(parents=True, exist_ok=True)
-                        self.results.append(ValidationResult(
-                            category="Directories",
-                            check=dir_name,
-                            status=ValidationStatus.PASS,
-                            message=f"Created",
-                            required=required
-                        ))
+                        self.results.append(
+                            ValidationResult(
+                                category="Directories",
+                                check=dir_name,
+                                status=ValidationStatus.PASS,
+                                message=f"Created",
+                                required=required,
+                            )
+                        )
                     except Exception as e:
-                        self.results.append(ValidationResult(
+                        self.results.append(
+                            ValidationResult(
+                                category="Directories",
+                                check=dir_name,
+                                status=ValidationStatus.FAIL,
+                                message=f"Cannot create: {e}",
+                                required=required,
+                            )
+                        )
+                else:
+                    self.results.append(
+                        ValidationResult(
                             category="Directories",
                             check=dir_name,
-                            status=ValidationStatus.FAIL,
-                            message=f"Cannot create: {e}",
-                            required=required
-                        ))
-                else:
-                    self.results.append(ValidationResult(
-                        category="Directories",
-                        check=dir_name,
-                        status=ValidationStatus.SKIP,
-                        message=f"Not created (optional)",
-                        required=required
-                    ))
+                            status=ValidationStatus.SKIP,
+                            message=f"Not created (optional)",
+                            required=required,
+                        )
+                    )
 
     def check_python_dependencies(self):
         """Check critical Python packages are installed"""
@@ -394,21 +478,25 @@ class EnvironmentValidator:
         for package, description in packages:
             try:
                 __import__(package)
-                self.results.append(ValidationResult(
-                    category="Python Packages",
-                    check=package,
-                    status=ValidationStatus.PASS,
-                    message="Installed",
-                    required=True
-                ))
+                self.results.append(
+                    ValidationResult(
+                        category="Python Packages",
+                        check=package,
+                        status=ValidationStatus.PASS,
+                        message="Installed",
+                        required=True,
+                    )
+                )
             except ImportError:
-                self.results.append(ValidationResult(
-                    category="Python Packages",
-                    check=package,
-                    status=ValidationStatus.FAIL,
-                    message="Not installed",
-                    required=True
-                ))
+                self.results.append(
+                    ValidationResult(
+                        category="Python Packages",
+                        check=package,
+                        status=ValidationStatus.FAIL,
+                        message="Not installed",
+                        required=True,
+                    )
+                )
 
     def display_results(self):
         """Display validation results in a table"""
@@ -433,13 +521,13 @@ class EnvironmentValidator:
                     ValidationStatus.PASS: "green",
                     ValidationStatus.FAIL: "red",
                     ValidationStatus.WARN: "yellow",
-                    ValidationStatus.SKIP: "dim"
+                    ValidationStatus.SKIP: "dim",
                 }[result.status]
 
                 table.add_row(
                     result.check,
                     f"[{status_color}]{result.status.value}[/{status_color}]",
-                    result.message
+                    result.message,
                 )
 
             console.print(table)
@@ -447,42 +535,52 @@ class EnvironmentValidator:
     def get_overall_status(self) -> bool:
         """Get overall validation status"""
         # Check if any required checks failed
-        failed_required = [r for r in self.results if r.required and r.status == ValidationStatus.FAIL]
+        failed_required = [
+            r for r in self.results if r.required and r.status == ValidationStatus.FAIL
+        ]
         warnings = [r for r in self.results if r.status == ValidationStatus.WARN]
 
-        console.print("\n" + "="*80 + "\n")
+        console.print("\n" + "=" * 80 + "\n")
 
         if failed_required:
-            console.print(Panel(
-                f"[bold red]❌ Validation Failed[/bold red]\n\n"
-                f"Failed checks: {len(failed_required)}\n"
-                f"Warnings: {len(warnings)}\n\n"
-                f"[yellow]Fix the failed checks before deployment.[/yellow]",
-                style="red"
-            ))
+            console.print(
+                Panel(
+                    f"[bold red]❌ Validation Failed[/bold red]\n\n"
+                    f"Failed checks: {len(failed_required)}\n"
+                    f"Warnings: {len(warnings)}\n\n"
+                    f"[yellow]Fix the failed checks before deployment.[/yellow]",
+                    style="red",
+                )
+            )
 
             # List failed checks
             console.print("\n[bold red]Failed Required Checks:[/bold red]")
             for result in failed_required:
-                console.print(f"  ❌ {result.category} → {result.check}: {result.message}")
+                console.print(
+                    f"  ❌ {result.category} → {result.check}: {result.message}"
+                )
 
             return False
 
         elif warnings:
-            console.print(Panel(
-                f"[bold yellow]⚠️  Validation Passed with Warnings[/bold yellow]\n\n"
-                f"Warnings: {len(warnings)}\n\n"
-                f"[dim]System can proceed but some optional features may not work.[/dim]",
-                style="yellow"
-            ))
+            console.print(
+                Panel(
+                    f"[bold yellow]⚠️  Validation Passed with Warnings[/bold yellow]\n\n"
+                    f"Warnings: {len(warnings)}\n\n"
+                    f"[dim]System can proceed but some optional features may not work.[/dim]",
+                    style="yellow",
+                )
+            )
             return True
 
         else:
-            console.print(Panel(
-                f"[bold green]✅ All Validation Checks Passed[/bold green]\n\n"
-                f"System is ready for deployment!",
-                style="green"
-            ))
+            console.print(
+                Panel(
+                    f"[bold green]✅ All Validation Checks Passed[/bold green]\n\n"
+                    f"System is ready for deployment!",
+                    style="green",
+                )
+            )
             return True
 
 
@@ -490,10 +588,17 @@ def main():
     """Main entry point"""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Validate NBA MCP Synthesis environment")
-    parser.add_argument('--env-file', default='.env', help='Environment file to validate')
-    parser.add_argument('--exit-on-failure', action='store_true',
-                       help='Exit with non-zero code if validation fails')
+    parser = argparse.ArgumentParser(
+        description="Validate NBA MCP Synthesis environment"
+    )
+    parser.add_argument(
+        "--env-file", default=".env", help="Environment file to validate"
+    )
+    parser.add_argument(
+        "--exit-on-failure",
+        action="store_true",
+        help="Exit with non-zero code if validation fails",
+    )
 
     args = parser.parse_args()
 
