@@ -32,13 +32,15 @@ class EnhancedRecommendationsIntegrator:
         if not self.simulator_path.exists():
             raise ValueError(f"Simulator path does not exist: {simulator_path}")
 
-        logger.info(f"Initialized integrator with paths: {synthesis_path}, {simulator_path}")
+        logger.info(
+            f"Initialized integrator with paths: {synthesis_path}, {simulator_path}"
+        )
 
     async def integrate_enhanced_recommendations(
         self,
         enhanced_analysis_path: str,
         github_integration_path: str,
-        output_dir: str = "integrated_recommendations"
+        output_dir: str = "integrated_recommendations",
     ) -> Dict[str, Any]:
         """
         Integrate enhanced recommendations with GitHub code examples.
@@ -51,7 +53,9 @@ class EnhancedRecommendationsIntegrator:
         Returns:
             Dictionary with integration results
         """
-        logger.info("🔗 Integrating enhanced recommendations with GitHub code examples...")
+        logger.info(
+            "🔗 Integrating enhanced recommendations with GitHub code examples..."
+        )
 
         os.makedirs(output_dir, exist_ok=True)
 
@@ -59,7 +63,9 @@ class EnhancedRecommendationsIntegrator:
         enhanced_analysis = await self._load_analysis_results(enhanced_analysis_path)
 
         # Load GitHub integration results
-        github_integration = await self._load_github_integration(github_integration_path)
+        github_integration = await self._load_github_integration(
+            github_integration_path
+        )
 
         # Integrate recommendations
         integrated_recommendations = await self._integrate_recommendations(
@@ -85,35 +91,49 @@ class EnhancedRecommendationsIntegrator:
             "project_structure": project_structure,
             "statistics": {
                 "total_recommendations": len(integrated_recommendations),
-                "recommendations_with_code": len([r for r in integrated_recommendations if r.get("code_examples")]),
-                "total_code_examples": sum(len(r.get("code_examples", [])) for r in integrated_recommendations),
-                "repositories_referenced": len(set(r.get("repository", "") for r in integrated_recommendations if r.get("repository")))
-            }
+                "recommendations_with_code": len(
+                    [r for r in integrated_recommendations if r.get("code_examples")]
+                ),
+                "total_code_examples": sum(
+                    len(r.get("code_examples", [])) for r in integrated_recommendations
+                ),
+                "repositories_referenced": len(
+                    set(
+                        r.get("repository", "")
+                        for r in integrated_recommendations
+                        if r.get("repository")
+                    )
+                ),
+            },
         }
 
         # Save integration results
         output_file = os.path.join(output_dir, "enhanced_integration_results.json")
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(integration_results, f, indent=2)
 
-        logger.info(f"✅ Integration complete: {integration_results['statistics']['total_recommendations']} recommendations integrated")
+        logger.info(
+            f"✅ Integration complete: {integration_results['statistics']['total_recommendations']} recommendations integrated"
+        )
         return integration_results
 
     async def _load_analysis_results(self, analysis_path: str) -> Dict[str, Any]:
         """Load enhanced analysis results."""
         if os.path.exists(analysis_path):
-            with open(analysis_path, 'r') as f:
+            with open(analysis_path, "r") as f:
                 return json.load(f)
         return {}
 
     async def _load_github_integration(self, github_path: str) -> Dict[str, Any]:
         """Load GitHub integration results."""
         if os.path.exists(github_path):
-            with open(github_path, 'r') as f:
+            with open(github_path, "r") as f:
                 return json.load(f)
         return {}
 
-    async def _integrate_recommendations(self, enhanced_analysis: Dict, github_integration: Dict) -> List[Dict]:
+    async def _integrate_recommendations(
+        self, enhanced_analysis: Dict, github_integration: Dict
+    ) -> List[Dict]:
         """Integrate enhanced recommendations with GitHub code examples."""
         integrated_recommendations = []
 
@@ -140,17 +160,25 @@ class EnhancedRecommendationsIntegrator:
             rec_description = rec.get("description", "").lower()
 
             for concept, examples in concept_to_examples.items():
-                if concept.lower() in rec_description or any(keyword in rec_description for keyword in concept.split('-')):
+                if concept.lower() in rec_description or any(
+                    keyword in rec_description for keyword in concept.split("-")
+                ):
                     relevant_examples.extend(examples)
 
             # Add code examples to recommendation
             if relevant_examples:
                 integrated_rec["code_examples"] = relevant_examples
-                integrated_rec["implementation_guidance"] = f"See {len(relevant_examples)} code examples from GitHub repositories"
+                integrated_rec["implementation_guidance"] = (
+                    f"See {len(relevant_examples)} code examples from GitHub repositories"
+                )
 
                 # Add implementation priority based on code examples
-                priority_scores = [self._calculate_priority_score(ex) for ex in relevant_examples]
-                integrated_rec["implementation_priority"] = max(priority_scores) if priority_scores else "medium"
+                priority_scores = [
+                    self._calculate_priority_score(ex) for ex in relevant_examples
+                ]
+                integrated_rec["implementation_priority"] = (
+                    max(priority_scores) if priority_scores else "medium"
+                )
 
             integrated_recommendations.append(integrated_rec)
 
@@ -169,17 +197,14 @@ class EnhancedRecommendationsIntegrator:
         else:
             return "medium"
 
-    async def _generate_implementation_plans(self, integrated_recommendations: List[Dict]) -> List[Dict]:
+    async def _generate_implementation_plans(
+        self, integrated_recommendations: List[Dict]
+    ) -> List[Dict]:
         """Generate implementation plans for integrated recommendations."""
         implementation_plans = []
 
         # Group recommendations by priority
-        priority_groups = {
-            "critical": [],
-            "high": [],
-            "medium": [],
-            "low": []
-        }
+        priority_groups = {"critical": [], "high": [], "medium": [], "low": []}
 
         for rec in integrated_recommendations:
             priority = rec.get("implementation_priority", "medium")
@@ -191,9 +216,13 @@ class EnhancedRecommendationsIntegrator:
                 plan = {
                     "priority": priority,
                     "recommendations": recommendations,
-                    "implementation_order": self._determine_implementation_order(recommendations),
-                    "estimated_effort": self._estimate_implementation_effort(recommendations),
-                    "dependencies": self._identify_dependencies(recommendations)
+                    "implementation_order": self._determine_implementation_order(
+                        recommendations
+                    ),
+                    "estimated_effort": self._estimate_implementation_effort(
+                        recommendations
+                    ),
+                    "dependencies": self._identify_dependencies(recommendations),
                 }
                 implementation_plans.append(plan)
 
@@ -206,7 +235,9 @@ class EnhancedRecommendationsIntegrator:
 
     def _estimate_implementation_effort(self, recommendations: List[Dict]) -> str:
         """Estimate implementation effort for a group of recommendations."""
-        total_examples = sum(len(rec.get("code_examples", [])) for rec in recommendations)
+        total_examples = sum(
+            len(rec.get("code_examples", [])) for rec in recommendations
+        )
 
         if total_examples > 10:
             return "high"
@@ -231,13 +262,15 @@ class EnhancedRecommendationsIntegrator:
 
         return dependencies
 
-    async def _create_project_structure_recommendations(self, integrated_recommendations: List[Dict]) -> Dict[str, Any]:
+    async def _create_project_structure_recommendations(
+        self, integrated_recommendations: List[Dict]
+    ) -> Dict[str, Any]:
         """Create project structure recommendations based on integrated recommendations."""
         project_structure = {
             "directories": [],
             "files": [],
             "dependencies": [],
-            "configuration": {}
+            "configuration": {},
         }
 
         # Analyze recommendations to suggest project structure
@@ -254,34 +287,34 @@ class EnhancedRecommendationsIntegrator:
 
         # Suggest directory structure based on concepts
         if "machine-learning" in concepts:
-            project_structure["directories"].extend([
-                "src/ml/",
-                "src/ml/models/",
-                "src/ml/data/",
-                "src/ml/utils/",
-                "tests/ml/",
-                "notebooks/ml/"
-            ])
+            project_structure["directories"].extend(
+                [
+                    "src/ml/",
+                    "src/ml/models/",
+                    "src/ml/data/",
+                    "src/ml/utils/",
+                    "tests/ml/",
+                    "notebooks/ml/",
+                ]
+            )
 
         if "deep-learning" in concepts:
-            project_structure["directories"].extend([
-                "src/deep_learning/",
-                "src/deep_learning/models/",
-                "src/deep_learning/training/",
-                "src/deep_learning/inference/",
-                "models/",
-                "data/raw/",
-                "data/processed/"
-            ])
+            project_structure["directories"].extend(
+                [
+                    "src/deep_learning/",
+                    "src/deep_learning/models/",
+                    "src/deep_learning/training/",
+                    "src/deep_learning/inference/",
+                    "models/",
+                    "data/raw/",
+                    "data/processed/",
+                ]
+            )
 
         if "mlops" in concepts or "production" in concepts:
-            project_structure["directories"].extend([
-                "deployment/",
-                "monitoring/",
-                "pipeline/",
-                "config/",
-                "scripts/"
-            ])
+            project_structure["directories"].extend(
+                ["deployment/", "monitoring/", "pipeline/", "config/", "scripts/"]
+            )
 
         # Suggest files based on repositories
         for repo in repositories:
@@ -290,32 +323,23 @@ class EnhancedRecommendationsIntegrator:
             elif "pyprobml" in repo:
                 project_structure["files"].append("src/ml/probabilistic_models.py")
             elif "d2l-en" in repo:
-                project_structure["files"].append("src/deep_learning/d2l_implementations.py")
+                project_structure["files"].append(
+                    "src/deep_learning/d2l_implementations.py"
+                )
 
         # Suggest dependencies based on concepts
         if "machine-learning" in concepts:
-            project_structure["dependencies"].extend([
-                "scikit-learn",
-                "pandas",
-                "numpy",
-                "matplotlib",
-                "seaborn"
-            ])
+            project_structure["dependencies"].extend(
+                ["scikit-learn", "pandas", "numpy", "matplotlib", "seaborn"]
+            )
 
         if "deep-learning" in concepts:
-            project_structure["dependencies"].extend([
-                "torch",
-                "tensorflow",
-                "keras",
-                "transformers"
-            ])
+            project_structure["dependencies"].extend(
+                ["torch", "tensorflow", "keras", "transformers"]
+            )
 
         if "bayesian" in concepts:
-            project_structure["dependencies"].extend([
-                "pymc",
-                "pyro",
-                "arviz"
-            ])
+            project_structure["dependencies"].extend(["pymc", "pyro", "arviz"])
 
         # Remove duplicates
         project_structure["directories"] = list(set(project_structure["directories"]))
@@ -324,7 +348,9 @@ class EnhancedRecommendationsIntegrator:
 
         return project_structure
 
-    async def generate_implementation_scripts(self, integration_results: Dict, output_dir: str) -> List[str]:
+    async def generate_implementation_scripts(
+        self, integration_results: Dict, output_dir: str
+    ) -> List[str]:
         """Generate implementation scripts based on integration results."""
         scripts = []
 
@@ -332,11 +358,15 @@ class EnhancedRecommendationsIntegrator:
         project_structure = integration_results.get("project_structure", {})
 
         # Generate directory creation script
-        dir_script = self._generate_directory_script(project_structure["directories"], output_dir)
+        dir_script = self._generate_directory_script(
+            project_structure["directories"], output_dir
+        )
         scripts.append(dir_script)
 
         # Generate dependency installation script
-        deps_script = self._generate_dependencies_script(project_structure["dependencies"], output_dir)
+        deps_script = self._generate_dependencies_script(
+            project_structure["dependencies"], output_dir
+        )
         scripts.append(deps_script)
 
         # Generate implementation scripts for each priority
@@ -346,7 +376,9 @@ class EnhancedRecommendationsIntegrator:
 
         return scripts
 
-    def _generate_directory_script(self, directories: List[str], output_dir: str) -> str:
+    def _generate_directory_script(
+        self, directories: List[str], output_dir: str
+    ) -> str:
         """Generate script to create project directories."""
         script_content = f"""#!/bin/bash
 # Generated directory creation script
@@ -364,13 +396,15 @@ echo "Directories created successfully!"
 """
 
         script_path = os.path.join(output_dir, "create_directories.sh")
-        with open(script_path, 'w') as f:
+        with open(script_path, "w") as f:
             f.write(script_content)
 
         os.chmod(script_path, 0o755)
         return script_path
 
-    def _generate_dependencies_script(self, dependencies: List[str], output_dir: str) -> str:
+    def _generate_dependencies_script(
+        self, dependencies: List[str], output_dir: str
+    ) -> str:
         """Generate script to install dependencies."""
         script_content = f"""#!/bin/bash
 # Generated dependencies installation script
@@ -390,7 +424,7 @@ echo "Dependencies installed successfully!"
 """
 
         script_path = os.path.join(output_dir, "install_dependencies.sh")
-        with open(script_path, 'w') as f:
+        with open(script_path, "w") as f:
             f.write(script_content)
 
         os.chmod(script_path, 0o755)
@@ -435,8 +469,10 @@ EOF
 echo "Implementation completed successfully!"
 """
 
-        script_path = os.path.join(output_dir, f"implement_{priority}_recommendations.sh")
-        with open(script_path, 'w') as f:
+        script_path = os.path.join(
+            output_dir, f"implement_{priority}_recommendations.sh"
+        )
+        with open(script_path, "w") as f:
             f.write(script_content)
 
         os.chmod(script_path, 0o755)
@@ -450,12 +486,14 @@ async def main():
     # Example usage
     integrator = EnhancedRecommendationsIntegrator(
         synthesis_path="/Users/ryanranft/nba-mcp-synthesis",
-        simulator_path="/Users/ryanranft/nba-simulator-aws"
+        simulator_path="/Users/ryanranft/nba-simulator-aws",
     )
 
     # Mock paths
     enhanced_analysis_path = "analysis_results/enhanced/sample_analysis.json"
-    github_integration_path = "analysis_results/github_integration/sample_integration.json"
+    github_integration_path = (
+        "analysis_results/github_integration/sample_integration.json"
+    )
 
     # Create mock data for demonstration
     os.makedirs("analysis_results/enhanced", exist_ok=True)
@@ -468,9 +506,9 @@ async def main():
                 "id": "rec_001",
                 "description": "Implement machine learning pipeline with scikit-learn",
                 "concept": "machine-learning",
-                "priority": "high"
+                "priority": "high",
             }
-        ]
+        ],
     }
 
     mock_integration = {
@@ -480,15 +518,15 @@ async def main():
                 "repository": "handson-ml3",
                 "code_snippet": "from sklearn.ensemble import RandomForestClassifier\nclf = RandomForestClassifier()",
                 "file_path": "ml_example.py",
-                "priority": "critical"
+                "priority": "critical",
             }
         ]
     }
 
-    with open(enhanced_analysis_path, 'w') as f:
+    with open(enhanced_analysis_path, "w") as f:
         json.dump(mock_analysis, f, indent=2)
 
-    with open(github_integration_path, 'w') as f:
+    with open(github_integration_path, "w") as f:
         json.dump(mock_integration, f, indent=2)
 
     # Run integration
@@ -497,7 +535,9 @@ async def main():
     )
 
     # Generate implementation scripts
-    scripts = await integrator.generate_implementation_scripts(results, "implementation_scripts")
+    scripts = await integrator.generate_implementation_scripts(
+        results, "implementation_scripts"
+    )
 
     print(f"✅ Enhanced recommendations integration completed!")
     print(f"   Generated {len(scripts)} implementation scripts")
@@ -505,6 +545,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
-

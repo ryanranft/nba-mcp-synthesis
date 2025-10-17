@@ -21,7 +21,7 @@ import json
 from typing import Dict, List, Any
 
 # Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from mcp_server.tools.automated_formula_discovery import (
     AutomatedFormulaDiscoveryEngine,
@@ -31,7 +31,7 @@ from mcp_server.tools.automated_formula_discovery import (
     optimize_formula_performance,
     rank_formulas_by_performance,
     DiscoveryMethod,
-    ComplexityLevel
+    ComplexityLevel,
 )
 
 
@@ -41,24 +41,30 @@ class Phase72TestSuite(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures"""
         self.engine = AutomatedFormulaDiscoveryEngine()
-        self.test_variables = ["points", "rebounds", "assists", "minutes", "field_goals_made"]
+        self.test_variables = [
+            "points",
+            "rebounds",
+            "assists",
+            "minutes",
+            "field_goals_made",
+        ]
         self.test_data_patterns = [
             {
                 "points": [25, 30, 22, 28, 35],
                 "rebounds": [8, 10, 6, 9, 12],
-                "assists": [5, 7, 4, 6, 8]
+                "assists": [5, 7, 4, 6, 8],
             },
             {
                 "minutes": [35, 38, 32, 36, 40],
                 "field_goals_made": [10, 12, 8, 11, 14],
-                "points": [25, 30, 22, 28, 35]
-            }
+                "points": [25, 30, 22, 28, 35],
+            },
         ]
         self.test_formulas = [
             "points * rebounds / minutes",
             "assists + rebounds",
             "field_goals_made / minutes * 100",
-            "points / (rebounds + assists)"
+            "points / (rebounds + assists)",
         ]
 
     def test_automated_formula_discovery_engine_initialization(self):
@@ -83,7 +89,7 @@ class Phase72TestSuite(unittest.TestCase):
             discovery_method="hybrid",
             complexity_limit="moderate",
             max_formulas=3,
-            confidence_threshold=0.6
+            confidence_threshold=0.6,
         )
 
         self.assertEqual(result["status"], "success")
@@ -98,7 +104,9 @@ class Phase72TestSuite(unittest.TestCase):
             self.assertIn("confidence_score", formula)
             self.assertIn("discovery_method", formula)
 
-        print(f"✓ Formula discovery test passed: {result['final_count']} formulas discovered")
+        print(
+            f"✓ Formula discovery test passed: {result['final_count']} formulas discovered"
+        )
 
     def test_pattern_analysis_for_formula_discovery(self):
         """Test pattern analysis for formula discovery"""
@@ -108,7 +116,7 @@ class Phase72TestSuite(unittest.TestCase):
             data_patterns=self.test_data_patterns,
             pattern_types=["linear", "polynomial"],
             correlation_threshold=0.5,
-            significance_level=0.05
+            significance_level=0.05,
         )
 
         self.assertEqual(result["status"], "success")
@@ -123,7 +131,9 @@ class Phase72TestSuite(unittest.TestCase):
             self.assertIn("correlation", pattern)
             self.assertIn("formula_expression", pattern)
 
-        print(f"✓ Pattern analysis test passed: {result['total_patterns']} patterns found")
+        print(
+            f"✓ Pattern analysis test passed: {result['total_patterns']} patterns found"
+        )
 
     def test_formula_validation_performance(self):
         """Test formula validation performance"""
@@ -133,7 +143,7 @@ class Phase72TestSuite(unittest.TestCase):
             formula_expressions=self.test_formulas,
             test_data=None,
             validation_metrics=["r_squared", "mae"],
-            minimum_performance=0.5
+            minimum_performance=0.5,
         )
 
         self.assertEqual(result["status"], "success")
@@ -148,7 +158,9 @@ class Phase72TestSuite(unittest.TestCase):
             self.assertIn("validation_metrics", validation)
             self.assertIn("validation_status", validation)
 
-        print(f"✓ Formula validation test passed: {result['validated_formulas']} formulas validated")
+        print(
+            f"✓ Formula validation test passed: {result['validated_formulas']} formulas validated"
+        )
 
     def test_formula_optimization(self):
         """Test formula optimization"""
@@ -160,7 +172,7 @@ class Phase72TestSuite(unittest.TestCase):
             base_formula=base_formula,
             optimization_objective="balanced",
             optimization_method="genetic_algorithm",
-            max_iterations=50
+            max_iterations=50,
         )
 
         self.assertEqual(result["status"], "success")
@@ -174,7 +186,9 @@ class Phase72TestSuite(unittest.TestCase):
         self.assertIn("improvement_score", opt_result)
         self.assertIn("optimization_method", opt_result)
 
-        print(f"✓ Formula optimization test passed: {opt_result['improvement_score']:.2%} improvement")
+        print(
+            f"✓ Formula optimization test passed: {opt_result['improvement_score']:.2%} improvement"
+        )
 
     def test_formula_ranking_by_performance(self):
         """Test formula ranking by performance"""
@@ -187,28 +201,28 @@ class Phase72TestSuite(unittest.TestCase):
                 "expression": "points * rebounds / minutes",
                 "accuracy_score": 0.8,
                 "complexity_score": 0.3,
-                "confidence_score": 0.75
+                "confidence_score": 0.75,
             },
             {
                 "formula_id": "formula_2",
                 "expression": "assists + rebounds",
                 "accuracy_score": 0.6,
                 "complexity_score": 0.1,
-                "confidence_score": 0.65
+                "confidence_score": 0.65,
             },
             {
                 "formula_id": "formula_3",
                 "expression": "field_goals_made / minutes * 100",
                 "accuracy_score": 0.7,
                 "complexity_score": 0.2,
-                "confidence_score": 0.7
-            }
+                "confidence_score": 0.7,
+            },
         ]
 
         result = rank_formulas_by_performance(
             discovered_formulas=discovered_formulas,
             ranking_criteria=["accuracy", "simplicity"],
-            weights={"accuracy": 0.7, "simplicity": 0.3}
+            weights={"accuracy": 0.7, "simplicity": 0.3},
         )
 
         self.assertEqual(result["status"], "success")
@@ -223,7 +237,9 @@ class Phase72TestSuite(unittest.TestCase):
             self.assertIn("rank", ranking)
             self.assertIn("criteria_scores", ranking)
 
-        print(f"✓ Formula ranking test passed: {len(result['ranking_results'])} formulas ranked")
+        print(
+            f"✓ Formula ranking test passed: {len(result['ranking_results'])} formulas ranked"
+        )
 
     def test_discovery_methods(self):
         """Test different discovery methods"""
@@ -237,7 +253,7 @@ class Phase72TestSuite(unittest.TestCase):
                 available_variables=self.test_variables[:3],
                 discovery_method=method,
                 max_formulas=2,
-                confidence_threshold=0.5
+                confidence_threshold=0.5,
             )
 
             self.assertEqual(result["status"], "success")
@@ -258,12 +274,14 @@ class Phase72TestSuite(unittest.TestCase):
                 available_variables=self.test_variables[:3],
                 complexity_limit=complexity,
                 max_formulas=2,
-                confidence_threshold=0.5
+                confidence_threshold=0.5,
             )
 
             self.assertEqual(result["status"], "success")
             self.assertIn("discovery_summary", result)
-            self.assertEqual(result["discovery_summary"]["complexity_limit"], complexity)
+            self.assertEqual(
+                result["discovery_summary"]["complexity_limit"], complexity
+            )
 
         print("✓ Complexity limits test passed")
 
@@ -275,7 +293,7 @@ class Phase72TestSuite(unittest.TestCase):
         result = discover_formulas_from_data_patterns(
             data_description="Test with invalid variables",
             available_variables=[],  # Empty variables
-            max_formulas=1
+            max_formulas=1,
         )
 
         # Should handle gracefully
@@ -283,8 +301,7 @@ class Phase72TestSuite(unittest.TestCase):
 
         # Test with invalid formula expressions
         result = validate_discovered_formula_performance(
-            formula_expressions=["invalid formula expression"],
-            minimum_performance=0.5
+            formula_expressions=["invalid formula expression"], minimum_performance=0.5
         )
 
         self.assertEqual(result["status"], "success")
@@ -303,7 +320,7 @@ class Phase72TestSuite(unittest.TestCase):
             data_description="Performance test",
             available_variables=self.test_variables,
             max_formulas=5,
-            confidence_threshold=0.6
+            confidence_threshold=0.6,
         )
 
         discovery_time = time.time() - start_time
@@ -311,7 +328,9 @@ class Phase72TestSuite(unittest.TestCase):
         self.assertEqual(result["status"], "success")
         self.assertLess(discovery_time, 10.0)  # Should complete within 10 seconds
 
-        print(f"✓ Performance test passed: Discovery completed in {discovery_time:.2f} seconds")
+        print(
+            f"✓ Performance test passed: Discovery completed in {discovery_time:.2f} seconds"
+        )
 
     def test_standalone_functions(self):
         """Test standalone functions"""
@@ -319,8 +338,7 @@ class Phase72TestSuite(unittest.TestCase):
 
         # Test pattern analysis standalone
         patterns = analyze_patterns_for_formula_discovery(
-            data_patterns=self.test_data_patterns,
-            pattern_types=["linear"]
+            data_patterns=self.test_data_patterns, pattern_types=["linear"]
         )
 
         self.assertEqual(patterns["status"], "success")
@@ -333,9 +351,7 @@ class Phase72TestSuite(unittest.TestCase):
         self.assertEqual(validation["status"], "success")
 
         # Test optimization standalone
-        optimization = optimize_formula_performance(
-            base_formula="points * rebounds"
-        )
+        optimization = optimize_formula_performance(base_formula="points * rebounds")
 
         self.assertEqual(optimization["status"], "success")
 
@@ -349,13 +365,19 @@ class Phase72TestSuite(unittest.TestCase):
         self.assertIsInstance(self.engine.sports_formulas, dict)
 
         # Test discovery with sports-related variables
-        sports_variables = ["points", "rebounds", "assists", "field_goals_attempted", "field_goals_made"]
+        sports_variables = [
+            "points",
+            "rebounds",
+            "assists",
+            "field_goals_attempted",
+            "field_goals_made",
+        ]
 
         result = discover_formulas_from_data_patterns(
             data_description="NBA player efficiency analysis",
             available_variables=sports_variables,
             discovery_method="pattern_matching",
-            max_formulas=3
+            max_formulas=3,
         )
 
         self.assertEqual(result["status"], "success")
@@ -366,12 +388,19 @@ class Phase72TestSuite(unittest.TestCase):
 
 def run_performance_benchmark():
     """Run performance benchmark tests"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("PERFORMANCE BENCHMARK TESTS")
-    print("="*60)
+    print("=" * 60)
 
     engine = AutomatedFormulaDiscoveryEngine()
-    test_variables = ["points", "rebounds", "assists", "minutes", "field_goals_made", "field_goals_attempted"]
+    test_variables = [
+        "points",
+        "rebounds",
+        "assists",
+        "minutes",
+        "field_goals_made",
+        "field_goals_attempted",
+    ]
 
     # Benchmark formula discovery
     start_time = time.time()
@@ -380,26 +409,35 @@ def run_performance_benchmark():
         available_variables=test_variables,
         discovery_method="hybrid",
         max_formulas=10,
-        confidence_threshold=0.7
+        confidence_threshold=0.7,
     )
     discovery_time = time.time() - start_time
 
-    print(f"Formula Discovery: {discovery_time:.2f}s ({result['final_count']} formulas)")
+    print(
+        f"Formula Discovery: {discovery_time:.2f}s ({result['final_count']} formulas)"
+    )
 
     # Benchmark pattern analysis
     test_patterns = [
-        {"points": list(range(10, 31)), "rebounds": list(range(5, 16)), "assists": list(range(3, 11))},
-        {"minutes": list(range(20, 41)), "field_goals_made": list(range(5, 16)), "field_goals_attempted": list(range(10, 21))}
+        {
+            "points": list(range(10, 31)),
+            "rebounds": list(range(5, 16)),
+            "assists": list(range(3, 11)),
+        },
+        {
+            "minutes": list(range(20, 41)),
+            "field_goals_made": list(range(5, 16)),
+            "field_goals_attempted": list(range(10, 21)),
+        },
     ]
 
     start_time = time.time()
     patterns = analyze_patterns_for_formula_discovery(
-        data_patterns=test_patterns,
-        pattern_types=["linear", "polynomial"]
+        data_patterns=test_patterns, pattern_types=["linear", "polynomial"]
     )
     pattern_time = time.time() - start_time
 
-    total_patterns = patterns.get('total_patterns', 0)
+    total_patterns = patterns.get("total_patterns", 0)
     print(f"Pattern Analysis: {pattern_time:.2f}s ({total_patterns} patterns)")
 
     # Benchmark validation
@@ -408,17 +446,19 @@ def run_performance_benchmark():
         "assists + rebounds",
         "field_goals_made / field_goals_attempted * 100",
         "points / (rebounds + assists)",
-        "minutes * points / 100"
+        "minutes * points / 100",
     ]
 
     start_time = time.time()
     validation = validate_discovered_formula_performance(
         formula_expressions=test_formulas,
-        validation_metrics=["r_squared", "mae", "rmse"]
+        validation_metrics=["r_squared", "mae", "rmse"],
     )
     validation_time = time.time() - start_time
 
-    print(f"Formula Validation: {validation_time:.2f}s ({validation['validated_formulas']} formulas)")
+    print(
+        f"Formula Validation: {validation_time:.2f}s ({validation['validated_formulas']} formulas)"
+    )
 
     total_time = discovery_time + pattern_time + validation_time
     print(f"\nTotal Benchmark Time: {total_time:.2f}s")
@@ -428,17 +468,17 @@ def run_performance_benchmark():
         "pattern_time": pattern_time,
         "validation_time": validation_time,
         "total_time": total_time,
-        "formulas_discovered": result['final_count'],
-        "patterns_found": patterns['total_patterns'],
-        "formulas_validated": validation['validated_formulas']
+        "formulas_discovered": result["final_count"],
+        "patterns_found": patterns["total_patterns"],
+        "formulas_validated": validation["validated_formulas"],
     }
 
 
 def main():
     """Main test function"""
-    print("="*60)
+    print("=" * 60)
     print("PHASE 7.2: AUTOMATED FORMULA DISCOVERY - TEST SUITE")
-    print("="*60)
+    print("=" * 60)
 
     # Create test suite
     suite = unittest.TestLoader().loadTestsFromTestCase(Phase72TestSuite)
@@ -448,13 +488,15 @@ def main():
     result = runner.run(suite)
 
     # Print summary
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEST SUMMARY")
-    print("="*60)
+    print("=" * 60)
     print(f"Tests run: {result.testsRun}")
     print(f"Failures: {len(result.failures)}")
     print(f"Errors: {len(result.errors)}")
-    print(f"Success rate: {((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100):.1f}%")
+    print(
+        f"Success rate: {((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100):.1f}%"
+    )
 
     if result.failures:
         print("\nFAILURES:")
@@ -475,10 +517,14 @@ def main():
             "tests_run": result.testsRun,
             "failures": len(result.failures),
             "errors": len(result.errors),
-            "success_rate": ((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100)
+            "success_rate": (
+                (result.testsRun - len(result.failures) - len(result.errors))
+                / result.testsRun
+                * 100
+            ),
         },
         "benchmark_results": benchmark_results,
-        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
     }
 
     with open("phase_7_2_test_results.json", "w") as f:

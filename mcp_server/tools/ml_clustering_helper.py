@@ -15,26 +15,37 @@ from functools import wraps
 
 def log_operation(operation_name: str):
     """Decorator for structured logging of operations"""
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             try:
                 result = func(*args, **kwargs)
-                print(json.dumps({
-                    "operation": operation_name,
-                    "status": "success",
-                    "function": func.__name__
-                }))
+                print(
+                    json.dumps(
+                        {
+                            "operation": operation_name,
+                            "status": "success",
+                            "function": func.__name__,
+                        }
+                    )
+                )
                 return result
             except Exception as e:
-                print(json.dumps({
-                    "operation": operation_name,
-                    "status": "error",
-                    "function": func.__name__,
-                    "error": str(e)
-                }))
+                print(
+                    json.dumps(
+                        {
+                            "operation": operation_name,
+                            "status": "error",
+                            "function": func.__name__,
+                            "error": str(e),
+                        }
+                    )
+                )
                 raise
+
         return wrapper
+
     return decorator
 
 
@@ -42,10 +53,10 @@ def log_operation(operation_name: str):
 # Distance and Similarity Measures
 # ============================================================================
 
+
 @log_operation("ml_euclidean_distance")
 def calculate_euclidean_distance(
-    point1: List[Union[int, float]],
-    point2: List[Union[int, float]]
+    point1: List[Union[int, float]], point2: List[Union[int, float]]
 ) -> float:
     """
     Calculate Euclidean distance between two points.
@@ -70,7 +81,9 @@ def calculate_euclidean_distance(
         - Distance shows how similar players are
     """
     if len(point1) != len(point2):
-        raise ValueError(f"Points must have same dimensions: {len(point1)} vs {len(point2)}")
+        raise ValueError(
+            f"Points must have same dimensions: {len(point1)} vs {len(point2)}"
+        )
 
     if len(point1) == 0:
         raise ValueError("Points cannot be empty")
@@ -84,8 +97,7 @@ def calculate_euclidean_distance(
 
 @log_operation("ml_cosine_similarity")
 def calculate_cosine_similarity(
-    vector1: List[Union[int, float]],
-    vector2: List[Union[int, float]]
+    vector1: List[Union[int, float]], vector2: List[Union[int, float]]
 ) -> float:
     """
     Calculate cosine similarity between two vectors.
@@ -113,7 +125,9 @@ def calculate_cosine_similarity(
         - Better than Euclidean for normalized comparisons
     """
     if len(vector1) != len(vector2):
-        raise ValueError(f"Vectors must have same dimensions: {len(vector1)} vs {len(vector2)}")
+        raise ValueError(
+            f"Vectors must have same dimensions: {len(vector1)} vs {len(vector2)}"
+        )
 
     if len(vector1) == 0:
         raise ValueError("Vectors cannot be empty")
@@ -122,8 +136,8 @@ def calculate_cosine_similarity(
     dot_product = sum(x * y for x, y in zip(vector1, vector2))
 
     # Calculate magnitudes
-    magnitude1 = math.sqrt(sum(x ** 2 for x in vector1))
-    magnitude2 = math.sqrt(sum(x ** 2 for x in vector2))
+    magnitude1 = math.sqrt(sum(x**2 for x in vector1))
+    magnitude2 = math.sqrt(sum(x**2 for x in vector2))
 
     # Handle zero vectors
     if magnitude1 == 0 or magnitude2 == 0:
@@ -137,13 +151,14 @@ def calculate_cosine_similarity(
 # K-Means Clustering
 # ============================================================================
 
+
 @log_operation("ml_kmeans_clustering")
 def kmeans_clustering(
     data: List[List[Union[int, float]]],
     k: int = 3,
     max_iterations: int = 100,
     tolerance: float = 1e-4,
-    random_seed: Optional[int] = None
+    random_seed: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
     Perform K-means clustering using Lloyd's algorithm.
@@ -186,15 +201,19 @@ def kmeans_clustering(
     dimensions = len(data[0])
     for i, point in enumerate(data):
         if len(point) != dimensions:
-            raise ValueError(f"All points must have same dimensions. Point {i} has {len(point)}, expected {dimensions}")
+            raise ValueError(
+                f"All points must have same dimensions. Point {i} has {len(point)}, expected {dimensions}"
+            )
 
     # Set random seed if provided
     if random_seed is not None:
         import random
+
         random.seed(random_seed)
 
     # Initialize centroids (k-means++ would be better, but using simple random for now)
     import random
+
     centroids = [list(point) for point in random.sample(data, k)]
 
     clusters = [0] * len(data)
@@ -203,7 +222,7 @@ def kmeans_clustering(
     for iteration in range(max_iterations):
         # Assignment step: assign each point to nearest centroid
         for i, point in enumerate(data):
-            min_distance = float('inf')
+            min_distance = float("inf")
             closest_centroid = 0
 
             for j, centroid in enumerate(centroids):
@@ -250,7 +269,7 @@ def kmeans_clustering(
     for i, point in enumerate(data):
         centroid = centroids[clusters[i]]
         distance = calculate_euclidean_distance(point, centroid)
-        inertia += distance ** 2
+        inertia += distance**2
 
     return {
         "clusters": clusters,
@@ -261,8 +280,8 @@ def kmeans_clustering(
         "summary": {
             "num_clusters": k,
             "cluster_sizes": [clusters.count(i) for i in range(k)],
-            "avg_distance_to_centroid": inertia / len(data)
-        }
+            "avg_distance_to_centroid": inertia / len(data),
+        },
     }
 
 
@@ -270,13 +289,14 @@ def kmeans_clustering(
 # K-Nearest Neighbors
 # ============================================================================
 
+
 @log_operation("ml_knn_classify")
 def find_nearest_neighbors(
     point: List[Union[int, float]],
     data: List[List[Union[int, float]]],
     labels: List[Any],
     k: int = 5,
-    distance_metric: str = "euclidean"
+    distance_metric: str = "euclidean",
 ) -> Dict[str, Any]:
     """
     Find K-nearest neighbors and classify a point.
@@ -307,13 +327,17 @@ def find_nearest_neighbors(
         raise ValueError("Training data cannot be empty")
 
     if len(data) != len(labels):
-        raise ValueError(f"Data and labels must have same length: {len(data)} vs {len(labels)}")
+        raise ValueError(
+            f"Data and labels must have same length: {len(data)} vs {len(labels)}"
+        )
 
     if k <= 0:
         raise ValueError(f"k must be positive: {k}")
 
     if k > len(data):
-        raise ValueError(f"k ({k}) cannot exceed number of training points ({len(data)})")
+        raise ValueError(
+            f"k ({k}) cannot exceed number of training points ({len(data)})"
+        )
 
     # Calculate distances to all training points
     distances = []
@@ -352,7 +376,7 @@ def find_nearest_neighbors(
         "confidence": confidence,
         "vote_counts": vote_counts,
         "k": k,
-        "distance_metric": distance_metric
+        "distance_metric": distance_metric,
     }
 
 
@@ -360,11 +384,10 @@ def find_nearest_neighbors(
 # Hierarchical Clustering
 # ============================================================================
 
+
 @log_operation("ml_hierarchical_clustering")
 def hierarchical_clustering(
-    data: List[List[Union[int, float]]],
-    n_clusters: int = 3,
-    linkage: str = "average"
+    data: List[List[Union[int, float]]], n_clusters: int = 3, linkage: str = "average"
 ) -> Dict[str, Any]:
     """
     Perform agglomerative hierarchical clustering.
@@ -399,10 +422,14 @@ def hierarchical_clustering(
         raise ValueError(f"n_clusters must be positive: {n_clusters}")
 
     if n_clusters > len(data):
-        raise ValueError(f"n_clusters ({n_clusters}) cannot exceed number of points ({len(data)})")
+        raise ValueError(
+            f"n_clusters ({n_clusters}) cannot exceed number of points ({len(data)})"
+        )
 
     if linkage not in ["single", "complete", "average"]:
-        raise ValueError(f"Unknown linkage: {linkage}. Use 'single', 'complete', or 'average'")
+        raise ValueError(
+            f"Unknown linkage: {linkage}. Use 'single', 'complete', or 'average'"
+        )
 
     # Initialize: each point is its own cluster
     clusters = [[i] for i in range(len(data))]
@@ -411,14 +438,12 @@ def hierarchical_clustering(
     # Merge until we have desired number of clusters
     while len(clusters) > n_clusters:
         # Find pair of clusters with minimum distance
-        min_distance = float('inf')
+        min_distance = float("inf")
         merge_i, merge_j = 0, 1
 
         for i in range(len(clusters)):
             for j in range(i + 1, len(clusters)):
-                distance = _cluster_distance(
-                    clusters[i], clusters[j], data, linkage
-                )
+                distance = _cluster_distance(clusters[i], clusters[j], data, linkage)
 
                 if distance < min_distance:
                     min_distance = distance
@@ -448,12 +473,11 @@ def hierarchical_clustering(
     return {
         "clusters": cluster_assignments,
         "dendrogram": [
-            {"cluster1": i, "cluster2": j, "distance": d}
-            for i, j, d in dendrogram
+            {"cluster1": i, "cluster2": j, "distance": d} for i, j, d in dendrogram
         ],
         "final_clusters": len(clusters),
         "linkage_used": linkage,
-        "cluster_sizes": [len(cluster) for cluster in clusters]
+        "cluster_sizes": [len(cluster) for cluster in clusters],
     }
 
 
@@ -461,7 +485,7 @@ def _cluster_distance(
     cluster1: List[int],
     cluster2: List[int],
     data: List[List[Union[int, float]]],
-    linkage: str
+    linkage: str,
 ) -> float:
     """
     Calculate distance between two clusters based on linkage criterion.
@@ -499,9 +523,9 @@ def _cluster_distance(
 # Utility Functions
 # ============================================================================
 
+
 def normalize_features(
-    data: List[List[Union[int, float]]],
-    method: str = "min-max"
+    data: List[List[Union[int, float]]], method: str = "min-max"
 ) -> List[List[float]]:
     """
     Normalize features to [0, 1] range (min-max) or standardize (z-score).
@@ -530,8 +554,11 @@ def normalize_features(
         normalized = []
         for point in data:
             normalized_point = [
-                (point[dim] - mins[dim]) / (maxs[dim] - mins[dim])
-                if maxs[dim] != mins[dim] else 0.0
+                (
+                    (point[dim] - mins[dim]) / (maxs[dim] - mins[dim])
+                    if maxs[dim] != mins[dim]
+                    else 0.0
+                )
                 for dim in range(dimensions)
             ]
             normalized.append(normalized_point)
@@ -540,7 +567,9 @@ def normalize_features(
 
     elif method == "z-score":
         # Calculate mean and std for each dimension
-        means = [sum(point[dim] for point in data) / len(data) for dim in range(dimensions)]
+        means = [
+            sum(point[dim] for point in data) / len(data) for dim in range(dimensions)
+        ]
 
         stds = [
             math.sqrt(sum((point[dim] - means[dim]) ** 2 for point in data) / len(data))
@@ -551,8 +580,7 @@ def normalize_features(
         normalized = []
         for point in data:
             normalized_point = [
-                (point[dim] - means[dim]) / stds[dim]
-                if stds[dim] != 0 else 0.0
+                (point[dim] - means[dim]) / stds[dim] if stds[dim] != 0 else 0.0
                 for dim in range(dimensions)
             ]
             normalized.append(normalized_point)

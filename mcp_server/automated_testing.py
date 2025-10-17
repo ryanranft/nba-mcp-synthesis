@@ -19,7 +19,7 @@ class TestCase:
         name: str,
         test_fn: Callable,
         expected: Any,
-        description: Optional[str] = None
+        description: Optional[str] = None,
     ):
         """
         Initialize test case.
@@ -55,7 +55,7 @@ class TestSuite:
         name: str,
         test_fn: Callable,
         expected: Any,
-        description: Optional[str] = None
+        description: Optional[str] = None,
     ):
         """Add test case to suite"""
         test = TestCase(name, test_fn, expected, description)
@@ -77,30 +77,34 @@ class TestSuite:
 
                 if result == test.expected:
                     passed += 1
-                    self.results.append({
-                        "test": test.name,
-                        "status": "PASSED",
-                        "expected": test.expected,
-                        "actual": result
-                    })
+                    self.results.append(
+                        {
+                            "test": test.name,
+                            "status": "PASSED",
+                            "expected": test.expected,
+                            "actual": result,
+                        }
+                    )
                     logger.debug(f"✅ {test.name}: PASSED")
                 else:
                     failed += 1
-                    self.results.append({
-                        "test": test.name,
-                        "status": "FAILED",
-                        "expected": test.expected,
-                        "actual": result
-                    })
-                    logger.warning(f"❌ {test.name}: FAILED (expected {test.expected}, got {result})")
+                    self.results.append(
+                        {
+                            "test": test.name,
+                            "status": "FAILED",
+                            "expected": test.expected,
+                            "actual": result,
+                        }
+                    )
+                    logger.warning(
+                        f"❌ {test.name}: FAILED (expected {test.expected}, got {result})"
+                    )
 
             except Exception as e:
                 errors += 1
-                self.results.append({
-                    "test": test.name,
-                    "status": "ERROR",
-                    "error": str(e)
-                })
+                self.results.append(
+                    {"test": test.name, "status": "ERROR", "error": str(e)}
+                )
                 logger.error(f"💥 {test.name}: ERROR - {e}")
 
         end_time = datetime.utcnow()
@@ -114,7 +118,7 @@ class TestSuite:
             "errors": errors,
             "duration_seconds": duration,
             "pass_rate": (passed / len(self.tests) * 100) if self.tests else 0,
-            "results": self.results
+            "results": self.results,
         }
 
         logger.info(
@@ -130,22 +134,17 @@ class ModelTester:
 
     @staticmethod
     def test_prediction_shape(
-        predict_fn: Callable,
-        test_input: Any,
-        expected_shape: tuple
+        predict_fn: Callable, test_input: Any, expected_shape: tuple
     ) -> bool:
         """Test prediction output shape"""
         result = predict_fn(test_input)
-        if hasattr(result, 'shape'):
+        if hasattr(result, "shape"):
             return result.shape == expected_shape
         return len(result) == expected_shape[0] if expected_shape else True
 
     @staticmethod
     def test_prediction_range(
-        predict_fn: Callable,
-        test_input: Any,
-        min_val: float,
-        max_val: float
+        predict_fn: Callable, test_input: Any, min_val: float, max_val: float
     ) -> bool:
         """Test prediction is in expected range"""
         result = predict_fn(test_input)
@@ -153,9 +152,7 @@ class ModelTester:
 
     @staticmethod
     def test_reproducibility(
-        predict_fn: Callable,
-        test_input: Any,
-        num_runs: int = 3
+        predict_fn: Callable, test_input: Any, num_runs: int = 3
     ) -> bool:
         """Test model produces consistent results"""
         results = [predict_fn(test_input) for _ in range(num_runs)]
@@ -163,12 +160,11 @@ class ModelTester:
 
     @staticmethod
     def test_inference_time(
-        predict_fn: Callable,
-        test_input: Any,
-        max_time_ms: float
+        predict_fn: Callable, test_input: Any, max_time_ms: float
     ) -> bool:
         """Test inference completes within time limit"""
         import time
+
         start = time.time()
         predict_fn(test_input)
         duration_ms = (time.time() - start) * 1000
@@ -179,26 +175,17 @@ class APITester:
     """Specialized testing for APIs"""
 
     @staticmethod
-    def test_response_status(
-        response: Dict,
-        expected_status: int
-    ) -> bool:
+    def test_response_status(response: Dict, expected_status: int) -> bool:
         """Test API response status code"""
         return response.get("status_code") == expected_status
 
     @staticmethod
-    def test_response_schema(
-        response: Dict,
-        required_fields: List[str]
-    ) -> bool:
+    def test_response_schema(response: Dict, required_fields: List[str]) -> bool:
         """Test API response has required fields"""
         return all(field in response for field in required_fields)
 
     @staticmethod
-    def test_response_time(
-        response_time_ms: float,
-        max_time_ms: float
-    ) -> bool:
+    def test_response_time(response_time_ms: float, max_time_ms: float) -> bool:
         """Test API response time"""
         return response_time_ms <= max_time_ms
 
@@ -225,30 +212,25 @@ if __name__ == "__main__":
         "prediction_in_range",
         lambda: ModelTester.test_prediction_range(mock_predict, [10, 20, 30], 0, 10),
         True,
-        "Check prediction is in valid range"
+        "Check prediction is in valid range",
     )
 
     suite.add_test(
         "inference_time",
         lambda: ModelTester.test_inference_time(mock_predict, [10, 20, 30], 100),
         True,
-        "Check inference completes in < 100ms"
+        "Check inference completes in < 100ms",
     )
 
     suite.add_test(
         "reproducibility",
         lambda: ModelTester.test_reproducibility(mock_predict, [10, 20, 30]),
         True,
-        "Check model is deterministic"
+        "Check model is deterministic",
     )
 
     # Add a failing test
-    suite.add_test(
-        "intentional_fail",
-        lambda: False,
-        True,
-        "This test should fail"
-    )
+    suite.add_test("intentional_fail", lambda: False, True, "This test should fail")
 
     print(f"✅ Added {len(suite.tests)} tests")
 
@@ -274,12 +256,11 @@ if __name__ == "__main__":
 
     # Detailed results
     print("\nDetailed Results:")
-    for result in results['results']:
+    for result in results["results"]:
         status_icon = {"PASSED": "✅", "FAILED": "❌", "ERROR": "💥"}
-        icon = status_icon.get(result['status'], "❓")
+        icon = status_icon.get(result["status"], "❓")
         print(f"  {icon} {result['test']}: {result['status']}")
 
     print("\n" + "=" * 80)
     print("Automated Testing Demo Complete!")
     print("=" * 80)
-

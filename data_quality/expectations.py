@@ -16,40 +16,29 @@ def create_game_expectations() -> List[Dict[str, Any]]:
     return [
         {
             "type": "expect_column_values_to_not_be_null",
-            "kwargs": {"column": "game_id"}
+            "kwargs": {"column": "game_id"},
         },
-        {
-            "type": "expect_column_values_to_be_unique",
-            "kwargs": {"column": "game_id"}
-        },
+        {"type": "expect_column_values_to_be_unique", "kwargs": {"column": "game_id"}},
         {
             "type": "expect_column_values_to_not_be_null",
-            "kwargs": {"column": "game_date"}
+            "kwargs": {"column": "game_date"},
         },
         {
             "type": "expect_column_values_to_be_between",
-            "kwargs": {
-                "column": "home_team_score",
-                "min_value": 0,
-                "max_value": 200
-            }
+            "kwargs": {"column": "home_team_score", "min_value": 0, "max_value": 200},
         },
         {
             "type": "expect_column_values_to_be_between",
-            "kwargs": {
-                "column": "away_team_score",
-                "min_value": 0,
-                "max_value": 200
-            }
+            "kwargs": {"column": "away_team_score", "min_value": 0, "max_value": 200},
         },
         {
             "type": "expect_column_values_to_not_be_null",
-            "kwargs": {"column": "home_team_id"}
+            "kwargs": {"column": "home_team_id"},
         },
         {
             "type": "expect_column_values_to_not_be_null",
-            "kwargs": {"column": "away_team_id"}
-        }
+            "kwargs": {"column": "away_team_id"},
+        },
     ]
 
 
@@ -63,40 +52,32 @@ def create_player_expectations() -> List[Dict[str, Any]]:
     return [
         {
             "type": "expect_column_values_to_not_be_null",
-            "kwargs": {"column": "player_id"}
+            "kwargs": {"column": "player_id"},
         },
         {
             "type": "expect_column_values_to_be_unique",
-            "kwargs": {"column": "player_id"}
+            "kwargs": {"column": "player_id"},
         },
         {
             "type": "expect_column_values_to_not_be_null",
-            "kwargs": {"column": "player_name"}
+            "kwargs": {"column": "player_name"},
         },
         {
             "type": "expect_column_values_to_be_between",
             "kwargs": {
                 "column": "points",
                 "min_value": 0,
-                "max_value": 100  # Single game max
-            }
+                "max_value": 100,  # Single game max
+            },
         },
         {
             "type": "expect_column_values_to_be_between",
-            "kwargs": {
-                "column": "rebounds",
-                "min_value": 0,
-                "max_value": 50
-            }
+            "kwargs": {"column": "rebounds", "min_value": 0, "max_value": 50},
         },
         {
             "type": "expect_column_values_to_be_between",
-            "kwargs": {
-                "column": "assists",
-                "min_value": 0,
-                "max_value": 30
-            }
-        }
+            "kwargs": {"column": "assists", "min_value": 0, "max_value": 30},
+        },
     ]
 
 
@@ -110,16 +91,13 @@ def create_team_expectations() -> List[Dict[str, Any]]:
     return [
         {
             "type": "expect_column_values_to_not_be_null",
-            "kwargs": {"column": "team_id"}
+            "kwargs": {"column": "team_id"},
         },
-        {
-            "type": "expect_column_values_to_be_unique",
-            "kwargs": {"column": "team_id"}
-        },
+        {"type": "expect_column_values_to_be_unique", "kwargs": {"column": "team_id"}},
         {
             "type": "expect_column_values_to_not_be_null",
-            "kwargs": {"column": "team_name"}
-        }
+            "kwargs": {"column": "team_name"},
+        },
     ]
 
 

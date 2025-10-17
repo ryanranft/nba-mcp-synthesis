@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 class HealthStatus(Enum):
     """Dependency health status"""
+
     HEALTHY = "healthy"
     DEGRADED = "degraded"
     UNHEALTHY = "unhealthy"
@@ -25,6 +26,7 @@ class HealthStatus(Enum):
 @dataclass
 class HealthCheckResult:
     """Result of a single health check"""
+
     dependency_name: str
     status: HealthStatus
     response_time_ms: float
@@ -47,7 +49,7 @@ class DependencyHealthMonitor:
         check_func: callable,
         check_interval_seconds: int = 60,
         timeout_seconds: int = 5,
-        critical: bool = True
+        critical: bool = True,
     ):
         """
         Register a dependency for health monitoring.
@@ -65,7 +67,7 @@ class DependencyHealthMonitor:
             "timeout": timeout_seconds,
             "critical": critical,
             "last_check": None,
-            "status": HealthStatus.UNKNOWN
+            "status": HealthStatus.UNKNOWN,
         }
         self.health_history[name] = []
         logger.info(f"Registered dependency: {name} (critical={critical})")
@@ -92,7 +94,7 @@ class DependencyHealthMonitor:
                 dependency_name="database",
                 status=status,
                 response_time_ms=response_time,
-                message=message
+                message=message,
             )
 
         except Exception as e:
@@ -101,7 +103,7 @@ class DependencyHealthMonitor:
                 dependency_name="database",
                 status=HealthStatus.UNHEALTHY,
                 response_time_ms=response_time,
-                message=f"Database connection failed: {str(e)}"
+                message=f"Database connection failed: {str(e)}",
             )
 
     def check_api(self, api_name: str, test_func: callable) -> HealthCheckResult:
@@ -126,7 +128,7 @@ class DependencyHealthMonitor:
                 dependency_name=api_name,
                 status=status,
                 response_time_ms=response_time,
-                message=message
+                message=message,
             )
 
         except Exception as e:
@@ -135,10 +137,12 @@ class DependencyHealthMonitor:
                 dependency_name=api_name,
                 status=HealthStatus.UNHEALTHY,
                 response_time_ms=response_time,
-                message=f"API check failed: {str(e)}"
+                message=f"API check failed: {str(e)}",
             )
 
-    def check_service(self, service_name: str, check_func: callable) -> HealthCheckResult:
+    def check_service(
+        self, service_name: str, check_func: callable
+    ) -> HealthCheckResult:
         """Check generic service health"""
         start_time = time.time()
 
@@ -157,7 +161,7 @@ class DependencyHealthMonitor:
                 dependency_name=service_name,
                 status=status,
                 response_time_ms=response_time,
-                message=message
+                message=message,
             )
 
         except Exception as e:
@@ -166,7 +170,7 @@ class DependencyHealthMonitor:
                 dependency_name=service_name,
                 status=HealthStatus.UNHEALTHY,
                 response_time_ms=response_time,
-                message=f"Service check failed: {str(e)}"
+                message=f"Service check failed: {str(e)}",
             )
 
     def check_all(self) -> Dict[str, HealthCheckResult]:
@@ -184,7 +188,9 @@ class DependencyHealthMonitor:
                 # Store in history
                 self.health_history[name].append(result)
                 if len(self.health_history[name]) > self.max_history_size:
-                    self.health_history[name] = self.health_history[name][-self.max_history_size:]
+                    self.health_history[name] = self.health_history[name][
+                        -self.max_history_size :
+                    ]
 
                 results[name] = result
 
@@ -194,7 +200,7 @@ class DependencyHealthMonitor:
                     dependency_name=name,
                     status=HealthStatus.UNKNOWN,
                     response_time_ms=0,
-                    message=f"Check error: {str(e)}"
+                    message=f"Check error: {str(e)}",
                 )
                 results[name] = result
 
@@ -205,7 +211,7 @@ class DependencyHealthMonitor:
         if not self.dependencies:
             return {
                 "status": HealthStatus.UNKNOWN.value,
-                "message": "No dependencies registered"
+                "message": "No dependencies registered",
             }
 
         critical_unhealthy = []
@@ -236,13 +242,15 @@ class DependencyHealthMonitor:
                 name: {
                     "status": config["status"].value,
                     "last_check": config["last_check"],
-                    "critical": config["critical"]
+                    "critical": config["critical"],
                 }
                 for name, config in self.dependencies.items()
-            }
+            },
         }
 
-    def get_dependency_uptime(self, dependency_name: str, hours: int = 24) -> Optional[float]:
+    def get_dependency_uptime(
+        self, dependency_name: str, hours: int = 24
+    ) -> Optional[float]:
         """Calculate uptime percentage for a dependency"""
         if dependency_name not in self.health_history:
             return None
@@ -254,14 +262,17 @@ class DependencyHealthMonitor:
         # Filter to last N hours
         cutoff_time = datetime.utcnow().timestamp() - (hours * 3600)
         recent_checks = [
-            h for h in history
+            h
+            for h in history
             if datetime.fromisoformat(h.timestamp).timestamp() > cutoff_time
         ]
 
         if not recent_checks:
             return None
 
-        healthy_checks = sum(1 for h in recent_checks if h.status == HealthStatus.HEALTHY)
+        healthy_checks = sum(
+            1 for h in recent_checks if h.status == HealthStatus.HEALTHY
+        )
         uptime = (healthy_checks / len(recent_checks)) * 100
 
         return uptime
@@ -312,7 +323,11 @@ if __name__ == "__main__":
     results = monitor.check_all()
 
     for name, result in results.items():
-        status_icon = "✅" if result.status == HealthStatus.HEALTHY else "⚠️" if result.status == HealthStatus.DEGRADED else "❌"
+        status_icon = (
+            "✅"
+            if result.status == HealthStatus.HEALTHY
+            else "⚠️" if result.status == HealthStatus.DEGRADED else "❌"
+        )
         print(f"\n{status_icon} {name}")
         print(f"   Status: {result.status.value}")
         print(f"   Response Time: {result.response_time_ms:.2f}ms")
@@ -328,8 +343,8 @@ if __name__ == "__main__":
     print(f"Message: {system_health['message']}")
 
     print("\nDependencies:")
-    for dep_name, dep_info in system_health['dependencies'].items():
-        critical_label = "CRITICAL" if dep_info['critical'] else "non-critical"
+    for dep_name, dep_info in system_health["dependencies"].items():
+        critical_label = "CRITICAL" if dep_info["critical"] else "non-critical"
         print(f"  - {dep_name}: {dep_info['status']} ({critical_label})")
 
     # Calculate uptime
@@ -350,4 +365,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("Dependency Health Checks Complete!")
     print("=" * 80)
-

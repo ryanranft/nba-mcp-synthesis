@@ -26,8 +26,10 @@ logger = logging.getLogger(__name__)
 # Data Structures
 # =============================================================================
 
+
 class ContextDepth(Enum):
     """Context analysis depth levels"""
+
     SHALLOW = "shallow"
     MODERATE = "moderate"
     DEEP = "deep"
@@ -35,6 +37,7 @@ class ContextDepth(Enum):
 
 class ExpertiseLevel(Enum):
     """User expertise levels"""
+
     BEGINNER = "beginner"
     INTERMEDIATE = "intermediate"
     ADVANCED = "advanced"
@@ -43,6 +46,7 @@ class ExpertiseLevel(Enum):
 
 class BehaviorType(Enum):
     """Types of user behavior to analyze"""
+
     FORMULA_USAGE = "formula_usage"
     QUERY_PATTERNS = "query_patterns"
     PREFERENCES = "preferences"
@@ -52,6 +56,7 @@ class BehaviorType(Enum):
 
 class ContextType(Enum):
     """Types of context data"""
+
     USER_PREFERENCES = "user_preferences"
     ANALYSIS_STATE = "analysis_state"
     FORMULA_HISTORY = "formula_history"
@@ -60,6 +65,7 @@ class ContextType(Enum):
 
 class InsightType(Enum):
     """Types of insights to generate"""
+
     PATTERN = "pattern"
     ANOMALY = "anomaly"
     TREND = "trend"
@@ -71,6 +77,7 @@ class InsightType(Enum):
 @dataclass
 class ContextInsight:
     """Context insight data structure"""
+
     insight_id: str
     insight_type: str
     title: str
@@ -85,6 +92,7 @@ class ContextInsight:
 @dataclass
 class BehaviorPattern:
     """User behavior pattern data structure"""
+
     pattern_id: str
     pattern_type: str
     frequency: int
@@ -98,6 +106,7 @@ class BehaviorPattern:
 @dataclass
 class ContextualRecommendation:
     """Contextual recommendation data structure"""
+
     recommendation_id: str
     recommendation_type: str
     title: str
@@ -112,6 +121,7 @@ class ContextualRecommendation:
 @dataclass
 class SessionContext:
     """Session context data structure"""
+
     session_id: str
     context_type: str
     data: Dict[str, Any]
@@ -124,6 +134,7 @@ class SessionContext:
 # =============================================================================
 # Core Smart Context Analysis Engine
 # =============================================================================
+
 
 class SmartContextAnalysisEngine:
     """
@@ -158,14 +169,14 @@ class SmartContextAnalysisEngine:
                     "efficiency_focused": "User frequently uses efficiency metrics like PER, TS%, and Usage Rate",
                     "defensive_focused": "User shows preference for defensive metrics and analysis",
                     "shooting_focused": "User primarily analyzes shooting statistics and percentages",
-                    "team_focused": "User focuses on team-level metrics and analysis"
+                    "team_focused": "User focuses on team-level metrics and analysis",
                 },
                 "query_patterns": {
                     "comparative": "User frequently asks for comparisons between players or teams",
                     "predictive": "User often requests predictive analysis and forecasting",
                     "diagnostic": "User asks diagnostic questions about performance issues",
-                    "exploratory": "User explores data with open-ended questions"
-                }
+                    "exploratory": "User explores data with open-ended questions",
+                },
             }
 
             # Context templates
@@ -174,14 +185,14 @@ class SmartContextAnalysisEngine:
                     "current_formulas": [],
                     "analysis_goals": [],
                     "data_sources": [],
-                    "progress": 0.0
+                    "progress": 0.0,
                 },
                 "user_preferences": {
                     "expertise_level": "intermediate",
                     "preferred_formulas": [],
                     "analysis_style": "balanced",
-                    "visualization_preference": "charts"
-                }
+                    "visualization_preference": "charts",
+                },
             }
 
             logger.info("Default patterns and templates initialized")
@@ -197,7 +208,7 @@ class SmartContextAnalysisEngine:
         analysis_goals: Optional[List[str]] = None,
         expertise_level: str = "intermediate",
         preferred_formulas: Optional[List[str]] = None,
-        context_depth: str = "moderate"
+        context_depth: str = "moderate",
     ) -> Dict[str, Any]:
         """
         Perform intelligent analysis of user context.
@@ -251,17 +262,21 @@ class SmartContextAnalysisEngine:
                     "insights": [asdict(insight) for insight in insights],
                     "recommendations": [asdict(rec) for rec in recommendations],
                     "analysis_depth": context_depth,
-                    "confidence_score": self._calculate_context_confidence(context_elements)
+                    "confidence_score": self._calculate_context_confidence(
+                        context_elements
+                    ),
                 },
                 "metadata": {
                     "analysis_timestamp": datetime.now().isoformat(),
                     "context_depth": context_depth,
                     "insights_count": len(insights),
-                    "recommendations_count": len(recommendations)
-                }
+                    "recommendations_count": len(recommendations),
+                },
             }
 
-            logger.info(f"Context analysis completed: {len(insights)} insights, {len(recommendations)} recommendations")
+            logger.info(
+                f"Context analysis completed: {len(insights)} insights, {len(recommendations)} recommendations"
+            )
             return result
 
         except Exception as e:
@@ -270,7 +285,7 @@ class SmartContextAnalysisEngine:
                 "status": "error",
                 "error": str(e),
                 "context_analysis": {},
-                "metadata": {}
+                "metadata": {},
             }
 
     def analyze_user_behavior_patterns(
@@ -280,7 +295,7 @@ class SmartContextAnalysisEngine:
         behavior_types: List[str] = None,
         include_patterns: bool = True,
         include_predictions: bool = True,
-        privacy_level: str = "basic"
+        privacy_level: str = "basic",
     ) -> Dict[str, Any]:
         """
         Analyze user behavior patterns for personalization.
@@ -338,17 +353,19 @@ class SmartContextAnalysisEngine:
                     "analysis_results": behavior_analysis,
                     "patterns": [asdict(pattern) for pattern in patterns],
                     "predictions": predictions,
-                    "privacy_level": privacy_level
+                    "privacy_level": privacy_level,
                 },
                 "metadata": {
                     "analysis_timestamp": datetime.now().isoformat(),
                     "patterns_count": len(patterns),
                     "predictions_count": len(predictions),
-                    "privacy_compliant": True
-                }
+                    "privacy_compliant": True,
+                },
             }
 
-            logger.info(f"Behavior analysis completed: {len(patterns)} patterns, {len(predictions)} predictions")
+            logger.info(
+                f"Behavior analysis completed: {len(patterns)} patterns, {len(predictions)} predictions"
+            )
             return result
 
         except Exception as e:
@@ -357,7 +374,7 @@ class SmartContextAnalysisEngine:
                 "status": "error",
                 "error": str(e),
                 "behavior_analysis": {},
-                "metadata": {}
+                "metadata": {},
             }
 
     def generate_contextual_recommendations(
@@ -368,7 +385,7 @@ class SmartContextAnalysisEngine:
         personalization_level: str = "basic",
         include_alternatives: bool = True,
         explanation_depth: str = "detailed",
-        confidence_threshold: float = 0.6
+        confidence_threshold: float = 0.6,
     ) -> Dict[str, Any]:
         """
         Generate contextual recommendations based on analysis.
@@ -390,7 +407,9 @@ class SmartContextAnalysisEngine:
 
             # Handle empty context analysis
             if not context_analysis:
-                logger.warning("Empty context analysis provided, using fallback recommendations")
+                logger.warning(
+                    "Empty context analysis provided, using fallback recommendations"
+                )
                 return self._generate_fallback_recommendations(
                     recommendation_count, recommendation_types, personalization_level
                 )
@@ -408,8 +427,12 @@ class SmartContextAnalysisEngine:
 
             for rec_type in recommendation_types:
                 type_recommendations = self._generate_type_recommendations(
-                    rec_type, query_intent, user_profile, insights,
-                    personalization_level, confidence_threshold
+                    rec_type,
+                    query_intent,
+                    user_profile,
+                    insights,
+                    personalization_level,
+                    confidence_threshold,
                 )
                 recommendations.extend(type_recommendations)
 
@@ -417,7 +440,7 @@ class SmartContextAnalysisEngine:
             recommendations = sorted(
                 recommendations,
                 key=lambda x: (x.confidence, x.personalization_score),
-                reverse=True
+                reverse=True,
             )[:recommendation_count]
 
             # Add alternatives if requested
@@ -436,11 +459,13 @@ class SmartContextAnalysisEngine:
                     "recommendation_count": len(recommendations),
                     "personalization_level": personalization_level,
                     "explanation_depth": explanation_depth,
-                    "confidence_threshold": confidence_threshold
-                }
+                    "confidence_threshold": confidence_threshold,
+                },
             }
 
-            logger.info(f"Contextual recommendations generated: {len(recommendations)} recommendations")
+            logger.info(
+                f"Contextual recommendations generated: {len(recommendations)} recommendations"
+            )
             return result
 
         except Exception as e:
@@ -449,7 +474,7 @@ class SmartContextAnalysisEngine:
                 "status": "error",
                 "error": str(e),
                 "recommendations": [],
-                "metadata": {}
+                "metadata": {},
             }
 
     def manage_session_context(
@@ -459,7 +484,7 @@ class SmartContextAnalysisEngine:
         context_type: str = "analysis_state",
         operation: str = "store",
         expiration_time: Optional[int] = None,
-        include_metadata: bool = True
+        include_metadata: bool = True,
     ) -> Dict[str, Any]:
         """
         Manage session context data.
@@ -492,7 +517,11 @@ class SmartContextAnalysisEngine:
                     created_at=now,
                     updated_at=now,
                     expires_at=expires_at,
-                    metadata={"operation": "store", "timestamp": now.isoformat()} if include_metadata else {}
+                    metadata=(
+                        {"operation": "store", "timestamp": now.isoformat()}
+                        if include_metadata
+                        else {}
+                    ),
                 )
                 self.session_contexts[session_id] = session_context
 
@@ -505,14 +534,14 @@ class SmartContextAnalysisEngine:
                         return {
                             "status": "error",
                             "error": "Session context expired",
-                            "operation_result": {}
+                            "operation_result": {},
                         }
                     context_data = session_context.data
                 else:
                     return {
                         "status": "error",
                         "error": "Session context not found",
-                        "operation_result": {}
+                        "operation_result": {},
                     }
 
             elif operation == "update":
@@ -526,7 +555,7 @@ class SmartContextAnalysisEngine:
                     return {
                         "status": "error",
                         "error": "Session context not found for update",
-                        "operation_result": {}
+                        "operation_result": {},
                     }
 
             elif operation == "clear":
@@ -543,12 +572,21 @@ class SmartContextAnalysisEngine:
                     "context_type": context_type,
                     "context_data": context_data,
                     "expires_at": expires_at.isoformat() if expires_at else None,
-                    "metadata": self.session_contexts.get(session_id, SessionContext("", "", {}, datetime.now(), datetime.now(), None, {})).metadata if include_metadata else {}
+                    "metadata": (
+                        self.session_contexts.get(
+                            session_id,
+                            SessionContext(
+                                "", "", {}, datetime.now(), datetime.now(), None, {}
+                            ),
+                        ).metadata
+                        if include_metadata
+                        else {}
+                    ),
                 },
                 "metadata": {
                     "operation_timestamp": now.isoformat(),
-                    "session_count": len(self.session_contexts)
-                }
+                    "session_count": len(self.session_contexts),
+                },
             }
 
             logger.info(f"Session context {operation} completed successfully")
@@ -560,7 +598,7 @@ class SmartContextAnalysisEngine:
                 "status": "error",
                 "error": str(e),
                 "operation_result": {},
-                "metadata": {}
+                "metadata": {},
             }
 
     def generate_intelligent_insights(
@@ -571,7 +609,7 @@ class SmartContextAnalysisEngine:
         include_visualizations: bool = True,
         include_actionable_recommendations: bool = True,
         confidence_threshold: float = 0.7,
-        max_insights: int = 10
+        max_insights: int = 10,
     ) -> Dict[str, Any]:
         """
         Generate intelligent insights from analysis context.
@@ -608,9 +646,7 @@ class SmartContextAnalysisEngine:
 
             # Sort by confidence and relevance
             insights = sorted(
-                insights,
-                key=lambda x: (x.confidence, x.relevance_score),
-                reverse=True
+                insights, key=lambda x: (x.confidence, x.relevance_score), reverse=True
             )[:max_insights]
 
             # Add visualizations if requested
@@ -635,8 +671,8 @@ class SmartContextAnalysisEngine:
                     "insights_count": len(insights),
                     "insight_types": insight_types,
                     "insight_depth": insight_depth,
-                    "confidence_threshold": confidence_threshold
-                }
+                    "confidence_threshold": confidence_threshold,
+                },
             }
 
             logger.info(f"Intelligent insights generated: {len(insights)} insights")
@@ -644,12 +680,7 @@ class SmartContextAnalysisEngine:
 
         except Exception as e:
             logger.error(f"Intelligent insight generation failed: {e}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "insights": [],
-                "metadata": {}
-            }
+            return {"status": "error", "error": str(e), "insights": [], "metadata": {}}
 
     # =============================================================================
     # Helper Methods
@@ -659,7 +690,7 @@ class SmartContextAnalysisEngine:
         self,
         user_query: str,
         session_history: Optional[List[Dict[str, Any]]],
-        available_data: Optional[Dict[str, Any]]
+        available_data: Optional[Dict[str, Any]],
     ) -> Dict[str, Any]:
         """Extract context elements from user input"""
         try:
@@ -668,7 +699,7 @@ class SmartContextAnalysisEngine:
                 "query_intent": self._classify_query_intent(user_query),
                 "data_availability": available_data or {},
                 "session_context": session_history or [],
-                "temporal_context": self._analyze_temporal_context(session_history)
+                "temporal_context": self._analyze_temporal_context(session_history),
             }
             return elements
         except Exception as e:
@@ -679,9 +710,24 @@ class SmartContextAnalysisEngine:
         """Extract keywords from user query"""
         try:
             # Simple keyword extraction
-            keywords = re.findall(r'\b\w+\b', query.lower())
+            keywords = re.findall(r"\b\w+\b", query.lower())
             # Filter out common words
-            stop_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'}
+            stop_words = {
+                "the",
+                "a",
+                "an",
+                "and",
+                "or",
+                "but",
+                "in",
+                "on",
+                "at",
+                "to",
+                "for",
+                "of",
+                "with",
+                "by",
+            }
             keywords = [kw for kw in keywords if kw not in stop_words and len(kw) > 2]
             return keywords[:10]  # Limit to top 10 keywords
         except Exception as e:
@@ -693,13 +739,19 @@ class SmartContextAnalysisEngine:
         try:
             query_lower = query.lower()
 
-            if any(word in query_lower for word in ['compare', 'comparison', 'vs', 'versus']):
+            if any(
+                word in query_lower
+                for word in ["compare", "comparison", "vs", "versus"]
+            ):
                 return "comparative"
-            elif any(word in query_lower for word in ['predict', 'forecast', 'future', 'will']):
+            elif any(
+                word in query_lower
+                for word in ["predict", "forecast", "future", "will"]
+            ):
                 return "predictive"
-            elif any(word in query_lower for word in ['why', 'what', 'how', 'explain']):
+            elif any(word in query_lower for word in ["why", "what", "how", "explain"]):
                 return "diagnostic"
-            elif any(word in query_lower for word in ['show', 'find', 'get', 'list']):
+            elif any(word in query_lower for word in ["show", "find", "get", "list"]):
                 return "exploratory"
             else:
                 return "general"
@@ -707,23 +759,31 @@ class SmartContextAnalysisEngine:
             logger.error(f"Error classifying query intent: {e}")
             return "general"
 
-    def _analyze_temporal_context(self, session_history: Optional[List[Dict[str, Any]]]) -> Dict[str, Any]:
+    def _analyze_temporal_context(
+        self, session_history: Optional[List[Dict[str, Any]]]
+    ) -> Dict[str, Any]:
         """Analyze temporal context from session history"""
         try:
             if not session_history:
                 return {"session_length": 0, "recent_activity": []}
 
-            recent_activity = session_history[-5:] if len(session_history) > 5 else session_history
+            recent_activity = (
+                session_history[-5:] if len(session_history) > 5 else session_history
+            )
             return {
                 "session_length": len(session_history),
                 "recent_activity": recent_activity,
-                "activity_pattern": "increasing" if len(session_history) > 3 else "stable"
+                "activity_pattern": (
+                    "increasing" if len(session_history) > 3 else "stable"
+                ),
             }
         except Exception as e:
             logger.error(f"Error analyzing temporal context: {e}")
             return {"session_length": 0, "recent_activity": []}
 
-    def _analyze_query_intent(self, query: str, context_elements: Dict[str, Any]) -> Dict[str, Any]:
+    def _analyze_query_intent(
+        self, query: str, context_elements: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Analyze query intent with context"""
         try:
             intent = self._classify_query_intent(query)
@@ -733,12 +793,22 @@ class SmartContextAnalysisEngine:
                 "primary_intent": intent,
                 "confidence": 0.8,  # Simplified confidence calculation
                 "keywords": keywords,
-                "complexity": "high" if len(keywords) > 5 else "medium" if len(keywords) > 2 else "low",
-                "domain": self._identify_domain(keywords)
+                "complexity": (
+                    "high"
+                    if len(keywords) > 5
+                    else "medium" if len(keywords) > 2 else "low"
+                ),
+                "domain": self._identify_domain(keywords),
             }
         except Exception as e:
             logger.error(f"Error analyzing query intent: {e}")
-            return {"primary_intent": "general", "confidence": 0.5, "keywords": [], "complexity": "low", "domain": "general"}
+            return {
+                "primary_intent": "general",
+                "confidence": 0.5,
+                "keywords": [],
+                "complexity": "low",
+                "domain": "general",
+            }
 
     def _identify_domain(self, keywords: List[str]) -> str:
         """Identify the domain of the query based on keywords"""
@@ -748,7 +818,7 @@ class SmartContextAnalysisEngine:
                 "shooting": ["shooting", "fg", "3pt", "free throw"],
                 "defensive": ["defense", "steal", "block", "rebound"],
                 "team": ["team", "roster", "lineup", "chemistry"],
-                "player": ["player", "individual", "personal"]
+                "player": ["player", "individual", "personal"],
             }
 
             for domain, domain_kw in domain_keywords.items():
@@ -764,7 +834,7 @@ class SmartContextAnalysisEngine:
         self,
         context_elements: Dict[str, Any],
         query_intent: Dict[str, Any],
-        context_depth: str
+        context_depth: str,
     ) -> List[ContextInsight]:
         """Generate context insights based on analysis depth"""
         try:
@@ -781,7 +851,7 @@ class SmartContextAnalysisEngine:
                     relevance_score=0.9,
                     actionable=True,
                     category="intent",
-                    metadata={"intent_type": "comparative"}
+                    metadata={"intent_type": "comparative"},
                 )
                 insights.append(insight)
 
@@ -798,7 +868,7 @@ class SmartContextAnalysisEngine:
                         relevance_score=0.8,
                         actionable=True,
                         category="domain",
-                        metadata={"domain": domain}
+                        metadata={"domain": domain},
                     )
                     insights.append(insight)
 
@@ -815,7 +885,7 @@ class SmartContextAnalysisEngine:
                         relevance_score=0.7,
                         actionable=True,
                         category="complexity",
-                        metadata={"complexity": complexity}
+                        metadata={"complexity": complexity},
                     )
                     insights.append(insight)
 
@@ -829,7 +899,7 @@ class SmartContextAnalysisEngine:
         self,
         expertise_level: str,
         preferred_formulas: Optional[List[str]],
-        session_history: Optional[List[Dict[str, Any]]]
+        session_history: Optional[List[Dict[str, Any]]],
     ) -> Dict[str, Any]:
         """Analyze user profile from provided information"""
         try:
@@ -837,13 +907,21 @@ class SmartContextAnalysisEngine:
                 "expertise_level": expertise_level,
                 "preferred_formulas": preferred_formulas or [],
                 "analysis_style": self._determine_analysis_style(expertise_level),
-                "experience_indicator": self._calculate_experience_indicator(session_history),
-                "preferences": self._infer_preferences(preferred_formulas, session_history)
+                "experience_indicator": self._calculate_experience_indicator(
+                    session_history
+                ),
+                "preferences": self._infer_preferences(
+                    preferred_formulas, session_history
+                ),
             }
             return profile
         except Exception as e:
             logger.error(f"Error analyzing user profile: {e}")
-            return {"expertise_level": expertise_level, "preferred_formulas": [], "analysis_style": "balanced"}
+            return {
+                "expertise_level": expertise_level,
+                "preferred_formulas": [],
+                "analysis_style": "balanced",
+            }
 
     def _determine_analysis_style(self, expertise_level: str) -> str:
         """Determine analysis style based on expertise level"""
@@ -851,11 +929,13 @@ class SmartContextAnalysisEngine:
             "beginner": "guided",
             "intermediate": "balanced",
             "advanced": "detailed",
-            "expert": "comprehensive"
+            "expert": "comprehensive",
         }
         return style_mapping.get(expertise_level, "balanced")
 
-    def _calculate_experience_indicator(self, session_history: Optional[List[Dict[str, Any]]]) -> float:
+    def _calculate_experience_indicator(
+        self, session_history: Optional[List[Dict[str, Any]]]
+    ) -> float:
         """Calculate experience indicator from session history"""
         try:
             if not session_history:
@@ -863,7 +943,9 @@ class SmartContextAnalysisEngine:
 
             # Simple calculation based on session length and diversity
             session_count = len(session_history)
-            diversity_score = len(set(str(interaction) for interaction in session_history)) / max(session_count, 1)
+            diversity_score = len(
+                set(str(interaction) for interaction in session_history)
+            ) / max(session_count, 1)
 
             return min(0.2 + (session_count * 0.1) + (diversity_score * 0.3), 1.0)
         except Exception as e:
@@ -873,20 +955,30 @@ class SmartContextAnalysisEngine:
     def _infer_preferences(
         self,
         preferred_formulas: Optional[List[str]],
-        session_history: Optional[List[Dict[str, Any]]]
+        session_history: Optional[List[Dict[str, Any]]],
     ) -> Dict[str, Any]:
         """Infer user preferences from available data"""
         try:
             preferences = {
                 "formula_types": [],
                 "analysis_depth": "moderate",
-                "visualization_preference": "charts"
+                "visualization_preference": "charts",
             }
 
             if preferred_formulas:
                 # Analyze formula types
-                efficiency_formulas = [f for f in preferred_formulas if any(term in f.lower() for term in ['per', 'efficiency', 'rating'])]
-                shooting_formulas = [f for f in preferred_formulas if any(term in f.lower() for term in ['shooting', 'fg', '3pt'])]
+                efficiency_formulas = [
+                    f
+                    for f in preferred_formulas
+                    if any(
+                        term in f.lower() for term in ["per", "efficiency", "rating"]
+                    )
+                ]
+                shooting_formulas = [
+                    f
+                    for f in preferred_formulas
+                    if any(term in f.lower() for term in ["shooting", "fg", "3pt"])
+                ]
 
                 if efficiency_formulas:
                     preferences["formula_types"].append("efficiency")
@@ -896,13 +988,17 @@ class SmartContextAnalysisEngine:
             return preferences
         except Exception as e:
             logger.error(f"Error inferring preferences: {e}")
-            return {"formula_types": [], "analysis_depth": "moderate", "visualization_preference": "charts"}
+            return {
+                "formula_types": [],
+                "analysis_depth": "moderate",
+                "visualization_preference": "charts",
+            }
 
     def _generate_context_recommendations(
         self,
         context_elements: Dict[str, Any],
         user_profile: Dict[str, Any],
-        query_intent: Dict[str, Any]
+        query_intent: Dict[str, Any],
     ) -> List[ContextualRecommendation]:
         """Generate contextual recommendations"""
         try:
@@ -922,7 +1018,7 @@ class SmartContextAnalysisEngine:
                     personalization_score=0.7,
                     reasoning="Based on comparative intent detected",
                     alternatives=["PER", "TS%", "Usage Rate"],
-                    metadata={"intent": intent, "domain": domain}
+                    metadata={"intent": intent, "domain": domain},
                 )
                 recommendations.append(rec)
 
@@ -937,7 +1033,7 @@ class SmartContextAnalysisEngine:
                     personalization_score=0.6,
                     reasoning=f"Based on {domain} domain focus",
                     alternatives=self._get_domain_formulas(domain),
-                    metadata={"domain": domain}
+                    metadata={"domain": domain},
                 )
                 recommendations.append(rec)
 
@@ -954,7 +1050,7 @@ class SmartContextAnalysisEngine:
             "shooting": ["TS%", "eFG%", "3PT%", "FT%"],
             "defensive": ["Defensive Rating", "Steal%", "Block%", "DRB%"],
             "team": ["Pace", "Offensive Rating", "Defensive Rating", "Net Rating"],
-            "player": ["PER", "Game Score", "VORP", "BPM"]
+            "player": ["PER", "Game Score", "VORP", "BPM"],
         }
         return domain_formulas.get(domain, ["PER", "TS%"])
 
@@ -985,19 +1081,20 @@ class SmartContextAnalysisEngine:
             # For now, return mock data
             return {
                 "formula_usage": ["PER", "TS%", "Usage Rate"],
-                "query_patterns": ["compare players", "team analysis", "shooting stats"],
+                "query_patterns": [
+                    "compare players",
+                    "team analysis",
+                    "shooting stats",
+                ],
                 "session_count": 5,
-                "last_activity": datetime.now().isoformat()
+                "last_activity": datetime.now().isoformat(),
             }
         except Exception as e:
             logger.error(f"Error getting user behavior data: {e}")
             return {}
 
     def _analyze_behavior_type(
-        self,
-        behavior_data: Dict[str, Any],
-        behavior_type: str,
-        privacy_level: str
+        self, behavior_data: Dict[str, Any], behavior_type: str, privacy_level: str
     ) -> Dict[str, Any]:
         """Analyze specific behavior type"""
         try:
@@ -1006,12 +1103,22 @@ class SmartContextAnalysisEngine:
             elif behavior_type == "query_patterns":
                 return self._analyze_query_patterns(behavior_data, privacy_level)
             else:
-                return {"type": behavior_type, "analysis": "Basic analysis", "confidence": 0.5}
+                return {
+                    "type": behavior_type,
+                    "analysis": "Basic analysis",
+                    "confidence": 0.5,
+                }
         except Exception as e:
             logger.error(f"Error analyzing behavior type {behavior_type}: {e}")
-            return {"type": behavior_type, "analysis": "Error in analysis", "confidence": 0.0}
+            return {
+                "type": behavior_type,
+                "analysis": "Error in analysis",
+                "confidence": 0.0,
+            }
 
-    def _analyze_formula_usage(self, behavior_data: Dict[str, Any], privacy_level: str) -> Dict[str, Any]:
+    def _analyze_formula_usage(
+        self, behavior_data: Dict[str, Any], privacy_level: str
+    ) -> Dict[str, Any]:
         """Analyze formula usage patterns"""
         try:
             formulas = behavior_data.get("formula_usage", [])
@@ -1021,7 +1128,7 @@ class SmartContextAnalysisEngine:
                 "most_used": usage_count.most_common(3),
                 "usage_diversity": len(set(formulas)),
                 "preferred_categories": self._categorize_formulas(formulas),
-                "privacy_level": privacy_level
+                "privacy_level": privacy_level,
             }
 
             return analysis
@@ -1029,7 +1136,9 @@ class SmartContextAnalysisEngine:
             logger.error(f"Error analyzing formula usage: {e}")
             return {"most_used": [], "usage_diversity": 0, "preferred_categories": []}
 
-    def _analyze_query_patterns(self, behavior_data: Dict[str, Any], privacy_level: str) -> Dict[str, Any]:
+    def _analyze_query_patterns(
+        self, behavior_data: Dict[str, Any], privacy_level: str
+    ) -> Dict[str, Any]:
         """Analyze query patterns"""
         try:
             queries = behavior_data.get("query_patterns", [])
@@ -1038,24 +1147,32 @@ class SmartContextAnalysisEngine:
                 "query_types": self._classify_queries(queries),
                 "query_complexity": self._assess_query_complexity(queries),
                 "common_themes": self._extract_common_themes(queries),
-                "privacy_level": privacy_level
+                "privacy_level": privacy_level,
             }
 
             return analysis
         except Exception as e:
             logger.error(f"Error analyzing query patterns: {e}")
-            return {"query_types": [], "query_complexity": "medium", "common_themes": []}
+            return {
+                "query_types": [],
+                "query_complexity": "medium",
+                "common_themes": [],
+            }
 
     def _categorize_formulas(self, formulas: List[str]) -> List[str]:
         """Categorize formulas by type"""
         try:
             categories = []
             for formula in formulas:
-                if any(term in formula.lower() for term in ['per', 'efficiency', 'rating']):
+                if any(
+                    term in formula.lower() for term in ["per", "efficiency", "rating"]
+                ):
                     categories.append("efficiency")
-                elif any(term in formula.lower() for term in ['shooting', 'fg', '3pt']):
+                elif any(term in formula.lower() for term in ["shooting", "fg", "3pt"]):
                     categories.append("shooting")
-                elif any(term in formula.lower() for term in ['defense', 'steal', 'block']):
+                elif any(
+                    term in formula.lower() for term in ["defense", "steal", "block"]
+                ):
                     categories.append("defensive")
 
             return list(set(categories))
@@ -1097,20 +1214,20 @@ class SmartContextAnalysisEngine:
         try:
             all_words = []
             for query in queries:
-                words = re.findall(r'\b\w+\b', query.lower())
+                words = re.findall(r"\b\w+\b", query.lower())
                 all_words.extend(words)
 
             word_count = Counter(all_words)
-            common_words = [word for word, count in word_count.most_common(5) if count > 1]
+            common_words = [
+                word for word, count in word_count.most_common(5) if count > 1
+            ]
             return common_words
         except Exception as e:
             logger.error(f"Error extracting common themes: {e}")
             return []
 
     def _identify_behavior_patterns(
-        self,
-        analysis: Dict[str, Any],
-        behavior_type: str
+        self, analysis: Dict[str, Any], behavior_type: str
     ) -> List[BehaviorPattern]:
         """Identify behavior patterns from analysis"""
         try:
@@ -1127,7 +1244,7 @@ class SmartContextAnalysisEngine:
                         description=f"User prefers {most_used[0][0]} formula",
                         examples=[most_used[0][0]] if most_used else [],
                         predictions=["Likely to use similar formulas"],
-                        metadata={"behavior_type": behavior_type}
+                        metadata={"behavior_type": behavior_type},
                     )
                     patterns.append(pattern)
 
@@ -1137,9 +1254,7 @@ class SmartContextAnalysisEngine:
             return []
 
     def _generate_behavior_predictions(
-        self,
-        patterns: List[BehaviorPattern],
-        user_id: str
+        self, patterns: List[BehaviorPattern], user_id: str
     ) -> List[str]:
         """Generate behavior predictions from patterns"""
         try:
@@ -1147,7 +1262,9 @@ class SmartContextAnalysisEngine:
 
             for pattern in patterns:
                 if pattern.pattern_type == "formula_preference":
-                    predictions.append(f"User will likely continue using {pattern.examples[0]} formula")
+                    predictions.append(
+                        f"User will likely continue using {pattern.examples[0]} formula"
+                    )
 
             return predictions[:5]  # Limit to 5 predictions
         except Exception as e:
@@ -1158,19 +1275,21 @@ class SmartContextAnalysisEngine:
         self,
         user_id: str,
         behavior_analysis: Dict[str, Any],
-        patterns: List[BehaviorPattern]
+        patterns: List[BehaviorPattern],
     ):
         """Update user profile with behavior analysis results"""
         try:
             if user_id not in self.user_profiles:
                 self.user_profiles[user_id] = {}
 
-            self.user_profiles[user_id].update({
-                "last_analysis": datetime.now().isoformat(),
-                "behavior_analysis": behavior_analysis,
-                "patterns": [asdict(pattern) for pattern in patterns],
-                "profile_confidence": 0.7
-            })
+            self.user_profiles[user_id].update(
+                {
+                    "last_analysis": datetime.now().isoformat(),
+                    "behavior_analysis": behavior_analysis,
+                    "patterns": [asdict(pattern) for pattern in patterns],
+                    "profile_confidence": 0.7,
+                }
+            )
         except Exception as e:
             logger.error(f"Error updating user profile: {e}")
 
@@ -1181,7 +1300,7 @@ class SmartContextAnalysisEngine:
         user_profile: Dict[str, Any],
         insights: List[Dict[str, Any]],
         personalization_level: str,
-        confidence_threshold: float
+        confidence_threshold: float,
     ) -> List[ContextualRecommendation]:
         """Generate recommendations for specific type"""
         try:
@@ -1202,7 +1321,7 @@ class SmartContextAnalysisEngine:
                         personalization_score=0.7,
                         reasoning=f"Recommended for {domain} analysis",
                         alternatives=[],
-                        metadata={"formula": formula, "domain": domain}
+                        metadata={"formula": formula, "domain": domain},
                     )
                     recommendations.append(rec)
 
@@ -1212,9 +1331,7 @@ class SmartContextAnalysisEngine:
             return []
 
     def _generate_alternative_recommendations(
-        self,
-        recommendations: List[ContextualRecommendation],
-        explanation_depth: str
+        self, recommendations: List[ContextualRecommendation], explanation_depth: str
     ) -> List[str]:
         """Generate alternative recommendations"""
         try:
@@ -1222,7 +1339,9 @@ class SmartContextAnalysisEngine:
 
             for rec in recommendations[:2]:  # Limit to top 2 recommendations
                 if rec.recommendation_type == "formula":
-                    alternatives.append(f"Alternative: Consider {rec.title} with different parameters")
+                    alternatives.append(
+                        f"Alternative: Consider {rec.title} with different parameters"
+                    )
 
             return alternatives
         except Exception as e:
@@ -1233,7 +1352,7 @@ class SmartContextAnalysisEngine:
         self,
         recommendation_count: int,
         recommendation_types: Optional[List[str]],
-        personalization_level: str
+        personalization_level: str,
     ) -> Dict[str, Any]:
         """Generate fallback recommendations when context analysis is empty"""
         try:
@@ -1246,7 +1365,13 @@ class SmartContextAnalysisEngine:
             for rec_type in recommendation_types:
                 if rec_type == "formula":
                     # Basic formula recommendations
-                    basic_formulas = ["PER", "TS%", "Usage Rate", "eFG%", "Defensive Rating"]
+                    basic_formulas = [
+                        "PER",
+                        "TS%",
+                        "Usage Rate",
+                        "eFG%",
+                        "Defensive Rating",
+                    ]
 
                     for formula in basic_formulas[:recommendation_count]:
                         rec = ContextualRecommendation(
@@ -1258,7 +1383,7 @@ class SmartContextAnalysisEngine:
                             personalization_score=0.3,  # Lower personalization
                             reasoning="Fallback recommendation due to limited context",
                             alternatives=[],
-                            metadata={"fallback": True, "formula": formula}
+                            metadata={"fallback": True, "formula": formula},
                         )
                         recommendations.append(rec)
 
@@ -1271,8 +1396,8 @@ class SmartContextAnalysisEngine:
                     "recommendation_count": len(recommendations),
                     "personalization_level": personalization_level,
                     "fallback_mode": True,
-                    "note": "Generated fallback recommendations due to empty context analysis"
-                }
+                    "note": "Generated fallback recommendations due to empty context analysis",
+                },
             }
 
         except Exception as e:
@@ -1281,17 +1406,19 @@ class SmartContextAnalysisEngine:
                 "status": "error",
                 "error": str(e),
                 "recommendations": [],
-                "metadata": {}
+                "metadata": {},
             }
 
-    def _extract_analysis_data(self, analysis_context: Dict[str, Any]) -> Dict[str, Any]:
+    def _extract_analysis_data(
+        self, analysis_context: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Extract analysis data from context"""
         try:
             return {
                 "formulas_used": analysis_context.get("formulas_used", []),
                 "analysis_results": analysis_context.get("results", {}),
                 "data_points": analysis_context.get("data_points", []),
-                "metrics": analysis_context.get("metrics", {})
+                "metrics": analysis_context.get("metrics", {}),
             }
         except Exception as e:
             logger.error(f"Error extracting analysis data: {e}")
@@ -1302,7 +1429,7 @@ class SmartContextAnalysisEngine:
         insight_type: str,
         analysis_data: Dict[str, Any],
         insight_depth: str,
-        confidence_threshold: float
+        confidence_threshold: float,
     ) -> List[ContextInsight]:
         """Generate insights for specific type"""
         try:
@@ -1321,7 +1448,7 @@ class SmartContextAnalysisEngine:
                         relevance_score=0.7,
                         actionable=True,
                         category="usage",
-                        metadata={"formulas": formulas_used}
+                        metadata={"formulas": formulas_used},
                     )
                     insights.append(insight)
 
@@ -1338,7 +1465,7 @@ class SmartContextAnalysisEngine:
                         relevance_score=0.8,
                         actionable=True,
                         category="trend",
-                        metadata={"metrics": list(metrics.keys())}
+                        metadata={"metrics": list(metrics.keys())},
                     )
                     insights.append(insight)
 
@@ -1347,7 +1474,9 @@ class SmartContextAnalysisEngine:
             logger.error(f"Error generating type insights: {e}")
             return []
 
-    def _generate_visualization_suggestions(self, insights: List[ContextInsight]) -> List[str]:
+    def _generate_visualization_suggestions(
+        self, insights: List[ContextInsight]
+    ) -> List[str]:
         """Generate visualization suggestions for insights"""
         try:
             suggestions = []
@@ -1364,9 +1493,7 @@ class SmartContextAnalysisEngine:
             return []
 
     def _generate_actionable_recommendations(
-        self,
-        insights: List[ContextInsight],
-        analysis_data: Dict[str, Any]
+        self, insights: List[ContextInsight], analysis_data: Dict[str, Any]
     ) -> List[str]:
         """Generate actionable recommendations from insights"""
         try:
@@ -1386,6 +1513,7 @@ class SmartContextAnalysisEngine:
 # Standalone Functions
 # =============================================================================
 
+
 def analyze_user_context_intelligently(
     user_query: str,
     session_history: Optional[List[Dict[str, Any]]] = None,
@@ -1393,7 +1521,7 @@ def analyze_user_context_intelligently(
     analysis_goals: Optional[List[str]] = None,
     expertise_level: str = "intermediate",
     preferred_formulas: Optional[List[str]] = None,
-    context_depth: str = "moderate"
+    context_depth: str = "moderate",
 ) -> Dict[str, Any]:
     """
     Standalone function for intelligent user context analysis.
@@ -1418,7 +1546,7 @@ def analyze_user_context_intelligently(
         analysis_goals=analysis_goals,
         expertise_level=expertise_level,
         preferred_formulas=preferred_formulas,
-        context_depth=context_depth
+        context_depth=context_depth,
     )
 
 
@@ -1428,7 +1556,7 @@ def analyze_user_behavior_patterns(
     behavior_types: List[str] = None,
     include_patterns: bool = True,
     include_predictions: bool = True,
-    privacy_level: str = "basic"
+    privacy_level: str = "basic",
 ) -> Dict[str, Any]:
     """
     Standalone function for user behavior pattern analysis.
@@ -1451,7 +1579,7 @@ def analyze_user_behavior_patterns(
         behavior_types=behavior_types,
         include_patterns=include_patterns,
         include_predictions=include_predictions,
-        privacy_level=privacy_level
+        privacy_level=privacy_level,
     )
 
 
@@ -1462,7 +1590,7 @@ def generate_contextual_recommendations(
     personalization_level: str = "basic",
     include_alternatives: bool = True,
     explanation_depth: str = "detailed",
-    confidence_threshold: float = 0.6
+    confidence_threshold: float = 0.6,
 ) -> Dict[str, Any]:
     """
     Standalone function for contextual recommendation generation.
@@ -1487,7 +1615,7 @@ def generate_contextual_recommendations(
         personalization_level=personalization_level,
         include_alternatives=include_alternatives,
         explanation_depth=explanation_depth,
-        confidence_threshold=confidence_threshold
+        confidence_threshold=confidence_threshold,
     )
 
 
@@ -1497,7 +1625,7 @@ def manage_session_context(
     context_type: str = "analysis_state",
     operation: str = "store",
     expiration_time: Optional[int] = None,
-    include_metadata: bool = True
+    include_metadata: bool = True,
 ) -> Dict[str, Any]:
     """
     Standalone function for session context management.
@@ -1520,7 +1648,7 @@ def manage_session_context(
         context_type=context_type,
         operation=operation,
         expiration_time=expiration_time,
-        include_metadata=include_metadata
+        include_metadata=include_metadata,
     )
 
 
@@ -1531,7 +1659,7 @@ def generate_intelligent_insights(
     include_visualizations: bool = True,
     include_actionable_recommendations: bool = True,
     confidence_threshold: float = 0.7,
-    max_insights: int = 10
+    max_insights: int = 10,
 ) -> Dict[str, Any]:
     """
     Standalone function for intelligent insight generation.
@@ -1556,5 +1684,5 @@ def generate_intelligent_insights(
         include_visualizations=include_visualizations,
         include_actionable_recommendations=include_actionable_recommendations,
         confidence_threshold=confidence_threshold,
-        max_insights=max_insights
+        max_insights=max_insights,
     )

@@ -27,11 +27,8 @@ from scripts.recursive_book_analysis import BookManager
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler('sports_books_upload.log')
-    ]
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler(), logging.FileHandler("sports_books_upload.log")],
 )
 logger = logging.getLogger(__name__)
 
@@ -46,7 +43,7 @@ BOOKS = [
         "digital_editions_path": "~/Documents/Digital Editions/Sports Analytics.pdf",
         "downloads_path": "~/Downloads/Sports_Analytics.pdf",
         "s3_path": "books/Sports_Analytics.pdf",
-        "converted": True
+        "converted": True,
     },
     {
         "id": "basketball_beyond_paper",
@@ -54,7 +51,7 @@ BOOKS = [
         "digital_editions_path": "~/Documents/Digital Editions/Basketball Beyond Paper.pdf",
         "downloads_path": "~/Downloads/Basketball_Beyond_Paper.pdf",
         "s3_path": "books/Basketball_Beyond_Paper.pdf",
-        "converted": True
+        "converted": True,
     },
     {
         "id": "midrange_theory",
@@ -62,8 +59,8 @@ BOOKS = [
         "digital_editions_path": "~/Documents/Digital Editions/The Midrange Theory.pdf",
         "downloads_path": "~/Downloads/The_Midrange_Theory.pdf",
         "s3_path": "books/The_Midrange_Theory.pdf",
-        "converted": False
-    }
+        "converted": False,
+    },
 ]
 
 
@@ -125,7 +122,8 @@ def upload_to_s3(book: dict) -> bool:
 
 def handle_missing_book(book: dict) -> None:
     """Provide instructions for the missing book."""
-    logger.info(f"""
+    logger.info(
+        f"""
 ╔══════════════════════════════════════════════════════════════════╗
 ║           ⚠️  MANUAL CONVERSION REQUIRED                         ║
 ╚══════════════════════════════════════════════════════════════════╝
@@ -143,7 +141,8 @@ Follow these steps:
 6. Re-run this script
 
 ═══════════════════════════════════════════════════════════════════
-""")
+"""
+    )
 
 
 def main():
@@ -154,7 +153,7 @@ def main():
     results = {
         "successful_uploads": [],
         "failed_uploads": [],
-        "missing_conversions": []
+        "missing_conversions": [],
     }
 
     for book in BOOKS:
@@ -180,7 +179,8 @@ def main():
             results["failed_uploads"].append(book)
 
     # Print summary
-    logger.info(f"""
+    logger.info(
+        f"""
 ╔══════════════════════════════════════════════════════════════════╗
 ║                    📊 UPLOAD SUMMARY                             ║
 ╚══════════════════════════════════════════════════════════════════╝
@@ -190,34 +190,43 @@ Failed Uploads: {len(results['failed_uploads'])}/3
 Missing Conversions: {len(results['missing_conversions'])}/3
 
 ✅ Successfully Uploaded:
-""")
+"""
+    )
 
     for book in results["successful_uploads"]:
         logger.info(f"   - {book['title']}")
 
     if results["failed_uploads"]:
-        logger.info(f"""
+        logger.info(
+            f"""
 ❌ Failed Uploads:
-""")
+"""
+        )
         for book in results["failed_uploads"]:
             logger.info(f"   - {book['title']}")
 
     if results["missing_conversions"]:
-        logger.info(f"""
+        logger.info(
+            f"""
 ⚠️  Needs Manual Conversion:
-""")
+"""
+        )
         for book in results["missing_conversions"]:
             logger.info(f"   - {book['title']}")
 
-    logger.info(f"""
+    logger.info(
+        f"""
 ═══════════════════════════════════════════════════════════════════
-""")
+"""
+    )
 
     # Exit with appropriate code
     if len(results["successful_uploads"]) >= 2:
         logger.info("🎉 Most books successfully uploaded!")
         if results["missing_conversions"]:
-            logger.info("📝 Please convert the remaining book manually and re-run this script.")
+            logger.info(
+                "📝 Please convert the remaining book manually and re-run this script."
+            )
         sys.exit(0)
     else:
         logger.error("⚠️  Some books failed to upload. Check logs for details.")
@@ -226,7 +235,3 @@ Missing Conversions: {len(results['missing_conversions'])}/3
 
 if __name__ == "__main__":
     main()
-
-
-
-

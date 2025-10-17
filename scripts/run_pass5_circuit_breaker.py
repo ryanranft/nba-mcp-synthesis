@@ -19,8 +19,7 @@ from generate_implementation_files import MCPImplementationGenerator
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -33,15 +32,15 @@ class CircuitBreaker:
         self.timeout = timeout
         self.failure_count = 0
         self.last_failure_time = None
-        self.state = 'CLOSED'  # CLOSED, OPEN, HALF_OPEN
+        self.state = "CLOSED"  # CLOSED, OPEN, HALF_OPEN
 
     def can_execute(self):
         """Check if execution is allowed."""
-        if self.state == 'CLOSED':
+        if self.state == "CLOSED":
             return True
-        elif self.state == 'OPEN':
+        elif self.state == "OPEN":
             if datetime.now().timestamp() - self.last_failure_time > self.timeout:
-                self.state = 'HALF_OPEN'
+                self.state = "HALF_OPEN"
                 return True
             return False
         else:  # HALF_OPEN
@@ -50,7 +49,7 @@ class CircuitBreaker:
     def on_success(self):
         """Handle successful execution."""
         self.failure_count = 0
-        self.state = 'CLOSED'
+        self.state = "CLOSED"
 
     def on_failure(self):
         """Handle failed execution."""
@@ -58,8 +57,10 @@ class CircuitBreaker:
         self.last_failure_time = datetime.now().timestamp()
 
         if self.failure_count >= self.failure_threshold:
-            self.state = 'OPEN'
-            logger.warning(f"🔴 Circuit breaker OPENED after {self.failure_count} failures")
+            self.state = "OPEN"
+            logger.warning(
+                f"🔴 Circuit breaker OPENED after {self.failure_count} failures"
+            )
 
 
 async def run_pass5_with_circuit_breaker():
@@ -74,9 +75,9 @@ async def run_pass5_with_circuit_breaker():
         logger.error(f"❌ Master recommendations file not found: {master_recs_path}")
         return False
 
-    with open(master_recs_path, 'r') as f:
+    with open(master_recs_path, "r") as f:
         data = json.load(f)
-        recommendations = data.get('recommendations', [])
+        recommendations = data.get("recommendations", [])
 
     logger.info(f"📋 Loaded {len(recommendations)} recommendations")
 
@@ -89,7 +90,7 @@ async def run_pass5_with_circuit_breaker():
         generator = MCPImplementationGenerator(
             mcp_server_url="http://localhost:8000",
             output_base="/Users/ryanranft/nba-simulator-aws/docs/phases",
-            templates_dir="templates"
+            templates_dir="templates",
         )
         logger.info("✅ Generator initialized successfully")
     except Exception as e:
@@ -97,7 +98,9 @@ async def run_pass5_with_circuit_breaker():
         return False
 
     # Initialize circuit breaker
-    circuit_breaker = CircuitBreaker(failure_threshold=10, timeout=120)  # 10 failures, 2 min timeout
+    circuit_breaker = CircuitBreaker(
+        failure_threshold=10, timeout=120
+    )  # 10 failures, 2 min timeout
 
     implementations_generated = 0
     files_created = 0
@@ -107,35 +110,45 @@ async def run_pass5_with_circuit_breaker():
     for i, rec in enumerate(recommendations):
         # Check circuit breaker
         if not circuit_breaker.can_execute():
-            logger.warning(f"🔴 Circuit breaker OPEN - skipping recommendation {i+1}/{len(recommendations)}")
+            logger.warning(
+                f"🔴 Circuit breaker OPEN - skipping recommendation {i+1}/{len(recommendations)}"
+            )
             skipped_due_to_circuit_breaker += 1
             continue
 
         try:
-            logger.info(f"🔧 Processing recommendation {i+1}/{len(recommendations)}: {rec.get('title', 'Untitled')}")
+            logger.info(
+                f"🔧 Processing recommendation {i+1}/{len(recommendations)}: {rec.get('title', 'Untitled')}"
+            )
 
             # Get phase from recommendation
-            phase = rec.get('phase', 0)
+            phase = rec.get("phase", 0)
 
             # Set timeout for each recommendation (60 seconds)
             try:
                 result = await asyncio.wait_for(
                     generator.generate_files_for_recommendation(rec, phase),
-                    timeout=60.0
+                    timeout=60.0,
                 )
 
-                if result.get('generated_files'):
+                if result.get("generated_files"):
                     implementations_generated += 1
-                    files_created += len(result.get('generated_files', []))
+                    files_created += len(result.get("generated_files", []))
                     circuit_breaker.on_success()
-                    logger.info(f"✅ Generated {len(result.get('generated_files', []))} files")
+                    logger.info(
+                        f"✅ Generated {len(result.get('generated_files', []))} files"
+                    )
                 else:
                     circuit_breaker.on_failure()
-                    logger.warning(f"⚠️ Failed to generate implementation: {result.get('errors', ['Unknown error'])}")
+                    logger.warning(
+                        f"⚠️ Failed to generate implementation: {result.get('errors', ['Unknown error'])}"
+                    )
 
             except asyncio.TimeoutError:
                 circuit_breaker.on_failure()
-                logger.error(f"⏰ Timeout processing recommendation: {rec.get('title', 'Untitled')}")
+                logger.error(
+                    f"⏰ Timeout processing recommendation: {rec.get('title', 'Untitled')}"
+                )
                 continue
             except Exception as e:
                 circuit_breaker.on_failure()
@@ -144,12 +157,16 @@ async def run_pass5_with_circuit_breaker():
 
         except Exception as e:
             circuit_breaker.on_failure()
-            logger.error(f"❌ Error generating implementation for {rec.get('title', 'Untitled')}: {e}")
+            logger.error(
+                f"❌ Error generating implementation for {rec.get('title', 'Untitled')}: {e}"
+            )
             continue
 
         # Progress update every 20 recommendations
         if (i + 1) % 20 == 0:
-            logger.info(f"📊 Progress: {i+1}/{len(recommendations)} processed, {implementations_generated} successful")
+            logger.info(
+                f"📊 Progress: {i+1}/{len(recommendations)} processed, {implementations_generated} successful"
+            )
 
     # Final results
     logger.info("\n" + "=" * 70)
@@ -158,21 +175,23 @@ async def run_pass5_with_circuit_breaker():
     logger.info(f"   Implementations generated: {implementations_generated}")
     logger.info(f"   Files created: {files_created}")
     logger.info(f"   Skipped (circuit breaker): {skipped_due_to_circuit_breaker}")
-    logger.info(f"   Success rate: {implementations_generated/len(recommendations)*100:.1f}%")
+    logger.info(
+        f"   Success rate: {implementations_generated/len(recommendations)*100:.1f}%"
+    )
     logger.info(f"   Circuit breaker state: {circuit_breaker.state}")
 
     # Update progress file
     progress_path = "analysis_results/multi_pass_progress.json"
     if os.path.exists(progress_path):
-        with open(progress_path, 'r') as f:
+        with open(progress_path, "r") as f:
             progress = json.load(f)
 
-        progress['pass_5']['status'] = 'completed'
-        progress['pass_5']['implementations_generated'] = implementations_generated
-        progress['pass_5']['files_created'] = files_created
-        progress['pass_5']['end_time'] = datetime.now().isoformat()
+        progress["pass_5"]["status"] = "completed"
+        progress["pass_5"]["implementations_generated"] = implementations_generated
+        progress["pass_5"]["files_created"] = files_created
+        progress["pass_5"]["end_time"] = datetime.now().isoformat()
 
-        with open(progress_path, 'w') as f:
+        with open(progress_path, "w") as f:
             json.dump(progress, f, indent=2)
 
         logger.info("💾 Progress file updated")
@@ -181,14 +200,18 @@ async def run_pass5_with_circuit_breaker():
         logger.info("✅ Pass 5 implementation generation completed successfully!")
         return True
     else:
-        logger.error("❌ Pass 5 implementation generation failed - no implementations generated")
+        logger.error(
+            "❌ Pass 5 implementation generation failed - no implementations generated"
+        )
         return False
 
 
 async def main():
     """Main function with overall timeout."""
     try:
-        success = await asyncio.wait_for(run_pass5_with_circuit_breaker(), timeout=1800.0)  # 30 minute total timeout
+        success = await asyncio.wait_for(
+            run_pass5_with_circuit_breaker(), timeout=1800.0
+        )  # 30 minute total timeout
         return 0 if success else 1
     except asyncio.TimeoutError:
         logger.error("⏰ Overall timeout (30 minutes)")
@@ -200,4 +223,3 @@ async def main():
 
 if __name__ == "__main__":
     exit(asyncio.run(main()))
-

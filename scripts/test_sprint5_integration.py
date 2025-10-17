@@ -21,6 +21,7 @@ print()
 print("1. Testing Helper Module Imports...")
 try:
     from mcp_server.tools import math_helper, stats_helper, nba_metrics_helper
+
     print("   ✓ All helper modules imported successfully")
 except Exception as e:
     print(f"   ✗ Import failed: {e}")
@@ -56,8 +57,8 @@ try:
     print(f"   ✓ median([10,20,30,40,50]) = {result}")
 
     summary = stats_helper.calculate_summary_stats([10, 20, 30, 40, 50])
-    assert summary['count'] == 5, "Expected count=5"
-    assert summary['mean'] == 30.0, "Expected mean=30.0"
+    assert summary["count"] == 5, "Expected count=5"
+    assert summary["mean"] == 30.0, "Expected mean=30.0"
     print(f"   ✓ summary_stats returned {summary['count']} values")
 except Exception as e:
     print(f"   ✗ Stats test failed: {e}")
@@ -68,9 +69,17 @@ print("4. Testing NBA Metrics...")
 try:
     # Test PER
     stats = {
-        "points": 2000, "rebounds": 600, "assists": 500,
-        "steals": 100, "blocks": 50, "fgm": 750, "fga": 1600,
-        "ftm": 400, "fta": 500, "turnovers": 200, "minutes": 2800
+        "points": 2000,
+        "rebounds": 600,
+        "assists": 500,
+        "steals": 100,
+        "blocks": 50,
+        "fgm": 750,
+        "fga": 1600,
+        "ftm": 400,
+        "fta": 500,
+        "turnovers": 200,
+        "minutes": 2800,
     }
     per = nba_metrics_helper.calculate_per(stats)
     assert per > 0, f"Expected positive PER, got {per}"
@@ -123,8 +132,10 @@ print()
 print("6. Testing Parameter Models...")
 try:
     from mcp_server.tools.params import (
-        MathTwoNumberParams, MathNumberListParams,
-        StatsVarianceParams, NbaPerParams
+        MathTwoNumberParams,
+        MathNumberListParams,
+        StatsVarianceParams,
+        NbaPerParams,
     )
 
     # Test basic math params
@@ -139,9 +150,17 @@ try:
 
     # Test NBA params
     params = NbaPerParams(
-        points=2000, rebounds=600, assists=500,
-        steals=100, blocks=50, fgm=750, fga=1600,
-        ftm=400, fta=500, turnovers=200, minutes=2800
+        points=2000,
+        rebounds=600,
+        assists=500,
+        steals=100,
+        blocks=50,
+        fgm=750,
+        fga=1600,
+        ftm=400,
+        fta=500,
+        turnovers=200,
+        minutes=2800,
     )
     assert params.points == 2000
     print("   ✓ NbaPerParams validated")
@@ -152,27 +171,17 @@ except Exception as e:
 print()
 print("7. Testing Response Models...")
 try:
-    from mcp_server.responses import (
-        MathOperationResult, StatsResult, NbaMetricResult
-    )
+    from mcp_server.responses import MathOperationResult, StatsResult, NbaMetricResult
 
     # Test math response
     response = MathOperationResult(
-        operation="add",
-        result=8.0,
-        inputs={"a": 5, "b": 3},
-        success=True
+        operation="add", result=8.0, inputs={"a": 5, "b": 3}, success=True
     )
     assert response.success is True
     print("   ✓ MathOperationResult created")
 
     # Test stats response
-    response = StatsResult(
-        statistic="mean",
-        result=30.0,
-        input_count=5,
-        success=True
-    )
+    response = StatsResult(statistic="mean", result=30.0, input_count=5, success=True)
     assert response.success is True
     print("   ✓ StatsResult created")
 
@@ -182,7 +191,7 @@ try:
         result=18.5,
         inputs={"points": 2000},
         interpretation="Above league average",
-        success=True
+        success=True,
     )
     assert response.success is True
     print("   ✓ NbaMetricResult created")

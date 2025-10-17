@@ -18,12 +18,12 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from scripts.google_claude_book_analyzer import GoogleClaudeBookAnalyzer
+from mcp_server.env_helper import get_hierarchical_env
 from scripts.cost_tracker import CostTracker
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ TEST_BOOKS = [
         - Automated workflows
         - Security and compliance
         - Performance optimization
-        """
+        """,
     },
     {
         "id": "statistics_601",
@@ -83,9 +83,10 @@ TEST_BOOKS = [
         - Robust statistical methods
         - Research methodology
         - Data quality assessment
-        """
-    }
+        """,
+    },
 ]
+
 
 async def test_google_claude_analysis():
     """Test Google + Claude analysis on 2 books"""
@@ -94,8 +95,12 @@ async def test_google_claude_analysis():
     logger.info("=" * 60)
 
     # Check API keys
-    google_api_key = os.getenv("GOOGLE_API_KEY")
-    claude_api_key = os.getenv("ANTHROPIC_API_KEY")
+    google_api_key = get_hierarchical_env(
+        "GOOGLE_API_KEY", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+    )
+    claude_api_key = get_hierarchical_env(
+        "ANTHROPIC_API_KEY", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+    )
 
     if not google_api_key:
         logger.error("❌ GOOGLE_API_KEY environment variable not set")
@@ -147,9 +152,19 @@ async def test_google_claude_analysis():
             logger.info(f"   Time: {result.total_time:.1f}s")
 
             # Count by priority
-            critical_count = len([r for r in result.recommendations if r.get('priority') == 'CRITICAL'])
-            important_count = len([r for r in result.recommendations if r.get('priority') == 'IMPORTANT'])
-            nice_count = len([r for r in result.recommendations if r.get('priority') == 'NICE-TO-HAVE'])
+            critical_count = len(
+                [r for r in result.recommendations if r.get("priority") == "CRITICAL"]
+            )
+            important_count = len(
+                [r for r in result.recommendations if r.get("priority") == "IMPORTANT"]
+            )
+            nice_count = len(
+                [
+                    r
+                    for r in result.recommendations
+                    if r.get("priority") == "NICE-TO-HAVE"
+                ]
+            )
 
             logger.info(f"   Priority breakdown:")
             logger.info(f"     Critical: {critical_count}")
@@ -164,21 +179,25 @@ async def test_google_claude_analysis():
 
             # Save individual results
             output_file = f"test_results_{book['id']}.json"
-            with open(output_file, 'w') as f:
-                json.dump({
-                    "book": book,
-                    "result": {
-                        "recommendations": result.recommendations,
-                        "google_analysis": result.google_analysis,
-                        "claude_synthesis": result.claude_synthesis,
-                        "total_cost": result.total_cost,
-                        "total_tokens": result.total_tokens,
-                        "total_time": result.total_time,
-                        "google_cost": result.google_cost,
-                        "claude_cost": result.claude_cost,
-                        "processing_details": result.processing_details
-                    }
-                }, f, indent=2)
+            with open(output_file, "w") as f:
+                json.dump(
+                    {
+                        "book": book,
+                        "result": {
+                            "recommendations": result.recommendations,
+                            "google_analysis": result.google_analysis,
+                            "claude_synthesis": result.claude_synthesis,
+                            "total_cost": result.total_cost,
+                            "total_tokens": result.total_tokens,
+                            "total_time": result.total_time,
+                            "google_cost": result.google_cost,
+                            "claude_cost": result.claude_cost,
+                            "processing_details": result.processing_details,
+                        },
+                    },
+                    f,
+                    indent=2,
+                )
 
             logger.info(f"💾 Results saved to {output_file}")
 
@@ -208,9 +227,15 @@ async def test_google_claude_analysis():
     logger.info(f"\n🎯 QUALITY ASSESSMENT")
     logger.info("-" * 30)
 
-    critical_count = len([r for r in all_recommendations if r.get('priority') == 'CRITICAL'])
-    important_count = len([r for r in all_recommendations if r.get('priority') == 'IMPORTANT'])
-    nice_count = len([r for r in all_recommendations if r.get('priority') == 'NICE-TO-HAVE'])
+    critical_count = len(
+        [r for r in all_recommendations if r.get("priority") == "CRITICAL"]
+    )
+    important_count = len(
+        [r for r in all_recommendations if r.get("priority") == "IMPORTANT"]
+    )
+    nice_count = len(
+        [r for r in all_recommendations if r.get("priority") == "NICE-TO-HAVE"]
+    )
 
     logger.info(f"Critical recommendations: {critical_count}")
     logger.info(f"Important recommendations: {important_count}")
@@ -219,7 +244,13 @@ async def test_google_claude_analysis():
     # Check for required fields
     complete_recs = 0
     for rec in all_recommendations:
-        required_fields = ['title', 'description', 'priority', 'time_estimate', 'mapped_phase']
+        required_fields = [
+            "title",
+            "description",
+            "priority",
+            "time_estimate",
+            "mapped_phase",
+        ]
         if all(field in rec for field in required_fields):
             complete_recs += 1
 
@@ -235,34 +266,41 @@ async def test_google_claude_analysis():
             "total_time": total_time,
             "average_cost_per_book": total_cost / len(TEST_BOOKS),
             "average_tokens_per_book": total_tokens // len(TEST_BOOKS),
-            "average_time_per_book": total_time / len(TEST_BOOKS)
+            "average_time_per_book": total_time / len(TEST_BOOKS),
         },
         "cost_projections": {
             "estimated_cost_20_books": total_cost * 10,
-            "estimated_cost_17_books": total_cost * 8.5
+            "estimated_cost_17_books": total_cost * 8.5,
         },
         "quality_metrics": {
             "critical_recommendations": critical_count,
             "important_recommendations": important_count,
             "nice_to_have_recommendations": nice_count,
             "complete_recommendations": complete_recs,
-            "completion_rate": complete_recs / len(all_recommendations) if all_recommendations else 0
+            "completion_rate": (
+                complete_recs / len(all_recommendations) if all_recommendations else 0
+            ),
         },
-        "recommendations": all_recommendations
+        "recommendations": all_recommendations,
     }
 
-    with open("google_claude_test_summary.json", 'w') as f:
+    with open("google_claude_test_summary.json", "w") as f:
         json.dump(summary, f, indent=2)
 
     logger.info("💾 Test summary saved to google_claude_test_summary.json")
 
     # Final assessment
-    if total_cost < 5.0 and len(all_recommendations) >= 10 and complete_recs >= len(all_recommendations) * 0.8:
+    if (
+        total_cost < 5.0
+        and len(all_recommendations) >= 10
+        and complete_recs >= len(all_recommendations) * 0.8
+    ):
         logger.info("\n✅ TEST PASSED - Ready for full deployment!")
         return True
     else:
         logger.warning("\n⚠️ TEST NEEDS REVIEW - Check results before full deployment")
         return False
+
 
 async def main():
     """Main test function"""
@@ -278,9 +316,6 @@ async def main():
         logger.error(f"\n💥 Test crashed: {str(e)}")
         sys.exit(1)
 
+
 if __name__ == "__main__":
     asyncio.run(main())
-
-
-
-

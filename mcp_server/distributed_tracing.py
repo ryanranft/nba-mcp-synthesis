@@ -1,4 +1,5 @@
 """Distributed Tracing - IMPORTANT 15"""
+
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
@@ -19,7 +20,7 @@ class DistributedTracer:
         self,
         service_name: str = "nba-mcp",
         jaeger_host: str = "localhost",
-        jaeger_port: int = 6831
+        jaeger_port: int = 6831,
     ):
         """
         Initialize distributed tracer
@@ -32,10 +33,9 @@ class DistributedTracer:
         self.service_name = service_name
 
         # Create resource
-        resource = Resource(attributes={
-            "service.name": service_name,
-            "service.version": "1.0.0"
-        })
+        resource = Resource(
+            attributes={"service.name": service_name, "service.version": "1.0.0"}
+        )
 
         # Create tracer provider
         provider = TracerProvider(resource=resource)
@@ -68,10 +68,7 @@ class DistributedTracer:
         Returns:
             Span context manager
         """
-        return self.tracer.start_as_current_span(
-            name,
-            attributes=attributes
-        )
+        return self.tracer.start_as_current_span(name, attributes=attributes)
 
     def trace_function(self, span_name: str = None):
         """
@@ -85,15 +82,14 @@ class DistributedTracer:
             def my_function():
                 ...
         """
+
         def decorator(func: Callable) -> Callable:
             @wraps(func)
             def wrapper(*args, **kwargs) -> Any:
                 name = span_name or func.__name__
 
                 with self.start_span(
-                    name,
-                    function=func.__name__,
-                    module=func.__module__
+                    name, function=func.__name__, module=func.__module__
                 ) as span:
                     try:
                         # Add function args as attributes
@@ -122,6 +118,7 @@ class DistributedTracer:
                         raise
 
             return wrapper
+
         return decorator
 
     def add_event(self, name: str, **attributes):
@@ -168,11 +165,7 @@ def fetch_player_stats(player_id: int, season: str):
     """Fetch player statistics"""
     tracer = get_tracer()
 
-    with tracer.start_span(
-        "database_query",
-        player_id=player_id,
-        season=season
-    ):
+    with tracer.start_span("database_query", player_id=player_id, season=season):
         # Simulate database query
         time.sleep(0.1)
         return {"player_id": player_id, "points": 25}
@@ -202,5 +195,6 @@ if __name__ == "__main__":
 
         tracer.add_event("processing_complete", result_count=1)
 
-    logger.info("✅ Tracing example complete - view in Jaeger UI at http://localhost:16686")
-
+    logger.info(
+        "✅ Tracing example complete - view in Jaeger UI at http://localhost:16686"
+    )

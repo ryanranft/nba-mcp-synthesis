@@ -19,6 +19,8 @@ from rich.json import JSON
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from mcp_server.env_helper import get_hierarchical_env
+
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from dotenv import load_dotenv
@@ -51,14 +53,35 @@ class MCPTestClient:
             command="python3",
             args=[self.server_script_path],
             env={
-                "RDS_HOST": os.getenv("RDS_HOST"),
-                "RDS_PORT": os.getenv("RDS_PORT"),
-                "RDS_DATABASE": os.getenv("RDS_DATABASE"),
-                "RDS_USERNAME": os.getenv("RDS_USERNAME"),
-                "RDS_PASSWORD": os.getenv("RDS_PASSWORD"),
-                "S3_BUCKET": os.getenv("S3_BUCKET"),
-                "S3_REGION": os.getenv("S3_REGION", "us-east-1"),
-            }
+                "RDS_HOST": get_hierarchical_env(
+                    "RDS_HOST", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+                )
+                or "localhost",
+                "RDS_PORT": get_hierarchical_env(
+                    "RDS_PORT", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+                )
+                or "5432",
+                "RDS_DATABASE": get_hierarchical_env(
+                    "RDS_DATABASE", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+                )
+                or "nba_stats",
+                "RDS_USERNAME": get_hierarchical_env(
+                    "RDS_USERNAME", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+                )
+                or "postgres",
+                "RDS_PASSWORD": get_hierarchical_env(
+                    "RDS_PASSWORD", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+                )
+                or "",
+                "S3_BUCKET": get_hierarchical_env(
+                    "S3_BUCKET", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+                )
+                or "nba-mcp-books-20251011",
+                "S3_REGION": get_hierarchical_env(
+                    "S3_REGION", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+                )
+                or "us-east-1",
+            },
         )
 
         try:
@@ -79,6 +102,7 @@ class MCPTestClient:
         except Exception as e:
             console.print(f"[red]❌ Failed to connect: {e}[/red]")
             import traceback
+
             console.print(traceback.format_exc())
             return False
 
@@ -102,10 +126,7 @@ class MCPTestClient:
             table.add_column("Description", style="white", width=50)
 
             for tool in result.tools:
-                table.add_row(
-                    tool.name,
-                    tool.description or "No description"
-                )
+                table.add_row(tool.name, tool.description or "No description")
 
             console.print(table)
             console.print(f"\n[green]Found {len(result.tools)} tools[/green]")
@@ -137,31 +158,39 @@ class MCPTestClient:
 
             execution_time = (datetime.now() - start_time).total_seconds()
 
-            console.print(f"\n[green]✅ Tool executed successfully ({execution_time:.2f}s)[/green]")
+            console.print(
+                f"\n[green]✅ Tool executed successfully ({execution_time:.2f}s)[/green]"
+            )
 
             # Display result
-            if hasattr(result, 'content') and result.content:
+            if hasattr(result, "content") and result.content:
                 for content in result.content:
-                    if hasattr(content, 'text'):
+                    if hasattr(content, "text"):
                         # Try to parse as JSON for pretty printing
                         try:
                             result_data = json.loads(content.text)
-                            console.print(Panel(
-                                JSON(json.dumps(result_data, indent=2)),
-                                title=f"Result from {tool_name}"
-                            ))
+                            console.print(
+                                Panel(
+                                    JSON(json.dumps(result_data, indent=2)),
+                                    title=f"Result from {tool_name}",
+                                )
+                            )
                         except json.JSONDecodeError:
                             # Not JSON, just print as text
-                            console.print(Panel(
-                                content.text[:500] + ("..." if len(content.text) > 500 else ""),
-                                title=f"Result from {tool_name}"
-                            ))
+                            console.print(
+                                Panel(
+                                    content.text[:500]
+                                    + ("..." if len(content.text) > 500 else ""),
+                                    title=f"Result from {tool_name}",
+                                )
+                            )
 
             return result
 
         except Exception as e:
             console.print(f"[red]❌ Tool execution failed: {e}[/red]")
             import traceback
+
             console.print(traceback.format_exc())
             return None
 
@@ -176,25 +205,26 @@ async def test_list_tables(client: MCPTestClient):
 
 async def test_get_table_schema(client: MCPTestClient):
     """Test get_table_schema tool"""
-    console.print("\n" + "="*80 + "\n")
+    console.print("\n" + "=" * 80 + "\n")
     console.print(Panel.fit("Test 2: Get Table Schema", style="bold blue"))
 
     # First list tables to get a table name
     tables_result = await client.call_tool("list_tables", {})
 
-    if tables_result and hasattr(tables_result, 'content'):
+    if tables_result and hasattr(tables_result, "content"):
         for content in tables_result.content:
-            if hasattr(content, 'text'):
+            if hasattr(content, "text"):
                 try:
                     data = json.loads(content.text)
-                    if 'tables' in data and data['tables']:
+                    if "tables" in data and data["tables"]:
                         # Get schema for first table
-                        table_name = data['tables'][0]
-                        console.print(f"\n[cyan]Getting schema for: {table_name}[/cyan]")
+                        table_name = data["tables"][0]
+                        console.print(
+                            f"\n[cyan]Getting schema for: {table_name}[/cyan]"
+                        )
 
                         schema_result = await client.call_tool(
-                            "get_table_schema",
-                            {"table_name": table_name}
+                            "get_table_schema", {"table_name": table_name}
                         )
                         return schema_result
                 except json.JSONDecodeError:
@@ -206,39 +236,30 @@ async def test_get_table_schema(client: MCPTestClient):
 
 async def test_query_database(client: MCPTestClient):
     """Test query_database tool"""
-    console.print("\n" + "="*80 + "\n")
+    console.print("\n" + "=" * 80 + "\n")
     console.print(Panel.fit("Test 3: Query Database", style="bold blue"))
 
     # Simple query
     sql = "SELECT version()"
 
-    result = await client.call_tool(
-        "query_database",
-        {"sql": sql}
-    )
+    result = await client.call_tool("query_database", {"sql": sql})
 
     return result
 
 
 async def test_list_s3_files(client: MCPTestClient):
     """Test list_s3_files tool"""
-    console.print("\n" + "="*80 + "\n")
+    console.print("\n" + "=" * 80 + "\n")
     console.print(Panel.fit("Test 4: List S3 Files", style="bold blue"))
 
-    result = await client.call_tool(
-        "list_s3_files",
-        {
-            "prefix": "",
-            "max_keys": 10
-        }
-    )
+    result = await client.call_tool("list_s3_files", {"prefix": "", "max_keys": 10})
 
     return result
 
 
 async def test_complex_query(client: MCPTestClient):
     """Test complex database query"""
-    console.print("\n" + "="*80 + "\n")
+    console.print("\n" + "=" * 80 + "\n")
     console.print(Panel.fit("Test 5: Complex Query", style="bold blue"))
 
     # Get tables first
@@ -255,21 +276,20 @@ async def test_complex_query(client: MCPTestClient):
     LIMIT 20
     """
 
-    result = await client.call_tool(
-        "query_database",
-        {"sql": sql}
-    )
+    result = await client.call_tool("query_database", {"sql": sql})
 
     return result
 
 
 async def main():
     """Run MCP client tests"""
-    console.print(Panel.fit(
-        "NBA MCP Server - Client Testing Suite\n" +
-        "Testing MCP server communication via stdio",
-        style="bold white on blue"
-    ))
+    console.print(
+        Panel.fit(
+            "NBA MCP Server - Client Testing Suite\n"
+            + "Testing MCP server communication via stdio",
+            style="bold white on blue",
+        )
+    )
 
     # Determine server script path
     project_root = Path(__file__).parent.parent
@@ -294,19 +314,21 @@ async def main():
         tools = await client.list_tools()
 
         if not tools:
-            console.print("[yellow]No tools available. Check server configuration.[/yellow]")
+            console.print(
+                "[yellow]No tools available. Check server configuration.[/yellow]"
+            )
             return
 
         # Run tests
         results = []
 
-        console.print("\n" + "="*80 + "\n")
+        console.print("\n" + "=" * 80 + "\n")
         console.print(Panel.fit("Running Tests", style="bold green"))
 
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
-            console=console
+            console=console,
         ) as progress:
             # Test 1: List tables
             task1 = progress.add_task("Test 1: List tables", total=1)
@@ -339,7 +361,7 @@ async def main():
             progress.update(task5, completed=1)
 
         # Summary
-        console.print("\n" + "="*80 + "\n")
+        console.print("\n" + "=" * 80 + "\n")
         console.print(Panel.fit("Test Summary", style="bold green"))
 
         summary_table = Table(title="Test Results", show_header=True)
@@ -348,8 +370,7 @@ async def main():
 
         for test_name, success in results:
             summary_table.add_row(
-                test_name,
-                "[green]✅ PASS[/green]" if success else "[red]❌ FAIL[/red]"
+                test_name, "[green]✅ PASS[/green]" if success else "[red]❌ FAIL[/red]"
             )
 
         console.print(summary_table)
@@ -360,13 +381,16 @@ async def main():
         if success_count == len(results):
             console.print("[bold green]✅ All tests passed![/bold green]")
         else:
-            console.print(f"[bold yellow]⚠️  {len(results) - success_count} test(s) failed[/bold yellow]")
+            console.print(
+                f"[bold yellow]⚠️  {len(results) - success_count} test(s) failed[/bold yellow]"
+            )
 
     except KeyboardInterrupt:
         console.print("\n[yellow]Tests interrupted by user[/yellow]")
     except Exception as e:
         console.print(f"\n[bold red]Error: {e}[/bold red]")
         import traceback
+
         console.print(traceback.format_exc())
     finally:
         # Disconnect

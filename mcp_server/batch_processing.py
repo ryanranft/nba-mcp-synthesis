@@ -37,12 +37,13 @@ import json
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar('T')
-R = TypeVar('R')
+T = TypeVar("T")
+R = TypeVar("R")
 
 
 class BatchStatus(Enum):
     """Batch job status"""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -54,6 +55,7 @@ class BatchStatus(Enum):
 @dataclass
 class BatchResult:
     """Result of batch processing"""
+
     total_items: int
     processed_items: int
     failed_items: int
@@ -67,6 +69,7 @@ class BatchResult:
 @dataclass
 class BatchProgress:
     """Track batch processing progress"""
+
     total_items: int
     processed_items: int = 0
     failed_items: int = 0
@@ -115,19 +118,19 @@ class BatchProgress:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'total_items': self.total_items,
-            'processed_items': self.processed_items,
-            'failed_items': self.failed_items,
-            'skipped_items': self.skipped_items,
-            'progress_percent': round(self.progress_percent, 2),
-            'success_rate': round(self.success_rate, 2),
-            'elapsed_seconds': round(self.elapsed_seconds, 2),
-            'items_per_second': round(self.items_per_second, 2),
-            'estimated_time_remaining_seconds': (
+            "total_items": self.total_items,
+            "processed_items": self.processed_items,
+            "failed_items": self.failed_items,
+            "skipped_items": self.skipped_items,
+            "progress_percent": round(self.progress_percent, 2),
+            "success_rate": round(self.success_rate, 2),
+            "elapsed_seconds": round(self.elapsed_seconds, 2),
+            "items_per_second": round(self.items_per_second, 2),
+            "estimated_time_remaining_seconds": (
                 round(self.estimated_time_remaining_seconds, 2)
                 if self.estimated_time_remaining_seconds
                 else None
-            )
+            ),
         }
 
 
@@ -139,7 +142,7 @@ class BatchProcessor(Generic[T, R]):
         batch_size: int = 100,
         max_workers: int = 4,
         checkpoint_interval: int = 1000,
-        enable_checkpoints: bool = True
+        enable_checkpoints: bool = True,
     ):
         self.batch_size = batch_size
         self.max_workers = max_workers
@@ -157,30 +160,19 @@ class BatchProcessor(Generic[T, R]):
     def _create_batches(self, items: List[T]) -> Iterator[List[T]]:
         """Split items into batches"""
         for i in range(0, len(items), self.batch_size):
-            yield items[i:i + self.batch_size]
+            yield items[i : i + self.batch_size]
 
     def _process_item(self, item: T, processor: Callable[[T], R]) -> Dict[str, Any]:
         """Process single item with error handling"""
         try:
             result = processor(item)
-            return {
-                'success': True,
-                'item': item,
-                'result': result
-            }
+            return {"success": True, "item": item, "result": result}
         except Exception as e:
             logger.error(f"Error processing item {item}: {e}")
-            return {
-                'success': False,
-                'item': item,
-                'error': str(e)
-            }
+            return {"success": False, "item": item, "error": str(e)}
 
     def _process_batch(
-        self,
-        batch: List[T],
-        processor: Callable[[T], R],
-        parallel: bool = True
+        self, batch: List[T], processor: Callable[[T], R], parallel: bool = True
     ) -> List[Dict[str, Any]]:
         """Process a single batch"""
         if parallel and len(batch) > 1:
@@ -207,7 +199,7 @@ class BatchProcessor(Generic[T, R]):
 
         checkpoint_file = f"checkpoint_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         try:
-            with open(checkpoint_file, 'w') as f:
+            with open(checkpoint_file, "w") as f:
                 json.dump(checkpoint_data, f)
             logger.info(f"Checkpoint saved: {checkpoint_file}")
         except Exception as e:
@@ -218,7 +210,7 @@ class BatchProcessor(Generic[T, R]):
         items: List[T],
         processor: Callable[[T], R],
         parallel: bool = True,
-        on_progress: Optional[Callable[[BatchProgress], None]] = None
+        on_progress: Optional[Callable[[BatchProgress], None]] = None,
     ) -> BatchResult:
         """Process items in batches"""
         if not items:
@@ -228,7 +220,7 @@ class BatchProcessor(Generic[T, R]):
                 failed_items=0,
                 skipped_items=0,
                 success_rate=0.0,
-                processing_time_seconds=0.0
+                processing_time_seconds=0.0,
             )
 
         # Initialize
@@ -237,8 +229,7 @@ class BatchProcessor(Generic[T, R]):
 
         batches = list(self._create_batches(items))
         self.progress = BatchProgress(
-            total_items=len(items),
-            total_batches=len(batches)
+            total_items=len(items), total_batches=len(batches)
         )
 
         all_results = []
@@ -264,14 +255,13 @@ class BatchProcessor(Generic[T, R]):
                     self.progress.current_batch = batch_idx + 1
 
                     for result in batch_results:
-                        if result['success']:
-                            all_results.append(result['result'])
+                        if result["success"]:
+                            all_results.append(result["result"])
                             self.progress.processed_items += 1
                         else:
-                            all_errors.append({
-                                'item': result['item'],
-                                'error': result['error']
-                            })
+                            all_errors.append(
+                                {"item": result["item"], "error": result["error"]}
+                            )
                             self.progress.failed_items += 1
 
                     self.progress.last_update = datetime.now()
@@ -281,11 +271,14 @@ class BatchProcessor(Generic[T, R]):
                     on_progress(self.progress)
 
                 # Checkpoint
-                if self.enable_checkpoints and (batch_idx + 1) % self.checkpoint_interval == 0:
+                if (
+                    self.enable_checkpoints
+                    and (batch_idx + 1) % self.checkpoint_interval == 0
+                ):
                     checkpoint_data = {
-                        'batch_idx': batch_idx + 1,
-                        'progress': self.progress.to_dict(),
-                        'timestamp': datetime.now().isoformat()
+                        "batch_idx": batch_idx + 1,
+                        "progress": self.progress.to_dict(),
+                        "timestamp": datetime.now().isoformat(),
                     }
                     self._save_checkpoint(checkpoint_data)
 
@@ -311,7 +304,7 @@ class BatchProcessor(Generic[T, R]):
             success_rate=(processed - failed) / processed * 100 if processed > 0 else 0,
             processing_time_seconds=processing_time,
             results=all_results,
-            errors=all_errors
+            errors=all_errors,
         )
 
     def pause(self) -> None:
@@ -345,9 +338,7 @@ class StreamingBatchProcessor(Generic[T, R]):
         self.batch_size = batch_size
 
     def process_stream(
-        self,
-        item_iterator: Iterator[T],
-        processor: Callable[[List[T]], List[R]]
+        self, item_iterator: Iterator[T], processor: Callable[[List[T]], List[R]]
     ) -> Iterator[R]:
         """Process items from an iterator in batches"""
         batch = []
@@ -379,11 +370,11 @@ def batch_update_player_stats(player_ids: List[int]) -> BatchResult:
         # Simulate API call
         time.sleep(0.1)
         return {
-            'player_id': player_id,
-            'ppg': 20.5,
-            'rpg': 8.2,
-            'apg': 5.1,
-            'updated_at': datetime.now().isoformat()
+            "player_id": player_id,
+            "ppg": 20.5,
+            "rpg": 8.2,
+            "apg": 5.1,
+            "updated_at": datetime.now().isoformat(),
         }
 
     return processor.process(player_ids, update_stats, parallel=True)
@@ -397,9 +388,9 @@ def batch_generate_predictions(games: List[Dict[str, Any]]) -> BatchResult:
         """Predict single game outcome"""
         time.sleep(0.2)  # Simulate ML model inference
         return {
-            'game_id': game['game_id'],
-            'prediction': 'home_win',
-            'confidence': 0.72
+            "game_id": game["game_id"],
+            "prediction": "home_win",
+            "confidence": 0.72,
         }
 
     return processor.process(games, predict_game, parallel=True)
@@ -419,19 +410,18 @@ if __name__ == "__main__":
     def square_number(n: int) -> int:
         """Simple processing function"""
         time.sleep(0.1)  # Simulate work
-        return n ** 2
+        return n**2
 
     def progress_callback(progress: BatchProgress):
         """Progress callback"""
-        print(f"  Progress: {progress.progress_percent:.1f}% "
-              f"({progress.processed_items}/{progress.total_items}) "
-              f"- {progress.items_per_second:.1f} items/sec")
+        print(
+            f"  Progress: {progress.progress_percent:.1f}% "
+            f"({progress.processed_items}/{progress.total_items}) "
+            f"- {progress.items_per_second:.1f} items/sec"
+        )
 
     result = processor.process(
-        items,
-        square_number,
-        parallel=True,
-        on_progress=progress_callback
+        items, square_number, parallel=True, on_progress=progress_callback
     )
 
     print(f"\nBatch Result:")
@@ -450,7 +440,9 @@ if __name__ == "__main__":
     print(f"Updating stats for {len(player_ids)} players...")
 
     stats_result = batch_update_player_stats(player_ids)
-    print(f"Updated {stats_result.processed_items} players in {stats_result.processing_time_seconds:.2f}s")
+    print(
+        f"Updated {stats_result.processed_items} players in {stats_result.processing_time_seconds:.2f}s"
+    )
 
     # Streaming processor demo
     print("\n--- Streaming Processor Demo ---")
@@ -472,4 +464,3 @@ if __name__ == "__main__":
         print(f"  Result: {result}")
 
     print("\n=== Demo Complete ===")
-

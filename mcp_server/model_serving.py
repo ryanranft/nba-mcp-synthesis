@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 class ModelStatus(Enum):
     """Model deployment status"""
+
     LOADING = "loading"
     READY = "ready"
     DEGRADED = "degraded"
@@ -55,7 +56,9 @@ class ServingModel:
         except Exception as e:
             with self.lock:
                 self.error_count += 1
-            logger.error(f"Prediction error in model {self.model_id} v{self.version}: {e}")
+            logger.error(
+                f"Prediction error in model {self.model_id} v{self.version}: {e}"
+            )
             raise
 
     @property
@@ -82,7 +85,7 @@ class ServingModel:
             "error_count": self.error_count,
             "error_rate": self.error_rate,
             "avg_latency_ms": self.avg_latency_ms,
-            "uptime_seconds": (datetime.utcnow() - self.loaded_at).total_seconds()
+            "uptime_seconds": (datetime.utcnow() - self.loaded_at).total_seconds(),
         }
 
 
@@ -92,14 +95,12 @@ class ModelServingManager:
     def __init__(self):
         self.models: Dict[str, List[ServingModel]] = {}  # model_id -> list of versions
         self.active_models: Dict[str, str] = {}  # model_id -> active version
-        self.ab_tests: Dict[str, Dict[str, float]] = {}  # model_id -> {version: traffic_percent}
+        self.ab_tests: Dict[str, Dict[str, float]] = (
+            {}
+        )  # model_id -> {version: traffic_percent}
 
     def deploy_model(
-        self,
-        model_id: str,
-        version: str,
-        model_instance: Any,
-        set_active: bool = True
+        self, model_id: str, version: str, model_instance: Any, set_active: bool = True
     ) -> bool:
         """
         Deploy a model for serving.
@@ -122,7 +123,9 @@ class ModelServingManager:
             # Check if version already exists
             for m in self.models[model_id]:
                 if m.version == version:
-                    logger.warning(f"Model {model_id} v{version} already deployed, replacing...")
+                    logger.warning(
+                        f"Model {model_id} v{version} already deployed, replacing..."
+                    )
                     self.models[model_id].remove(m)
                     break
 
@@ -153,11 +156,7 @@ class ModelServingManager:
         logger.info(f"Model {model_id} active version set to {version}")
         return True
 
-    def setup_ab_test(
-        self,
-        model_id: str,
-        version_weights: Dict[str, float]
-    ) -> bool:
+    def setup_ab_test(self, model_id: str, version_weights: Dict[str, float]) -> bool:
         """
         Setup A/B test for model versions.
 
@@ -186,9 +185,7 @@ class ModelServingManager:
         return True
 
     def get_model_for_prediction(
-        self,
-        model_id: str,
-        traffic_split: Optional[float] = None
+        self, model_id: str, traffic_split: Optional[float] = None
     ) -> Optional[ServingModel]:
         """
         Get model instance for prediction (handles A/B testing).
@@ -229,10 +226,7 @@ class ModelServingManager:
         return None
 
     def predict(
-        self,
-        model_id: str,
-        inputs: Any,
-        traffic_split: Optional[float] = None
+        self, model_id: str, inputs: Any, traffic_split: Optional[float] = None
     ) -> Any:
         """
         Make a prediction using the appropriate model version.
@@ -277,7 +271,7 @@ class ModelServingManager:
             model_id: {
                 "active_version": self.active_models.get(model_id),
                 "versions": [m.get_metrics() for m in models],
-                "ab_test": self.ab_tests.get(model_id)
+                "ab_test": self.ab_tests.get(model_id),
             }
             for model_id, models in self.models.items()
         }
@@ -296,6 +290,7 @@ if __name__ == "__main__":
 
         def predict(self, inputs):
             import numpy as np
+
             return np.random.rand() < self.accuracy
 
     # Initialize serving manager
@@ -310,8 +305,7 @@ if __name__ == "__main__":
 
     # Setup A/B test
     serving_mgr.setup_ab_test(
-        "nba_predictor",
-        {"v1.0": 0.7, "v1.1": 0.3}  # 70% v1.0, 30% v1.1
+        "nba_predictor", {"v1.0": 0.7, "v1.1": 0.3}  # 70% v1.0, 30% v1.1
     )
 
     print("\n✅ A/B test configured: 70% v1.0, 30% v1.1")
@@ -322,9 +316,12 @@ if __name__ == "__main__":
     print("=" * 80)
 
     import random
+
     for i in range(10):
         traffic_split = random.random()
-        result = serving_mgr.predict("nba_predictor", [1, 2, 3], traffic_split=traffic_split)
+        result = serving_mgr.predict(
+            "nba_predictor", [1, 2, 3], traffic_split=traffic_split
+        )
         print(f"Prediction {i+1}: {result} (traffic_split: {traffic_split:.2f})")
 
     # Get metrics
@@ -338,12 +335,13 @@ if __name__ == "__main__":
         print(f"   Active Version: {info['active_version']}")
         print(f"   A/B Test: {info['ab_test']}")
         print(f"\n   Versions:")
-        for version_metrics in info['versions']:
-            print(f"      - v{version_metrics['version']}: "
-                  f"{version_metrics['request_count']} requests, "
-                  f"{version_metrics['avg_latency_ms']:.2f}ms avg latency")
+        for version_metrics in info["versions"]:
+            print(
+                f"      - v{version_metrics['version']}: "
+                f"{version_metrics['request_count']} requests, "
+                f"{version_metrics['avg_latency_ms']:.2f}ms avg latency"
+            )
 
     print("\n" + "=" * 80)
     print("Model Serving Demo Complete!")
     print("=" * 80)
-

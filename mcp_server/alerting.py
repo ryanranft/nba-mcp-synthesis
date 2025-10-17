@@ -1,4 +1,5 @@
 """Alerting System - CRITICAL 6"""
+
 import os
 import logging
 from typing import Optional, List, Dict, Any
@@ -10,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 class AlertSeverity(Enum):
     """Alert severity levels"""
+
     INFO = "info"
     WARNING = "warning"
     ERROR = "error"
@@ -18,6 +20,7 @@ class AlertSeverity(Enum):
 
 class AlertChannel(Enum):
     """Alert delivery channels"""
+
     EMAIL = "email"
     SLACK = "slack"
     PAGERDUTY = "pagerduty"
@@ -26,13 +29,14 @@ class AlertChannel(Enum):
 
 class Alert:
     """Alert model"""
+
     def __init__(
         self,
         title: str,
         message: str,
         severity: AlertSeverity,
         channels: List[AlertChannel],
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ):
         self.title = title
         self.message = message
@@ -106,7 +110,7 @@ def alert(title: str, message: str, severity: AlertSeverity = AlertSeverity.INFO
         title=title,
         message=message,
         severity=severity,
-        channels=[AlertChannel.LOG, AlertChannel.SLACK]
+        channels=[AlertChannel.LOG, AlertChannel.SLACK],
     )
     manager.send_alert(alert_obj)
 
@@ -117,7 +121,7 @@ def alert_database_down():
     alert(
         "Database Connection Failed",
         "Unable to connect to RDS database",
-        AlertSeverity.CRITICAL
+        AlertSeverity.CRITICAL,
     )
 
 
@@ -126,7 +130,7 @@ def alert_high_error_rate(error_rate: float):
     alert(
         "High Error Rate Detected",
         f"Error rate: {error_rate:.2%} (threshold: 5%)",
-        AlertSeverity.ERROR
+        AlertSeverity.ERROR,
     )
 
 
@@ -135,6 +139,5 @@ def alert_rate_limit_exceeded(user_id: str):
     alert(
         "Rate Limit Exceeded",
         f"User {user_id} exceeded rate limit",
-        AlertSeverity.WARNING
+        AlertSeverity.WARNING,
     )
-

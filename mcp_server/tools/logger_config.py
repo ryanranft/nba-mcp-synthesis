@@ -37,7 +37,7 @@ class StructuredLogger:
 
         # Use basic formatter (JSON formatting done in log methods)
         formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         )
         handler.setFormatter(formatter)
 
@@ -49,7 +49,7 @@ class StructuredLogger:
             "timestamp": datetime.utcnow().isoformat() + "Z",
             "level": logging.getLevelName(level),
             "message": message,
-            **context
+            **context,
         }
 
         # Log as JSON string
@@ -110,6 +110,7 @@ def log_operation(operation_name: str):
     Args:
         operation_name: Name of the operation being logged
     """
+
     def decorator(func):
         @wraps(func)
         async def async_wrapper(*args, **kwargs):
@@ -121,7 +122,7 @@ def log_operation(operation_name: str):
                 f"Operation started: {operation_name}",
                 operation=operation_name,
                 function=func.__name__,
-                status="started"
+                status="started",
             )
 
             try:
@@ -137,7 +138,7 @@ def log_operation(operation_name: str):
                     operation=operation_name,
                     function=func.__name__,
                     status="completed",
-                    duration_seconds=duration
+                    duration_seconds=duration,
                 )
 
                 return result
@@ -154,7 +155,7 @@ def log_operation(operation_name: str):
                     status="failed",
                     duration_seconds=duration,
                     error_type=type(e).__name__,
-                    error_message=str(e)
+                    error_message=str(e),
                 )
 
                 raise
@@ -169,7 +170,7 @@ def log_operation(operation_name: str):
                 f"Operation started: {operation_name}",
                 operation=operation_name,
                 function=func.__name__,
-                status="started"
+                status="started",
             )
 
             try:
@@ -185,7 +186,7 @@ def log_operation(operation_name: str):
                     operation=operation_name,
                     function=func.__name__,
                     status="completed",
-                    duration_seconds=duration
+                    duration_seconds=duration,
                 )
 
                 return result
@@ -202,13 +203,14 @@ def log_operation(operation_name: str):
                     status="failed",
                     duration_seconds=duration,
                     error_type=type(e).__name__,
-                    error_message=str(e)
+                    error_message=str(e),
                 )
 
                 raise
 
         # Return appropriate wrapper based on function type
         import inspect
+
         if inspect.iscoroutinefunction(func):
             return async_wrapper
         else:
@@ -220,7 +222,7 @@ def log_operation(operation_name: str):
 def setup_file_logging(
     log_dir: str = "logs",
     log_file_prefix: str = "nba-mcp",
-    log_level: int = logging.INFO
+    log_level: int = logging.INFO,
 ) -> None:
     """
     Setup file-based logging with rotation.
@@ -237,7 +239,7 @@ def setup_file_logging(
     log_path.mkdir(exist_ok=True)
 
     # Create log file with timestamp
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     log_file = log_path / f"{log_file_prefix}_{timestamp}.log"
 
     # Setup file handler
@@ -246,7 +248,7 @@ def setup_file_logging(
 
     # JSON formatter for file logs
     formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
     file_handler.setFormatter(formatter)
 
@@ -260,12 +262,13 @@ def setup_file_logging(
 
 # Utility functions for logging contexts
 
+
 def log_tool_call(
     logger: StructuredLogger,
     tool_name: str,
     params: Dict[str, Any],
     success: bool = True,
-    error: Optional[str] = None
+    error: Optional[str] = None,
 ) -> None:
     """
     Log MCP tool call with structured data.
@@ -277,11 +280,7 @@ def log_tool_call(
         success: Whether the call succeeded
         error: Error message if failed
     """
-    log_data = {
-        "tool": tool_name,
-        "params": params,
-        "success": success
-    }
+    log_data = {"tool": tool_name, "params": params, "success": success}
 
     if error:
         log_data["error"] = error
@@ -298,7 +297,7 @@ def log_book_processing(
     book_path: str,
     success: bool = True,
     metadata: Optional[Dict[str, Any]] = None,
-    error: Optional[str] = None
+    error: Optional[str] = None,
 ) -> None:
     """
     Log book processing operation with structured data.
@@ -311,11 +310,7 @@ def log_book_processing(
         metadata: Additional metadata (size, format, chunks, etc.)
         error: Error message if failed
     """
-    log_data = {
-        "operation": operation,
-        "book_path": book_path,
-        "success": success
-    }
+    log_data = {"operation": operation, "book_path": book_path, "success": success}
 
     if metadata:
         log_data["metadata"] = metadata
@@ -339,12 +334,15 @@ if __name__ == "__main__":
 
     # Test logging
     logger.info("Testing structured logging", test=True, value=123)
-    logger.error("Testing error logging", error_type="TestError", details="This is a test")
+    logger.error(
+        "Testing error logging", error_type="TestError", details="This is a test"
+    )
 
     # Test operation decorator
     @log_operation("test_operation")
     async def test_async_function():
         import asyncio
+
         await asyncio.sleep(0.1)
         return "success"
 
@@ -354,6 +352,7 @@ if __name__ == "__main__":
 
     # Run tests
     import asyncio
+
     asyncio.run(test_async_function())
     test_sync_function()
 

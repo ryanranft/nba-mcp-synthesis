@@ -14,16 +14,24 @@ from pathlib import Path
 # Add the project root to the path
 project_root = Path(__file__).parent.parent
 import sys
+
 sys.path.insert(0, str(project_root))
 
 from mcp_server.tools.algebra_helper import (
-    solve_equation, simplify_expression, differentiate_expression,
-    integrate_expression, get_sports_formula, render_equation_latex,
-    matrix_operations, solve_equation_system
+    solve_equation,
+    simplify_expression,
+    differentiate_expression,
+    integrate_expression,
+    get_sports_formula,
+    render_equation_latex,
+    matrix_operations,
+    solve_equation_system,
 )
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -34,11 +42,7 @@ def test_basic_algebra():
 
     # Test equation solving
     logger.info("\n1️⃣ Equation Solving:")
-    equations = [
-        "x**2 + 2*x - 3 = 0",
-        "2*y + 5 = 13",
-        "x**3 - 8 = 0"
-    ]
+    equations = ["x**2 + 2*x - 3 = 0", "2*y + 5 = 13", "x**3 - 8 = 0"]
 
     for eq in equations:
         result = solve_equation(eq)
@@ -49,11 +53,7 @@ def test_basic_algebra():
 
     # Test expression simplification
     logger.info("2️⃣ Expression Simplification:")
-    expressions = [
-        "x**2 + 2*x + 1",
-        "(x + 1)**2 - 1",
-        "x**3 + 3*x**2 + 3*x + 1"
-    ]
+    expressions = ["x**2 + 2*x + 1", "(x + 1)**2 - 1", "x**3 + 3*x**2 + 3*x + 1"]
 
     for expr in expressions:
         result = simplify_expression(expr)
@@ -69,9 +69,21 @@ def test_sports_analytics_formulas():
 
     # Test Player Efficiency Rating
     logger.info("\n1️⃣ Player Efficiency Rating (PER):")
-    per_result = get_sports_formula("per",
-        FGM=8, STL=2, three_pm=3, FTM=4, BLK=1, OREB=2, AST=5, DREB=6,
-        PF=3, FTA=5, FGA=15, TOV=2, MP=35
+    per_result = get_sports_formula(
+        "per",
+        FGM=8,
+        STL=2,
+        three_pm=3,
+        FTM=4,
+        BLK=1,
+        OREB=2,
+        AST=5,
+        DREB=6,
+        PF=3,
+        FTA=5,
+        FGA=15,
+        TOV=2,
+        MP=35,
     )
     logger.info(f"   Formula: {per_result['formula']}")
     logger.info(f"   LaTeX: {per_result['latex']}")
@@ -88,8 +100,16 @@ def test_sports_analytics_formulas():
 
     # Test Usage Rate
     logger.info("3️⃣ Usage Rate:")
-    usage_result = get_sports_formula("usage_rate",
-        FGA=15, FTA=5, TOV=2, TM_MP=240, MP=35, TM_FGA=80, TM_FTA=20, TM_TOV=12
+    usage_result = get_sports_formula(
+        "usage_rate",
+        FGA=15,
+        FTA=5,
+        TOV=2,
+        TM_MP=240,
+        MP=35,
+        TM_FGA=80,
+        TM_FTA=20,
+        TM_TOV=12,
     )
     logger.info(f"   Formula: {usage_result['formula']}")
     logger.info(f"   LaTeX: {usage_result['latex']}")
@@ -104,11 +124,7 @@ def test_calculus_operations():
 
     # Test differentiation
     logger.info("\n1️⃣ Differentiation:")
-    derivatives = [
-        ("x**3 + 2*x**2 + x", "x"),
-        ("sin(x)", "x"),
-        ("x**2 + y**2", "x")
-    ]
+    derivatives = [("x**3 + 2*x**2 + x", "x"), ("sin(x)", "x"), ("x**2 + y**2", "x")]
 
     for expr, var in derivatives:
         result = differentiate_expression(expr, var)
@@ -121,7 +137,7 @@ def test_calculus_operations():
     integrals = [
         ("x**2", "x"),
         ("x**2", "x", 0, 2),  # Definite integral
-        ("sin(x)", "x")
+        ("sin(x)", "x"),
     ]
 
     for integral_args in integrals:
@@ -132,7 +148,9 @@ def test_calculus_operations():
         else:
             expr, var, lower, upper = integral_args
             result = integrate_expression(expr, var, lower, upper)
-            logger.info(f"   ∫[{lower} to {upper}] {expr} d{var} = {result['integral']}")
+            logger.info(
+                f"   ∫[{lower} to {upper}] {expr} d{var} = {result['integral']}"
+            )
             logger.info(f"   Value: {result['value']}")
         logger.info(f"   LaTeX: {result['latex']}")
         logger.info("")
@@ -148,7 +166,7 @@ def test_matrix_operations():
         ([[1, 2], [3, 4]], "determinant"),
         ([[1, 2], [3, 4]], "inverse"),
         ([[2, 0], [0, 3]], "eigenvalues"),
-        ([[1, 2], [3, 4]], "multiply", [[5, 6], [7, 8]])
+        ([[1, 2], [3, 4]], "multiply", [[5, 6], [7, 8]]),
     ]
 
     for matrix_args in matrices:
@@ -173,10 +191,7 @@ def test_equation_systems():
 
     # Test linear system
     logger.info("\n1️⃣ Linear System:")
-    linear_system = solve_equation_system(
-        ["x + y = 5", "x - y = 1"],
-        ["x", "y"]
-    )
+    linear_system = solve_equation_system(["x + y = 5", "x - y = 1"], ["x", "y"])
     logger.info(f"   Equations: {linear_system['equations']}")
     logger.info(f"   Solutions: {linear_system['solutions']}")
     logger.info("")
@@ -184,8 +199,7 @@ def test_equation_systems():
     # Test quadratic system
     logger.info("2️⃣ Quadratic System:")
     quadratic_system = solve_equation_system(
-        ["x**2 + y**2 = 25", "x + y = 7"],
-        ["x", "y"]
+        ["x**2 + y**2 = 25", "x + y = 7"], ["x", "y"]
     )
     logger.info(f"   Equations: {quadratic_system['equations']}")
     logger.info(f"   Solutions: {quadratic_system['solutions']}")
@@ -201,7 +215,7 @@ def test_latex_rendering():
         "x**2 + 2*x + 1",
         "sin(x) + cos(x)",
         "integrate(x**2, x)",
-        "diff(sin(x), x)"
+        "diff(sin(x), x)",
     ]
 
     for expr in expressions:
@@ -214,7 +228,8 @@ def test_latex_rendering():
 
 def print_usage_examples():
     """Print examples of how to use the algebraic tools."""
-    logger.info("""
+    logger.info(
+        """
 ╔══════════════════════════════════════════════════════════════════╗
 ║              🚀 ALGEBRAIC EQUATION TOOLS - USAGE GUIDE          ║
 ╚══════════════════════════════════════════════════════════════════╝
@@ -352,7 +367,8 @@ understanding compared to plain text because they:
 **Perfect for working with mathematical notation from sports analytics books!**
 
 ═══════════════════════════════════════════════════════════════════
-""")
+"""
+    )
 
 
 def main():
@@ -372,7 +388,8 @@ def main():
         # Print usage guide
         print_usage_examples()
 
-        logger.info("""
+        logger.info(
+            """
 🎉 ALL TESTS COMPLETED SUCCESSFULLY!
 
 The NBA MCP server now has powerful algebraic equation manipulation
@@ -380,11 +397,13 @@ capabilities perfect for working with mathematical notation from
 sports analytics books!
 
 ═══════════════════════════════════════════════════════════════════
-""")
+"""
+        )
 
     except Exception as e:
         logger.error(f"❌ Test failed: {e}")
-        logger.info("""
+        logger.info(
+            """
 ⚠️  DEPENDENCY ISSUE:
 
 If you see import errors, install SymPy:
@@ -393,12 +412,9 @@ If you see import errors, install SymPy:
 Then restart the MCP server to use the new algebraic tools.
 
 ═══════════════════════════════════════════════════════════════════
-""")
+"""
+        )
 
 
 if __name__ == "__main__":
     main()
-
-
-
-

@@ -15,26 +15,37 @@ from functools import wraps
 
 def log_operation(operation_name: str):
     """Decorator for structured logging of operations"""
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             try:
                 result = func(*args, **kwargs)
-                print(json.dumps({
-                    "operation": operation_name,
-                    "status": "success",
-                    "function": func.__name__
-                }))
+                print(
+                    json.dumps(
+                        {
+                            "operation": operation_name,
+                            "status": "success",
+                            "function": func.__name__,
+                        }
+                    )
+                )
                 return result
             except Exception as e:
-                print(json.dumps({
-                    "operation": operation_name,
-                    "status": "error",
-                    "function": func.__name__,
-                    "error": str(e)
-                }))
+                print(
+                    json.dumps(
+                        {
+                            "operation": operation_name,
+                            "status": "error",
+                            "function": func.__name__,
+                            "error": str(e),
+                        }
+                    )
+                )
                 raise
+
         return wrapper
+
     return decorator
 
 
@@ -42,13 +53,14 @@ def log_operation(operation_name: str):
 # Logistic Regression
 # ============================================================================
 
+
 @log_operation("ml_logistic_regression")
 def logistic_regression(
     X_train: List[List[Union[int, float]]],
     y_train: List[int],
     learning_rate: float = 0.01,
     max_iterations: int = 1000,
-    tolerance: float = 1e-4
+    tolerance: float = 1e-4,
 ) -> Dict[str, Any]:
     """
     Train a logistic regression classifier using gradient descent.
@@ -81,7 +93,9 @@ def logistic_regression(
         raise ValueError("Training data cannot be empty")
 
     if len(X_train) != len(y_train):
-        raise ValueError(f"X_train and y_train must have same length: {len(X_train)} vs {len(y_train)}")
+        raise ValueError(
+            f"X_train and y_train must have same length: {len(X_train)} vs {len(y_train)}"
+        )
 
     # Validate binary labels
     unique_labels = set(y_train)
@@ -122,7 +136,9 @@ def logistic_regression(
             # Loss = -[y*log(p) + (1-y)*log(1-p)]
             epsilon = 1e-15  # Prevent log(0)
             p = max(min(prediction, 1 - epsilon), epsilon)
-            total_loss += -(y_train[i] * math.log(p) + (1 - y_train[i]) * math.log(1 - p))
+            total_loss += -(
+                y_train[i] * math.log(p) + (1 - y_train[i]) * math.log(1 - p)
+            )
 
         # Average loss
         avg_loss = total_loss / n_samples
@@ -145,7 +161,7 @@ def logistic_regression(
         "converged": converged,
         "final_loss": avg_loss,
         "num_features": n_features,
-        "training_samples": n_samples
+        "training_samples": n_samples,
     }
 
 
@@ -154,7 +170,7 @@ def logistic_predict(
     X: List[List[Union[int, float]]],
     weights: List[float],
     threshold: float = 0.5,
-    return_probabilities: bool = False
+    return_probabilities: bool = False,
 ) -> Dict[str, Any]:
     """
     Make predictions using trained logistic regression model.
@@ -187,7 +203,9 @@ def logistic_predict(
 
     n_features = len(X[0])
     if len(weights) != n_features + 1:
-        raise ValueError(f"Weights length ({len(weights)}) must be n_features + 1 ({n_features + 1})")
+        raise ValueError(
+            f"Weights length ({len(weights)}) must be n_features + 1 ({n_features + 1})"
+        )
 
     predictions = []
     probabilities = []
@@ -206,11 +224,7 @@ def logistic_predict(
         prediction = 1 if prob >= threshold else 0
         predictions.append(prediction)
 
-    result = {
-        "predictions": predictions,
-        "threshold": threshold,
-        "num_samples": len(X)
-    }
+    result = {"predictions": predictions, "threshold": threshold, "num_samples": len(X)}
 
     if return_probabilities:
         result["probabilities"] = probabilities
@@ -241,10 +255,10 @@ def _sigmoid(z: float) -> float:
 # Naive Bayes Classifier
 # ============================================================================
 
+
 @log_operation("ml_naive_bayes")
 def naive_bayes_train(
-    X_train: List[List[Union[int, float]]],
-    y_train: List[Any]
+    X_train: List[List[Union[int, float]]], y_train: List[Any]
 ) -> Dict[str, Any]:
     """
     Train a Gaussian Naive Bayes classifier.
@@ -307,30 +321,27 @@ def naive_bayes_train(
             means.append(mean)
 
             # Calculate standard deviation
-            variance = sum((x - mean) ** 2 for x in feature_values) / len(feature_values)
+            variance = sum((x - mean) ** 2 for x in feature_values) / len(
+                feature_values
+            )
             std = math.sqrt(variance)
             # Add small constant to prevent division by zero
             stds.append(std if std > 0 else 1e-6)
 
-        feature_stats[cls] = {
-            "means": means,
-            "stds": stds,
-            "count": len(class_samples)
-        }
+        feature_stats[cls] = {"means": means, "stds": stds, "count": len(class_samples)}
 
     return {
         "classes": classes,
         "class_priors": class_priors,
         "feature_stats": feature_stats,
         "num_features": n_features,
-        "training_samples": len(y_train)
+        "training_samples": len(y_train),
     }
 
 
 @log_operation("ml_naive_bayes_predict")
 def naive_bayes_predict(
-    X: List[List[Union[int, float]]],
-    model: Dict[str, Any]
+    X: List[List[Union[int, float]]], model: Dict[str, Any]
 ) -> Dict[str, Any]:
     """
     Make predictions using trained Naive Bayes model.
@@ -379,9 +390,7 @@ def naive_bayes_predict(
             for feature_idx in range(len(sample)):
                 # Gaussian probability density
                 prob = _gaussian_pdf(
-                    sample[feature_idx],
-                    means[feature_idx],
-                    stds[feature_idx]
+                    sample[feature_idx], means[feature_idx], stds[feature_idx]
                 )
                 # Add log probability
                 log_prob += math.log(prob + 1e-10)  # Prevent log(0)
@@ -412,7 +421,7 @@ def naive_bayes_predict(
         "predictions": predictions,
         "probabilities": all_probabilities,
         "confidence": confidences,
-        "num_samples": len(X)
+        "num_samples": len(X),
     }
 
 
@@ -430,7 +439,7 @@ def _gaussian_pdf(x: float, mean: float, std: float) -> float:
     Returns:
         Probability density
     """
-    variance = std ** 2
+    variance = std**2
     coefficient = 1.0 / math.sqrt(2 * math.pi * variance)
     exponent = math.exp(-((x - mean) ** 2) / (2 * variance))
     return coefficient * exponent
@@ -440,12 +449,13 @@ def _gaussian_pdf(x: float, mean: float, std: float) -> float:
 # Decision Tree (Simplified CART)
 # ============================================================================
 
+
 @log_operation("ml_decision_tree")
 def decision_tree_train(
     X_train: List[List[Union[int, float]]],
     y_train: List[Any],
     max_depth: int = 5,
-    min_samples_split: int = 2
+    min_samples_split: int = 2,
 ) -> Dict[str, Any]:
     """
     Train a decision tree classifier using CART algorithm.
@@ -482,7 +492,13 @@ def decision_tree_train(
     n_features = len(X_train[0])
 
     # Build tree recursively
-    tree = _build_tree(X_train, y_train, depth=0, max_depth=max_depth, min_samples_split=min_samples_split)
+    tree = _build_tree(
+        X_train,
+        y_train,
+        depth=0,
+        max_depth=max_depth,
+        min_samples_split=min_samples_split,
+    )
 
     # Count leaves
     num_leaves = _count_leaves(tree)
@@ -502,14 +518,13 @@ def decision_tree_train(
         "num_leaves": num_leaves,
         "feature_importance": feature_importance,
         "num_features": n_features,
-        "training_samples": len(y_train)
+        "training_samples": len(y_train),
     }
 
 
 @log_operation("ml_decision_tree_predict")
 def decision_tree_predict(
-    X: List[List[Union[int, float]]],
-    tree: Dict[str, Any]
+    X: List[List[Union[int, float]]], tree: Dict[str, Any]
 ) -> Dict[str, Any]:
     """
     Make predictions using trained decision tree.
@@ -541,11 +556,7 @@ def decision_tree_predict(
         predictions.append(prediction)
         paths.append(path)
 
-    return {
-        "predictions": predictions,
-        "paths": paths,
-        "num_samples": len(X)
-    }
+    return {"predictions": predictions, "paths": paths, "num_samples": len(X)}
 
 
 def _build_tree(
@@ -553,7 +564,7 @@ def _build_tree(
     y: List[Any],
     depth: int,
     max_depth: int,
-    min_samples_split: int
+    min_samples_split: int,
 ) -> Dict[str, Any]:
     """
     Recursively build decision tree.
@@ -585,7 +596,7 @@ def _build_tree(
             "type": "leaf",
             "class": majority_class,
             "samples": len(y),
-            "distribution": class_counts
+            "distribution": class_counts,
         }
 
     # Find best split
@@ -602,7 +613,7 @@ def _build_tree(
             "type": "leaf",
             "class": majority_class,
             "samples": len(y),
-            "distribution": class_counts
+            "distribution": class_counts,
         }
 
     # Split data
@@ -610,7 +621,9 @@ def _build_tree(
 
     # Recursively build subtrees
     left_subtree = _build_tree(left_X, left_y, depth + 1, max_depth, min_samples_split)
-    right_subtree = _build_tree(right_X, right_y, depth + 1, max_depth, min_samples_split)
+    right_subtree = _build_tree(
+        right_X, right_y, depth + 1, max_depth, min_samples_split
+    )
 
     return {
         "type": "split",
@@ -619,13 +632,12 @@ def _build_tree(
         "gini": best_gini,
         "samples": len(y),
         "left": left_subtree,
-        "right": right_subtree
+        "right": right_subtree,
     }
 
 
 def _find_best_split(
-    X: List[List[Union[int, float]]],
-    y: List[Any]
+    X: List[List[Union[int, float]]], y: List[Any]
 ) -> Tuple[Optional[int], Optional[float], Optional[float]]:
     """
     Find best feature and threshold to split on.
@@ -661,7 +673,9 @@ def _find_best_split(
             left_gini = _gini_impurity(left_y)
             right_gini = _gini_impurity(right_y)
 
-            weighted_gini = (len(left_y) / n) * left_gini + (len(right_y) / n) * right_gini
+            weighted_gini = (len(left_y) / n) * left_gini + (
+                len(right_y) / n
+            ) * right_gini
 
             # Gini gain
             gini_gain = parent_gini - weighted_gini
@@ -696,16 +710,13 @@ def _gini_impurity(y: List[Any]) -> float:
 
     for count in class_counts.values():
         probability = count / n
-        gini -= probability ** 2
+        gini -= probability**2
 
     return gini
 
 
 def _split_data(
-    X: List[List[Union[int, float]]],
-    y: List[Any],
-    feature_idx: int,
-    threshold: float
+    X: List[List[Union[int, float]]], y: List[Any], feature_idx: int, threshold: float
 ) -> Tuple[List, List, List, List]:
     """
     Split data based on feature threshold.
@@ -728,9 +739,7 @@ def _split_data(
 
 
 def _traverse_tree(
-    node: Dict[str, Any],
-    sample: List[Union[int, float]],
-    path: List[str]
+    node: Dict[str, Any], sample: List[Union[int, float]], path: List[str]
 ) -> Tuple[Any, List[str]]:
     """
     Traverse tree to make prediction for single sample.
@@ -774,6 +783,7 @@ def _calculate_feature_importance(node: Dict[str, Any], importance: List[int]):
 # Random Forest (Ensemble of Decision Trees)
 # ============================================================================
 
+
 @log_operation("ml_random_forest")
 def random_forest_train(
     X_train: List[List[Union[int, float]]],
@@ -781,7 +791,7 @@ def random_forest_train(
     n_trees: int = 10,
     max_depth: int = 5,
     min_samples_split: int = 2,
-    random_seed: Optional[int] = None
+    random_seed: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
     Train a random forest classifier (ensemble of decision trees).
@@ -823,9 +833,11 @@ def random_forest_train(
     # Set random seed
     if random_seed is not None:
         import random
+
         random.seed(random_seed)
 
     import random
+
     n_samples = len(X_train)
     n_features = len(X_train[0])
 
@@ -843,7 +855,7 @@ def random_forest_train(
             X_bootstrap,
             y_bootstrap,
             max_depth=max_depth,
-            min_samples_split=min_samples_split
+            min_samples_split=min_samples_split,
         )
 
         trees.append(tree_model["tree"])
@@ -863,14 +875,13 @@ def random_forest_train(
         "feature_importance": avg_importance,
         "max_depth": max_depth,
         "num_features": n_features,
-        "training_samples": len(y_train)
+        "training_samples": len(y_train),
     }
 
 
 @log_operation("ml_random_forest_predict")
 def random_forest_predict(
-    X: List[List[Union[int, float]]],
-    model: Dict[str, Any]
+    X: List[List[Union[int, float]]], model: Dict[str, Any]
 ) -> Dict[str, Any]:
     """
     Make predictions using trained random forest.
@@ -928,5 +939,5 @@ def random_forest_predict(
         "vote_counts": all_vote_counts,
         "confidence": confidences,
         "num_samples": len(X),
-        "n_trees": n_trees
+        "n_trees": n_trees,
     }

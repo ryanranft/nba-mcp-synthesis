@@ -18,12 +18,14 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from scripts.notification_manager import NotificationManager, LinearClient
 
+
 async def test_slack_notifications(webhook_url: str):
     """Test Slack notifications."""
     print("🔔 Testing Slack notifications...")
 
     try:
         from mcp_server.connectors.slack_notifier import SlackNotifier
+
         notifier = SlackNotifier(webhook_url)
 
         # Test basic notification
@@ -34,23 +36,20 @@ async def test_slack_notifications(webhook_url: str):
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "*🧪 Test Notification*\nThis is a test message from the NBA Book Analysis Workflow system."
-                    }
+                        "text": "*🧪 Test Notification*\nThis is a test message from the NBA Book Analysis Workflow system.",
+                    },
                 },
                 {
                     "type": "section",
                     "fields": [
+                        {"type": "mrkdwn", "text": "*Status:* ✅ Working"},
                         {
                             "type": "mrkdwn",
-                            "text": "*Status:* ✅ Working"
+                            "text": "*Time:* " + str(asyncio.get_event_loop().time()),
                         },
-                        {
-                            "type": "mrkdwn",
-                            "text": "*Time:* " + str(asyncio.get_event_loop().time())
-                        }
-                    ]
-                }
-            ]
+                    ],
+                },
+            ],
         }
 
         await notifier.send_notification(test_message)
@@ -60,6 +59,7 @@ async def test_slack_notifications(webhook_url: str):
     except Exception as e:
         print(f"❌ Slack notification failed: {e}")
         return False
+
 
 async def test_linear_integration(api_key: str):
     """Test Linear integration and get team/project IDs."""
@@ -84,12 +84,14 @@ async def test_linear_integration(api_key: str):
         print("\n🔍 Getting projects for each team...")
         for team in teams:
             print(f"\n📁 Projects for team '{team['name']}':")
-            projects = await client.get_projects(team['id'])
+            projects = await client.get_projects(team["id"])
 
             if projects:
                 for project in projects:
                     print(f"  📋 Project: {project['name']} (ID: {project['id']})")
-                    print(f"      Description: {project.get('description', 'No description')}")
+                    print(
+                        f"      Description: {project.get('description', 'No description')}"
+                    )
                     print(f"      State: {project.get('state', 'Unknown')}")
             else:
                 print("  📋 No projects found")
@@ -97,13 +99,13 @@ async def test_linear_integration(api_key: str):
         # Test issue creation (optional)
         print("\n🧪 Testing issue creation...")
         if teams:
-            test_team_id = teams[0]['id']
+            test_team_id = teams[0]["id"]
             test_project_id = None
 
             # Try to find a project
             projects = await client.get_projects(test_team_id)
             if projects:
-                test_project_id = projects[0]['id']
+                test_project_id = projects[0]["id"]
 
             test_issue_id = await client.create_issue(
                 title="🧪 NBA Book Analysis Workflow - Test Issue",
@@ -111,7 +113,7 @@ async def test_linear_integration(api_key: str):
                 team_id=test_team_id,
                 project_id=test_project_id,
                 priority=4,  # Low priority
-                labels=["test", "workflow"]
+                labels=["test", "workflow"],
             )
 
             if test_issue_id:
@@ -126,6 +128,7 @@ async def test_linear_integration(api_key: str):
         print(f"❌ Linear integration failed: {e}")
         return False
 
+
 async def test_notification_manager(slack_webhook: str, linear_api_key: str):
     """Test the complete notification manager."""
     print("🔧 Testing complete notification manager...")
@@ -134,17 +137,23 @@ async def test_notification_manager(slack_webhook: str, linear_api_key: str):
         manager = NotificationManager(slack_webhook, linear_api_key)
 
         # Test stage notifications
-        await manager.notify_stage_start("test_stage", {
-            "description": "Testing notification manager",
-            "books_count": 3,
-            "budget": 10.0
-        })
+        await manager.notify_stage_start(
+            "test_stage",
+            {
+                "description": "Testing notification manager",
+                "books_count": 3,
+                "budget": 10.0,
+            },
+        )
 
-        await manager.notify_stage_complete("test_stage", {
-            "description": "Test stage completed successfully",
-            "recommendations": 5,
-            "cost": 0.15
-        })
+        await manager.notify_stage_complete(
+            "test_stage",
+            {
+                "description": "Test stage completed successfully",
+                "recommendations": 5,
+                "cost": 0.15,
+            },
+        )
 
         print("✅ Notification manager test completed!")
         return True
@@ -153,11 +162,12 @@ async def test_notification_manager(slack_webhook: str, linear_api_key: str):
         print(f"❌ Notification manager test failed: {e}")
         return False
 
+
 def print_setup_instructions():
     """Print setup instructions for getting credentials."""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("📋 SETUP INSTRUCTIONS")
-    print("="*80)
+    print("=" * 80)
 
     print("\n🔔 SLACK SETUP:")
     print("1. Go to https://api.slack.com/apps")
@@ -166,7 +176,9 @@ def print_setup_instructions():
     print("4. Click 'Add New Webhook to Workspace'")
     print("5. Select your channel (e.g., #nba-simulator-notifications)")
     print("6. Copy the webhook URL")
-    print("7. Add to .env.workflow: SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...")
+    print(
+        "7. Add to .env.workflow: SLACK_WEBHOOK_URL=https://hooks.slack.com/services/..."
+    )
 
     print("\n📋 LINEAR SETUP:")
     print("1. Go to https://linear.app/settings/api")
@@ -180,19 +192,28 @@ def print_setup_instructions():
     print("\n🚀 QUICK START:")
     print("1. Add SLACK_WEBHOOK_URL to .env.workflow")
     print("2. Add LINEAR_API_KEY to .env.workflow")
-    print("3. Run: python3 scripts/test_notifications.py --slack-webhook YOUR_WEBHOOK --linear-api-key YOUR_KEY")
+    print(
+        "3. Run: python3 scripts/test_notifications.py --slack-webhook YOUR_WEBHOOK --linear-api-key YOUR_KEY"
+    )
     print("4. Copy the team and project IDs from the output")
     print("5. Add LINEAR_TEAM_ID and LINEAR_PROJECT_ID to .env.workflow")
     print("6. Run: ./scripts/launch_automated_workflow.sh")
 
+
 async def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(description='Test Slack and Linear notifications')
-    parser.add_argument('--slack-webhook', help='Slack webhook URL')
-    parser.add_argument('--linear-api-key', help='Linear API key')
-    parser.add_argument('--test-slack-only', action='store_true', help='Test only Slack')
-    parser.add_argument('--test-linear-only', action='store_true', help='Test only Linear')
-    parser.add_argument('--setup-instructions', action='store_true', help='Show setup instructions')
+    parser = argparse.ArgumentParser(description="Test Slack and Linear notifications")
+    parser.add_argument("--slack-webhook", help="Slack webhook URL")
+    parser.add_argument("--linear-api-key", help="Linear API key")
+    parser.add_argument(
+        "--test-slack-only", action="store_true", help="Test only Slack"
+    )
+    parser.add_argument(
+        "--test-linear-only", action="store_true", help="Test only Linear"
+    )
+    parser.add_argument(
+        "--setup-instructions", action="store_true", help="Show setup instructions"
+    )
 
     args = parser.parse_args()
 
@@ -206,7 +227,7 @@ async def main():
         return
 
     print("🧪 NBA Book Analysis Workflow - Notification Test")
-    print("="*60)
+    print("=" * 60)
 
     success_count = 0
     total_tests = 0
@@ -233,7 +254,7 @@ async def main():
         print()
 
     # Summary
-    print("="*60)
+    print("=" * 60)
     print(f"🧪 Test Results: {success_count}/{total_tests} tests passed")
 
     if success_count == total_tests:
@@ -246,5 +267,6 @@ async def main():
         print("❌ Some tests failed. Check the error messages above.")
         print("   Use --setup-instructions to see how to get credentials")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     asyncio.run(main())

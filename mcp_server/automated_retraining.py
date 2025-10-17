@@ -1,4 +1,5 @@
 """Automated Model Retraining - BOOK RECOMMENDATION 6 & IMPORTANT"""
+
 import logging
 from typing import Dict, Any, Optional, Callable
 from datetime import datetime, timedelta
@@ -12,6 +13,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class RetrainingConfig:
     """Configuration for automated retraining"""
+
     model_name: str
     schedule_type: str  # daily, weekly, monthly, on_drift
     drift_threshold: float = 0.1
@@ -67,7 +69,10 @@ class AutomatedRetrainingPipeline:
         # Check new data availability
         new_samples = self._get_new_sample_count(model_name)
         if new_samples < config.min_new_samples:
-            return False, f"Insufficient new samples ({new_samples} < {config.min_new_samples})"
+            return (
+                False,
+                f"Insufficient new samples ({new_samples} < {config.min_new_samples})",
+            )
 
         # Check schedule
         last_training = self._get_last_training_date(model_name)
@@ -115,10 +120,7 @@ class AutomatedRetrainingPipeline:
         return history[-1]["timestamp"]
 
     def retrain_model(
-        self,
-        model_name: str,
-        training_func: Callable,
-        evaluation_func: Callable
+        self, model_name: str, training_func: Callable, evaluation_func: Callable
     ) -> Dict[str, Any]:
         """
         Retrain a model
@@ -158,8 +160,7 @@ class AutomatedRetrainingPipeline:
             # Determine if should deploy
             config = self.configs[model_name]
             should_deploy = (
-                config.auto_deploy and
-                improvement >= config.performance_threshold
+                config.auto_deploy and improvement >= config.performance_threshold
             )
 
             # Save model
@@ -172,7 +173,9 @@ class AutomatedRetrainingPipeline:
                 self._deploy_model(model_name, model_version)
                 deployment_status = "deployed"
             else:
-                logger.info("⏸️  Model saved but not deployed (requires manual approval)")
+                logger.info(
+                    "⏸️  Model saved but not deployed (requires manual approval)"
+                )
                 deployment_status = "pending_approval"
 
             # Record in history
@@ -183,7 +186,7 @@ class AutomatedRetrainingPipeline:
                 "metrics": new_metrics,
                 "improvement": improvement,
                 "deployment_status": deployment_status,
-                "duration_seconds": (datetime.utcnow() - start_time).total_seconds()
+                "duration_seconds": (datetime.utcnow() - start_time).total_seconds(),
             }
 
             self.training_history[model_name].append(result)
@@ -205,17 +208,18 @@ class AutomatedRetrainingPipeline:
                 "timestamp": start_time,
                 "model_name": model_name,
                 "status": "failed",
-                "error": str(e)
+                "error": str(e),
             }
 
             self.training_history[model_name].append(result)
 
             # Send alert
             from mcp_server.alerting import alert, AlertSeverity
+
             alert(
                 f"Model Retraining Failed: {model_name}",
                 f"Error: {e}",
-                AlertSeverity.CRITICAL
+                AlertSeverity.CRITICAL,
             )
 
             return result
@@ -224,6 +228,7 @@ class AutomatedRetrainingPipeline:
         """Load training data"""
         # TODO: Implement data loading from database/S3
         import numpy as np
+
         X = np.random.randn(1000, 10)
         y = np.random.randint(0, 2, 1000)
         return X, y
@@ -232,6 +237,7 @@ class AutomatedRetrainingPipeline:
         """Load validation data"""
         # TODO: Implement data loading
         import numpy as np
+
         X = np.random.randn(200, 10)
         y = np.random.randint(0, 2, 200)
         return X, y
@@ -242,24 +248,21 @@ class AutomatedRetrainingPipeline:
         return {"accuracy": 0.80, "f1_score": 0.78}
 
     def _calculate_improvement(
-        self,
-        new_metrics: Dict[str, float],
-        current_metrics: Dict[str, float]
+        self, new_metrics: Dict[str, float], current_metrics: Dict[str, float]
     ) -> float:
         """Calculate improvement over current model"""
         # Use primary metric (e.g., accuracy) for comparison
         primary_metric = "accuracy"
 
         if primary_metric in new_metrics and primary_metric in current_metrics:
-            return (new_metrics[primary_metric] - current_metrics[primary_metric]) / current_metrics[primary_metric]
+            return (
+                new_metrics[primary_metric] - current_metrics[primary_metric]
+            ) / current_metrics[primary_metric]
 
         return 0.0
 
     def _save_model(
-        self,
-        model_name: str,
-        model: Any,
-        metrics: Dict[str, float]
+        self, model_name: str, model: Any, metrics: Dict[str, float]
     ) -> str:
         """Save model to registry"""
         from mcp_server.model_versioning import get_model_registry
@@ -270,7 +273,7 @@ class AutomatedRetrainingPipeline:
             model=model,
             model_name=model_name,
             params={"retrained": True, "automated": True},
-            metrics=metrics
+            metrics=metrics,
         )
 
         version = registry.register_model(run_id, model_name)
@@ -301,11 +304,7 @@ Improvement: {result.get('improvement', 0):.2%}
 Duration: {result.get('duration_seconds', 0):.1f}s
 """
 
-        alert(
-            f"Model Retraining Complete: {model_name}",
-            message,
-            AlertSeverity.INFO
-        )
+        alert(f"Model Retraining Complete: {model_name}", message, AlertSeverity.INFO)
 
     def run_scheduled_retraining(self):
         """Run scheduled retraining for all registered models"""
@@ -365,7 +364,7 @@ if __name__ == "__main__":
         schedule_type="weekly",
         min_new_samples=1000,
         performance_threshold=0.05,
-        auto_deploy=False
+        auto_deploy=False,
     )
 
     pipeline.register_model(config)
@@ -373,4 +372,3 @@ if __name__ == "__main__":
     # Check if should retrain
     should_retrain, reason = pipeline.should_retrain("nba_win_predictor")
     print(f"Should retrain: {should_retrain}, Reason: {reason}")
-

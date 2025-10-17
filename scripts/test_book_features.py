@@ -29,22 +29,18 @@ from mcp_server.fastmcp_server import (
     search_books,
     get_book_metadata,
     get_book_chunk,
-    detect_math_content
+    detect_math_content,
 )
-from mcp_server.tools.params import (
-    ListBooksParams,
-    ReadBookParams,
-    SearchBooksParams
-)
+from mcp_server.tools.params import ListBooksParams, ReadBookParams, SearchBooksParams
 
 
 class MockContext:
     """Mock FastMCP context for testing."""
 
     def __init__(self, lifespan_context):
-        self.request_context = type('obj', (object,), {
-            'lifespan_context': lifespan_context
-        })()
+        self.request_context = type(
+            "obj", (object,), {"lifespan_context": lifespan_context}
+        )()
 
     async def info(self, msg):
         print(f"[INFO] {msg}")
@@ -93,9 +89,9 @@ async def test_math_detection():
     print(f"  has_math: {result3['has_math']}")
     print(f"  math_symbols: {result3['math_symbols']}")
 
-    assert result1['has_math'] == True
-    assert result2['has_math'] == False
-    assert result3['has_math'] == True
+    assert result1["has_math"] == True
+    assert result2["has_math"] == False
+    assert result3["has_math"] == True
 
     print("\n✅ Math detection tests passed!")
 
@@ -112,7 +108,7 @@ async def test_list_books(ctx):
     print(f"\n📚 Found {result.count} books")
 
     if result.success and result.books:
-        math_books = [b for b in result.books if b.get('has_math')]
+        math_books = [b for b in result.books if b.get("has_math")]
         print(f"📐 {len(math_books)} books with math content")
 
         print("\n📖 Sample books:")
@@ -121,7 +117,7 @@ async def test_list_books(ctx):
             print(f"    Size: {book.get('size', 0):,} bytes")
             print(f"    Format: {book.get('format', 'unknown')}")
             print(f"    Has math: {book.get('has_math', False)}")
-            if book.get('has_math'):
+            if book.get("has_math"):
                 print(f"    Math difficulty: {book.get('math_difficulty', 0.0):.2f}")
                 print(f"    Recommended MCP: {book.get('recommended_mcp')}")
 
@@ -146,15 +142,13 @@ async def test_read_book(ctx, book_path=None):
     print(f"\n📖 Reading: {book_path}")
 
     # Read first chunk
-    params = ReadBookParams(
-        book_path=book_path,
-        chunk_size=50000,
-        chunk_number=0
-    )
+    params = ReadBookParams(book_path=book_path, chunk_size=50000, chunk_number=0)
     result = await read_book(params, ctx)
 
     if result.success:
-        print(f"\n✅ Successfully read chunk {result.chunk_number + 1}/{result.total_chunks}")
+        print(
+            f"\n✅ Successfully read chunk {result.chunk_number + 1}/{result.total_chunks}"
+        )
         print(f"   Chunk size: {result.chunk_size:,} characters")
         print(f"   Has more: {result.has_more}")
 
@@ -163,7 +157,7 @@ async def test_read_book(ctx, book_path=None):
         print(f"   Total size: {result.metadata.get('total_size', 0):,} bytes")
         print(f"   Format: {result.metadata.get('format')}")
         print(f"   Has math: {result.metadata.get('has_math')}")
-        if result.metadata.get('has_math'):
+        if result.metadata.get("has_math"):
             print(f"   LaTeX formulas: {result.metadata.get('latex_formulas')}")
             print(f"   Math difficulty: {result.metadata.get('math_difficulty'):.2f}")
 
@@ -173,7 +167,7 @@ async def test_read_book(ctx, book_path=None):
         print(f"   {preview}...")
 
         # Check for LaTeX
-        if '$' in result.content or '\\begin{' in result.content:
+        if "$" in result.content or "\\begin{" in result.content:
             print("\n   ✓ LaTeX formulas detected and preserved!")
 
         print("\n✅ read_book test passed!")
@@ -190,21 +184,12 @@ async def test_search_books(ctx):
     print("=" * 60)
 
     # Test search queries
-    queries = [
-        "standard deviation",
-        "machine learning",
-        "python",
-        "formula"
-    ]
+    queries = ["standard deviation", "machine learning", "python", "formula"]
 
     for query in queries:
         print(f"\n🔍 Searching for: '{query}'")
 
-        params = SearchBooksParams(
-            query=query,
-            book_prefix="books/",
-            max_results=3
-        )
+        params = SearchBooksParams(query=query, book_prefix="books/", max_results=3)
         result = await search_books(params, ctx)
 
         if result.success and result.results:
@@ -235,7 +220,7 @@ async def test_book_resources(ctx):
         print("\n⚠️  No books available for resource test")
         return
 
-    book_path = result.books[0]['path']
+    book_path = result.books[0]["path"]
     print(f"\n🔗 Testing resource access for: {book_path}")
 
     # Test metadata resource
@@ -275,11 +260,7 @@ async def test_chunking_edge_cases(ctx, book_path=None):
 
     # Test invalid chunk number
     print("\n🧪 Test: Invalid chunk number (999)")
-    params = ReadBookParams(
-        book_path=book_path,
-        chunk_size=50000,
-        chunk_number=999
-    )
+    params = ReadBookParams(book_path=book_path, chunk_size=50000, chunk_number=999)
     result = await read_book(params, ctx)
 
     if not result.success:
@@ -290,11 +271,7 @@ async def test_chunking_edge_cases(ctx, book_path=None):
     # Test different chunk sizes
     print("\n🧪 Test: Different chunk sizes")
     for size in [10000, 50000, 100000, 200000]:
-        params = ReadBookParams(
-            book_path=book_path,
-            chunk_size=size,
-            chunk_number=0
-        )
+        params = ReadBookParams(book_path=book_path, chunk_size=size, chunk_number=0)
         result = await read_book(params, ctx)
 
         if result.success:
@@ -328,11 +305,11 @@ async def run_all_tests():
             # Find a book with math content for further tests
             book_path = None
             if books:
-                book_path = books[0]['path']
+                book_path = books[0]["path"]
                 # Prefer a math book if available
-                math_books = [b for b in books if b.get('has_math')]
+                math_books = [b for b in books if b.get("has_math")]
                 if math_books:
-                    book_path = math_books[0]['path']
+                    book_path = math_books[0]["path"]
 
             # Test 3: Read book
             book_result = await test_read_book(ctx, book_path)
@@ -353,6 +330,7 @@ async def run_all_tests():
     except Exception as e:
         print(f"\n❌ Test suite failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 
@@ -379,12 +357,14 @@ async def run_interactive_demo():
             return
 
         # Show books with math content
-        math_books = [b for b in result.books if b.get('has_math')]
-        regular_books = [b for b in result.books if not b.get('has_math')]
+        math_books = [b for b in result.books if b.get("has_math")]
+        regular_books = [b for b in result.books if not b.get("has_math")]
 
         print(f"\n📐 Math books ({len(math_books)}):")
         for book in math_books:
-            print(f"  • {book['path']} (difficulty: {book.get('math_difficulty', 0):.2f})")
+            print(
+                f"  • {book['path']} (difficulty: {book.get('math_difficulty', 0):.2f})"
+            )
 
         print(f"\n📖 Regular books ({len(regular_books)}):")
         for book in regular_books[:5]:
@@ -394,7 +374,7 @@ async def run_interactive_demo():
         print("\n" + "-" * 60)
         print("Select a book to read:")
         for i, book in enumerate(result.books[:10], 1):
-            indicator = "📐" if book.get('has_math') else "📖"
+            indicator = "📐" if book.get("has_math") else "📖"
             print(f"  {i}. {indicator} {book['path']}")
 
         try:
@@ -405,9 +385,7 @@ async def run_interactive_demo():
 
                 # Read first chunk
                 params = ReadBookParams(
-                    book_path=book['path'],
-                    chunk_size=50000,
-                    chunk_number=0
+                    book_path=book["path"], chunk_size=50000, chunk_number=0
                 )
                 read_result = await read_book(params, ctx)
 
@@ -418,12 +396,14 @@ async def run_interactive_demo():
                     print("\n[... content continues ...]")
                     print("-" * 60)
 
-                    if read_result.metadata.get('has_math'):
+                    if read_result.metadata.get("has_math"):
                         print("\n💡 This book contains math content!")
                         print("   Use math-mcp tools for computations.")
 
                     if read_result.has_more:
-                        print(f"\n📚 {read_result.total_chunks - 1} more chunks available")
+                        print(
+                            f"\n📚 {read_result.total_chunks - 1} more chunks available"
+                        )
         except (ValueError, KeyboardInterrupt):
             print("\nSkipping interactive demo...")
 
@@ -431,13 +411,11 @@ async def run_interactive_demo():
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Test NBA MCP Server book integration"
-    )
+    parser = argparse.ArgumentParser(description="Test NBA MCP Server book integration")
     parser.add_argument(
         "--demo",
         action="store_true",
-        help="Run interactive demo instead of automated tests"
+        help="Run interactive demo instead of automated tests",
     )
 
     args = parser.parse_args()

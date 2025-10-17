@@ -20,6 +20,7 @@ from datetime import datetime
 from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass
 from pathlib import Path
+from mcp_server.env_helper import get_hierarchical_env
 
 # Import synthesis modules
 from synthesis.multi_model_synthesis import synthesize_with_mcp_context
@@ -28,13 +29,16 @@ from synthesis.models.claude_model import ClaudeModel
 from synthesis.models.ollama_model import OllamaModel
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class ModelResponse:
     """Response from a single model"""
+
     model_name: str
     recommendations: List[Dict[str, Any]]
     cost: float
@@ -46,8 +50,9 @@ class ModelResponse:
 @dataclass
 class ConsensusResult:
     """Consensus result from multiple models"""
+
     unanimous_recommendations: List[Dict[str, Any]]  # 3/3 agreement
-    majority_recommendations: List[Dict[str, Any]]   # 2/3 agreement
+    majority_recommendations: List[Dict[str, Any]]  # 2/3 agreement
     total_cost: float
     total_tokens: int
     total_time: float
@@ -72,36 +77,36 @@ class MultiModelBookAnalyzer:
                     "api_key_env": "DEEPSEEK_API_KEY",
                     "model": "deepseek-chat",
                     "max_tokens": 4000,
-                    "temperature": 0.1
+                    "temperature": 0.1,
                 },
                 "claude": {
                     "enabled": True,
                     "api_key_env": "ANTHROPIC_API_KEY",
                     "model": "claude-3-5-sonnet-20241022",
                     "max_tokens": 4000,
-                    "temperature": 0.1
+                    "temperature": 0.1,
                 },
                 "ollama": {
                     "enabled": True,
                     "model": "llama3.1:70b",
                     "max_tokens": 4000,
-                    "temperature": 0.1
-                }
+                    "temperature": 0.1,
+                },
             },
             "consensus": {
                 "unanimous_threshold": 3,  # 3/3 models must agree for Critical
-                "majority_threshold": 2,   # 2/3 models must agree for Important
-                "min_agreement": 1         # Minimum models for consideration
+                "majority_threshold": 2,  # 2/3 models must agree for Important
+                "min_agreement": 1,  # Minimum models for consideration
             },
             "analysis": {
-                "max_chunk_size": 50000,   # Characters per chunk
-                "overlap_size": 5000,      # Overlap between chunks
-                "max_iterations": 5        # Max recursive iterations
-            }
+                "max_chunk_size": 50000,  # Characters per chunk
+                "overlap_size": 5000,  # Overlap between chunks
+                "max_iterations": 5,  # Max recursive iterations
+            },
         }
 
         if os.path.exists(self.config_path):
-            with open(self.config_path, 'r') as f:
+            with open(self.config_path, "r") as f:
                 config = json.load(f)
                 # Merge with defaults
                 for key, value in default_config.items():
@@ -111,7 +116,7 @@ class MultiModelBookAnalyzer:
         else:
             # Save default config
             os.makedirs(os.path.dirname(self.config_path), exist_ok=True)
-            with open(self.config_path, 'w') as f:
+            with open(self.config_path, "w") as f:
                 json.dump(default_config, f, indent=2)
             return default_config
 
@@ -122,8 +127,12 @@ class MultiModelBookAnalyzer:
         if self.config["models"]["deepseek"]["enabled"]:
             try:
                 models["deepseek"] = DeepSeekModel(
-                    api_key=os.getenv(self.config["models"]["deepseek"]["api_key_env"]),
-                    model=self.config["models"]["deepseek"]["model"]
+                    api_key=get_hierarchical_env(
+                        self.config["models"]["deepseek"]["api_key_env"],
+                        "NBA_MCP_SYNTHESIS",
+                        "WORKFLOW",
+                    ),
+                    model=self.config["models"]["deepseek"]["model"],
                 )
                 logger.info("✅ DeepSeek model initialized")
             except Exception as e:
@@ -146,11 +155,15 @@ class MultiModelBookAnalyzer:
                 logger.warning(f"⚠️ Ollama initialization failed: {e}")
 
         if not models:
-            raise RuntimeError("No models could be initialized. Check API keys and configuration.")
+            raise RuntimeError(
+                "No models could be initialized. Check API keys and configuration."
+            )
 
         return models
 
-    async def analyze_book(self, book_data: Dict[str, Any], existing_recommendations: List[Dict] = None) -> ConsensusResult:
+    async def analyze_book(
+        self, book_data: Dict[str, Any], existing_recommendations: List[Dict] = None
+    ) -> ConsensusResult:
         """
         Analyze a book using multiple models with consensus voting
 
@@ -161,7 +174,9 @@ class MultiModelBookAnalyzer:
         Returns:
             ConsensusResult with unanimous and majority recommendations
         """
-        logger.info(f"🔍 Starting multi-model analysis of: {book_data.get('title', 'Unknown')}")
+        logger.info(
+            f"🔍 Starting multi-model analysis of: {book_data.get('title', 'Unknown')}"
+        )
 
         # Prepare analysis prompt
         prompt = self._build_analysis_prompt(book_data, existing_recommendations)
@@ -181,14 +196,16 @@ class MultiModelBookAnalyzer:
             if isinstance(response, Exception):
                 model_name = list(self.models.keys())[i]
                 logger.error(f"❌ {model_name} failed: {response}")
-                valid_responses.append(ModelResponse(
-                    model_name=model_name,
-                    recommendations=[],
-                    cost=0.0,
-                    tokens_used=0,
-                    processing_time=0.0,
-                    error=str(response)
-                ))
+                valid_responses.append(
+                    ModelResponse(
+                        model_name=model_name,
+                        recommendations=[],
+                        cost=0.0,
+                        tokens_used=0,
+                        processing_time=0.0,
+                        error=str(response),
+                    )
+                )
             else:
                 valid_responses.append(response)
 
@@ -199,13 +216,19 @@ class MultiModelBookAnalyzer:
         self.cost_tracker.add_session(consensus.total_cost, consensus.total_tokens)
 
         logger.info(f"✅ Multi-model analysis complete:")
-        logger.info(f"   Unanimous (Critical): {len(consensus.unanimous_recommendations)}")
-        logger.info(f"   Majority (Important): {len(consensus.majority_recommendations)}")
+        logger.info(
+            f"   Unanimous (Critical): {len(consensus.unanimous_recommendations)}"
+        )
+        logger.info(
+            f"   Majority (Important): {len(consensus.majority_recommendations)}"
+        )
         logger.info(f"   Total cost: ${consensus.total_cost:.2f}")
 
         return consensus
 
-    async def _analyze_with_model(self, model_name: str, model: Any, prompt: str, book_data: Dict) -> ModelResponse:
+    async def _analyze_with_model(
+        self, model_name: str, model: Any, prompt: str, book_data: Dict
+    ) -> ModelResponse:
         """Analyze with a single model"""
         start_time = datetime.now()
 
@@ -218,9 +241,9 @@ class MultiModelBookAnalyzer:
                 context_data={
                     "book_title": book_data.get("title", ""),
                     "book_author": book_data.get("author", ""),
-                    "analysis_type": "book_recommendations"
+                    "analysis_type": "book_recommendations",
                 },
-                models=[model_name]  # Use specific model
+                models=[model_name],  # Use specific model
             )
 
             # Parse response into recommendations
@@ -232,14 +255,16 @@ class MultiModelBookAnalyzer:
 
             processing_time = (datetime.now() - start_time).total_seconds()
 
-            logger.info(f"✅ {model_name} complete: {len(recommendations)} recommendations, ${cost:.2f}")
+            logger.info(
+                f"✅ {model_name} complete: {len(recommendations)} recommendations, ${cost:.2f}"
+            )
 
             return ModelResponse(
                 model_name=model_name,
                 recommendations=recommendations,
                 cost=cost,
                 tokens_used=tokens_used,
-                processing_time=processing_time
+                processing_time=processing_time,
             )
 
         except Exception as e:
@@ -252,10 +277,12 @@ class MultiModelBookAnalyzer:
                 cost=0.0,
                 tokens_used=0,
                 processing_time=processing_time,
-                error=str(e)
+                error=str(e),
             )
 
-    def _build_analysis_prompt(self, book_data: Dict[str, Any], existing_recommendations: List[Dict] = None) -> str:
+    def _build_analysis_prompt(
+        self, book_data: Dict[str, Any], existing_recommendations: List[Dict] = None
+    ) -> str:
         """Build analysis prompt for book recommendations"""
 
         base_prompt = f"""
@@ -312,7 +339,9 @@ Output Format (JSON):
 
         return base_prompt
 
-    def _parse_model_response(self, response: Dict[str, Any], model_name: str) -> List[Dict[str, Any]]:
+    def _parse_model_response(
+        self, response: Dict[str, Any], model_name: str
+    ) -> List[Dict[str, Any]]:
         """Parse model response into structured recommendations"""
         try:
             # Extract JSON from response
@@ -320,7 +349,8 @@ Output Format (JSON):
 
             # Try to find JSON in the response
             import re
-            json_match = re.search(r'\{.*\}', content, re.DOTALL)
+
+            json_match = re.search(r"\{.*\}", content, re.DOTALL)
             if json_match:
                 json_str = json_match.group()
                 parsed = json.loads(json_str)
@@ -343,10 +373,19 @@ Output Format (JSON):
 
     def _validate_recommendation(self, rec: Dict[str, Any]) -> bool:
         """Validate recommendation has required fields"""
-        required_fields = ["title", "description", "priority", "source_chapter", "time_estimate", "impact"]
+        required_fields = [
+            "title",
+            "description",
+            "priority",
+            "source_chapter",
+            "time_estimate",
+            "impact",
+        ]
         return all(field in rec and rec[field] for field in required_fields)
 
-    def _calculate_consensus(self, model_responses: List[ModelResponse]) -> ConsensusResult:
+    def _calculate_consensus(
+        self, model_responses: List[ModelResponse]
+    ) -> ConsensusResult:
         """Calculate consensus from multiple model responses"""
 
         # Collect all recommendations with model votes
@@ -364,7 +403,7 @@ Output Format (JSON):
                     recommendation_votes[key] = {
                         "recommendation": rec,
                         "votes": [],
-                        "models": []
+                        "models": [],
                     }
 
                 recommendation_votes[key]["votes"].append(rec)
@@ -405,7 +444,7 @@ Output Format (JSON):
             total_cost=total_cost,
             total_tokens=total_tokens,
             total_time=total_time,
-            model_responses=model_responses
+            model_responses=model_responses,
         )
 
     def _get_recommendation_key(self, rec: Dict[str, Any]) -> str:
@@ -415,7 +454,9 @@ Output Format (JSON):
         words = title.split()[:3]
         return " ".join(words)
 
-    def _merge_recommendations(self, recommendations: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _merge_recommendations(
+        self, recommendations: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """Merge multiple similar recommendations into one"""
         if not recommendations:
             return {}
@@ -442,11 +483,9 @@ class CostTracker:
 
     def add_session(self, cost: float, tokens: int):
         """Add a session's cost and tokens"""
-        self.session_costs.append({
-            "timestamp": datetime.now().isoformat(),
-            "cost": cost,
-            "tokens": tokens
-        })
+        self.session_costs.append(
+            {"timestamp": datetime.now().isoformat(), "cost": cost, "tokens": tokens}
+        )
         self.total_cost += cost
         self.total_tokens += tokens
 
@@ -461,10 +500,10 @@ class CostTracker:
             "total_cost": self.total_cost,
             "total_tokens": self.total_tokens,
             "session_costs": self.session_costs,
-            "last_updated": datetime.now().isoformat()
+            "last_updated": datetime.now().isoformat(),
         }
 
-        with open(self.cost_file, 'w') as f:
+        with open(self.cost_file, "w") as f:
             json.dump(cost_data, f, indent=2)
 
     def get_cost_summary(self) -> Dict[str, Any]:
@@ -473,7 +512,9 @@ class CostTracker:
             "total_cost": self.total_cost,
             "total_tokens": self.total_tokens,
             "session_count": len(self.session_costs),
-            "average_per_session": self.total_cost / len(self.session_costs) if self.session_costs else 0
+            "average_per_session": (
+                self.total_cost / len(self.session_costs) if self.session_costs else 0
+            ),
         }
 
 
@@ -487,7 +528,7 @@ async def main():
         "title": "Designing Machine Learning Systems",
         "author": "Chip Huyen",
         "genre": "Machine Learning",
-        "pages": 461
+        "pages": 461,
     }
 
     print("🧪 Testing Multi-Model Book Analyzer...")

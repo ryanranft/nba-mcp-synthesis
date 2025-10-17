@@ -26,8 +26,10 @@ from .algebra_helper import get_sports_formula
 
 logger = logging.getLogger(__name__)
 
+
 class VisualizationType(Enum):
     """Types of visualizations supported"""
+
     LATEX = "latex"
     TABLE = "table"
     CHART = "chart"
@@ -43,8 +45,10 @@ class VisualizationType(Enum):
     NETWORK = "network"
     TIMELINE = "timeline"
 
+
 class ChartType(Enum):
     """Specific chart types"""
+
     SCATTER = "scatter"
     LINE = "line"
     BAR = "bar"
@@ -56,9 +60,11 @@ class ChartType(Enum):
     RADAR = "radar"
     SANKEY = "sankey"
 
+
 @dataclass
 class VisualizationConfig:
     """Configuration for visualizations"""
+
     width: int = 800
     height: int = 600
     title: str = ""
@@ -73,9 +79,11 @@ class VisualizationConfig:
     animation: bool = False
     export_format: str = "png"
 
+
 @dataclass
 class DataPoint:
     """Represents a single data point"""
+
     x: float
     y: float
     z: Optional[float] = None
@@ -84,9 +92,11 @@ class DataPoint:
     size: Optional[float] = None
     metadata: Optional[Dict[str, Any]] = None
 
+
 @dataclass
 class Dataset:
     """Represents a dataset for visualization"""
+
     name: str
     data_points: List[DataPoint]
     x_column: str = "x"
@@ -96,18 +106,21 @@ class Dataset:
     size_column: Optional[str] = None
     metadata: Optional[Dict[str, Any]] = None
 
+
 @dataclass
 class VisualizationResult:
     """Result of a visualization generation"""
+
     success: bool
     visualization_type: VisualizationType
     data: Optional[Dict[str, Any]] = None
     image_data: Optional[str] = None  # Base64 encoded image
-    svg_data: Optional[str] = None    # SVG markup
-    html_data: Optional[str] = None   # HTML with embedded visualization
+    svg_data: Optional[str] = None  # SVG markup
+    html_data: Optional[str] = None  # HTML with embedded visualization
     latex_data: Optional[str] = None  # LaTeX representation
     error: Optional[str] = None
     metadata: Optional[Dict[str, Any]] = None
+
 
 class AdvancedVisualizationEngine:
     """
@@ -138,7 +151,7 @@ class AdvancedVisualizationEngine:
                 "x_label": "Offensive Rating",
                 "y_label": "Defensive Rating",
                 "color_scheme": "sports",
-                "interactive": True
+                "interactive": True,
             },
             "team_metrics": {
                 "type": ChartType.BAR,
@@ -146,7 +159,7 @@ class AdvancedVisualizationEngine:
                 "x_label": "Teams",
                 "y_label": "Performance Score",
                 "color_scheme": "team_colors",
-                "interactive": True
+                "interactive": True,
             },
             "formula_analysis": {
                 "type": ChartType.LINE,
@@ -154,7 +167,7 @@ class AdvancedVisualizationEngine:
                 "x_label": "Time Period",
                 "y_label": "Formula Value",
                 "color_scheme": "formula",
-                "interactive": True
+                "interactive": True,
             },
             "shooting_efficiency": {
                 "type": ChartType.HEATMAP,
@@ -162,8 +175,8 @@ class AdvancedVisualizationEngine:
                 "x_label": "Distance from Basket",
                 "y_label": "Angle from Center",
                 "color_scheme": "efficiency",
-                "interactive": True
-            }
+                "interactive": True,
+            },
         }
 
     def _initialize_color_schemes(self) -> Dict[str, List[str]]:
@@ -174,7 +187,7 @@ class AdvancedVisualizationEngine:
             "team_colors": ["#C8102E", "#1D428A", "#CE1141", "#0C2340", "#E31837"],
             "efficiency": ["#FF0000", "#FF8000", "#FFFF00", "#80FF00", "#00FF00"],
             "formula": ["#8B5CF6", "#06B6D4", "#10B981", "#F59E0B", "#EF4444"],
-            "heatmap": ["#000080", "#0000FF", "#00FFFF", "#FFFF00", "#FF0000"]
+            "heatmap": ["#000080", "#0000FF", "#00FFFF", "#FFFF00", "#FF0000"],
         }
 
     def generate_visualization(
@@ -182,7 +195,7 @@ class AdvancedVisualizationEngine:
         visualization_type: VisualizationType,
         data: Union[List[DataPoint], Dataset, Dict[str, Any]],
         config: Optional[VisualizationConfig] = None,
-        chart_type: Optional[ChartType] = None
+        chart_type: Optional[ChartType] = None,
     ) -> VisualizationResult:
         """
         Generate a visualization based on type and data.
@@ -235,29 +248,24 @@ class AdvancedVisualizationEngine:
                 return VisualizationResult(
                     success=False,
                     visualization_type=visualization_type,
-                    error=f"Unsupported visualization type: {visualization_type}"
+                    error=f"Unsupported visualization type: {visualization_type}",
                 )
 
         except Exception as e:
             logger.error(f"Error generating visualization: {e}")
             return VisualizationResult(
-                success=False,
-                visualization_type=visualization_type,
-                error=str(e)
+                success=False, visualization_type=visualization_type, error=str(e)
             )
 
-    def _normalize_data(self, data: Union[List[DataPoint], Dataset, Dict[str, Any]]) -> Dataset:
+    def _normalize_data(
+        self, data: Union[List[DataPoint], Dataset, Dict[str, Any]]
+    ) -> Dataset:
         """Normalize different data formats to Dataset"""
         if isinstance(data, Dataset):
             return data
         elif isinstance(data, list):
             # Assume list of DataPoint objects
-            return Dataset(
-                name="dataset",
-                data_points=data,
-                x_column="x",
-                y_column="y"
-            )
+            return Dataset(name="dataset", data_points=data, x_column="x", y_column="y")
         elif isinstance(data, dict):
             # Convert dictionary to Dataset
             if "data_points" in data:
@@ -282,12 +290,14 @@ class AdvancedVisualizationEngine:
                     x_column=data.get("x_column", "x"),
                     y_column=data.get("y_column", "y"),
                     z_column=data.get("z_column"),
-                    metadata=data.get("metadata")
+                    metadata=data.get("metadata"),
                 )
         else:
             raise ValueError(f"Unsupported data type: {type(data)}")
 
-    def _generate_latex_visualization(self, dataset: Dataset, config: VisualizationConfig) -> VisualizationResult:
+    def _generate_latex_visualization(
+        self, dataset: Dataset, config: VisualizationConfig
+    ) -> VisualizationResult:
         """Generate LaTeX visualization"""
         try:
             latex_content = []
@@ -319,18 +329,18 @@ class AdvancedVisualizationEngine:
                 latex_data=latex_data,
                 metadata={
                     "point_count": len(dataset.data_points),
-                    "has_3d": any(p.z is not None for p in dataset.data_points)
-                }
+                    "has_3d": any(p.z is not None for p in dataset.data_points),
+                },
             )
 
         except Exception as e:
             return VisualizationResult(
-                success=False,
-                visualization_type=VisualizationType.LATEX,
-                error=str(e)
+                success=False, visualization_type=VisualizationType.LATEX, error=str(e)
             )
 
-    def _generate_table_visualization(self, dataset: Dataset, config: VisualizationConfig) -> VisualizationResult:
+    def _generate_table_visualization(
+        self, dataset: Dataset, config: VisualizationConfig
+    ) -> VisualizationResult:
         """Generate table visualization"""
         try:
             table_data = []
@@ -365,22 +375,20 @@ class AdvancedVisualizationEngine:
                 data={"table": table_data},
                 metadata={
                     "row_count": len(table_data) - 1,
-                    "column_count": len(headers)
-                }
+                    "column_count": len(headers),
+                },
             )
 
         except Exception as e:
             return VisualizationResult(
-                success=False,
-                visualization_type=VisualizationType.TABLE,
-                error=str(e)
+                success=False, visualization_type=VisualizationType.TABLE, error=str(e)
             )
 
     def _generate_chart_visualization(
         self,
         dataset: Dataset,
         config: VisualizationConfig,
-        chart_type: Optional[ChartType]
+        chart_type: Optional[ChartType],
     ) -> VisualizationResult:
         """Generate chart visualization"""
         try:
@@ -393,16 +401,12 @@ class AdvancedVisualizationEngine:
                 "title": config.title or f"{chart_type.value.title()} Chart",
                 "x_label": config.x_label or dataset.x_column,
                 "y_label": config.y_label or dataset.y_column,
-                "data": []
+                "data": [],
             }
 
             # Convert data points to chart format
             for point in dataset.data_points:
-                chart_point = {
-                    "x": point.x,
-                    "y": point.y,
-                    "label": point.label
-                }
+                chart_point = {"x": point.x, "y": point.y, "label": point.label}
                 if point.z is not None:
                     chart_point["z"] = point.z
                 if point.color:
@@ -422,18 +426,18 @@ class AdvancedVisualizationEngine:
                 metadata={
                     "chart_type": chart_type.value,
                     "point_count": len(chart_data["data"]),
-                    "interactive": config.interactive
-                }
+                    "interactive": config.interactive,
+                },
             )
 
         except Exception as e:
             return VisualizationResult(
-                success=False,
-                visualization_type=VisualizationType.CHART,
-                error=str(e)
+                success=False, visualization_type=VisualizationType.CHART, error=str(e)
             )
 
-    def _generate_chart_html(self, chart_data: Dict[str, Any], config: VisualizationConfig) -> str:
+    def _generate_chart_html(
+        self, chart_data: Dict[str, Any], config: VisualizationConfig
+    ) -> str:
         """Generate HTML representation of chart"""
         chart_id = f"chart_{uuid.uuid4().hex[:8]}"
 
@@ -482,7 +486,11 @@ class AdvancedVisualizationEngine:
 
                 for point in chart_data["data"]:
                     svg_x = plot_x + (point["x"] - x_min) / (x_max - x_min) * plot_width
-                    svg_y = plot_y + plot_height - (point["y"] - y_min) / (y_max - y_min) * plot_height
+                    svg_y = (
+                        plot_y
+                        + plot_height
+                        - (point["y"] - y_min) / (y_max - y_min) * plot_height
+                    )
 
                     color = point.get("color", "#1f77b4")
                     size = point.get("size", 5)
@@ -501,14 +509,13 @@ class AdvancedVisualizationEngine:
 
         return html
 
-    def _generate_graph_visualization(self, dataset: Dataset, config: VisualizationConfig) -> VisualizationResult:
+    def _generate_graph_visualization(
+        self, dataset: Dataset, config: VisualizationConfig
+    ) -> VisualizationResult:
         """Generate graph visualization (network/relationship)"""
         try:
             # For now, generate a simple network graph
-            graph_data = {
-                "nodes": [],
-                "edges": []
-            }
+            graph_data = {"nodes": [], "edges": []}
 
             # Convert data points to nodes
             for i, point in enumerate(dataset.data_points):
@@ -517,19 +524,21 @@ class AdvancedVisualizationEngine:
                     "label": point.label or f"Point {i}",
                     "x": point.x,
                     "y": point.y,
-                    "color": point.color or "#1f77b4"
+                    "color": point.color or "#1f77b4",
                 }
                 graph_data["nodes"].append(node)
 
             # Create edges between nearby points
             for i, point1 in enumerate(dataset.data_points):
-                for j, point2 in enumerate(dataset.data_points[i+1:], i+1):
-                    distance = math.sqrt((point1.x - point2.x)**2 + (point1.y - point2.y)**2)
+                for j, point2 in enumerate(dataset.data_points[i + 1 :], i + 1):
+                    distance = math.sqrt(
+                        (point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2
+                    )
                     if distance < 10:  # Threshold for edge creation
                         edge = {
                             "source": f"node_{i}",
                             "target": f"node_{j}",
-                            "weight": distance
+                            "weight": distance,
                         }
                         graph_data["edges"].append(edge)
 
@@ -539,22 +548,24 @@ class AdvancedVisualizationEngine:
                 data=graph_data,
                 metadata={
                     "node_count": len(graph_data["nodes"]),
-                    "edge_count": len(graph_data["edges"])
-                }
+                    "edge_count": len(graph_data["edges"]),
+                },
             )
 
         except Exception as e:
             return VisualizationResult(
-                success=False,
-                visualization_type=VisualizationType.GRAPH,
-                error=str(e)
+                success=False, visualization_type=VisualizationType.GRAPH, error=str(e)
             )
 
-    def _generate_2d_plot(self, dataset: Dataset, config: VisualizationConfig) -> VisualizationResult:
+    def _generate_2d_plot(
+        self, dataset: Dataset, config: VisualizationConfig
+    ) -> VisualizationResult:
         """Generate 2D plot visualization"""
         return self._generate_chart_visualization(dataset, config, ChartType.SCATTER)
 
-    def _generate_3d_plot(self, dataset: Dataset, config: VisualizationConfig) -> VisualizationResult:
+    def _generate_3d_plot(
+        self, dataset: Dataset, config: VisualizationConfig
+    ) -> VisualizationResult:
         """Generate 3D plot visualization"""
         try:
             # Check if we have 3D data
@@ -563,7 +574,7 @@ class AdvancedVisualizationEngine:
                 return VisualizationResult(
                     success=False,
                     visualization_type=VisualizationType.PLOT_3D,
-                    error="No 3D data available (z values missing)"
+                    error="No 3D data available (z values missing)",
                 )
 
             # Generate 3D plot data
@@ -573,37 +584,38 @@ class AdvancedVisualizationEngine:
                 "x_label": config.x_label or dataset.x_column,
                 "y_label": config.y_label or dataset.y_column,
                 "z_label": config.z_label or dataset.z_column or "Z",
-                "data": []
+                "data": [],
             }
 
             for point in dataset.data_points:
                 if point.z is not None:
-                    plot_data["data"].append({
-                        "x": point.x,
-                        "y": point.y,
-                        "z": point.z,
-                        "label": point.label,
-                        "color": point.color
-                    })
+                    plot_data["data"].append(
+                        {
+                            "x": point.x,
+                            "y": point.y,
+                            "z": point.z,
+                            "label": point.label,
+                            "color": point.color,
+                        }
+                    )
 
             return VisualizationResult(
                 success=True,
                 visualization_type=VisualizationType.PLOT_3D,
                 data=plot_data,
-                metadata={
-                    "point_count": len(plot_data["data"]),
-                    "has_3d": True
-                }
+                metadata={"point_count": len(plot_data["data"]), "has_3d": True},
             )
 
         except Exception as e:
             return VisualizationResult(
                 success=False,
                 visualization_type=VisualizationType.PLOT_3D,
-                error=str(e)
+                error=str(e),
             )
 
-    def _generate_heatmap(self, dataset: Dataset, config: VisualizationConfig) -> VisualizationResult:
+    def _generate_heatmap(
+        self, dataset: Dataset, config: VisualizationConfig
+    ) -> VisualizationResult:
         """Generate heatmap visualization"""
         try:
             # Create grid for heatmap
@@ -614,7 +626,7 @@ class AdvancedVisualizationEngine:
                 return VisualizationResult(
                     success=False,
                     visualization_type=VisualizationType.HEATMAP,
-                    error="No data points available for heatmap"
+                    error="No data points available for heatmap",
                 )
 
             x_min, x_max = min(x_values), max(x_values)
@@ -633,9 +645,12 @@ class AdvancedVisualizationEngine:
                     cell_y = y_min + j * y_step
 
                     # Count points in this cell
-                    count = sum(1 for p in dataset.data_points
-                              if cell_x <= p.x < cell_x + x_step and
-                                 cell_y <= p.y < cell_y + y_step)
+                    count = sum(
+                        1
+                        for p in dataset.data_points
+                        if cell_x <= p.x < cell_x + x_step
+                        and cell_y <= p.y < cell_y + y_step
+                    )
 
                     row.append(count)
                 heatmap_data.append(row)
@@ -647,26 +662,30 @@ class AdvancedVisualizationEngine:
                     "heatmap": heatmap_data,
                     "x_range": [x_min, x_max],
                     "y_range": [y_min, y_max],
-                    "grid_size": grid_size
+                    "grid_size": grid_size,
                 },
                 metadata={
                     "grid_size": grid_size,
-                    "max_value": max(max(row) for row in heatmap_data)
-                }
+                    "max_value": max(max(row) for row in heatmap_data),
+                },
             )
 
         except Exception as e:
             return VisualizationResult(
                 success=False,
                 visualization_type=VisualizationType.HEATMAP,
-                error=str(e)
+                error=str(e),
             )
 
-    def _generate_scatter_plot(self, dataset: Dataset, config: VisualizationConfig) -> VisualizationResult:
+    def _generate_scatter_plot(
+        self, dataset: Dataset, config: VisualizationConfig
+    ) -> VisualizationResult:
         """Generate scatter plot visualization"""
         return self._generate_chart_visualization(dataset, config, ChartType.SCATTER)
 
-    def _generate_histogram(self, dataset: Dataset, config: VisualizationConfig) -> VisualizationResult:
+    def _generate_histogram(
+        self, dataset: Dataset, config: VisualizationConfig
+    ) -> VisualizationResult:
         """Generate histogram visualization"""
         try:
             # Use y values for histogram
@@ -676,7 +695,7 @@ class AdvancedVisualizationEngine:
                 return VisualizationResult(
                     success=False,
                     visualization_type=VisualizationType.HISTOGRAM,
-                    error="No data points available for histogram"
+                    error="No data points available for histogram",
                 )
 
             # Create bins
@@ -699,35 +718,38 @@ class AdvancedVisualizationEngine:
                 "bins": bins,
                 "counts": bin_counts,
                 "bin_width": bin_width,
-                "total_points": len(y_values)
+                "total_points": len(y_values),
             }
 
             return VisualizationResult(
                 success=True,
                 visualization_type=VisualizationType.HISTOGRAM,
                 data=histogram_data,
-                metadata={
-                    "num_bins": num_bins,
-                    "max_count": max(bin_counts)
-                }
+                metadata={"num_bins": num_bins, "max_count": max(bin_counts)},
             )
 
         except Exception as e:
             return VisualizationResult(
                 success=False,
                 visualization_type=VisualizationType.HISTOGRAM,
-                error=str(e)
+                error=str(e),
             )
 
-    def _generate_bar_chart(self, dataset: Dataset, config: VisualizationConfig) -> VisualizationResult:
+    def _generate_bar_chart(
+        self, dataset: Dataset, config: VisualizationConfig
+    ) -> VisualizationResult:
         """Generate bar chart visualization"""
         return self._generate_chart_visualization(dataset, config, ChartType.BAR)
 
-    def _generate_line_chart(self, dataset: Dataset, config: VisualizationConfig) -> VisualizationResult:
+    def _generate_line_chart(
+        self, dataset: Dataset, config: VisualizationConfig
+    ) -> VisualizationResult:
         """Generate line chart visualization"""
         return self._generate_chart_visualization(dataset, config, ChartType.LINE)
 
-    def _generate_pie_chart(self, dataset: Dataset, config: VisualizationConfig) -> VisualizationResult:
+    def _generate_pie_chart(
+        self, dataset: Dataset, config: VisualizationConfig
+    ) -> VisualizationResult:
         """Generate pie chart visualization"""
         try:
             # Group data by labels or create categories
@@ -741,7 +763,7 @@ class AdvancedVisualizationEngine:
             pie_data = {
                 "categories": list(categories.keys()),
                 "values": list(categories.values()),
-                "total": sum(categories.values())
+                "total": sum(categories.values()),
             }
 
             return VisualizationResult(
@@ -750,22 +772,26 @@ class AdvancedVisualizationEngine:
                 data=pie_data,
                 metadata={
                     "category_count": len(categories),
-                    "total_value": pie_data["total"]
-                }
+                    "total_value": pie_data["total"],
+                },
             )
 
         except Exception as e:
             return VisualizationResult(
                 success=False,
                 visualization_type=VisualizationType.PIE_CHART,
-                error=str(e)
+                error=str(e),
             )
 
-    def _generate_network_graph(self, dataset: Dataset, config: VisualizationConfig) -> VisualizationResult:
+    def _generate_network_graph(
+        self, dataset: Dataset, config: VisualizationConfig
+    ) -> VisualizationResult:
         """Generate network graph visualization"""
         return self._generate_graph_visualization(dataset, config)
 
-    def _generate_timeline(self, dataset: Dataset, config: VisualizationConfig) -> VisualizationResult:
+    def _generate_timeline(
+        self, dataset: Dataset, config: VisualizationConfig
+    ) -> VisualizationResult:
         """Generate timeline visualization"""
         try:
             # Sort data points by x value (assuming x is time)
@@ -774,7 +800,7 @@ class AdvancedVisualizationEngine:
             timeline_data = {
                 "events": [],
                 "start_time": sorted_points[0].x if sorted_points else 0,
-                "end_time": sorted_points[-1].x if sorted_points else 0
+                "end_time": sorted_points[-1].x if sorted_points else 0,
             }
 
             for point in sorted_points:
@@ -783,7 +809,7 @@ class AdvancedVisualizationEngine:
                     "label": point.label or f"Event at {point.x}",
                     "value": point.y,
                     "color": point.color,
-                    "metadata": point.metadata
+                    "metadata": point.metadata,
                 }
                 timeline_data["events"].append(event)
 
@@ -793,22 +819,22 @@ class AdvancedVisualizationEngine:
                 data=timeline_data,
                 metadata={
                     "event_count": len(timeline_data["events"]),
-                    "duration": timeline_data["end_time"] - timeline_data["start_time"]
-                }
+                    "duration": timeline_data["end_time"] - timeline_data["start_time"],
+                },
             )
 
         except Exception as e:
             return VisualizationResult(
                 success=False,
                 visualization_type=VisualizationType.TIMELINE,
-                error=str(e)
+                error=str(e),
             )
 
     def export_visualization(
         self,
         visualization: VisualizationResult,
         format: str,
-        filename: Optional[str] = None
+        filename: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Export visualization in specified format.
@@ -825,7 +851,7 @@ class AdvancedVisualizationEngine:
             if format not in self.export_formats:
                 return {
                     "success": False,
-                    "error": f"Unsupported export format: {format}"
+                    "error": f"Unsupported export format: {format}",
                 }
 
             if filename is None:
@@ -836,7 +862,7 @@ class AdvancedVisualizationEngine:
                 "filename": filename,
                 "format": format,
                 "visualization_type": visualization.visualization_type.value,
-                "metadata": visualization.metadata
+                "metadata": visualization.metadata,
             }
 
             if format == "json":
@@ -851,16 +877,10 @@ class AdvancedVisualizationEngine:
                 # PDF export would require additional processing
                 export_data["note"] = "PDF export requires additional processing"
 
-            return {
-                "success": True,
-                "export": export_data
-            }
+            return {"success": True, "export": export_data}
 
         except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
 
     def get_visualization_templates(self) -> Dict[str, Dict[str, Any]]:
         """Get available visualization templates"""
@@ -873,7 +893,3 @@ class AdvancedVisualizationEngine:
     def get_supported_formats(self) -> List[str]:
         """Get supported export formats"""
         return self.export_formats
-
-
-
-

@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 class VariantStatus(Enum):
     """Status of A/B test variant"""
+
     INACTIVE = "inactive"
     TESTING = "testing"
     WINNING = "winning"
@@ -29,6 +30,7 @@ class VariantStatus(Enum):
 @dataclass
 class Variant:
     """A/B test variant configuration"""
+
     name: str
     traffic_percentage: float  # 0-100
     config: Dict[str, Any]
@@ -43,6 +45,7 @@ class Variant:
 @dataclass
 class ABTest:
     """A/B test configuration"""
+
     test_id: str
     name: str
     description: str
@@ -55,10 +58,7 @@ class ABTest:
     end_time: Optional[str] = None
 
     def to_dict(self) -> Dict:
-        return {
-            **asdict(self),
-            "variants": [asdict(v) for v in self.variants]
-        }
+        return {**asdict(self), "variants": [asdict(v) for v in self.variants]}
 
 
 class ABTestingFramework:
@@ -66,12 +66,13 @@ class ABTestingFramework:
 
     def __init__(self, config_file: Optional[str] = None):
         self.config_file = config_file or os.path.join(
-            os.path.dirname(__file__),
-            "ab_tests.json"
+            os.path.dirname(__file__), "ab_tests.json"
         )
         self.active_tests: Dict[str, ABTest] = {}
         self.feature_flags: Dict[str, bool] = {}
-        self.user_assignments: Dict[str, Dict[str, str]] = {}  # user_id -> {test_id: variant}
+        self.user_assignments: Dict[str, Dict[str, str]] = (
+            {}
+        )  # user_id -> {test_id: variant}
 
         self._load_config()
 
@@ -79,7 +80,7 @@ class ABTestingFramework:
         """Load AB test configuration from file"""
         if os.path.exists(self.config_file):
             try:
-                with open(self.config_file, 'r') as f:
+                with open(self.config_file, "r") as f:
                     data = json.load(f)
 
                 self.feature_flags = data.get("feature_flags", {})
@@ -97,12 +98,10 @@ class ABTestingFramework:
         try:
             data = {
                 "feature_flags": self.feature_flags,
-                "active_tests": [
-                    test.to_dict() for test in self.active_tests.values()
-                ]
+                "active_tests": [test.to_dict() for test in self.active_tests.values()],
             }
 
-            with open(self.config_file, 'w') as f:
+            with open(self.config_file, "w") as f:
                 json.dump(data, f, indent=2)
 
         except Exception as e:
@@ -115,7 +114,7 @@ class ABTestingFramework:
         variants: List[Variant],
         control_variant: str,
         success_metric: str,
-        **kwargs
+        **kwargs,
     ) -> ABTest:
         """
         Create a new A/B test
@@ -139,7 +138,7 @@ class ABTestingFramework:
             success_metric=success_metric,
             minimum_sample_size=kwargs.get("minimum_sample_size", 1000),
             confidence_level=kwargs.get("confidence_level", 0.95),
-            start_time=datetime.now().isoformat()
+            start_time=datetime.now().isoformat(),
         )
 
         self.active_tests[test_id] = test
@@ -149,10 +148,7 @@ class ABTestingFramework:
         return test
 
     def assign_variant(
-        self,
-        test_id: str,
-        user_id: str,
-        sticky: bool = True
+        self, test_id: str, user_id: str, sticky: bool = True
     ) -> Optional[Variant]:
         """
         Assign user to a variant
@@ -192,14 +188,13 @@ class ABTestingFramework:
                 return variant
 
         # Fallback to control
-        return next((v for v in test.variants if v.name == test.control_variant), test.variants[0])
+        return next(
+            (v for v in test.variants if v.name == test.control_variant),
+            test.variants[0],
+        )
 
     def record_metric(
-        self,
-        test_id: str,
-        variant_name: str,
-        metric_name: str,
-        value: float
+        self, test_id: str, variant_name: str, metric_name: str, value: float
     ):
         """Record metric value for a variant"""
         if test_id not in self.active_tests:
@@ -232,7 +227,9 @@ class ABTestingFramework:
             return {"error": "Test not found"}
 
         test = self.active_tests[test_id]
-        control = next((v for v in test.variants if v.name == test.control_variant), None)
+        control = next(
+            (v for v in test.variants if v.name == test.control_variant), None
+        )
 
         if not control:
             return {"error": "Control variant not found"}
@@ -242,7 +239,7 @@ class ABTestingFramework:
             "test_name": test.name,
             "variants": {},
             "winner": None,
-            "confidence": 0.0
+            "confidence": 0.0,
         }
 
         # Analyze each variant against control
@@ -250,27 +247,23 @@ class ABTestingFramework:
             if variant.name == test.control_variant:
                 continue
 
-            comparison = self._compare_variants(
-                control,
-                variant,
-                test.success_metric
-            )
+            comparison = self._compare_variants(control, variant, test.success_metric)
 
             results["variants"][variant.name] = comparison
 
             # Determine winner (simplified)
             if comparison.get("significant_improvement"):
-                if not results["winner"] or comparison["improvement"] > results["confidence"]:
+                if (
+                    not results["winner"]
+                    or comparison["improvement"] > results["confidence"]
+                ):
                     results["winner"] = variant.name
                     results["confidence"] = comparison["improvement"]
 
         return results
 
     def _compare_variants(
-        self,
-        control: Variant,
-        variant: Variant,
-        metric_name: str
+        self, control: Variant, variant: Variant, metric_name: str
     ) -> Dict[str, Any]:
         """Compare variant against control"""
         control_values = control.metrics.get(metric_name, [])
@@ -280,7 +273,7 @@ class ABTestingFramework:
             return {
                 "sample_size_control": len(control_values),
                 "sample_size_variant": len(variant_values),
-                "sufficient_data": False
+                "sufficient_data": False,
             }
 
         import numpy as np
@@ -288,7 +281,11 @@ class ABTestingFramework:
         control_mean = np.mean(control_values)
         variant_mean = np.mean(variant_values)
 
-        improvement = ((variant_mean - control_mean) / control_mean) * 100 if control_mean != 0 else 0
+        improvement = (
+            ((variant_mean - control_mean) / control_mean) * 100
+            if control_mean != 0
+            else 0
+        )
 
         return {
             "sample_size_control": len(control_values),
@@ -297,7 +294,8 @@ class ABTestingFramework:
             "variant_mean": variant_mean,
             "improvement": improvement,
             "significant_improvement": improvement > 5,  # Simplified
-            "sufficient_data": len(control_values) >= 1000 and len(variant_values) >= 1000
+            "sufficient_data": len(control_values) >= 1000
+            and len(variant_values) >= 1000,
         }
 
     def set_feature_flag(self, flag_name: str, enabled: bool):
@@ -314,7 +312,7 @@ class ABTestingFramework:
         self,
         test_id: str,
         steps: List[int] = [10, 25, 50, 75, 100],
-        check_metrics: bool = True
+        check_metrics: bool = True,
     ) -> Dict[str, Any]:
         """
         Perform gradual rollout of winning variant
@@ -351,7 +349,7 @@ class ABTestingFramework:
             "winner": winner_name,
             "rollout_plan": steps,
             "status": "ready",
-            "message": f"Ready to roll out {winner_name} in steps: {steps}"
+            "message": f"Ready to roll out {winner_name} in steps: {steps}",
         }
 
 
@@ -371,9 +369,9 @@ def get_ab_testing() -> ABTestingFramework:
 
 # CLI for testing
 if __name__ == "__main__":
-    print("="*70)
+    print("=" * 70)
     print("A/B Testing Framework - Demo")
-    print("="*70)
+    print("=" * 70)
     print()
 
     # Create framework
@@ -389,17 +387,17 @@ if __name__ == "__main__":
                 name="control",
                 traffic_percentage=50,
                 config={"model": "deepseek-chat"},
-                status=VariantStatus.TESTING
+                status=VariantStatus.TESTING,
             ),
             Variant(
                 name="variant_a",
                 traffic_percentage=50,
                 config={"model": "gpt-4"},
-                status=VariantStatus.TESTING
-            )
+                status=VariantStatus.TESTING,
+            ),
         ],
         control_variant="control",
-        success_metric="response_quality"
+        success_metric="response_quality",
     )
 
     print(f"  ✅ Created test: {test.test_id}")
@@ -424,10 +422,14 @@ if __name__ == "__main__":
     framework.set_feature_flag("new_synthesis_algorithm", True)
     framework.set_feature_flag("experimental_caching", False)
 
-    print(f"  new_synthesis_algorithm: {framework.is_feature_enabled('new_synthesis_algorithm')}")
-    print(f"  experimental_caching: {framework.is_feature_enabled('experimental_caching')}")
+    print(
+        f"  new_synthesis_algorithm: {framework.is_feature_enabled('new_synthesis_algorithm')}"
+    )
+    print(
+        f"  experimental_caching: {framework.is_feature_enabled('experimental_caching')}"
+    )
 
     print()
-    print("="*70)
+    print("=" * 70)
     print("✅ A/B Testing Framework demo complete!")
-    print("="*70)
+    print("=" * 70)

@@ -12,9 +12,9 @@ from mcp_server.tools import nba_metrics_helper
 
 def test_win_shares():
     """Test Win Shares calculation"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Testing Win Shares (WS)")
-    print("="*60)
+    print("=" * 60)
 
     # Example: LeBron James 2012-13 season
     # Marginal offense: 5.8, Marginal defense: 3.3, MPW: 30
@@ -23,9 +23,7 @@ def test_win_shares():
     marginal_points_per_win = 30.0
 
     result = nba_metrics_helper.calculate_win_shares(
-        marginal_offense,
-        marginal_defense,
-        marginal_points_per_win
+        marginal_offense, marginal_defense, marginal_points_per_win
     )
 
     print(f"Inputs:")
@@ -33,7 +31,9 @@ def test_win_shares():
     print(f"  Marginal Defense: {marginal_defense}")
     print(f"  Marginal Points Per Win: {marginal_points_per_win}")
     print(f"\nResult: {result:.2f} WS")
-    print(f"Interpretation: {'Elite' if result > 10 else 'Above Average' if result > 5 else 'Average'} contribution")
+    print(
+        f"Interpretation: {'Elite' if result > 10 else 'Above Average' if result > 5 else 'Average'} contribution"
+    )
 
     assert result > 0, "Win Shares should be positive"
     print("✅ Win Shares test passed")
@@ -43,9 +43,9 @@ def test_win_shares():
 
 def test_box_plus_minus():
     """Test Box Plus/Minus calculation"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Testing Box Plus/Minus (BPM)")
-    print("="*60)
+    print("=" * 60)
 
     # Example: All-Star level player
     # PER: 25.0, Team pace: 98.0, League avg PER: 15.0, League avg pace: 100.0
@@ -55,10 +55,7 @@ def test_box_plus_minus():
     league_avg_pace = 100.0
 
     result = nba_metrics_helper.calculate_box_plus_minus(
-        per,
-        team_pace,
-        league_avg_per,
-        league_avg_pace
+        per, team_pace, league_avg_per, league_avg_pace
     )
 
     print(f"Inputs:")
@@ -69,9 +66,13 @@ def test_box_plus_minus():
     print(f"\nResult: {result:+.1f} BPM")
 
     if result > 0:
-        print(f"Interpretation: {result:.1f} points per 100 possessions ABOVE league average")
+        print(
+            f"Interpretation: {result:.1f} points per 100 possessions ABOVE league average"
+        )
     elif result < 0:
-        print(f"Interpretation: {abs(result):.1f} points per 100 possessions BELOW league average")
+        print(
+            f"Interpretation: {abs(result):.1f} points per 100 possessions BELOW league average"
+        )
     else:
         print("Interpretation: At league average")
 
@@ -82,9 +83,9 @@ def test_box_plus_minus():
 
 def test_edge_cases():
     """Test edge cases"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Testing Edge Cases")
-    print("="*60)
+    print("=" * 60)
 
     # Test 1: Zero values for Win Shares
     ws_zero = nba_metrics_helper.calculate_win_shares(0, 0, 30)
@@ -106,10 +107,10 @@ def test_edge_cases():
 
 def main():
     """Run all tests"""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("NBA METRICS REGISTRATION VERIFICATION")
     print("Testing: nba_win_shares & nba_box_plus_minus")
-    print("="*70)
+    print("=" * 70)
 
     try:
         # Test Win Shares
@@ -122,21 +123,22 @@ def main():
         test_edge_cases()
 
         # Summary
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("TEST SUMMARY")
-        print("="*70)
+        print("=" * 70)
         print(f"✅ All tests passed successfully!")
         print(f"\nSample Results:")
         print(f"  Win Shares: {ws_result:.2f}")
         print(f"  Box Plus/Minus: {bpm_result:+.1f}")
         print(f"\nTools are ready for use in fastmcp_server.py")
-        print("="*70)
+        print("=" * 70)
 
         return 0
 
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         return 1
 

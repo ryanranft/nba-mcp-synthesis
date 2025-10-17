@@ -1,4 +1,5 @@
 """Model Versioning with MLflow - BOOK RECOMMENDATION 1"""
+
 import mlflow
 import mlflow.sklearn
 import mlflow.pytorch
@@ -30,7 +31,7 @@ class ModelRegistry:
         experiment_name: str = "nba_models",
         params: Optional[Dict] = None,
         metrics: Optional[Dict] = None,
-        artifacts: Optional[Dict] = None
+        artifacts: Optional[Dict] = None,
     ) -> str:
         """
         Log a model to MLflow
@@ -59,9 +60,9 @@ class ModelRegistry:
                 mlflow.log_metrics(metrics)
 
             # Log model
-            if hasattr(model, 'sklearn'):
+            if hasattr(model, "sklearn"):
                 mlflow.sklearn.log_model(model, model_name)
-            elif hasattr(model, 'pytorch'):
+            elif hasattr(model, "pytorch"):
                 mlflow.pytorch.log_model(model, model_name)
             else:
                 # Generic Python model
@@ -72,16 +73,21 @@ class ModelRegistry:
                 for name, content in artifacts.items():
                     # Save artifact to temp file
                     import tempfile
-                    with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+
+                    with tempfile.NamedTemporaryFile(
+                        mode="w", delete=False, suffix=".json"
+                    ) as f:
                         json.dump(content, f)
                         mlflow.log_artifact(f.name, name)
 
             # Add tags
-            mlflow.set_tags({
-                "model_name": model_name,
-                "timestamp": datetime.utcnow().isoformat(),
-                "stage": "staging"
-            })
+            mlflow.set_tags(
+                {
+                    "model_name": model_name,
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "stage": "staging",
+                }
+            )
 
             logger.info(f"✅ Model logged: {model_name} (run_id: {run.info.run_id})")
             return run.info.run_id
@@ -121,7 +127,7 @@ class ModelRegistry:
             name=model_name,
             version=version,
             stage="Production",
-            archive_existing_versions=True
+            archive_existing_versions=True,
         )
 
         logger.info(f"✅ Model promoted to production: {model_name} v{version}")
@@ -158,18 +164,20 @@ class ModelRegistry:
 
         model_list = []
         for model in models:
-            model_list.append({
-                "name": model.name,
-                "creation_timestamp": model.creation_timestamp,
-                "latest_versions": [
-                    {
-                        "version": v.version,
-                        "stage": v.current_stage,
-                        "status": v.status
-                    }
-                    for v in model.latest_versions
-                ]
-            })
+            model_list.append(
+                {
+                    "name": model.name,
+                    "creation_timestamp": model.creation_timestamp,
+                    "latest_versions": [
+                        {
+                            "version": v.version,
+                            "stage": v.current_stage,
+                            "status": v.status,
+                        }
+                        for v in model.latest_versions
+                    ],
+                }
+            )
 
         return model_list
 
@@ -201,7 +209,7 @@ class ModelRegistry:
             "creation_timestamp": model_version.creation_timestamp,
             "last_updated_timestamp": model_version.last_updated_timestamp,
             "source": model_version.source,
-            "run_id": model_version.run_id
+            "run_id": model_version.run_id,
         }
 
     def rollback(self, model_name: str, target_version: str):
@@ -233,20 +241,20 @@ class ModelRegistry:
         v2_info = self.get_model_info(model_name, version2)
 
         # Get metrics for both versions
-        v1_run = self.client.get_run(v1_info['run_id'])
-        v2_run = self.client.get_run(v2_info['run_id'])
+        v1_run = self.client.get_run(v1_info["run_id"])
+        v2_run = self.client.get_run(v2_info["run_id"])
 
         comparison = {
             "version1": {
                 "version": version1,
                 "metrics": v1_run.data.metrics,
-                "params": v1_run.data.params
+                "params": v1_run.data.params,
             },
             "version2": {
                 "version": version2,
                 "metrics": v2_run.data.metrics,
-                "params": v2_run.data.params
-            }
+                "params": v2_run.data.params,
+            },
         }
 
         logger.info(f"📊 Model comparison: {model_name} v{version1} vs v{version2}")
@@ -279,7 +287,7 @@ if __name__ == "__main__":
         model=model,
         model_name="nba_win_predictor",
         params={"n_estimators": 100, "max_depth": 10},
-        metrics={"accuracy": 0.85, "f1_score": 0.83}
+        metrics={"accuracy": 0.85, "f1_score": 0.83},
     )
 
     # Register model
@@ -290,4 +298,3 @@ if __name__ == "__main__":
 
     # Load model
     loaded_model = registry.load_model("nba_win_predictor", "Production")
-

@@ -1,4 +1,5 @@
 """Health Check Endpoints - IMPORTANT 17"""
+
 from typing import Dict, Any, List
 from datetime import datetime
 import logging
@@ -21,21 +22,22 @@ class HealthCheck:
         results = {
             "status": "healthy",
             "timestamp": datetime.utcnow().isoformat(),
-            "checks": {}
+            "checks": {},
         }
 
         for name, check_func in self.checks.items():
             try:
-                check_result = await check_func() if asyncio.iscoroutinefunction(check_func) else check_func()
+                check_result = (
+                    await check_func()
+                    if asyncio.iscoroutinefunction(check_func)
+                    else check_func()
+                )
                 results["checks"][name] = {
                     "status": "pass" if check_result else "fail",
-                    "details": check_result
+                    "details": check_result,
                 }
             except Exception as e:
-                results["checks"][name] = {
-                    "status": "fail",
-                    "error": str(e)
-                }
+                results["checks"][name] = {"status": "fail", "error": str(e)}
                 results["status"] = "degraded"
 
         # Overall status
@@ -59,6 +61,7 @@ def check_database() -> bool:
     """Check database connectivity"""
     try:
         from mcp_server.database import get_database_engine
+
         engine = get_database_engine()
         with engine.connect() as conn:
             conn.execute("SELECT 1")
@@ -72,8 +75,9 @@ def check_s3() -> bool:
     """Check S3 connectivity"""
     try:
         import boto3
-        s3 = boto3.client('s3')
-        s3.head_bucket(Bucket='nba-mcp-books-20251011')
+
+        s3 = boto3.client("s3")
+        s3.head_bucket(Bucket="nba-mcp-books-20251011")
         return True
     except Exception as e:
         logger.error(f"S3 health check failed: {e}")
@@ -83,24 +87,26 @@ def check_s3() -> bool:
 def check_memory() -> Dict[str, Any]:
     """Check memory usage"""
     import psutil
+
     memory = psutil.virtual_memory()
     return {
         "total": memory.total,
         "available": memory.available,
         "percent": memory.percent,
-        "status": "ok" if memory.percent < 90 else "critical"
+        "status": "ok" if memory.percent < 90 else "critical",
     }
 
 
 def check_disk() -> Dict[str, Any]:
     """Check disk usage"""
     import psutil
-    disk = psutil.disk_usage('/')
+
+    disk = psutil.disk_usage("/")
     return {
         "total": disk.total,
         "free": disk.free,
         "percent": disk.percent,
-        "status": "ok" if disk.percent < 90 else "critical"
+        "status": "ok" if disk.percent < 90 else "critical",
     }
 
 
@@ -133,4 +139,3 @@ async def liveness():
     # Simple liveness check
     return {"alive": True}
 """
-

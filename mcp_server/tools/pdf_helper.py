@@ -16,6 +16,7 @@ from pathlib import Path
 
 try:
     import fitz  # PyMuPDF
+
     PYMUPDF_AVAILABLE = True
 except ImportError:
     fitz = None
@@ -23,6 +24,7 @@ except ImportError:
 
 try:
     from bs4 import BeautifulSoup
+
     BEAUTIFULSOUP_AVAILABLE = True
 except ImportError:
     BeautifulSoup = None
@@ -30,6 +32,7 @@ except ImportError:
 
 try:
     import html2text
+
     HTML2TEXT_AVAILABLE = True
 except ImportError:
     html2text = None
@@ -74,7 +77,7 @@ def get_all_pdf_files(path: str) -> List[str]:
     if not os.path.exists(path):
         raise FileNotFoundError(f"Directory not found: {path}")
 
-    return [f for f in os.listdir(path) if f.lower().endswith('.pdf')]
+    return [f for f in os.listdir(path) if f.lower().endswith(".pdf")]
 
 
 @log_operation("pdf_metadata_extraction")
@@ -102,7 +105,7 @@ def get_metadata(pdf_path: str) -> Dict[str, Union[str, int]]:
             logger.error(
                 "PDF file not found",
                 file_path=pdf_path,
-                operation="metadata_extraction"
+                operation="metadata_extraction",
             )
             raise FileNotFoundError(f"PDF file not found: {pdf_path}")
 
@@ -110,7 +113,7 @@ def get_metadata(pdf_path: str) -> Dict[str, Union[str, int]]:
         logger.debug(
             "Starting PDF metadata extraction",
             file_path=pdf_path,
-            operation="metadata_extraction"
+            operation="metadata_extraction",
         )
         doc = fitz.open(pdf_path)
         meta = {}
@@ -118,22 +121,22 @@ def get_metadata(pdf_path: str) -> Dict[str, Union[str, int]]:
         # Extract standard metadata
         pdf_meta = doc.metadata
         if pdf_meta:
-            meta['title'] = pdf_meta.get('title', '')
-            meta['author'] = pdf_meta.get('author', '')
-            meta['subject'] = pdf_meta.get('subject', '')
-            meta['creator'] = pdf_meta.get('creator', '')
-            meta['producer'] = pdf_meta.get('producer', '')
-            meta['creation_date'] = pdf_meta.get('creationDate', '')
-            meta['modification_date'] = pdf_meta.get('modDate', '')
-            meta['keywords'] = pdf_meta.get('keywords', '')
+            meta["title"] = pdf_meta.get("title", "")
+            meta["author"] = pdf_meta.get("author", "")
+            meta["subject"] = pdf_meta.get("subject", "")
+            meta["creator"] = pdf_meta.get("creator", "")
+            meta["producer"] = pdf_meta.get("producer", "")
+            meta["creation_date"] = pdf_meta.get("creationDate", "")
+            meta["modification_date"] = pdf_meta.get("modDate", "")
+            meta["keywords"] = pdf_meta.get("keywords", "")
 
         # Add page count
-        meta['page_count'] = doc.page_count
+        meta["page_count"] = doc.page_count
 
         # Check if PDF has TOC
         toc = doc.get_toc()
-        meta['has_toc'] = len(toc) > 0
-        meta['toc_entries'] = len(toc)
+        meta["has_toc"] = len(toc) > 0
+        meta["toc_entries"] = len(toc)
 
         doc.close()
 
@@ -141,8 +144,8 @@ def get_metadata(pdf_path: str) -> Dict[str, Union[str, int]]:
             "PDF metadata extraction completed",
             file_path=pdf_path,
             operation="metadata_extraction",
-            page_count=meta['page_count'],
-            has_toc=meta['has_toc']
+            page_count=meta["page_count"],
+            has_toc=meta["has_toc"],
         )
         return meta
 
@@ -154,9 +157,11 @@ def get_metadata(pdf_path: str) -> Dict[str, Union[str, int]]:
             file_path=pdf_path,
             operation="metadata_extraction",
             error_type=type(e).__name__,
-            error_details=str(e)
+            error_details=str(e),
         )
-        raise PdfProcessingError("Failed to parse PDF file", pdf_path, "metadata_extraction", e)
+        raise PdfProcessingError(
+            "Failed to parse PDF file", pdf_path, "metadata_extraction", e
+        )
 
 
 @log_operation("pdf_toc_extraction")
@@ -182,9 +187,7 @@ def get_toc(pdf_path: str) -> List[Tuple[int, str, int]]:
     try:
         if not os.path.exists(pdf_path):
             logger.error(
-                "PDF file not found",
-                file_path=pdf_path,
-                operation="toc_extraction"
+                "PDF file not found", file_path=pdf_path, operation="toc_extraction"
             )
             raise FileNotFoundError(f"PDF file not found: {pdf_path}")
 
@@ -192,7 +195,7 @@ def get_toc(pdf_path: str) -> List[Tuple[int, str, int]]:
         logger.debug(
             "Starting PDF TOC extraction",
             file_path=pdf_path,
-            operation="toc_extraction"
+            operation="toc_extraction",
         )
         doc = fitz.open(pdf_path)
         toc = doc.get_toc()
@@ -202,7 +205,7 @@ def get_toc(pdf_path: str) -> List[Tuple[int, str, int]]:
             "PDF TOC extraction completed",
             file_path=pdf_path,
             operation="toc_extraction",
-            entry_count=len(toc)
+            entry_count=len(toc),
         )
         return toc
 
@@ -214,9 +217,11 @@ def get_toc(pdf_path: str) -> List[Tuple[int, str, int]]:
             file_path=pdf_path,
             operation="toc_extraction",
             error_type=type(e).__name__,
-            error_details=str(e)
+            error_details=str(e),
         )
-        raise PdfProcessingError("Failed to parse PDF file", pdf_path, "toc_extraction", e)
+        raise PdfProcessingError(
+            "Failed to parse PDF file", pdf_path, "toc_extraction", e
+        )
 
 
 @log_operation("pdf_page_extraction")
@@ -240,9 +245,7 @@ def extract_page_text(pdf_path: str, page_number: int) -> str:
     try:
         if not os.path.exists(pdf_path):
             logger.error(
-                "PDF file not found",
-                file_path=pdf_path,
-                operation="page_extraction"
+                "PDF file not found", file_path=pdf_path, operation="page_extraction"
             )
             raise FileNotFoundError(f"PDF file not found: {pdf_path}")
 
@@ -251,7 +254,7 @@ def extract_page_text(pdf_path: str, page_number: int) -> str:
             "Starting PDF page extraction",
             file_path=pdf_path,
             page_number=page_number,
-            operation="page_extraction"
+            operation="page_extraction",
         )
         doc = fitz.open(pdf_path)
 
@@ -261,7 +264,7 @@ def extract_page_text(pdf_path: str, page_number: int) -> str:
             raise PdfProcessingError(
                 f"Page number {page_number} out of range (0-{doc.page_count-1})",
                 pdf_path,
-                "page_extraction"
+                "page_extraction",
             )
 
         # Extract text
@@ -274,7 +277,7 @@ def extract_page_text(pdf_path: str, page_number: int) -> str:
             file_path=pdf_path,
             page_number=page_number,
             operation="page_extraction",
-            text_length=len(text)
+            text_length=len(text),
         )
         return text
 
@@ -289,9 +292,11 @@ def extract_page_text(pdf_path: str, page_number: int) -> str:
             page_number=page_number,
             operation="page_extraction",
             error_type=type(e).__name__,
-            error_details=str(e)
+            error_details=str(e),
         )
-        raise PdfProcessingError("Failed to extract page from PDF", pdf_path, "page_extraction", e)
+        raise PdfProcessingError(
+            "Failed to extract page from PDF", pdf_path, "page_extraction", e
+        )
 
 
 @log_operation("pdf_page_html_extraction")
@@ -317,7 +322,7 @@ def extract_page_html(pdf_path: str, page_number: int) -> str:
             logger.error(
                 "PDF file not found",
                 file_path=pdf_path,
-                operation="page_html_extraction"
+                operation="page_html_extraction",
             )
             raise FileNotFoundError(f"PDF file not found: {pdf_path}")
 
@@ -326,7 +331,7 @@ def extract_page_html(pdf_path: str, page_number: int) -> str:
             "Starting PDF page HTML extraction",
             file_path=pdf_path,
             page_number=page_number,
-            operation="page_html_extraction"
+            operation="page_html_extraction",
         )
         doc = fitz.open(pdf_path)
 
@@ -336,7 +341,7 @@ def extract_page_html(pdf_path: str, page_number: int) -> str:
             raise PdfProcessingError(
                 f"Page number {page_number} out of range (0-{doc.page_count-1})",
                 pdf_path,
-                "page_html_extraction"
+                "page_html_extraction",
             )
 
         # Extract HTML
@@ -349,7 +354,7 @@ def extract_page_html(pdf_path: str, page_number: int) -> str:
             file_path=pdf_path,
             page_number=page_number,
             operation="page_html_extraction",
-            html_length=len(html)
+            html_length=len(html),
         )
         return html
 
@@ -364,9 +369,11 @@ def extract_page_html(pdf_path: str, page_number: int) -> str:
             page_number=page_number,
             operation="page_html_extraction",
             error_type=type(e).__name__,
-            error_details=str(e)
+            error_details=str(e),
         )
-        raise PdfProcessingError("Failed to extract HTML from PDF page", pdf_path, "page_html_extraction", e)
+        raise PdfProcessingError(
+            "Failed to extract HTML from PDF page", pdf_path, "page_html_extraction", e
+        )
 
 
 def convert_html_to_markdown(html_str: str) -> str:
@@ -409,7 +416,9 @@ def extract_page_markdown(pdf_path: str, page_number: int) -> str:
 
 
 @log_operation("pdf_page_range_extraction")
-def extract_page_range(pdf_path: str, start_page: int, end_page: int, output: str = 'text') -> str:
+def extract_page_range(
+    pdf_path: str, start_page: int, end_page: int, output: str = "text"
+) -> str:
     """
     Extract text from a range of pages.
 
@@ -434,7 +443,7 @@ def extract_page_range(pdf_path: str, start_page: int, end_page: int, output: st
             logger.error(
                 "PDF file not found",
                 file_path=pdf_path,
-                operation="page_range_extraction"
+                operation="page_range_extraction",
             )
             raise FileNotFoundError(f"PDF file not found: {pdf_path}")
 
@@ -445,7 +454,7 @@ def extract_page_range(pdf_path: str, start_page: int, end_page: int, output: st
             start_page=start_page,
             end_page=end_page,
             output_format=output,
-            operation="page_range_extraction"
+            operation="page_range_extraction",
         )
         doc = fitz.open(pdf_path)
 
@@ -455,7 +464,7 @@ def extract_page_range(pdf_path: str, start_page: int, end_page: int, output: st
             raise PdfProcessingError(
                 f"Invalid page range [{start_page}, {end_page}] for document with {doc.page_count} pages",
                 pdf_path,
-                "page_range_extraction"
+                "page_range_extraction",
             )
 
         # Extract pages
@@ -463,24 +472,26 @@ def extract_page_range(pdf_path: str, start_page: int, end_page: int, output: st
         for page_num in range(start_page, end_page + 1):
             page = doc[page_num]
 
-            if output == 'text':
+            if output == "text":
                 content_parts.append(page.get_text())
-            elif output == 'html':
+            elif output == "html":
                 content_parts.append(page.get_text("html"))
-            elif output == 'markdown':
+            elif output == "markdown":
                 html = page.get_text("html")
                 content_parts.append(convert_html_to_markdown(html))
             else:
                 doc.close()
-                raise ValueError(f"Invalid output format: {output}. Use 'text', 'html', or 'markdown'.")
+                raise ValueError(
+                    f"Invalid output format: {output}. Use 'text', 'html', or 'markdown'."
+                )
 
         doc.close()
 
         # Combine content
-        if output == 'markdown':
-            result = '\n\n---\n\n'.join(content_parts)  # Page breaks
+        if output == "markdown":
+            result = "\n\n---\n\n".join(content_parts)  # Page breaks
         else:
-            result = '\n\n'.join(content_parts)
+            result = "\n\n".join(content_parts)
 
         logger.info(
             "PDF page range extraction completed",
@@ -489,7 +500,7 @@ def extract_page_range(pdf_path: str, start_page: int, end_page: int, output: st
             end_page=end_page,
             page_count=end_page - start_page + 1,
             operation="page_range_extraction",
-            content_length=len(result)
+            content_length=len(result),
         )
         return result
 
@@ -507,13 +518,20 @@ def extract_page_range(pdf_path: str, start_page: int, end_page: int, output: st
             end_page=end_page,
             operation="page_range_extraction",
             error_type=type(e).__name__,
-            error_details=str(e)
+            error_details=str(e),
         )
-        raise PdfProcessingError("Failed to extract page range from PDF", pdf_path, "page_range_extraction", e)
+        raise PdfProcessingError(
+            "Failed to extract page range from PDF",
+            pdf_path,
+            "page_range_extraction",
+            e,
+        )
 
 
 @log_operation("pdf_chapter_extraction")
-def extract_chapter(pdf_path: str, chapter_title: str, output: str = 'text') -> Dict[str, Any]:
+def extract_chapter(
+    pdf_path: str, chapter_title: str, output: str = "text"
+) -> Dict[str, Any]:
     """
     Extract a chapter by title from PDF TOC.
 
@@ -539,9 +557,7 @@ def extract_chapter(pdf_path: str, chapter_title: str, output: str = 'text') -> 
     try:
         if not os.path.exists(pdf_path):
             logger.error(
-                "PDF file not found",
-                file_path=pdf_path,
-                operation="chapter_extraction"
+                "PDF file not found", file_path=pdf_path, operation="chapter_extraction"
             )
             raise FileNotFoundError(f"PDF file not found: {pdf_path}")
 
@@ -550,7 +566,7 @@ def extract_chapter(pdf_path: str, chapter_title: str, output: str = 'text') -> 
             "Starting PDF chapter extraction",
             file_path=pdf_path,
             chapter_title=chapter_title,
-            operation="chapter_extraction"
+            operation="chapter_extraction",
         )
         doc = fitz.open(pdf_path)
         toc = doc.get_toc()
@@ -567,7 +583,7 @@ def extract_chapter(pdf_path: str, chapter_title: str, output: str = 'text') -> 
             raise PdfProcessingError(
                 f"Chapter '{chapter_title}' not found in TOC",
                 pdf_path,
-                "chapter_extraction"
+                "chapter_extraction",
             )
 
         # Get chapter info
@@ -587,12 +603,12 @@ def extract_chapter(pdf_path: str, chapter_title: str, output: str = 'text') -> 
         content = extract_page_range(pdf_path, start_page - 1, end_page - 1, output)
 
         result = {
-            'title': chapter_title_full,
-            'level': chapter_level,
-            'start_page': start_page,
-            'end_page': end_page,
-            'page_count': end_page - start_page + 1,
-            'content': content
+            "title": chapter_title_full,
+            "level": chapter_level,
+            "start_page": start_page,
+            "end_page": end_page,
+            "page_count": end_page - start_page + 1,
+            "content": content,
         }
 
         logger.info(
@@ -601,7 +617,7 @@ def extract_chapter(pdf_path: str, chapter_title: str, output: str = 'text') -> 
             chapter_title=chapter_title_full,
             start_page=start_page,
             end_page=end_page,
-            operation="chapter_extraction"
+            operation="chapter_extraction",
         )
         return result
 
@@ -616,13 +632,15 @@ def extract_chapter(pdf_path: str, chapter_title: str, output: str = 'text') -> 
             chapter_title=chapter_title,
             operation="chapter_extraction",
             error_type=type(e).__name__,
-            error_details=str(e)
+            error_details=str(e),
         )
-        raise PdfProcessingError("Failed to extract chapter from PDF", pdf_path, "chapter_extraction", e)
+        raise PdfProcessingError(
+            "Failed to extract chapter from PDF", pdf_path, "chapter_extraction", e
+        )
 
 
 @log_operation("pdf_full_text_extraction")
-def extract_full_text(pdf_path: str, output: str = 'text') -> str:
+def extract_full_text(pdf_path: str, output: str = "text") -> str:
     """
     Extract all text from PDF.
 
@@ -644,7 +662,7 @@ def extract_full_text(pdf_path: str, output: str = 'text') -> str:
             logger.error(
                 "PDF file not found",
                 file_path=pdf_path,
-                operation="full_text_extraction"
+                operation="full_text_extraction",
             )
             raise FileNotFoundError(f"PDF file not found: {pdf_path}")
 
@@ -653,7 +671,7 @@ def extract_full_text(pdf_path: str, output: str = 'text') -> str:
             "Starting PDF full text extraction",
             file_path=pdf_path,
             output_format=output,
-            operation="full_text_extraction"
+            operation="full_text_extraction",
         )
         doc = fitz.open(pdf_path)
 
@@ -667,7 +685,7 @@ def extract_full_text(pdf_path: str, output: str = 'text') -> str:
             file_path=pdf_path,
             page_count=doc.page_count,
             operation="full_text_extraction",
-            content_length=len(result)
+            content_length=len(result),
         )
         return result
 
@@ -681,12 +699,16 @@ def extract_full_text(pdf_path: str, output: str = 'text') -> str:
             file_path=pdf_path,
             operation="full_text_extraction",
             error_type=type(e).__name__,
-            error_details=str(e)
+            error_details=str(e),
         )
-        raise PdfProcessingError("Failed to extract full text from PDF", pdf_path, "full_text_extraction", e)
+        raise PdfProcessingError(
+            "Failed to extract full text from PDF", pdf_path, "full_text_extraction", e
+        )
 
 
-def search_text_in_pdf(pdf_path: str, query: str, context_chars: int = 100) -> List[Dict[str, Any]]:
+def search_text_in_pdf(
+    pdf_path: str, query: str, context_chars: int = 100
+) -> List[Dict[str, Any]]:
     """
     Search for text in PDF and return matches with context.
 
@@ -735,12 +757,14 @@ def search_text_in_pdf(pdf_path: str, query: str, context_chars: int = 100) -> L
                 context_end = min(len(text), pos + len(query) + context_chars)
                 context = text[context_start:context_end]
 
-                results.append({
-                    'page': page_num,
-                    'match': text[pos:pos + len(query)],
-                    'context': context,
-                    'position': pos
-                })
+                results.append(
+                    {
+                        "page": page_num,
+                        "match": text[pos : pos + len(query)],
+                        "context": context,
+                        "position": pos,
+                    }
+                )
 
                 start = pos + 1
 
@@ -755,6 +779,8 @@ def search_text_in_pdf(pdf_path: str, query: str, context_chars: int = 100) -> L
             file_path=pdf_path,
             query=query,
             error_type=type(e).__name__,
-            error_details=str(e)
+            error_details=str(e),
         )
-        raise PdfProcessingError("Failed to search text in PDF", pdf_path, "text_search", e)
+        raise PdfProcessingError(
+            "Failed to search text in PDF", pdf_path, "text_search", e
+        )

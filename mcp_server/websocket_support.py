@@ -38,6 +38,7 @@ logger = logging.getLogger(__name__)
 
 class MessageType(Enum):
     """WebSocket message types"""
+
     CONNECT = "connect"
     DISCONNECT = "disconnect"
     SUBSCRIBE = "subscribe"
@@ -50,6 +51,7 @@ class MessageType(Enum):
 
 class ChannelType(Enum):
     """Subscription channels"""
+
     GAME_UPDATES = "game_updates"
     PLAYER_STATS = "player_stats"
     TEAM_STANDINGS = "team_standings"
@@ -61,6 +63,7 @@ class ChannelType(Enum):
 @dataclass
 class WebSocketMessage:
     """WebSocket message structure"""
+
     type: MessageType
     channel: str
     data: Dict[str, Any]
@@ -68,28 +71,31 @@ class WebSocketMessage:
 
     def to_json(self) -> str:
         """Serialize to JSON"""
-        return json.dumps({
-            'type': self.type.value,
-            'channel': self.channel,
-            'data': self.data,
-            'timestamp': self.timestamp.isoformat()
-        })
+        return json.dumps(
+            {
+                "type": self.type.value,
+                "channel": self.channel,
+                "data": self.data,
+                "timestamp": self.timestamp.isoformat(),
+            }
+        )
 
     @classmethod
-    def from_json(cls, json_str: str) -> 'WebSocketMessage':
+    def from_json(cls, json_str: str) -> "WebSocketMessage":
         """Deserialize from JSON"""
         data = json.loads(json_str)
         return cls(
-            type=MessageType(data['type']),
-            channel=data['channel'],
-            data=data['data'],
-            timestamp=datetime.fromisoformat(data['timestamp'])
+            type=MessageType(data["type"]),
+            channel=data["channel"],
+            data=data["data"],
+            timestamp=datetime.fromisoformat(data["timestamp"]),
         )
 
 
 @dataclass
 class WebSocketClient:
     """Connected WebSocket client"""
+
     id: str
     websocket: Any  # websocket connection object
     subscriptions: Set[str] = field(default_factory=set)
@@ -129,11 +135,11 @@ class WebSocketManager:
                 type=MessageType.CONNECT,
                 channel=ChannelType.SYSTEM.value,
                 data={
-                    'message': 'Connected to NBA MCP WebSocket',
-                    'client_id': client_id,
-                    'server_time': datetime.now().isoformat()
-                }
-            )
+                    "message": "Connected to NBA MCP WebSocket",
+                    "client_id": client_id,
+                    "server_time": datetime.now().isoformat(),
+                },
+            ),
         )
 
         return client
@@ -170,8 +176,8 @@ class WebSocketManager:
             WebSocketMessage(
                 type=MessageType.SUBSCRIBE,
                 channel=channel,
-                data={'status': 'subscribed', 'channel': channel}
-            )
+                data={"status": "subscribed", "channel": channel},
+            ),
         )
 
         return True
@@ -207,7 +213,9 @@ class WebSocketManager:
             await self.unregister_client(client_id)
             return False
 
-    async def broadcast_to_channel(self, channel: str, message: WebSocketMessage) -> int:
+    async def broadcast_to_channel(
+        self, channel: str, message: WebSocketMessage
+    ) -> int:
         """Broadcast message to all clients in channel"""
         if channel not in self.channels:
             return 0
@@ -240,8 +248,8 @@ class WebSocketManager:
                     WebSocketMessage(
                         type=MessageType.ERROR,
                         channel=ChannelType.SYSTEM.value,
-                        data={'error': 'Rate limit exceeded'}
-                    )
+                        data={"error": "Rate limit exceeded"},
+                    ),
                 )
                 return
 
@@ -258,17 +266,14 @@ class WebSocketManager:
                     WebSocketMessage(
                         type=MessageType.PONG,
                         channel=ChannelType.SYSTEM.value,
-                        data={'timestamp': datetime.now().isoformat()}
-                    )
+                        data={"timestamp": datetime.now().isoformat()},
+                    ),
                 )
 
             elif message.type == MessageType.MESSAGE:
                 # Call custom handler if registered
                 if message.channel in self.message_handlers:
-                    await self.message_handlers[message.channel](
-                        client_id,
-                        message
-                    )
+                    await self.message_handlers[message.channel](client_id, message)
 
         except Exception as e:
             logger.error(f"Error handling message from {client_id}: {e}")
@@ -277,8 +282,8 @@ class WebSocketManager:
                 WebSocketMessage(
                     type=MessageType.ERROR,
                     channel=ChannelType.SYSTEM.value,
-                    data={'error': str(e)}
-                )
+                    data={"error": str(e)},
+                ),
             )
 
     def register_handler(self, channel: str, handler: Callable) -> None:
@@ -322,10 +327,8 @@ class WebSocketManager:
                 await self.send_to_client(
                     client_id,
                     WebSocketMessage(
-                        type=MessageType.PING,
-                        channel=ChannelType.SYSTEM.value,
-                        data={}
-                    )
+                        type=MessageType.PING, channel=ChannelType.SYSTEM.value, data={}
+                    ),
                 )
 
     def stop_heartbeat(self) -> None:
@@ -335,37 +338,39 @@ class WebSocketManager:
     def get_stats(self) -> Dict[str, Any]:
         """Get WebSocket server statistics"""
         return {
-            'total_clients': len(self.clients),
-            'total_channels': len(self.channels),
-            'channels': {
-                channel: len(clients)
-                for channel, clients in self.channels.items()
+            "total_clients": len(self.clients),
+            "total_channels": len(self.channels),
+            "channels": {
+                channel: len(clients) for channel, clients in self.channels.items()
             },
-            'clients': [
+            "clients": [
                 {
-                    'id': client.id,
-                    'subscriptions': list(client.subscriptions),
-                    'authenticated': client.authenticated,
-                    'message_count': client.message_count,
-                    'connected_duration': (datetime.now() - client.connected_at).seconds
+                    "id": client.id,
+                    "subscriptions": list(client.subscriptions),
+                    "authenticated": client.authenticated,
+                    "message_count": client.message_count,
+                    "connected_duration": (
+                        datetime.now() - client.connected_at
+                    ).seconds,
                 }
                 for client in self.clients.values()
-            ]
+            ],
         }
 
 
 # NBA-specific WebSocket handlers
 
+
 async def handle_game_subscription(client_id: str, message: WebSocketMessage) -> None:
     """Handle game-specific subscriptions"""
-    game_id = message.data.get('game_id')
+    game_id = message.data.get("game_id")
     if game_id:
         logger.info(f"Client {client_id} subscribed to game {game_id}")
 
 
 async def handle_player_subscription(client_id: str, message: WebSocketMessage) -> None:
     """Handle player-specific subscriptions"""
-    player_id = message.data.get('player_id')
+    player_id = message.data.get("player_id")
     if player_id:
         logger.info(f"Client {client_id} subscribed to player {player_id}")
 
@@ -380,12 +385,10 @@ class NBAWebSocketServer:
     def _setup_handlers(self) -> None:
         """Set up NBA-specific message handlers"""
         self.manager.register_handler(
-            ChannelType.GAME_UPDATES.value,
-            handle_game_subscription
+            ChannelType.GAME_UPDATES.value, handle_game_subscription
         )
         self.manager.register_handler(
-            ChannelType.PLAYER_STATS.value,
-            handle_player_subscription
+            ChannelType.PLAYER_STATS.value, handle_player_subscription
         )
 
     async def broadcast_game_update(
@@ -394,49 +397,38 @@ class NBAWebSocketServer:
         home_score: int,
         away_score: int,
         quarter: int,
-        time_remaining: str
+        time_remaining: str,
     ) -> None:
         """Broadcast game score update"""
         message = WebSocketMessage(
             type=MessageType.MESSAGE,
             channel=ChannelType.GAME_UPDATES.value,
             data={
-                'game_id': game_id,
-                'home_score': home_score,
-                'away_score': away_score,
-                'quarter': quarter,
-                'time_remaining': time_remaining
-            }
+                "game_id": game_id,
+                "home_score": home_score,
+                "away_score": away_score,
+                "quarter": quarter,
+                "time_remaining": time_remaining,
+            },
         )
-        await self.manager.broadcast_to_channel(
-            ChannelType.GAME_UPDATES.value,
-            message
-        )
+        await self.manager.broadcast_to_channel(ChannelType.GAME_UPDATES.value, message)
 
     async def broadcast_player_stat_update(
-        self,
-        player_id: int,
-        player_name: str,
-        points: int,
-        rebounds: int,
-        assists: int
+        self, player_id: int, player_name: str, points: int, rebounds: int, assists: int
     ) -> None:
         """Broadcast player stat update"""
         message = WebSocketMessage(
             type=MessageType.MESSAGE,
             channel=ChannelType.PLAYER_STATS.value,
             data={
-                'player_id': player_id,
-                'player_name': player_name,
-                'points': points,
-                'rebounds': rebounds,
-                'assists': assists
-            }
+                "player_id": player_id,
+                "player_name": player_name,
+                "points": points,
+                "rebounds": rebounds,
+                "assists": assists,
+            },
         )
-        await self.manager.broadcast_to_channel(
-            ChannelType.PLAYER_STATS.value,
-            message
-        )
+        await self.manager.broadcast_to_channel(ChannelType.PLAYER_STATS.value, message)
 
     async def broadcast_play_by_play(
         self,
@@ -445,25 +437,22 @@ class NBAWebSocketServer:
         player_name: str,
         team: str,
         quarter: int,
-        time_remaining: str
+        time_remaining: str,
     ) -> None:
         """Broadcast play-by-play event"""
         message = WebSocketMessage(
             type=MessageType.MESSAGE,
             channel=ChannelType.PLAY_BY_PLAY.value,
             data={
-                'game_id': game_id,
-                'event': event,
-                'player_name': player_name,
-                'team': team,
-                'quarter': quarter,
-                'time_remaining': time_remaining
-            }
+                "game_id": game_id,
+                "event": event,
+                "player_name": player_name,
+                "team": team,
+                "quarter": quarter,
+                "time_remaining": time_remaining,
+            },
         )
-        await self.manager.broadcast_to_channel(
-            ChannelType.PLAY_BY_PLAY.value,
-            message
-        )
+        await self.manager.broadcast_to_channel(ChannelType.PLAY_BY_PLAY.value, message)
 
 
 if __name__ == "__main__":
@@ -477,40 +466,55 @@ if __name__ == "__main__":
     print()
 
     print("2. Subscribe to live game updates:")
-    print(json.dumps({
-        'type': 'subscribe',
-        'channel': 'game_updates',
-        'data': {'game_id': 12345}
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "type": "subscribe",
+                "channel": "game_updates",
+                "data": {"game_id": 12345},
+            },
+            indent=2,
+        )
+    )
     print()
 
     print("3. Receive real-time updates:")
-    print(json.dumps({
-        'type': 'message',
-        'channel': 'game_updates',
-        'data': {
-            'game_id': 12345,
-            'home_score': 95,
-            'away_score': 92,
-            'quarter': 4,
-            'time_remaining': '2:30'
-        },
-        'timestamp': '2025-10-12T20:30:00'
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "type": "message",
+                "channel": "game_updates",
+                "data": {
+                    "game_id": 12345,
+                    "home_score": 95,
+                    "away_score": 92,
+                    "quarter": 4,
+                    "time_remaining": "2:30",
+                },
+                "timestamp": "2025-10-12T20:30:00",
+            },
+            indent=2,
+        )
+    )
     print()
 
     print("4. Subscribe to player stats:")
-    print(json.dumps({
-        'type': 'subscribe',
-        'channel': 'player_stats',
-        'data': {'player_id': 23}
-    }, indent=2))
+    print(
+        json.dumps(
+            {"type": "subscribe", "channel": "player_stats", "data": {"player_id": 23}},
+            indent=2,
+        )
+    )
     print()
 
     print("5. Subscribe to play-by-play:")
-    print(json.dumps({
-        'type': 'subscribe',
-        'channel': 'play_by_play',
-        'data': {'game_id': 12345}
-    }, indent=2))
-
+    print(
+        json.dumps(
+            {
+                "type": "subscribe",
+                "channel": "play_by_play",
+                "data": {"game_id": 12345},
+            },
+            indent=2,
+        )
+    )

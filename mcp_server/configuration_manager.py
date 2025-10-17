@@ -62,6 +62,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ConfigSource:
     """Configuration source metadata"""
+
     source_type: str  # 'file', 'env', 'consul', 'aws_ssm'
     location: str
     priority: int = 100
@@ -80,35 +81,47 @@ class ConfigurationSchema:
         errors = []
 
         # Check required fields
-        required = self.schema.get('required', [])
+        required = self.schema.get("required", [])
         for field in required:
             if field not in config:
                 errors.append(f"Missing required field: {field}")
 
         # Check field types
-        properties = self.schema.get('properties', {})
+        properties = self.schema.get("properties", {})
         for field, field_schema in properties.items():
             if field in config:
-                expected_type = field_schema.get('type')
+                expected_type = field_schema.get("type")
                 actual_value = config[field]
 
-                if expected_type == 'string' and not isinstance(actual_value, str):
-                    errors.append(f"Field {field} should be string, got {type(actual_value).__name__}")
-                elif expected_type == 'integer' and not isinstance(actual_value, int):
-                    errors.append(f"Field {field} should be integer, got {type(actual_value).__name__}")
-                elif expected_type == 'boolean' and not isinstance(actual_value, bool):
-                    errors.append(f"Field {field} should be boolean, got {type(actual_value).__name__}")
+                if expected_type == "string" and not isinstance(actual_value, str):
+                    errors.append(
+                        f"Field {field} should be string, got {type(actual_value).__name__}"
+                    )
+                elif expected_type == "integer" and not isinstance(actual_value, int):
+                    errors.append(
+                        f"Field {field} should be integer, got {type(actual_value).__name__}"
+                    )
+                elif expected_type == "boolean" and not isinstance(actual_value, bool):
+                    errors.append(
+                        f"Field {field} should be boolean, got {type(actual_value).__name__}"
+                    )
 
                 # Check enums
-                if 'enum' in field_schema:
-                    if actual_value not in field_schema['enum']:
-                        errors.append(f"Field {field} must be one of {field_schema['enum']}, got {actual_value}")
+                if "enum" in field_schema:
+                    if actual_value not in field_schema["enum"]:
+                        errors.append(
+                            f"Field {field} must be one of {field_schema['enum']}, got {actual_value}"
+                        )
 
                 # Check ranges
-                if 'minimum' in field_schema and actual_value < field_schema['minimum']:
-                    errors.append(f"Field {field} must be >= {field_schema['minimum']}, got {actual_value}")
-                if 'maximum' in field_schema and actual_value > field_schema['maximum']:
-                    errors.append(f"Field {field} must be <= {field_schema['maximum']}, got {actual_value}")
+                if "minimum" in field_schema and actual_value < field_schema["minimum"]:
+                    errors.append(
+                        f"Field {field} must be >= {field_schema['minimum']}, got {actual_value}"
+                    )
+                if "maximum" in field_schema and actual_value > field_schema["maximum"]:
+                    errors.append(
+                        f"Field {field} must be <= {field_schema['maximum']}, got {actual_value}"
+                    )
 
         return len(errors) == 0, errors
 
@@ -119,11 +132,12 @@ class ConfigurationManager:
     def __init__(self, environment: str = "development", config_dir: str = "config"):
         # Deprecation warning
         import warnings
+
         warnings.warn(
             "ConfigurationManager is deprecated. Use UnifiedConfigurationManager instead. "
             "See mcp_server/unified_configuration_manager.py for migration guide.",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
 
         self.environment = environment
@@ -136,47 +150,31 @@ class ConfigurationManager:
 
         # Initialize
         self._load_default_config()
-        logger.warning(f"⚠️  DEPRECATED: ConfigurationManager loaded for environment: {environment}")
+        logger.warning(
+            f"⚠️  DEPRECATED: ConfigurationManager loaded for environment: {environment}"
+        )
         logger.warning("⚠️  Please migrate to UnifiedConfigurationManager")
 
     def _load_default_config(self) -> None:
         """Load default configuration"""
         defaults = {
-            'app': {
-                'name': 'NBA MCP Synthesis',
-                'version': '1.0.0',
-                'debug': False
-            },
-            'server': {
-                'host': '0.0.0.0',
-                'port': 8000,
-                'workers': 4
-            },
-            'database': {
-                'pool_size': 10,
-                'max_overflow': 20,
-                'pool_timeout': 30
-            },
-            'cache': {
-                'enabled': True,
-                'ttl_seconds': 300,
-                'max_size': 1000
-            },
-            'logging': {
-                'level': 'INFO',
-                'format': 'json',
-                'output': 'stdout'
-            }
+            "app": {"name": "NBA MCP Synthesis", "version": "1.0.0", "debug": False},
+            "server": {"host": "0.0.0.0", "port": 8000, "workers": 4},
+            "database": {"pool_size": 10, "max_overflow": 20, "pool_timeout": 30},
+            "cache": {"enabled": True, "ttl_seconds": 300, "max_size": 1000},
+            "logging": {"level": "INFO", "format": "json", "output": "stdout"},
         }
 
         with self._lock:
             self._config = defaults
-            self._sources.append(ConfigSource(
-                source_type='default',
-                location='builtin',
-                priority=0,
-                loaded_at=datetime.now()
-            ))
+            self._sources.append(
+                ConfigSource(
+                    source_type="default",
+                    location="builtin",
+                    priority=0,
+                    loaded_at=datetime.now(),
+                )
+            )
 
     def register_schema(self, namespace: str, schema: Dict[str, Any]) -> None:
         """Register configuration schema for validation"""
@@ -192,13 +190,13 @@ class ConfigurationManager:
             return False
 
         try:
-            with open(filepath, 'r') as f:
+            with open(filepath, "r") as f:
                 file_content = f.read()
                 checksum = hashlib.sha256(file_content.encode()).hexdigest()
 
-                if filepath.suffix in ['.yaml', '.yml']:
+                if filepath.suffix in [".yaml", ".yml"]:
                     config_data = yaml.safe_load(file_content)
-                elif filepath.suffix == '.json':
+                elif filepath.suffix == ".json":
                     config_data = json.loads(file_content)
                 else:
                     logger.error(f"Unsupported file format: {filepath.suffix}")
@@ -206,13 +204,15 @@ class ConfigurationManager:
 
             with self._lock:
                 self._merge_config(config_data, priority)
-                self._sources.append(ConfigSource(
-                    source_type='file',
-                    location=str(filepath),
-                    priority=priority,
-                    loaded_at=datetime.now(),
-                    checksum=checksum
-                ))
+                self._sources.append(
+                    ConfigSource(
+                        source_type="file",
+                        location=str(filepath),
+                        priority=priority,
+                        loaded_at=datetime.now(),
+                        checksum=checksum,
+                    )
+                )
 
             logger.info(f"Loaded configuration from {filepath}")
             self._notify_watchers()
@@ -229,8 +229,8 @@ class ConfigurationManager:
         for key, value in os.environ.items():
             if key.startswith(prefix):
                 # Convert NBA_MCP_SERVER_PORT to server.port
-                config_key = key[len(prefix):].lower()
-                parts = config_key.split('_')
+                config_key = key[len(prefix) :].lower()
+                parts = config_key.split("_")
 
                 # Navigate nested dict
                 current = config_data
@@ -246,22 +246,26 @@ class ConfigurationManager:
         if config_data:
             with self._lock:
                 self._merge_config(config_data, priority)
-                self._sources.append(ConfigSource(
-                    source_type='env',
-                    location='environment',
-                    priority=priority,
-                    loaded_at=datetime.now()
-                ))
+                self._sources.append(
+                    ConfigSource(
+                        source_type="env",
+                        location="environment",
+                        priority=priority,
+                        loaded_at=datetime.now(),
+                    )
+                )
 
-            logger.info(f"Loaded {len(config_data)} configuration items from environment")
+            logger.info(
+                f"Loaded {len(config_data)} configuration items from environment"
+            )
             self._notify_watchers()
 
     def _convert_env_value(self, value: str) -> Union[str, int, float, bool]:
         """Convert environment variable string to appropriate type"""
         # Boolean
-        if value.lower() in ['true', 'yes', '1']:
+        if value.lower() in ["true", "yes", "1"]:
             return True
-        if value.lower() in ['false', 'no', '0']:
+        if value.lower() in ["false", "no", "0"]:
             return False
 
         # Integer
@@ -281,10 +285,15 @@ class ConfigurationManager:
 
     def _merge_config(self, new_config: Dict[str, Any], priority: int) -> None:
         """Merge new configuration with existing (deep merge)"""
+
         def deep_merge(base: Dict, update: Dict) -> Dict:
             result = base.copy()
             for key, value in update.items():
-                if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+                if (
+                    key in result
+                    and isinstance(result[key], dict)
+                    and isinstance(value, dict)
+                ):
                     result[key] = deep_merge(result[key], value)
                 else:
                     result[key] = value
@@ -292,13 +301,15 @@ class ConfigurationManager:
 
         self._config = deep_merge(self._config, new_config)
 
-    def get(self, key: str, default: Any = None, namespace: Optional[str] = None) -> Any:
+    def get(
+        self, key: str, default: Any = None, namespace: Optional[str] = None
+    ) -> Any:
         """Get configuration value by dot-notation key"""
         with self._lock:
             if namespace:
-                keys = [namespace] + key.split('.')
+                keys = [namespace] + key.split(".")
             else:
-                keys = key.split('.')
+                keys = key.split(".")
 
             current = self._config
             for k in keys:
@@ -313,9 +324,9 @@ class ConfigurationManager:
         """Set configuration value by dot-notation key"""
         with self._lock:
             if namespace:
-                keys = [namespace] + key.split('.')
+                keys = [namespace] + key.split(".")
             else:
-                keys = key.split('.')
+                keys = key.split(".")
 
             current = self._config
             for k in keys[:-1]:
@@ -382,10 +393,10 @@ class ConfigurationManager:
         # Reload each source
         success = True
         for source in sources:
-            if source.source_type == 'file':
+            if source.source_type == "file":
                 if not self.load_from_file(Path(source.location).name, source.priority):
                     success = False
-            elif source.source_type == 'env':
+            elif source.source_type == "env":
                 self.load_from_env(priority=source.priority)
 
         if success:
@@ -395,7 +406,7 @@ class ConfigurationManager:
 
         return success
 
-    def export_to_file(self, filename: str, format: str = 'yaml') -> bool:
+    def export_to_file(self, filename: str, format: str = "yaml") -> bool:
         """Export current configuration to file"""
         filepath = self.config_dir / filename
 
@@ -403,10 +414,10 @@ class ConfigurationManager:
             with self._lock:
                 config_copy = self._config.copy()
 
-            with open(filepath, 'w') as f:
-                if format == 'yaml':
+            with open(filepath, "w") as f:
+                if format == "yaml":
                     yaml.dump(config_copy, f, default_flow_style=False)
-                elif format == 'json':
+                elif format == "json":
                     json.dump(config_copy, f, indent=2)
                 else:
                     logger.error(f"Unsupported export format: {format}")
@@ -430,7 +441,7 @@ def get_config_manager(environment: Optional[str] = None) -> ConfigurationManage
     global _config_manager
     with _config_lock:
         if _config_manager is None:
-            env = environment or os.getenv('NBA_MCP_ENV', 'development')
+            env = environment or os.getenv("NBA_MCP_ENV", "development")
             _config_manager = ConfigurationManager(environment=env)
         return _config_manager
 
@@ -441,18 +452,18 @@ if __name__ == "__main__":
     print("=== Configuration Manager Demo ===\n")
 
     # Create manager
-    config_manager = ConfigurationManager(environment='development')
+    config_manager = ConfigurationManager(environment="development")
 
     # Register schema
     server_schema = {
-        'required': ['host', 'port'],
-        'properties': {
-            'host': {'type': 'string'},
-            'port': {'type': 'integer', 'minimum': 1024, 'maximum': 65535},
-            'workers': {'type': 'integer', 'minimum': 1, 'maximum': 32}
-        }
+        "required": ["host", "port"],
+        "properties": {
+            "host": {"type": "string"},
+            "port": {"type": "integer", "minimum": 1024, "maximum": 65535},
+            "workers": {"type": "integer", "minimum": 1, "maximum": 32},
+        },
     }
-    config_manager.register_schema('server', server_schema)
+    config_manager.register_schema("server", server_schema)
 
     # Get configurations
     print("--- Default Configuration ---")
@@ -463,14 +474,14 @@ if __name__ == "__main__":
 
     # Set custom values
     print("\n--- Setting Custom Values ---")
-    config_manager.set('server.port', 9000)
-    config_manager.set('app.debug', True)
+    config_manager.set("server.port", 9000)
+    config_manager.set("app.debug", True)
     print(f"Server port: {config_manager.get('server.port')}")
     print(f"Debug mode: {config_manager.get('app.debug')}")
 
     # Validate
     print("\n--- Validation ---")
-    is_valid, errors = config_manager.validate('server')
+    is_valid, errors = config_manager.validate("server")
     print(f"Server config valid: {is_valid}")
     if errors:
         for error in errors:
@@ -478,19 +489,21 @@ if __name__ == "__main__":
 
     # Load from environment
     print("\n--- Loading from Environment ---")
-    os.environ['NBA_MCP_SERVER_PORT'] = '8080'
-    os.environ['NBA_MCP_APP_DEBUG'] = 'true'
+    os.environ["NBA_MCP_SERVER_PORT"] = "8080"
+    os.environ["NBA_MCP_APP_DEBUG"] = "true"
     config_manager.load_from_env()
     print(f"Server port (from env): {config_manager.get('server.port')}")
     print(f"Debug mode (from env): {config_manager.get('app.debug')}")
 
     # Watch for changes
     print("\n--- Configuration Watcher ---")
+
     def on_config_change(config):
-        print(f"  Configuration changed! Cache enabled: {config.get('cache', {}).get('enabled')}")
+        print(
+            f"  Configuration changed! Cache enabled: {config.get('cache', {}).get('enabled')}"
+        )
 
     config_manager.watch(on_config_change)
-    config_manager.set('cache.enabled', False)
+    config_manager.set("cache.enabled", False)
 
     print("\n=== Demo Complete ===")
-

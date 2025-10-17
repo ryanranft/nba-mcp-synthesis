@@ -23,7 +23,7 @@ import logging
 from typing import Dict, Any, List
 
 # Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Import the deployment pipeline
 from mcp_server.tools.production_deployment_pipeline import (
@@ -38,12 +38,13 @@ from mcp_server.tools.production_deployment_pipeline import (
     get_deployment_history,
     DeploymentStatus,
     EnvironmentType,
-    DeploymentStrategy
+    DeploymentStrategy,
 )
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 class Phase101TestSuite(unittest.TestCase):
     """Test suite for Phase 10.1: Production Deployment Pipeline"""
@@ -64,8 +65,8 @@ class Phase101TestSuite(unittest.TestCase):
 
         # Check configuration
         self.assertIsNotNone(self.pipeline.config)
-        self.assertIn('environments', self.pipeline.config)
-        self.assertIn('deployment', self.pipeline.config)
+        self.assertIn("environments", self.pipeline.config)
+        self.assertIn("deployment", self.pipeline.config)
 
         logger.info("✓ Pipeline initialization test passed")
 
@@ -74,9 +75,7 @@ class Phase101TestSuite(unittest.TestCase):
         logger.info("Testing rolling deployment strategy...")
 
         result = self.pipeline.deploy(
-            environment="development",
-            version="v1.0.0",
-            strategy="rolling"
+            environment="development", version="v1.0.0", strategy="rolling"
         )
 
         self.assertIsNotNone(result)
@@ -95,9 +94,7 @@ class Phase101TestSuite(unittest.TestCase):
         logger.info("Testing blue-green deployment strategy...")
 
         result = self.pipeline.deploy(
-            environment="staging",
-            version="v1.1.0",
-            strategy="blue_green"
+            environment="staging", version="v1.1.0", strategy="blue_green"
         )
 
         self.assertIsNotNone(result)
@@ -113,9 +110,7 @@ class Phase101TestSuite(unittest.TestCase):
         logger.info("Testing canary deployment strategy...")
 
         result = self.pipeline.deploy(
-            environment="production",
-            version="v1.2.0",
-            strategy="canary"
+            environment="production", version="v1.2.0", strategy="canary"
         )
 
         self.assertIsNotNone(result)
@@ -131,9 +126,7 @@ class Phase101TestSuite(unittest.TestCase):
         logger.info("Testing recreate deployment strategy...")
 
         result = self.pipeline.deploy(
-            environment="testing",
-            version="v1.0.0",
-            strategy="recreate"
+            environment="testing", version="v1.0.0", strategy="recreate"
         )
 
         self.assertIsNotNone(result)
@@ -150,17 +143,14 @@ class Phase101TestSuite(unittest.TestCase):
 
         # First deploy
         deploy_result = self.pipeline.deploy(
-            environment="development",
-            version="v1.1.0",
-            strategy="rolling"
+            environment="development", version="v1.1.0", strategy="rolling"
         )
 
         self.assertTrue(deploy_result.success)
 
         # Then rollback
         rollback_result = self.pipeline.rollback(
-            deployment_id=deploy_result.deployment_id,
-            target_version="v1.0.0"
+            deployment_id=deploy_result.deployment_id, target_version="v1.0.0"
         )
 
         self.assertIsNotNone(rollback_result)
@@ -175,8 +165,7 @@ class Phase101TestSuite(unittest.TestCase):
         logger.info("Testing health check functionality...")
 
         result = self.pipeline.health_check(
-            endpoint="http://localhost:8080/health",
-            timeout=30
+            endpoint="http://localhost:8080/health", timeout=30
         )
 
         self.assertIsNotNone(result)
@@ -193,8 +182,7 @@ class Phase101TestSuite(unittest.TestCase):
         logger.info("Testing security scan functionality...")
 
         result = self.pipeline.security_scan(
-            image_name="nba-mcp-server:latest",
-            scan_type="vulnerability"
+            image_name="nba-mcp-server:latest", scan_type="vulnerability"
         )
 
         self.assertIsNotNone(result)
@@ -216,7 +204,7 @@ class Phase101TestSuite(unittest.TestCase):
 
         result = self.pipeline.performance_test(
             endpoint="http://localhost:8080/api",
-            test_config={"duration": 60, "users": 10}
+            test_config={"duration": 60, "users": 10},
         )
 
         self.assertIsNotNone(result)
@@ -238,9 +226,7 @@ class Phase101TestSuite(unittest.TestCase):
 
         # First deploy
         deploy_result = self.pipeline.deploy(
-            environment="development",
-            version="v1.0.0",
-            strategy="rolling"
+            environment="development", version="v1.0.0", strategy="rolling"
         )
 
         # Get status
@@ -260,9 +246,7 @@ class Phase101TestSuite(unittest.TestCase):
         # Create multiple deployments
         for i, env in enumerate(self.test_environments):
             self.pipeline.deploy(
-                environment=env,
-                version=f"v1.{i}.0",
-                strategy="rolling"
+                environment=env, version=f"v1.{i}.0", strategy="rolling"
             )
 
         # List all deployments
@@ -283,9 +267,7 @@ class Phase101TestSuite(unittest.TestCase):
         # Create some deployments
         for i in range(3):
             self.pipeline.deploy(
-                environment="development",
-                version=f"v1.{i}.0",
-                strategy="rolling"
+                environment="development", version=f"v1.{i}.0", strategy="rolling"
             )
 
         # Get history
@@ -296,12 +278,12 @@ class Phase101TestSuite(unittest.TestCase):
 
         # Check history structure
         for record in history:
-            self.assertIn('deployment_id', record)
-            self.assertIn('environment', record)
-            self.assertIn('version', record)
-            self.assertIn('status', record)
-            self.assertIn('start_time', record)
-            self.assertIn('success', record)
+            self.assertIn("deployment_id", record)
+            self.assertIn("environment", record)
+            self.assertIn("version", record)
+            self.assertIn("status", record)
+            self.assertIn("start_time", record)
+            self.assertIn("success", record)
 
         logger.info("✓ Deployment history test passed")
 
@@ -312,9 +294,7 @@ class Phase101TestSuite(unittest.TestCase):
         # Test invalid environment
         try:
             result = self.pipeline.deploy(
-                environment="invalid_env",
-                version="v1.0.0",
-                strategy="rolling"
+                environment="invalid_env", version="v1.0.0", strategy="rolling"
             )
             # Should handle gracefully
             self.assertIsNotNone(result)
@@ -325,9 +305,7 @@ class Phase101TestSuite(unittest.TestCase):
         # Test invalid strategy
         try:
             result = self.pipeline.deploy(
-                environment="development",
-                version="v1.0.0",
-                strategy="invalid_strategy"
+                environment="development", version="v1.0.0", strategy="invalid_strategy"
             )
             # Should handle gracefully
             self.assertIsNotNone(result)
@@ -343,51 +321,45 @@ class Phase101TestSuite(unittest.TestCase):
 
         # Test deploy_application
         result = deploy_application(
-            environment="development",
-            version="v1.0.0",
-            strategy="rolling"
+            environment="development", version="v1.0.0", strategy="rolling"
         )
 
         self.assertIsInstance(result, dict)
-        self.assertIn('deployment_id', result)
-        self.assertIn('success', result)
-        self.assertIn('status', result)
+        self.assertIn("deployment_id", result)
+        self.assertIn("success", result)
+        self.assertIn("status", result)
 
         # Test check_deployment_health
         health_result = check_deployment_health(
-            endpoint="http://localhost:8080/health",
-            timeout=30
+            endpoint="http://localhost:8080/health", timeout=30
         )
 
         self.assertIsInstance(health_result, dict)
-        self.assertIn('endpoint', health_result)
-        self.assertIn('healthy', health_result)
+        self.assertIn("endpoint", health_result)
+        self.assertIn("healthy", health_result)
 
         # Test scan_security
         security_result = scan_security(
-            image_name="nba-mcp-server:latest",
-            scan_type="vulnerability"
+            image_name="nba-mcp-server:latest", scan_type="vulnerability"
         )
 
         self.assertIsInstance(security_result, dict)
-        self.assertIn('scan_type', security_result)
-        self.assertIn('vulnerabilities_found', security_result)
+        self.assertIn("scan_type", security_result)
+        self.assertIn("vulnerabilities_found", security_result)
 
         # Test test_performance
-        performance_result = test_performance(
-            endpoint="http://localhost:8080/api"
-        )
+        performance_result = test_performance(endpoint="http://localhost:8080/api")
 
         self.assertIsInstance(performance_result, dict)
-        self.assertIn('test_name', performance_result)
-        self.assertIn('requests_per_second', performance_result)
+        self.assertIn("test_name", performance_result)
+        self.assertIn("requests_per_second", performance_result)
 
         # Test get_deployment_status
-        status_result = get_deployment_status(result['deployment_id'])
+        status_result = get_deployment_status(result["deployment_id"])
 
         if status_result:
             self.assertIsInstance(status_result, dict)
-            self.assertIn('deployment_id', status_result)
+            self.assertIn("deployment_id", status_result)
 
         # Test list_deployments
         deployments = list_deployments()
@@ -408,9 +380,7 @@ class Phase101TestSuite(unittest.TestCase):
         # Test multiple deployments
         for i in range(5):
             result = self.pipeline.deploy(
-                environment="development",
-                version=f"v1.{i}.0",
-                strategy="rolling"
+                environment="development", version=f"v1.{i}.0", strategy="rolling"
             )
             self.assertTrue(result.success)
 
@@ -420,7 +390,9 @@ class Phase101TestSuite(unittest.TestCase):
         # Performance should be reasonable (less than 30 seconds for 5 deployments)
         self.assertLess(total_time, 30.0)
 
-        logger.info(f"✓ Performance test passed: {total_time:.2f} seconds for 5 deployments")
+        logger.info(
+            f"✓ Performance test passed: {total_time:.2f} seconds for 5 deployments"
+        )
 
     def test_integration_scenarios(self):
         """Test integration scenarios"""
@@ -428,9 +400,7 @@ class Phase101TestSuite(unittest.TestCase):
 
         # Scenario 1: Deploy -> Health Check -> Rollback
         deploy_result = self.pipeline.deploy(
-            environment="staging",
-            version="v1.0.0",
-            strategy="rolling"
+            environment="staging", version="v1.0.0", strategy="rolling"
         )
 
         self.assertTrue(deploy_result.success)
@@ -448,17 +418,18 @@ class Phase101TestSuite(unittest.TestCase):
         self.assertIsNotNone(security_result)
 
         deploy_result2 = self.pipeline.deploy(
-            environment="production",
-            version="v1.1.0",
-            strategy="canary"
+            environment="production", version="v1.1.0", strategy="canary"
         )
 
         self.assertTrue(deploy_result2.success)
 
-        performance_result = self.pipeline.performance_test("http://production.example.com/api")
+        performance_result = self.pipeline.performance_test(
+            "http://production.example.com/api"
+        )
         self.assertIsNotNone(performance_result)
 
         logger.info("✓ Integration scenarios test passed")
+
 
 def run_performance_test():
     """Run performance test"""
@@ -470,9 +441,7 @@ def run_performance_test():
 
     # Test deployment performance
     result = pipeline.deploy(
-        environment="development",
-        version="v1.0.0",
-        strategy="rolling"
+        environment="development", version="v1.0.0", strategy="rolling"
     )
 
     end_time = time.time()
@@ -482,6 +451,7 @@ def run_performance_test():
     logger.info(f"Success: {result.success}")
 
     return deployment_time < 10.0  # Should complete within 10 seconds
+
 
 def main():
     """Main test function"""
@@ -522,15 +492,17 @@ def main():
     logger.info(f"Success Rate: {success_rate:.1f}%")
 
     if result.wasSuccessful() and performance_passed:
-        logger.info("\n🎉 ALL TESTS PASSED! Phase 10.1 implementation is working correctly.")
+        logger.info(
+            "\n🎉 ALL TESTS PASSED! Phase 10.1 implementation is working correctly."
+        )
         return True
     else:
-        logger.info(f"\n❌ {failed_tests + error_tests} tests failed. Please review the implementation.")
+        logger.info(
+            f"\n❌ {failed_tests + error_tests} tests failed. Please review the implementation."
+        )
         return False
+
 
 if __name__ == "__main__":
     success = main()
     sys.exit(0 if success else 1)
-
-
-

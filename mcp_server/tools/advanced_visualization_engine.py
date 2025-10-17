@@ -35,22 +35,29 @@ try:
     import matplotlib.patches as patches
     from matplotlib.figure import Figure
     import seaborn as sns
+
     MATPLOTLIB_AVAILABLE = True
 except ImportError:
     MATPLOTLIB_AVAILABLE = False
-    logging.warning("Matplotlib not available. Install matplotlib and seaborn for visualization.")
+    logging.warning(
+        "Matplotlib not available. Install matplotlib and seaborn for visualization."
+    )
 
 try:
     import plotly.graph_objects as go
     import plotly.express as px
     from plotly.subplots import make_subplots
+
     PLOTLY_AVAILABLE = True
 except ImportError:
     PLOTLY_AVAILABLE = False
-    logging.warning("Plotly not available. Install plotly for interactive visualizations.")
+    logging.warning(
+        "Plotly not available. Install plotly for interactive visualizations."
+    )
 
 try:
     from PIL import Image
+
     PIL_AVAILABLE = True
 except ImportError:
     PIL_AVAILABLE = False
@@ -62,8 +69,10 @@ logger = logging.getLogger(__name__)
 # Data Structures
 # ============================================================================
 
+
 class VisualizationType(Enum):
     """Types of visualizations"""
+
     FORMULA_GRAPH = "formula_graph"
     DATA_PLOT = "data_plot"
     FORMULA_RELATIONSHIP = "formula_relationship"
@@ -72,8 +81,10 @@ class VisualizationType(Enum):
     REAL_TIME = "real_time"
     STATIC_CHART = "static_chart"
 
+
 class ChartType(Enum):
     """Types of charts"""
+
     LINE = "line"
     SCATTER = "scatter"
     BAR = "bar"
@@ -85,8 +96,10 @@ class ChartType(Enum):
     TREE = "tree"
     SANKEY = "sankey"
 
+
 class ExportFormat(Enum):
     """Export formats for visualizations"""
+
     PNG = "png"
     JPG = "jpg"
     SVG = "svg"
@@ -95,9 +108,11 @@ class ExportFormat(Enum):
     JSON = "json"
     BASE64 = "base64"
 
+
 @dataclass
 class VisualizationConfig:
     """Configuration for visualizations"""
+
     width: int = 800
     height: int = 600
     dpi: int = 100
@@ -111,9 +126,11 @@ class VisualizationConfig:
     y_label: Optional[str] = None
     z_label: Optional[str] = None
 
+
 @dataclass
 class FormulaVisualizationResult:
     """Result from formula visualization"""
+
     visualization_id: str
     formula_id: str
     visualization_type: VisualizationType
@@ -125,9 +142,11 @@ class FormulaVisualizationResult:
     success: bool = True
     error_message: Optional[str] = None
 
+
 @dataclass
 class DataVisualizationResult:
     """Result from data visualization"""
+
     visualization_id: str
     data_source: str
     visualization_type: VisualizationType
@@ -139,9 +158,11 @@ class DataVisualizationResult:
     success: bool = True
     error_message: Optional[str] = None
 
+
 @dataclass
 class InteractiveVisualizationResult:
     """Result from interactive visualization"""
+
     visualization_id: str
     visualization_type: VisualizationType
     interactive_data: Dict[str, Any]
@@ -150,9 +171,11 @@ class InteractiveVisualizationResult:
     success: bool = True
     error_message: Optional[str] = None
 
+
 # ============================================================================
 # Advanced Visualization Engine
 # ============================================================================
+
 
 class AdvancedVisualizationEngine:
     """
@@ -172,7 +195,7 @@ class AdvancedVisualizationEngine:
 
         # Set up matplotlib style
         if self.matplotlib_available:
-            plt.style.use('default')
+            plt.style.use("default")
             sns.set_palette("husl")
 
         self.logger.info("Advanced visualization engine initialized")
@@ -184,7 +207,7 @@ class AdvancedVisualizationEngine:
         chart_type: ChartType = ChartType.LINE,
         config: Optional[VisualizationConfig] = None,
         variables: Optional[Dict[str, List[float]]] = None,
-        export_format: ExportFormat = ExportFormat.PNG
+        export_format: ExportFormat = ExportFormat.PNG,
     ) -> FormulaVisualizationResult:
         """
         Visualize a mathematical formula
@@ -214,11 +237,17 @@ class AdvancedVisualizationEngine:
 
             # Generate visualization based on type
             if visualization_type == VisualizationType.FORMULA_GRAPH:
-                result = self._create_formula_graph(expr, config, variables, export_format)
+                result = self._create_formula_graph(
+                    expr, config, variables, export_format
+                )
             elif visualization_type == VisualizationType.THREE_DIMENSIONAL:
-                result = self._create_3d_visualization(expr, config, variables, export_format)
+                result = self._create_3d_visualization(
+                    expr, config, variables, export_format
+                )
             elif visualization_type == VisualizationType.INTERACTIVE_CHART:
-                result = self._create_interactive_chart(expr, config, variables, export_format)
+                result = self._create_interactive_chart(
+                    expr, config, variables, export_format
+                )
             else:
                 result = self._create_basic_plot(expr, config, variables, export_format)
 
@@ -227,15 +256,15 @@ class AdvancedVisualizationEngine:
                 formula_id=formula_id,
                 visualization_type=visualization_type,
                 chart_type=chart_type,
-                image_data=result.get('image_data'),
-                html_data=result.get('html_data'),
-                json_data=result.get('json_data'),
+                image_data=result.get("image_data"),
+                html_data=result.get("html_data"),
+                json_data=result.get("json_data"),
                 metadata={
                     "formula": formula,
                     "variables": list(expr.free_symbols),
                     "config": asdict(config),
-                    "export_format": export_format.value
-                }
+                    "export_format": export_format.value,
+                },
             )
 
         except Exception as e:
@@ -247,7 +276,7 @@ class AdvancedVisualizationEngine:
                 chart_type=chart_type,
                 success=False,
                 error_message=str(e),
-                metadata={"formula": formula}
+                metadata={"formula": formula},
             )
 
     def visualize_data(
@@ -256,7 +285,7 @@ class AdvancedVisualizationEngine:
         visualization_type: VisualizationType = VisualizationType.DATA_PLOT,
         chart_type: ChartType = ChartType.LINE,
         config: Optional[VisualizationConfig] = None,
-        export_format: ExportFormat = ExportFormat.PNG
+        export_format: ExportFormat = ExportFormat.PNG,
     ) -> DataVisualizationResult:
         """
         Visualize data using various chart types
@@ -302,15 +331,15 @@ class AdvancedVisualizationEngine:
                 data_source=data_source,
                 visualization_type=visualization_type,
                 chart_type=chart_type,
-                image_data=result.get('image_data'),
-                html_data=result.get('html_data'),
-                json_data=result.get('json_data'),
+                image_data=result.get("image_data"),
+                html_data=result.get("html_data"),
+                json_data=result.get("json_data"),
                 metadata={
                     "data_shape": df.shape,
                     "columns": list(df.columns),
                     "config": asdict(config),
-                    "export_format": export_format.value
-                }
+                    "export_format": export_format.value,
+                },
             )
 
         except Exception as e:
@@ -322,14 +351,14 @@ class AdvancedVisualizationEngine:
                 chart_type=chart_type,
                 success=False,
                 error_message=str(e),
-                metadata={"data_keys": list(data.keys())}
+                metadata={"data_keys": list(data.keys())},
             )
 
     def create_interactive_visualization(
         self,
         data: Dict[str, Any],
         visualization_type: VisualizationType = VisualizationType.INTERACTIVE_CHART,
-        config: Optional[VisualizationConfig] = None
+        config: Optional[VisualizationConfig] = None,
     ) -> InteractiveVisualizationResult:
         """
         Create interactive visualization
@@ -362,10 +391,7 @@ class AdvancedVisualizationEngine:
                 visualization_type=visualization_type,
                 interactive_data=interactive_data,
                 controls=controls,
-                metadata={
-                    "data_type": type(data).__name__,
-                    "config": asdict(config)
-                }
+                metadata={"data_type": type(data).__name__, "config": asdict(config)},
             )
 
         except Exception as e:
@@ -376,7 +402,7 @@ class AdvancedVisualizationEngine:
                 interactive_data={},
                 controls=[],
                 success=False,
-                error_message=str(e)
+                error_message=str(e),
             )
 
     def visualize_formula_relationships(
@@ -384,7 +410,7 @@ class AdvancedVisualizationEngine:
         formulas: List[str],
         relationships: List[Tuple[str, str, str]],
         config: Optional[VisualizationConfig] = None,
-        export_format: ExportFormat = ExportFormat.PNG
+        export_format: ExportFormat = ExportFormat.PNG,
     ) -> FormulaVisualizationResult:
         """
         Visualize relationships between formulas
@@ -408,22 +434,24 @@ class AdvancedVisualizationEngine:
                 config = self.default_config
 
             # Create relationship network
-            result = self._create_relationship_network(formulas, relationships, config, export_format)
+            result = self._create_relationship_network(
+                formulas, relationships, config, export_format
+            )
 
             return FormulaVisualizationResult(
                 visualization_id=visualization_id,
                 formula_id=formula_id,
                 visualization_type=VisualizationType.FORMULA_RELATIONSHIP,
                 chart_type=ChartType.NETWORK,
-                image_data=result.get('image_data'),
-                html_data=result.get('html_data'),
-                json_data=result.get('json_data'),
+                image_data=result.get("image_data"),
+                html_data=result.get("html_data"),
+                json_data=result.get("json_data"),
                 metadata={
                     "formulas": formulas,
                     "relationships": relationships,
                     "config": asdict(config),
-                    "export_format": export_format.value
-                }
+                    "export_format": export_format.value,
+                },
             )
 
         except Exception as e:
@@ -435,7 +463,7 @@ class AdvancedVisualizationEngine:
                 chart_type=ChartType.NETWORK,
                 success=False,
                 error_message=str(e),
-                metadata={"formulas": formulas, "relationships": relationships}
+                metadata={"formulas": formulas, "relationships": relationships},
             )
 
     # ========================================================================
@@ -447,7 +475,7 @@ class AdvancedVisualizationEngine:
         expr: Expr,
         config: VisualizationConfig,
         variables: Optional[Dict[str, List[float]]],
-        export_format: ExportFormat
+        export_format: ExportFormat,
     ) -> Dict[str, Any]:
         """Create a graph visualization of a formula"""
         try:
@@ -463,19 +491,21 @@ class AdvancedVisualizationEngine:
                 x_vals = np.linspace(-10, 10, 1000)
 
                 # Create lambda function
-                f = lambdify(x, expr, 'numpy')
+                f = lambdify(x, expr, "numpy")
                 y_vals = f(x_vals)
 
                 # Create plot
-                fig, ax = plt.subplots(figsize=(config.width/100, config.height/100), dpi=config.dpi)
-                ax.plot(x_vals, y_vals, linewidth=2, color='blue')
+                fig, ax = plt.subplots(
+                    figsize=(config.width / 100, config.height / 100), dpi=config.dpi
+                )
+                ax.plot(x_vals, y_vals, linewidth=2, color="blue")
                 ax.set_xlabel(config.x_label or str(x))
-                ax.set_ylabel(config.y_label or 'f(x)')
-                ax.set_title(config.title or f'Graph of {expr}')
+                ax.set_ylabel(config.y_label or "f(x)")
+                ax.set_title(config.title or f"Graph of {expr}")
                 ax.grid(config.grid)
 
                 if config.legend:
-                    ax.legend([f'{expr}'])
+                    ax.legend([f"{expr}"])
 
             elif len(free_symbols) == 2:
                 # Two variable function
@@ -485,25 +515,36 @@ class AdvancedVisualizationEngine:
                 X, Y = np.meshgrid(x_vals, y_vals)
 
                 # Create lambda function
-                f = lambdify([x, y], expr, 'numpy')
+                f = lambdify([x, y], expr, "numpy")
                 Z = f(X, Y)
 
                 # Create contour plot
-                fig, ax = plt.subplots(figsize=(config.width/100, config.height/100), dpi=config.dpi)
+                fig, ax = plt.subplots(
+                    figsize=(config.width / 100, config.height / 100), dpi=config.dpi
+                )
                 contour = ax.contour(X, Y, Z, levels=20)
                 ax.clabel(contour, inline=True, fontsize=8)
                 ax.set_xlabel(config.x_label or str(x))
                 ax.set_ylabel(config.y_label or str(y))
-                ax.set_title(config.title or f'Contour plot of {expr}')
+                ax.set_title(config.title or f"Contour plot of {expr}")
                 ax.grid(config.grid)
 
             else:
                 # Multi-variable function - create parameter plot
-                fig, ax = plt.subplots(figsize=(config.width/100, config.height/100), dpi=config.dpi)
-                ax.text(0.5, 0.5, f'Formula: {expr}\nVariables: {free_symbols}',
-                       ha='center', va='center', fontsize=12, transform=ax.transAxes)
-                ax.set_title(config.title or 'Formula Display')
-                ax.axis('off')
+                fig, ax = plt.subplots(
+                    figsize=(config.width / 100, config.height / 100), dpi=config.dpi
+                )
+                ax.text(
+                    0.5,
+                    0.5,
+                    f"Formula: {expr}\nVariables: {free_symbols}",
+                    ha="center",
+                    va="center",
+                    fontsize=12,
+                    transform=ax.transAxes,
+                )
+                ax.set_title(config.title or "Formula Display")
+                ax.axis("off")
 
             # Export visualization
             result = self._export_visualization(fig, export_format)
@@ -520,7 +561,7 @@ class AdvancedVisualizationEngine:
         expr: Expr,
         config: VisualizationConfig,
         variables: Optional[Dict[str, List[float]]],
-        export_format: ExportFormat
+        export_format: ExportFormat,
     ) -> Dict[str, Any]:
         """Create a 3D visualization of a formula"""
         try:
@@ -539,24 +580,28 @@ class AdvancedVisualizationEngine:
                 X, Y = np.meshgrid(x_vals, y_vals)
 
                 # Create lambda function
-                f = lambdify([x, y], expr, 'numpy')
+                f = lambdify([x, y], expr, "numpy")
                 Z = f(X, Y)
 
                 # Create 3D plot
-                fig = plt.figure(figsize=(config.width/100, config.height/100), dpi=config.dpi)
-                ax = fig.add_subplot(111, projection='3d')
-                surf = ax.plot_surface(X, Y, Z, cmap='viridis', alpha=0.8)
+                fig = plt.figure(
+                    figsize=(config.width / 100, config.height / 100), dpi=config.dpi
+                )
+                ax = fig.add_subplot(111, projection="3d")
+                surf = ax.plot_surface(X, Y, Z, cmap="viridis", alpha=0.8)
                 ax.set_xlabel(config.x_label or str(x))
                 ax.set_ylabel(config.y_label or str(y))
-                ax.set_zlabel(config.z_label or 'f(x,y)')
-                ax.set_title(config.title or f'3D plot of {expr}')
+                ax.set_zlabel(config.z_label or "f(x,y)")
+                ax.set_title(config.title or f"3D plot of {expr}")
 
                 if config.legend:
                     fig.colorbar(surf, shrink=0.5, aspect=5)
 
             else:
                 # Single variable - create 2D plot
-                return self._create_formula_graph(expr, config, variables, export_format)
+                return self._create_formula_graph(
+                    expr, config, variables, export_format
+                )
 
             # Export visualization
             result = self._export_visualization(fig, export_format)
@@ -573,7 +618,7 @@ class AdvancedVisualizationEngine:
         expr: Expr,
         config: VisualizationConfig,
         variables: Optional[Dict[str, List[float]]],
-        export_format: ExportFormat
+        export_format: ExportFormat,
     ) -> Dict[str, Any]:
         """Create an interactive chart"""
         try:
@@ -589,18 +634,20 @@ class AdvancedVisualizationEngine:
                 x_vals = np.linspace(-10, 10, 1000)
 
                 # Create lambda function
-                f = lambdify(x, expr, 'numpy')
+                f = lambdify(x, expr, "numpy")
                 y_vals = f(x_vals)
 
                 # Create interactive plot
                 fig = go.Figure()
-                fig.add_trace(go.Scatter(x=x_vals, y=y_vals, mode='lines', name=str(expr)))
+                fig.add_trace(
+                    go.Scatter(x=x_vals, y=y_vals, mode="lines", name=str(expr))
+                )
                 fig.update_layout(
-                    title=config.title or f'Interactive plot of {expr}',
+                    title=config.title or f"Interactive plot of {expr}",
                     xaxis_title=config.x_label or str(x),
-                    yaxis_title=config.y_label or 'f(x)',
+                    yaxis_title=config.y_label or "f(x)",
                     width=config.width,
-                    height=config.height
+                    height=config.height,
                 )
 
             elif len(free_symbols) == 2:
@@ -611,44 +658,44 @@ class AdvancedVisualizationEngine:
                 X, Y = np.meshgrid(x_vals, y_vals)
 
                 # Create lambda function
-                f = lambdify([x, y], expr, 'numpy')
+                f = lambdify([x, y], expr, "numpy")
                 Z = f(X, Y)
 
                 # Create 3D surface plot
                 fig = go.Figure(data=[go.Surface(z=Z, x=X, y=Y)])
                 fig.update_layout(
-                    title=config.title or f'3D surface of {expr}',
+                    title=config.title or f"3D surface of {expr}",
                     scene=dict(
                         xaxis_title=config.x_label or str(x),
                         yaxis_title=config.y_label or str(y),
-                        zaxis_title=config.z_label or 'f(x,y)'
+                        zaxis_title=config.z_label or "f(x,y)",
                     ),
                     width=config.width,
-                    height=config.height
+                    height=config.height,
                 )
 
             else:
                 # Multi-variable function
                 fig = go.Figure()
                 fig.add_annotation(
-                    text=f'Formula: {expr}<br>Variables: {free_symbols}',
-                    xref="paper", yref="paper",
-                    x=0.5, y=0.5, showarrow=False,
-                    font=dict(size=16)
+                    text=f"Formula: {expr}<br>Variables: {free_symbols}",
+                    xref="paper",
+                    yref="paper",
+                    x=0.5,
+                    y=0.5,
+                    showarrow=False,
+                    font=dict(size=16),
                 )
                 fig.update_layout(
-                    title=config.title or 'Formula Display',
+                    title=config.title or "Formula Display",
                     width=config.width,
-                    height=config.height
+                    height=config.height,
                 )
 
             # Convert to HTML
-            html_data = fig.to_html(include_plotlyjs='cdn')
+            html_data = fig.to_html(include_plotlyjs="cdn")
 
-            return {
-                "html_data": html_data,
-                "json_data": fig.to_dict()
-            }
+            return {"html_data": html_data, "json_data": fig.to_dict()}
 
         except Exception as e:
             self.logger.error(f"Interactive chart creation failed: {e}")
@@ -659,30 +706,29 @@ class AdvancedVisualizationEngine:
         expr: Expr,
         config: VisualizationConfig,
         variables: Optional[Dict[str, List[float]]],
-        export_format: ExportFormat
+        export_format: ExportFormat,
     ) -> Dict[str, Any]:
         """Create a basic plot"""
         return self._create_formula_graph(expr, config, variables, export_format)
 
     def _create_line_chart(
-        self,
-        df: pd.DataFrame,
-        config: VisualizationConfig,
-        export_format: ExportFormat
+        self, df: pd.DataFrame, config: VisualizationConfig, export_format: ExportFormat
     ) -> Dict[str, Any]:
         """Create a line chart"""
         try:
             if not self.matplotlib_available:
                 return {"error": "Matplotlib not available"}
 
-            fig, ax = plt.subplots(figsize=(config.width/100, config.height/100), dpi=config.dpi)
+            fig, ax = plt.subplots(
+                figsize=(config.width / 100, config.height / 100), dpi=config.dpi
+            )
 
             for column in df.columns:
                 ax.plot(df.index, df[column], label=column, linewidth=2)
 
-            ax.set_xlabel(config.x_label or 'Index')
-            ax.set_ylabel(config.y_label or 'Value')
-            ax.set_title(config.title or 'Line Chart')
+            ax.set_xlabel(config.x_label or "Index")
+            ax.set_ylabel(config.y_label or "Value")
+            ax.set_title(config.title or "Line Chart")
             ax.grid(config.grid)
 
             if config.legend:
@@ -699,17 +745,16 @@ class AdvancedVisualizationEngine:
             return {"error": str(e)}
 
     def _create_scatter_chart(
-        self,
-        df: pd.DataFrame,
-        config: VisualizationConfig,
-        export_format: ExportFormat
+        self, df: pd.DataFrame, config: VisualizationConfig, export_format: ExportFormat
     ) -> Dict[str, Any]:
         """Create a scatter chart"""
         try:
             if not self.matplotlib_available:
                 return {"error": "Matplotlib not available"}
 
-            fig, ax = plt.subplots(figsize=(config.width/100, config.height/100), dpi=config.dpi)
+            fig, ax = plt.subplots(
+                figsize=(config.width / 100, config.height / 100), dpi=config.dpi
+            )
 
             if len(df.columns) >= 2:
                 ax.scatter(df.iloc[:, 0], df.iloc[:, 1], alpha=0.6)
@@ -717,10 +762,10 @@ class AdvancedVisualizationEngine:
                 ax.set_ylabel(config.y_label or df.columns[1])
             else:
                 ax.scatter(df.index, df.iloc[:, 0], alpha=0.6)
-                ax.set_xlabel(config.x_label or 'Index')
+                ax.set_xlabel(config.x_label or "Index")
                 ax.set_ylabel(config.y_label or df.columns[0])
 
-            ax.set_title(config.title or 'Scatter Chart')
+            ax.set_title(config.title or "Scatter Chart")
             ax.grid(config.grid)
 
             # Export visualization
@@ -734,25 +779,24 @@ class AdvancedVisualizationEngine:
             return {"error": str(e)}
 
     def _create_bar_chart(
-        self,
-        df: pd.DataFrame,
-        config: VisualizationConfig,
-        export_format: ExportFormat
+        self, df: pd.DataFrame, config: VisualizationConfig, export_format: ExportFormat
     ) -> Dict[str, Any]:
         """Create a bar chart"""
         try:
             if not self.matplotlib_available:
                 return {"error": "Matplotlib not available"}
 
-            fig, ax = plt.subplots(figsize=(config.width/100, config.height/100), dpi=config.dpi)
+            fig, ax = plt.subplots(
+                figsize=(config.width / 100, config.height / 100), dpi=config.dpi
+            )
 
             # Use first column for bars
             column = df.columns[0]
             ax.bar(range(len(df)), df[column])
-            ax.set_xlabel(config.x_label or 'Index')
+            ax.set_xlabel(config.x_label or "Index")
             ax.set_ylabel(config.y_label or column)
-            ax.set_title(config.title or f'Bar Chart - {column}')
-            ax.grid(config.grid, axis='y')
+            ax.set_title(config.title or f"Bar Chart - {column}")
+            ax.grid(config.grid, axis="y")
 
             # Export visualization
             result = self._export_visualization(fig, export_format)
@@ -765,22 +809,21 @@ class AdvancedVisualizationEngine:
             return {"error": str(e)}
 
     def _create_heatmap(
-        self,
-        df: pd.DataFrame,
-        config: VisualizationConfig,
-        export_format: ExportFormat
+        self, df: pd.DataFrame, config: VisualizationConfig, export_format: ExportFormat
     ) -> Dict[str, Any]:
         """Create a heatmap"""
         try:
             if not self.matplotlib_available:
                 return {"error": "Matplotlib not available"}
 
-            fig, ax = plt.subplots(figsize=(config.width/100, config.height/100), dpi=config.dpi)
+            fig, ax = plt.subplots(
+                figsize=(config.width / 100, config.height / 100), dpi=config.dpi
+            )
 
             # Create correlation heatmap if multiple columns
             if len(df.columns) > 1:
                 corr_matrix = df.corr()
-                im = ax.imshow(corr_matrix, cmap='coolwarm', aspect='auto')
+                im = ax.imshow(corr_matrix, cmap="coolwarm", aspect="auto")
                 ax.set_xticks(range(len(corr_matrix.columns)))
                 ax.set_yticks(range(len(corr_matrix.columns)))
                 ax.set_xticklabels(corr_matrix.columns, rotation=45)
@@ -791,12 +834,12 @@ class AdvancedVisualizationEngine:
             else:
                 # Single column heatmap
                 data = df.values.reshape(-1, 1)
-                im = ax.imshow(data.T, cmap='viridis', aspect='auto')
-                ax.set_xlabel(config.x_label or 'Index')
+                im = ax.imshow(data.T, cmap="viridis", aspect="auto")
+                ax.set_xlabel(config.x_label or "Index")
                 ax.set_ylabel(config.y_label or df.columns[0])
                 plt.colorbar(im, ax=ax)
 
-            ax.set_title(config.title or 'Heatmap')
+            ax.set_title(config.title or "Heatmap")
 
             # Export visualization
             result = self._export_visualization(fig, export_format)
@@ -809,25 +852,24 @@ class AdvancedVisualizationEngine:
             return {"error": str(e)}
 
     def _create_histogram(
-        self,
-        df: pd.DataFrame,
-        config: VisualizationConfig,
-        export_format: ExportFormat
+        self, df: pd.DataFrame, config: VisualizationConfig, export_format: ExportFormat
     ) -> Dict[str, Any]:
         """Create a histogram"""
         try:
             if not self.matplotlib_available:
                 return {"error": "Matplotlib not available"}
 
-            fig, ax = plt.subplots(figsize=(config.width/100, config.height/100), dpi=config.dpi)
+            fig, ax = plt.subplots(
+                figsize=(config.width / 100, config.height / 100), dpi=config.dpi
+            )
 
             # Create histogram for first column
             column = df.columns[0]
-            ax.hist(df[column], bins=30, alpha=0.7, edgecolor='black')
+            ax.hist(df[column], bins=30, alpha=0.7, edgecolor="black")
             ax.set_xlabel(config.x_label or column)
-            ax.set_ylabel(config.y_label or 'Frequency')
-            ax.set_title(config.title or f'Histogram - {column}')
-            ax.grid(config.grid, axis='y')
+            ax.set_ylabel(config.y_label or "Frequency")
+            ax.set_title(config.title or f"Histogram - {column}")
+            ax.grid(config.grid, axis="y")
 
             # Export visualization
             result = self._export_visualization(fig, export_format)
@@ -840,9 +882,7 @@ class AdvancedVisualizationEngine:
             return {"error": str(e)}
 
     def _create_interactive_plotly(
-        self,
-        data: Dict[str, Any],
-        config: VisualizationConfig
+        self, data: Dict[str, Any], config: VisualizationConfig
     ) -> Dict[str, Any]:
         """Create interactive Plotly visualization"""
         try:
@@ -852,23 +892,22 @@ class AdvancedVisualizationEngine:
             # Create a simple interactive plot
             fig = go.Figure()
 
-            if isinstance(data, dict) and 'x' in data and 'y' in data:
-                fig.add_trace(go.Scatter(
-                    x=data['x'],
-                    y=data['y'],
-                    mode='lines+markers',
-                    name='Data'
-                ))
+            if isinstance(data, dict) and "x" in data and "y" in data:
+                fig.add_trace(
+                    go.Scatter(
+                        x=data["x"], y=data["y"], mode="lines+markers", name="Data"
+                    )
+                )
             else:
                 # Create sample data
                 x = np.linspace(0, 10, 100)
                 y = np.sin(x)
-                fig.add_trace(go.Scatter(x=x, y=y, mode='lines', name='sin(x)'))
+                fig.add_trace(go.Scatter(x=x, y=y, mode="lines", name="sin(x)"))
 
             fig.update_layout(
-                title=config.title or 'Interactive Visualization',
+                title=config.title or "Interactive Visualization",
                 width=config.width,
-                height=config.height
+                height=config.height,
             )
 
             return fig.to_dict()
@@ -878,28 +917,31 @@ class AdvancedVisualizationEngine:
             return {"error": str(e)}
 
     def _generate_interactive_controls(
-        self,
-        data: Dict[str, Any]
+        self, data: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """Generate interactive controls for visualization"""
         controls = []
 
         # Add basic controls
-        controls.append({
-            "type": "slider",
-            "name": "range",
-            "min": 0,
-            "max": 100,
-            "value": 50,
-            "step": 1
-        })
+        controls.append(
+            {
+                "type": "slider",
+                "name": "range",
+                "min": 0,
+                "max": 100,
+                "value": 50,
+                "step": 1,
+            }
+        )
 
-        controls.append({
-            "type": "dropdown",
-            "name": "chart_type",
-            "options": ["line", "scatter", "bar"],
-            "value": "line"
-        })
+        controls.append(
+            {
+                "type": "dropdown",
+                "name": "chart_type",
+                "options": ["line", "scatter", "bar"],
+                "value": "line",
+            }
+        )
 
         return controls
 
@@ -908,29 +950,40 @@ class AdvancedVisualizationEngine:
         formulas: List[str],
         relationships: List[Tuple[str, str, str]],
         config: VisualizationConfig,
-        export_format: ExportFormat
+        export_format: ExportFormat,
     ) -> Dict[str, Any]:
         """Create a network visualization of formula relationships"""
         try:
             if not self.matplotlib_available:
                 return {"error": "Matplotlib not available"}
 
-            fig, ax = plt.subplots(figsize=(config.width/100, config.height/100), dpi=config.dpi)
+            fig, ax = plt.subplots(
+                figsize=(config.width / 100, config.height / 100), dpi=config.dpi
+            )
 
             # Create simple network visualization
             n_formulas = len(formulas)
             if n_formulas == 0:
-                ax.text(0.5, 0.5, 'No formulas to visualize', ha='center', va='center', transform=ax.transAxes)
+                ax.text(
+                    0.5,
+                    0.5,
+                    "No formulas to visualize",
+                    ha="center",
+                    va="center",
+                    transform=ax.transAxes,
+                )
             else:
                 # Position formulas in a circle
-                angles = np.linspace(0, 2*np.pi, n_formulas, endpoint=False)
+                angles = np.linspace(0, 2 * np.pi, n_formulas, endpoint=False)
                 x_pos = np.cos(angles)
                 y_pos = np.sin(angles)
 
                 # Plot formulas as nodes
                 for i, formula in enumerate(formulas):
-                    ax.scatter(x_pos[i], y_pos[i], s=200, c='blue', alpha=0.7)
-                    ax.annotate(f'F{i+1}', (x_pos[i], y_pos[i]), ha='center', va='center')
+                    ax.scatter(x_pos[i], y_pos[i], s=200, c="blue", alpha=0.7)
+                    ax.annotate(
+                        f"F{i+1}", (x_pos[i], y_pos[i]), ha="center", va="center"
+                    )
 
                 # Plot relationships as edges
                 for rel in relationships:
@@ -938,17 +991,22 @@ class AdvancedVisualizationEngine:
                     try:
                         idx1 = formulas.index(formula1)
                         idx2 = formulas.index(formula2)
-                        ax.plot([x_pos[idx1], x_pos[idx2]], [y_pos[idx1], y_pos[idx2]],
-                               'k-', alpha=0.5, linewidth=1)
+                        ax.plot(
+                            [x_pos[idx1], x_pos[idx2]],
+                            [y_pos[idx1], y_pos[idx2]],
+                            "k-",
+                            alpha=0.5,
+                            linewidth=1,
+                        )
                     except ValueError:
                         continue
 
                 ax.set_xlim(-1.5, 1.5)
                 ax.set_ylim(-1.5, 1.5)
-                ax.set_aspect('equal')
-                ax.axis('off')
+                ax.set_aspect("equal")
+                ax.axis("off")
 
-            ax.set_title(config.title or 'Formula Relationship Network')
+            ax.set_title(config.title or "Formula Relationship Network")
 
             # Export visualization
             result = self._export_visualization(fig, export_format)
@@ -961,9 +1019,7 @@ class AdvancedVisualizationEngine:
             return {"error": str(e)}
 
     def _export_visualization(
-        self,
-        fig: Figure,
-        export_format: ExportFormat
+        self, fig: Figure, export_format: ExportFormat
     ) -> Dict[str, Any]:
         """Export visualization in specified format"""
         try:
@@ -972,34 +1028,34 @@ class AdvancedVisualizationEngine:
             if export_format == ExportFormat.BASE64:
                 # Export as base64
                 buffer = io.BytesIO()
-                fig.savefig(buffer, format='png', dpi=100, bbox_inches='tight')
+                fig.savefig(buffer, format="png", dpi=100, bbox_inches="tight")
                 buffer.seek(0)
-                image_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
-                result['image_data'] = image_data
+                image_data = base64.b64encode(buffer.getvalue()).decode("utf-8")
+                result["image_data"] = image_data
 
             elif export_format == ExportFormat.PNG:
                 # Export as PNG
                 buffer = io.BytesIO()
-                fig.savefig(buffer, format='png', dpi=100, bbox_inches='tight')
+                fig.savefig(buffer, format="png", dpi=100, bbox_inches="tight")
                 buffer.seek(0)
-                image_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
-                result['image_data'] = image_data
+                image_data = base64.b64encode(buffer.getvalue()).decode("utf-8")
+                result["image_data"] = image_data
 
             elif export_format == ExportFormat.SVG:
                 # Export as SVG
                 buffer = io.BytesIO()
-                fig.savefig(buffer, format='svg', bbox_inches='tight')
+                fig.savefig(buffer, format="svg", bbox_inches="tight")
                 buffer.seek(0)
-                svg_data = buffer.getvalue().decode('utf-8')
-                result['json_data'] = {"svg": svg_data}
+                svg_data = buffer.getvalue().decode("utf-8")
+                result["json_data"] = {"svg": svg_data}
 
             else:
                 # Default to PNG
                 buffer = io.BytesIO()
-                fig.savefig(buffer, format='png', dpi=100, bbox_inches='tight')
+                fig.savefig(buffer, format="png", dpi=100, bbox_inches="tight")
                 buffer.seek(0)
-                image_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
-                result['image_data'] = image_data
+                image_data = base64.b64encode(buffer.getvalue()).decode("utf-8")
+                result["image_data"] = image_data
 
             return result
 
@@ -1010,18 +1066,20 @@ class AdvancedVisualizationEngine:
     def get_visualization_capabilities(self) -> Dict[str, Any]:
         """Get information about visualization capabilities"""
         return {
-            'matplotlib_available': self.matplotlib_available,
-            'plotly_available': self.plotly_available,
-            'pil_available': self.pil_available,
-            'supported_formats': [fmt.value for fmt in ExportFormat],
-            'supported_chart_types': [chart.value for chart in ChartType],
-            'supported_visualization_types': [viz.value for viz in VisualizationType],
-            'default_config': asdict(self.default_config)
+            "matplotlib_available": self.matplotlib_available,
+            "plotly_available": self.plotly_available,
+            "pil_available": self.pil_available,
+            "supported_formats": [fmt.value for fmt in ExportFormat],
+            "supported_chart_types": [chart.value for chart in ChartType],
+            "supported_visualization_types": [viz.value for viz in VisualizationType],
+            "default_config": asdict(self.default_config),
         }
+
 
 # ============================================================================
 # Standalone Functions for MCP Tools
 # ============================================================================
+
 
 def visualize_formula(
     formula: str,
@@ -1029,7 +1087,7 @@ def visualize_formula(
     chart_type: str = "line",
     config: Optional[Dict[str, Any]] = None,
     variables: Optional[Dict[str, List[float]]] = None,
-    export_format: str = "png"
+    export_format: str = "png",
 ) -> Dict[str, Any]:
     """
     Visualize a mathematical formula
@@ -1061,17 +1119,18 @@ def visualize_formula(
         chart_type=chart_type_enum,
         config=viz_config,
         variables=variables,
-        export_format=export_format_enum
+        export_format=export_format_enum,
     )
 
     return asdict(result)
+
 
 def visualize_data(
     data: Dict[str, List[float]],
     visualization_type: str = "data_plot",
     chart_type: str = "line",
     config: Optional[Dict[str, Any]] = None,
-    export_format: str = "png"
+    export_format: str = "png",
 ) -> Dict[str, Any]:
     """
     Visualize data using various chart types
@@ -1101,15 +1160,16 @@ def visualize_data(
         visualization_type=viz_type,
         chart_type=chart_type_enum,
         config=viz_config,
-        export_format=export_format_enum
+        export_format=export_format_enum,
     )
 
     return asdict(result)
 
+
 def create_interactive_visualization(
     data: Dict[str, Any],
     visualization_type: str = "interactive_chart",
-    config: Optional[Dict[str, Any]] = None
+    config: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Create interactive visualization
@@ -1131,18 +1191,17 @@ def create_interactive_visualization(
         viz_config = VisualizationConfig(**config)
 
     result = engine.create_interactive_visualization(
-        data=data,
-        visualization_type=viz_type,
-        config=viz_config
+        data=data, visualization_type=viz_type, config=viz_config
     )
 
     return asdict(result)
+
 
 def visualize_formula_relationships(
     formulas: List[str],
     relationships: List[Tuple[str, str, str]],
     config: Optional[Dict[str, Any]] = None,
-    export_format: str = "png"
+    export_format: str = "png",
 ) -> Dict[str, Any]:
     """
     Visualize relationships between formulas
@@ -1168,10 +1227,11 @@ def visualize_formula_relationships(
         formulas=formulas,
         relationships=relationships,
         config=viz_config,
-        export_format=export_format_enum
+        export_format=export_format_enum,
     )
 
     return asdict(result)
+
 
 def get_visualization_capabilities() -> Dict[str, Any]:
     """
@@ -1183,12 +1243,15 @@ def get_visualization_capabilities() -> Dict[str, Any]:
     engine = AdvancedVisualizationEngine()
     return engine.get_visualization_capabilities()
 
+
 # ============================================================================
 # Logging Configuration
 # ============================================================================
 
+
 def log_operation(operation_name: str):
     """Decorator for logging operations"""
+
     def decorator(func):
         def wrapper(*args, **kwargs):
             logger.info(f"Starting {operation_name}")
@@ -1199,5 +1262,7 @@ def log_operation(operation_name: str):
             except Exception as e:
                 logger.error(f"Failed {operation_name}: {e}")
                 raise
+
         return wrapper
+
     return decorator

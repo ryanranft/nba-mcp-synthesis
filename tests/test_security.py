@@ -15,6 +15,7 @@ from unittest.mock import Mock, AsyncMock, patch
 
 # Import security module
 import sys
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from mcp_server.security import (
@@ -26,13 +27,14 @@ from mcp_server.security import (
     RequestValidator,
     SecurityManager,
     with_timeout,
-    enforce_timeout
+    enforce_timeout,
 )
 
 
 # ==============================================================================
 # Rate Limiter Tests
 # ==============================================================================
+
 
 class TestRateLimiter:
     """Test rate limiting functionality"""
@@ -41,9 +43,7 @@ class TestRateLimiter:
     async def test_rate_limiter_initial_state(self):
         """Test rate limiter initial state"""
         config = RateLimitConfig(
-            requests_per_minute=10,
-            requests_per_hour=100,
-            burst_size=5
+            requests_per_minute=10, requests_per_hour=100, burst_size=5
         )
         limiter = RateLimiter(config)
 
@@ -56,10 +56,7 @@ class TestRateLimiter:
     @pytest.mark.asyncio
     async def test_rate_limiter_burst_exceeded(self):
         """Test rate limiter blocks after burst size exceeded"""
-        config = RateLimitConfig(
-            requests_per_minute=60,
-            burst_size=3
-        )
+        config = RateLimitConfig(requests_per_minute=60, burst_size=3)
         limiter = RateLimiter(config)
 
         # First 3 should succeed
@@ -75,10 +72,7 @@ class TestRateLimiter:
     @pytest.mark.asyncio
     async def test_rate_limiter_per_minute_limit(self):
         """Test per-minute rate limit"""
-        config = RateLimitConfig(
-            requests_per_minute=5,
-            burst_size=10
-        )
+        config = RateLimitConfig(requests_per_minute=5, burst_size=10)
         limiter = RateLimiter(config)
 
         # Make 5 requests (within minute limit)
@@ -96,8 +90,8 @@ class TestRateLimiter:
         """Test per-hour rate limit"""
         config = RateLimitConfig(
             requests_per_minute=1000,  # High minute limit
-            requests_per_hour=10,      # Low hour limit
-            burst_size=20
+            requests_per_hour=10,  # Low hour limit
+            burst_size=20,
         )
         limiter = RateLimiter(config)
 
@@ -115,8 +109,7 @@ class TestRateLimiter:
     async def test_rate_limiter_token_refill(self):
         """Test token bucket refills over time"""
         config = RateLimitConfig(
-            requests_per_minute=60,  # 1 token per second
-            burst_size=2
+            requests_per_minute=60, burst_size=2  # 1 token per second
         )
         limiter = RateLimiter(config)
 
@@ -138,10 +131,7 @@ class TestRateLimiter:
     @pytest.mark.asyncio
     async def test_rate_limiter_per_client_isolation(self):
         """Test rate limits are per-client"""
-        config = RateLimitConfig(
-            requests_per_minute=2,
-            burst_size=2
-        )
+        config = RateLimitConfig(requests_per_minute=2, burst_size=2)
         limiter = RateLimiter(config)
 
         # Client 1 uses up limit
@@ -159,10 +149,7 @@ class TestRateLimiter:
     @pytest.mark.asyncio
     async def test_rate_limiter_reset_client(self):
         """Test resetting rate limit for specific client"""
-        config = RateLimitConfig(
-            requests_per_minute=2,
-            burst_size=2
-        )
+        config = RateLimitConfig(requests_per_minute=2, burst_size=2)
         limiter = RateLimiter(config)
 
         # Consume limit
@@ -183,10 +170,7 @@ class TestRateLimiter:
     @pytest.mark.asyncio
     async def test_rate_limiter_get_stats(self):
         """Test getting client statistics"""
-        config = RateLimitConfig(
-            requests_per_minute=10,
-            burst_size=5
-        )
+        config = RateLimitConfig(requests_per_minute=10, burst_size=5)
         limiter = RateLimiter(config)
 
         # Make some requests
@@ -214,6 +198,7 @@ class TestRateLimiter:
 # SQL Validator Tests
 # ==============================================================================
 
+
 class TestSQLValidator:
     """Test SQL injection prevention"""
 
@@ -228,7 +213,7 @@ class TestSQLValidator:
             "SELECT COUNT(*) FROM games WHERE game_date > '2024-01-01'",
             "EXPLAIN SELECT * FROM games",
             "SHOW TABLES",
-            "DESCRIBE players"
+            "DESCRIBE players",
         ]
 
         for query in valid_queries:
@@ -249,7 +234,7 @@ class TestSQLValidator:
             "ALTER TABLE games ADD COLUMN test INT",
             "CREATE TABLE test (id INT)",
             "GRANT ALL ON games TO user",
-            "REVOKE SELECT ON games FROM user"
+            "REVOKE SELECT ON games FROM user",
         ]
 
         for query in forbidden_queries:
@@ -269,7 +254,7 @@ class TestSQLValidator:
             "SELECT * FROM games UNION SELECT * FROM users",
             "SELECT * FROM games WHERE id = 1 --",
             "SELECT * FROM games WHERE id = 1 /* comment */",
-            "SELECT * FROM games WHERE id = EXEC('malicious')"
+            "SELECT * FROM games WHERE id = EXEC('malicious')",
         ]
 
         for query in injection_attempts:
@@ -286,7 +271,9 @@ class TestSQLValidator:
         assert valid is True
 
         # Long query should fail
-        long_query = "SELECT * FROM games WHERE " + " AND ".join([f"col{i} = {i}" for i in range(100)])
+        long_query = "SELECT * FROM games WHERE " + " AND ".join(
+            [f"col{i} = {i}" for i in range(100)]
+        )
         valid, message = validator.validate_sql_query(long_query)
         assert valid is False
         assert "too long" in message
@@ -335,6 +322,7 @@ class TestSQLValidator:
 # Path Validator Tests
 # ==============================================================================
 
+
 class TestPathValidator:
     """Test path traversal prevention"""
 
@@ -348,7 +336,7 @@ class TestPathValidator:
                 "test.py",
                 "subdir/file.sql",
                 "data/results.json",
-                "logs/app.log"
+                "logs/app.log",
             ]
 
             for path in valid_paths:
@@ -365,7 +353,7 @@ class TestPathValidator:
                 "../etc/passwd",
                 "../../secret.txt",
                 "subdir/../../etc/shadow",
-                "test/../../../etc/passwd"
+                "test/../../../etc/passwd",
             ]
 
             for path in traversal_attempts:
@@ -385,7 +373,7 @@ class TestPathValidator:
                 "/root/.bashrc",
                 ".env",
                 ".git/config",
-                "__pycache__/test.pyc"
+                "__pycache__/test.pyc",
             ]
 
             for path in forbidden_paths:
@@ -399,13 +387,13 @@ class TestPathValidator:
             validator = PathValidator(config, tmpdir)
 
             # Allowed extensions
-            for ext in ['.py', '.sql', '.json', '.md', '.txt']:
+            for ext in [".py", ".sql", ".json", ".md", ".txt"]:
                 path = f"test{ext}"
                 valid, message = validator.validate_file_path(path)
                 assert valid is True, f"Extension should be allowed: {ext}"
 
             # Forbidden extensions
-            forbidden_exts = ['.exe', '.sh', '.bat', '.dll']
+            forbidden_exts = [".exe", ".sh", ".bat", ".dll"]
             for ext in forbidden_exts:
                 path = f"test{ext}"
                 valid, message = validator.validate_file_path(path)
@@ -439,6 +427,7 @@ class TestPathValidator:
 # Request Validator Tests
 # ==============================================================================
 
+
 class TestRequestValidator:
     """Test request size and parameter validation"""
 
@@ -466,11 +455,7 @@ class TestRequestValidator:
         config = SecurityConfig()
         validator = RequestValidator(config)
 
-        valid_params = {
-            "sql_query": "SELECT * FROM games",
-            "limit": 10,
-            "offset": 0
-        }
+        valid_params = {"sql_query": "SELECT * FROM games", "limit": 10, "offset": 0}
         valid, message = validator.validate_parameters(valid_params)
         assert valid is True
 
@@ -507,22 +492,27 @@ class TestRequestValidator:
 # Timeout Tests
 # ==============================================================================
 
+
 class TestTimeout:
     """Test timeout enforcement"""
 
     @pytest.mark.asyncio
     async def test_with_timeout_success(self):
         """Test with_timeout allows fast operations"""
+
         async def fast_operation():
             await asyncio.sleep(0.1)
             return "success"
 
-        result = await with_timeout(fast_operation(), timeout=1.0, operation_name="test")
+        result = await with_timeout(
+            fast_operation(), timeout=1.0, operation_name="test"
+        )
         assert result == "success"
 
     @pytest.mark.asyncio
     async def test_with_timeout_exceeded(self):
         """Test with_timeout raises error on timeout"""
+
         async def slow_operation():
             await asyncio.sleep(2.0)
             return "success"
@@ -533,6 +523,7 @@ class TestTimeout:
     @pytest.mark.asyncio
     async def test_enforce_timeout_decorator_success(self):
         """Test enforce_timeout decorator allows fast operations"""
+
         @enforce_timeout(1.0)
         async def fast_func():
             await asyncio.sleep(0.1)
@@ -544,6 +535,7 @@ class TestTimeout:
     @pytest.mark.asyncio
     async def test_enforce_timeout_decorator_exceeded(self):
         """Test enforce_timeout decorator raises error on timeout"""
+
         @enforce_timeout(0.5)
         async def slow_func():
             await asyncio.sleep(2.0)
@@ -557,6 +549,7 @@ class TestTimeout:
 # Security Manager Integration Tests
 # ==============================================================================
 
+
 class TestSecurityManager:
     """Test security manager orchestration"""
 
@@ -564,15 +557,13 @@ class TestSecurityManager:
     async def test_security_manager_valid_database_request(self):
         """Test security manager allows valid database query"""
         with tempfile.TemporaryDirectory() as tmpdir:
-            config = SecurityConfig(
-                rate_limit=RateLimitConfig(requests_per_minute=100)
-            )
+            config = SecurityConfig(rate_limit=RateLimitConfig(requests_per_minute=100))
             manager = SecurityManager(config, tmpdir)
 
             valid, message = await manager.validate_request(
                 client_id="client1",
                 tool_name="query_database",
-                arguments={"sql_query": "SELECT * FROM games LIMIT 10"}
+                arguments={"sql_query": "SELECT * FROM games LIMIT 10"},
             )
 
             assert valid is True
@@ -587,7 +578,7 @@ class TestSecurityManager:
             valid, message = await manager.validate_request(
                 client_id="client1",
                 tool_name="query_database",
-                arguments={"sql_query": "DROP TABLE games"}
+                arguments={"sql_query": "DROP TABLE games"},
             )
 
             assert valid is False
@@ -603,7 +594,7 @@ class TestSecurityManager:
             valid, message = await manager.validate_request(
                 client_id="client1",
                 tool_name="read_file",
-                arguments={"file_path": "../../../etc/passwd"}
+                arguments={"file_path": "../../../etc/passwd"},
             )
 
             assert valid is False
@@ -614,10 +605,7 @@ class TestSecurityManager:
         """Test security manager enforces rate limits"""
         with tempfile.TemporaryDirectory() as tmpdir:
             config = SecurityConfig(
-                rate_limit=RateLimitConfig(
-                    requests_per_minute=3,
-                    burst_size=3
-                )
+                rate_limit=RateLimitConfig(requests_per_minute=3, burst_size=3)
             )
             manager = SecurityManager(config, tmpdir)
 
@@ -626,7 +614,7 @@ class TestSecurityManager:
                 valid, _ = await manager.validate_request(
                     client_id="client1",
                     tool_name="query_database",
-                    arguments={"sql_query": "SELECT * FROM games"}
+                    arguments={"sql_query": "SELECT * FROM games"},
                 )
                 assert valid is True
 
@@ -634,7 +622,7 @@ class TestSecurityManager:
             valid, message = await manager.validate_request(
                 client_id="client1",
                 tool_name="query_database",
-                arguments={"sql_query": "SELECT * FROM games"}
+                arguments={"sql_query": "SELECT * FROM games"},
             )
             assert valid is False
             assert "Rate limit exceeded" in message
@@ -651,7 +639,7 @@ class TestSecurityManager:
                 await manager.validate_request(
                     client_id="attacker",
                     tool_name="query_database",
-                    arguments={"sql_query": "DROP TABLE games"}
+                    arguments={"sql_query": "DROP TABLE games"},
                 )
 
             # Check failed request tracking
@@ -669,7 +657,7 @@ class TestSecurityManager:
             await manager.validate_request(
                 client_id="client1",
                 tool_name="query_database",
-                arguments={"sql_query": "SELECT * FROM games"}
+                arguments={"sql_query": "SELECT * FROM games"},
             )
 
             stats = manager.get_security_stats()
@@ -688,7 +676,7 @@ class TestSecurityManager:
             valid, message = await manager.validate_request(
                 client_id="client1",
                 tool_name="query_database",
-                arguments={"sql_query": "x" * 10000}
+                arguments={"sql_query": "x" * 10000},
             )
 
             assert valid is False
@@ -698,6 +686,7 @@ class TestSecurityManager:
 # ==============================================================================
 # Configuration Tests
 # ==============================================================================
+
 
 class TestSecurityConfig:
     """Test security configuration"""
@@ -715,20 +704,20 @@ class TestSecurityConfig:
         config = SecurityConfig()
         assert config.max_request_size_bytes == 1_048_576  # 1MB
         assert config.max_sql_query_length == 10_000
-        assert 'DROP' in config.forbidden_sql_keywords
-        assert 'SELECT' in config.allowed_sql_keywords
-        assert '.py' in config.allowed_file_extensions
+        assert "DROP" in config.forbidden_sql_keywords
+        assert "SELECT" in config.allowed_sql_keywords
+        assert ".py" in config.allowed_file_extensions
 
     def test_security_config_custom_values(self):
         """Test security config with custom values"""
         config = SecurityConfig(
             rate_limit=RateLimitConfig(requests_per_minute=100),
             max_request_size_bytes=2_000_000,
-            forbidden_sql_keywords={'DROP', 'DELETE'}
+            forbidden_sql_keywords={"DROP", "DELETE"},
         )
         assert config.rate_limit.requests_per_minute == 100
         assert config.max_request_size_bytes == 2_000_000
-        assert config.forbidden_sql_keywords == {'DROP', 'DELETE'}
+        assert config.forbidden_sql_keywords == {"DROP", "DELETE"}
 
 
 # ==============================================================================

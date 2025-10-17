@@ -20,15 +20,16 @@ from mcp_server.tools import math_helper, stats_helper, nba_metrics_helper
 # ANSI Color Codes for Terminal Output
 # =============================================================================
 
+
 class Colors:
-    GREEN = '\033[92m'
-    RED = '\033[91m'
-    YELLOW = '\033[93m'
-    BLUE = '\033[94m'
-    MAGENTA = '\033[95m'
-    CYAN = '\033[96m'
-    BOLD = '\033[1m'
-    RESET = '\033[0m'
+    GREEN = "\033[92m"
+    RED = "\033[91m"
+    YELLOW = "\033[93m"
+    BLUE = "\033[94m"
+    MAGENTA = "\033[95m"
+    CYAN = "\033[96m"
+    BOLD = "\033[1m"
+    RESET = "\033[0m"
 
 
 def success(msg):
@@ -62,6 +63,7 @@ def subheader(msg):
 # Test Runner
 # =============================================================================
 
+
 class TestRunner:
     def __init__(self):
         self.passed = 0
@@ -84,7 +86,9 @@ class TestRunner:
                     else:
                         error(f"{description}: Expected {expected}, got {result}")
                         self.failed += 1
-                        self.tests.append((description, False, f"Expected {expected}, got {result}"))
+                        self.tests.append(
+                            (description, False, f"Expected {expected}, got {result}")
+                        )
                 elif result == expected:
                     success(f"{description}: {result}")
                     self.passed += 1
@@ -92,7 +96,9 @@ class TestRunner:
                 else:
                     error(f"{description}: Expected {expected}, got {result}")
                     self.failed += 1
-                    self.tests.append((description, False, f"Expected {expected}, got {result}"))
+                    self.tests.append(
+                        (description, False, f"Expected {expected}, got {result}")
+                    )
             else:
                 success(f"{description}: {result}")
                 self.passed += 1
@@ -125,6 +131,7 @@ class TestRunner:
 # Math Tools Tests
 # =============================================================================
 
+
 def test_math_tools(runner):
     """Test all mathematical operations"""
     header("MATH TOOLS TESTS")
@@ -151,10 +158,26 @@ def test_math_tools(runner):
         runner.passed += 1
 
     subheader("Advanced Operations")
-    runner.test("Sum [1, 2, 3, 4, 5]", math_helper.sum_numbers, [1, 2, 3, 4, 5], expected=15)
-    runner.test("Sum [10.5, 20.5, 30]", math_helper.sum_numbers, [10.5, 20.5, 30], expected=61.0)
-    runner.test("Round 3.14159 to 2 decimals", math_helper.round_number, 3.14159, 2, expected=3.14)
-    runner.test("Round 123.456 to 1 decimal", math_helper.round_number, 123.456, 1, expected=123.5)
+    runner.test(
+        "Sum [1, 2, 3, 4, 5]", math_helper.sum_numbers, [1, 2, 3, 4, 5], expected=15
+    )
+    runner.test(
+        "Sum [10.5, 20.5, 30]", math_helper.sum_numbers, [10.5, 20.5, 30], expected=61.0
+    )
+    runner.test(
+        "Round 3.14159 to 2 decimals",
+        math_helper.round_number,
+        3.14159,
+        2,
+        expected=3.14,
+    )
+    runner.test(
+        "Round 123.456 to 1 decimal",
+        math_helper.round_number,
+        123.456,
+        1,
+        expected=123.5,
+    )
     runner.test("Modulo 17 % 5", math_helper.modulo, 17, 5, expected=2)
     runner.test("Modulo 20 % 4", math_helper.modulo, 20, 4, expected=0)
 
@@ -169,6 +192,7 @@ def test_math_tools(runner):
 # Stats Tools Tests
 # =============================================================================
 
+
 def test_stats_tools(runner):
     """Test all statistical operations"""
     header("STATS TOOLS TESTS")
@@ -177,30 +201,72 @@ def test_stats_tools(runner):
     test_data_2 = [1, 2, 2, 3, 4, 4, 4, 5]
 
     subheader("Basic Statistics")
-    runner.test("Mean of [10, 20, 30, 40, 50]",
-                stats_helper.calculate_mean, test_data, expected=30.0)
-    runner.test("Median of [10, 20, 30, 40, 50]",
-                stats_helper.calculate_median, test_data, expected=30)
-    runner.test("Mode of [1, 2, 2, 3, 4, 4, 4, 5]",
-                stats_helper.calculate_mode, test_data_2, expected=4)  # Single value, not list
-    runner.test("Min of [10, 20, 30, 40, 50]",
-                stats_helper.calculate_min, test_data, expected=10)
-    runner.test("Max of [10, 20, 30, 40, 50]",
-                stats_helper.calculate_max, test_data, expected=50)
+    runner.test(
+        "Mean of [10, 20, 30, 40, 50]",
+        stats_helper.calculate_mean,
+        test_data,
+        expected=30.0,
+    )
+    runner.test(
+        "Median of [10, 20, 30, 40, 50]",
+        stats_helper.calculate_median,
+        test_data,
+        expected=30,
+    )
+    runner.test(
+        "Mode of [1, 2, 2, 3, 4, 4, 4, 5]",
+        stats_helper.calculate_mode,
+        test_data_2,
+        expected=4,
+    )  # Single value, not list
+    runner.test(
+        "Min of [10, 20, 30, 40, 50]",
+        stats_helper.calculate_min,
+        test_data,
+        expected=10,
+    )
+    runner.test(
+        "Max of [10, 20, 30, 40, 50]",
+        stats_helper.calculate_max,
+        test_data,
+        expected=50,
+    )
 
     subheader("Advanced Statistics")
-    runner.test("Range of [10, 20, 30, 40, 50]",
-                stats_helper.calculate_range, test_data, expected=40)
-    runner.test("Variance of [10, 20, 30, 40, 50]",
-                stats_helper.calculate_variance, test_data, expected=250.0)  # Sample variance
-    runner.test("Std Dev of [10, 20, 30, 40, 50]",
-                stats_helper.calculate_std_dev, test_data, expected=15.81)  # sqrt(250)
+    runner.test(
+        "Range of [10, 20, 30, 40, 50]",
+        stats_helper.calculate_range,
+        test_data,
+        expected=40,
+    )
+    runner.test(
+        "Variance of [10, 20, 30, 40, 50]",
+        stats_helper.calculate_variance,
+        test_data,
+        expected=250.0,
+    )  # Sample variance
+    runner.test(
+        "Std Dev of [10, 20, 30, 40, 50]",
+        stats_helper.calculate_std_dev,
+        test_data,
+        expected=15.81,
+    )  # sqrt(250)
 
     subheader("Percentiles and Quartiles")
-    runner.test("50th percentile (median) of [10, 20, 30, 40, 50]",
-                stats_helper.calculate_percentile, test_data, 50, expected=30)
-    runner.test("75th percentile of [10, 20, 30, 40, 50]",
-                stats_helper.calculate_percentile, test_data, 75, expected=40)
+    runner.test(
+        "50th percentile (median) of [10, 20, 30, 40, 50]",
+        stats_helper.calculate_percentile,
+        test_data,
+        50,
+        expected=30,
+    )
+    runner.test(
+        "75th percentile of [10, 20, 30, 40, 50]",
+        stats_helper.calculate_percentile,
+        test_data,
+        75,
+        expected=40,
+    )
 
     # Test quartiles
     quartiles = stats_helper.calculate_quartiles(test_data)
@@ -224,6 +290,7 @@ def test_stats_tools(runner):
 # NBA Metrics Tests
 # =============================================================================
 
+
 def test_nba_metrics(runner):
     """Test all NBA-specific metrics"""
     header("NBA METRICS TESTS")
@@ -240,7 +307,7 @@ def test_nba_metrics(runner):
         "ftm": 400,
         "fta": 500,
         "turnovers": 200,
-        "minutes": 2800
+        "minutes": 2800,
     }
 
     subheader("Player Efficiency Metrics")
@@ -252,19 +319,13 @@ def test_nba_metrics(runner):
     runner.test("PER is calculated", lambda: per > 0, expected=True)
 
     # Test True Shooting %
-    ts_pct = nba_metrics_helper.calculate_true_shooting(
-        points=2000,
-        fga=1600,
-        fta=500
-    )
+    ts_pct = nba_metrics_helper.calculate_true_shooting(points=2000, fga=1600, fta=500)
     info(f"True Shooting %: {ts_pct:.1%}")
     runner.test("TS% between 0 and 1", lambda: 0 <= ts_pct <= 1, expected=True)
 
     # Test Effective FG %
     efg_pct = nba_metrics_helper.calculate_effective_fg_pct(
-        fgm=750,
-        fga=1600,
-        three_pm=200
+        fgm=750, fga=1600, three_pm=200
     )
     info(f"Effective Field Goal %: {efg_pct:.1%}")
     runner.test("eFG% between 0 and 1", lambda: 0 <= efg_pct <= 1, expected=True)
@@ -278,64 +339,48 @@ def test_nba_metrics(runner):
         team_minutes=19680,  # 5 players * 48 min * 82 games
         team_fga=7000,
         team_fta=2000,
-        team_turnovers=1200
+        team_turnovers=1200,
     )
     info(f"Usage Rate: {usg_rate}%")
-    runner.test("USG% is reasonable (10-40%)", lambda: 10 <= usg_rate <= 40, expected=True)
+    runner.test(
+        "USG% is reasonable (10-40%)", lambda: 10 <= usg_rate <= 40, expected=True
+    )
 
     subheader("Team Efficiency Metrics")
 
     # Test Offensive Rating
-    ortg = nba_metrics_helper.calculate_offensive_rating(
-        points=9000,
-        possessions=8000
-    )
+    ortg = nba_metrics_helper.calculate_offensive_rating(points=9000, possessions=8000)
     info(f"Offensive Rating: {ortg} (points per 100 possessions)")
     runner.test("ORtg is calculated", lambda: ortg > 0, expected=True)
 
     # Test Defensive Rating
     drtg = nba_metrics_helper.calculate_defensive_rating(
-        points_allowed=8500,
-        possessions=8000
+        points_allowed=8500, possessions=8000
     )
     info(f"Defensive Rating: {drtg} (points allowed per 100 possessions)")
     runner.test("DRtg is calculated", lambda: drtg > 0, expected=True)
 
     # Test Pace
-    pace = nba_metrics_helper.calculate_pace(
-        possessions=8000,
-        minutes=19680
-    )
+    pace = nba_metrics_helper.calculate_pace(possessions=8000, minutes=19680)
     info(f"Pace: {pace} (possessions per 48 minutes)")
     runner.test("Pace is calculated", lambda: pace > 0, expected=True)
 
     subheader("Shooting Metrics")
 
     # Test 3-Point Rate
-    three_par = nba_metrics_helper.calculate_three_point_rate(
-        three_pa=600,
-        fga=1600
-    )
+    three_par = nba_metrics_helper.calculate_three_point_rate(three_pa=600, fga=1600)
     info(f"3-Point Attempt Rate: {three_par:.1%}")
     runner.test("3PAr between 0 and 1", lambda: 0 <= three_par <= 1, expected=True)
 
     # Test Free Throw Rate
-    ftr = nba_metrics_helper.calculate_free_throw_rate(
-        fta=500,
-        fga=1600
-    )
+    ftr = nba_metrics_helper.calculate_free_throw_rate(fta=500, fga=1600)
     info(f"Free Throw Rate: {ftr:.3f}")
     runner.test("FTr between 0 and 1", lambda: 0 <= ftr <= 1, expected=True)
 
     subheader("Utility Functions")
 
     # Test possession estimation
-    poss = nba_metrics_helper.estimate_possessions(
-        fga=1600,
-        fta=500,
-        orb=200,
-        tov=200
-    )
+    poss = nba_metrics_helper.estimate_possessions(fga=1600, fta=500, orb=200, tov=200)
     info(f"Estimated Possessions: {poss}")
     runner.test("Possessions estimated", lambda: poss > 0, expected=True)
 
@@ -343,6 +388,7 @@ def test_nba_metrics(runner):
 # =============================================================================
 # Real-World Examples
 # =============================================================================
+
 
 def test_real_world_examples(runner):
     """Test with real-world basketball scenarios"""
@@ -357,7 +403,9 @@ def test_real_world_examples(runner):
     team_possessions = 8200  # Estimated possessions
 
     ortg = nba_metrics_helper.calculate_offensive_rating(team_points, team_possessions)
-    drtg = nba_metrics_helper.calculate_defensive_rating(team_opp_points, team_possessions)
+    drtg = nba_metrics_helper.calculate_defensive_rating(
+        team_opp_points, team_possessions
+    )
     net_rating = ortg - drtg
 
     info(f"  Offensive Rating: {ortg}")
@@ -389,16 +437,12 @@ def test_real_world_examples(runner):
 
     # Player A: Volume shooter
     ts_pct_a = nba_metrics_helper.calculate_true_shooting(
-        points=2100,
-        fga=1800,
-        fta=400
+        points=2100, fga=1800, fta=400
     )
 
     # Player B: Efficient shooter
     ts_pct_b = nba_metrics_helper.calculate_true_shooting(
-        points=1600,
-        fga=1200,
-        fta=350
+        points=1600, fga=1200, fta=350
     )
 
     info(f"  Player A TS%: {ts_pct_a:.1%}")
@@ -407,14 +451,17 @@ def test_real_world_examples(runner):
     if ts_pct_b > ts_pct_a:
         info(f"  Player B is more efficient (+{(ts_pct_b - ts_pct_a):.1%})")
 
-    runner.test("Both players have valid TS%",
-                lambda: 0 < ts_pct_a < 1 and 0 < ts_pct_b < 1,
-                expected=True)
+    runner.test(
+        "Both players have valid TS%",
+        lambda: 0 < ts_pct_a < 1 and 0 < ts_pct_b < 1,
+        expected=True,
+    )
 
 
 # =============================================================================
 # Interactive Demo Mode
 # =============================================================================
+
 
 def interactive_demo():
     """Interactive demo mode for testing calculations"""
@@ -480,9 +527,17 @@ def interactive_demo():
                 minutes = int(input("Minutes (default 2800): ") or 2800)
 
                 stats = {
-                    "points": points, "rebounds": rebounds, "assists": assists,
-                    "steals": steals, "blocks": blocks, "fgm": fgm, "fga": fga,
-                    "ftm": ftm, "fta": fta, "turnovers": turnovers, "minutes": minutes
+                    "points": points,
+                    "rebounds": rebounds,
+                    "assists": assists,
+                    "steals": steals,
+                    "blocks": blocks,
+                    "fgm": fgm,
+                    "fga": fga,
+                    "ftm": ftm,
+                    "fta": fta,
+                    "turnovers": turnovers,
+                    "minutes": minutes,
                 }
 
                 per = nba_metrics_helper.calculate_per(stats)
@@ -507,7 +562,9 @@ def interactive_demo():
                 points = float(input("Points scored: "))
                 possessions = float(input("Possessions: "))
 
-                ortg = nba_metrics_helper.calculate_offensive_rating(points, possessions)
+                ortg = nba_metrics_helper.calculate_offensive_rating(
+                    points, possessions
+                )
                 success(f"Offensive Rating: {ortg} (points per 100 possessions)")
             except ValueError:
                 error("Invalid input. Please enter numbers.")
@@ -519,6 +576,7 @@ def interactive_demo():
 # =============================================================================
 # Main Test Runner
 # =============================================================================
+
 
 def main():
     """Run all tests or interactive demo"""
@@ -543,7 +601,9 @@ def main():
         # Print summary
         runner.summary()
 
-        info(f"\nTo run interactive demo: {Colors.BOLD}python {sys.argv[0]} --demo{Colors.RESET}")
+        info(
+            f"\nTo run interactive demo: {Colors.BOLD}python {sys.argv[0]} --demo{Colors.RESET}"
+        )
 
         # Return exit code based on test results
         sys.exit(0 if runner.failed == 0 else 1)

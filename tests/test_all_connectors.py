@@ -16,7 +16,10 @@ import json
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from dotenv import load_dotenv
+
 load_dotenv()
+
+from mcp_server.env_helper import get_hierarchical_env
 
 
 class TestSlackIntegration:
@@ -27,6 +30,7 @@ class TestSlackIntegration:
         """Test: Slack notifier module can be imported"""
         try:
             from mcp_server.connectors.slack_notifier import SlackNotifier
+
             assert SlackNotifier is not None
             print("✅ Slack notifier module available")
         except ImportError as e:
@@ -38,7 +42,9 @@ class TestSlackIntegration:
         from mcp_server.connectors.slack_notifier import SlackNotifier
 
         webhook_url = "https://hooks.slack.com/services/TEST/TEST/TEST"
-        notifier = SlackNotifier(webhook_url=webhook_url, channel=os.getenv("SLACK_CHANNEL", "#test"))
+        notifier = SlackNotifier(
+            webhook_url=webhook_url, channel=os.getenv("SLACK_CHANNEL", "#test")
+        )
 
         assert notifier.webhook_url == webhook_url
         assert notifier.channel == "#test"
@@ -53,7 +59,7 @@ class TestSlackIntegration:
         notifier = SlackNotifier(webhook_url=webhook_url)
 
         # Mock the HTTP client
-        with patch('httpx.AsyncClient') as mock_client:
+        with patch("httpx.AsyncClient") as mock_client:
             mock_response = Mock()
             mock_response.status_code = 200
             mock_client.return_value.__aenter__.return_value.post = AsyncMock(
@@ -66,7 +72,7 @@ class TestSlackIntegration:
                 models_used=["deepseek", "claude"],
                 execution_time=5.2,
                 tokens_used=3500,
-                success=True
+                success=True,
             )
 
             # Verify structure would be correct
@@ -79,19 +85,21 @@ class TestSlackIntegration:
         from synthesis import multi_model_synthesis
 
         # Verify the _send_slack_notification function exists
-        assert hasattr(multi_model_synthesis, '_send_slack_notification')
+        assert hasattr(multi_model_synthesis, "_send_slack_notification")
         print("✅ Synthesis workflow has Slack integration")
 
     @pytest.mark.skipif(
-        not os.getenv("SLACK_WEBHOOK_URL"),
-        reason="SLACK_WEBHOOK_URL not configured"
+        not get_hierarchical_env("SLACK_WEBHOOK_URL", "NBA_MCP_SYNTHESIS", "WORKFLOW"),
+        reason="SLACK_WEBHOOK_URL not configured",
     )
     @pytest.mark.asyncio
     async def test_real_slack_notification(self):
         """Test: Send real Slack notification (if webhook configured)"""
         from mcp_server.connectors.slack_notifier import SlackNotifier
 
-        webhook_url = os.getenv("SLACK_WEBHOOK_URL")
+        webhook_url = get_hierarchical_env(
+            "SLACK_WEBHOOK_URL", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+        )
         notifier = SlackNotifier(webhook_url=webhook_url)
 
         result = await notifier.notify_synthesis_complete(
@@ -99,7 +107,7 @@ class TestSlackIntegration:
             models_used=["deepseek", "claude"],
             execution_time=1.5,
             tokens_used=500,
-            success=True
+            success=True,
         )
 
         assert result == True
@@ -114,6 +122,7 @@ class TestDataQualityValidation:
         """Test: Data validator can be imported"""
         try:
             from data_quality.validator import DataValidator
+
             assert DataValidator is not None
             print("✅ Data validator module available")
         except ImportError as e:
@@ -130,9 +139,9 @@ class TestDataQualityValidation:
         print("✅ Data validator initializes correctly")
 
     @pytest.mark.skipif(
-        not os.path.exists("/usr/local/bin/great_expectations") and
-        not __import__('importlib.util').util.find_spec("great_expectations"),
-        reason="Great Expectations not installed (optional dependency)"
+        not os.path.exists("/usr/local/bin/great_expectations")
+        and not __import__("importlib.util").util.find_spec("great_expectations"),
+        reason="Great Expectations not installed (optional dependency)",
     )
     @pytest.mark.asyncio
     async def test_validation_with_mock_data(self):
@@ -144,37 +153,37 @@ class TestDataQualityValidation:
         validator = DataValidator(use_configured_context=False)
 
         # Create mock data
-        mock_data = pd.DataFrame({
-            'game_id': [1, 2, 3, 4, 5],
-            'home_team_score': [105, 98, 112, 95, 103],
-            'away_team_score': [102, 100, 108, 98, 99]
-        })
+        mock_data = pd.DataFrame(
+            {
+                "game_id": [1, 2, 3, 4, 5],
+                "home_team_score": [105, 98, 112, 95, 103],
+                "away_team_score": [102, 100, 108, 98, 99],
+            }
+        )
 
         # Define expectations
         expectations = [
             {
                 "type": "expect_column_values_to_not_be_null",
-                "kwargs": {"column": "game_id"}
+                "kwargs": {"column": "game_id"},
             },
             {
                 "type": "expect_column_values_to_be_unique",
-                "kwargs": {"column": "game_id"}
+                "kwargs": {"column": "game_id"},
             },
             {
                 "type": "expect_column_values_to_be_between",
                 "kwargs": {
                     "column": "home_team_score",
                     "min_value": 0,
-                    "max_value": 200
-                }
-            }
+                    "max_value": 200,
+                },
+            },
         ]
 
         # Run validation
         result = await validator.validate_table(
-            table_name="games_mock",
-            data=mock_data,
-            expectations=expectations
+            table_name="games_mock", data=mock_data, expectations=expectations
         )
 
         assert result.get("success") == True
@@ -185,9 +194,9 @@ class TestDataQualityValidation:
         print(f"   Pass rate: {result.get('summary', {}).get('pass_rate', 0)*100:.1f}%")
 
     @pytest.mark.skipif(
-        not os.path.exists("/usr/local/bin/great_expectations") and
-        not __import__('importlib.util').util.find_spec("great_expectations"),
-        reason="Great Expectations not installed (optional dependency)"
+        not os.path.exists("/usr/local/bin/great_expectations")
+        and not __import__("importlib.util").util.find_spec("great_expectations"),
+        reason="Great Expectations not installed (optional dependency)",
     )
     @pytest.mark.asyncio
     async def test_validation_detects_failures(self):
@@ -199,31 +208,31 @@ class TestDataQualityValidation:
         validator = DataValidator(use_configured_context=False)
 
         # Create data with issues
-        bad_data = pd.DataFrame({
-            'game_id': [1, 2, 2, 4, 5],  # Duplicate ID
-            'home_team_score': [105, 250, 112, 95, -5],  # Out of range values
-            'away_team_score': [102, 100, None, 98, 99]  # Null value
-        })
+        bad_data = pd.DataFrame(
+            {
+                "game_id": [1, 2, 2, 4, 5],  # Duplicate ID
+                "home_team_score": [105, 250, 112, 95, -5],  # Out of range values
+                "away_team_score": [102, 100, None, 98, 99],  # Null value
+            }
+        )
 
         expectations = [
             {
                 "type": "expect_column_values_to_be_unique",
-                "kwargs": {"column": "game_id"}
+                "kwargs": {"column": "game_id"},
             },
             {
                 "type": "expect_column_values_to_be_between",
                 "kwargs": {
                     "column": "home_team_score",
                     "min_value": 0,
-                    "max_value": 200
-                }
-            }
+                    "max_value": 200,
+                },
+            },
         ]
 
         result = await validator.validate_table(
-            table_name="games_bad",
-            data=bad_data,
-            expectations=expectations
+            table_name="games_bad", data=bad_data, expectations=expectations
         )
 
         assert result.get("success") == True  # Validation ran
@@ -249,7 +258,7 @@ class TestJupyterNotebooks:
         expected_notebooks = [
             "01_data_exploration.ipynb",
             "02_synthesis_workflow.ipynb",
-            "README.md"
+            "README.md",
         ]
 
         for notebook in expected_notebooks:
@@ -262,7 +271,7 @@ class TestJupyterNotebooks:
         notebooks_dir = Path(__file__).parent.parent / "notebooks"
 
         for notebook_file in notebooks_dir.glob("*.ipynb"):
-            with open(notebook_file, 'r') as f:
+            with open(notebook_file, "r") as f:
                 try:
                     notebook_data = json.load(f)
                     assert "cells" in notebook_data
@@ -276,13 +285,10 @@ class TestJupyterNotebooks:
         """Test: Notebooks contain valid import statements"""
         notebooks_dir = Path(__file__).parent.parent / "notebooks"
 
-        required_imports = [
-            "synthesis.mcp_client",
-            "synthesis.multi_model_synthesis"
-        ]
+        required_imports = ["synthesis.mcp_client", "synthesis.multi_model_synthesis"]
 
         for notebook_file in notebooks_dir.glob("*.ipynb"):
-            with open(notebook_file, 'r') as f:
+            with open(notebook_file, "r") as f:
                 content = f.read()
 
                 # Check for key imports
@@ -295,10 +301,12 @@ class TestDocumentedConnectors:
 
     def test_streamlit_implementation_documented(self):
         """Test: Streamlit implementation is documented"""
-        doc_file = Path(__file__).parent.parent / "CONNECTORS_IMPLEMENTATION_COMPLETE.md"
+        doc_file = (
+            Path(__file__).parent.parent / "CONNECTORS_IMPLEMENTATION_COMPLETE.md"
+        )
         assert doc_file.exists()
 
-        with open(doc_file, 'r') as f:
+        with open(doc_file, "r") as f:
             content = f.read()
             assert "Streamlit Interactive Dashboard" in content
             assert "streamlit run" in content
@@ -307,9 +315,11 @@ class TestDocumentedConnectors:
 
     def test_basketball_reference_implementation_documented(self):
         """Test: Basketball-Reference scraper is documented"""
-        doc_file = Path(__file__).parent.parent / "CONNECTORS_IMPLEMENTATION_COMPLETE.md"
+        doc_file = (
+            Path(__file__).parent.parent / "CONNECTORS_IMPLEMENTATION_COMPLETE.md"
+        )
 
-        with open(doc_file, 'r') as f:
+        with open(doc_file, "r") as f:
             content = f.read()
             assert "Basketball-Reference" in content
             assert "BasketballReferenceConnector" in content
@@ -318,9 +328,11 @@ class TestDocumentedConnectors:
 
     def test_notion_implementation_documented(self):
         """Test: Notion API implementation is documented"""
-        doc_file = Path(__file__).parent.parent / "CONNECTORS_IMPLEMENTATION_COMPLETE.md"
+        doc_file = (
+            Path(__file__).parent.parent / "CONNECTORS_IMPLEMENTATION_COMPLETE.md"
+        )
 
-        with open(doc_file, 'r') as f:
+        with open(doc_file, "r") as f:
             content = f.read()
             assert "Notion API" in content
             assert "NotionClient" in content
@@ -329,9 +341,11 @@ class TestDocumentedConnectors:
 
     def test_google_sheets_implementation_documented(self):
         """Test: Google Sheets implementation is documented"""
-        doc_file = Path(__file__).parent.parent / "CONNECTORS_IMPLEMENTATION_COMPLETE.md"
+        doc_file = (
+            Path(__file__).parent.parent / "CONNECTORS_IMPLEMENTATION_COMPLETE.md"
+        )
 
-        with open(doc_file, 'r') as f:
+        with open(doc_file, "r") as f:
             content = f.read()
             assert "Google Sheets" in content
             assert "GoogleSheetsClient" in content
@@ -340,9 +354,11 @@ class TestDocumentedConnectors:
 
     def test_airflow_implementation_documented(self):
         """Test: Airflow setup is documented"""
-        doc_file = Path(__file__).parent.parent / "CONNECTORS_IMPLEMENTATION_COMPLETE.md"
+        doc_file = (
+            Path(__file__).parent.parent / "CONNECTORS_IMPLEMENTATION_COMPLETE.md"
+        )
 
-        with open(doc_file, 'r') as f:
+        with open(doc_file, "r") as f:
             content = f.read()
             assert "Apache Airflow" in content
             assert "DAG" in content
@@ -363,19 +379,19 @@ class TestRequirementsDependencies:
         """Test: All connector dependencies are in requirements.txt"""
         req_file = Path(__file__).parent.parent / "requirements.txt"
 
-        with open(req_file, 'r') as f:
+        with open(req_file, "r") as f:
             content = f.read()
 
             # Check for all connector dependencies
             required_packages = [
                 "great-expectations",  # Data quality
-                "streamlit",           # Dashboard
-                "beautifulsoup4",      # Web scraping
-                "jupyter",             # Notebooks
-                "notion-client",       # Notion
-                "gspread",            # Google Sheets
-                "slack-sdk",          # Slack
-                "httpx",              # HTTP client
+                "streamlit",  # Dashboard
+                "beautifulsoup4",  # Web scraping
+                "jupyter",  # Notebooks
+                "notion-client",  # Notion
+                "gspread",  # Google Sheets
+                "slack-sdk",  # Slack
+                "httpx",  # HTTP client
             ]
 
             for package in required_packages:
@@ -393,7 +409,7 @@ class TestSystemIntegration:
         required_docs = [
             "CONNECTORS_IMPLEMENTATION_COMPLETE.md",
             "ALL_CONNECTORS_DEPLOYMENT_SUMMARY.md",
-            "notebooks/README.md"
+            "notebooks/README.md",
         ]
 
         for doc in required_docs:
@@ -405,7 +421,7 @@ class TestSystemIntegration:
         """Test: .env.example has all connector variables"""
         env_file = Path(__file__).parent.parent / ".env.example"
 
-        with open(env_file, 'r') as f:
+        with open(env_file, "r") as f:
             content = f.read()
 
             required_vars = [

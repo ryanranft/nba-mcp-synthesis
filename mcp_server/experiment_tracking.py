@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class Experiment:
     """ML experiment"""
+
     experiment_id: str
     name: str
     description: Optional[str] = None
@@ -30,6 +31,7 @@ class Experiment:
 @dataclass
 class ExperimentRun:
     """Single experiment run"""
+
     run_id: str
     experiment_id: str
     params: Dict[str, Any]
@@ -63,7 +65,7 @@ class ExperimentTracker:
         """Load experiments from disk"""
         exp_file = self.tracking_dir / "experiments.json"
         if exp_file.exists():
-            with open(exp_file, 'r') as f:
+            with open(exp_file, "r") as f:
                 data = json.load(f)
                 for exp_id, exp_data in data["experiments"].items():
                     self.experiments[exp_id] = Experiment(
@@ -73,7 +75,7 @@ class ExperimentTracker:
                         created_at=datetime.fromisoformat(exp_data["created_at"]),
                         created_by=exp_data["created_by"],
                         tags=exp_data.get("tags", {}),
-                        runs=exp_data.get("runs", [])
+                        runs=exp_data.get("runs", []),
                     )
 
                 for run_id, run_data in data["runs"].items():
@@ -84,20 +86,23 @@ class ExperimentTracker:
                         metrics=run_data["metrics"],
                         artifacts=run_data.get("artifacts", {}),
                         start_time=datetime.fromisoformat(run_data["start_time"]),
-                        end_time=datetime.fromisoformat(run_data["end_time"]) if run_data.get("end_time") else None,
+                        end_time=(
+                            datetime.fromisoformat(run_data["end_time"])
+                            if run_data.get("end_time")
+                            else None
+                        ),
                         status=run_data["status"],
-                        notes=run_data.get("notes")
+                        notes=run_data.get("notes"),
                     )
 
-            logger.info(f"Loaded {len(self.experiments)} experiments, {len(self.runs)} runs")
+            logger.info(
+                f"Loaded {len(self.experiments)} experiments, {len(self.runs)} runs"
+            )
 
     def _save_experiments(self):
         """Save experiments to disk"""
         exp_file = self.tracking_dir / "experiments.json"
-        data = {
-            "experiments": {},
-            "runs": {}
-        }
+        data = {"experiments": {}, "runs": {}}
 
         for exp_id, exp in self.experiments.items():
             data["experiments"][exp_id] = {
@@ -107,7 +112,7 @@ class ExperimentTracker:
                 "created_at": exp.created_at.isoformat(),
                 "created_by": exp.created_by,
                 "tags": exp.tags,
-                "runs": exp.runs
+                "runs": exp.runs,
             }
 
         for run_id, run in self.runs.items():
@@ -120,26 +125,23 @@ class ExperimentTracker:
                 "start_time": run.start_time.isoformat(),
                 "end_time": run.end_time.isoformat() if run.end_time else None,
                 "status": run.status,
-                "notes": run.notes
+                "notes": run.notes,
             }
 
-        with open(exp_file, 'w') as f:
+        with open(exp_file, "w") as f:
             json.dump(data, f, indent=2)
 
     def create_experiment(
         self,
         name: str,
         description: Optional[str] = None,
-        tags: Optional[Dict[str, str]] = None
+        tags: Optional[Dict[str, str]] = None,
     ) -> Experiment:
         """Create new experiment"""
         exp_id = hashlib.md5(f"{name}{datetime.utcnow()}".encode()).hexdigest()[:12]
 
         experiment = Experiment(
-            experiment_id=exp_id,
-            name=name,
-            description=description,
-            tags=tags or {}
+            experiment_id=exp_id, name=name, description=description, tags=tags or {}
         )
 
         self.experiments[exp_id] = experiment
@@ -150,16 +152,15 @@ class ExperimentTracker:
         return experiment
 
     def start_run(
-        self,
-        experiment_id: str,
-        params: Dict[str, Any],
-        notes: Optional[str] = None
+        self, experiment_id: str, params: Dict[str, Any], notes: Optional[str] = None
     ) -> ExperimentRun:
         """Start new experiment run"""
         if experiment_id not in self.experiments:
             raise ValueError(f"Experiment {experiment_id} not found")
 
-        run_id = hashlib.md5(f"{experiment_id}{datetime.utcnow()}".encode()).hexdigest()[:12]
+        run_id = hashlib.md5(
+            f"{experiment_id}{datetime.utcnow()}".encode()
+        ).hexdigest()[:12]
 
         run = ExperimentRun(
             run_id=run_id,
@@ -167,7 +168,7 @@ class ExperimentTracker:
             params=params.copy(),
             metrics={},
             status="running",
-            notes=notes
+            notes=notes,
         )
 
         self.runs[run_id] = run
@@ -178,11 +179,7 @@ class ExperimentTracker:
 
         return run
 
-    def log_metrics(
-        self,
-        run_id: str,
-        metrics: Dict[str, float]
-    ):
+    def log_metrics(self, run_id: str, metrics: Dict[str, float]):
         """Log metrics for a run"""
         if run_id not in self.runs:
             raise ValueError(f"Run {run_id} not found")
@@ -192,11 +189,7 @@ class ExperimentTracker:
 
         logger.debug(f"Logged {len(metrics)} metrics for run {run_id}")
 
-    def end_run(
-        self,
-        run_id: str,
-        status: str = "completed"
-    ):
+    def end_run(self, run_id: str, status: str = "completed"):
         """End an experiment run"""
         if run_id not in self.runs:
             raise ValueError(f"Run {run_id} not found")
@@ -207,10 +200,7 @@ class ExperimentTracker:
 
         logger.info(f"Ended run: {run_id} with status {status}")
 
-    def compare_runs(
-        self,
-        run_ids: List[str]
-    ) -> Dict[str, Any]:
+    def compare_runs(self, run_ids: List[str]) -> Dict[str, Any]:
         """Compare multiple runs"""
         if not all(rid in self.runs for rid in run_ids):
             raise ValueError("One or more runs not found")
@@ -222,27 +212,32 @@ class ExperimentTracker:
         for run in runs:
             all_metrics.update(run.metrics.keys())
 
-        comparison = {
-            "runs": [],
-            "best_by_metric": {}
-        }
+        comparison = {"runs": [], "best_by_metric": {}}
 
         for run in runs:
-            comparison["runs"].append({
-                "run_id": run.run_id,
-                "params": run.params,
-                "metrics": run.metrics,
-                "status": run.status
-            })
+            comparison["runs"].append(
+                {
+                    "run_id": run.run_id,
+                    "params": run.params,
+                    "metrics": run.metrics,
+                    "status": run.status,
+                }
+            )
 
         # Find best for each metric
         for metric in all_metrics:
-            values = [(run.run_id, run.metrics.get(metric)) for run in runs if metric in run.metrics]
+            values = [
+                (run.run_id, run.metrics.get(metric))
+                for run in runs
+                if metric in run.metrics
+            ]
             if values:
-                best_run_id, best_value = max(values, key=lambda x: x[1] if x[1] is not None else float('-inf'))
+                best_run_id, best_value = max(
+                    values, key=lambda x: x[1] if x[1] is not None else float("-inf")
+                )
                 comparison["best_by_metric"][metric] = {
                     "run_id": best_run_id,
-                    "value": best_value
+                    "value": best_value,
                 }
 
         return comparison
@@ -261,7 +256,11 @@ class ExperimentTracker:
             "total_runs": len(runs),
             "completed_runs": len([r for r in runs if r.status == "completed"]),
             "failed_runs": len([r for r in runs if r.status == "failed"]),
-            "best_run": max(runs, key=lambda r: r.metrics.get("accuracy", 0)).run_id if runs else None
+            "best_run": (
+                max(runs, key=lambda r: r.metrics.get("accuracy", 0)).run_id
+                if runs
+                else None
+            ),
         }
 
 
@@ -281,7 +280,7 @@ if __name__ == "__main__":
     exp = tracker.create_experiment(
         name="NBA Win Prediction",
         description="Predict team win probability",
-        tags={"sport": "basketball", "task": "classification"}
+        tags={"sport": "basketball", "task": "classification"},
     )
 
     print(f"✅ Created experiment: {exp.name} ({exp.experiment_id})")
@@ -297,7 +296,7 @@ if __name__ == "__main__":
         params = {
             "n_estimators": random.choice([50, 100, 200]),
             "max_depth": random.choice([5, 10, 15]),
-            "learning_rate": random.choice([0.01, 0.1, 0.3])
+            "learning_rate": random.choice([0.01, 0.1, 0.3]),
         }
 
         run = tracker.start_run(exp.experiment_id, params, notes=f"Run {i+1}")
@@ -306,7 +305,7 @@ if __name__ == "__main__":
         metrics = {
             "accuracy": random.uniform(0.75, 0.95),
             "precision": random.uniform(0.7, 0.9),
-            "recall": random.uniform(0.7, 0.9)
+            "recall": random.uniform(0.7, 0.9),
         }
 
         tracker.log_metrics(run.run_id, metrics)
@@ -340,4 +339,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("Experiment Tracking Demo Complete!")
     print("=" * 80)
-

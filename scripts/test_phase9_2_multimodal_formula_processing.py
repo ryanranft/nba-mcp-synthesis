@@ -24,7 +24,7 @@ import numpy as np
 import pandas as pd
 
 # Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from mcp_server.tools.multimodal_formula_processing import (
     MultiModalFormulaProcessor,
@@ -39,7 +39,7 @@ from mcp_server.tools.multimodal_formula_processing import (
     CrossModalValidationResult,
     ProcessingMode,
     FormulaSource,
-    ValidationStatus
+    ValidationStatus,
 )
 
 
@@ -56,14 +56,14 @@ class Phase92TestSuite(unittest.TestCase):
             "True Shooting Percentage is calculated as PTS / (2 * (FGA + 0.44 * FTA))",
             "Usage Rate equals (FGA + 0.44 * FTA + TOV) * (Team Minutes / 5) / (Player Minutes * (Team FGA + 0.44 * Team FTA + Team TOV)) * 100",
             "The effective field goal percentage formula is: eFG% = (FGM + 0.5 * 3PM) / FGA",
-            "Player Efficiency Rating = (Points + Rebounds + Assists + Steals + Blocks - Missed Shots - Turnovers) / Minutes"
+            "Player Efficiency Rating = (Points + Rebounds + Assists + Steals + Blocks - Missed Shots - Turnovers) / Minutes",
         ]
 
         self.test_data = {
             "points": [25.0, 30.0, 20.0, 35.0, 28.0, 22.0, 40.0, 18.0, 32.0, 26.0],
             "rebounds": [8.0, 10.0, 6.0, 12.0, 9.0, 7.0, 15.0, 5.0, 11.0, 8.0],
             "assists": [5.0, 7.0, 4.0, 8.0, 6.0, 3.0, 10.0, 2.0, 9.0, 5.0],
-            "minutes": [35.0, 38.0, 30.0, 42.0, 36.0, 28.0, 45.0, 25.0, 40.0, 33.0]
+            "minutes": [35.0, 38.0, 30.0, 42.0, 36.0, 28.0, 45.0, 25.0, 40.0, 33.0],
         }
 
         # Create a simple test image (1x1 pixel PNG)
@@ -76,14 +76,14 @@ class Phase92TestSuite(unittest.TestCase):
             import base64
 
             # Create a simple 1x1 pixel image
-            img = Image.new('RGB', (1, 1), color='white')
+            img = Image.new("RGB", (1, 1), color="white")
 
             # Convert to base64
             buffer = io.BytesIO()
-            img.save(buffer, format='PNG')
+            img.save(buffer, format="PNG")
             img_bytes = buffer.getvalue()
 
-            return base64.b64encode(img_bytes).decode('utf-8')
+            return base64.b64encode(img_bytes).decode("utf-8")
         except ImportError:
             # Return a minimal base64 string if PIL is not available
             return "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
@@ -97,10 +97,10 @@ class Phase92TestSuite(unittest.TestCase):
         # Test capabilities
         capabilities = self.processor.get_processing_capabilities()
         self.assertIsInstance(capabilities, dict)
-        self.assertIn('text_processing', capabilities)
-        self.assertIn('image_processing', capabilities)
-        self.assertIn('data_processing', capabilities)
-        self.assertIn('cross_modal_validation', capabilities)
+        self.assertIn("text_processing", capabilities)
+        self.assertIn("image_processing", capabilities)
+        self.assertIn("data_processing", capabilities)
+        self.assertIn("cross_modal_validation", capabilities)
 
     def test_text_formula_processing(self):
         """Test text-based formula processing"""
@@ -109,9 +109,7 @@ class Phase92TestSuite(unittest.TestCase):
         for i, text in enumerate(self.test_texts):
             with self.subTest(text=text[:50] + "..."):
                 result = self.processor.process_text_formula(
-                    text=text,
-                    context="basketball",
-                    confidence_threshold=0.5
+                    text=text, context="basketball", confidence_threshold=0.5
                 )
 
                 self.assertIsInstance(result, TextProcessingResult)
@@ -124,7 +122,9 @@ class Phase92TestSuite(unittest.TestCase):
                 self.assertIsInstance(result.validation_status, ValidationStatus)
                 self.assertIsInstance(result.metadata, dict)
 
-                print(f"✓ Text {i+1}: {result.processing_method} - Confidence: {result.confidence:.2f}")
+                print(
+                    f"✓ Text {i+1}: {result.processing_method} - Confidence: {result.confidence:.2f}"
+                )
                 if result.extracted_formula:
                     print(f"  Formula: {result.extracted_formula}")
                     print(f"  Variables: {result.variables}")
@@ -136,7 +136,7 @@ class Phase92TestSuite(unittest.TestCase):
         result = self.processor.process_image_formula(
             image_data=self.test_image_data,
             image_format="base64",
-            confidence_threshold=0.5
+            confidence_threshold=0.5,
         )
 
         self.assertIsInstance(result, ImageProcessingResult)
@@ -150,7 +150,9 @@ class Phase92TestSuite(unittest.TestCase):
         self.assertIsInstance(result.validation_status, ValidationStatus)
         self.assertIsInstance(result.metadata, dict)
 
-        print(f"✓ Image Processing: {result.processing_method} - Confidence: {result.confidence:.2f}")
+        print(
+            f"✓ Image Processing: {result.processing_method} - Confidence: {result.confidence:.2f}"
+        )
         print(f"  Extracted Text: {result.extracted_text}")
         print(f"  Formula: {result.extracted_formula}")
 
@@ -166,7 +168,7 @@ class Phase92TestSuite(unittest.TestCase):
                     data=self.test_data,
                     target_variable="points",
                     method=method,
-                    confidence_threshold=0.5
+                    confidence_threshold=0.5,
                 )
 
                 self.assertIsInstance(result, DataProcessingResult)
@@ -189,8 +191,7 @@ class Phase92TestSuite(unittest.TestCase):
 
         # First process a text formula to get a formula ID
         text_result = self.processor.process_text_formula(
-            text=self.test_texts[0],
-            context="basketball"
+            text=self.test_texts[0], context="basketball"
         )
 
         validation_methods = ["syntax", "semantics", "mathematical", "domain"]
@@ -198,7 +199,7 @@ class Phase92TestSuite(unittest.TestCase):
         result = self.processor.validate_cross_modal(
             formula_id=text_result.formula_id,
             validation_methods=validation_methods,
-            confidence_threshold=0.5
+            confidence_threshold=0.5,
         )
 
         self.assertIsInstance(result, CrossModalValidationResult)
@@ -222,41 +223,37 @@ class Phase92TestSuite(unittest.TestCase):
 
         # Test text processing
         text_result = process_text_formula(
-            text=self.test_texts[0],
-            context="basketball"
+            text=self.test_texts[0], context="basketball"
         )
         self.assertIsInstance(text_result, dict)
-        self.assertIn('formula_id', text_result)
+        self.assertIn("formula_id", text_result)
 
         # Test image processing
         image_result = process_image_formula(
-            image_data=self.test_image_data,
-            image_format="base64"
+            image_data=self.test_image_data, image_format="base64"
         )
         self.assertIsInstance(image_result, dict)
-        self.assertIn('formula_id', image_result)
+        self.assertIn("formula_id", image_result)
 
         # Test data processing
         data_result = process_data_formula(
-            data=self.test_data,
-            target_variable="points",
-            method="regression"
+            data=self.test_data, target_variable="points", method="regression"
         )
         self.assertIsInstance(data_result, dict)
-        self.assertIn('formula_id', data_result)
+        self.assertIn("formula_id", data_result)
 
         # Test cross-modal validation
         validation_result = validate_cross_modal_formula(
-            formula_id=text_result['formula_id'],
-            validation_methods=["syntax", "semantics"]
+            formula_id=text_result["formula_id"],
+            validation_methods=["syntax", "semantics"],
         )
         self.assertIsInstance(validation_result, dict)
-        self.assertIn('formula_id', validation_result)
+        self.assertIn("formula_id", validation_result)
 
         # Test capabilities
         capabilities = get_multimodal_capabilities()
         self.assertIsInstance(capabilities, dict)
-        self.assertIn('text_processing', capabilities)
+        self.assertIn("text_processing", capabilities)
 
         print("✓ All standalone functions working correctly")
 
@@ -265,26 +262,20 @@ class Phase92TestSuite(unittest.TestCase):
         print("\n=== Testing Error Handling ===")
 
         # Test with invalid text
-        result = self.processor.process_text_formula(
-            text="",
-            context="basketball"
-        )
+        result = self.processor.process_text_formula(text="", context="basketball")
         self.assertIsInstance(result, TextProcessingResult)
         self.assertEqual(result.validation_status, ValidationStatus.INVALID)
 
         # Test with invalid data
         result = self.processor.process_data_formula(
-            data={},
-            target_variable="nonexistent",
-            method="regression"
+            data={}, target_variable="nonexistent", method="regression"
         )
         self.assertIsInstance(result, DataProcessingResult)
         self.assertEqual(result.validation_status, ValidationStatus.INVALID)
 
         # Test with invalid image data
         result = self.processor.process_image_formula(
-            image_data="invalid_base64",
-            image_format="base64"
+            image_data="invalid_base64", image_format="base64"
         )
         self.assertIsInstance(result, ImageProcessingResult)
         self.assertEqual(result.validation_status, ValidationStatus.INVALID)
@@ -299,19 +290,20 @@ class Phase92TestSuite(unittest.TestCase):
         basketball_texts = [
             "PER = (FGM * 2 + 3PM * 3 + FTM) / MP * 100",
             "True Shooting Percentage = PTS / (2 * (FGA + 0.44 * FTA))",
-            "Usage Rate = (FGA + 0.44 * FTA + TOV) * (Team Minutes / 5) / (Player Minutes * (Team FGA + 0.44 * Team FTA + Team TOV)) * 100"
+            "Usage Rate = (FGA + 0.44 * FTA + TOV) * (Team Minutes / 5) / (Player Minutes * (Team FGA + 0.44 * Team FTA + Team TOV)) * 100",
         ]
 
         for text in basketball_texts:
             result = self.processor.process_text_formula(
-                text=text,
-                context="basketball"
+                text=text, context="basketball"
             )
 
             self.assertIsInstance(result, TextProcessingResult)
             self.assertGreater(result.confidence, 0.0)
 
-            print(f"✓ Basketball Formula: {result.processing_method} - Confidence: {result.confidence:.2f}")
+            print(
+                f"✓ Basketball Formula: {result.processing_method} - Confidence: {result.confidence:.2f}"
+            )
 
     def test_performance_benchmarks(self):
         """Test performance benchmarks"""
@@ -329,17 +321,14 @@ class Phase92TestSuite(unittest.TestCase):
         start_time = time.time()
         for method in ["regression", "correlation", "pattern"]:
             self.processor.process_data_formula(
-                data=self.test_data,
-                target_variable="points",
-                method=method
+                data=self.test_data, target_variable="points", method=method
             )
         data_time = time.time() - start_time
 
         # Image processing benchmark
         start_time = time.time()
         self.processor.process_image_formula(
-            image_data=self.test_image_data,
-            image_format="base64"
+            image_data=self.test_image_data, image_format="base64"
         )
         image_time = time.time() - start_time
 
@@ -361,9 +350,9 @@ class Phase92TestSuite(unittest.TestCase):
         validation_result = self.processor._validate_formula(valid_formula)
 
         self.assertIsInstance(validation_result, dict)
-        self.assertIn('status', validation_result)
-        self.assertIn('parsed', validation_result)
-        self.assertIn('variables', validation_result)
+        self.assertIn("status", validation_result)
+        self.assertIn("parsed", validation_result)
+        self.assertIn("variables", validation_result)
 
         print(f"✓ Formula Validation: {validation_result['status'].value}")
         print(f"  Variables: {validation_result['variables']}")
@@ -373,30 +362,36 @@ class Phase92TestSuite(unittest.TestCase):
         print("\n=== Testing Pattern Extraction ===")
 
         # Test direct extraction
-        direct_result = self.processor._extract_direct_formula("PER = (FGM * 2 + 3PM * 3 + FTM) / MP * 100")
+        direct_result = self.processor._extract_direct_formula(
+            "PER = (FGM * 2 + 3PM * 3 + FTM) / MP * 100"
+        )
         if direct_result:
             self.assertIsInstance(direct_result, dict)
-            self.assertIn('formula', direct_result)
-            self.assertIn('variables', direct_result)
-            self.assertIn('confidence', direct_result)
+            self.assertIn("formula", direct_result)
+            self.assertIn("variables", direct_result)
+            self.assertIn("confidence", direct_result)
             print(f"✓ Direct Extraction: {direct_result['confidence']:.2f}")
 
         # Test pattern-based extraction
-        pattern_result = self.processor._extract_pattern_based_formula("Player Efficiency Rating is calculated as...")
+        pattern_result = self.processor._extract_pattern_based_formula(
+            "Player Efficiency Rating is calculated as..."
+        )
         if pattern_result:
             self.assertIsInstance(pattern_result, dict)
-            self.assertIn('formula', pattern_result)
-            self.assertIn('variables', pattern_result)
-            self.assertIn('confidence', pattern_result)
+            self.assertIn("formula", pattern_result)
+            self.assertIn("variables", pattern_result)
+            self.assertIn("confidence", pattern_result)
             print(f"✓ Pattern Extraction: {pattern_result['confidence']:.2f}")
 
         # Test context-aware extraction
-        context_result = self.processor._extract_context_aware_formula("PER calculation", "basketball")
+        context_result = self.processor._extract_context_aware_formula(
+            "PER calculation", "basketball"
+        )
         if context_result:
             self.assertIsInstance(context_result, dict)
-            self.assertIn('formula', context_result)
-            self.assertIn('variables', context_result)
-            self.assertIn('confidence', context_result)
+            self.assertIn("formula", context_result)
+            self.assertIn("variables", context_result)
+            self.assertIn("confidence", context_result)
             print(f"✓ Context Extraction: {context_result['confidence']:.2f}")
 
 
@@ -420,7 +415,9 @@ def run_tests():
     print(f"Tests run: {result.testsRun}")
     print(f"Failures: {len(result.failures)}")
     print(f"Errors: {len(result.errors)}")
-    print(f"Success rate: {((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100):.1f}%")
+    print(
+        f"Success rate: {((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100):.1f}%"
+    )
 
     if result.failures:
         print("\nFAILURES:")
@@ -438,6 +435,3 @@ def run_tests():
 if __name__ == "__main__":
     success = run_tests()
     sys.exit(0 if success else 1)
-
-
-

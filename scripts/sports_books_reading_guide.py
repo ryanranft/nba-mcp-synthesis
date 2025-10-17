@@ -17,8 +17,7 @@ from pathlib import Path
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -32,29 +31,30 @@ SPORTS_BOOKS = [
         "title": "Sports Analytics",
         "s3_path": "books/Sports_Analytics.pdf",
         "size": "22.2 MB",
-        "description": "Comprehensive guide to sports analytics methodologies"
+        "description": "Comprehensive guide to sports analytics methodologies",
     },
     {
         "id": "basketball_beyond_paper",
         "title": "Basketball Beyond Paper",
         "s3_path": "books/Basketball_Beyond_Paper.pdf",
         "size": "4.7 MB",
-        "description": "Advanced basketball analytics beyond traditional metrics"
+        "description": "Advanced basketball analytics beyond traditional metrics",
     },
     {
         "id": "midrange_theory",
         "title": "The Midrange Theory",
         "s3_path": "books/The_Midrange_Theory.pdf",
         "size": "2.4 MB",
-        "description": "Theoretical framework for midrange shot analysis"
-    }
+        "description": "Theoretical framework for midrange shot analysis",
+    },
 ]
 
 
 def print_reading_guide():
     """Print a comprehensive guide on how to read the sports analytics books."""
 
-    print("""
+    print(
+        """
 ╔══════════════════════════════════════════════════════════════════╗
 ║              📚 SPORTS ANALYTICS BOOKS - READING GUIDE          ║
 ╚══════════════════════════════════════════════════════════════════╝
@@ -69,17 +69,21 @@ def print_reading_guide():
 ═══════════════════════════════════════════════════════════════════
 
 🏀 AVAILABLE SPORTS ANALYTICS BOOKS:
-""")
+"""
+    )
 
     for i, book in enumerate(SPORTS_BOOKS, 1):
-        print(f"""
+        print(
+            f"""
 {i}. 📊 {book['title']}
    📁 S3 Path: {book['s3_path']}
    📏 Size: {book['size']}
    📝 Description: {book['description']}
-""")
+"""
+        )
 
-    print("""
+    print(
+        """
 ═══════════════════════════════════════════════════════════════════
 
 🚀 HOW TO READ USING MCP SERVER:
@@ -244,7 +248,8 @@ The MCP server's PDF capabilities are actually BETTER than plain text
 for mathematical notation because they preserve formatting and context!
 
 ═══════════════════════════════════════════════════════════════════
-""")
+"""
+    )
 
 
 def main():
@@ -254,7 +259,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-

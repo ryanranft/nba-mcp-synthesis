@@ -31,11 +31,7 @@ class PredictionCache:
         self.lock = threading.Lock()
 
         # Statistics
-        self.stats = {
-            "hits": 0,
-            "misses": 0,
-            "evictions": 0
-        }
+        self.stats = {"hits": 0, "misses": 0, "evictions": 0}
 
     def _generate_cache_key(self, model_id: str, inputs: Any) -> str:
         """Generate cache key from model_id and inputs"""
@@ -85,7 +81,13 @@ class PredictionCache:
             logger.debug(f"Cache MISS for model {model_id}")
             return None
 
-    def set(self, model_id: str, inputs: Any, prediction: Any, metadata: Optional[Dict] = None):
+    def set(
+        self,
+        model_id: str,
+        inputs: Any,
+        prediction: Any,
+        metadata: Optional[Dict] = None,
+    ):
         """
         Cache a prediction.
 
@@ -110,7 +112,7 @@ class PredictionCache:
             self.cache[cache_key] = {
                 "prediction": prediction,
                 "created_at": datetime.utcnow().isoformat(),
-                "metadata": metadata or {}
+                "metadata": metadata or {},
             }
 
             logger.debug(f"Cached prediction for model {model_id}")
@@ -141,7 +143,9 @@ class PredictionCache:
         """Get cache statistics"""
         with self.lock:
             total_requests = self.stats["hits"] + self.stats["misses"]
-            hit_rate = (self.stats["hits"] / total_requests * 100) if total_requests > 0 else 0
+            hit_rate = (
+                (self.stats["hits"] / total_requests * 100) if total_requests > 0 else 0
+            )
 
             return {
                 "cache_size": len(self.cache),
@@ -150,7 +154,7 @@ class PredictionCache:
                 "hits": self.stats["hits"],
                 "misses": self.stats["misses"],
                 "evictions": self.stats["evictions"],
-                "hit_rate": hit_rate
+                "hit_rate": hit_rate,
             }
 
 
@@ -209,11 +213,12 @@ class CachedModelPredictor:
             return {
                 "prediction": cached_prediction,
                 "cached": True,
-                "model_id": self.model_id
+                "model_id": self.model_id,
             }
 
         # Cache miss - compute prediction
         import time
+
         start_time = time.time()
         prediction = self.model.predict(inputs)
         latency_ms = (time.time() - start_time) * 1000
@@ -225,7 +230,7 @@ class CachedModelPredictor:
             "prediction": prediction,
             "cached": False,
             "model_id": self.model_id,
-            "latency_ms": latency_ms
+            "latency_ms": latency_ms,
         }
 
 
@@ -239,6 +244,7 @@ if __name__ == "__main__":
     class MockModel:
         def predict(self, inputs):
             import time
+
             time.sleep(0.1)  # Simulate model inference
             return sum(inputs) > 50  # Simple prediction
 
@@ -252,7 +258,7 @@ if __name__ == "__main__":
         [40, 50, 60],
         [10, 20, 30],  # Duplicate - should hit cache
         [40, 50, 60],  # Duplicate - should hit cache
-        [70, 80, 90]
+        [70, 80, 90],
     ]
 
     print("\n" + "=" * 80)
@@ -261,6 +267,7 @@ if __name__ == "__main__":
 
     for i, inputs in enumerate(test_inputs, 1):
         import time
+
         start = time.time()
         result = cached_predictor.predict_with_metadata(inputs)
         latency = (time.time() - start) * 1000
@@ -296,4 +303,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("Prediction Caching Demo Complete!")
     print("=" * 80)
-

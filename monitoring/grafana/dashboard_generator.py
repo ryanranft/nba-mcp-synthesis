@@ -21,16 +21,13 @@ class GrafanaDashboardGenerator:
         grafana_url: str = "http://localhost:3000",
         api_key: Optional[str] = None,
         username: str = "admin",
-        password: str = "admin"
+        password: str = "admin",
     ):
         self.grafana_url = grafana_url.rstrip("/")
         self.api_key = api_key
         self.username = username
         self.password = password
-        self.dashboards_dir = os.path.join(
-            os.path.dirname(__file__),
-            "dashboards"
-        )
+        self.dashboards_dir = os.path.join(os.path.dirname(__file__), "dashboards")
 
     def _get_auth_headers(self) -> Dict[str, str]:
         """Get authentication headers"""
@@ -48,7 +45,7 @@ class GrafanaDashboardGenerator:
         """Load dashboard JSON from file"""
         filepath = os.path.join(self.dashboards_dir, filename)
 
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             data = json.load(f)
 
         return data
@@ -57,7 +54,7 @@ class GrafanaDashboardGenerator:
         self,
         dashboard_data: Dict[str, Any],
         folder_name: str = "NBA MCP Synthesis",
-        overwrite: bool = True
+        overwrite: bool = True,
     ) -> bool:
         """
         Upload dashboard to Grafana
@@ -78,7 +75,7 @@ class GrafanaDashboardGenerator:
             payload = {
                 "dashboard": dashboard_data.get("dashboard", dashboard_data),
                 "folderId": folder_id,
-                "overwrite": overwrite
+                "overwrite": overwrite,
             }
 
             # Upload dashboard
@@ -87,7 +84,7 @@ class GrafanaDashboardGenerator:
                 json=payload,
                 headers=self._get_auth_headers(),
                 auth=self._get_auth(),
-                timeout=10
+                timeout=10,
             )
 
             if response.status_code in [200, 201]:
@@ -95,7 +92,9 @@ class GrafanaDashboardGenerator:
                 logger.info(f"✅ Uploaded dashboard: {dashboard_title}")
                 return True
             else:
-                logger.error(f"Failed to upload dashboard: {response.status_code} - {response.text}")
+                logger.error(
+                    f"Failed to upload dashboard: {response.status_code} - {response.text}"
+                )
                 return False
 
         except Exception as e:
@@ -110,7 +109,7 @@ class GrafanaDashboardGenerator:
                 f"{self.grafana_url}/api/folders",
                 headers=self._get_auth_headers(),
                 auth=self._get_auth(),
-                timeout=10
+                timeout=10,
             )
 
             if response.status_code == 200:
@@ -125,7 +124,7 @@ class GrafanaDashboardGenerator:
                 json={"title": folder_name},
                 headers=self._get_auth_headers(),
                 auth=self._get_auth(),
-                timeout=10
+                timeout=10,
             )
 
             if response.status_code in [200, 201]:
@@ -145,7 +144,7 @@ class GrafanaDashboardGenerator:
         dashboard_files = [
             "nba_synthesis.json",
             "workflow_metrics.json",
-            "cost_analysis.json"
+            "cost_analysis.json",
         ]
 
         for filename in dashboard_files:
@@ -172,7 +171,7 @@ class GrafanaDashboardGenerator:
         panel_type: str,
         query: str,
         grid_pos: Dict[str, int],
-        panel_id: int = 1
+        panel_id: int = 1,
     ) -> Dict[str, Any]:
         """
         Create a custom panel configuration
@@ -192,26 +191,14 @@ class GrafanaDashboardGenerator:
             "title": title,
             "type": panel_type,
             "gridPos": grid_pos,
-            "targets": [
-                {
-                    "expr": query,
-                    "refId": "A"
-                }
-            ]
+            "targets": [{"expr": query, "refId": "A"}],
         }
 
         # Add type-specific configurations
         if panel_type == "graph":
-            panel["yaxes"] = [
-                {"format": "short"},
-                {"format": "short"}
-            ]
+            panel["yaxes"] = [{"format": "short"}, {"format": "short"}]
         elif panel_type == "stat":
-            panel["fieldConfig"] = {
-                "defaults": {
-                    "unit": "short"
-                }
-            }
+            panel["fieldConfig"] = {"defaults": {"unit": "short"}}
 
         return panel
 
@@ -220,9 +207,9 @@ class GrafanaDashboardGenerator:
 if __name__ == "__main__":
     import sys
 
-    print("="*70)
+    print("=" * 70)
     print("Grafana Dashboard Generator")
-    print("="*70)
+    print("=" * 70)
     print()
 
     # Check environment
@@ -236,9 +223,7 @@ if __name__ == "__main__":
 
     # Create generator
     generator = GrafanaDashboardGenerator(
-        grafana_url=grafana_url,
-        username=grafana_user,
-        password=grafana_password
+        grafana_url=grafana_url, username=grafana_user, password=grafana_password
     )
 
     # Test connection
@@ -247,7 +232,7 @@ if __name__ == "__main__":
         response = requests.get(
             f"{grafana_url}/api/health",
             auth=(grafana_user, grafana_password),
-            timeout=5
+            timeout=5,
         )
         if response.status_code == 200:
             print("✅ Connected to Grafana")
@@ -284,4 +269,4 @@ if __name__ == "__main__":
         print("View dashboards at:")
         print(f"  {grafana_url}/dashboards")
 
-    print("="*70)
+    print("=" * 70)

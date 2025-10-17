@@ -29,6 +29,7 @@ async def test_completions():
     except Exception as e:
         print(f"\n❌ Completions test FAILED: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -72,6 +73,7 @@ async def test_pagination_tools():
     except Exception as e:
         print(f"\n❌ Pagination tools test FAILED: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -113,6 +115,7 @@ async def test_parameter_models():
     except Exception as e:
         print(f"\n❌ Parameter models test FAILED: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -132,7 +135,7 @@ async def test_response_models():
             count=1,
             next_cursor="abc123",
             has_more=True,
-            success=True
+            success=True,
         )
         assert result.count == 1
         assert result.has_more is True
@@ -145,7 +148,7 @@ async def test_response_models():
             count=1,
             next_cursor=None,
             has_more=False,
-            success=True
+            success=True,
         )
         assert result.count == 1
         assert result.has_more is False
@@ -158,6 +161,7 @@ async def test_response_models():
     except Exception as e:
         print(f"\n❌ Response models test FAILED: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -187,6 +191,7 @@ async def test_base64_cursor():
     except Exception as e:
         print(f"\n❌ Cursor encoding test FAILED: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 

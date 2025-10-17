@@ -14,7 +14,12 @@ logger = logging.getLogger(__name__)
 class LinearClient:
     """Linear API client for creating issues"""
 
-    def __init__(self, api_key: str, team_id: Optional[str] = None, project_id: Optional[str] = None):
+    def __init__(
+        self,
+        api_key: str,
+        team_id: Optional[str] = None,
+        project_id: Optional[str] = None,
+    ):
         """
         Initialize Linear client
 
@@ -30,48 +35,44 @@ class LinearClient:
 
         # Priority mapping
         self.priority_map = {
-            'CRITICAL': 1,  # Urgent
-            'IMPORTANT': 2,  # High
-            'NICE_TO_HAVE': 3,  # Normal
-            'unknown': 4  # Low
+            "CRITICAL": 1,  # Urgent
+            "IMPORTANT": 2,  # High
+            "NICE_TO_HAVE": 3,  # Normal
+            "unknown": 4,  # Low
         }
 
         logger.info("Linear client initialized")
 
-    async def _make_request(self, query: str, variables: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def _make_request(
+        self, query: str, variables: Dict[str, Any] = None
+    ) -> Dict[str, Any]:
         """Make GraphQL request to Linear API"""
         try:
             headers = {
                 "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             }
 
-            payload = {
-                "query": query,
-                "variables": variables or {}
-            }
+            payload = {"query": query, "variables": variables or {}}
 
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    self.base_url,
-                    json=payload,
-                    headers=headers,
-                    timeout=30.0
+                    self.base_url, json=payload, headers=headers, timeout=30.0
                 )
 
             if response.status_code == 200:
                 data = response.json()
-                if 'errors' in data:
+                if "errors" in data:
                     logger.error(f"Linear API errors: {data['errors']}")
-                    return {'success': False, 'errors': data['errors']}
-                return {'success': True, 'data': data['data']}
+                    return {"success": False, "errors": data["errors"]}
+                return {"success": True, "data": data["data"]}
             else:
                 logger.error(f"Linear API request failed: {response.status_code}")
-                return {'success': False, 'error': f"HTTP {response.status_code}"}
+                return {"success": False, "error": f"HTTP {response.status_code}"}
 
         except Exception as e:
             logger.error(f"Linear API request failed: {e}")
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     async def get_team_info(self) -> Dict[str, Any]:
         """Get team information"""
@@ -93,8 +94,8 @@ class LinearClient:
         """
 
         result = await self._make_request(query)
-        if result['success']:
-            return result['data']
+        if result["success"]:
+            return result["data"]
         return {}
 
     async def get_projects(self, team_id: str = None) -> List[Dict[str, Any]]:
@@ -120,18 +121,18 @@ class LinearClient:
         """
 
         result = await self._make_request(query, {"teamId": team})
-        if result['success'] and result['data']['team']:
-            return result['data']['team']['projects']['nodes']
+        if result["success"] and result["data"]["team"]:
+            return result["data"]["team"]["projects"]["nodes"]
         return []
 
     async def create_issue(
         self,
         title: str,
         description: str,
-        priority: str = 'IMPORTANT',
+        priority: str = "IMPORTANT",
         labels: List[str] = None,
         team_id: str = None,
-        project_id: str = None
+        project_id: str = None,
     ) -> str:
         """
         Create Linear issue
@@ -195,7 +196,7 @@ class LinearClient:
             "description": description,
             "teamId": team,
             "priority": self.priority_map.get(priority.upper(), 2),
-            "labelIds": label_ids
+            "labelIds": label_ids,
         }
 
         if project:
@@ -203,10 +204,12 @@ class LinearClient:
 
         result = await self._make_request(mutation, variables)
 
-        if result['success'] and result['data']['issueCreate']['success']:
-            issue = result['data']['issueCreate']['issue']
-            logger.info(f"Created Linear issue: {issue['identifier']} - {issue['title']}")
-            return issue['id']
+        if result["success"] and result["data"]["issueCreate"]["success"]:
+            issue = result["data"]["issueCreate"]["issue"]
+            logger.info(
+                f"Created Linear issue: {issue['identifier']} - {issue['title']}"
+            )
+            return issue["id"]
         else:
             logger.error(f"Failed to create Linear issue: {result}")
             return ""
@@ -227,11 +230,11 @@ class LinearClient:
         """
 
         result = await self._make_request(query, {"teamId": team_id})
-        if not result['success'] or not result['data']['team']:
+        if not result["success"] or not result["data"]["team"]:
             return []
 
-        labels = result['data']['team']['labels']['nodes']
-        label_map = {label['name']: label['id'] for label in labels}
+        labels = result["data"]["team"]["labels"]["nodes"]
+        label_map = {label["name"]: label["id"] for label in labels}
 
         # Return IDs for labels that exist, create missing ones
         label_ids = []
@@ -267,14 +270,16 @@ class LinearClient:
 
         result = await self._make_request(mutation, {"name": name, "teamId": team_id})
 
-        if result['success'] and result['data']['issueLabelCreate']['success']:
-            label = result['data']['issueLabelCreate']['issueLabel']
+        if result["success"] and result["data"]["issueLabelCreate"]["success"]:
+            label = result["data"]["issueLabelCreate"]["issueLabel"]
             logger.info(f"Created Linear label: {label['name']}")
-            return label['id']
+            return label["id"]
 
         return ""
 
-    async def create_issues_batch(self, recommendations: List[Dict[str, Any]]) -> List[str]:
+    async def create_issues_batch(
+        self, recommendations: List[Dict[str, Any]]
+    ) -> List[str]:
         """
         Create multiple Linear issues in batch
 
@@ -292,9 +297,9 @@ class LinearClient:
         for rec in recommendations:
             try:
                 # Prepare issue details
-                title = rec.get('title', 'Untitled Recommendation')
+                title = rec.get("title", "Untitled Recommendation")
                 description = self._format_issue_description(rec)
-                priority = rec.get('priority', 'IMPORTANT')
+                priority = rec.get("priority", "IMPORTANT")
 
                 # Generate labels
                 labels = self._generate_labels(rec)
@@ -304,13 +309,15 @@ class LinearClient:
                     title=title,
                     description=description,
                     priority=priority,
-                    labels=labels
+                    labels=labels,
                 )
 
                 if issue_id:
                     issue_ids.append(issue_id)
                     created_count += 1
-                    logger.info(f"Created issue {created_count}/{len(recommendations)}: {title}")
+                    logger.info(
+                        f"Created issue {created_count}/{len(recommendations)}: {title}"
+                    )
                 else:
                     logger.warning(f"Failed to create issue for: {title}")
 
@@ -318,7 +325,9 @@ class LinearClient:
                 await asyncio.sleep(0.1)
 
             except Exception as e:
-                logger.error(f"Error creating issue for {rec.get('title', 'Unknown')}: {e}")
+                logger.error(
+                    f"Error creating issue for {rec.get('title', 'Unknown')}: {e}"
+                )
                 continue
 
         logger.info(f"Created {created_count}/{len(recommendations)} Linear issues")
@@ -374,23 +383,25 @@ Implementation files have been generated in the NBA Simulator AWS project:
         labels = []
 
         # Priority label
-        priority = rec.get('priority', 'IMPORTANT').lower()
+        priority = rec.get("priority", "IMPORTANT").lower()
         labels.append(f"priority-{priority}")
 
         # Phase labels
-        phases = rec.get('phases', [])
+        phases = rec.get("phases", [])
         for phase in phases:
             labels.append(f"phase-{phase}")
 
         # Source book labels
-        source_books = rec.get('source_books', [])
+        source_books = rec.get("source_books", [])
         for book in source_books:
             # Clean book name for label
-            clean_name = book.lower().replace(' ', '-').replace('(', '').replace(')', '')
+            clean_name = (
+                book.lower().replace(" ", "-").replace("(", "").replace(")", "")
+            )
             labels.append(f"book-{clean_name[:20]}")  # Limit length
 
         # Category label
-        category = rec.get('category', 'unknown').lower()
+        category = rec.get("category", "unknown").lower()
         labels.append(f"category-{category}")
 
         # Workflow label
@@ -401,7 +412,3 @@ Implementation files have been generated in the NBA Simulator AWS project:
 
 # Import asyncio for sleep function
 import asyncio
-
-
-
-

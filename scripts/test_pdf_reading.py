@@ -13,13 +13,24 @@ from pathlib import Path
 # Add the project root to the path
 project_root = Path(__file__).parent.parent
 import sys
+
 sys.path.insert(0, str(project_root))
 
-from mcp_server.tools.params import GetPdfMetadataParams, ReadPdfPageParams, SearchPdfParams
-from mcp_server.tools.pdf_helper import get_metadata, extract_page_text, search_text_in_pdf
+from mcp_server.tools.params import (
+    GetPdfMetadataParams,
+    ReadPdfPageParams,
+    SearchPdfParams,
+)
+from mcp_server.tools.pdf_helper import (
+    get_metadata,
+    extract_page_text,
+    search_text_in_pdf,
+)
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # S3 bucket configuration
@@ -31,20 +42,20 @@ BOOKS_TO_TEST = [
         "id": "sports_analytics",
         "title": "Sports Analytics",
         "s3_path": "books/Sports_Analytics.pdf",
-        "local_path": "/Users/ryanranft/Downloads/Sports_Analytics.pdf"
+        "local_path": "/Users/ryanranft/Downloads/Sports_Analytics.pdf",
     },
     {
         "id": "basketball_beyond_paper",
         "title": "Basketball Beyond Paper",
         "s3_path": "books/Basketball_Beyond_Paper.pdf",
-        "local_path": "/Users/ryanranft/Downloads/Basketball_Beyond_Paper.pdf"
+        "local_path": "/Users/ryanranft/Downloads/Basketball_Beyond_Paper.pdf",
     },
     {
         "id": "midrange_theory",
         "title": "The Midrange Theory",
         "s3_path": "books/The_Midrange_Theory.pdf",
-        "local_path": "/Users/ryanranft/Downloads/The_Midrange_Theory.pdf"
-    }
+        "local_path": "/Users/ryanranft/Downloads/The_Midrange_Theory.pdf",
+    },
 ]
 
 
@@ -77,18 +88,24 @@ def test_local_pdf_reading():
             logger.info("📖 Reading first page...")
             first_page = extract_page_text(local_path, 0)
             if first_page:
-                preview = first_page[:200] + "..." if len(first_page) > 200 else first_page
+                preview = (
+                    first_page[:200] + "..." if len(first_page) > 200 else first_page
+                )
                 logger.info(f"✅ First page preview: {preview}")
             else:
                 logger.warning("⚠️ Could not extract text from first page")
 
             # Test search functionality
             logger.info("🔍 Searching for 'analytics'...")
-            search_results = search_text_in_pdf(local_path, "analytics", context_chars=100)
+            search_results = search_text_in_pdf(
+                local_path, "analytics", context_chars=100
+            )
             if search_results:
                 logger.info(f"✅ Found {len(search_results)} matches")
                 for i, result in enumerate(search_results[:3]):  # Show first 3 matches
-                    logger.info(f"   Match {i+1} (Page {result['page']+1}): {result['context'][:100]}...")
+                    logger.info(
+                        f"   Match {i+1} (Page {result['page']+1}): {result['context'][:100]}..."
+                    )
             else:
                 logger.warning("⚠️ No matches found for 'analytics'")
 
@@ -98,7 +115,8 @@ def test_local_pdf_reading():
 
 def print_usage_examples():
     """Print examples of how to use the MCP server tools."""
-    logger.info("""
+    logger.info(
+        """
 ╔══════════════════════════════════════════════════════════════════╗
 ║              🚀 MCP SERVER PDF TOOLS - USAGE EXAMPLES           ║
 ╚══════════════════════════════════════════════════════════════════╝
@@ -236,7 +254,8 @@ for result in per_results:
    - Integrated with your workflow
 
 ═══════════════════════════════════════════════════════════════════
-""")
+"""
+    )
 
 
 def main():
@@ -250,7 +269,8 @@ def main():
     # Print usage examples
     print_usage_examples()
 
-    logger.info("""
+    logger.info(
+        """
 🎉 CONCLUSION:
 
 The MCP server PDF tools provide BETTER mathematical notation reading
@@ -266,12 +286,9 @@ Use the PDF tools instead of text conversion for optimal
 mathematical notation understanding!
 
 ═══════════════════════════════════════════════════════════════════
-""")
+"""
+    )
 
 
 if __name__ == "__main__":
     main()
-
-
-
-

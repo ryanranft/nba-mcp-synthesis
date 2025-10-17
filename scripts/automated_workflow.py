@@ -27,8 +27,7 @@ from scripts.notification_manager import NotificationManager
 from mcp_server.unified_configuration_manager import UnifiedConfigurationManager
 
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -41,7 +40,7 @@ class AutomatedWorkflow:
         config_file: str,
         budget: float,
         notification_manager: NotificationManager,
-        output_dir: str = "analysis_results"
+        output_dir: str = "analysis_results",
     ):
         """
         Initialize automated workflow.
@@ -58,12 +57,12 @@ class AutomatedWorkflow:
         self.output_dir = Path(output_dir)
         self.start_time = datetime.now()
         self.results = {
-            'books_analyzed': 0,
-            'recommendations_generated': 0,
-            'total_cost': 0.0,
-            'files_generated': 0,
-            'linear_issues_created': 0,
-            'errors': []
+            "books_analyzed": 0,
+            "recommendations_generated": 0,
+            "total_cost": 0.0,
+            "files_generated": 0,
+            "linear_issues_created": 0,
+            "errors": [],
         }
 
         # Load configuration
@@ -76,7 +75,7 @@ class AutomatedWorkflow:
 
     def _load_config(self) -> Dict[str, Any]:
         """Load books configuration."""
-        with open(self.config_file, 'r') as f:
+        with open(self.config_file, "r") as f:
             config = json.load(f)
 
         logger.info(f"Loaded configuration: {len(config.get('books', []))} books")
@@ -96,18 +95,24 @@ class AutomatedWorkflow:
             Function result or None if failed
         """
         try:
-            await self.notifier.notify_stage_start(stage, {
-                "description": f"Starting {stage.replace('_', ' ').title()}",
-                "books_count": len(self.config.get('books', [])),
-                "budget": self.budget
-            })
+            await self.notifier.notify_stage_start(
+                stage,
+                {
+                    "description": f"Starting {stage.replace('_', ' ').title()}",
+                    "books_count": len(self.config.get("books", [])),
+                    "budget": self.budget,
+                },
+            )
 
             result = await func(*args, **kwargs)
 
-            await self.notifier.notify_stage_complete(stage, {
-                "description": f"{stage.replace('_', ' ').title()} completed successfully",
-                **result
-            })
+            await self.notifier.notify_stage_complete(
+                stage,
+                {
+                    "description": f"{stage.replace('_', ' ').title()} completed successfully",
+                    **result,
+                },
+            )
 
             return result
 
@@ -117,14 +122,16 @@ class AutomatedWorkflow:
 
             await self.notifier.notify_error(stage, error_msg)
 
-            self.results['errors'].append({
-                'stage': stage,
-                'error': error_msg,
-                'timestamp': datetime.now().isoformat()
-            })
+            self.results["errors"].append(
+                {
+                    "stage": stage,
+                    "error": error_msg,
+                    "timestamp": datetime.now().isoformat(),
+                }
+            )
 
             # Decide whether to continue or abort
-            critical_stages = ['pre_flight', 'book_analysis']
+            critical_stages = ["pre_flight", "book_analysis"]
             if stage in critical_stages:
                 logger.error(f"Critical stage {stage} failed, aborting workflow")
                 raise
@@ -137,25 +144,32 @@ class AutomatedWorkflow:
         logger.info("🔍 Running pre-flight checks...")
 
         checks = {
-            'api_keys_valid': True,
-            'budget_sufficient': True,
-            'output_dir_writable': True,
-            'config_valid': True
+            "api_keys_valid": True,
+            "budget_sufficient": True,
+            "output_dir_writable": True,
+            "config_valid": True,
         }
 
         # Check API keys
-        required_keys = ['GOOGLE_API_KEY', 'DEEPSEEK_API_KEY', 'ANTHROPIC_API_KEY', 'OPENAI_API_KEY']
+        required_keys = [
+            "GOOGLE_API_KEY",
+            "DEEPSEEK_API_KEY",
+            "ANTHROPIC_API_KEY",
+            "OPENAI_API_KEY",
+        ]
         for key in required_keys:
             if not get_hierarchical_env(key, "NBA_MCP_SYNTHESIS", "WORKFLOW"):
-                checks['api_keys_valid'] = False
+                checks["api_keys_valid"] = False
                 logger.error(f"Missing API key: {key}")
 
         # Check budget
-        num_books = len(self.config.get('books', []))
+        num_books = len(self.config.get("books", []))
         estimated_cost = num_books * 0.20  # Conservative estimate
         if self.budget < estimated_cost:
-            checks['budget_sufficient'] = False
-            logger.error(f"Budget ${self.budget:.2f} insufficient for {num_books} books (estimated: ${estimated_cost:.2f})")
+            checks["budget_sufficient"] = False
+            logger.error(
+                f"Budget ${self.budget:.2f} insufficient for {num_books} books (estimated: ${estimated_cost:.2f})"
+            )
 
         # Check output directory
         try:
@@ -163,12 +177,12 @@ class AutomatedWorkflow:
             test_file.write_text("test")
             test_file.unlink()
         except Exception as e:
-            checks['output_dir_writable'] = False
+            checks["output_dir_writable"] = False
             logger.error(f"Cannot write to output directory: {e}")
 
         # Check configuration
-        if not self.config.get('books'):
-            checks['config_valid'] = False
+        if not self.config.get("books"):
+            checks["config_valid"] = False
             logger.error("No books found in configuration")
 
         all_passed = all(checks.values())
@@ -176,33 +190,38 @@ class AutomatedWorkflow:
         logger.info(f"Pre-flight checks: {'✅ PASSED' if all_passed else '❌ FAILED'}")
 
         return {
-            'checks': checks,
-            'all_passed': all_passed,
-            'books_count': num_books,
-            'estimated_cost': estimated_cost
+            "checks": checks,
+            "all_passed": all_passed,
+            "books_count": num_books,
+            "estimated_cost": estimated_cost,
         }
 
     async def _analyze_books(self) -> Dict[str, Any]:
         """Run book analysis."""
         logger.info("📚 Starting book analysis...")
 
-        books = self.config.get('books', [])
+        books = self.config.get("books", [])
         total_recommendations = 0
         total_cost = 0.0
 
         for i, book in enumerate(books):
             book_start_time = datetime.now()
 
-            logger.info(f"Analyzing book {i+1}/{len(books)}: {book.get('title', 'Unknown')}")
+            logger.info(
+                f"Analyzing book {i+1}/{len(books)}: {book.get('title', 'Unknown')}"
+            )
 
             try:
                 # Run book analysis using existing script
                 cmd = [
-                    'python3',
-                    'scripts/simplified_recursive_analysis.py',
-                    '--config', self.config_file,
-                    '--output-dir', str(self.output_dir),
-                    '--book', book.get('title', '')
+                    "python3",
+                    "scripts/simplified_recursive_analysis.py",
+                    "--config",
+                    self.config_file,
+                    "--output-dir",
+                    str(self.output_dir),
+                    "--book",
+                    book.get("title", ""),
                 ]
 
                 try:
@@ -211,15 +230,17 @@ class AutomatedWorkflow:
                         capture_output=True,
                         text=True,
                         cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                        timeout=600  # 10 minute timeout per book (reduced from 30 minutes)
+                        timeout=600,  # 10 minute timeout per book (reduced from 30 minutes)
                     )
                 except subprocess.TimeoutExpired:
-                    logger.error(f"Book analysis timeout for {book.get('title', 'Unknown')} after 10 minutes")
+                    logger.error(
+                        f"Book analysis timeout for {book.get('title', 'Unknown')} after 10 minutes"
+                    )
                     continue
 
                 if result.returncode == 0:
                     # Parse results from output
-                    book_recommendations = self._parse_book_results(book.get('id', ''))
+                    book_recommendations = self._parse_book_results(book.get("id", ""))
                     book_cost = self._estimate_book_cost(book)
 
                     total_recommendations += book_recommendations
@@ -229,30 +250,36 @@ class AutomatedWorkflow:
 
                     # Notify book completion
                     await self.notifier.notify_book_analysis_complete(
-                        book_title=book.get('title', 'Unknown'),
+                        book_title=book.get("title", "Unknown"),
                         recommendations=book_recommendations,
                         cost=book_cost,
-                        time_taken=book_time
+                        time_taken=book_time,
                     )
 
-                    self.results['books_analyzed'] += 1
+                    self.results["books_analyzed"] += 1
 
                 else:
-                    logger.error(f"Book analysis failed for {book.get('title', 'Unknown')}: {result.stderr}")
+                    logger.error(
+                        f"Book analysis failed for {book.get('title', 'Unknown')}: {result.stderr}"
+                    )
 
             except Exception as e:
-                logger.error(f"Error analyzing book {book.get('title', 'Unknown')}: {e}")
+                logger.error(
+                    f"Error analyzing book {book.get('title', 'Unknown')}: {e}"
+                )
                 continue
 
-        self.results['recommendations_generated'] = total_recommendations
-        self.results['total_cost'] = total_cost
+        self.results["recommendations_generated"] = total_recommendations
+        self.results["total_cost"] = total_cost
 
-        logger.info(f"Book analysis complete: {total_recommendations} recommendations, ${total_cost:.2f} cost")
+        logger.info(
+            f"Book analysis complete: {total_recommendations} recommendations, ${total_cost:.2f} cost"
+        )
 
         return {
-            'books_analyzed': self.results['books_analyzed'],
-            'recommendations': total_recommendations,
-            'cost': total_cost
+            "books_analyzed": self.results["books_analyzed"],
+            "recommendations": total_recommendations,
+            "cost": total_cost,
         }
 
     def _parse_book_results(self, book_id: str) -> int:
@@ -261,18 +288,20 @@ class AutomatedWorkflow:
             # Look for book-specific results file
             book_results_file = self.output_dir / f"{book_id}_results.json"
             if book_results_file.exists():
-                with open(book_results_file, 'r') as f:
+                with open(book_results_file, "r") as f:
                     data = json.load(f)
-                return len(data.get('recommendations', []))
+                return len(data.get("recommendations", []))
 
             # Fallback: check master recommendations
-            master_file = self.output_dir / 'master_recommendations.json'
+            master_file = self.output_dir / "master_recommendations.json"
             if master_file.exists():
-                with open(master_file, 'r') as f:
+                with open(master_file, "r") as f:
                     data = json.load(f)
-                recommendations = data.get('recommendations', [])
+                recommendations = data.get("recommendations", [])
                 # Count recommendations from this book
-                book_recs = [r for r in recommendations if book_id in r.get('source_books', [])]
+                book_recs = [
+                    r for r in recommendations if book_id in r.get("source_books", [])
+                ]
                 return len(book_recs)
 
             return 0
@@ -284,14 +313,14 @@ class AutomatedWorkflow:
     def _estimate_book_cost(self, book: Dict[str, Any]) -> float:
         """Estimate cost for analyzing a single book."""
         # Rough estimate based on book size and complexity
-        pages = book.get('pages', 100)
-        complexity = book.get('category', 'medium')
+        pages = book.get("pages", 100)
+        complexity = book.get("category", "medium")
 
         base_cost = 0.05  # Base cost per book
 
-        if complexity == 'high':
+        if complexity == "high":
             multiplier = 1.5
-        elif complexity == 'low':
+        elif complexity == "low":
             multiplier = 0.7
         else:
             multiplier = 1.0
@@ -307,17 +336,19 @@ class AutomatedWorkflow:
         try:
             # Run integration script
             cmd = [
-                'python3',
-                'scripts/integrate_recommendations.py',
-                '--synthesis-path', '/Users/ryanranft/nba-mcp-synthesis',
-                '--simulator-path', '/Users/ryanranft/nba-simulator-aws'
+                "python3",
+                "scripts/integrate_recommendations.py",
+                "--synthesis-path",
+                "/Users/ryanranft/nba-mcp-synthesis",
+                "--simulator-path",
+                "/Users/ryanranft/nba-simulator-aws",
             ]
 
             result = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
-                cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
             )
 
             if result.returncode == 0:
@@ -325,32 +356,34 @@ class AutomatedWorkflow:
                 phases_updated = self._count_updated_phases()
                 files_generated = self._count_generated_files()
 
-                self.results['files_generated'] = files_generated
+                self.results["files_generated"] = files_generated
 
-                logger.info(f"Integration complete: {phases_updated} phases updated, {files_generated} files generated")
+                logger.info(
+                    f"Integration complete: {phases_updated} phases updated, {files_generated} files generated"
+                )
 
                 return {
-                    'phases_updated': phases_updated,
-                    'files_generated': files_generated,
-                    'success': True
+                    "phases_updated": phases_updated,
+                    "files_generated": files_generated,
+                    "success": True,
                 }
             else:
                 logger.error(f"Integration failed: {result.stderr}")
-                return {'success': False, 'error': result.stderr}
+                return {"success": False, "error": result.stderr}
 
         except Exception as e:
             logger.error(f"Error in integration: {e}")
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     def _count_updated_phases(self) -> int:
         """Count number of phases that were updated."""
-        simulator_path = Path('/Users/ryanranft/nba-simulator-aws/docs/phases')
+        simulator_path = Path("/Users/ryanranft/nba-simulator-aws/docs/phases")
         phases_updated = 0
 
-        for phase_dir in simulator_path.glob('phase_*'):
+        for phase_dir in simulator_path.glob("phase_*"):
             if phase_dir.is_dir():
                 # Check if phase has book recommendations
-                book_recs_file = phase_dir / 'BOOK_RECOMMENDATIONS_INDEX.md'
+                book_recs_file = phase_dir / "BOOK_RECOMMENDATIONS_INDEX.md"
                 if book_recs_file.exists():
                     phases_updated += 1
 
@@ -358,27 +391,27 @@ class AutomatedWorkflow:
 
     def _count_generated_files(self) -> int:
         """Count number of implementation files generated."""
-        simulator_path = Path('/Users/ryanranft/nba-simulator-aws/docs/phases')
+        simulator_path = Path("/Users/ryanranft/nba-simulator-aws/docs/phases")
         files_count = 0
 
         # Count Python implementation files
-        for py_file in simulator_path.rglob('implement_*.py'):
+        for py_file in simulator_path.rglob("implement_*.py"):
             files_count += 1
 
         # Count test files
-        for test_file in simulator_path.rglob('test_*.py'):
+        for test_file in simulator_path.rglob("test_*.py"):
             files_count += 1
 
         # Count SQL files
-        for sql_file in simulator_path.rglob('*_migration.sql'):
+        for sql_file in simulator_path.rglob("*_migration.sql"):
             files_count += 1
 
         # Count CloudFormation files
-        for cf_file in simulator_path.rglob('*_infrastructure.yaml'):
+        for cf_file in simulator_path.rglob("*_infrastructure.yaml"):
             files_count += 1
 
         # Count implementation guides
-        for guide_file in simulator_path.rglob('*_IMPLEMENTATION_GUIDE.md'):
+        for guide_file in simulator_path.rglob("*_IMPLEMENTATION_GUIDE.md"):
             files_count += 1
 
         return files_count
@@ -389,47 +422,46 @@ class AutomatedWorkflow:
 
         try:
             # Load master recommendations
-            master_file = self.output_dir / 'master_recommendations.json'
+            master_file = self.output_dir / "master_recommendations.json"
             if not master_file.exists():
                 logger.warning("No master recommendations file found")
-                return {'issues_created': 0, 'success': False}
+                return {"issues_created": 0, "success": False}
 
-            with open(master_file, 'r') as f:
+            with open(master_file, "r") as f:
                 data = json.load(f)
 
-            recommendations = data.get('recommendations', [])
+            recommendations = data.get("recommendations", [])
 
             if not recommendations:
                 logger.warning("No recommendations found to create issues for")
-                return {'issues_created': 0, 'success': True}
+                return {"issues_created": 0, "success": True}
 
             # Get team and project IDs from environment
-            team_id = get_hierarchical_env("LINEAR_TEAM_ID", "NBA_MCP_SYNTHESIS", "WORKFLOW")
-            project_id = get_hierarchical_env("LINEAR_PROJECT_ID", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+            team_id = get_hierarchical_env(
+                "LINEAR_TEAM_ID", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+            )
+            project_id = get_hierarchical_env(
+                "LINEAR_PROJECT_ID", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+            )
 
             if not team_id:
                 logger.error("LINEAR_TEAM_ID not set")
-                return {'issues_created': 0, 'success': False}
+                return {"issues_created": 0, "success": False}
 
             # Create issues
             issue_ids = await self.notifier.create_linear_issues(
-                recommendations=recommendations,
-                team_id=team_id,
-                project_id=project_id
+                recommendations=recommendations, team_id=team_id, project_id=project_id
             )
 
-            self.results['linear_issues_created'] = len(issue_ids)
+            self.results["linear_issues_created"] = len(issue_ids)
 
             logger.info(f"Created {len(issue_ids)} Linear issues")
 
-            return {
-                'issues_created': len(issue_ids),
-                'success': True
-            }
+            return {"issues_created": len(issue_ids), "success": True}
 
         except Exception as e:
             logger.error(f"Error creating Linear issues: {e}")
-            return {'issues_created': 0, 'success': False, 'error': str(e)}
+            return {"issues_created": 0, "success": False, "error": str(e)}
 
     async def _run_multi_pass_deployment(self) -> Dict[str, Any]:
         """Run multi-pass deployment (Passes 1-5)."""
@@ -445,25 +477,31 @@ class AutomatedWorkflow:
 
             if success:
                 # Count results
-                progress_file = Path('analysis_results/multi_pass_progress.json')
+                progress_file = Path("analysis_results/multi_pass_progress.json")
                 if progress_file.exists():
-                    with open(progress_file, 'r') as f:
+                    with open(progress_file, "r") as f:
                         progress = json.load(f)
 
                     return {
-                        'success': True,
-                        'phases_updated': progress.get('pass_4', {}).get('phases_updated', 0),
-                        'implementations_generated': progress.get('pass_5', {}).get('implementations_generated', 0),
-                        'files_created': progress.get('pass_5', {}).get('files_created', 0)
+                        "success": True,
+                        "phases_updated": progress.get("pass_4", {}).get(
+                            "phases_updated", 0
+                        ),
+                        "implementations_generated": progress.get("pass_5", {}).get(
+                            "implementations_generated", 0
+                        ),
+                        "files_created": progress.get("pass_5", {}).get(
+                            "files_created", 0
+                        ),
                     }
                 else:
-                    return {'success': True}
+                    return {"success": True}
             else:
-                return {'success': False, 'error': 'Deployment failed'}
+                return {"success": False, "error": "Deployment failed"}
 
         except Exception as e:
             logger.error(f"Multi-pass deployment error: {e}")
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     async def run(self) -> bool:
         """Run the complete automated workflow."""
@@ -471,41 +509,52 @@ class AutomatedWorkflow:
 
         try:
             # Stage 1: Pre-flight checks
-            pre_flight_result = await self._safe_execute('pre_flight', self._pre_flight_checks)
-            if not pre_flight_result or not pre_flight_result.get('all_passed'):
+            pre_flight_result = await self._safe_execute(
+                "pre_flight", self._pre_flight_checks
+            )
+            if not pre_flight_result or not pre_flight_result.get("all_passed"):
                 logger.error("Pre-flight checks failed, aborting workflow")
                 return False
 
             # Stage 2: Book analysis
-            analysis_result = await self._safe_execute('book_analysis', self._analyze_books)
+            analysis_result = await self._safe_execute(
+                "book_analysis", self._analyze_books
+            )
             if not analysis_result:
                 logger.error("Book analysis failed, aborting workflow")
                 return False
 
             # Stage 3: Integration
-            integration_result = await self._safe_execute('integration', self._integrate_recommendations)
+            integration_result = await self._safe_execute(
+                "integration", self._integrate_recommendations
+            )
             if not integration_result:
                 logger.warning("Integration had issues, but continuing...")
 
             # NEW STAGE 3.5: Multi-Pass Deployment
-            deployment_result = await self._safe_execute('multi_pass_deployment', self._run_multi_pass_deployment)
-            if deployment_result and deployment_result.get('success'):
-                logger.info(f"✅ Multi-pass deployment: {deployment_result.get('implementations_generated', 0)} implementations generated")
-                self.results['files_generated'] = deployment_result.get('files_created', 0)
+            deployment_result = await self._safe_execute(
+                "multi_pass_deployment", self._run_multi_pass_deployment
+            )
+            if deployment_result and deployment_result.get("success"):
+                logger.info(
+                    f"✅ Multi-pass deployment: {deployment_result.get('implementations_generated', 0)} implementations generated"
+                )
+                self.results["files_generated"] = deployment_result.get(
+                    "files_created", 0
+                )
             else:
                 logger.warning("Multi-pass deployment had issues, but continuing...")
 
             # Stage 4: Linear issues
-            linear_result = await self._safe_execute('linear_issues', self._create_linear_issues)
+            linear_result = await self._safe_execute(
+                "linear_issues", self._create_linear_issues
+            )
             if not linear_result:
                 logger.warning("Linear issue creation had issues, but continuing...")
 
             # Final notification
             duration = (datetime.now() - self.start_time).total_seconds()
-            summary = {
-                **self.results,
-                'duration': duration
-            }
+            summary = {**self.results, "duration": duration}
 
             await self.notifier.notify_workflow_complete(summary)
 
@@ -514,40 +563,61 @@ class AutomatedWorkflow:
 
         except Exception as e:
             logger.error(f"Workflow failed: {e}")
-            await self.notifier.notify_error('workflow', str(e))
+            await self.notifier.notify_error("workflow", str(e))
             return False
 
 
 async def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(description='Run automated book analysis workflow')
-    parser.add_argument('--config', default='config/books_to_analyze_all_ai_ml.json',
-                        help='Path to books configuration file')
-    parser.add_argument('--budget', type=float, default=410.0,
-                        help='Maximum budget in USD')
-    parser.add_argument('--output', default='analysis_results',
-                        help='Output directory for results')
-    parser.add_argument('--project', default='nba-mcp-synthesis',
-                        help='Project name for secrets loading')
-    parser.add_argument('--sport', default='NBA',
-                        help='Sport name for secrets loading')
-    parser.add_argument('--context', default='production',
-                        help='Context for secrets loading (production, development, test)')
-    parser.add_argument('--slack-webhook', help='Slack webhook URL (overrides secrets)')
-    parser.add_argument('--linear-api-key', help='Linear API key (overrides secrets)')
-    parser.add_argument('--linear-team-id', help='Linear team ID (overrides secrets)')
-    parser.add_argument('--linear-project-id', help='Linear project ID (overrides secrets)')
+    parser = argparse.ArgumentParser(description="Run automated book analysis workflow")
+    parser.add_argument(
+        "--config",
+        default="config/books_to_analyze_all_ai_ml.json",
+        help="Path to books configuration file",
+    )
+    parser.add_argument(
+        "--budget", type=float, default=410.0, help="Maximum budget in USD"
+    )
+    parser.add_argument(
+        "--output", default="analysis_results", help="Output directory for results"
+    )
+    parser.add_argument(
+        "--project",
+        default="nba-mcp-synthesis",
+        help="Project name for secrets loading",
+    )
+    parser.add_argument("--sport", default="NBA", help="Sport name for secrets loading")
+    parser.add_argument(
+        "--context",
+        default="production",
+        help="Context for secrets loading (production, development, test)",
+    )
+    parser.add_argument("--slack-webhook", help="Slack webhook URL (overrides secrets)")
+    parser.add_argument("--linear-api-key", help="Linear API key (overrides secrets)")
+    parser.add_argument("--linear-team-id", help="Linear team ID (overrides secrets)")
+    parser.add_argument(
+        "--linear-project-id", help="Linear project ID (overrides secrets)"
+    )
 
     args = parser.parse_args()
 
     # Load secrets using hierarchical loader
-    logger.info(f"Loading secrets for project={args.project}, sport={args.sport}, context={args.context}")
+    logger.info(
+        f"Loading secrets for project={args.project}, sport={args.sport}, context={args.context}"
+    )
     try:
-        result = subprocess.run([
-            sys.executable,
-            "/Users/ryanranft/load_env_hierarchical.py",
-            args.project, args.sport, args.context
-        ], capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            [
+                sys.executable,
+                "/Users/ryanranft/load_env_hierarchical.py",
+                args.project,
+                args.sport,
+                args.context,
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
 
         logger.info("✅ Secrets loaded successfully")
     except subprocess.CalledProcessError as e:
@@ -573,7 +643,9 @@ async def main():
 
     # Validate required credentials
     if not slack_webhook:
-        logger.error("Slack webhook URL is required (set via --slack-webhook or secrets)")
+        logger.error(
+            "Slack webhook URL is required (set via --slack-webhook or secrets)"
+        )
         return 1
     if not linear_api_key:
         logger.error("Linear API key is required (set via --linear-api-key or secrets)")
@@ -581,9 +653,9 @@ async def main():
 
     # Set environment variables for backward compatibility
     if linear_team_id:
-        os.environ['LINEAR_TEAM_ID'] = linear_team_id
+        os.environ["LINEAR_TEAM_ID"] = linear_team_id
     if linear_project_id:
-        os.environ['LINEAR_PROJECT_ID'] = linear_project_id
+        os.environ["LINEAR_PROJECT_ID"] = linear_project_id
 
     # Initialize notification manager
     notifier = NotificationManager(slack_webhook, linear_api_key)
@@ -593,7 +665,7 @@ async def main():
         config_file=args.config,
         budget=args.budget,
         notification_manager=notifier,
-        output_dir=args.output
+        output_dir=args.output,
     )
 
     # Run workflow
@@ -602,5 +674,5 @@ async def main():
     sys.exit(0 if success else 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())

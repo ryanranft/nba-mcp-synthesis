@@ -1,4 +1,5 @@
 """Feedback Loop - BOOK RECOMMENDATION 8 & IMPORTANT"""
+
 import logging
 from typing import Dict, Any, Optional, List
 from datetime import datetime
@@ -11,6 +12,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class Feedback:
     """User feedback on a prediction"""
+
     feedback_id: str
     model_name: str
     model_version: str
@@ -32,7 +34,7 @@ class FeedbackCollector:
         self.stats: Dict[str, Any] = {
             "total_feedback": 0,
             "by_model": {},
-            "by_type": {}
+            "by_type": {},
         }
 
     def record_feedback(
@@ -45,7 +47,7 @@ class FeedbackCollector:
         user_id: Optional[str] = None,
         confidence_score: Optional[float] = None,
         feedback_type: str = "correction",
-        metadata: Optional[Dict] = None
+        metadata: Optional[Dict] = None,
     ) -> str:
         """
         Record user feedback
@@ -76,7 +78,7 @@ class FeedbackCollector:
             user_id=user_id,
             confidence_score=confidence_score,
             feedback_type=feedback_type,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
         self.feedback_storage.append(feedback)
@@ -111,7 +113,8 @@ class FeedbackCollector:
         try:
             engine = get_database_engine()
 
-            query = text("""
+            query = text(
+                """
                 INSERT INTO feedback_log (
                     feedback_id, model_name, model_version,
                     prediction, actual_outcome, features,
@@ -123,22 +126,26 @@ class FeedbackCollector:
                     :timestamp, :user_id, :confidence_score,
                     :feedback_type, :metadata
                 )
-            """)
+            """
+            )
 
             with engine.begin() as conn:
-                conn.execute(query, {
-                    "feedback_id": feedback.feedback_id,
-                    "model_name": feedback.model_name,
-                    "model_version": feedback.model_version,
-                    "prediction": json.dumps(feedback.prediction),
-                    "actual_outcome": json.dumps(feedback.actual_outcome),
-                    "features": json.dumps(feedback.features),
-                    "timestamp": feedback.timestamp,
-                    "user_id": feedback.user_id,
-                    "confidence_score": feedback.confidence_score,
-                    "feedback_type": feedback.feedback_type,
-                    "metadata": json.dumps(feedback.metadata)
-                })
+                conn.execute(
+                    query,
+                    {
+                        "feedback_id": feedback.feedback_id,
+                        "model_name": feedback.model_name,
+                        "model_version": feedback.model_version,
+                        "prediction": json.dumps(feedback.prediction),
+                        "actual_outcome": json.dumps(feedback.actual_outcome),
+                        "features": json.dumps(feedback.features),
+                        "timestamp": feedback.timestamp,
+                        "user_id": feedback.user_id,
+                        "confidence_score": feedback.confidence_score,
+                        "feedback_type": feedback.feedback_type,
+                        "metadata": json.dumps(feedback.metadata),
+                    },
+                )
         except Exception as e:
             logger.error(f"❌ Failed to persist feedback: {e}")
 
@@ -154,7 +161,9 @@ class FeedbackCollector:
     def get_feedback_summary(self, model_name: Optional[str] = None) -> Dict[str, Any]:
         """Get feedback summary"""
         if model_name:
-            feedback_list = [f for f in self.feedback_storage if f.model_name == model_name]
+            feedback_list = [
+                f for f in self.feedback_storage if f.model_name == model_name
+            ]
         else:
             feedback_list = self.feedback_storage
 
@@ -170,9 +179,11 @@ class FeedbackCollector:
             "correct_predictions": correct,
             "accuracy": correct / total if total > 0 else 0,
             "feedback_by_type": {
-                feedback_type: sum(1 for f in feedback_list if f.feedback_type == feedback_type)
+                feedback_type: sum(
+                    1 for f in feedback_list if f.feedback_type == feedback_type
+                )
                 for feedback_type in set(f.feedback_type for f in feedback_list)
-            }
+            },
         }
 
 
@@ -192,7 +203,9 @@ class FeedbackAnalyzer:
         Returns:
             Analysis results
         """
-        feedback_list = [f for f in self.collector.feedback_storage if f.model_name == model_name]
+        feedback_list = [
+            f for f in self.collector.feedback_storage if f.model_name == model_name
+        ]
 
         if not feedback_list:
             return {"error": "No feedback available"}
@@ -203,23 +216,27 @@ class FeedbackAnalyzer:
             "accuracy_metrics": self._calculate_accuracy(feedback_list),
             "error_patterns": self._identify_error_patterns(feedback_list),
             "feature_importance": self._analyze_feature_importance(feedback_list),
-            "recommendations": []
+            "recommendations": [],
         }
 
         # Generate recommendations
         if analysis["accuracy_metrics"]["accuracy"] < 0.80:
-            analysis["recommendations"].append({
-                "priority": "high",
-                "type": "retrain",
-                "message": "Model accuracy below 80% - retraining recommended"
-            })
+            analysis["recommendations"].append(
+                {
+                    "priority": "high",
+                    "type": "retrain",
+                    "message": "Model accuracy below 80% - retraining recommended",
+                }
+            )
 
         if len(analysis["error_patterns"]) > 0:
-            analysis["recommendations"].append({
-                "priority": "medium",
-                "type": "investigate",
-                "message": f"Found {len(analysis['error_patterns'])} error patterns to investigate"
-            })
+            analysis["recommendations"].append(
+                {
+                    "priority": "medium",
+                    "type": "investigate",
+                    "message": f"Found {len(analysis['error_patterns'])} error patterns to investigate",
+                }
+            )
 
         logger.info(f"📊 Analyzed {len(feedback_list)} feedback items for {model_name}")
 
@@ -239,9 +256,19 @@ class FeedbackAnalyzer:
 
             return {
                 "accuracy": correct / total if total > 0 else 0,
-                "precision": float(precision_score(actuals, predictions, average='weighted', zero_division=0)),
-                "recall": float(recall_score(actuals, predictions, average='weighted', zero_division=0)),
-                "f1_score": float(f1_score(actuals, predictions, average='weighted', zero_division=0))
+                "precision": float(
+                    precision_score(
+                        actuals, predictions, average="weighted", zero_division=0
+                    )
+                ),
+                "recall": float(
+                    recall_score(
+                        actuals, predictions, average="weighted", zero_division=0
+                    )
+                ),
+                "f1_score": float(
+                    f1_score(actuals, predictions, average="weighted", zero_division=0)
+                ),
             }
         else:
             # For regression
@@ -251,12 +278,9 @@ class FeedbackAnalyzer:
             actuals = [f.actual_outcome for f in feedback_list]
 
             mae = np.mean(np.abs(np.array(predictions) - np.array(actuals)))
-            rmse = np.sqrt(np.mean((np.array(predictions) - np.array(actuals))**2))
+            rmse = np.sqrt(np.mean((np.array(predictions) - np.array(actuals)) ** 2))
 
-            return {
-                "mae": float(mae),
-                "rmse": float(rmse)
-            }
+            return {"mae": float(mae), "rmse": float(rmse)}
 
     def _identify_error_patterns(self, feedback_list: List[Feedback]) -> List[Dict]:
         """Identify common error patterns"""
@@ -282,17 +306,21 @@ class FeedbackAnalyzer:
 
         for key, count in feature_error_counts.items():
             if count / total_errors > 0.2:  # More than 20% of errors
-                patterns.append({
-                    "pattern": key,
-                    "error_count": count,
-                    "error_rate": count / total_errors
-                })
+                patterns.append(
+                    {
+                        "pattern": key,
+                        "error_count": count,
+                        "error_rate": count / total_errors,
+                    }
+                )
 
         patterns.sort(key=lambda x: x["error_count"], reverse=True)
 
         return patterns[:10]  # Top 10 patterns
 
-    def _analyze_feature_importance(self, feedback_list: List[Feedback]) -> Dict[str, float]:
+    def _analyze_feature_importance(
+        self, feedback_list: List[Feedback]
+    ) -> Dict[str, float]:
         """Analyze which features are most associated with errors"""
         errors = [f for f in feedback_list if f.prediction != f.actual_outcome]
         correct = [f for f in feedback_list if f.prediction == f.actual_outcome]
@@ -323,7 +351,7 @@ class FeedbackLoop:
         prediction: Any,
         actual_outcome: Any,
         features: Dict[str, Any],
-        **kwargs
+        **kwargs,
     ) -> Dict[str, Any]:
         """Record feedback and trigger analysis if needed"""
         # Record feedback
@@ -333,7 +361,7 @@ class FeedbackLoop:
             prediction=prediction,
             actual_outcome=actual_outcome,
             features=features,
-            **kwargs
+            **kwargs,
         )
 
         # Get summary
@@ -346,13 +374,10 @@ class FeedbackLoop:
             return {
                 "feedback_id": feedback_id,
                 "summary": summary,
-                "analysis": analysis
+                "analysis": analysis,
             }
 
-        return {
-            "feedback_id": feedback_id,
-            "summary": summary
-        }
+        return {"feedback_id": feedback_id, "summary": summary}
 
 
 # Global instances
@@ -399,10 +424,9 @@ if __name__ == "__main__":
             model_version="v1.0",
             prediction=prediction,
             actual_outcome=actual,
-            features={"points_diff": i, "home_advantage": i % 2}
+            features={"points_diff": i, "home_advantage": i % 2},
         )
 
         if "analysis" in result:
             print(f"\nAnalysis triggered at {i} feedback items:")
             print(json.dumps(result["analysis"], indent=2))
-

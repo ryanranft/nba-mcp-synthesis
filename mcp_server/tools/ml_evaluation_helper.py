@@ -15,26 +15,37 @@ from functools import wraps
 
 def log_operation(operation_name: str):
     """Decorator for structured logging of operations"""
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             try:
                 result = func(*args, **kwargs)
-                print(json.dumps({
-                    "operation": operation_name,
-                    "status": "success",
-                    "function": func.__name__
-                }))
+                print(
+                    json.dumps(
+                        {
+                            "operation": operation_name,
+                            "status": "success",
+                            "function": func.__name__,
+                        }
+                    )
+                )
                 return result
             except Exception as e:
-                print(json.dumps({
-                    "operation": operation_name,
-                    "status": "error",
-                    "function": func.__name__,
-                    "error": str(e)
-                }))
+                print(
+                    json.dumps(
+                        {
+                            "operation": operation_name,
+                            "status": "error",
+                            "function": func.__name__,
+                            "error": str(e),
+                        }
+                    )
+                )
                 raise
+
         return wrapper
+
     return decorator
 
 
@@ -42,11 +53,9 @@ def log_operation(operation_name: str):
 # Classification Metrics
 # ============================================================================
 
+
 @log_operation("ml_accuracy_score")
-def accuracy_score(
-    y_true: List[Any],
-    y_pred: List[Any]
-) -> Dict[str, Any]:
+def accuracy_score(y_true: List[Any], y_pred: List[Any]) -> Dict[str, Any]:
     """
     Calculate prediction accuracy.
 
@@ -71,7 +80,9 @@ def accuracy_score(
         raise ValueError("y_true and y_pred cannot be empty")
 
     if len(y_true) != len(y_pred):
-        raise ValueError(f"y_true and y_pred must have same length: {len(y_true)} vs {len(y_pred)}")
+        raise ValueError(
+            f"y_true and y_pred must have same length: {len(y_true)} vs {len(y_pred)}"
+        )
 
     correct = sum(1 for yt, yp in zip(y_true, y_pred) if yt == yp)
     total = len(y_true)
@@ -82,7 +93,7 @@ def accuracy_score(
         "correct": correct,
         "total": total,
         "percentage": accuracy * 100,
-        "interpretation": _interpret_accuracy(accuracy)
+        "interpretation": _interpret_accuracy(accuracy),
     }
 
 
@@ -102,10 +113,7 @@ def _interpret_accuracy(acc: float) -> str:
 
 @log_operation("ml_precision_recall_f1")
 def precision_recall_f1(
-    y_true: List[Any],
-    y_pred: List[Any],
-    average: str = "binary",
-    pos_label: Any = 1
+    y_true: List[Any], y_pred: List[Any], average: str = "binary", pos_label: Any = 1
 ) -> Dict[str, Any]:
     """
     Calculate precision, recall, and F1-score.
@@ -148,13 +156,23 @@ def precision_recall_f1(
             raise ValueError(f"Binary average requires 2 classes, got {len(classes)}")
 
         # Calculate TP, FP, FN for positive class
-        tp = sum(1 for yt, yp in zip(y_true, y_pred) if yt == pos_label and yp == pos_label)
-        fp = sum(1 for yt, yp in zip(y_true, y_pred) if yt != pos_label and yp == pos_label)
-        fn = sum(1 for yt, yp in zip(y_true, y_pred) if yt == pos_label and yp != pos_label)
+        tp = sum(
+            1 for yt, yp in zip(y_true, y_pred) if yt == pos_label and yp == pos_label
+        )
+        fp = sum(
+            1 for yt, yp in zip(y_true, y_pred) if yt != pos_label and yp == pos_label
+        )
+        fn = sum(
+            1 for yt, yp in zip(y_true, y_pred) if yt == pos_label and yp != pos_label
+        )
 
         precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
         recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-        f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
+        f1 = (
+            2 * (precision * recall) / (precision + recall)
+            if (precision + recall) > 0
+            else 0.0
+        )
 
         support = sum(1 for yt in y_true if yt == pos_label)
 
@@ -169,8 +187,8 @@ def precision_recall_f1(
             "interpretation": {
                 "precision": _interpret_precision(precision),
                 "recall": _interpret_recall(recall),
-                "f1": _interpret_f1(f1)
-            }
+                "f1": _interpret_f1(f1),
+            },
         }
 
     else:
@@ -192,7 +210,7 @@ def precision_recall_f1(
                 "precision": p,
                 "recall": r,
                 "f1_score": f,
-                "support": s
+                "support": s,
             }
 
         # Calculate averages
@@ -205,9 +223,18 @@ def precision_recall_f1(
         elif average == "weighted":
             # Weighted by support
             total_support = sum(pc["support"] for pc in per_class.values())
-            precision = sum(pc["precision"] * pc["support"] for pc in per_class.values()) / total_support
-            recall = sum(pc["recall"] * pc["support"] for pc in per_class.values()) / total_support
-            f1 = sum(pc["f1_score"] * pc["support"] for pc in per_class.values()) / total_support
+            precision = (
+                sum(pc["precision"] * pc["support"] for pc in per_class.values())
+                / total_support
+            )
+            recall = (
+                sum(pc["recall"] * pc["support"] for pc in per_class.values())
+                / total_support
+            )
+            f1 = (
+                sum(pc["f1_score"] * pc["support"] for pc in per_class.values())
+                / total_support
+            )
 
         elif average == "micro":
             # Global TP, FP, FN
@@ -215,12 +242,22 @@ def precision_recall_f1(
             total_fp = sum(1 for yt, yp in zip(y_true, y_pred) if yt != yp)
             total_fn = total_fp  # In multiclass, FP == FN
 
-            precision = total_tp / (total_tp + total_fp) if (total_tp + total_fp) > 0 else 0.0
-            recall = total_tp / (total_tp + total_fn) if (total_tp + total_fn) > 0 else 0.0
-            f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
+            precision = (
+                total_tp / (total_tp + total_fp) if (total_tp + total_fp) > 0 else 0.0
+            )
+            recall = (
+                total_tp / (total_tp + total_fn) if (total_tp + total_fn) > 0 else 0.0
+            )
+            f1 = (
+                2 * (precision * recall) / (precision + recall)
+                if (precision + recall) > 0
+                else 0.0
+            )
 
         else:
-            raise ValueError(f"Unknown average: {average}. Use 'binary', 'macro', 'weighted', or 'micro'")
+            raise ValueError(
+                f"Unknown average: {average}. Use 'binary', 'macro', 'weighted', or 'micro'"
+            )
 
         return {
             "precision": precision,
@@ -232,8 +269,8 @@ def precision_recall_f1(
             "interpretation": {
                 "precision": _interpret_precision(precision),
                 "recall": _interpret_recall(recall),
-                "f1": _interpret_f1(f1)
-            }
+                "f1": _interpret_f1(f1),
+            },
         }
 
 
@@ -278,7 +315,7 @@ def confusion_matrix(
     y_true: List[Any],
     y_pred: List[Any],
     labels: Optional[List[Any]] = None,
-    normalize: Optional[str] = None
+    normalize: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Generate confusion matrix.
@@ -341,16 +378,22 @@ def confusion_matrix(
     if normalize == "true":
         # Normalize by true labels (rows)
         matrix = [
-            [matrix[i][j] / sum(matrix[i]) if sum(matrix[i]) > 0 else 0.0
-             for j in range(n_classes)]
+            [
+                matrix[i][j] / sum(matrix[i]) if sum(matrix[i]) > 0 else 0.0
+                for j in range(n_classes)
+            ]
             for i in range(n_classes)
         ]
     elif normalize == "pred":
         # Normalize by predicted labels (columns)
-        col_sums = [sum(matrix[i][j] for i in range(n_classes)) for j in range(n_classes)]
+        col_sums = [
+            sum(matrix[i][j] for i in range(n_classes)) for j in range(n_classes)
+        ]
         matrix = [
-            [matrix[i][j] / col_sums[j] if col_sums[j] > 0 else 0.0
-             for j in range(n_classes)]
+            [
+                matrix[i][j] / col_sums[j] if col_sums[j] > 0 else 0.0
+                for j in range(n_classes)
+            ]
             for i in range(n_classes)
         ]
     elif normalize == "all":
@@ -365,7 +408,7 @@ def confusion_matrix(
         "matrix": matrix,
         "labels": labels,
         "num_classes": n_classes,
-        "normalize": normalize
+        "normalize": normalize,
     }
 
     # Add binary metrics if binary classification
@@ -376,25 +419,29 @@ def confusion_matrix(
         fn = matrix[1][0] if not normalize else int(matrix[1][0] * len(y_true))
         tp = matrix[1][1] if not normalize else int(matrix[1][1] * len(y_true))
 
-        result.update({
-            "true_negatives": tn,
-            "false_positives": fp,
-            "false_negatives": fn,
-            "true_positives": tp,
-            "sensitivity": tp / (tp + fn) if (tp + fn) > 0 else 0.0,  # Same as recall
-            "specificity": tn / (tn + fp) if (tn + fp) > 0 else 0.0,
-            "positive_predictive_value": tp / (tp + fp) if (tp + fp) > 0 else 0.0,  # Same as precision
-            "negative_predictive_value": tn / (tn + fn) if (tn + fn) > 0 else 0.0
-        })
+        result.update(
+            {
+                "true_negatives": tn,
+                "false_positives": fp,
+                "false_negatives": fn,
+                "true_positives": tp,
+                "sensitivity": (
+                    tp / (tp + fn) if (tp + fn) > 0 else 0.0
+                ),  # Same as recall
+                "specificity": tn / (tn + fp) if (tn + fp) > 0 else 0.0,
+                "positive_predictive_value": (
+                    tp / (tp + fp) if (tp + fp) > 0 else 0.0
+                ),  # Same as precision
+                "negative_predictive_value": tn / (tn + fn) if (tn + fn) > 0 else 0.0,
+            }
+        )
 
     return result
 
 
 @log_operation("ml_roc_auc_score")
 def roc_auc_score(
-    y_true: List[int],
-    y_scores: List[float],
-    num_thresholds: int = 100
+    y_true: List[int], y_scores: List[float], num_thresholds: int = 100
 ) -> Dict[str, Any]:
     """
     Calculate ROC-AUC (area under ROC curve).
@@ -431,8 +478,10 @@ def roc_auc_score(
     # Generate thresholds
     min_score = min(y_scores)
     max_score = max(y_scores)
-    thresholds = [min_score + (max_score - min_score) * i / num_thresholds
-                  for i in range(num_thresholds + 1)]
+    thresholds = [
+        min_score + (max_score - min_score) * i / num_thresholds
+        for i in range(num_thresholds + 1)
+    ]
 
     # Calculate TPR and FPR for each threshold
     fpr_list = []
@@ -459,7 +508,7 @@ def roc_auc_score(
     auc = 0.0
     for i in range(len(fpr_list) - 1):
         # Area of trapezoid
-        auc += (fpr_list[i+1] - fpr_list[i]) * (tpr_list[i] + tpr_list[i+1]) / 2
+        auc += (fpr_list[i + 1] - fpr_list[i]) * (tpr_list[i] + tpr_list[i + 1]) / 2
 
     # Find optimal threshold (maximizing TPR - FPR)
     differences = [tpr - fpr for tpr, fpr in zip(tpr_list, fpr_list)]
@@ -468,15 +517,11 @@ def roc_auc_score(
 
     return {
         "auc": abs(auc),  # Absolute value in case of negative (decreasing FPR)
-        "roc_curve": {
-            "fpr": fpr_list,
-            "tpr": tpr_list,
-            "thresholds": thresholds
-        },
+        "roc_curve": {"fpr": fpr_list, "tpr": tpr_list, "thresholds": thresholds},
         "optimal_threshold": optimal_threshold,
         "optimal_tpr": tpr_list[optimal_idx],
         "optimal_fpr": fpr_list[optimal_idx],
-        "interpretation": _interpret_auc(abs(auc))
+        "interpretation": _interpret_auc(abs(auc)),
     }
 
 
@@ -495,10 +540,7 @@ def _interpret_auc(auc: float) -> str:
 
 
 @log_operation("ml_classification_report")
-def classification_report(
-    y_true: List[Any],
-    y_pred: List[Any]
-) -> Dict[str, Any]:
+def classification_report(y_true: List[Any], y_pred: List[Any]) -> Dict[str, Any]:
     """
     Generate comprehensive classification report.
 
@@ -542,14 +584,18 @@ def classification_report(
 
         precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
         recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-        f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
+        f1 = (
+            2 * (precision * recall) / (precision + recall)
+            if (precision + recall) > 0
+            else 0.0
+        )
         support = sum(1 for yt in y_true if yt == cls)
 
         per_class[str(cls)] = {
             "precision": precision,
             "recall": recall,
             "f1_score": f1,
-            "support": support
+            "support": support,
         }
 
     # Calculate macro average (unweighted)
@@ -559,9 +605,16 @@ def classification_report(
 
     # Calculate weighted average
     total_support = sum(pc["support"] for pc in per_class.values())
-    weighted_precision = sum(pc["precision"] * pc["support"] for pc in per_class.values()) / total_support
-    weighted_recall = sum(pc["recall"] * pc["support"] for pc in per_class.values()) / total_support
-    weighted_f1 = sum(pc["f1_score"] * pc["support"] for pc in per_class.values()) / total_support
+    weighted_precision = (
+        sum(pc["precision"] * pc["support"] for pc in per_class.values())
+        / total_support
+    )
+    weighted_recall = (
+        sum(pc["recall"] * pc["support"] for pc in per_class.values()) / total_support
+    )
+    weighted_f1 = (
+        sum(pc["f1_score"] * pc["support"] for pc in per_class.values()) / total_support
+    )
 
     # Overall accuracy
     accuracy = sum(1 for yt, yp in zip(y_true, y_pred) if yt == yp) / len(y_true)
@@ -572,25 +625,23 @@ def classification_report(
             "precision": macro_precision,
             "recall": macro_recall,
             "f1_score": macro_f1,
-            "support": total_support
+            "support": total_support,
         },
         "weighted_avg": {
             "precision": weighted_precision,
             "recall": weighted_recall,
             "f1_score": weighted_f1,
-            "support": total_support
+            "support": total_support,
         },
         "accuracy": accuracy,
         "num_classes": len(classes),
-        "total_samples": len(y_true)
+        "total_samples": len(y_true),
     }
 
 
 @log_operation("ml_log_loss")
 def log_loss(
-    y_true: List[int],
-    y_pred_proba: List[float],
-    eps: float = 1e-15
+    y_true: List[int], y_pred_proba: List[float], eps: float = 1e-15
 ) -> Dict[str, Any]:
     """
     Calculate log loss (cross-entropy loss).
@@ -637,7 +688,7 @@ def log_loss(
     return {
         "log_loss": overall_loss,
         "per_sample_loss": per_sample_loss,
-        "interpretation": _interpret_log_loss(overall_loss)
+        "interpretation": _interpret_log_loss(overall_loss),
     }
 
 
@@ -659,10 +710,10 @@ def _interpret_log_loss(loss: float) -> str:
 # Regression Metrics
 # ============================================================================
 
+
 @log_operation("ml_mse_rmse_mae")
 def mse_rmse_mae(
-    y_true: List[Union[int, float]],
-    y_pred: List[Union[int, float]]
+    y_true: List[Union[int, float]], y_pred: List[Union[int, float]]
 ) -> Dict[str, Any]:
     """
     Calculate regression error metrics.
@@ -694,7 +745,7 @@ def mse_rmse_mae(
 
     # Calculate errors
     errors = [yt - yp for yt, yp in zip(y_true, y_pred)]
-    squared_errors = [e ** 2 for e in errors]
+    squared_errors = [e**2 for e in errors]
     absolute_errors = [abs(e) for e in errors]
 
     # MSE
@@ -713,14 +764,13 @@ def mse_rmse_mae(
         "sample_errors": errors,
         "sample_squared_errors": squared_errors,
         "sample_absolute_errors": absolute_errors,
-        "num_samples": len(y_true)
+        "num_samples": len(y_true),
     }
 
 
 @log_operation("ml_r2_score")
 def r2_score(
-    y_true: List[Union[int, float]],
-    y_pred: List[Union[int, float]]
+    y_true: List[Union[int, float]], y_pred: List[Union[int, float]]
 ) -> Dict[str, Any]:
     """
     Calculate coefficient of determination (R²).
@@ -775,7 +825,7 @@ def r2_score(
         "explained_variance": explained_var,
         "ss_res": ss_res,
         "ss_tot": ss_tot,
-        "interpretation": _interpret_r2(r2)
+        "interpretation": _interpret_r2(r2),
     }
 
 
@@ -799,7 +849,7 @@ def _interpret_r2(r2: float) -> str:
 def mean_absolute_percentage_error(
     y_true: List[Union[int, float]],
     y_pred: List[Union[int, float]],
-    epsilon: float = 1e-10
+    epsilon: float = 1e-10,
 ) -> Dict[str, Any]:
     """
     Calculate Mean Absolute Percentage Error (MAPE).
@@ -842,7 +892,7 @@ def mean_absolute_percentage_error(
     return {
         "mape": mape,
         "per_sample_ape": per_sample_ape,
-        "interpretation": _interpret_mape(mape)
+        "interpretation": _interpret_mape(mape),
     }
 
 

@@ -28,7 +28,7 @@ def test_internet_speed():
         "Google": "https://www.google.com",
         "GitHub": "https://github.com",
         "DeepSeek API": "https://api.deepseek.com",
-        "Anthropic API": "https://api.anthropic.com"
+        "Anthropic API": "https://api.anthropic.com",
     }
 
     for name, url in test_urls.items():
@@ -40,7 +40,7 @@ def test_internet_speed():
             results[name] = {
                 "status": "✅" if response.status_code < 400 else "⚠️",
                 "latency": f"{latency:.0f}ms",
-                "code": response.status_code
+                "code": response.status_code,
             }
         except requests.exceptions.Timeout:
             results[name] = {"status": "❌", "latency": "Timeout", "code": "N/A"}
@@ -55,11 +55,11 @@ def test_internet_speed():
     table.add_column("Notes")
 
     for name, result in results.items():
-        latency = result['latency']
+        latency = result["latency"]
 
         # Determine if latency is good/bad
-        if isinstance(latency, str) and 'ms' in latency:
-            ms = int(latency.replace('ms', ''))
+        if isinstance(latency, str) and "ms" in latency:
+            ms = int(latency.replace("ms", ""))
             if ms < 100:
                 note = "[green]Excellent[/green]"
             elif ms < 300:
@@ -71,7 +71,7 @@ def test_internet_speed():
         else:
             note = "[red]Connection Issue[/red]"
 
-        table.add_row(name, result['status'], result['latency'], note)
+        table.add_row(name, result["status"], result["latency"], note)
 
     console.print(table)
 
@@ -94,7 +94,9 @@ async def test_deepseek_api_speed():
 
         # Test 2: Medium query
         start = time.time()
-        result2 = await model.query("Optimize: SELECT * FROM table", temperature=0.2, max_tokens=500)
+        result2 = await model.query(
+            "Optimize: SELECT * FROM table", temperature=0.2, max_tokens=500
+        )
         time2 = time.time() - start
 
         table = Table(title="DeepSeek API Performance")
@@ -106,27 +108,31 @@ async def test_deepseek_api_speed():
 
         # Analyze results
         def assess_time(t):
-            if t < 2: return "[green]Excellent[/green]"
-            elif t < 5: return "[yellow]Good[/yellow]"
-            elif t < 15: return "[yellow]Slow (Network?)[/yellow]"
-            else: return "[red]Very Slow (Check Network!)[/red]"
+            if t < 2:
+                return "[green]Excellent[/green]"
+            elif t < 5:
+                return "[yellow]Good[/yellow]"
+            elif t < 15:
+                return "[yellow]Slow (Network?)[/yellow]"
+            else:
+                return "[red]Very Slow (Check Network!)[/red]"
 
-        if result1.get('success'):
+        if result1.get("success"):
             table.add_row(
                 "Simple Query",
                 f"{time1:.2f}s",
-                str(result1.get('tokens_used', 'N/A')),
+                str(result1.get("tokens_used", "N/A")),
                 f"${result1.get('cost', 0):.6f}",
-                assess_time(time1)
+                assess_time(time1),
             )
 
-        if result2.get('success'):
+        if result2.get("success"):
             table.add_row(
                 "SQL Optimization",
                 f"{time2:.2f}s",
-                str(result2.get('tokens_used', 'N/A')),
+                str(result2.get("tokens_used", "N/A")),
                 f"${result2.get('cost', 0):.6f}",
-                assess_time(time2)
+                assess_time(time2),
             )
 
         console.print(table)
@@ -153,7 +159,7 @@ async def test_claude_api_speed():
             deepseek_result="The query is optimized",
             original_request="Optimize query",
             context_summary="Test",
-            include_verification=False
+            include_verification=False,
         )
         time_taken = time.time() - start
 
@@ -165,18 +171,22 @@ async def test_claude_api_speed():
         table.add_column("Assessment")
 
         def assess_time(t):
-            if t < 3: return "[green]Excellent[/green]"
-            elif t < 10: return "[yellow]Good[/yellow]"
-            elif t < 20: return "[yellow]Slow (Network?)[/yellow]"
-            else: return "[red]Very Slow (Check Network!)[/red]"
+            if t < 3:
+                return "[green]Excellent[/green]"
+            elif t < 10:
+                return "[yellow]Good[/yellow]"
+            elif t < 20:
+                return "[yellow]Slow (Network?)[/yellow]"
+            else:
+                return "[red]Very Slow (Check Network!)[/red]"
 
-        if result.get('success'):
+        if result.get("success"):
             table.add_row(
                 "Synthesis",
                 f"{time_taken:.2f}s",
-                str(result.get('tokens_used', 'N/A')),
+                str(result.get("tokens_used", "N/A")),
                 f"${result.get('cost', 0):.6f}",
-                assess_time(time_taken)
+                assess_time(time_taken),
             )
 
         console.print(table)
@@ -212,7 +222,9 @@ def diagnose_bottleneck(network_results, deepseek_time, claude_time):
 
     # Check API response times
     if deepseek_time and deepseek_time.get("simple", 0) > 10:
-        issues.append(f"⚠️  DeepSeek API very slow ({deepseek_time['simple']:.1f}s for simple query)")
+        issues.append(
+            f"⚠️  DeepSeek API very slow ({deepseek_time['simple']:.1f}s for simple query)"
+        )
         recommendations.append("This is likely a network issue, not your modem")
         recommendations.append("Try: Restart router, check bandwidth usage")
 
@@ -241,11 +253,19 @@ def diagnose_bottleneck(network_results, deepseek_time, claude_time):
     if "ms" in str(google_latency):
         google_ms = int(google_latency.replace("ms", ""))
         if google_ms < 100:
-            console.print("  [green]✅ Unlikely - your connection to Google is fast[/green]")
-            console.print("  [dim]The slowdown is probably API server latency, not your modem[/dim]")
+            console.print(
+                "  [green]✅ Unlikely - your connection to Google is fast[/green]"
+            )
+            console.print(
+                "  [dim]The slowdown is probably API server latency, not your modem[/dim]"
+            )
         else:
-            console.print("  [yellow]⚠️  Possible - your general internet is slow[/yellow]")
-            console.print("  [yellow]Try: Restart modem/router, check for ISP issues[/yellow]")
+            console.print(
+                "  [yellow]⚠️  Possible - your general internet is slow[/yellow]"
+            )
+            console.print(
+                "  [yellow]Try: Restart modem/router, check for ISP issues[/yellow]"
+            )
 
     # Performance expectations
     console.print(f"\n[bold]Expected Performance:[/bold]")
@@ -253,7 +273,9 @@ def diagnose_bottleneck(network_results, deepseek_time, claude_time):
     console.print("  • DeepSeek SQL optimization: 10-25s (complex reasoning)")
     console.print("  • Claude synthesis: 5-15s")
     console.print("  • Total synthesis: 15-40s")
-    console.print("\n  [dim]Note: 20-25s of this is actual AI processing, not network![/dim]")
+    console.print(
+        "\n  [dim]Note: 20-25s of this is actual AI processing, not network![/dim]"
+    )
 
 
 async def main():

@@ -17,10 +17,13 @@ import asyncio
 from typing import Dict, Any, List
 
 # Add the project root to the Python path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
 
 from mcp.server.fastmcp import FastMCP, Context
 from mcp_server.fastmcp_server import mcp as nba_mcp_server
+
 
 class TestMCPIntegration(unittest.TestCase):
     """Test cases for MCP server integration"""
@@ -31,11 +34,29 @@ class TestMCPIntegration(unittest.TestCase):
 
         # Test data
         self.test_player_stats = {
-            'PTS': 25.0, 'FGM': 10.0, 'FGA': 20.0, '3PM': 3.0, '3PA': 8.0,
-            'FTM': 2.0, 'FTA': 3.0, 'REB': 8.0, 'AST': 6.0, 'STL': 2.0,
-            'BLK': 1.0, 'TOV': 3.0, 'PF': 2.0, 'MP': 35.0, 'TM_MP': 240.0,
-            'TM_FGA': 90.0, 'TM_FTA': 25.0, 'TM_TOV': 12.0, 'TM_FGM': 35.0,
-            'TM_REB': 45.0, 'OPP_REB': 42.0, 'OPP_POSS': 100.0, 'OPP_2PA': 50.0
+            "PTS": 25.0,
+            "FGM": 10.0,
+            "FGA": 20.0,
+            "3PM": 3.0,
+            "3PA": 8.0,
+            "FTM": 2.0,
+            "FTA": 3.0,
+            "REB": 8.0,
+            "AST": 6.0,
+            "STL": 2.0,
+            "BLK": 1.0,
+            "TOV": 3.0,
+            "PF": 2.0,
+            "MP": 35.0,
+            "TM_MP": 240.0,
+            "TM_FGA": 90.0,
+            "TM_FTA": 25.0,
+            "TM_TOV": 12.0,
+            "TM_FGM": 35.0,
+            "TM_REB": 45.0,
+            "OPP_REB": 42.0,
+            "OPP_POSS": 100.0,
+            "OPP_2PA": 50.0,
         }
 
     async def test_algebra_tools_integration(self):
@@ -43,7 +64,12 @@ class TestMCPIntegration(unittest.TestCase):
         # Test formula calculation
         result_tuple = await self.mcp_server.call_tool(
             "algebra_sports_formula",
-            {"params": {"formula_name": "true_shooting", "stats": self.test_player_stats}}
+            {
+                "params": {
+                    "formula_name": "true_shooting",
+                    "stats": self.test_player_stats,
+                }
+            },
         )
         result = result_tuple[1]
 
@@ -54,8 +80,7 @@ class TestMCPIntegration(unittest.TestCase):
         # Test formula simplification
         formula = "PTS / (2 * (FGA + 0.44 * FTA))"
         result_tuple = await self.mcp_server.call_tool(
-            "algebra_simplify",
-            {"params": {"formula": formula}}
+            "algebra_simplify", {"params": {"formula": formula}}
         )
         result = result_tuple[1]
 
@@ -69,8 +94,7 @@ class TestMCPIntegration(unittest.TestCase):
 
         # Test formula type identification
         result_tuple = await self.mcp_server.call_tool(
-            "formula_identify_type",
-            {"params": {"formula": formula}}
+            "formula_identify_type", {"params": {"formula": formula}}
         )
         result = result_tuple[1]
 
@@ -80,8 +104,7 @@ class TestMCPIntegration(unittest.TestCase):
 
         # Test tool suggestions
         result_tuple = await self.mcp_server.call_tool(
-            "formula_suggest_tools",
-            {"params": {"formula": formula}}
+            "formula_suggest_tools", {"params": {"formula": formula}}
         )
         result = result_tuple[1]
 
@@ -91,8 +114,7 @@ class TestMCPIntegration(unittest.TestCase):
 
         # Test variable mapping
         result_tuple = await self.mcp_server.call_tool(
-            "formula_map_variables",
-            {"params": {"formula": formula}}
+            "formula_map_variables", {"params": {"formula": formula}}
         )
         result = result_tuple[1]
 
@@ -106,8 +128,7 @@ class TestMCPIntegration(unittest.TestCase):
         formula = "PTS / (2 * (FGA + 0.44 * FTA))"
 
         result_tuple = await self.mcp_server.call_tool(
-            "analyze_formula_structure",
-            {"params": {"formula": formula}}
+            "analyze_formula_structure", {"params": {"formula": formula}}
         )
         result = result_tuple[1]
 
@@ -120,8 +141,7 @@ class TestMCPIntegration(unittest.TestCase):
         latex_formula = r"\frac{PTS}{2 \cdot (FGA + 0.44 \cdot FTA)}"
 
         result_tuple = await self.mcp_server.call_tool(
-            "convert_latex_to_sympy",
-            {"params": {"latex_formula": latex_formula}}
+            "convert_latex_to_sympy", {"params": {"latex_formula": latex_formula}}
         )
         result = result_tuple[1]
 
@@ -136,7 +156,7 @@ class TestMCPIntegration(unittest.TestCase):
         # Test formula validation
         result_tuple = await self.mcp_server.call_tool(
             "formula_builder_validate",
-            {"params": {"formula": formula, "validation_level": "syntax"}}
+            {"params": {"formula": formula, "validation_level": "syntax"}},
         )
         result = result_tuple[1]
 
@@ -147,7 +167,7 @@ class TestMCPIntegration(unittest.TestCase):
         # Test completion suggestions
         result_tuple = await self.mcp_server.call_tool(
             "formula_builder_suggest",
-            {"params": {"partial_formula": "PTS / (2 * (FGA +", "context": "shooting"}}
+            {"params": {"partial_formula": "PTS / (2 * (FGA +", "context": "shooting"}},
         )
         result = result_tuple[1]
 
@@ -158,7 +178,7 @@ class TestMCPIntegration(unittest.TestCase):
         # Test formula preview
         result_tuple = await self.mcp_server.call_tool(
             "formula_builder_preview",
-            {"params": {"formula": formula, "variable_values": self.test_player_stats}}
+            {"params": {"formula": formula, "variable_values": self.test_player_stats}},
         )
         result = result_tuple[1]
 
@@ -174,8 +194,7 @@ class TestMCPIntegration(unittest.TestCase):
 
         # Step 2: Analyze formula structure
         result_tuple = await self.mcp_server.call_tool(
-            "analyze_formula_structure",
-            {"params": {"formula": formula_text}}
+            "analyze_formula_structure", {"params": {"formula": formula_text}}
         )
         structure_result = result_tuple[1]
 
@@ -183,8 +202,7 @@ class TestMCPIntegration(unittest.TestCase):
 
         # Step 3: Identify formula type
         result_tuple = await self.mcp_server.call_tool(
-            "formula_identify_type",
-            {"params": {"formula": formula_text}}
+            "formula_identify_type", {"params": {"formula": formula_text}}
         )
         type_result = result_tuple[1]
 
@@ -193,7 +211,7 @@ class TestMCPIntegration(unittest.TestCase):
         # Step 4: Validate formula
         result_tuple = await self.mcp_server.call_tool(
             "formula_builder_validate",
-            {"params": {"formula": formula_text, "validation_level": "semantic"}}
+            {"params": {"formula": formula_text, "validation_level": "semantic"}},
         )
         validation_result = result_tuple[1]
 
@@ -203,7 +221,12 @@ class TestMCPIntegration(unittest.TestCase):
         # Step 5: Calculate with real data
         result_tuple = await self.mcp_server.call_tool(
             "algebra_sports_formula",
-            {"params": {"formula_name": "true_shooting", "stats": self.test_player_stats}}
+            {
+                "params": {
+                    "formula_name": "true_shooting",
+                    "stats": self.test_player_stats,
+                }
+            },
         )
         calculation_result = result_tuple[1]
 
@@ -213,7 +236,7 @@ class TestMCPIntegration(unittest.TestCase):
         # Step 6: Export result
         result_tuple = await self.mcp_server.call_tool(
             "formula_builder_export",
-            {"params": {"formula": formula_text, "format_type": "latex"}}
+            {"params": {"formula": formula_text, "format_type": "latex"}},
         )
         export_result = result_tuple[1]
 
@@ -225,7 +248,12 @@ class TestMCPIntegration(unittest.TestCase):
         # Test invalid formula name
         result_tuple = await self.mcp_server.call_tool(
             "algebra_sports_formula",
-            {"params": {"formula_name": "invalid_formula", "stats": self.test_player_stats}}
+            {
+                "params": {
+                    "formula_name": "invalid_formula",
+                    "stats": self.test_player_stats,
+                }
+            },
         )
         result = result_tuple[1]
 
@@ -235,7 +263,7 @@ class TestMCPIntegration(unittest.TestCase):
         # Test malformed formula
         result_tuple = await self.mcp_server.call_tool(
             "formula_builder_validate",
-            {"params": {"formula": "PTS / (2 * (FGA +", "validation_level": "syntax"}}
+            {"params": {"formula": "PTS / (2 * (FGA +", "validation_level": "syntax"}},
         )
         result = result_tuple[1]
 
@@ -248,7 +276,7 @@ class TestMCPIntegration(unittest.TestCase):
 
         result_tuple = await self.mcp_server.call_tool(
             "algebra_sports_formula",
-            {"params": {"formula_name": "true_shooting", "stats": incomplete_stats}}
+            {"params": {"formula_name": "true_shooting", "stats": incomplete_stats}},
         )
         result = result_tuple[1]
 
@@ -265,7 +293,12 @@ class TestMCPIntegration(unittest.TestCase):
         for _ in range(10):
             result_tuple = await self.mcp_server.call_tool(
                 "algebra_sports_formula",
-                {"params": {"formula_name": "true_shooting", "stats": self.test_player_stats}}
+                {
+                    "params": {
+                        "formula_name": "true_shooting",
+                        "stats": self.test_player_stats,
+                    }
+                },
             )
             result = result_tuple[1]
             self.assertTrue(result["success"])
@@ -283,14 +316,19 @@ class TestMCPIntegration(unittest.TestCase):
         # 1. Direct calculation
         result_tuple = await self.mcp_server.call_tool(
             "algebra_sports_formula",
-            {"params": {"formula_name": "true_shooting", "stats": self.test_player_stats}}
+            {
+                "params": {
+                    "formula_name": "true_shooting",
+                    "stats": self.test_player_stats,
+                }
+            },
         )
         direct_result = result_tuple[1]
 
         # 2. Formula preview calculation
         result_tuple = await self.mcp_server.call_tool(
             "formula_builder_preview",
-            {"params": {"formula": formula, "variable_values": self.test_player_stats}}
+            {"params": {"formula": formula, "variable_values": self.test_player_stats}},
         )
         preview_result = result_tuple[1]
 
@@ -306,6 +344,7 @@ class TestMCPIntegration(unittest.TestCase):
             tolerance = abs(direct_value) * 0.01
             self.assertLessEqual(abs(direct_value - preview_value), tolerance)
 
+
 class TestWorkflowIntegration(unittest.TestCase):
     """Test cases for complete workflow integration"""
 
@@ -317,11 +356,29 @@ class TestWorkflowIntegration(unittest.TestCase):
         """Test complete sports analytics workflow"""
         # Simulate analyzing a player's performance
         player_stats = {
-            'PTS': 28.0, 'FGM': 11.0, 'FGA': 22.0, '3PM': 4.0, '3PA': 9.0,
-            'FTM': 2.0, 'FTA': 3.0, 'REB': 7.0, 'AST': 8.0, 'STL': 1.0,
-            'BLK': 0.0, 'TOV': 4.0, 'PF': 3.0, 'MP': 36.0, 'TM_MP': 240.0,
-            'TM_FGA': 88.0, 'TM_FTA': 24.0, 'TM_TOV': 13.0, 'TM_FGM': 34.0,
-            'TM_REB': 44.0, 'OPP_REB': 41.0, 'OPP_POSS': 98.0, 'OPP_2PA': 48.0
+            "PTS": 28.0,
+            "FGM": 11.0,
+            "FGA": 22.0,
+            "3PM": 4.0,
+            "3PA": 9.0,
+            "FTM": 2.0,
+            "FTA": 3.0,
+            "REB": 7.0,
+            "AST": 8.0,
+            "STL": 1.0,
+            "BLK": 0.0,
+            "TOV": 4.0,
+            "PF": 3.0,
+            "MP": 36.0,
+            "TM_MP": 240.0,
+            "TM_FGA": 88.0,
+            "TM_FTA": 24.0,
+            "TM_TOV": 13.0,
+            "TM_FGM": 34.0,
+            "TM_REB": 44.0,
+            "OPP_REB": 41.0,
+            "OPP_POSS": 98.0,
+            "OPP_2PA": 48.0,
         }
 
         # Step 1: Calculate multiple metrics
@@ -331,7 +388,7 @@ class TestWorkflowIntegration(unittest.TestCase):
         for metric in metrics:
             result_tuple = await self.mcp_server.call_tool(
                 "algebra_sports_formula",
-                {"params": {"formula_name": metric, "stats": player_stats}}
+                {"params": {"formula_name": metric, "stats": player_stats}},
             )
             result = result_tuple[1]
 
@@ -346,7 +403,7 @@ class TestWorkflowIntegration(unittest.TestCase):
             # Get formula definition
             result_tuple = await self.mcp_server.call_tool(
                 "algebra_sports_formula",
-                {"params": {"formula_name": metric, "stats": {}}}
+                {"params": {"formula_name": metric, "stats": {}}},
             )
             formula_result = result_tuple[1]
 
@@ -355,8 +412,7 @@ class TestWorkflowIntegration(unittest.TestCase):
 
                 # Analyze structure
                 result_tuple = await self.mcp_server.call_tool(
-                    "analyze_formula_structure",
-                    {"params": {"formula": formula_text}}
+                    "analyze_formula_structure", {"params": {"formula": formula_text}}
                 )
                 structure_result = result_tuple[1]
 
@@ -368,15 +424,14 @@ class TestWorkflowIntegration(unittest.TestCase):
         formulas = [
             "PTS / (2 * (FGA + 0.44 * FTA))",  # TS%
             "(FGM + 0.5 * 3PM) / FGA",  # eFG%
-            "FGM / FGA"  # FG%
+            "FGM / FGA",  # FG%
         ]
 
         # Test each formula
         for formula in formulas:
             # Analyze structure
             result_tuple = await self.mcp_server.call_tool(
-                "analyze_formula_structure",
-                {"params": {"formula": formula}}
+                "analyze_formula_structure", {"params": {"formula": formula}}
             )
             structure_result = result_tuple[1]
 
@@ -384,8 +439,7 @@ class TestWorkflowIntegration(unittest.TestCase):
 
             # Identify type
             result_tuple = await self.mcp_server.call_tool(
-                "formula_identify_type",
-                {"params": {"formula": formula}}
+                "formula_identify_type", {"params": {"formula": formula}}
             )
             type_result = result_tuple[1]
 
@@ -394,7 +448,7 @@ class TestWorkflowIntegration(unittest.TestCase):
             # Validate
             result_tuple = await self.mcp_server.call_tool(
                 "formula_builder_validate",
-                {"params": {"formula": formula, "validation_level": "semantic"}}
+                {"params": {"formula": formula, "validation_level": "semantic"}},
             )
             validation_result = result_tuple[1]
 
@@ -407,8 +461,7 @@ class TestWorkflowIntegration(unittest.TestCase):
 
         # Step 1: Get comprehensive analysis
         result_tuple = await self.mcp_server.call_tool(
-            "formula_analyze_comprehensive",
-            {"params": {"formula": formula}}
+            "formula_analyze_comprehensive", {"params": {"formula": formula}}
         )
         analysis_result = result_tuple[1]
 
@@ -420,7 +473,7 @@ class TestWorkflowIntegration(unittest.TestCase):
         # Step 2: Get recommendations
         result_tuple = await self.mcp_server.call_tool(
             "formula_get_recommendations",
-            {"params": {"formula": formula, "context": "shooting efficiency"}}
+            {"params": {"formula": formula, "context": "shooting efficiency"}},
         )
         recommendations_result = result_tuple[1]
 
@@ -432,7 +485,7 @@ class TestWorkflowIntegration(unittest.TestCase):
         # Step 3: Get template suggestions
         result_tuple = await self.mcp_server.call_tool(
             "formula_builder_get_templates",
-            {"params": {"template_name": None, "category": "shooting"}}
+            {"params": {"template_name": None, "category": "shooting"}},
         )
         templates_result = result_tuple[1]
 
@@ -440,10 +493,7 @@ class TestWorkflowIntegration(unittest.TestCase):
         self.assertIn("templates", templates_result)
         self.assertGreater(len(templates_result["templates"]), 0)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     # Run the tests
     unittest.main(verbosity=2)
-
-
-
-

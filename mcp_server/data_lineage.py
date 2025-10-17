@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 class NodeType(Enum):
     """Type of node in lineage graph"""
+
     SOURCE = "source"
     TRANSFORMATION = "transformation"
     FEATURE = "feature"
@@ -27,6 +28,7 @@ class NodeType(Enum):
 @dataclass
 class LineageNode:
     """Node in the lineage graph"""
+
     node_id: str
     node_type: NodeType
     name: str
@@ -56,7 +58,7 @@ class DataLineageTracker:
         """Load lineage from disk"""
         lineage_file = self.storage_path / "lineage.json"
         if lineage_file.exists():
-            with open(lineage_file, 'r') as f:
+            with open(lineage_file, "r") as f:
                 data = json.load(f)
                 for node_id, node_data in data.items():
                     self.nodes[node_id] = LineageNode(
@@ -66,7 +68,7 @@ class DataLineageTracker:
                         metadata=node_data.get("metadata", {}),
                         created_at=datetime.fromisoformat(node_data["created_at"]),
                         parents=node_data.get("parents", []),
-                        children=node_data.get("children", [])
+                        children=node_data.get("children", []),
                     )
             logger.info(f"Loaded {len(self.nodes)} lineage nodes")
 
@@ -82,10 +84,10 @@ class DataLineageTracker:
                 "metadata": node.metadata,
                 "created_at": node.created_at.isoformat(),
                 "parents": node.parents,
-                "children": node.children
+                "children": node.children,
             }
 
-        with open(lineage_file, 'w') as f:
+        with open(lineage_file, "w") as f:
             json.dump(data, f, indent=2)
 
         logger.debug(f"Saved {len(self.nodes)} lineage nodes")
@@ -96,7 +98,7 @@ class DataLineageTracker:
         node_type: NodeType,
         name: str,
         parent_ids: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> LineageNode:
         """
         Track a new node in the lineage.
@@ -118,7 +120,7 @@ class DataLineageTracker:
             node_type=node_type,
             name=name,
             metadata=metadata or {},
-            parents=parent_ids.copy()
+            parents=parent_ids.copy(),
         )
 
         # Add as child to parents
@@ -268,13 +270,12 @@ class DataLineageTracker:
             "node": node.name,
             "node_type": node.node_type.value,
             "total_impacted": len(descendants),
-            "impacted_by_type": {
-                k: len(v) for k, v in impact_by_type.items()
-            },
+            "impacted_by_type": {k: len(v) for k, v in impact_by_type.items()},
             "critical_dependencies": [
-                desc.name for desc in descendants
+                desc.name
+                for desc in descendants
                 if desc.node_type in [NodeType.MODEL, NodeType.PREDICTION]
-            ]
+            ],
         }
 
 
@@ -296,7 +297,7 @@ if __name__ == "__main__":
         node_id="raw_games_2024",
         node_type=NodeType.SOURCE,
         name="Raw Games 2024",
-        metadata={"table": "games", "records": 1230}
+        metadata={"table": "games", "records": 1230},
     )
 
     # Transformations
@@ -305,7 +306,7 @@ if __name__ == "__main__":
         node_type=NodeType.TRANSFORMATION,
         name="Cleaned Games",
         parent_ids=["raw_games_2024"],
-        metadata={"operation": "clean_nulls", "records": 1200}
+        metadata={"operation": "clean_nulls", "records": 1200},
     )
 
     tracker.track_node(
@@ -313,7 +314,7 @@ if __name__ == "__main__":
         node_type=NodeType.TRANSFORMATION,
         name="Aggregated Team Stats",
         parent_ids=["cleaned_games"],
-        metadata={"operation": "aggregate_by_team"}
+        metadata={"operation": "aggregate_by_team"},
     )
 
     # Features
@@ -322,7 +323,7 @@ if __name__ == "__main__":
         node_type=NodeType.FEATURE,
         name="Team Win Rate",
         parent_ids=["aggregated_stats"],
-        metadata={"formula": "wins / total_games"}
+        metadata={"formula": "wins / total_games"},
     )
 
     tracker.track_node(
@@ -330,7 +331,7 @@ if __name__ == "__main__":
         node_type=NodeType.FEATURE,
         name="Points Per Game",
         parent_ids=["aggregated_stats"],
-        metadata={"formula": "total_points / total_games"}
+        metadata={"formula": "total_points / total_games"},
     )
 
     # Model
@@ -339,7 +340,7 @@ if __name__ == "__main__":
         node_type=NodeType.MODEL,
         name="Playoff Predictor v1",
         parent_ids=["feature_win_rate", "feature_ppg"],
-        metadata={"algorithm": "RandomForest", "accuracy": 0.87}
+        metadata={"algorithm": "RandomForest", "accuracy": 0.87},
     )
 
     print("✅ Tracked 6 pipeline nodes")
@@ -363,7 +364,7 @@ if __name__ == "__main__":
     print(f"\nChanging '{impact['node']}' would impact:")
     print(f"  Total nodes: {impact['total_impacted']}")
     print(f"  By type:")
-    for node_type, count in impact['impacted_by_type'].items():
+    for node_type, count in impact["impacted_by_type"].items():
         print(f"    - {node_type}: {count}")
     print(f"  Critical dependencies: {impact['critical_dependencies']}")
 
@@ -380,4 +381,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("Data Lineage Demo Complete!")
     print("=" * 80)
-

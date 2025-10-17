@@ -38,6 +38,7 @@ logger = logging.getLogger(__name__)
 
 class TenantStatus(Enum):
     """Tenant account status"""
+
     ACTIVE = "active"
     SUSPENDED = "suspended"
     TRIAL = "trial"
@@ -46,6 +47,7 @@ class TenantStatus(Enum):
 
 class TenantTier(Enum):
     """Tenant subscription tier"""
+
     FREE = "free"
     STARTER = "starter"
     PROFESSIONAL = "professional"
@@ -55,6 +57,7 @@ class TenantTier(Enum):
 @dataclass
 class ResourceQuota:
     """Resource usage limits per tenant"""
+
     max_api_calls_per_day: int = 1000
     max_storage_gb: float = 10.0
     max_models: int = 5
@@ -66,7 +69,7 @@ class ResourceQuota:
         return asdict(self)
 
     @staticmethod
-    def for_tier(tier: TenantTier) -> 'ResourceQuota':
+    def for_tier(tier: TenantTier) -> "ResourceQuota":
         """Get default quotas for subscription tier"""
         quotas = {
             TenantTier.FREE: ResourceQuota(
@@ -75,7 +78,7 @@ class ResourceQuota:
                 max_models=1,
                 max_concurrent_requests=2,
                 max_query_results=1000,
-                max_users=1
+                max_users=1,
             ),
             TenantTier.STARTER: ResourceQuota(
                 max_api_calls_per_day=10000,
@@ -83,7 +86,7 @@ class ResourceQuota:
                 max_models=10,
                 max_concurrent_requests=10,
                 max_query_results=50000,
-                max_users=5
+                max_users=5,
             ),
             TenantTier.PROFESSIONAL: ResourceQuota(
                 max_api_calls_per_day=100000,
@@ -91,7 +94,7 @@ class ResourceQuota:
                 max_models=50,
                 max_concurrent_requests=50,
                 max_query_results=500000,
-                max_users=25
+                max_users=25,
             ),
             TenantTier.ENTERPRISE: ResourceQuota(
                 max_api_calls_per_day=-1,  # unlimited
@@ -99,8 +102,8 @@ class ResourceQuota:
                 max_models=-1,
                 max_concurrent_requests=200,
                 max_query_results=-1,
-                max_users=-1
-            )
+                max_users=-1,
+            ),
         }
         return quotas.get(tier, ResourceQuota())
 
@@ -108,6 +111,7 @@ class ResourceQuota:
 @dataclass
 class TenantUsage:
     """Track tenant resource usage"""
+
     api_calls_today: int = 0
     storage_used_gb: float = 0.0
     models_created: int = 0
@@ -122,13 +126,14 @@ class TenantUsage:
 
     def to_dict(self) -> Dict[str, Any]:
         data = asdict(self)
-        data['last_reset'] = self.last_reset.isoformat()
+        data["last_reset"] = self.last_reset.isoformat()
         return data
 
 
 @dataclass
 class TenantConfig:
     """Tenant-specific configuration"""
+
     # Branding
     company_name: str = "NBA Analytics"
     logo_url: Optional[str] = None
@@ -156,6 +161,7 @@ class TenantConfig:
 @dataclass
 class Tenant:
     """Tenant (customer/organization) definition"""
+
     tenant_id: str
     name: str
     status: TenantStatus = TenantStatus.TRIAL
@@ -176,28 +182,33 @@ class Tenant:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'tenant_id': self.tenant_id,
-            'name': self.name,
-            'status': self.status.value,
-            'tier': self.tier.value,
-            'quota': self.quota.to_dict(),
-            'usage': self.usage.to_dict(),
-            'config': self.config.to_dict(),
-            'created_at': self.created_at.isoformat(),
-            'updated_at': self.updated_at.isoformat(),
-            'trial_ends_at': self.trial_ends_at.isoformat() if self.trial_ends_at else None,
-            'primary_contact_email': self.primary_contact_email,
-            'billing_email': self.billing_email
+            "tenant_id": self.tenant_id,
+            "name": self.name,
+            "status": self.status.value,
+            "tier": self.tier.value,
+            "quota": self.quota.to_dict(),
+            "usage": self.usage.to_dict(),
+            "config": self.config.to_dict(),
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+            "trial_ends_at": (
+                self.trial_ends_at.isoformat() if self.trial_ends_at else None
+            ),
+            "primary_contact_email": self.primary_contact_email,
+            "billing_email": self.billing_email,
         }
 
     def is_within_quota(self, resource: str) -> bool:
         """Check if tenant is within quota for a resource"""
         quota_map = {
-            'api_calls': (self.usage.api_calls_today, self.quota.max_api_calls_per_day),
-            'storage': (self.usage.storage_used_gb, self.quota.max_storage_gb),
-            'models': (self.usage.models_created, self.quota.max_models),
-            'concurrent_requests': (self.usage.concurrent_requests, self.quota.max_concurrent_requests),
-            'users': (self.usage.total_users, self.quota.max_users)
+            "api_calls": (self.usage.api_calls_today, self.quota.max_api_calls_per_day),
+            "storage": (self.usage.storage_used_gb, self.quota.max_storage_gb),
+            "models": (self.usage.models_created, self.quota.max_models),
+            "concurrent_requests": (
+                self.usage.concurrent_requests,
+                self.quota.max_concurrent_requests,
+            ),
+            "users": (self.usage.total_users, self.quota.max_users),
         }
 
         if resource not in quota_map:
@@ -232,13 +243,13 @@ class TenantContext:
     @classmethod
     def get_current_tenant(cls) -> Optional[str]:
         """Get current tenant ID"""
-        return getattr(cls._thread_local, 'tenant_id', None)
+        return getattr(cls._thread_local, "tenant_id", None)
 
     @classmethod
     def clear(cls) -> None:
         """Clear tenant context"""
-        if hasattr(cls._thread_local, 'tenant_id'):
-            delattr(cls._thread_local, 'tenant_id')
+        if hasattr(cls._thread_local, "tenant_id"):
+            delattr(cls._thread_local, "tenant_id")
 
 
 class TenantManager:
@@ -252,25 +263,30 @@ class TenantManager:
         self,
         name: str,
         tier: TenantTier = TenantTier.TRIAL,
-        primary_email: Optional[str] = None
+        primary_email: Optional[str] = None,
     ) -> Tenant:
         """Create a new tenant"""
         # Generate tenant ID
-        tenant_id = hashlib.sha256(f"{name}{datetime.now().isoformat()}".encode()).hexdigest()[:16]
+        tenant_id = hashlib.sha256(
+            f"{name}{datetime.now().isoformat()}".encode()
+        ).hexdigest()[:16]
 
         tenant = Tenant(
             tenant_id=tenant_id,
             name=name,
             tier=tier,
-            status=TenantStatus.TRIAL if tier == TenantTier.FREE else TenantStatus.ACTIVE,
+            status=(
+                TenantStatus.TRIAL if tier == TenantTier.FREE else TenantStatus.ACTIVE
+            ),
             quota=ResourceQuota.for_tier(tier),
             primary_contact_email=primary_email,
-            billing_email=primary_email
+            billing_email=primary_email,
         )
 
         # Set trial period
         if tier == TenantTier.FREE:
             from datetime import timedelta
+
             tenant.trial_ends_at = datetime.now() + timedelta(days=30)
 
         with self._lock:
@@ -293,9 +309,7 @@ class TenantManager:
             return None
 
     def list_tenants(
-        self,
-        status: Optional[TenantStatus] = None,
-        tier: Optional[TenantTier] = None
+        self, status: Optional[TenantStatus] = None, tier: Optional[TenantTier] = None
     ) -> List[Tenant]:
         """List all tenants with optional filters"""
         with self._lock:
@@ -338,7 +352,7 @@ class TenantManager:
                 return False
 
             # Check quota
-            if not tenant.is_within_quota('api_calls'):
+            if not tenant.is_within_quota("api_calls"):
                 logger.warning(f"Tenant {tenant_id} exceeded API call quota")
                 return False
 
@@ -354,7 +368,7 @@ class TenantManager:
 
             tenant.usage.storage_used_gb = storage_gb
 
-            if not tenant.is_within_quota('storage'):
+            if not tenant.is_within_quota("storage"):
                 logger.warning(f"Tenant {tenant_id} exceeded storage quota")
                 return False
 
@@ -376,21 +390,19 @@ class TenantManager:
                 tier = tenant.tier.value
                 by_tier[tier] = by_tier.get(tier, 0) + 1
 
-            return {
-                'total_tenants': total,
-                'by_status': by_status,
-                'by_tier': by_tier
-            }
+            return {"total_tenants": total, "by_status": by_status, "by_tier": by_tier}
 
 
 # Decorator for tenant-aware endpoints
 def require_tenant(func):
     """Decorator to enforce tenant context"""
+
     def wrapper(*args, **kwargs):
         tenant_id = TenantContext.get_current_tenant()
         if not tenant_id:
             raise ValueError("No tenant context set")
         return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -421,21 +433,21 @@ if __name__ == "__main__":
     nba_team1 = manager.create_tenant(
         name="Los Angeles Lakers",
         tier=TenantTier.PROFESSIONAL,
-        primary_email="analytics@lakers.com"
+        primary_email="analytics@lakers.com",
     )
     print(f"Created: {nba_team1.name} ({nba_team1.tier.value})")
 
     nba_team2 = manager.create_tenant(
         name="Golden State Warriors",
         tier=TenantTier.ENTERPRISE,
-        primary_email="stats@warriors.com"
+        primary_email="stats@warriors.com",
     )
     print(f"Created: {nba_team2.name} ({nba_team2.tier.value})")
 
     startup = manager.create_tenant(
         name="Startup Analytics Inc",
         tier=TenantTier.FREE,
-        primary_email="team@startup.com"
+        primary_email="team@startup.com",
     )
     print(f"Created: {startup.name} ({startup.tier.value})")
 
@@ -456,7 +468,9 @@ if __name__ == "__main__":
         else:
             print(f"API call {i+1} REJECTED - quota exceeded for {startup.name}")
 
-    print(f"\nCurrent usage: {startup.usage.api_calls_today}/{startup.quota.max_api_calls_per_day}")
+    print(
+        f"\nCurrent usage: {startup.usage.api_calls_today}/{startup.quota.max_api_calls_per_day}"
+    )
 
     # Upgrade tenant
     print("\n--- Tenant Upgrade ---")
@@ -485,4 +499,3 @@ if __name__ == "__main__":
     print(f"Tenant name: {tenant.name}")
 
     print("\n=== Demo Complete ===")
-

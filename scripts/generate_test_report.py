@@ -34,10 +34,7 @@ class ReportGenerator:
         for file in test_files:
             with open(file) as f:
                 data = json.load(f)
-                self.test_results.append({
-                    "file": file.name,
-                    "data": data
-                })
+                self.test_results.append({"file": file.name, "data": data})
                 print(f"  ✅ Loaded test: {file.name}")
 
         # Load benchmark results
@@ -47,13 +44,12 @@ class ReportGenerator:
             for file in benchmark_files:
                 with open(file) as f:
                     data = json.load(f)
-                    self.benchmark_results.append({
-                        "file": file.name,
-                        "data": data
-                    })
+                    self.benchmark_results.append({"file": file.name, "data": data})
                     print(f"  ✅ Loaded benchmark: {file.name}")
 
-        print(f"\n📊 Found {len(self.test_results)} test runs, {len(self.benchmark_results)} benchmarks\n")
+        print(
+            f"\n📊 Found {len(self.test_results)} test runs, {len(self.benchmark_results)} benchmarks\n"
+        )
 
     def generate_consolidated_html(self, output_file: Path):
         """Generate consolidated HTML report"""
@@ -100,33 +96,35 @@ class ReportGenerator:
         total_failed = total_tests - total_passed
         pass_rate = (total_passed / total_tests * 100) if total_tests > 0 else 0
 
-        html_parts.extend([
-            "        <div class='summary'>",
-            "            <h2>📊 Overall Summary</h2>",
-            "            <div class='summary-grid'>",
-            "                <div class='metric'>",
-            f"                    <div class='metric-value'>{len(self.test_results)}</div>",
-            "                    <div class='metric-label'>Test Runs</div>",
-            "                </div>",
-            "                <div class='metric'>",
-            f"                    <div class='metric-value'>{total_tests}</div>",
-            "                    <div class='metric-label'>Total Tests</div>",
-            "                </div>",
-            "                <div class='metric'>",
-            f"                    <div class='metric-value' style='color: #27ae60;'>{total_passed}</div>",
-            "                    <div class='metric-label'>Passed</div>",
-            "                </div>",
-            "                <div class='metric'>",
-            f"                    <div class='metric-value' style='color: #e74c3c;'>{total_failed}</div>",
-            "                    <div class='metric-label'>Failed</div>",
-            "                </div>",
-            "                <div class='metric'>",
-            f"                    <div class='metric-value'>{pass_rate:.1f}%</div>",
-            "                    <div class='metric-label'>Pass Rate</div>",
-            "                </div>",
-            "            </div>",
-            "        </div>",
-        ])
+        html_parts.extend(
+            [
+                "        <div class='summary'>",
+                "            <h2>📊 Overall Summary</h2>",
+                "            <div class='summary-grid'>",
+                "                <div class='metric'>",
+                f"                    <div class='metric-value'>{len(self.test_results)}</div>",
+                "                    <div class='metric-label'>Test Runs</div>",
+                "                </div>",
+                "                <div class='metric'>",
+                f"                    <div class='metric-value'>{total_tests}</div>",
+                "                    <div class='metric-label'>Total Tests</div>",
+                "                </div>",
+                "                <div class='metric'>",
+                f"                    <div class='metric-value' style='color: #27ae60;'>{total_passed}</div>",
+                "                    <div class='metric-label'>Passed</div>",
+                "                </div>",
+                "                <div class='metric'>",
+                f"                    <div class='metric-value' style='color: #e74c3c;'>{total_failed}</div>",
+                "                    <div class='metric-label'>Failed</div>",
+                "                </div>",
+                "                <div class='metric'>",
+                f"                    <div class='metric-value'>{pass_rate:.1f}%</div>",
+                "                    <div class='metric-label'>Pass Rate</div>",
+                "                </div>",
+                "            </div>",
+                "        </div>",
+            ]
+        )
 
         # Test runs details
         html_parts.append("        <h2>🧪 Test Runs</h2>")
@@ -135,38 +133,44 @@ class ReportGenerator:
             data = result["data"]
             summary = data.get("summary", {})
 
-            html_parts.extend([
-                f"        <h3>Run {i}: {result['file']}</h3>",
-                "        <table>",
-                "            <thead>",
-                "                <tr>",
-                "                    <th>Test Name</th>",
-                "                    <th>Category</th>",
-                "                    <th>Status</th>",
-                "                    <th>Duration</th>",
-                "                </tr>",
-                "            </thead>",
-                "            <tbody>",
-            ])
+            html_parts.extend(
+                [
+                    f"        <h3>Run {i}: {result['file']}</h3>",
+                    "        <table>",
+                    "            <thead>",
+                    "                <tr>",
+                    "                    <th>Test Name</th>",
+                    "                    <th>Category</th>",
+                    "                    <th>Status</th>",
+                    "                    <th>Duration</th>",
+                    "                </tr>",
+                    "            </thead>",
+                    "            <tbody>",
+                ]
+            )
 
             for test in data.get("tests", []):
                 status_class = "pass" if test.get("passed") else "fail"
                 status_text = "✅ PASS" if test.get("passed") else "❌ FAIL"
                 duration = test.get("duration", 0)
 
-                html_parts.extend([
-                    "                <tr>",
-                    f"                    <td>{test.get('name', 'Unknown')}</td>",
-                    f"                    <td>{test.get('category', 'N/A')}</td>",
-                    f"                    <td class='{status_class}'>{status_text}</td>",
-                    f"                    <td>{duration:.3f}s</td>",
-                    "                </tr>",
-                ])
+                html_parts.extend(
+                    [
+                        "                <tr>",
+                        f"                    <td>{test.get('name', 'Unknown')}</td>",
+                        f"                    <td>{test.get('category', 'N/A')}</td>",
+                        f"                    <td class='{status_class}'>{status_text}</td>",
+                        f"                    <td>{duration:.3f}s</td>",
+                        "                </tr>",
+                    ]
+                )
 
-            html_parts.extend([
-                "            </tbody>",
-                "        </table>",
-            ])
+            html_parts.extend(
+                [
+                    "            </tbody>",
+                    "        </table>",
+                ]
+            )
 
         # Benchmark results
         if self.benchmark_results:
@@ -175,48 +179,58 @@ class ReportGenerator:
             for i, result in enumerate(self.benchmark_results, 1):
                 data = result["data"]
 
-                html_parts.extend([
-                    f"        <h3>Benchmark {i}: {result['file']}</h3>",
-                    "        <table>",
-                    "            <thead>",
-                    "                <tr>",
-                    "                    <th>Benchmark</th>",
-                    "                    <th>Iterations</th>",
-                    "                    <th>Avg Time</th>",
-                    "                    <th>Ops/sec</th>",
-                    "                    <th>Success Rate</th>",
-                    "                </tr>",
-                    "            </thead>",
-                    "            <tbody>",
-                ])
+                html_parts.extend(
+                    [
+                        f"        <h3>Benchmark {i}: {result['file']}</h3>",
+                        "        <table>",
+                        "            <thead>",
+                        "                <tr>",
+                        "                    <th>Benchmark</th>",
+                        "                    <th>Iterations</th>",
+                        "                    <th>Avg Time</th>",
+                        "                    <th>Ops/sec</th>",
+                        "                    <th>Success Rate</th>",
+                        "                </tr>",
+                        "            </thead>",
+                        "            <tbody>",
+                    ]
+                )
 
                 for bench in data.get("results", []):
-                    success_rate = (bench.get("success_count", 0) / bench.get("iterations", 1) * 100)
+                    success_rate = (
+                        bench.get("success_count", 0) / bench.get("iterations", 1) * 100
+                    )
 
-                    html_parts.extend([
-                        "                <tr>",
-                        f"                    <td>{bench.get('name', 'Unknown')}</td>",
-                        f"                    <td>{bench.get('iterations', 0)}</td>",
-                        f"                    <td>{bench.get('avg_time', 0):.4f}s</td>",
-                        f"                    <td>{bench.get('operations_per_sec', 0):.2f}</td>",
-                        f"                    <td>{success_rate:.1f}%</td>",
-                        "                </tr>",
-                    ])
+                    html_parts.extend(
+                        [
+                            "                <tr>",
+                            f"                    <td>{bench.get('name', 'Unknown')}</td>",
+                            f"                    <td>{bench.get('iterations', 0)}</td>",
+                            f"                    <td>{bench.get('avg_time', 0):.4f}s</td>",
+                            f"                    <td>{bench.get('operations_per_sec', 0):.2f}</td>",
+                            f"                    <td>{success_rate:.1f}%</td>",
+                            "                </tr>",
+                        ]
+                    )
 
-                html_parts.extend([
-                    "            </tbody>",
-                    "        </table>",
-                ])
+                html_parts.extend(
+                    [
+                        "            </tbody>",
+                        "        </table>",
+                    ]
+                )
 
-        html_parts.extend([
-            "    </div>",
-            "</body>",
-            "</html>",
-        ])
+        html_parts.extend(
+            [
+                "    </div>",
+                "</body>",
+                "</html>",
+            ]
+        )
 
         # Write HTML
         output_file.parent.mkdir(parents=True, exist_ok=True)
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             f.write("\n".join(html_parts))
 
         print(f"✅ Consolidated HTML report: {output_file}")
@@ -234,30 +248,36 @@ class ReportGenerator:
 
         # Test results
         if self.test_results:
-            lines.extend([
-                "TEST RUNS",
-                "-" * 70,
-            ])
+            lines.extend(
+                [
+                    "TEST RUNS",
+                    "-" * 70,
+                ]
+            )
 
             for i, result in enumerate(self.test_results, 1):
                 data = result["data"]
                 summary = data.get("summary", {})
 
-                lines.extend([
-                    f"\nRun {i}: {result['file']}",
-                    f"  Total:  {summary.get('total', 0)}",
-                    f"  Passed: {summary.get('passed', 0)}",
-                    f"  Failed: {summary.get('failed', 0)}",
-                    f"  Rate:   {summary.get('pass_rate', 0):.1f}%",
-                ])
+                lines.extend(
+                    [
+                        f"\nRun {i}: {result['file']}",
+                        f"  Total:  {summary.get('total', 0)}",
+                        f"  Passed: {summary.get('passed', 0)}",
+                        f"  Failed: {summary.get('failed', 0)}",
+                        f"  Rate:   {summary.get('pass_rate', 0):.1f}%",
+                    ]
+                )
 
         # Benchmark results
         if self.benchmark_results:
-            lines.extend([
-                "",
-                "BENCHMARKS",
-                "-" * 70,
-            ])
+            lines.extend(
+                [
+                    "",
+                    "BENCHMARKS",
+                    "-" * 70,
+                ]
+            )
 
             for i, result in enumerate(self.benchmark_results, 1):
                 data = result["data"]
@@ -265,17 +285,19 @@ class ReportGenerator:
                 lines.append(f"\nBenchmark {i}: {result['file']}")
 
                 for bench in data.get("results", []):
-                    lines.extend([
-                        f"  {bench.get('name', 'Unknown')}:",
-                        f"    Avg time: {bench.get('avg_time', 0):.4f}s",
-                        f"    Ops/sec:  {bench.get('operations_per_sec', 0):.2f}",
-                    ])
+                    lines.extend(
+                        [
+                            f"  {bench.get('name', 'Unknown')}:",
+                            f"    Avg time: {bench.get('avg_time', 0):.4f}s",
+                            f"    Ops/sec:  {bench.get('operations_per_sec', 0):.2f}",
+                        ]
+                    )
 
         lines.append("\n" + "=" * 70)
 
         # Write text
         output_file.parent.mkdir(parents=True, exist_ok=True)
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             f.write("\n".join(lines))
 
         print(f"✅ Summary text file: {output_file}")
@@ -289,13 +311,13 @@ def main():
         "--input",
         type=Path,
         default=Path("./test_results"),
-        help="Input directory with test results (default: ./test_results)"
+        help="Input directory with test results (default: ./test_results)",
     )
     parser.add_argument(
         "--output",
         type=Path,
         default=Path("./reports"),
-        help="Output directory for reports (default: ./reports)"
+        help="Output directory for reports (default: ./reports)",
     )
 
     args = parser.parse_args()
@@ -326,9 +348,7 @@ def main():
         args.output / f"consolidated_report_{timestamp}.html"
     )
 
-    generator.generate_summary_text(
-        args.output / f"summary_{timestamp}.txt"
-    )
+    generator.generate_summary_text(args.output / f"summary_{timestamp}.txt")
 
     print(f"\n✅ Reports generated in: {args.output}\n")
 
@@ -337,4 +357,5 @@ def main():
 
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())

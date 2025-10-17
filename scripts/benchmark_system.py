@@ -34,6 +34,7 @@ load_dotenv()
 @dataclass
 class BenchmarkResult:
     """Individual benchmark result"""
+
     benchmark_name: str
     category: str
     duration: float
@@ -53,12 +54,7 @@ class PerformanceBenchmark:
         self.mcp_server_url = os.getenv("MCP_SERVER_URL", "http://localhost:3000")
 
     async def benchmark(
-        self,
-        name: str,
-        category: str,
-        func,
-        *args,
-        **kwargs
+        self, name: str, category: str, func, *args, **kwargs
     ) -> BenchmarkResult:
         """Run a single benchmark"""
         print(f"  Running: {name}...", end=" ", flush=True)
@@ -76,11 +72,11 @@ class PerformanceBenchmark:
 
             # Extract metrics if dict returned
             if isinstance(result, dict):
-                cost = result.get('total_cost', 0.0)
-                tokens_input = result.get('tokens_input', 0)
-                tokens_output = result.get('tokens_output', 0)
-                metadata = result.get('metadata', {})
-                success = result.get('status') == 'success'
+                cost = result.get("total_cost", 0.0)
+                tokens_input = result.get("tokens_input", 0)
+                tokens_output = result.get("tokens_output", 0)
+                metadata = result.get("metadata", {})
+                success = result.get("status") == "success"
 
         except Exception as e:
             success = False
@@ -97,7 +93,7 @@ class PerformanceBenchmark:
             tokens_output=tokens_output,
             success=success,
             error=error,
-            metadata=metadata
+            metadata=metadata,
         )
 
         self.results.append(result)
@@ -134,10 +130,7 @@ class PerformanceBenchmark:
 
         try:
             tables = await connector.list_tables()
-            return {
-                "status": "success",
-                "metadata": {"table_count": len(tables)}
-            }
+            return {"status": "success", "metadata": {"table_count": len(tables)}}
         finally:
             await connector.disconnect()
 
@@ -150,10 +143,7 @@ class PerformanceBenchmark:
             tables = await connector.list_tables()
             if tables:
                 schema = await connector.get_table_schema(tables[0])
-                return {
-                    "status": "success",
-                    "metadata": {"table": tables[0]}
-                }
+                return {"status": "success", "metadata": {"table": tables[0]}}
         finally:
             await connector.disconnect()
 
@@ -166,10 +156,7 @@ class PerformanceBenchmark:
         connector = S3Connector()
 
         files = await connector.list_files(prefix="", max_keys=10)
-        return {
-            "status": "success",
-            "metadata": {"files_found": len(files)}
-        }
+        return {"status": "success", "metadata": {"files_found": len(files)}}
 
     # ===== AI Model Benchmarks =====
 
@@ -178,16 +165,14 @@ class PerformanceBenchmark:
         model = DeepSeekModel()
 
         result = await model.query(
-            prompt="What is 2 + 2?",
-            temperature=0.3,
-            max_tokens=100
+            prompt="What is 2 + 2?", temperature=0.3, max_tokens=100
         )
 
         return {
             "status": "success",
-            "total_cost": result.get('cost', 0),
-            "tokens_input": result.get('tokens_input', 0),
-            "tokens_output": result.get('tokens_output', 0)
+            "total_cost": result.get("cost", 0),
+            "tokens_input": result.get("tokens_input", 0),
+            "tokens_output": result.get("tokens_output", 0),
         }
 
     async def benchmark_deepseek_code_generation(self) -> Dict:
@@ -197,14 +182,14 @@ class PerformanceBenchmark:
         result = await model.query(
             prompt="Write a Python function to calculate factorial",
             temperature=0.3,
-            max_tokens=500
+            max_tokens=500,
         )
 
         return {
             "status": "success",
-            "total_cost": result.get('cost', 0),
-            "tokens_input": result.get('tokens_input', 0),
-            "tokens_output": result.get('tokens_output', 0)
+            "total_cost": result.get("cost", 0),
+            "tokens_input": result.get("tokens_input", 0),
+            "tokens_output": result.get("tokens_output", 0),
         }
 
     async def benchmark_claude_simple_query(self) -> Dict:
@@ -212,16 +197,14 @@ class PerformanceBenchmark:
         model = ClaudeModel()
 
         result = await model.query(
-            prompt="What is the capital of France?",
-            temperature=0.3,
-            max_tokens=100
+            prompt="What is the capital of France?", temperature=0.3, max_tokens=100
         )
 
         return {
             "status": "success",
-            "total_cost": result.get('cost', 0),
-            "tokens_input": result.get('tokens_input', 0),
-            "tokens_output": result.get('tokens_output', 0)
+            "total_cost": result.get("cost", 0),
+            "tokens_input": result.get("tokens_input", 0),
+            "tokens_output": result.get("tokens_output", 0),
         }
 
     async def benchmark_claude_synthesis(self) -> Dict:
@@ -234,17 +217,13 @@ class PerformanceBenchmark:
         Please synthesize this answer into a clear explanation.
         """
 
-        result = await model.query(
-            prompt=prompt,
-            temperature=0.1,
-            max_tokens=300
-        )
+        result = await model.query(prompt=prompt, temperature=0.1, max_tokens=300)
 
         return {
             "status": "success",
-            "total_cost": result.get('cost', 0),
-            "tokens_input": result.get('tokens_input', 0),
-            "tokens_output": result.get('tokens_output', 0)
+            "total_cost": result.get("cost", 0),
+            "tokens_input": result.get("tokens_input", 0),
+            "tokens_output": result.get("tokens_output", 0),
         }
 
     # ===== MCP Benchmarks =====
@@ -265,10 +244,7 @@ class PerformanceBenchmark:
         await client.connect()
         try:
             tools = await client.list_available_tools()
-            return {
-                "status": "success",
-                "metadata": {"tool_count": len(tools)}
-            }
+            return {"status": "success", "metadata": {"tool_count": len(tools)}}
         finally:
             await client.disconnect()
 
@@ -278,10 +254,10 @@ class PerformanceBenchmark:
 
         await client.connect()
         try:
-            result = await client.call_tool("query_database", {
-                "sql": "SELECT COUNT(*) FROM games LIMIT 1"
-            })
-            return {"status": "success" if result.get('success') else "failed"}
+            result = await client.call_tool(
+                "query_database", {"sql": "SELECT COUNT(*) FROM games LIMIT 1"}
+            )
+            return {"status": "success" if result.get("success") else "failed"}
         finally:
             await client.disconnect()
 
@@ -293,7 +269,7 @@ class PerformanceBenchmark:
             user_input="Calculate the sum of 1 to 10",
             query_type="general_analysis",
             enable_ollama_verification=False,
-            mcp_server_url=self.mcp_server_url
+            mcp_server_url=self.mcp_server_url,
         )
 
         return result
@@ -304,7 +280,7 @@ class PerformanceBenchmark:
             user_input="Generate SQL to find top 5 players by points",
             query_type="sql_optimization",
             enable_ollama_verification=False,
-            mcp_server_url=self.mcp_server_url
+            mcp_server_url=self.mcp_server_url,
         )
 
         return result
@@ -323,25 +299,33 @@ def factorial(n):
             user_input=f"Debug this factorial function:\n{code}",
             query_type="code_debugging",
             enable_ollama_verification=False,
-            mcp_server_url=self.mcp_server_url
+            mcp_server_url=self.mcp_server_url,
         )
 
         return result
 
     async def run_all_benchmarks(self):
         """Run complete benchmark suite"""
-        print("="*80)
+        print("=" * 80)
         print("NBA MCP Synthesis - Performance Benchmark Suite")
-        print("="*80)
+        print("=" * 80)
         print()
 
         # Database Benchmarks
         print("📊 Database Benchmarks")
         print("-" * 80)
-        await self.benchmark("DB Connection", "database", self.benchmark_database_connection)
-        await self.benchmark("DB Simple Query", "database", self.benchmark_database_simple_query)
-        await self.benchmark("DB Table List", "database", self.benchmark_database_table_list)
-        await self.benchmark("DB Schema Query", "database", self.benchmark_database_schema_query)
+        await self.benchmark(
+            "DB Connection", "database", self.benchmark_database_connection
+        )
+        await self.benchmark(
+            "DB Simple Query", "database", self.benchmark_database_simple_query
+        )
+        await self.benchmark(
+            "DB Table List", "database", self.benchmark_database_table_list
+        )
+        await self.benchmark(
+            "DB Schema Query", "database", self.benchmark_database_schema_query
+        )
         print()
 
         # S3 Benchmarks
@@ -353,10 +337,18 @@ def factorial(n):
         # AI Model Benchmarks
         print("🤖 AI Model Benchmarks")
         print("-" * 80)
-        await self.benchmark("DeepSeek Simple Query", "ai_model", self.benchmark_deepseek_simple_query)
-        await self.benchmark("DeepSeek Code Gen", "ai_model", self.benchmark_deepseek_code_generation)
-        await self.benchmark("Claude Simple Query", "ai_model", self.benchmark_claude_simple_query)
-        await self.benchmark("Claude Synthesis", "ai_model", self.benchmark_claude_synthesis)
+        await self.benchmark(
+            "DeepSeek Simple Query", "ai_model", self.benchmark_deepseek_simple_query
+        )
+        await self.benchmark(
+            "DeepSeek Code Gen", "ai_model", self.benchmark_deepseek_code_generation
+        )
+        await self.benchmark(
+            "Claude Simple Query", "ai_model", self.benchmark_claude_simple_query
+        )
+        await self.benchmark(
+            "Claude Synthesis", "ai_model", self.benchmark_claude_synthesis
+        )
         print()
 
         # MCP Benchmarks
@@ -370,9 +362,15 @@ def factorial(n):
         # Full Synthesis Benchmarks
         print("⚡ Full Synthesis Benchmarks")
         print("-" * 80)
-        await self.benchmark("Simple Synthesis", "synthesis", self.benchmark_simple_synthesis)
-        await self.benchmark("SQL Generation", "synthesis", self.benchmark_sql_generation)
-        await self.benchmark("Code Debugging", "synthesis", self.benchmark_code_debugging)
+        await self.benchmark(
+            "Simple Synthesis", "synthesis", self.benchmark_simple_synthesis
+        )
+        await self.benchmark(
+            "SQL Generation", "synthesis", self.benchmark_sql_generation
+        )
+        await self.benchmark(
+            "Code Debugging", "synthesis", self.benchmark_code_debugging
+        )
         print()
 
     def generate_report(self) -> Dict:
@@ -398,7 +396,7 @@ def factorial(n):
                 "mean_duration": statistics.mean(durations) if durations else 0,
                 "median_duration": statistics.median(durations) if durations else 0,
                 "total_cost": sum(costs),
-                "mean_cost": statistics.mean(costs) if costs else 0
+                "mean_cost": statistics.mean(costs) if costs else 0,
             }
 
         # Overall stats
@@ -413,23 +411,23 @@ def factorial(n):
             "mean_duration": statistics.mean(all_durations) if all_durations else 0,
             "median_duration": statistics.median(all_durations) if all_durations else 0,
             "total_cost": sum(all_costs),
-            "mean_cost": statistics.mean(all_costs) if all_costs else 0
+            "mean_cost": statistics.mean(all_costs) if all_costs else 0,
         }
 
         return {
             "timestamp": datetime.now().isoformat(),
             "overall": overall_stats,
             "by_category": category_stats,
-            "detailed_results": [asdict(r) for r in self.results]
+            "detailed_results": [asdict(r) for r in self.results],
         }
 
     def print_report(self):
         """Print formatted benchmark report"""
         report = self.generate_report()
 
-        print("="*80)
+        print("=" * 80)
         print("BENCHMARK REPORT")
-        print("="*80)
+        print("=" * 80)
         print()
 
         # Overall stats
@@ -450,22 +448,25 @@ def factorial(n):
         print("-" * 80)
         for category, stats in report["by_category"].items():
             print(f"\n  {category.upper()}")
-            print(f"    Benchmarks:        {stats['total_benchmarks']} ({stats['successful']} successful)")
+            print(
+                f"    Benchmarks:        {stats['total_benchmarks']} ({stats['successful']} successful)"
+            )
             print(f"    Mean Duration:     {stats['mean_duration']:.3f}s")
             print(f"    Total Cost:        ${stats['total_cost']:.6f}")
         print()
 
         # Performance targets
-        print("="*80)
+        print("=" * 80)
         print("PERFORMANCE TARGETS")
-        print("="*80)
+        print("=" * 80)
         print()
 
         passed = True
 
         # Target 1: Synthesis < 30s (p95)
-        synthesis_durations = [r.duration for r in self.results
-                             if r.category == "synthesis" and r.success]
+        synthesis_durations = [
+            r.duration for r in self.results if r.category == "synthesis" and r.success
+        ]
         if synthesis_durations:
             sorted_durations = sorted(synthesis_durations)
             p95_index = int(len(sorted_durations) * 0.95)
@@ -478,8 +479,9 @@ def factorial(n):
                 passed = False
 
         # Target 2: Mean cost < $0.015
-        synthesis_costs = [r.cost for r in self.results
-                          if r.category == "synthesis" and r.cost > 0]
+        synthesis_costs = [
+            r.cost for r in self.results if r.category == "synthesis" and r.cost > 0
+        ]
         if synthesis_costs:
             mean_synthesis_cost = statistics.mean(synthesis_costs)
 
@@ -490,8 +492,9 @@ def factorial(n):
                 passed = False
 
         # Target 3: Database query < 1s
-        db_durations = [r.duration for r in self.results
-                       if r.category == "database" and r.success]
+        db_durations = [
+            r.duration for r in self.results if r.category == "database" and r.success
+        ]
         if db_durations:
             mean_db_time = statistics.mean(db_durations)
 
@@ -501,12 +504,12 @@ def factorial(n):
                 print(f"⚠️  Mean DB query > 1s: {mean_db_time:.3f}s")
 
         print()
-        print("="*80)
+        print("=" * 80)
         if passed:
             print("✅ ALL PERFORMANCE TARGETS MET")
         else:
             print("❌ SOME PERFORMANCE TARGETS NOT MET")
-        print("="*80)
+        print("=" * 80)
         print()
 
         return passed
@@ -518,7 +521,7 @@ def factorial(n):
 
         report = self.generate_report()
 
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             json.dump(report, f, indent=2)
 
         print(f"📁 Benchmark report saved to: {output_file}")
@@ -548,7 +551,9 @@ def factorial(n):
         md.append("## Category Breakdown\n")
         for category, stats in report["by_category"].items():
             md.append(f"### {category.upper()}\n")
-            md.append(f"- Benchmarks: {stats['total_benchmarks']} ({stats['successful']} successful)")
+            md.append(
+                f"- Benchmarks: {stats['total_benchmarks']} ({stats['successful']} successful)"
+            )
             md.append(f"- Mean Duration: {stats['mean_duration']:.3f}s")
             md.append(f"- Total Cost: ${stats['total_cost']:.6f}\n")
 
@@ -558,11 +563,13 @@ def factorial(n):
 
         for result in self.results:
             status = "✅" if result.success else "❌"
-            md.append(f"| {result.benchmark_name} | {result.category} | "
-                     f"{result.duration:.3f}s | ${result.cost:.6f} | {status} |")
+            md.append(
+                f"| {result.benchmark_name} | {result.category} | "
+                f"{result.duration:.3f}s | ${result.cost:.6f} | {status} |"
+            )
 
-        with open(output_path, 'w') as f:
-            f.write('\n'.join(md))
+        with open(output_path, "w") as f:
+            f.write("\n".join(md))
 
         print(f"📁 Markdown report saved to: {output_file}")
 

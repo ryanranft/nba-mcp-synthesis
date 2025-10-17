@@ -35,10 +35,7 @@ class PyCharmMCPTool:
         self.deepseek = DeepSeekModel()
 
     async def analyze_code(
-        self,
-        code: str,
-        request: str,
-        use_ollama_primary: bool = True
+        self, code: str, request: str, use_ollama_primary: bool = True
     ) -> Dict[str, Any]:
         """
         Analyze code with MCP synthesis
@@ -63,51 +60,48 @@ class PyCharmMCPTool:
             console.print("[cyan]Using Ollama-primary workflow (no rate limits)[/cyan]")
 
             ollama_result = await self.ollama.query(
-                prompt=prompt,
-                temperature=0.3,
-                max_tokens=4000
+                prompt=prompt, temperature=0.3, max_tokens=4000
             )
 
             if ollama_result.get("success"):
                 # Optionally verify with Claude
                 synthesis_result = await self.claude.synthesize(
-                    deepseek_result=ollama_result.get('response', ''),
+                    deepseek_result=ollama_result.get("response", ""),
                     original_request=request,
                     context_summary=f"PyCharm code analysis",
-                    include_verification=True
+                    include_verification=True,
                 )
 
                 return {
                     "success": True,
-                    "primary_analysis": ollama_result.get('response'),
-                    "verification": synthesis_result.get('response'),
-                    "cost": synthesis_result.get('cost', 0),
-                    "workflow": "ollama-primary"
+                    "primary_analysis": ollama_result.get("response"),
+                    "verification": synthesis_result.get("response"),
+                    "cost": synthesis_result.get("cost", 0),
+                    "workflow": "ollama-primary",
                 }
 
         # Fallback to DeepSeek + Claude
         console.print("[yellow]Using DeepSeek + Claude workflow[/yellow]")
 
         deepseek_result = await self.deepseek.query(
-            prompt=prompt,
-            temperature=0.3,
-            max_tokens=4000
+            prompt=prompt, temperature=0.3, max_tokens=4000
         )
 
         if deepseek_result.get("success"):
             synthesis_result = await self.claude.synthesize(
-                deepseek_result=deepseek_result.get('response', ''),
+                deepseek_result=deepseek_result.get("response", ""),
                 original_request=request,
                 context_summary=f"PyCharm code analysis",
-                include_verification=True
+                include_verification=True,
             )
 
             return {
                 "success": True,
-                "primary_analysis": deepseek_result.get('response'),
-                "verification": synthesis_result.get('response'),
-                "cost": deepseek_result.get('cost', 0) + synthesis_result.get('cost', 0),
-                "workflow": "deepseek-claude"
+                "primary_analysis": deepseek_result.get("response"),
+                "verification": synthesis_result.get("response"),
+                "cost": deepseek_result.get("cost", 0)
+                + synthesis_result.get("cost", 0),
+                "workflow": "deepseek-claude",
             }
 
         return {"success": False, "error": "All models failed"}
@@ -116,7 +110,7 @@ class PyCharmMCPTool:
         self,
         url: Optional[str] = None,
         description: Optional[str] = None,
-        selected_code: Optional[str] = None
+        selected_code: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Generate or improve web scraper code
@@ -164,36 +158,30 @@ Provide complete, production-ready code.
         # Use Ollama for scraper generation (faster, free)
         if self.ollama.is_available():
             result = await self.ollama.query(
-                prompt=prompt,
-                temperature=0.4,
-                max_tokens=6000
+                prompt=prompt, temperature=0.4, max_tokens=6000
             )
 
             return {
                 "success": result.get("success"),
                 "scraper_code": result.get("response"),
                 "cost": 0,
-                "workflow": "ollama"
+                "workflow": "ollama",
             }
 
         # Fallback to DeepSeek
         result = await self.deepseek.query(
-            prompt=prompt,
-            temperature=0.4,
-            max_tokens=6000
+            prompt=prompt, temperature=0.4, max_tokens=6000
         )
 
         return {
             "success": result.get("success"),
             "scraper_code": result.get("response"),
             "cost": result.get("cost", 0),
-            "workflow": "deepseek"
+            "workflow": "deepseek",
         }
 
     async def generate_sql_query(
-        self,
-        natural_language: str,
-        table_hint: Optional[str] = None
+        self, natural_language: str, table_hint: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Generate SQL query from natural language
@@ -229,36 +217,29 @@ Provide:
         # Use Ollama for SQL generation
         if self.ollama.is_available():
             result = await self.ollama.query(
-                prompt=prompt,
-                temperature=0.2,
-                max_tokens=2000
+                prompt=prompt, temperature=0.2, max_tokens=2000
             )
 
             return {
                 "success": result.get("success"),
                 "sql_query": result.get("response"),
                 "cost": 0,
-                "workflow": "ollama"
+                "workflow": "ollama",
             }
 
         # Fallback
         result = await self.deepseek.query(
-            prompt=prompt,
-            temperature=0.2,
-            max_tokens=2000
+            prompt=prompt, temperature=0.2, max_tokens=2000
         )
 
         return {
             "success": result.get("success"),
             "sql_query": result.get("response"),
             "cost": result.get("cost", 0),
-            "workflow": "deepseek"
+            "workflow": "deepseek",
         }
 
-    async def execute_query_with_explanation(
-        self,
-        query: str
-    ) -> Dict[str, Any]:
+    async def execute_query_with_explanation(self, query: str) -> Dict[str, Any]:
         """
         Execute SQL query and explain results
 
@@ -297,7 +278,7 @@ Provide:
                 "results": result.get("results"),
                 "explanation": explanation.get("response"),
                 "row_count": result.get("row_count"),
-                "cost": 0
+                "cost": 0,
             }
 
         return result
@@ -333,12 +314,7 @@ async def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="NBA MCP PyCharm Integration")
-    parser.add_argument("action", choices=[
-        "analyze",
-        "scraper",
-        "sql",
-        "execute"
-    ])
+    parser.add_argument("action", choices=["analyze", "scraper", "sql", "execute"])
     parser.add_argument("--code", help="Code to analyze")
     parser.add_argument("--request", help="What to do")
     parser.add_argument("--url", help="URL for scraper")
@@ -347,14 +323,16 @@ async def main():
     parser.add_argument("--table", help="Table hint")
     parser.add_argument("--file", help="File containing code/query")
     parser.add_argument("--output", help="Output file for results")
-    parser.add_argument("--no-ollama", action="store_true", help="Disable Ollama-primary")
+    parser.add_argument(
+        "--no-ollama", action="store_true", help="Disable Ollama-primary"
+    )
 
     args = parser.parse_args()
 
     # Read from file if specified
     code = args.code
     if args.file:
-        with open(args.file, 'r') as f:
+        with open(args.file, "r") as f:
             code = f.read()
 
     tool = PyCharmMCPTool()
@@ -366,16 +344,12 @@ async def main():
                 console.print("[red]Error: --code and --request required[/red]")
                 sys.exit(1)
             result = await tool.analyze_code(
-                code=code,
-                request=args.request,
-                use_ollama_primary=not args.no_ollama
+                code=code, request=args.request, use_ollama_primary=not args.no_ollama
             )
 
         elif args.action == "scraper":
             result = await tool.generate_scraper(
-                url=args.url,
-                description=args.description,
-                selected_code=code
+                url=args.url, description=args.description, selected_code=code
             )
 
         elif args.action == "sql":
@@ -383,21 +357,18 @@ async def main():
                 console.print("[red]Error: --request required[/red]")
                 sys.exit(1)
             result = await tool.generate_sql_query(
-                natural_language=args.request,
-                table_hint=args.table
+                natural_language=args.request, table_hint=args.table
             )
 
         elif args.action == "execute":
             if not args.query:
                 console.print("[red]Error: --query required[/red]")
                 sys.exit(1)
-            result = await tool.execute_query_with_explanation(
-                query=args.query
-            )
+            result = await tool.execute_query_with_explanation(query=args.query)
 
         # Display result
         if result and result.get("success"):
-            console.print("\n" + "="*80 + "\n")
+            console.print("\n" + "=" * 80 + "\n")
             console.print(Panel.fit("Result", style="bold green"))
 
             if "primary_analysis" in result:
@@ -414,7 +385,7 @@ async def main():
 
             # Save to file if specified
             if args.output:
-                with open(args.output, 'w') as f:
+                with open(args.output, "w") as f:
                     json.dump(result, f, indent=2)
                 console.print(f"[cyan]Saved to {args.output}[/cyan]")
         else:
@@ -424,6 +395,7 @@ async def main():
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")
         import traceback
+
         console.print(traceback.format_exc())
         sys.exit(1)
 

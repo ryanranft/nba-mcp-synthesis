@@ -21,7 +21,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any
 
 # Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from mcp_server.tools.smart_context_analysis import (
     SmartContextAnalysisEngine,
@@ -33,7 +33,7 @@ from mcp_server.tools.smart_context_analysis import (
     ContextInsight,
     BehaviorPattern,
     ContextualRecommendation,
-    SessionContext
+    SessionContext,
 )
 
 
@@ -65,7 +65,7 @@ class Phase73TestSuite:
             self.test_error_handling,
             self.test_integration_with_sports_formulas,
             self.test_performance_benchmarks,
-            self.test_standalone_functions
+            self.test_standalone_functions,
         ]
 
         for test_method in test_methods:
@@ -73,10 +73,14 @@ class Phase73TestSuite:
                 print(f"Running {test_method.__name__}...")
                 test_method()
                 print(f"✓ {test_method.__name__} passed")
-                self.test_results.append({"test": test_method.__name__, "status": "passed"})
+                self.test_results.append(
+                    {"test": test_method.__name__, "status": "passed"}
+                )
             except Exception as e:
                 print(f"❌ {test_method.__name__} failed: {e}")
-                self.test_results.append({"test": test_method.__name__, "status": "failed", "error": str(e)})
+                self.test_results.append(
+                    {"test": test_method.__name__, "status": "failed", "error": str(e)}
+                )
             print()
 
         self.print_summary()
@@ -90,27 +94,37 @@ class Phase73TestSuite:
             user_query="Compare LeBron James and Michael Jordan's PER",
             session_history=[
                 {"query": "What is PER?", "timestamp": "2024-01-01T10:00:00"},
-                {"query": "Show me LeBron's stats", "timestamp": "2024-01-01T10:05:00"}
+                {"query": "Show me LeBron's stats", "timestamp": "2024-01-01T10:05:00"},
             ],
-            available_data={"players": ["LeBron James", "Michael Jordan"], "metrics": ["PER"]},
+            available_data={
+                "players": ["LeBron James", "Michael Jordan"],
+                "metrics": ["PER"],
+            },
             expertise_level="intermediate",
-            context_depth="moderate"
+            context_depth="moderate",
         )
 
         assert result["status"] == "success", "Context analysis should succeed"
         assert "context_analysis" in result, "Should include context analysis"
-        assert "query_intent" in result["context_analysis"], "Should include query intent"
-        assert result["context_analysis"]["query_intent"]["primary_intent"] == "comparative", "Should detect comparative intent"
+        assert (
+            "query_intent" in result["context_analysis"]
+        ), "Should include query intent"
+        assert (
+            result["context_analysis"]["query_intent"]["primary_intent"]
+            == "comparative"
+        ), "Should detect comparative intent"
 
         # Test deep context analysis
         deep_result = self.engine.analyze_user_context_intelligently(
             user_query="Analyze the correlation between usage rate and team success",
             expertise_level="expert",
-            context_depth="deep"
+            context_depth="deep",
         )
 
         assert deep_result["status"] == "success", "Deep analysis should succeed"
-        assert len(deep_result["context_analysis"]["insights"]) > 0, "Deep analysis should generate insights"
+        assert (
+            len(deep_result["context_analysis"]["insights"]) > 0
+        ), "Deep analysis should generate insights"
 
         print("  ✓ Basic context analysis")
         print("  ✓ Deep context analysis")
@@ -128,21 +142,24 @@ class Phase73TestSuite:
             behavior_types=["formula_usage", "query_patterns"],
             include_patterns=True,
             include_predictions=True,
-            privacy_level="basic"
+            privacy_level="basic",
         )
 
         assert result["status"] == "success", "Behavior analysis should succeed"
         assert "behavior_analysis" in result, "Should include behavior analysis"
         assert "patterns" in result["behavior_analysis"], "Should include patterns"
-        assert "predictions" in result["behavior_analysis"], "Should include predictions"
+        assert (
+            "predictions" in result["behavior_analysis"]
+        ), "Should include predictions"
 
         # Test different privacy levels
         detailed_result = self.engine.analyze_user_behavior_patterns(
-            user_id="test_user_456",
-            privacy_level="detailed"
+            user_id="test_user_456", privacy_level="detailed"
         )
 
-        assert detailed_result["status"] == "success", "Detailed analysis should succeed"
+        assert (
+            detailed_result["status"] == "success"
+        ), "Detailed analysis should succeed"
 
         print("  ✓ Behavior pattern identification")
         print("  ✓ Privacy level compliance")
@@ -158,11 +175,11 @@ class Phase73TestSuite:
             "query_intent": {
                 "primary_intent": "comparative",
                 "domain": "efficiency",
-                "confidence": 0.8
+                "confidence": 0.8,
             },
             "user_profile": {
                 "expertise_level": "intermediate",
-                "preferred_formulas": ["PER", "TS%"]
+                "preferred_formulas": ["PER", "TS%"],
             },
             "insights": [
                 {
@@ -171,9 +188,9 @@ class Phase73TestSuite:
                     "title": "Comparative Analysis Intent",
                     "description": "User is seeking comparative analysis",
                     "confidence": 0.8,
-                    "actionable": True
+                    "actionable": True,
                 }
-            ]
+            ],
         }
 
         # Test recommendation generation
@@ -183,7 +200,7 @@ class Phase73TestSuite:
             recommendation_types=["formula"],
             personalization_level="advanced",
             include_alternatives=True,
-            explanation_depth="detailed"
+            explanation_depth="detailed",
         )
 
         assert result["status"] == "success", "Recommendation generation should succeed"
@@ -193,11 +210,12 @@ class Phase73TestSuite:
 
         # Test different personalization levels
         basic_result = self.engine.generate_contextual_recommendations(
-            context_analysis=context_analysis,
-            personalization_level="basic"
+            context_analysis=context_analysis, personalization_level="basic"
         )
 
-        assert basic_result["status"] == "success", "Basic personalization should succeed"
+        assert (
+            basic_result["status"] == "success"
+        ), "Basic personalization should succeed"
 
         print("  ✓ Recommendation generation")
         print("  ✓ Personalization levels")
@@ -212,7 +230,7 @@ class Phase73TestSuite:
         context_data = {
             "current_formulas": ["PER", "TS%"],
             "analysis_goals": ["compare players"],
-            "progress": 0.5
+            "progress": 0.5,
         }
 
         # Test storing context
@@ -221,37 +239,37 @@ class Phase73TestSuite:
             context_data=context_data,
             context_type="analysis_state",
             operation="store",
-            expiration_time=3600
+            expiration_time=3600,
         )
 
         assert store_result["status"] == "success", "Context storage should succeed"
-        assert store_result["operation_result"]["operation"] == "store", "Should store context"
+        assert (
+            store_result["operation_result"]["operation"] == "store"
+        ), "Should store context"
 
         # Test retrieving context
         retrieve_result = self.engine.manage_session_context(
-            session_id=session_id,
-            context_data={},
-            operation="retrieve"
+            session_id=session_id, context_data={}, operation="retrieve"
         )
 
-        assert retrieve_result["status"] == "success", "Context retrieval should succeed"
-        assert retrieve_result["operation_result"]["operation"] == "retrieve", "Should retrieve context"
+        assert (
+            retrieve_result["status"] == "success"
+        ), "Context retrieval should succeed"
+        assert (
+            retrieve_result["operation_result"]["operation"] == "retrieve"
+        ), "Should retrieve context"
 
         # Test updating context
         update_data = {"progress": 0.8}
         update_result = self.engine.manage_session_context(
-            session_id=session_id,
-            context_data=update_data,
-            operation="update"
+            session_id=session_id, context_data=update_data, operation="update"
         )
 
         assert update_result["status"] == "success", "Context update should succeed"
 
         # Test clearing context
         clear_result = self.engine.manage_session_context(
-            session_id=session_id,
-            context_data={},
-            operation="clear"
+            session_id=session_id, context_data={}, operation="clear"
         )
 
         assert clear_result["status"] == "success", "Context clearing should succeed"
@@ -271,7 +289,7 @@ class Phase73TestSuite:
             "formulas_used": ["PER", "TS%", "Usage Rate"],
             "results": {"player_a_per": 25.5, "player_b_per": 23.2},
             "data_points": [25.5, 23.2, 22.8, 24.1],
-            "metrics": {"PER": [25.5, 23.2], "TS%": [0.58, 0.61]}
+            "metrics": {"PER": [25.5, 23.2], "TS%": [0.58, 0.61]},
         }
 
         # Test insight generation
@@ -282,23 +300,25 @@ class Phase73TestSuite:
             include_visualizations=True,
             include_actionable_recommendations=True,
             confidence_threshold=0.6,
-            max_insights=5
+            max_insights=5,
         )
 
         assert result["status"] == "success", "Insight generation should succeed"
         assert "insights" in result, "Should include insights"
         assert len(result["insights"]) > 0, "Should generate insights"
         assert "visualizations" in result, "Should include visualizations"
-        assert "actionable_recommendations" in result, "Should include actionable recommendations"
+        assert (
+            "actionable_recommendations" in result
+        ), "Should include actionable recommendations"
 
         # Test different insight depths
         deep_result = self.engine.generate_intelligent_insights(
-            analysis_context=analysis_context,
-            insight_depth="deep",
-            max_insights=10
+            analysis_context=analysis_context, insight_depth="deep", max_insights=10
         )
 
-        assert deep_result["status"] == "success", "Deep insight generation should succeed"
+        assert (
+            deep_result["status"] == "success"
+        ), "Deep insight generation should succeed"
 
         print("  ✓ Insight generation")
         print("  ✓ Insight depth levels")
@@ -314,29 +334,32 @@ class Phase73TestSuite:
 
         # Test shallow depth
         shallow_result = self.engine.analyze_user_context_intelligently(
-            user_query=query,
-            context_depth="shallow"
+            user_query=query, context_depth="shallow"
         )
 
         assert shallow_result["status"] == "success", "Shallow analysis should succeed"
 
         # Test moderate depth
         moderate_result = self.engine.analyze_user_context_intelligently(
-            user_query=query,
-            context_depth="moderate"
+            user_query=query, context_depth="moderate"
         )
 
-        assert moderate_result["status"] == "success", "Moderate analysis should succeed"
-        assert len(moderate_result["context_analysis"]["insights"]) >= len(shallow_result["context_analysis"]["insights"]), "Moderate should have more insights"
+        assert (
+            moderate_result["status"] == "success"
+        ), "Moderate analysis should succeed"
+        assert len(moderate_result["context_analysis"]["insights"]) >= len(
+            shallow_result["context_analysis"]["insights"]
+        ), "Moderate should have more insights"
 
         # Test deep depth
         deep_result = self.engine.analyze_user_context_intelligently(
-            user_query=query,
-            context_depth="deep"
+            user_query=query, context_depth="deep"
         )
 
         assert deep_result["status"] == "success", "Deep analysis should succeed"
-        assert len(deep_result["context_analysis"]["insights"]) >= len(moderate_result["context_analysis"]["insights"]), "Deep should have more insights"
+        assert len(deep_result["context_analysis"]["insights"]) >= len(
+            moderate_result["context_analysis"]["insights"]
+        ), "Deep should have more insights"
 
         print("  ✓ Shallow depth analysis")
         print("  ✓ Moderate depth analysis")
@@ -350,37 +373,37 @@ class Phase73TestSuite:
         context_analysis = {
             "query_intent": {"primary_intent": "comparative", "domain": "efficiency"},
             "user_profile": {"expertise_level": "intermediate"},
-            "insights": []
+            "insights": [],
         }
 
         # Test no personalization
         none_result = self.engine.generate_contextual_recommendations(
-            context_analysis=context_analysis,
-            personalization_level="none"
+            context_analysis=context_analysis, personalization_level="none"
         )
 
         assert none_result["status"] == "success", "No personalization should succeed"
 
         # Test basic personalization
         basic_result = self.engine.generate_contextual_recommendations(
-            context_analysis=context_analysis,
-            personalization_level="basic"
+            context_analysis=context_analysis, personalization_level="basic"
         )
 
-        assert basic_result["status"] == "success", "Basic personalization should succeed"
+        assert (
+            basic_result["status"] == "success"
+        ), "Basic personalization should succeed"
 
         # Test advanced personalization
         advanced_result = self.engine.generate_contextual_recommendations(
-            context_analysis=context_analysis,
-            personalization_level="advanced"
+            context_analysis=context_analysis, personalization_level="advanced"
         )
 
-        assert advanced_result["status"] == "success", "Advanced personalization should succeed"
+        assert (
+            advanced_result["status"] == "success"
+        ), "Advanced personalization should succeed"
 
         # Test full personalization
         full_result = self.engine.generate_contextual_recommendations(
-            context_analysis=context_analysis,
-            personalization_level="full"
+            context_analysis=context_analysis, personalization_level="full"
         )
 
         assert full_result["status"] == "success", "Full personalization should succeed"
@@ -396,30 +419,34 @@ class Phase73TestSuite:
 
         # Test invalid session context operation
         invalid_result = self.engine.manage_session_context(
-            session_id="nonexistent_session",
-            context_data={},
-            operation="retrieve"
+            session_id="nonexistent_session", context_data={}, operation="retrieve"
         )
 
-        assert invalid_result["status"] == "error", "Should handle invalid session gracefully"
+        assert (
+            invalid_result["status"] == "error"
+        ), "Should handle invalid session gracefully"
 
         # Test empty context analysis
         empty_result = self.engine.generate_contextual_recommendations(
-            context_analysis={},
-            recommendation_count=5
+            context_analysis={}, recommendation_count=5
         )
 
-        assert empty_result["status"] == "success", "Should handle empty context analysis gracefully"
-        assert empty_result["metadata"]["fallback_mode"] == True, "Should use fallback mode for empty context"
+        assert (
+            empty_result["status"] == "success"
+        ), "Should handle empty context analysis gracefully"
+        assert (
+            empty_result["metadata"]["fallback_mode"] == True
+        ), "Should use fallback mode for empty context"
 
         # Test invalid insight types
         invalid_insights_result = self.engine.generate_intelligent_insights(
-            analysis_context={"test": "data"},
-            insight_types=["invalid_type"]
+            analysis_context={"test": "data"}, insight_types=["invalid_type"]
         )
 
         # This should still succeed but with limited insights
-        assert invalid_insights_result["status"] == "success", "Should handle invalid insight types gracefully"
+        assert (
+            invalid_insights_result["status"] == "success"
+        ), "Should handle invalid insight types gracefully"
 
         print("  ✓ Invalid session handling")
         print("  ✓ Empty context handling")
@@ -433,35 +460,49 @@ class Phase73TestSuite:
         # Test context analysis with sports-specific queries
         sports_result = self.engine.analyze_user_context_intelligently(
             user_query="Calculate PER for LeBron James with 25 points, 8 rebounds, 8 assists",
-            available_data={"player": "LeBron James", "stats": {"points": 25, "rebounds": 8, "assists": 8}},
-            expertise_level="advanced"
+            available_data={
+                "player": "LeBron James",
+                "stats": {"points": 25, "rebounds": 8, "assists": 8},
+            },
+            expertise_level="advanced",
         )
 
-        assert sports_result["status"] == "success", "Sports context analysis should succeed"
-        assert sports_result["context_analysis"]["query_intent"]["domain"] == "efficiency", "Should identify efficiency domain"
+        assert (
+            sports_result["status"] == "success"
+        ), "Sports context analysis should succeed"
+        assert (
+            sports_result["context_analysis"]["query_intent"]["domain"] == "efficiency"
+        ), "Should identify efficiency domain"
 
         # Test behavior analysis with formula usage
         behavior_result = self.engine.analyze_user_behavior_patterns(
-            user_id="sports_analyst",
-            behavior_types=["formula_usage"]
+            user_id="sports_analyst", behavior_types=["formula_usage"]
         )
 
-        assert behavior_result["status"] == "success", "Sports behavior analysis should succeed"
+        assert (
+            behavior_result["status"] == "success"
+        ), "Sports behavior analysis should succeed"
 
         # Test recommendations with sports context
         sports_context = {
             "query_intent": {"primary_intent": "comparative", "domain": "efficiency"},
-            "user_profile": {"expertise_level": "advanced", "preferred_formulas": ["PER", "TS%", "Usage Rate"]},
-            "insights": []
+            "user_profile": {
+                "expertise_level": "advanced",
+                "preferred_formulas": ["PER", "TS%", "Usage Rate"],
+            },
+            "insights": [],
         }
 
         sports_rec_result = self.engine.generate_contextual_recommendations(
-            context_analysis=sports_context,
-            recommendation_types=["formula"]
+            context_analysis=sports_context, recommendation_types=["formula"]
         )
 
-        assert sports_rec_result["status"] == "success", "Sports recommendations should succeed"
-        assert len(sports_rec_result["recommendations"]) > 0, "Should generate sports recommendations"
+        assert (
+            sports_rec_result["status"] == "success"
+        ), "Sports recommendations should succeed"
+        assert (
+            len(sports_rec_result["recommendations"]) > 0
+        ), "Should generate sports recommendations"
 
         print("  ✓ Sports query analysis")
         print("  ✓ Formula usage patterns")
@@ -476,8 +517,7 @@ class Phase73TestSuite:
         start_time = time.time()
         for _ in range(10):
             self.engine.analyze_user_context_intelligently(
-                user_query="Test query for performance",
-                context_depth="moderate"
+                user_query="Test query for performance", context_depth="moderate"
             )
         context_time = time.time() - start_time
         print(f"  Context Analysis: {context_time:.2f}s (10 iterations)")
@@ -486,8 +526,7 @@ class Phase73TestSuite:
         start_time = time.time()
         for _ in range(5):
             self.engine.analyze_user_behavior_patterns(
-                user_id=f"perf_user_{_}",
-                behavior_types=["formula_usage"]
+                user_id=f"perf_user_{_}", behavior_types=["formula_usage"]
             )
         behavior_time = time.time() - start_time
         print(f"  Behavior Analysis: {behavior_time:.2f}s (5 iterations)")
@@ -496,14 +535,13 @@ class Phase73TestSuite:
         context_analysis = {
             "query_intent": {"primary_intent": "comparative", "domain": "efficiency"},
             "user_profile": {"expertise_level": "intermediate"},
-            "insights": []
+            "insights": [],
         }
 
         start_time = time.time()
         for _ in range(10):
             self.engine.generate_contextual_recommendations(
-                context_analysis=context_analysis,
-                recommendation_count=3
+                context_analysis=context_analysis, recommendation_count=3
             )
         rec_time = time.time() - start_time
         print(f"  Recommendation Generation: {rec_time:.2f}s (10 iterations)")
@@ -514,7 +552,7 @@ class Phase73TestSuite:
             self.engine.manage_session_context(
                 session_id=f"perf_session_{i}",
                 context_data={"test": "data"},
-                operation="store"
+                operation="store",
             )
         session_time = time.time() - start_time
         print(f"  Session Management: {session_time:.2f}s (20 operations)")
@@ -523,19 +561,20 @@ class Phase73TestSuite:
         analysis_context = {
             "formulas_used": ["PER", "TS%"],
             "results": {"per": 25.5},
-            "metrics": {"PER": [25.5, 23.2]}
+            "metrics": {"PER": [25.5, 23.2]},
         }
 
         start_time = time.time()
         for _ in range(5):
             self.engine.generate_intelligent_insights(
-                analysis_context=analysis_context,
-                insight_types=["pattern", "trend"]
+                analysis_context=analysis_context, insight_types=["pattern", "trend"]
             )
         insight_time = time.time() - start_time
         print(f"  Insight Generation: {insight_time:.2f}s (5 iterations)")
 
-        total_time = context_time + behavior_time + rec_time + session_time + insight_time
+        total_time = (
+            context_time + behavior_time + rec_time + session_time + insight_time
+        )
         print(f"  Total Benchmark Time: {total_time:.2f}s")
 
         # Performance assertions
@@ -552,55 +591,62 @@ class Phase73TestSuite:
         # Test standalone context analysis
         standalone_context = analyze_user_context_intelligently(
             user_query="Test standalone context analysis",
-            expertise_level="intermediate"
+            expertise_level="intermediate",
         )
 
-        assert standalone_context["status"] == "success", "Standalone context analysis should succeed"
+        assert (
+            standalone_context["status"] == "success"
+        ), "Standalone context analysis should succeed"
 
         # Test standalone behavior analysis
         standalone_behavior = analyze_user_behavior_patterns(
-            user_id="standalone_user",
-            behavior_types=["formula_usage"]
+            user_id="standalone_user", behavior_types=["formula_usage"]
         )
 
-        assert standalone_behavior["status"] == "success", "Standalone behavior analysis should succeed"
+        assert (
+            standalone_behavior["status"] == "success"
+        ), "Standalone behavior analysis should succeed"
 
         # Test standalone recommendations
         context_analysis = {
             "query_intent": {"primary_intent": "comparative", "domain": "efficiency"},
             "user_profile": {"expertise_level": "intermediate"},
-            "insights": []
+            "insights": [],
         }
 
         standalone_rec = generate_contextual_recommendations(
-            context_analysis=context_analysis,
-            recommendation_count=3
+            context_analysis=context_analysis, recommendation_count=3
         )
 
-        assert standalone_rec["status"] == "success", "Standalone recommendations should succeed"
+        assert (
+            standalone_rec["status"] == "success"
+        ), "Standalone recommendations should succeed"
 
         # Test standalone session management
         standalone_session = manage_session_context(
             session_id="standalone_session",
             context_data={"test": "standalone"},
-            operation="store"
+            operation="store",
         )
 
-        assert standalone_session["status"] == "success", "Standalone session management should succeed"
+        assert (
+            standalone_session["status"] == "success"
+        ), "Standalone session management should succeed"
 
         # Test standalone insights
         analysis_context = {
             "formulas_used": ["PER"],
             "results": {"per": 25.5},
-            "metrics": {"PER": [25.5]}
+            "metrics": {"PER": [25.5]},
         }
 
         standalone_insights = generate_intelligent_insights(
-            analysis_context=analysis_context,
-            insight_types=["pattern"]
+            analysis_context=analysis_context, insight_types=["pattern"]
         )
 
-        assert standalone_insights["status"] == "success", "Standalone insights should succeed"
+        assert (
+            standalone_insights["status"] == "success"
+        ), "Standalone insights should succeed"
 
         print("  ✓ Standalone context analysis")
         print("  ✓ Standalone behavior analysis")
@@ -635,7 +681,9 @@ class Phase73TestSuite:
         if len(passed_tests) == len(self.test_results):
             print("🎉 ALL TESTS PASSED! Phase 7.3 implementation is working correctly.")
         else:
-            print(f"⚠️  {len(failed_tests)} test(s) failed. Please review the implementation.")
+            print(
+                f"⚠️  {len(failed_tests)} test(s) failed. Please review the implementation."
+            )
 
         print("=" * 60)
 

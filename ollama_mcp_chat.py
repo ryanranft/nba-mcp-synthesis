@@ -14,10 +14,8 @@ from rich.panel import Panel
 console = Console()
 
 # Connect to Ollama
-ollama = OpenAI(
-    base_url="http://34.226.246.126:11434/v1",
-    api_key="ollama"
-)
+ollama = OpenAI(base_url="http://34.226.246.126:11434/v1", api_key="ollama")
+
 
 class MCPOllamaChat:
     def __init__(self):
@@ -28,6 +26,7 @@ class MCPOllamaChat:
         """Load MCP tools."""
         try:
             from mcp_server.fastmcp_server import mcp
+
             self.mcp_tools = await mcp.list_tools()
             console.print(f"✅ Loaded {len(self.mcp_tools)} MCP tools", style="green")
         except Exception as e:
@@ -35,10 +34,9 @@ class MCPOllamaChat:
 
     def get_system_prompt(self):
         """Create system prompt with MCP tools context."""
-        tool_list = "\n".join([
-            f"- {t.name}: {t.description}"
-            for t in self.mcp_tools[:20]
-        ])
+        tool_list = "\n".join(
+            [f"- {t.name}: {t.description}" for t in self.mcp_tools[:20]]
+        )
 
         return f"""You are an AI assistant with access to {len(self.mcp_tools)} NBA data tools.
 
@@ -56,15 +54,12 @@ Be conversational and helpful!"""
     async def chat(self, user_message):
         """Send message to Ollama with MCP context."""
         # Add user message
-        self.conversation.append({
-            "role": "user",
-            "content": user_message
-        })
+        self.conversation.append({"role": "user", "content": user_message})
 
         # Prepare messages with system context
         messages = [
             {"role": "system", "content": self.get_system_prompt()},
-            *self.conversation
+            *self.conversation,
         ]
 
         # Get response from Ollama
@@ -76,7 +71,7 @@ Be conversational and helpful!"""
                 messages=messages,
                 temperature=0.7,
                 max_tokens=1000,
-                stream=True  # Enable streaming for better UX
+                stream=True,  # Enable streaming for better UX
             )
 
             full_response = ""
@@ -89,10 +84,7 @@ Be conversational and helpful!"""
             console.print("\n")
 
             # Add assistant response to conversation
-            self.conversation.append({
-                "role": "assistant",
-                "content": full_response
-            })
+            self.conversation.append({"role": "assistant", "content": full_response})
 
             return full_response
 
@@ -105,11 +97,13 @@ Be conversational and helpful!"""
         console.clear()
 
         # Header
-        console.print(Panel.fit(
-            "[bold cyan]🤖 Ollama + NBA MCP Chat[/bold cyan]\n"
-            "[dim]Type 'exit' to quit, 'tools' to list all MCP tools[/dim]",
-            border_style="cyan"
-        ))
+        console.print(
+            Panel.fit(
+                "[bold cyan]🤖 Ollama + NBA MCP Chat[/bold cyan]\n"
+                "[dim]Type 'exit' to quit, 'tools' to list all MCP tools[/dim]",
+                border_style="cyan",
+            )
+        )
 
         # Initialize
         await self.initialize()
@@ -124,17 +118,21 @@ Be conversational and helpful!"""
                 if not user_input:
                     continue
 
-                if user_input.lower() in ['exit', 'quit', 'q']:
+                if user_input.lower() in ["exit", "quit", "q"]:
                     console.print("\n[cyan]👋 Goodbye![/cyan]\n")
                     break
 
-                if user_input.lower() == 'tools':
-                    console.print(f"\n[cyan]📋 Available MCP Tools ({len(self.mcp_tools)}):[/cyan]")
+                if user_input.lower() == "tools":
+                    console.print(
+                        f"\n[cyan]📋 Available MCP Tools ({len(self.mcp_tools)}):[/cyan]"
+                    )
                     for i, tool in enumerate(self.mcp_tools, 1):
-                        console.print(f"  {i}. [bold]{tool.name}[/bold]: {tool.description}")
+                        console.print(
+                            f"  {i}. [bold]{tool.name}[/bold]: {tool.description}"
+                        )
                     continue
 
-                if user_input.lower() == 'clear':
+                if user_input.lower() == "clear":
                     self.conversation = []
                     console.clear()
                     console.print("[cyan]💬 Conversation cleared![/cyan]")
@@ -149,10 +147,12 @@ Be conversational and helpful!"""
             except Exception as e:
                 console.print(f"\n[red]❌ Error: {e}[/red]\n")
 
+
 async def main():
     """Entry point."""
     chat = MCPOllamaChat()
     await chat.run()
+
 
 if __name__ == "__main__":
     try:
@@ -160,7 +160,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\n👋 Goodbye!")
         sys.exit(0)
-
-
-
-

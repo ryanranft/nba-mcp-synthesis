@@ -1,4 +1,5 @@
 """Database Query Optimization - IMPORTANT 14"""
+
 import logging
 from typing import List, Dict, Any, Optional
 from sqlalchemy import text
@@ -76,7 +77,9 @@ class QueryOptimizer:
             if slow_queries:
                 logger.warning(f"⚠️  Found {len(slow_queries)} slow queries")
                 for q in slow_queries[:5]:
-                    logger.warning(f"   {q['query'][:50]}... ({q['mean_exec_time']:.2f}ms avg)")
+                    logger.warning(
+                        f"   {q['query'][:50]}... ({q['mean_exec_time']:.2f}ms avg)"
+                    )
 
             return slow_queries
 
@@ -111,7 +114,7 @@ class QueryOptimizer:
 
             for col in columns:
                 # Suggest index if high cardinality
-                if col['n_distinct'] and abs(col['n_distinct']) > 100:
+                if col["n_distinct"] and abs(col["n_distinct"]) > 100:
                     suggestions.append(
                         f"CREATE INDEX idx_{table_name}_{col['column_name']} "
                         f"ON {table_name}({col['column_name']});"
@@ -216,4 +219,3 @@ if __name__ == "__main__":
     # Explain a query
     query = "SELECT * FROM players WHERE team = :team"
     plan = optimizer.explain_query(query, {"team": "Lakers"})
-

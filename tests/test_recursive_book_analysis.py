@@ -21,11 +21,16 @@ from datetime import datetime
 import sys
 
 # Add the scripts directory to the path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'scripts'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
 from recursive_book_analysis import (
-    BookManager, RecursiveAnalyzer, RecommendationGenerator,
-    PlanGenerator, MasterRecommendations, ProjectScanner, AcsmConverter
+    BookManager,
+    RecursiveAnalyzer,
+    RecommendationGenerator,
+    PlanGenerator,
+    MasterRecommendations,
+    ProjectScanner,
+    AcsmConverter,
 )
 
 
@@ -44,7 +49,7 @@ class TestAcsmConverter(unittest.TestCase):
     def test_is_ade_installed(self):
         """Test Adobe Digital Editions installation check."""
         # Mock the path check
-        with patch('os.path.exists') as mock_exists:
+        with patch("os.path.exists") as mock_exists:
             mock_exists.return_value = True
             self.assertTrue(self.converter.is_ade_installed())
 
@@ -73,9 +78,10 @@ class TestBookManager(unittest.TestCase):
 
         # Test book doesn't exist
         from botocore.exceptions import ClientError
-        error_response = {'Error': {'Code': '404'}}
+
+        error_response = {"Error": {"Code": "404"}}
         self.book_manager.s3_client.head_object.side_effect = ClientError(
-            error_response, 'HeadObject'
+            error_response, "HeadObject"
         )
         self.assertFalse(self.book_manager.book_exists_in_s3("books/missing.pdf"))
 
@@ -83,7 +89,7 @@ class TestBookManager(unittest.TestCase):
         """Test S3 upload functionality."""
         # Create a test file
         test_file = os.path.join(self.temp_dir, "test.pdf")
-        with open(test_file, 'w') as f:
+        with open(test_file, "w") as f:
             f.write("test content")
 
         # Mock successful upload
@@ -114,24 +120,24 @@ class TestProjectScanner(unittest.TestCase):
         os.makedirs(os.path.join(self.temp_dir, "tests"), exist_ok=True)
 
         # Create test files
-        with open(os.path.join(self.temp_dir, "src", "ml", "model.py"), 'w') as f:
+        with open(os.path.join(self.temp_dir, "src", "ml", "model.py"), "w") as f:
             f.write("class Model:\n    def train(self): pass")
 
-        with open(os.path.join(self.temp_dir, "tests", "test_model.py"), 'w') as f:
+        with open(os.path.join(self.temp_dir, "tests", "test_model.py"), "w") as f:
             f.write("def test_model(): pass")
 
         # Mock the scan
-        with patch.object(self.scanner, '_scan_directory') as mock_scan:
+        with patch.object(self.scanner, "_scan_directory") as mock_scan:
             mock_scan.return_value = {
-                'modules': ['src.ml.model'],
-                'features': ['Model', 'train'],
-                'files': 2
+                "modules": ["src.ml.model"],
+                "features": ["Model", "train"],
+                "files": 2,
             }
 
             result = self.scanner.scan_project(self.temp_dir)
-            self.assertIn('modules', result)
-            self.assertIn('features', result)
-            self.assertIn('files', result)
+            self.assertIn("modules", result)
+            self.assertIn("features", result)
+            self.assertIn("files", result)
 
 
 class TestMasterRecommendations(unittest.TestCase):
@@ -147,35 +153,26 @@ class TestMasterRecommendations(unittest.TestCase):
     def test_add_recommendation(self):
         """Test adding recommendations with deduplication."""
         # Add first recommendation
-        rec1 = {
-            'title': 'Implement model versioning',
-            'category': 'critical'
-        }
-        self.master_recs.add_recommendation(rec1, 'Test Book 1')
+        rec1 = {"title": "Implement model versioning", "category": "critical"}
+        self.master_recs.add_recommendation(rec1, "Test Book 1")
 
         # Add duplicate recommendation
-        rec2 = {
-            'title': 'Implement model versioning',
-            'category': 'critical'
-        }
-        self.master_recs.add_recommendation(rec2, 'Test Book 2')
+        rec2 = {"title": "Implement model versioning", "category": "critical"}
+        self.master_recs.add_recommendation(rec2, "Test Book 2")
 
         # Should only have one recommendation
         self.assertEqual(len(self.master_recs.recommendations), 1)
 
         # Should have both books as sources
         rec = self.master_recs.recommendations[0]
-        self.assertIn('Test Book 1', rec['source_books'])
-        self.assertIn('Test Book 2', rec['source_books'])
+        self.assertIn("Test Book 1", rec["source_books"])
+        self.assertIn("Test Book 2", rec["source_books"])
 
     def test_save_and_load(self):
         """Test saving and loading master recommendations."""
         # Add a recommendation
-        rec = {
-            'title': 'Test recommendation',
-            'category': 'important'
-        }
-        self.master_recs.add_recommendation(rec, 'Test Book')
+        rec = {"title": "Test recommendation", "category": "important"}
+        self.master_recs.add_recommendation(rec, "Test Book")
 
         # Save
         self.master_recs.save_master()
@@ -186,7 +183,9 @@ class TestMasterRecommendations(unittest.TestCase):
 
         # Should have the same recommendation
         self.assertEqual(len(new_master_recs.recommendations), 1)
-        self.assertEqual(new_master_recs.recommendations[0]['title'], 'Test recommendation')
+        self.assertEqual(
+            new_master_recs.recommendations[0]["title"], "Test recommendation"
+        )
 
 
 class TestRecursiveAnalyzer(unittest.TestCase):
@@ -194,17 +193,15 @@ class TestRecursiveAnalyzer(unittest.TestCase):
 
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()
-        self.analyzer = RecursiveAnalyzer({
-            'convergence_threshold': 3,
-            'max_iterations': 10,
-            'chunk_size': 1000
-        })
+        self.analyzer = RecursiveAnalyzer(
+            {"convergence_threshold": 3, "max_iterations": 10, "chunk_size": 1000}
+        )
 
         # Mock dependencies
         self.analyzer.scanner = Mock()
         self.analyzer.scanner.scan_projects.return_value = {
-            'synthesis': {'modules': [], 'features': []},
-            'simulator': {'modules': [], 'features': []}
+            "synthesis": {"modules": [], "features": []},
+            "simulator": {"modules": [], "features": []},
         }
         self.analyzer.master_recs = Mock()
 
@@ -215,38 +212,48 @@ class TestRecursiveAnalyzer(unittest.TestCase):
         """Test convergence detection logic."""
         # Test nice-to-have only iteration
         recommendations = {
-            'critical': [],
-            'important': [],
-            'nice_to_have': ['Test recommendation']
+            "critical": [],
+            "important": [],
+            "nice_to_have": ["Test recommendation"],
         }
 
-        has_critical = len(recommendations.get('critical', [])) > 0
-        has_important = len(recommendations.get('important', [])) > 0
-        has_only_nice = not has_critical and not has_important and len(recommendations.get('nice_to_have', [])) > 0
+        has_critical = len(recommendations.get("critical", [])) > 0
+        has_important = len(recommendations.get("important", [])) > 0
+        has_only_nice = (
+            not has_critical
+            and not has_important
+            and len(recommendations.get("nice_to_have", [])) > 0
+        )
 
         self.assertTrue(has_only_nice)
 
     def test_iteration_tracking(self):
         """Test iteration tracking functionality."""
         tracker = {
-            'iterations': [],
-            'total_recommendations': {'critical': 0, 'important': 0, 'nice_to_have': 0}
+            "iterations": [],
+            "total_recommendations": {"critical": 0, "important": 0, "nice_to_have": 0},
         }
 
         # Simulate iteration
         iteration_data = {
-            'iteration': 1,
-            'timestamp': datetime.now().isoformat(),
-            'recommendations': {'critical': ['Test'], 'important': [], 'nice_to_have': []}
+            "iteration": 1,
+            "timestamp": datetime.now().isoformat(),
+            "recommendations": {
+                "critical": ["Test"],
+                "important": [],
+                "nice_to_have": [],
+            },
         }
-        tracker['iterations'].append(iteration_data)
+        tracker["iterations"].append(iteration_data)
 
         # Update totals
-        for category in ['critical', 'important', 'nice_to_have']:
-            tracker['total_recommendations'][category] += len(iteration_data['recommendations'].get(category, []))
+        for category in ["critical", "important", "nice_to_have"]:
+            tracker["total_recommendations"][category] += len(
+                iteration_data["recommendations"].get(category, [])
+            )
 
-        self.assertEqual(tracker['total_recommendations']['critical'], 1)
-        self.assertEqual(len(tracker['iterations']), 1)
+        self.assertEqual(tracker["total_recommendations"]["critical"], 1)
+        self.assertEqual(len(tracker["iterations"]), 1)
 
 
 class TestRecommendationGenerator(unittest.TestCase):
@@ -262,26 +269,38 @@ class TestRecommendationGenerator(unittest.TestCase):
     def test_generate_report(self):
         """Test markdown report generation."""
         tracker = {
-            'book_title': 'Test Book',
-            'start_time': datetime.now().isoformat(),
-            'total_iterations': 3,
-            'convergence_achieved': True,
-            'convergence_iteration': 3,
-            'total_recommendations': {'critical': 2, 'important': 3, 'nice_to_have': 1},
-            'iterations': [
+            "book_title": "Test Book",
+            "start_time": datetime.now().isoformat(),
+            "total_iterations": 3,
+            "convergence_achieved": True,
+            "convergence_iteration": 3,
+            "total_recommendations": {"critical": 2, "important": 3, "nice_to_have": 1},
+            "iterations": [
                 {
-                    'iteration': 1,
-                    'recommendations': {'critical': ['Test 1'], 'important': [], 'nice_to_have': []}
+                    "iteration": 1,
+                    "recommendations": {
+                        "critical": ["Test 1"],
+                        "important": [],
+                        "nice_to_have": [],
+                    },
                 },
                 {
-                    'iteration': 2,
-                    'recommendations': {'critical': ['Test 2'], 'important': ['Test 3'], 'nice_to_have': []}
+                    "iteration": 2,
+                    "recommendations": {
+                        "critical": ["Test 2"],
+                        "important": ["Test 3"],
+                        "nice_to_have": [],
+                    },
                 },
                 {
-                    'iteration': 3,
-                    'recommendations': {'critical': [], 'important': [], 'nice_to_have': ['Test 4']}
-                }
-            ]
+                    "iteration": 3,
+                    "recommendations": {
+                        "critical": [],
+                        "important": [],
+                        "nice_to_have": ["Test 4"],
+                    },
+                },
+            ],
         }
 
         report_file = self.generator.generate_report(tracker, self.temp_dir)
@@ -290,12 +309,12 @@ class TestRecommendationGenerator(unittest.TestCase):
         self.assertTrue(os.path.exists(report_file))
 
         # Check content
-        with open(report_file, 'r') as f:
+        with open(report_file, "r") as f:
             content = f.read()
-            self.assertIn('Test Book', content)
-            self.assertIn('CONVERGENCE ACHIEVED', content)
-            self.assertIn('Test 1', content)
-            self.assertIn('Test 2', content)
+            self.assertIn("Test Book", content)
+            self.assertIn("CONVERGENCE ACHIEVED", content)
+            self.assertIn("Test 1", content)
+            self.assertIn("Test 2", content)
 
     def test_sanitize_filename(self):
         """Test filename sanitization."""
@@ -303,7 +322,7 @@ class TestRecommendationGenerator(unittest.TestCase):
             ("Test Book: Analysis", "Test_Book_Analysis"),
             ("Book/With\\Invalid:Chars", "Book_With_Invalid_Chars"),
             ("Book with spaces", "Book_with_spaces"),
-            ("Book@#$%^&*()", "Book")
+            ("Book@#$%^&*()", "Book"),
         ]
 
         for input_name, expected in test_cases:
@@ -324,16 +343,16 @@ class TestPlanGenerator(unittest.TestCase):
     def test_generate_plans(self):
         """Test implementation plan generation."""
         tracker = {
-            'book_title': 'Test Book',
-            'iterations': [
+            "book_title": "Test Book",
+            "iterations": [
                 {
-                    'recommendations': {
-                        'critical': ['Implement model versioning'],
-                        'important': ['Add monitoring'],
-                        'nice_to_have': ['Improve documentation']
+                    "recommendations": {
+                        "critical": ["Implement model versioning"],
+                        "important": ["Add monitoring"],
+                        "nice_to_have": ["Improve documentation"],
                     }
                 }
-            ]
+            ],
         }
 
         plan_files = self.generator.generate_plans(tracker, self.temp_dir)
@@ -346,28 +365,24 @@ class TestPlanGenerator(unittest.TestCase):
             self.assertTrue(os.path.exists(plan_file))
 
         # Check content
-        with open(plan_files[0], 'r') as f:
+        with open(plan_files[0], "r") as f:
             content = f.read()
-            self.assertIn('Implement model versioning', content)
-            self.assertIn('Test Book', content)
+            self.assertIn("Implement model versioning", content)
+            self.assertIn("Test Book", content)
 
     def test_generate_plan_file(self):
         """Test individual plan file generation."""
         plan_file = self.generator._generate_plan_file(
-            "Test Recommendation",
-            "critical",
-            1,
-            self.temp_dir,
-            "Test Book"
+            "Test Recommendation", "critical", 1, self.temp_dir, "Test Book"
         )
 
         self.assertTrue(os.path.exists(plan_file))
 
-        with open(plan_file, 'r') as f:
+        with open(plan_file, "r") as f:
             content = f.read()
-            self.assertIn('Test Recommendation', content)
-            self.assertIn('Critical', content)
-            self.assertIn('HIGH', content)
+            self.assertIn("Test Recommendation", content)
+            self.assertIn("Critical", content)
+            self.assertIn("HIGH", content)
 
 
 class TestIntegration(unittest.TestCase):
@@ -379,39 +394,39 @@ class TestIntegration(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.temp_dir)
 
-    @patch('recursive_book_analysis.BookManager')
-    @patch('recursive_book_analysis.RecursiveAnalyzer')
+    @patch("recursive_book_analysis.BookManager")
+    @patch("recursive_book_analysis.RecursiveAnalyzer")
     def test_full_workflow(self, mock_analyzer, mock_book_manager):
         """Test the complete workflow integration."""
         # Mock book manager
         mock_bm_instance = Mock()
         mock_bm_instance.check_and_upload_books.return_value = {
-            'already_in_s3': [],
-            'uploaded': [{'title': 'Test Book'}],
-            'needs_conversion': [],
-            'failed': [],
-            'skipped': []
+            "already_in_s3": [],
+            "uploaded": [{"title": "Test Book"}],
+            "needs_conversion": [],
+            "failed": [],
+            "skipped": [],
         }
         mock_book_manager.return_value = mock_bm_instance
 
         # Mock analyzer
         mock_analyzer_instance = Mock()
         mock_analyzer_instance.analyze_book_recursively.return_value = {
-            'book_title': 'Test Book',
-            'convergence_achieved': True,
-            'total_iterations': 3,
-            'total_recommendations': {'critical': 1, 'important': 2, 'nice_to_have': 1}
+            "book_title": "Test Book",
+            "convergence_achieved": True,
+            "total_iterations": 3,
+            "total_recommendations": {"critical": 1, "important": 2, "nice_to_have": 1},
         }
         mock_analyzer.return_value = mock_analyzer_instance
 
         # Mock recommendation generator
-        with patch('recursive_book_analysis.RecommendationGenerator') as mock_rg:
+        with patch("recursive_book_analysis.RecommendationGenerator") as mock_rg:
             mock_rg_instance = Mock()
             mock_rg_instance.generate_report.return_value = "test_report.md"
             mock_rg.return_value = mock_rg_instance
 
             # Mock plan generator
-            with patch('recursive_book_analysis.PlanGenerator') as mock_pg:
+            with patch("recursive_book_analysis.PlanGenerator") as mock_pg:
                 mock_pg_instance = Mock()
                 mock_pg_instance.generate_plans.return_value = ["plan1.md", "plan2.md"]
                 mock_pg.return_value = mock_pg_instance
@@ -432,31 +447,30 @@ class TestConfiguration(unittest.TestCase):
                     "id": "test_book",
                     "title": "Test Book",
                     "s3_path": "books/test.pdf",
-                    "format": "pdf"
+                    "format": "pdf",
                 }
             ],
-            "analysis_settings": {
-                "convergence_threshold": 3,
-                "max_iterations": 15
-            }
+            "analysis_settings": {"convergence_threshold": 3, "max_iterations": 15},
         }
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json.dump(config_data, f)
             config_file = f.name
 
         try:
-            with open(config_file, 'r') as f:
+            with open(config_file, "r") as f:
                 loaded_config = json.load(f)
 
-            self.assertEqual(len(loaded_config['books']), 1)
-            self.assertEqual(loaded_config['books'][0]['title'], 'Test Book')
-            self.assertEqual(loaded_config['analysis_settings']['convergence_threshold'], 3)
+            self.assertEqual(len(loaded_config["books"]), 1)
+            self.assertEqual(loaded_config["books"][0]["title"], "Test Book")
+            self.assertEqual(
+                loaded_config["analysis_settings"]["convergence_threshold"], 3
+            )
         finally:
             os.unlink(config_file)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Create test suite
     test_suite = unittest.TestSuite()
 
@@ -470,7 +484,7 @@ if __name__ == '__main__':
         TestRecommendationGenerator,
         TestPlanGenerator,
         TestIntegration,
-        TestConfiguration
+        TestConfiguration,
     ]
 
     for test_class in test_classes:
@@ -487,7 +501,9 @@ if __name__ == '__main__':
     print(f"  Tests run: {result.testsRun}")
     print(f"  Failures: {len(result.failures)}")
     print(f"  Errors: {len(result.errors)}")
-    print(f"  Success rate: {((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100):.1f}%")
+    print(
+        f"  Success rate: {((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100):.1f}%"
+    )
     print(f"{'='*70}")
 
     # Exit with error code if tests failed

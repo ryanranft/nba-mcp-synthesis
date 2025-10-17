@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 
 class LoadBalancerType(Enum):
     """Supported load balancer types"""
+
     HAPROXY = "haproxy"
     NGINX = "nginx"
     AWS_ALB = "aws_alb"
@@ -39,6 +40,7 @@ class LoadBalancerType(Enum):
 
 class HealthCheckProtocol(Enum):
     """Health check protocols"""
+
     HTTP = "http"
     HTTPS = "https"
     TCP = "tcp"
@@ -47,6 +49,7 @@ class HealthCheckProtocol(Enum):
 
 class RoutingAlgorithm(Enum):
     """Load balancing algorithms"""
+
     ROUND_ROBIN = "round_robin"
     LEAST_CONNECTIONS = "least_connections"
     IP_HASH = "ip_hash"
@@ -57,6 +60,7 @@ class RoutingAlgorithm(Enum):
 @dataclass
 class Backend:
     """Backend server configuration"""
+
     host: str
     port: int
     weight: int = 100
@@ -72,6 +76,7 @@ class Backend:
 @dataclass
 class HealthCheck:
     """Health check configuration"""
+
     protocol: HealthCheckProtocol = HealthCheckProtocol.HTTP
     path: str = "/health"
     interval_seconds: int = 10
@@ -84,6 +89,7 @@ class HealthCheck:
 @dataclass
 class LoadBalancerConfig:
     """Load balancer configuration"""
+
     name: str
     listen_port: int
     backends: List[Backend]
@@ -131,10 +137,11 @@ class HAProxyConfigGenerator:
         cfg.append("frontend {}_frontend".format(config.name))
 
         if config.ssl_enabled and config.ssl_cert_path:
-            cfg.append("    bind *:{} ssl crt {}".format(
-                config.listen_port,
-                config.ssl_cert_path
-            ))
+            cfg.append(
+                "    bind *:{} ssl crt {}".format(
+                    config.listen_port, config.ssl_cert_path
+                )
+            )
         else:
             cfg.append("    bind *:{}".format(config.listen_port))
 
@@ -142,11 +149,15 @@ class HAProxyConfigGenerator:
 
         # Rate limiting
         if config.rate_limit_requests_per_second:
-            cfg.append("    stick-table type ip size 100k expire 30s store http_req_rate(10s)")
+            cfg.append(
+                "    stick-table type ip size 100k expire 30s store http_req_rate(10s)"
+            )
             cfg.append("    http-request track-sc0 src")
-            cfg.append("    http-request deny deny_status 429 if {{ sc_http_req_rate(0) gt {} }}".format(
-                config.rate_limit_requests_per_second
-            ))
+            cfg.append(
+                "    http-request deny deny_status 429 if {{ sc_http_req_rate(0) gt {} }}".format(
+                    config.rate_limit_requests_per_second
+                )
+            )
 
         cfg.append("")
 
@@ -158,9 +169,11 @@ class HAProxyConfigGenerator:
             RoutingAlgorithm.ROUND_ROBIN: "roundrobin",
             RoutingAlgorithm.LEAST_CONNECTIONS: "leastconn",
             RoutingAlgorithm.IP_HASH: "source",
-            RoutingAlgorithm.WEIGHTED_ROUND_ROBIN: "roundrobin"
+            RoutingAlgorithm.WEIGHTED_ROUND_ROBIN: "roundrobin",
         }
-        cfg.append("    balance {}".format(algo_map.get(config.algorithm, "roundrobin")))
+        cfg.append(
+            "    balance {}".format(algo_map.get(config.algorithm, "roundrobin"))
+        )
 
         # Session affinity
         if config.session_affinity:
@@ -178,14 +191,13 @@ class HAProxyConfigGenerator:
                 continue
 
             server_line = "    server server{} {} weight {} maxconn {}".format(
-                i + 1,
-                backend.address,
-                backend.weight,
-                backend.max_connections
+                i + 1, backend.address, backend.weight, backend.max_connections
             )
 
             if config.health_check:
-                server_line += " check inter {}s".format(config.health_check.interval_seconds)
+                server_line += " check inter {}s".format(
+                    config.health_check.interval_seconds
+                )
 
             if backend.backup:
                 server_line += " backup"
@@ -213,7 +225,7 @@ class NginxConfigGenerator:
         algo_map = {
             RoutingAlgorithm.LEAST_CONNECTIONS: "least_conn;",
             RoutingAlgorithm.IP_HASH: "ip_hash;",
-            RoutingAlgorithm.WEIGHTED_ROUND_ROBIN: ""
+            RoutingAlgorithm.WEIGHTED_ROUND_ROBIN: "",
         }
         algo_directive = algo_map.get(config.algorithm, "")
         if algo_directive:
@@ -270,19 +282,32 @@ class NginxConfigGenerator:
         cfg.append("        proxy_pass http://{}_upstream;".format(config.name))
         cfg.append("        proxy_set_header Host $host;")
         cfg.append("        proxy_set_header X-Real-IP $remote_addr;")
-        cfg.append("        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;")
+        cfg.append(
+            "        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;"
+        )
         cfg.append("        proxy_set_header X-Forwarded-Proto $scheme;")
-        cfg.append("        proxy_connect_timeout {}s;".format(config.connection_timeout_seconds))
-        cfg.append("        proxy_send_timeout {}s;".format(config.connection_timeout_seconds))
-        cfg.append("        proxy_read_timeout {}s;".format(config.connection_timeout_seconds))
+        cfg.append(
+            "        proxy_connect_timeout {}s;".format(
+                config.connection_timeout_seconds
+            )
+        )
+        cfg.append(
+            "        proxy_send_timeout {}s;".format(config.connection_timeout_seconds)
+        )
+        cfg.append(
+            "        proxy_read_timeout {}s;".format(config.connection_timeout_seconds)
+        )
 
         # Rate limiting
         if config.rate_limit_requests_per_second:
-            cfg.append("        limit_req_zone $binary_remote_addr zone={}:10m rate={}r/s;".format(
-                config.name,
-                config.rate_limit_requests_per_second
-            ))
-            cfg.append("        limit_req zone={} burst=20 nodelay;".format(config.name))
+            cfg.append(
+                "        limit_req_zone $binary_remote_addr zone={}:10m rate={}r/s;".format(
+                    config.name, config.rate_limit_requests_per_second
+                )
+            )
+            cfg.append(
+                "        limit_req zone={} burst=20 nodelay;".format(config.name)
+            )
 
         cfg.append("    }")
         cfg.append("}")
@@ -310,7 +335,9 @@ class LoadBalancerManager:
         if config_name in self.configs:
             config = self.configs[config_name]
             original_count = len(config.backends)
-            config.backends = [b for b in config.backends if b.address != backend_address]
+            config.backends = [
+                b for b in config.backends if b.address != backend_address
+            ]
             removed = len(config.backends) < original_count
             if removed:
                 logger.info(f"Removed backend {backend_address} from {config_name}")
@@ -325,13 +352,17 @@ class LoadBalancerManager:
         """Disable a backend"""
         return self._toggle_backend(config_name, backend_address, False)
 
-    def _toggle_backend(self, config_name: str, backend_address: str, enabled: bool) -> bool:
+    def _toggle_backend(
+        self, config_name: str, backend_address: str, enabled: bool
+    ) -> bool:
         """Toggle backend enabled status"""
         if config_name in self.configs:
             for backend in self.configs[config_name].backends:
                 if backend.address == backend_address:
                     backend.enabled = enabled
-                    logger.info(f"{'Enabled' if enabled else 'Disabled'} backend {backend_address}")
+                    logger.info(
+                        f"{'Enabled' if enabled else 'Disabled'} backend {backend_address}"
+                    )
                     return True
         return False
 
@@ -349,7 +380,7 @@ class LoadBalancerManager:
     def save_config(self, config: LoadBalancerConfig, output_path: str) -> None:
         """Generate and save configuration to file"""
         cfg_content = self.generate_config(config)
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             f.write(cfg_content)
         logger.info(f"Configuration saved to {output_path}")
 
@@ -361,11 +392,11 @@ class LoadBalancerManager:
         config = self.configs[config_name]
         return [
             {
-                'address': b.address,
-                'weight': b.weight,
-                'enabled': b.enabled,
-                'backup': b.backup,
-                'max_connections': b.max_connections
+                "address": b.address,
+                "weight": b.weight,
+                "enabled": b.enabled,
+                "backup": b.backup,
+                "max_connections": b.max_connections,
             }
             for b in config.backends
         ]
@@ -387,7 +418,7 @@ def create_nba_mcp_load_balancer(port: int = 8000) -> LoadBalancerConfig:
         interval_seconds=10,
         timeout_seconds=5,
         healthy_threshold=2,
-        unhealthy_threshold=3
+        unhealthy_threshold=3,
     )
 
     return LoadBalancerConfig(
@@ -402,7 +433,7 @@ def create_nba_mcp_load_balancer(port: int = 8000) -> LoadBalancerConfig:
         ssl_key_path="/etc/ssl/private/nba_mcp.key",
         connection_timeout_seconds=30,
         max_connections=10000,
-        rate_limit_requests_per_second=1000
+        rate_limit_requests_per_second=1000,
     )
 
 
@@ -434,4 +465,3 @@ if __name__ == "__main__":
     status = haproxy_manager.get_backend_status("nba_mcp")
     for backend in status:
         print(json.dumps(backend, indent=2))
-

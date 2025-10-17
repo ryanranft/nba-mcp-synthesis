@@ -1,4 +1,5 @@
 """Performance Profiling & Optimization - IMPORTANT 13"""
+
 import time
 import functools
 import cProfile
@@ -22,8 +23,8 @@ class PerformanceMonitor:
             self.metrics[func_name] = {
                 "count": 0,
                 "total_time": 0.0,
-                "min_time": float('inf'),
-                "max_time": 0.0
+                "min_time": float("inf"),
+                "max_time": 0.0,
             }
 
         metrics = self.metrics[func_name]
@@ -41,7 +42,7 @@ class PerformanceMonitor:
                 "total_time": f"{metrics['total_time']:.3f}s",
                 "avg_time": f"{metrics['total_time'] / metrics['count']:.3f}s",
                 "min_time": f"{metrics['min_time']:.3f}s",
-                "max_time": f"{metrics['max_time']:.3f}s"
+                "max_time": f"{metrics['max_time']:.3f}s",
             }
         return stats
 
@@ -81,6 +82,7 @@ def profile(func: Callable = None, *, enabled: bool = True):
         def another_function():
             ...
     """
+
     def decorator(f: Callable) -> Callable:
         @functools.wraps(f)
         def wrapper(*args, **kwargs) -> Any:
@@ -97,7 +99,9 @@ def profile(func: Callable = None, *, enabled: bool = True):
 
                 # Log slow functions
                 if duration > 1.0:  # More than 1 second
-                    logger.warning(f"⚠️  Slow function: {f.__name__} took {duration:.3f}s")
+                    logger.warning(
+                        f"⚠️  Slow function: {f.__name__} took {duration:.3f}s"
+                    )
 
         return wrapper
 
@@ -116,6 +120,7 @@ def profile_code_block(name: str):
         with profile_code_block("data_processing"):
             # ... code to profile ...
     """
+
     class ProfileContext:
         def __init__(self, block_name: str):
             self.block_name = block_name
@@ -141,6 +146,7 @@ def detailed_profile(func: Callable) -> Callable:
         def complex_function():
             ...
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         profiler = cProfile.Profile()
@@ -154,7 +160,7 @@ def detailed_profile(func: Callable) -> Callable:
 
             # Print stats
             s = io.StringIO()
-            ps = pstats.Stats(profiler, stream=s).sort_stats('cumulative')
+            ps = pstats.Stats(profiler, stream=s).sort_stats("cumulative")
             ps.print_stats(20)  # Top 20 functions
 
             logger.info(f"\n📊 Detailed profile for {func.__name__}:\n{s.getvalue()}")
@@ -164,6 +170,7 @@ def detailed_profile(func: Callable) -> Callable:
 
 # Example usage
 if __name__ == "__main__":
+
     @profile
     def slow_function():
         time.sleep(0.1)
@@ -180,4 +187,3 @@ if __name__ == "__main__":
 
     # Print stats
     get_monitor().print_stats()
-

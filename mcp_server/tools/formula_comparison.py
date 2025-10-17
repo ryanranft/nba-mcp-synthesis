@@ -20,13 +20,19 @@ from collections import defaultdict
 
 # Import other modules
 from .formula_intelligence import FormulaIntelligence
-from .formula_validation import FormulaValidationEngine, ValidationStatus, ValidationType
+from .formula_validation import (
+    FormulaValidationEngine,
+    ValidationStatus,
+    ValidationType,
+)
 from .algebra_helper import get_sports_formula
 
 logger = logging.getLogger(__name__)
 
+
 class ComparisonType(Enum):
     """Types of formula comparisons"""
+
     STRUCTURAL = "structural"
     MATHEMATICAL = "mathematical"
     ACCURACY = "accuracy"
@@ -34,25 +40,31 @@ class ComparisonType(Enum):
     SOURCE_RELIABILITY = "source_reliability"
     PERFORMANCE = "performance"
 
+
 class SourceType(Enum):
     """Formula source types"""
+
     BOOK = "book"
     PAPER = "paper"
     WEBSITE = "website"
     DATABASE = "database"
     USER_DEFINED = "user_defined"
 
+
 class VariationType(Enum):
     """Types of formula variations"""
+
     SYNTAX_DIFFERENCE = "syntax_difference"
     PARAMETER_DIFFERENCE = "parameter_difference"
     CALCULATION_DIFFERENCE = "calculation_difference"
     SIMPLIFICATION_DIFFERENCE = "simplification_difference"
     VERSION_DIFFERENCE = "version_difference"
 
+
 @dataclass(frozen=True)
 class FormulaSource:
     """Source information for a formula"""
+
     source_id: str
     name: str
     type: SourceType
@@ -63,9 +75,11 @@ class FormulaSource:
     reliability_score: float = 1.0
     description: Optional[str] = None
 
+
 @dataclass(frozen=True)
 class FormulaVersion:
     """A specific version of a formula from a source"""
+
     version_id: str
     formula_id: str
     formula: str
@@ -76,9 +90,11 @@ class FormulaVersion:
     created_date: Optional[str] = None
     is_primary: bool = False
 
+
 @dataclass
 class FormulaVariation:
     """Represents a variation between formula versions"""
+
     variation_id: str
     formula_id: str
     version_a: FormulaVersion
@@ -89,9 +105,11 @@ class FormulaVariation:
     impact_assessment: str
     recommendations: List[str]
 
+
 @dataclass
 class ComparisonResult:
     """Result of comparing multiple formula versions"""
+
     comparison_id: str
     formula_id: str
     versions: List[FormulaVersion]
@@ -102,14 +120,17 @@ class ComparisonResult:
     summary: str
     created_at: datetime
 
+
 @dataclass
 class HistoricalEvolution:
     """Tracks historical evolution of a formula"""
+
     formula_id: str
     timeline: List[FormulaVersion]
     evolution_summary: str
     key_changes: List[str]
     current_consensus: Optional[FormulaVersion]
+
 
 class MultiBookFormulaComparison:
     """
@@ -124,7 +145,7 @@ class MultiBookFormulaComparison:
 
         # Formula database
         self.formula_versions = {}  # formula_id -> List[FormulaVersion]
-        self.formula_sources = {}   # source_id -> FormulaSource
+        self.formula_sources = {}  # source_id -> FormulaSource
         self.comparison_history = {}  # comparison_id -> ComparisonResult
 
         # Initialize with known sources
@@ -143,7 +164,7 @@ class MultiBookFormulaComparison:
                 author="Dean Oliver",
                 publication_date="2004",
                 reliability_score=0.95,
-                description="Classic basketball analytics book"
+                description="Classic basketball analytics book",
             ),
             FormulaSource(
                 source_id="basketball_analytics",
@@ -152,21 +173,21 @@ class MultiBookFormulaComparison:
                 author="Various",
                 publication_date="2020",
                 reliability_score=0.90,
-                description="Modern basketball analytics compilation"
+                description="Modern basketball analytics compilation",
             ),
             FormulaSource(
                 source_id="nba_com",
                 name="NBA.com",
                 type=SourceType.WEBSITE,
                 reliability_score=0.85,
-                description="Official NBA statistics and analytics"
+                description="Official NBA statistics and analytics",
             ),
             FormulaSource(
                 source_id="basketball_reference",
                 name="Basketball Reference",
                 type=SourceType.WEBSITE,
                 reliability_score=0.88,
-                description="Comprehensive basketball statistics database"
+                description="Comprehensive basketball statistics database",
             ),
             FormulaSource(
                 source_id="sports_analytics_paper",
@@ -175,8 +196,8 @@ class MultiBookFormulaComparison:
                 author="Research Team",
                 publication_date="2023",
                 reliability_score=0.92,
-                description="Academic research on sports analytics"
-            )
+                description="Academic research on sports analytics",
+            ),
         ]
 
         for source in sources:
@@ -193,13 +214,23 @@ class MultiBookFormulaComparison:
                 source=self.formula_sources["basketball_on_paper"],
                 description="Original PER formula from Basketball on Paper",
                 test_data={
-                    "FGM": 10, "STL": 2, "3PM": 3, "FTM": 5, "BLK": 1,
-                    "OREB": 2, "AST": 8, "DREB": 6, "PF": 3, "FTA": 6,
-                    "FGA": 18, "TOV": 3, "MP": 35
+                    "FGM": 10,
+                    "STL": 2,
+                    "3PM": 3,
+                    "FTM": 5,
+                    "BLK": 1,
+                    "OREB": 2,
+                    "AST": 8,
+                    "DREB": 6,
+                    "PF": 3,
+                    "FTA": 6,
+                    "FGA": 18,
+                    "TOV": 3,
+                    "MP": 35,
                 },
                 expected_result=25.2,
                 created_date="2004",
-                is_primary=True
+                is_primary=True,
             ),
             FormulaVersion(
                 version_id="per_nba_com",
@@ -208,12 +239,22 @@ class MultiBookFormulaComparison:
                 source=self.formula_sources["nba_com"],
                 description="PER formula from NBA.com (same as original)",
                 test_data={
-                    "FGM": 10, "STL": 2, "3PM": 3, "FTM": 5, "BLK": 1,
-                    "OREB": 2, "AST": 8, "DREB": 6, "PF": 3, "FTA": 6,
-                    "FGA": 18, "TOV": 3, "MP": 35
+                    "FGM": 10,
+                    "STL": 2,
+                    "3PM": 3,
+                    "FTM": 5,
+                    "BLK": 1,
+                    "OREB": 2,
+                    "AST": 8,
+                    "DREB": 6,
+                    "PF": 3,
+                    "FTA": 6,
+                    "FGA": 18,
+                    "TOV": 3,
+                    "MP": 35,
                 },
                 expected_result=25.2,
-                created_date="2010"
+                created_date="2010",
             ),
             FormulaVersion(
                 version_id="per_simplified",
@@ -222,13 +263,23 @@ class MultiBookFormulaComparison:
                 source=self.formula_sources["basketball_reference"],
                 description="Simplified PER formula with rounded coefficients",
                 test_data={
-                    "FGM": 10, "STL": 2, "3PM": 3, "FTM": 5, "BLK": 1,
-                    "OREB": 2, "AST": 8, "DREB": 6, "PF": 3, "FTA": 6,
-                    "FGA": 18, "TOV": 3, "MP": 35
+                    "FGM": 10,
+                    "STL": 2,
+                    "3PM": 3,
+                    "FTM": 5,
+                    "BLK": 1,
+                    "OREB": 2,
+                    "AST": 8,
+                    "DREB": 6,
+                    "PF": 3,
+                    "FTA": 6,
+                    "FGA": 18,
+                    "TOV": 3,
+                    "MP": 35,
                 },
                 expected_result=25.1,
-                created_date="2015"
-            )
+                created_date="2015",
+            ),
         ]
 
         # True Shooting Percentage variations
@@ -242,7 +293,7 @@ class MultiBookFormulaComparison:
                 test_data={"PTS": 25, "FGA": 20, "FTA": 5},
                 expected_result=0.568,
                 created_date="2004",
-                is_primary=True
+                is_primary=True,
             ),
             FormulaVersion(
                 version_id="ts_modern",
@@ -252,7 +303,7 @@ class MultiBookFormulaComparison:
                 description="Modern TS% formula (same as original)",
                 test_data={"PTS": 25, "FGA": 20, "FTA": 5},
                 expected_result=0.568,
-                created_date="2020"
+                created_date="2020",
             ),
             FormulaVersion(
                 version_id="ts_alternative",
@@ -262,8 +313,8 @@ class MultiBookFormulaComparison:
                 description="Alternative TS% formula with different FTA coefficient",
                 test_data={"PTS": 25, "FGA": 20, "FTA": 5},
                 expected_result=0.556,
-                created_date="2023"
-            )
+                created_date="2023",
+            ),
         ]
 
         # Usage Rate variations
@@ -275,12 +326,18 @@ class MultiBookFormulaComparison:
                 source=self.formula_sources["basketball_on_paper"],
                 description="Original Usage Rate formula from Basketball on Paper",
                 test_data={
-                    "FGA": 18, "FTA": 6, "TOV": 3, "MP": 35,
-                    "TM_MP": 240, "TM_FGA": 90, "TM_FTA": 25, "TM_TOV": 12
+                    "FGA": 18,
+                    "FTA": 6,
+                    "TOV": 3,
+                    "MP": 35,
+                    "TM_MP": 240,
+                    "TM_FGA": 90,
+                    "TM_FTA": 25,
+                    "TM_TOV": 12,
                 },
                 expected_result=28.5,
                 created_date="2004",
-                is_primary=True
+                is_primary=True,
             ),
             FormulaVersion(
                 version_id="usage_simplified",
@@ -289,12 +346,17 @@ class MultiBookFormulaComparison:
                 source=self.formula_sources["basketball_reference"],
                 description="Simplified Usage Rate formula using 48 minutes",
                 test_data={
-                    "FGA": 18, "FTA": 6, "TOV": 3, "MP": 35,
-                    "TM_FGA": 90, "TM_FTA": 25, "TM_TOV": 12
+                    "FGA": 18,
+                    "FTA": 6,
+                    "TOV": 3,
+                    "MP": 35,
+                    "TM_FGA": 90,
+                    "TM_FTA": 25,
+                    "TM_TOV": 12,
                 },
                 expected_result=28.3,
-                created_date="2010"
-            )
+                created_date="2010",
+            ),
         ]
 
         # Store all versions
@@ -316,9 +378,7 @@ class MultiBookFormulaComparison:
             return False
 
     def compare_formula_versions(
-        self,
-        formula_id: str,
-        comparison_types: Optional[List[ComparisonType]] = None
+        self, formula_id: str, comparison_types: Optional[List[ComparisonType]] = None
     ) -> ComparisonResult:
         """
         Compare all versions of a formula across different sources.
@@ -335,7 +395,9 @@ class MultiBookFormulaComparison:
 
         versions = self.formula_versions[formula_id]
         if len(versions) < 2:
-            raise ValueError(f"Need at least 2 versions to compare formula: {formula_id}")
+            raise ValueError(
+                f"Need at least 2 versions to compare formula: {formula_id}"
+            )
 
         comparison_id = str(uuid.uuid4())
         variations = []
@@ -344,7 +406,7 @@ class MultiBookFormulaComparison:
             comparison_types = [
                 ComparisonType.STRUCTURAL,
                 ComparisonType.MATHEMATICAL,
-                ComparisonType.ACCURACY
+                ComparisonType.ACCURACY,
             ]
 
         # Compare each pair of versions
@@ -366,7 +428,9 @@ class MultiBookFormulaComparison:
         recommended_version = self._recommend_best_version(versions, variations)
 
         # Generate summary
-        summary = self._generate_comparison_summary(versions, variations, overall_similarity)
+        summary = self._generate_comparison_summary(
+            versions, variations, overall_similarity
+        )
 
         result = ComparisonResult(
             comparison_id=comparison_id,
@@ -377,7 +441,7 @@ class MultiBookFormulaComparison:
             primary_version=primary_version,
             recommended_version=recommended_version,
             summary=summary,
-            created_at=datetime.now()
+            created_at=datetime.now(),
         )
 
         self.comparison_history[comparison_id] = result
@@ -390,16 +454,20 @@ class MultiBookFormulaComparison:
         formula_id: str,
         version_a: FormulaVersion,
         version_b: FormulaVersion,
-        comparison_types: List[ComparisonType]
+        comparison_types: List[ComparisonType],
     ) -> FormulaVariation:
         """Analyze the variation between two formula versions"""
         variation_id = str(uuid.uuid4())
 
         # Calculate similarity score
-        similarity_score = self._calculate_formula_similarity(version_a.formula, version_b.formula)
+        similarity_score = self._calculate_formula_similarity(
+            version_a.formula, version_b.formula
+        )
 
         # Identify differences
-        differences = self._identify_formula_differences(version_a.formula, version_b.formula)
+        differences = self._identify_formula_differences(
+            version_a.formula, version_b.formula
+        )
 
         # Determine variation type
         variation_type = self._classify_variation_type(differences)
@@ -423,7 +491,7 @@ class MultiBookFormulaComparison:
             similarity_score=similarity_score,
             differences=differences,
             impact_assessment=impact_assessment,
-            recommendations=recommendations
+            recommendations=recommendations,
         )
 
     def _calculate_formula_similarity(self, formula_a: str, formula_b: str) -> float:
@@ -453,7 +521,9 @@ class MultiBookFormulaComparison:
                     return 0.90
 
             except Exception as parse_error:
-                logger.warning(f"Could not parse formulas for symbolic comparison: {parse_error}")
+                logger.warning(
+                    f"Could not parse formulas for symbolic comparison: {parse_error}"
+                )
 
             # String-based similarity as fallback
             str_similarity = difflib.SequenceMatcher(None, formula_a, formula_b).ratio()
@@ -464,7 +534,9 @@ class MultiBookFormulaComparison:
             logger.error(f"Error calculating formula similarity: {e}")
             return 0.0
 
-    def _identify_formula_differences(self, formula_a: str, formula_b: str) -> List[str]:
+    def _identify_formula_differences(
+        self, formula_a: str, formula_b: str
+    ) -> List[str]:
         """Identify specific differences between formulas"""
         differences = []
 
@@ -490,20 +562,24 @@ class MultiBookFormulaComparison:
                 only_a = vars_a - vars_b
                 only_b = vars_b - vars_a
                 if only_a:
-                    differences.append(f"Variables only in formula A: {', '.join(only_a)}")
+                    differences.append(
+                        f"Variables only in formula A: {', '.join(only_a)}"
+                    )
                 if only_b:
-                    differences.append(f"Variables only in formula B: {', '.join(only_b)}")
+                    differences.append(
+                        f"Variables only in formula B: {', '.join(only_b)}"
+                    )
 
             # String-based differences
             if not differences:
                 diff = difflib.unified_diff(
-                    formula_a.splitlines(),
-                    formula_b.splitlines(),
-                    lineterm=''
+                    formula_a.splitlines(), formula_b.splitlines(), lineterm=""
                 )
                 diff_lines = list(diff)
                 if diff_lines:
-                    differences.append(f"Text differences: {len(diff_lines)} lines differ")
+                    differences.append(
+                        f"Text differences: {len(diff_lines)} lines differ"
+                    )
 
         except Exception as e:
             logger.error(f"Error identifying formula differences: {e}")
@@ -566,7 +642,7 @@ class MultiBookFormulaComparison:
         version_a: FormulaVersion,
         version_b: FormulaVersion,
         differences: List[str],
-        comparison_types: List[ComparisonType]
+        comparison_types: List[ComparisonType],
     ) -> str:
         """Assess the impact of formula variations"""
         impact_levels = []
@@ -579,8 +655,12 @@ class MultiBookFormulaComparison:
 
                 # Use version A's test data
                 test_data = version_a.test_data
-                result_a = float(expr_a.subs({sp.Symbol(k): v for k, v in test_data.items()}))
-                result_b = float(expr_b.subs({sp.Symbol(k): v for k, v in test_data.items()}))
+                result_a = float(
+                    expr_a.subs({sp.Symbol(k): v for k, v in test_data.items()})
+                )
+                result_b = float(
+                    expr_b.subs({sp.Symbol(k): v for k, v in test_data.items()})
+                )
 
                 diff_percent = abs(result_a - result_b) / result_a * 100
 
@@ -604,52 +684,76 @@ class MultiBookFormulaComparison:
             impact_levels.append("Structural changes may significantly affect results")
 
         # Assess source reliability
-        reliability_diff = abs(version_a.source.reliability_score - version_b.source.reliability_score)
+        reliability_diff = abs(
+            version_a.source.reliability_score - version_b.source.reliability_score
+        )
         if reliability_diff > 0.1:
             impact_levels.append("Source reliability differences may affect confidence")
 
-        return "; ".join(impact_levels) if impact_levels else "No significant impact detected"
+        return (
+            "; ".join(impact_levels)
+            if impact_levels
+            else "No significant impact detected"
+        )
 
     def _generate_variation_recommendations(
         self,
         version_a: FormulaVersion,
         version_b: FormulaVersion,
         variation_type: VariationType,
-        impact_assessment: str
+        impact_assessment: str,
     ) -> List[str]:
         """Generate recommendations for handling formula variations"""
         recommendations = []
 
         # Source-based recommendations
         if version_a.source.reliability_score > version_b.source.reliability_score:
-            recommendations.append(f"Prefer {version_a.source.name} version (higher reliability)")
+            recommendations.append(
+                f"Prefer {version_a.source.name} version (higher reliability)"
+            )
         elif version_b.source.reliability_score > version_a.source.reliability_score:
-            recommendations.append(f"Prefer {version_b.source.name} version (higher reliability)")
+            recommendations.append(
+                f"Prefer {version_b.source.name} version (higher reliability)"
+            )
 
         # Date-based recommendations
         if version_a.created_date and version_b.created_date:
             if version_a.created_date > version_b.created_date:
-                recommendations.append(f"Consider {version_a.source.name} version (more recent)")
+                recommendations.append(
+                    f"Consider {version_a.source.name} version (more recent)"
+                )
             elif version_b.created_date > version_a.created_date:
-                recommendations.append(f"Consider {version_b.source.name} version (more recent)")
+                recommendations.append(
+                    f"Consider {version_b.source.name} version (more recent)"
+                )
 
         # Variation type recommendations
         if variation_type == VariationType.PARAMETER_DIFFERENCE:
             recommendations.append("Verify coefficient accuracy with multiple sources")
         elif variation_type == VariationType.CALCULATION_DIFFERENCE:
-            recommendations.append("Test both versions with real data to determine accuracy")
+            recommendations.append(
+                "Test both versions with real data to determine accuracy"
+            )
         elif variation_type == VariationType.SYNTAX_DIFFERENCE:
-            recommendations.append("Check for mathematical equivalence despite syntax differences")
+            recommendations.append(
+                "Check for mathematical equivalence despite syntax differences"
+            )
 
         # Impact-based recommendations
         if "High impact" in impact_assessment:
-            recommendations.append("Carefully validate results before using either version")
+            recommendations.append(
+                "Carefully validate results before using either version"
+            )
         elif "Moderate impact" in impact_assessment:
-            recommendations.append("Consider the specific use case when choosing version")
+            recommendations.append(
+                "Consider the specific use case when choosing version"
+            )
 
         return recommendations
 
-    def _calculate_overall_similarity(self, variations: List[FormulaVariation]) -> float:
+    def _calculate_overall_similarity(
+        self, variations: List[FormulaVariation]
+    ) -> float:
         """Calculate overall similarity across all variations"""
         if not variations:
             return 1.0
@@ -657,7 +761,9 @@ class MultiBookFormulaComparison:
         similarities = [v.similarity_score for v in variations]
         return sum(similarities) / len(similarities)
 
-    def _find_primary_version(self, versions: List[FormulaVersion]) -> Optional[FormulaVersion]:
+    def _find_primary_version(
+        self, versions: List[FormulaVersion]
+    ) -> Optional[FormulaVersion]:
         """Find the primary version based on is_primary flag and reliability"""
         # First, look for explicitly marked primary version
         for version in versions:
@@ -671,9 +777,7 @@ class MultiBookFormulaComparison:
         return None
 
     def _recommend_best_version(
-        self,
-        versions: List[FormulaVersion],
-        variations: List[FormulaVariation]
+        self, versions: List[FormulaVersion], variations: List[FormulaVariation]
     ) -> Optional[FormulaVersion]:
         """Recommend the best version based on multiple criteria"""
         if not versions:
@@ -716,12 +820,14 @@ class MultiBookFormulaComparison:
         self,
         versions: List[FormulaVersion],
         variations: List[FormulaVariation],
-        overall_similarity: float
+        overall_similarity: float,
     ) -> str:
         """Generate a summary of the comparison"""
         summary_parts = []
 
-        summary_parts.append(f"Compared {len(versions)} versions of formula across {len(set(v.source.name for v in versions))} sources.")
+        summary_parts.append(
+            f"Compared {len(versions)} versions of formula across {len(set(v.source.name for v in versions))} sources."
+        )
 
         if overall_similarity >= 0.9:
             summary_parts.append("Formulas are highly consistent across sources.")
@@ -748,15 +854,12 @@ class MultiBookFormulaComparison:
         versions = self.formula_versions[formula_id]
 
         # Sort by date
-        sorted_versions = sorted(
-            versions,
-            key=lambda v: v.created_date or "1900"
-        )
+        sorted_versions = sorted(versions, key=lambda v: v.created_date or "1900")
 
         # Identify key changes
         key_changes = []
         for i in range(1, len(sorted_versions)):
-            prev_version = sorted_versions[i-1]
+            prev_version = sorted_versions[i - 1]
             curr_version = sorted_versions[i]
 
             variation = self._analyze_formula_variation(
@@ -764,7 +867,9 @@ class MultiBookFormulaComparison:
             )
 
             if variation.similarity_score < 0.95:
-                key_changes.append(f"{prev_version.created_date} → {curr_version.created_date}: {variation.variation_type.value}")
+                key_changes.append(
+                    f"{prev_version.created_date} → {curr_version.created_date}: {variation.variation_type.value}"
+                )
 
         # Determine current consensus
         current_consensus = self._recommend_best_version(versions, [])
@@ -776,7 +881,7 @@ class MultiBookFormulaComparison:
             timeline=sorted_versions,
             evolution_summary=evolution_summary,
             key_changes=key_changes,
-            current_consensus=current_consensus
+            current_consensus=current_consensus,
         )
 
     def get_all_formulas(self) -> Dict[str, List[FormulaVersion]]:

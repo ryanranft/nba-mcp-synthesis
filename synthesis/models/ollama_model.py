@@ -29,23 +29,30 @@ class OllamaModel:
     def __init__(self):
         """Initialize Ollama client"""
         # Try new naming convention first, then fallback to old
-        self.host = (get_hierarchical_env("OLLAMA_HOST", "NBA_MCP_SYNTHESIS", "WORKFLOW") or
-                    "http://localhost:11434")  # Fallback to default
-        
+        self.host = (
+            get_hierarchical_env("OLLAMA_HOST", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+            or "http://localhost:11434"
+        )  # Fallback to default
+
         # Try new naming convention first, then fallback to old
-        self.model = (get_hierarchical_env("OLLAMA_MODEL", "NBA_MCP_SYNTHESIS", "WORKFLOW") or
-                     "qwen2.5-coder:32b")  # Fallback to default
+        self.model = (
+            get_hierarchical_env("OLLAMA_MODEL", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+            or "qwen2.5-coder:32b"
+        )  # Fallback to default
 
         self.available = False
 
         try:
             import ollama
+
             self.client = ollama
             self.available = self._check_availability()
             if self.available:
                 logger.info(f"Initialized Ollama model: {self.model}")
             else:
-                logger.warning("Ollama server not available - local verification disabled")
+                logger.warning(
+                    "Ollama server not available - local verification disabled"
+                )
         except ImportError:
             logger.warning("Ollama package not installed - local verification disabled")
             self.client = None
@@ -61,9 +68,7 @@ class OllamaModel:
             return False
 
     async def quick_verify(
-        self,
-        code: str,
-        description: Optional[str] = None
+        self, code: str, description: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Quick local verification of code
@@ -80,7 +85,7 @@ class OllamaModel:
                 "success": False,
                 "model": "ollama",
                 "error": "Ollama not available",
-                "available": False
+                "available": False,
             }
 
         start_time = datetime.now()
@@ -101,10 +106,7 @@ Keep it concise."""
 
         try:
             response = self.client.chat(
-                model=self.model,
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
+                model=self.model, messages=[{"role": "user", "content": prompt}]
             )
 
             execution_time = (datetime.now() - start_time).total_seconds()
@@ -112,10 +114,10 @@ Keep it concise."""
             return {
                 "success": True,
                 "model": "ollama",
-                "verification": response['message']['content'],
+                "verification": response["message"]["content"],
                 "execution_time": execution_time,
                 "cost": 0.0,  # Local model - no cost
-                "available": True
+                "available": True,
             }
 
         except Exception as e:
@@ -125,13 +127,11 @@ Keep it concise."""
                 "model": "ollama",
                 "error": str(e),
                 "execution_time": (datetime.now() - start_time).total_seconds(),
-                "available": True
+                "available": True,
             }
 
     async def suggest_improvements(
-        self,
-        code: str,
-        context: Optional[str] = None
+        self, code: str, context: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Suggest code improvements
@@ -148,7 +148,7 @@ Keep it concise."""
                 "success": False,
                 "model": "ollama",
                 "error": "Ollama not available",
-                "available": False
+                "available": False,
             }
 
         prompt = f"""Suggest improvements for this code:
@@ -167,18 +167,15 @@ Be specific and actionable."""
 
         try:
             response = self.client.chat(
-                model=self.model,
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
+                model=self.model, messages=[{"role": "user", "content": prompt}]
             )
 
             return {
                 "success": True,
                 "model": "ollama",
-                "suggestions": response['message']['content'],
+                "suggestions": response["message"]["content"],
                 "cost": 0.0,
-                "available": True
+                "available": True,
             }
 
         except Exception as e:
@@ -187,13 +184,11 @@ Be specific and actionable."""
                 "success": False,
                 "model": "ollama",
                 "error": str(e),
-                "available": True
+                "available": True,
             }
 
     async def explain_diff(
-        self,
-        original_code: str,
-        modified_code: str
+        self, original_code: str, modified_code: str
     ) -> Dict[str, Any]:
         """
         Explain the differences between two code versions
@@ -210,7 +205,7 @@ Be specific and actionable."""
                 "success": False,
                 "model": "ollama",
                 "error": "Ollama not available",
-                "available": False
+                "available": False,
             }
 
         prompt = f"""Explain the changes between these code versions:
@@ -230,18 +225,15 @@ Be concise and focus on key differences."""
 
         try:
             response = self.client.chat(
-                model=self.model,
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
+                model=self.model, messages=[{"role": "user", "content": prompt}]
             )
 
             return {
                 "success": True,
                 "model": "ollama",
-                "explanation": response['message']['content'],
+                "explanation": response["message"]["content"],
                 "cost": 0.0,
-                "available": True
+                "available": True,
             }
 
         except Exception as e:
@@ -250,15 +242,11 @@ Be concise and focus on key differences."""
                 "success": False,
                 "model": "ollama",
                 "error": str(e),
-                "available": True
+                "available": True,
             }
 
     async def query(
-        self,
-        prompt: str,
-        temperature: float = 0.7,
-        max_tokens: int = 4000,
-        **kwargs
+        self, prompt: str, temperature: float = 0.7, max_tokens: int = 4000, **kwargs
     ) -> Dict[str, Any]:
         """
         General query method for Ollama
@@ -277,7 +265,7 @@ Be concise and focus on key differences."""
                 "success": False,
                 "model": "ollama",
                 "error": "Ollama not available",
-                "available": False
+                "available": False,
             }
 
         start_time = datetime.now()
@@ -285,13 +273,8 @@ Be concise and focus on key differences."""
         try:
             response = self.client.chat(
                 model=self.model,
-                messages=[
-                    {"role": "user", "content": prompt}
-                ],
-                options={
-                    "temperature": temperature,
-                    "num_predict": max_tokens
-                }
+                messages=[{"role": "user", "content": prompt}],
+                options={"temperature": temperature, "num_predict": max_tokens},
             )
 
             execution_time = (datetime.now() - start_time).total_seconds()
@@ -299,11 +282,13 @@ Be concise and focus on key differences."""
             return {
                 "success": True,
                 "model": "ollama",
-                "response": response['message']['content'],
-                "tokens_used": len(response['message']['content'].split()),  # Approximate
+                "response": response["message"]["content"],
+                "tokens_used": len(
+                    response["message"]["content"].split()
+                ),  # Approximate
                 "execution_time": execution_time,
                 "cost": 0.0,  # Local model - no cost
-                "available": True
+                "available": True,
             }
 
         except Exception as e:
@@ -313,7 +298,7 @@ Be concise and focus on key differences."""
                 "model": "ollama",
                 "error": str(e),
                 "execution_time": (datetime.now() - start_time).total_seconds(),
-                "available": True
+                "available": True,
             }
 
     def is_available(self) -> bool:
@@ -323,22 +308,18 @@ Be concise and focus on key differences."""
     def get_model_info(self) -> Dict[str, Any]:
         """Get information about the current model"""
         if not self.available:
-            return {
-                "available": False,
-                "model": self.model,
-                "host": self.host
-            }
+            return {"available": False, "model": self.model, "host": self.host}
 
         try:
             models = self.client.list()
-            model_names = [m['name'] for m in models.get('models', [])]
+            model_names = [m["name"] for m in models.get("models", [])]
 
             return {
                 "available": True,
                 "model": self.model,
                 "host": self.host,
                 "model_exists": self.model in model_names,
-                "available_models": model_names
+                "available_models": model_names,
             }
 
         except Exception as e:
@@ -346,5 +327,5 @@ Be concise and focus on key differences."""
                 "available": False,
                 "model": self.model,
                 "host": self.host,
-                "error": str(e)
+                "error": str(e),
             }

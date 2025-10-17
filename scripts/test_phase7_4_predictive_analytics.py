@@ -18,7 +18,7 @@ import unittest
 from typing import Dict, Any, List
 
 # Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from mcp_server.tools.predictive_analytics import (
     PredictiveAnalyticsEngine,
@@ -27,7 +27,7 @@ from mcp_server.tools.predictive_analytics import (
     evaluate_model_performance,
     predict_time_series,
     create_ensemble_model,
-    optimize_model_hyperparameters
+    optimize_model_hyperparameters,
 )
 
 
@@ -45,7 +45,7 @@ class Phase74TestSuite(unittest.TestCase):
             "rebounds": [8.0, 10.0, 6.0, 12.0, 7.0, 9.0, 11.0, 5.0, 10.0, 8.0],
             "assists": [5.0, 7.0, 3.0, 9.0, 4.0, 6.0, 8.0, 2.0, 7.0, 5.0],
             "minutes": [35.0, 38.0, 28.0, 42.0, 32.0, 36.0, 40.0, 25.0, 37.0, 33.0],
-            "efficiency": [18.5, 22.3, 14.2, 28.7, 16.8, 20.1, 26.4, 13.9, 23.2, 17.6]
+            "efficiency": [18.5, 22.3, 14.2, 28.7, 16.8, 20.1, 26.4, 13.9, 23.2, 17.6],
         }
 
         # Create sample test data
@@ -54,14 +54,56 @@ class Phase74TestSuite(unittest.TestCase):
             "rebounds": [9.0, 11.0, 7.0],
             "assists": [6.0, 8.0, 4.0],
             "minutes": [36.0, 39.0, 29.0],
-            "efficiency": [19.2, 23.1, 15.8]
+            "efficiency": [19.2, 23.1, 15.8],
         }
 
         # Create time series data
         self.time_series_data = {
             "game_number": list(range(1, 21)),
-            "points": [20, 22, 18, 25, 23, 21, 26, 24, 19, 27, 25, 22, 28, 26, 23, 29, 27, 24, 30, 28],
-            "rebounds": [8, 9, 7, 11, 10, 8, 12, 11, 7, 13, 12, 9, 14, 13, 10, 15, 14, 11, 16, 15]
+            "points": [
+                20,
+                22,
+                18,
+                25,
+                23,
+                21,
+                26,
+                24,
+                19,
+                27,
+                25,
+                22,
+                28,
+                26,
+                23,
+                29,
+                27,
+                24,
+                30,
+                28,
+            ],
+            "rebounds": [
+                8,
+                9,
+                7,
+                11,
+                10,
+                8,
+                12,
+                11,
+                7,
+                13,
+                12,
+                9,
+                14,
+                13,
+                10,
+                15,
+                14,
+                11,
+                16,
+                15,
+            ],
         }
 
         print("✓ Test environment setup complete")
@@ -79,7 +121,7 @@ class Phase74TestSuite(unittest.TestCase):
             test_data=self.sample_test_data,
             validation_split=0.2,
             cross_validation_folds=3,
-            performance_metrics=["mse", "rmse", "mae", "r2"]
+            performance_metrics=["mse", "rmse", "mae", "r2"],
         )
 
         assert result["status"] == "success", "Model training should succeed"
@@ -96,7 +138,7 @@ class Phase74TestSuite(unittest.TestCase):
             "rebounds": [8.0, 10.0, 6.0, 12.0, 7.0, 9.0, 11.0, 5.0, 10.0, 8.0],
             "assists": [5.0, 7.0, 3.0, 9.0, 4.0, 6.0, 8.0, 2.0, 7.0, 5.0],
             "minutes": [35.0, 38.0, 28.0, 42.0, 32.0, 36.0, 40.0, 25.0, 37.0, 33.0],
-            "all_star": [1, 1, 0, 1, 0, 1, 1, 0, 1, 0]
+            "all_star": [1, 1, 0, 1, 0, 1, 1, 0, 1, 0],
         }
 
         classification_result = train_predictive_model(
@@ -105,10 +147,12 @@ class Phase74TestSuite(unittest.TestCase):
             feature_variables=["points", "rebounds", "assists", "minutes"],
             training_data=classification_data,
             validation_split=0.2,
-            performance_metrics=["accuracy", "precision", "recall", "f1"]
+            performance_metrics=["accuracy", "precision", "recall", "f1"],
         )
 
-        assert classification_result["status"] == "success", "Classification training should succeed"
+        assert (
+            classification_result["status"] == "success"
+        ), "Classification training should succeed"
         print(f"  ✓ Classification model trained: {classification_result['model_id']}")
 
         print("✓ Model training test passed")
@@ -124,7 +168,7 @@ class Phase74TestSuite(unittest.TestCase):
             feature_variables=["points", "rebounds", "assists", "minutes"],
             training_data=self.sample_training_data,
             validation_split=0.2,
-            performance_metrics=["mse", "r2"]
+            performance_metrics=["mse", "r2"],
         )
 
         model_id = training_result["model_id"]
@@ -136,19 +180,23 @@ class Phase74TestSuite(unittest.TestCase):
                 "points": 25.0,
                 "rebounds": 10.0,
                 "assists": 7.0,
-                "minutes": 38.0
+                "minutes": 38.0,
             },
             prediction_type="single",
             include_feature_importance=True,
-            include_prediction_explanation=True
+            include_prediction_explanation=True,
         )
 
-        assert single_prediction["status"] == "success", "Single prediction should succeed"
+        assert (
+            single_prediction["status"] == "success"
+        ), "Single prediction should succeed"
         assert "predictions" in single_prediction, "Predictions should be present"
         assert len(single_prediction["predictions"]) == 1, "Should have one prediction"
 
         prediction_value = single_prediction["predictions"][0]["predicted_value"]
-        assert isinstance(prediction_value, (int, float)), "Prediction should be numeric"
+        assert isinstance(
+            prediction_value, (int, float)
+        ), "Prediction should be numeric"
         print(f"  ✓ Single prediction: {prediction_value:.2f}")
 
         # Test batch prediction
@@ -158,15 +206,21 @@ class Phase74TestSuite(unittest.TestCase):
                 "points": [25.0, 20.0, 30.0],
                 "rebounds": [10.0, 8.0, 12.0],
                 "assists": [7.0, 5.0, 9.0],
-                "minutes": [38.0, 35.0, 42.0]
+                "minutes": [38.0, 35.0, 42.0],
             },
             prediction_type="batch",
-            confidence_interval=0.95
+            confidence_interval=0.95,
         )
 
-        assert batch_prediction["status"] == "success", "Batch prediction should succeed"
-        assert len(batch_prediction["predictions"]) == 3, "Should have three predictions"
-        print(f"  ✓ Batch prediction: {len(batch_prediction['predictions'])} predictions")
+        assert (
+            batch_prediction["status"] == "success"
+        ), "Batch prediction should succeed"
+        assert (
+            len(batch_prediction["predictions"]) == 3
+        ), "Should have three predictions"
+        print(
+            f"  ✓ Batch prediction: {len(batch_prediction['predictions'])} predictions"
+        )
 
         print("✓ Prediction generation test passed")
 
@@ -181,7 +235,7 @@ class Phase74TestSuite(unittest.TestCase):
             feature_variables=["points", "rebounds", "assists", "minutes"],
             training_data=self.sample_training_data,
             validation_split=0.2,
-            performance_metrics=["mse", "r2"]
+            performance_metrics=["mse", "r2"],
         )
 
         model_id = training_result["model_id"]
@@ -194,13 +248,21 @@ class Phase74TestSuite(unittest.TestCase):
             include_cross_validation=True,
             include_feature_importance=True,
             include_residual_analysis=True,
-            confidence_level=0.95
+            confidence_level=0.95,
         )
 
-        assert evaluation_result["status"] == "success", "Model evaluation should succeed"
-        assert "performance_metrics" in evaluation_result, "Performance metrics should be present"
-        assert "cross_validation_results" in evaluation_result, "Cross-validation results should be present"
-        assert "feature_importance" in evaluation_result, "Feature importance should be present"
+        assert (
+            evaluation_result["status"] == "success"
+        ), "Model evaluation should succeed"
+        assert (
+            "performance_metrics" in evaluation_result
+        ), "Performance metrics should be present"
+        assert (
+            "cross_validation_results" in evaluation_result
+        ), "Cross-validation results should be present"
+        assert (
+            "feature_importance" in evaluation_result
+        ), "Feature importance should be present"
 
         metrics = evaluation_result["performance_metrics"]
         assert "mse" in metrics, "MSE should be calculated"
@@ -220,7 +282,7 @@ class Phase74TestSuite(unittest.TestCase):
             prediction_horizon=5,
             model_type="arima",
             include_confidence_intervals=True,
-            confidence_level=0.95
+            confidence_level=0.95,
         )
 
         assert arima_result["status"] == "success", "ARIMA prediction should succeed"
@@ -230,7 +292,9 @@ class Phase74TestSuite(unittest.TestCase):
         predictions = arima_result["predictions"]
         for pred in predictions:
             assert "predicted_value" in pred, "Each prediction should have a value"
-            assert "confidence_interval" in pred, "Each prediction should have confidence interval"
+            assert (
+                "confidence_interval" in pred
+            ), "Each prediction should have confidence interval"
 
         print(f"  ✓ ARIMA prediction: {len(predictions)} future values")
 
@@ -241,11 +305,15 @@ class Phase74TestSuite(unittest.TestCase):
             prediction_horizon=3,
             model_type="exponential_smoothing",
             trend_type="linear",
-            include_confidence_intervals=True
+            include_confidence_intervals=True,
         )
 
-        assert exp_smooth_result["status"] == "success", "Exponential smoothing should succeed"
-        print(f"  ✓ Exponential smoothing: {len(exp_smooth_result['predictions'])} predictions")
+        assert (
+            exp_smooth_result["status"] == "success"
+        ), "Exponential smoothing should succeed"
+        print(
+            f"  ✓ Exponential smoothing: {len(exp_smooth_result['predictions'])} predictions"
+        )
 
         print("✓ Time series prediction test passed")
 
@@ -260,7 +328,7 @@ class Phase74TestSuite(unittest.TestCase):
             feature_variables=["points", "rebounds"],
             training_data=self.sample_training_data,
             validation_split=0.2,
-            performance_metrics=["mse", "r2"]
+            performance_metrics=["mse", "r2"],
         )
 
         model2_result = train_predictive_model(
@@ -269,7 +337,7 @@ class Phase74TestSuite(unittest.TestCase):
             feature_variables=["assists", "minutes"],
             training_data=self.sample_training_data,
             validation_split=0.2,
-            performance_metrics=["mse", "r2"]
+            performance_metrics=["mse", "r2"],
         )
 
         base_models = [model1_result["model_id"], model2_result["model_id"]]
@@ -279,12 +347,14 @@ class Phase74TestSuite(unittest.TestCase):
             base_models=base_models,
             ensemble_method="voting",
             voting_type="hard",
-            include_model_performance=True
+            include_model_performance=True,
         )
 
         assert voting_ensemble["status"] == "success", "Voting ensemble should succeed"
         assert "ensemble_id" in voting_ensemble, "Ensemble ID should be present"
-        assert "ensemble_performance" in voting_ensemble, "Ensemble performance should be present"
+        assert (
+            "ensemble_performance" in voting_ensemble
+        ), "Ensemble performance should be present"
 
         print(f"  ✓ Voting ensemble created: {voting_ensemble['ensemble_id']}")
 
@@ -294,10 +364,12 @@ class Phase74TestSuite(unittest.TestCase):
             ensemble_method="stacking",
             meta_model_type="linear",
             cross_validation_folds=3,
-            include_model_performance=True
+            include_model_performance=True,
         )
 
-        assert stacking_ensemble["status"] == "success", "Stacking ensemble should succeed"
+        assert (
+            stacking_ensemble["status"] == "success"
+        ), "Stacking ensemble should succeed"
         print(f"  ✓ Stacking ensemble created: {stacking_ensemble['ensemble_id']}")
 
         print("✓ Ensemble model creation test passed")
@@ -313,7 +385,7 @@ class Phase74TestSuite(unittest.TestCase):
             feature_variables=["points", "rebounds", "assists", "minutes"],
             training_data=self.sample_training_data,
             validation_split=0.2,
-            performance_metrics=["mse", "r2"]
+            performance_metrics=["mse", "r2"],
         )
 
         model_id = base_model_result["model_id"]
@@ -325,20 +397,28 @@ class Phase74TestSuite(unittest.TestCase):
             parameter_grid={
                 "max_depth": [3, 5, 7],
                 "min_samples_split": [2, 5, 10],
-                "n_estimators": [50, 100, 200]
+                "n_estimators": [50, 100, 200],
             },
             optimization_metric="r2",
             max_iterations=20,
             cv_folds=3,
-            random_seed=42
+            random_seed=42,
         )
 
-        assert grid_search_result["status"] == "success", "Grid search optimization should succeed"
-        assert "optimization_result" in grid_search_result, "Optimization result should be present"
-        assert "best_parameters" in grid_search_result["optimization_result"], "Best parameters should be present"
+        assert (
+            grid_search_result["status"] == "success"
+        ), "Grid search optimization should succeed"
+        assert (
+            "optimization_result" in grid_search_result
+        ), "Optimization result should be present"
+        assert (
+            "best_parameters" in grid_search_result["optimization_result"]
+        ), "Best parameters should be present"
 
         best_params = grid_search_result["optimization_result"]["best_parameters"]
-        improvement = grid_search_result["optimization_result"].get("improvement_score", 0)
+        improvement = grid_search_result["optimization_result"].get(
+            "improvement_score", 0
+        )
 
         print(f"  ✓ Grid search completed: {improvement:.2%} improvement")
         print(f"  ✓ Best parameters: {best_params}")
@@ -350,14 +430,16 @@ class Phase74TestSuite(unittest.TestCase):
             parameter_grid={
                 "max_depth": [3, 5, 7, 9],
                 "min_samples_split": [2, 5, 10, 15],
-                "n_estimators": [50, 100, 200, 300]
+                "n_estimators": [50, 100, 200, 300],
             },
             optimization_metric="r2",
             max_iterations=15,
-            cv_folds=3
+            cv_folds=3,
         )
 
-        assert random_search_result["status"] == "success", "Random search optimization should succeed"
+        assert (
+            random_search_result["status"] == "success"
+        ), "Random search optimization should succeed"
         print(f"  ✓ Random search completed")
 
         print("✓ Hyperparameter optimization test passed")
@@ -372,20 +454,24 @@ class Phase74TestSuite(unittest.TestCase):
             target_variable="efficiency",
             feature_variables=["points", "rebounds"],
             training_data=self.sample_training_data,
-            validation_split=0.2
+            validation_split=0.2,
         )
 
-        assert invalid_model_result["status"] == "error", "Invalid model type should fail gracefully"
+        assert (
+            invalid_model_result["status"] == "error"
+        ), "Invalid model type should fail gracefully"
         assert "error" in invalid_model_result, "Error message should be present"
 
         # Test prediction with non-existent model
         nonexistent_prediction = make_prediction(
             model_id="nonexistent_model",
             input_features={"points": 25.0, "rebounds": 10.0},
-            prediction_type="single"
+            prediction_type="single",
         )
 
-        assert nonexistent_prediction["status"] == "error", "Non-existent model should fail gracefully"
+        assert (
+            nonexistent_prediction["status"] == "error"
+        ), "Non-existent model should fail gracefully"
 
         # Test time series with insufficient data
         insufficient_data = {"game_number": [1, 2], "points": [20, 22]}
@@ -393,10 +479,12 @@ class Phase74TestSuite(unittest.TestCase):
             time_series_data=insufficient_data,
             target_variable="points",
             prediction_horizon=5,
-            model_type="arima"
+            model_type="arima",
         )
 
-        assert insufficient_result["status"] == "error", "Insufficient data should fail gracefully"
+        assert (
+            insufficient_result["status"] == "error"
+        ), "Insufficient data should fail gracefully"
 
         print("  ✓ Invalid model type handling")
         print("  ✓ Non-existent model handling")
@@ -415,7 +503,7 @@ class Phase74TestSuite(unittest.TestCase):
             feature_variables=["points", "rebounds", "assists", "minutes"],
             training_data=self.sample_training_data,
             validation_split=0.2,
-            performance_metrics=["mse", "r2"]
+            performance_metrics=["mse", "r2"],
         )
         training_time = time.time() - start_time
 
@@ -431,9 +519,9 @@ class Phase74TestSuite(unittest.TestCase):
                 "points": [25.0, 20.0, 30.0, 18.0, 22.0],
                 "rebounds": [10.0, 8.0, 12.0, 7.0, 9.0],
                 "assists": [7.0, 5.0, 9.0, 4.0, 6.0],
-                "minutes": [38.0, 35.0, 42.0, 32.0, 36.0]
+                "minutes": [38.0, 35.0, 42.0, 32.0, 36.0],
             },
-            prediction_type="batch"
+            prediction_type="batch",
         )
         prediction_time = time.time() - start_time
 
@@ -446,7 +534,7 @@ class Phase74TestSuite(unittest.TestCase):
             model_id=model_id,
             evaluation_data=self.sample_test_data,
             evaluation_metrics=["mse", "r2"],
-            include_cross_validation=True
+            include_cross_validation=True,
         )
         evaluation_time = time.time() - start_time
 
@@ -464,24 +552,64 @@ class Phase74TestSuite(unittest.TestCase):
 
         # Create data that mimics NBA player statistics
         nba_training_data = {
-            "points_per_game": [25.0, 22.0, 18.0, 30.0, 20.0, 28.0, 15.0, 32.0, 24.0, 19.0],
+            "points_per_game": [
+                25.0,
+                22.0,
+                18.0,
+                30.0,
+                20.0,
+                28.0,
+                15.0,
+                32.0,
+                24.0,
+                19.0,
+            ],
             "rebounds_per_game": [8.0, 10.0, 6.0, 12.0, 7.0, 11.0, 5.0, 13.0, 9.0, 8.0],
             "assists_per_game": [7.0, 5.0, 3.0, 9.0, 4.0, 8.0, 2.0, 10.0, 6.0, 5.0],
-            "minutes_per_game": [38.0, 35.0, 28.0, 42.0, 32.0, 40.0, 25.0, 44.0, 36.0, 33.0],
-            "player_efficiency_rating": [22.5, 19.8, 16.2, 28.7, 18.5, 26.4, 14.1, 30.2, 21.3, 17.6]
+            "minutes_per_game": [
+                38.0,
+                35.0,
+                28.0,
+                42.0,
+                32.0,
+                40.0,
+                25.0,
+                44.0,
+                36.0,
+                33.0,
+            ],
+            "player_efficiency_rating": [
+                22.5,
+                19.8,
+                16.2,
+                28.7,
+                18.5,
+                26.4,
+                14.1,
+                30.2,
+                21.3,
+                17.6,
+            ],
         }
 
         # Train model to predict PER
         per_model_result = train_predictive_model(
             model_type="regression",
             target_variable="player_efficiency_rating",
-            feature_variables=["points_per_game", "rebounds_per_game", "assists_per_game", "minutes_per_game"],
+            feature_variables=[
+                "points_per_game",
+                "rebounds_per_game",
+                "assists_per_game",
+                "minutes_per_game",
+            ],
             training_data=nba_training_data,
             validation_split=0.2,
-            performance_metrics=["mse", "rmse", "mae", "r2"]
+            performance_metrics=["mse", "rmse", "mae", "r2"],
         )
 
-        assert per_model_result["status"] == "success", "PER model training should succeed"
+        assert (
+            per_model_result["status"] == "success"
+        ), "PER model training should succeed"
 
         # Test prediction for a hypothetical player
         per_prediction = make_prediction(
@@ -490,10 +618,10 @@ class Phase74TestSuite(unittest.TestCase):
                 "points_per_game": 27.0,
                 "rebounds_per_game": 9.0,
                 "assists_per_game": 8.0,
-                "minutes_per_game": 39.0
+                "minutes_per_game": 39.0,
             },
             prediction_type="single",
-            include_prediction_explanation=True
+            include_prediction_explanation=True,
         )
 
         assert per_prediction["status"] == "success", "PER prediction should succeed"
@@ -505,7 +633,7 @@ class Phase74TestSuite(unittest.TestCase):
         player_performance_data = {
             "game_number": list(range(1, 16)),
             "points": [20, 22, 18, 25, 23, 21, 26, 24, 19, 27, 25, 22, 28, 26, 23],
-            "rebounds": [8, 9, 7, 11, 10, 8, 12, 11, 7, 13, 12, 9, 14, 13, 10]
+            "rebounds": [8, 9, 7, 11, 10, 8, 12, 11, 7, 13, 12, 9, 14, 13, 10],
         }
 
         performance_trend = predict_time_series(
@@ -513,12 +641,16 @@ class Phase74TestSuite(unittest.TestCase):
             target_variable="points",
             prediction_horizon=5,
             model_type="arima",
-            include_confidence_intervals=True
+            include_confidence_intervals=True,
         )
 
-        assert performance_trend["status"] == "success", "Performance trend prediction should succeed"
+        assert (
+            performance_trend["status"] == "success"
+        ), "Performance trend prediction should succeed"
 
-        future_points = [pred["predicted_value"] for pred in performance_trend["predictions"]]
+        future_points = [
+            pred["predicted_value"] for pred in performance_trend["predictions"]
+        ]
         print(f"  ✓ Predicted future points: {[f'{p:.1f}' for p in future_points]}")
 
         print("✓ Sports formulas integration test passed")
@@ -536,7 +668,7 @@ def run_performance_benchmark() -> Dict[str, Any]:
         "rebounds": [8.0, 10.0, 6.0, 12.0, 7.0, 9.0, 11.0, 5.0, 10.0, 8.0] * 5,
         "assists": [5.0, 7.0, 3.0, 9.0, 4.0, 6.0, 8.0, 2.0, 7.0, 5.0] * 5,
         "minutes": [35.0, 38.0, 28.0, 42.0, 32.0, 36.0, 40.0, 25.0, 37.0, 33.0] * 5,
-        "efficiency": [18.5, 22.3, 14.2, 28.7, 16.8, 20.1, 26.4, 13.9, 23.2, 17.6] * 5
+        "efficiency": [18.5, 22.3, 14.2, 28.7, 16.8, 20.1, 26.4, 13.9, 23.2, 17.6] * 5,
     }
 
     test_data = {
@@ -544,7 +676,7 @@ def run_performance_benchmark() -> Dict[str, Any]:
         "rebounds": [9.0, 11.0, 7.0, 13.0, 8.0],
         "assists": [6.0, 8.0, 4.0, 10.0, 5.0],
         "minutes": [36.0, 39.0, 29.0, 43.0, 34.0],
-        "efficiency": [19.2, 23.1, 15.8, 29.3, 18.7]
+        "efficiency": [19.2, 23.1, 15.8, 29.3, 18.7],
     }
 
     # Benchmark model training
@@ -556,13 +688,15 @@ def run_performance_benchmark() -> Dict[str, Any]:
         training_data=training_data,
         test_data=test_data,
         validation_split=0.2,
-        performance_metrics=["mse", "rmse", "mae", "r2"]
+        performance_metrics=["mse", "rmse", "mae", "r2"],
     )
     training_time = time.time() - start_time
-    print(f"Model Training: {training_time:.2f}s ({training_result.get('status', 'unknown')})")
+    print(
+        f"Model Training: {training_time:.2f}s ({training_result.get('status', 'unknown')})"
+    )
 
     # Benchmark prediction
-    model_id = training_result.get('model_id', 'test_model')
+    model_id = training_result.get("model_id", "test_model")
     start_time = time.time()
     prediction_result = make_prediction(
         model_id=model_id,
@@ -570,12 +704,14 @@ def run_performance_benchmark() -> Dict[str, Any]:
             "points": [25.0, 20.0, 30.0, 18.0, 22.0],
             "rebounds": [10.0, 8.0, 12.0, 7.0, 9.0],
             "assists": [7.0, 5.0, 9.0, 4.0, 6.0],
-            "minutes": [38.0, 35.0, 42.0, 32.0, 36.0]
+            "minutes": [38.0, 35.0, 42.0, 32.0, 36.0],
         },
-        prediction_type="batch"
+        prediction_type="batch",
     )
     prediction_time = time.time() - start_time
-    print(f"Batch Prediction: {prediction_time:.2f}s ({len(prediction_result.get('predictions', []))} predictions)")
+    print(
+        f"Batch Prediction: {prediction_time:.2f}s ({len(prediction_result.get('predictions', []))} predictions)"
+    )
 
     # Benchmark evaluation
     start_time = time.time()
@@ -583,7 +719,7 @@ def run_performance_benchmark() -> Dict[str, Any]:
         model_id=model_id,
         evaluation_data=test_data,
         evaluation_metrics=["mse", "r2"],
-        include_cross_validation=True
+        include_cross_validation=True,
     )
     evaluation_time = time.time() - start_time
     print(f"Model Evaluation: {evaluation_time:.2f}s")
@@ -591,31 +727,56 @@ def run_performance_benchmark() -> Dict[str, Any]:
     # Benchmark time series prediction
     time_series_data = {
         "game_number": list(range(1, 21)),
-        "points": [20, 22, 18, 25, 23, 21, 26, 24, 19, 27, 25, 22, 28, 26, 23, 29, 27, 24, 30, 28]
+        "points": [
+            20,
+            22,
+            18,
+            25,
+            23,
+            21,
+            26,
+            24,
+            19,
+            27,
+            25,
+            22,
+            28,
+            26,
+            23,
+            29,
+            27,
+            24,
+            30,
+            28,
+        ],
     }
     start_time = time.time()
     ts_result = predict_time_series(
         time_series_data=time_series_data,
         target_variable="points",
         prediction_horizon=5,
-        model_type="arima"
+        model_type="arima",
     )
     ts_time = time.time() - start_time
-    print(f"Time Series Prediction: {ts_time:.2f}s ({len(ts_result.get('predictions', []))} predictions)")
+    print(
+        f"Time Series Prediction: {ts_time:.2f}s ({len(ts_result.get('predictions', []))} predictions)"
+    )
 
     # Benchmark ensemble creation
-    model1_id = training_result.get('model_id', 'model1')
-    model2_id = training_result.get('model_id', 'model2')  # Using same model for simplicity
+    model1_id = training_result.get("model_id", "model1")
+    model2_id = training_result.get(
+        "model_id", "model2"
+    )  # Using same model for simplicity
     start_time = time.time()
     ensemble_result = create_ensemble_model(
-        base_models=[model1_id, model2_id],
-        ensemble_method="voting",
-        voting_type="hard"
+        base_models=[model1_id, model2_id], ensemble_method="voting", voting_type="hard"
     )
     ensemble_time = time.time() - start_time
     print(f"Ensemble Creation: {ensemble_time:.2f}s")
 
-    total_benchmark_time = training_time + prediction_time + evaluation_time + ts_time + ensemble_time
+    total_benchmark_time = (
+        training_time + prediction_time + evaluation_time + ts_time + ensemble_time
+    )
     print(f"\nTotal Benchmark Time: {total_benchmark_time:.2f}s")
 
     return {
@@ -624,7 +785,7 @@ def run_performance_benchmark() -> Dict[str, Any]:
         "evaluation_time": evaluation_time,
         "time_series_time": ts_time,
         "ensemble_time": ensemble_time,
-        "total_benchmark_time": total_benchmark_time
+        "total_benchmark_time": total_benchmark_time,
     }
 
 
@@ -636,7 +797,7 @@ def main():
 
     # Run unit tests
     print("\nRunning unit tests...")
-    unittest.main(argv=[''], exit=False, verbosity=2)
+    unittest.main(argv=[""], exit=False, verbosity=2)
 
     # Run performance benchmarks
     benchmark_results = run_performance_benchmark()
@@ -650,6 +811,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-

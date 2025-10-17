@@ -17,6 +17,7 @@ from mcp_server.tools.logger_config import log_operation
 # Basic Statistical Operations
 # =============================================================================
 
+
 @log_operation("stats_mean")
 def calculate_mean(numbers: List[Union[int, float]]) -> float:
     """
@@ -38,11 +39,7 @@ def calculate_mean(numbers: List[Union[int, float]]) -> float:
         18.833333333333332
     """
     if not numbers:
-        raise ValidationError(
-            "Numbers list cannot be empty",
-            "numbers",
-            numbers
-        )
+        raise ValidationError("Numbers list cannot be empty", "numbers", numbers)
 
     return sum(numbers) / len(numbers)
 
@@ -68,11 +65,7 @@ def calculate_median(numbers: List[Union[int, float]]) -> float:
         2.5
     """
     if not numbers:
-        raise ValidationError(
-            "Numbers list cannot be empty",
-            "numbers",
-            numbers
-        )
+        raise ValidationError("Numbers list cannot be empty", "numbers", numbers)
 
     sorted_numbers = sorted(numbers)
     n = len(sorted_numbers)
@@ -87,7 +80,9 @@ def calculate_median(numbers: List[Union[int, float]]) -> float:
 
 
 @log_operation("stats_mode")
-def calculate_mode(numbers: List[Union[int, float]]) -> Union[int, float, List[Union[int, float]]]:
+def calculate_mode(
+    numbers: List[Union[int, float]],
+) -> Union[int, float, List[Union[int, float]]]:
     """
     Find the most common number(s) in a list.
 
@@ -108,11 +103,7 @@ def calculate_mode(numbers: List[Union[int, float]]) -> Union[int, float, List[U
         [1, 2]
     """
     if not numbers:
-        raise ValidationError(
-            "Numbers list cannot be empty",
-            "numbers",
-            numbers
-        )
+        raise ValidationError("Numbers list cannot be empty", "numbers", numbers)
 
     # Count occurrences
     counter = Counter(numbers)
@@ -147,11 +138,7 @@ def calculate_min(numbers: List[Union[int, float]]) -> Union[int, float]:
         3
     """
     if not numbers:
-        raise ValidationError(
-            "Numbers list cannot be empty",
-            "numbers",
-            numbers
-        )
+        raise ValidationError("Numbers list cannot be empty", "numbers", numbers)
 
     return min(numbers)
 
@@ -175,11 +162,7 @@ def calculate_max(numbers: List[Union[int, float]]) -> Union[int, float]:
         20
     """
     if not numbers:
-        raise ValidationError(
-            "Numbers list cannot be empty",
-            "numbers",
-            numbers
-        )
+        raise ValidationError("Numbers list cannot be empty", "numbers", numbers)
 
     return max(numbers)
 
@@ -187,6 +170,7 @@ def calculate_max(numbers: List[Union[int, float]]) -> Union[int, float]:
 # =============================================================================
 # Advanced Statistical Operations
 # =============================================================================
+
 
 @log_operation("stats_range")
 def calculate_range(numbers: List[Union[int, float]]) -> Union[int, float]:
@@ -207,11 +191,7 @@ def calculate_range(numbers: List[Union[int, float]]) -> Union[int, float]:
         17
     """
     if not numbers:
-        raise ValidationError(
-            "Numbers list cannot be empty",
-            "numbers",
-            numbers
-        )
+        raise ValidationError("Numbers list cannot be empty", "numbers", numbers)
 
     return max(numbers) - min(numbers)
 
@@ -236,17 +216,11 @@ def calculate_variance(numbers: List[Union[int, float]], sample: bool = True) ->
         10.0
     """
     if not numbers:
-        raise ValidationError(
-            "Numbers list cannot be empty",
-            "numbers",
-            numbers
-        )
+        raise ValidationError("Numbers list cannot be empty", "numbers", numbers)
 
     if sample and len(numbers) < 2:
         raise ValidationError(
-            "Sample variance requires at least 2 numbers",
-            "numbers",
-            numbers
+            "Sample variance requires at least 2 numbers", "numbers", numbers
         )
 
     mean = calculate_mean(numbers)
@@ -301,17 +275,11 @@ def calculate_percentile(numbers: List[Union[int, float]], percentile: float) ->
         4.0
     """
     if not numbers:
-        raise ValidationError(
-            "Numbers list cannot be empty",
-            "numbers",
-            numbers
-        )
+        raise ValidationError("Numbers list cannot be empty", "numbers", numbers)
 
     if not 0 <= percentile <= 100:
         raise ValidationError(
-            "Percentile must be between 0 and 100",
-            "percentile",
-            percentile
+            "Percentile must be between 0 and 100", "percentile", percentile
         )
 
     sorted_numbers = sorted(numbers)
@@ -358,16 +326,12 @@ def calculate_quartiles(numbers: List[Union[int, float]]) -> Dict[str, float]:
         {'Q1': 2.0, 'Q2': 3.0, 'Q3': 4.0}
     """
     if not numbers:
-        raise ValidationError(
-            "Numbers list cannot be empty",
-            "numbers",
-            numbers
-        )
+        raise ValidationError("Numbers list cannot be empty", "numbers", numbers)
 
     return {
         "Q1": calculate_percentile(numbers, 25),
         "Q2": calculate_percentile(numbers, 50),  # Median
-        "Q3": calculate_percentile(numbers, 75)
+        "Q3": calculate_percentile(numbers, 75),
     }
 
 
@@ -393,11 +357,7 @@ def calculate_summary_stats(numbers: List[Union[int, float]]) -> Dict[str, Any]:
         3.0
     """
     if not numbers:
-        raise ValidationError(
-            "Numbers list cannot be empty",
-            "numbers",
-            numbers
-        )
+        raise ValidationError("Numbers list cannot be empty", "numbers", numbers)
 
     quartiles = calculate_quartiles(numbers)
 
@@ -414,13 +374,14 @@ def calculate_summary_stats(numbers: List[Union[int, float]]) -> Dict[str, Any]:
         "Q1": quartiles["Q1"],
         "Q2": quartiles["Q2"],
         "Q3": quartiles["Q3"],
-        "IQR": quartiles["Q3"] - quartiles["Q1"]  # Interquartile Range
+        "IQR": quartiles["Q3"] - quartiles["Q1"],  # Interquartile Range
     }
 
 
 # =============================================================================
 # Utility Functions
 # =============================================================================
+
 
 def check_dependencies():
     """

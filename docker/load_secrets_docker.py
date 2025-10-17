@@ -21,13 +21,16 @@ from mcp_server.unified_secrets_manager import load_secrets_hierarchical
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 def main():
     """Main entry point"""
-    project = os.getenv('PROJECT_NAME', 'nba-mcp-synthesis')
-    sport = os.getenv('SPORT_NAME', 'NBA')
-    context = os.getenv('NBA_MCP_CONTEXT', 'WORKFLOW')
+    project = os.getenv("PROJECT_NAME", "nba-mcp-synthesis")
+    sport = os.getenv("SPORT_NAME", "NBA")
+    context = os.getenv("NBA_MCP_CONTEXT", "WORKFLOW")
 
-    logger.info(f"Loading secrets for project={project}, sport={sport}, context={context}")
+    logger.info(
+        f"Loading secrets for project={project}, sport={sport}, context={context}"
+    )
 
     # Load secrets using unified secrets manager
     success = load_secrets_hierarchical(project, sport, context)
@@ -37,9 +40,9 @@ def main():
 
         # Verify critical secrets are loaded
         critical_secrets = [
-            'GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW',
-            'ANTHROPIC_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW',
-            'DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW'
+            "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW",
+            "ANTHROPIC_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW",
+            "DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW",
         ]
 
         missing_secrets = []
@@ -56,5 +59,6 @@ def main():
         logger.error("❌ Failed to load secrets")
         sys.exit(1)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

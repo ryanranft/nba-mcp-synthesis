@@ -1,4 +1,5 @@
 """Data Drift Detection - BOOK RECOMMENDATION 2"""
+
 import numpy as np
 from typing import Dict, List, Any, Optional
 from datetime import datetime, timedelta
@@ -39,15 +40,13 @@ class DataDriftDetector:
                 "min": np.min(values),
                 "max": np.max(values),
                 "count": len(values),
-                "distribution": np.array(values)
+                "distribution": np.array(values),
             }
 
         logger.info(f"✅ Reference set for {len(data)} features: {name}")
 
     def detect_drift_ks(
-        self,
-        current_data: List[float],
-        reference_data: List[float]
+        self, current_data: List[float], reference_data: List[float]
     ) -> Dict[str, Any]:
         """
         Detect drift using Kolmogorov-Smirnov test
@@ -68,14 +67,13 @@ class DataDriftDetector:
             "statistic": float(statistic),
             "pvalue": float(pvalue),
             "drift_detected": drift_detected,
-            "severity": "high" if pvalue < 0.01 else ("medium" if drift_detected else "low")
+            "severity": (
+                "high" if pvalue < 0.01 else ("medium" if drift_detected else "low")
+            ),
         }
 
     def detect_drift_psi(
-        self,
-        current_data: List[float],
-        reference_data: List[float],
-        bins: int = 10
+        self, current_data: List[float], reference_data: List[float], bins: int = 10
     ) -> Dict[str, Any]:
         """
         Detect drift using Population Stability Index (PSI)
@@ -93,7 +91,9 @@ class DataDriftDetector:
         curr_counts, _ = np.histogram(current_data, bins=bin_edges)
 
         # Normalize to get percentages
-        ref_pct = (ref_counts / len(reference_data)) + 1e-10  # Add small value to avoid log(0)
+        ref_pct = (
+            ref_counts / len(reference_data)
+        ) + 1e-10  # Add small value to avoid log(0)
         curr_pct = (curr_counts / len(current_data)) + 1e-10
 
         # Calculate PSI
@@ -112,7 +112,7 @@ class DataDriftDetector:
             "psi": float(psi),
             "drift_detected": drift_detected,
             "severity": severity,
-            "interpretation": self._interpret_psi(psi)
+            "interpretation": self._interpret_psi(psi),
         }
 
     def _interpret_psi(self, psi: float) -> str:
@@ -125,9 +125,7 @@ class DataDriftDetector:
             return "Significant drift - investigate!"
 
     def check_all_features(
-        self,
-        current_data: Dict[str, List[float]],
-        reference_name: str = "baseline"
+        self, current_data: Dict[str, List[float]], reference_name: str = "baseline"
     ) -> Dict[str, Any]:
         """
         Check drift for all features
@@ -147,7 +145,7 @@ class DataDriftDetector:
             "reference": reference_name,
             "features": {},
             "overall_drift": False,
-            "drifted_features": []
+            "drifted_features": [],
         }
 
         reference = self.reference_stats[reference_name]
@@ -172,7 +170,7 @@ class DataDriftDetector:
                 "drift_detected": drift_detected,
                 "current_mean": float(np.mean(curr_values)),
                 "reference_mean": reference[feature]["mean"],
-                "mean_change": float(np.mean(curr_values) - reference[feature]["mean"])
+                "mean_change": float(np.mean(curr_values) - reference[feature]["mean"]),
             }
 
             if drift_detected:
@@ -193,10 +191,11 @@ class DataDriftDetector:
 
             # Send alert
             from mcp_server.alerting import alert, AlertSeverity
+
             alert(
                 "Data Drift Detected",
                 f"Drift detected in {len(results['drifted_features'])} features",
-                AlertSeverity.CRITICAL
+                AlertSeverity.CRITICAL,
             )
 
         return results
@@ -214,7 +213,8 @@ class DataDriftDetector:
         cutoff = datetime.utcnow() - timedelta(days=days)
 
         recent_drifts = [
-            d for d in self.drift_history
+            d
+            for d in self.drift_history
             if datetime.fromisoformat(d["timestamp"]) > cutoff
         ]
 
@@ -233,10 +233,8 @@ class DataDriftDetector:
             "checks_with_drift": sum(1 for d in recent_drifts if d["overall_drift"]),
             "features_with_drift": feature_drifts,
             "most_drifted_features": sorted(
-                feature_drifts.items(),
-                key=lambda x: x[1],
-                reverse=True
-            )[:5]
+                feature_drifts.items(), key=lambda x: x[1], reverse=True
+            )[:5],
         }
 
 
@@ -274,7 +272,7 @@ if __name__ == "__main__":
     reference = {
         "points_per_game": [20, 22, 19, 21, 23, 20, 22],
         "assists_per_game": [5, 6, 5, 7, 6, 5, 6],
-        "rebounds_per_game": [8, 9, 7, 8, 9, 8, 7]
+        "rebounds_per_game": [8, 9, 7, 8, 9, 8, 7],
     }
     detector.set_reference(reference)
 
@@ -282,10 +280,9 @@ if __name__ == "__main__":
     current = {
         "points_per_game": [15, 16, 14, 15, 16],  # Drifted down
         "assists_per_game": [5, 6, 5, 6, 5],  # No drift
-        "rebounds_per_game": [8, 9, 8, 7, 9]  # No drift
+        "rebounds_per_game": [8, 9, 8, 7, 9],  # No drift
     }
 
     results = detector.check_all_features(current)
     print(f"Drift detected: {results['overall_drift']}")
     print(f"Drifted features: {results['drifted_features']}")
-

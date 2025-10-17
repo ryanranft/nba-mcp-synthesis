@@ -49,7 +49,7 @@ class MCPServerManager:
             [sys.executable, str(server_script)],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            preexec_fn=os.setsid if hasattr(os, 'setsid') else None
+            preexec_fn=os.setsid if hasattr(os, "setsid") else None,
         )
 
         # Wait for server to be ready with exponential backoff
@@ -81,7 +81,7 @@ class MCPServerManager:
 
             try:
                 # Try graceful shutdown first
-                if hasattr(os, 'killpg'):
+                if hasattr(os, "killpg"):
                     os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)
                 else:
                     self.process.terminate()
@@ -91,7 +91,7 @@ class MCPServerManager:
                     self.process.wait(timeout=10)
                 except subprocess.TimeoutExpired:
                     # Force kill if needed
-                    if hasattr(os, 'killpg'):
+                    if hasattr(os, "killpg"):
                         os.killpg(os.getpgid(self.process.pid), signal.SIGKILL)
                     else:
                         self.process.kill()
@@ -133,15 +133,15 @@ class TestE2EWorkflow:
     async def test_01_environment_setup(self):
         """Test: Environment variables are configured"""
         required_vars = [
-            'RDS_HOST',
-            'RDS_DATABASE',
-            'RDS_USERNAME',
-            'RDS_PASSWORD',
-            'S3_BUCKET',
-            'AWS_ACCESS_KEY_ID',
-            'AWS_SECRET_ACCESS_KEY',
-            'DEEPSEEK_API_KEY',
-            'ANTHROPIC_API_KEY'
+            "RDS_HOST",
+            "RDS_DATABASE",
+            "RDS_USERNAME",
+            "RDS_PASSWORD",
+            "S3_BUCKET",
+            "AWS_ACCESS_KEY_ID",
+            "AWS_SECRET_ACCESS_KEY",
+            "DEEPSEEK_API_KEY",
+            "ANTHROPIC_API_KEY",
         ]
 
         missing_vars = []
@@ -149,16 +149,18 @@ class TestE2EWorkflow:
             if not os.getenv(var):
                 missing_vars.append(var)
 
-        assert len(missing_vars) == 0, \
-            f"Missing required environment variables: {', '.join(missing_vars)}"
+        assert (
+            len(missing_vars) == 0
+        ), f"Missing required environment variables: {', '.join(missing_vars)}"
 
         print("✅ All required environment variables are set")
 
     async def test_02_mcp_server_startup(self, mcp_server):
         """Test: MCP server starts and responds"""
         # Server is already started by fixture
-        assert mcp_server.process is not None or await mcp_server._is_server_running(), \
-            "MCP server should be running"
+        assert (
+            mcp_server.process is not None or await mcp_server._is_server_running()
+        ), "MCP server should be running"
 
         print("✅ MCP server is running")
 
@@ -186,12 +188,14 @@ class TestE2EWorkflow:
 
         try:
             # Execute simple query
-            result = await client.call_tool("query_database", {
-                "sql": "SELECT 1 AS test"
-            })
+            result = await client.call_tool(
+                "query_database", {"sql": "SELECT 1 AS test"}
+            )
 
-            assert result.get('success'), "Database query should succeed"
-            assert 'rows' in result or 'formatted_result' in result, "Query should return data"
+            assert result.get("success"), "Database query should succeed"
+            assert (
+                "rows" in result or "formatted_result" in result
+            ), "Query should return data"
 
             print("✅ Database query via MCP successful")
 
@@ -206,13 +210,12 @@ class TestE2EWorkflow:
 
         try:
             # List S3 files
-            result = await client.call_tool("list_s3_files", {
-                "prefix": "",
-                "max_keys": 5
-            })
+            result = await client.call_tool(
+                "list_s3_files", {"prefix": "", "max_keys": 5}
+            )
 
-            assert result.get('success'), "S3 listing should succeed"
-            assert 'files' in result or 'file_list' in result, "Should return file list"
+            assert result.get("success"), "S3 listing should succeed"
+            assert "files" in result or "file_list" in result, "Should return file list"
 
             print("✅ S3 access via MCP successful")
 
@@ -233,17 +236,18 @@ class TestE2EWorkflow:
             # List tables first
             tables_result = await client.call_tool("list_tables", {})
 
-            if tables_result.get('success') and tables_result.get('tables'):
+            if tables_result.get("success") and tables_result.get("tables"):
                 # Get schema for first table
-                first_table = tables_result['tables'][0]
+                first_table = tables_result["tables"][0]
 
-                schema_result = await client.call_tool("get_table_schema", {
-                    "table_name": first_table
-                })
+                schema_result = await client.call_tool(
+                    "get_table_schema", {"table_name": first_table}
+                )
 
-                assert schema_result.get('success'), "Table schema query should succeed"
-                assert 'columns' in schema_result or 'schema' in schema_result, \
-                    "Should return schema information"
+                assert schema_result.get("success"), "Table schema query should succeed"
+                assert (
+                    "columns" in schema_result or "schema" in schema_result
+                ), "Should return schema information"
 
                 print(f"✅ Table schema retrieval successful (table: {first_table})")
             else:
@@ -260,14 +264,16 @@ class TestE2EWorkflow:
             user_input=request,
             query_type="general_analysis",
             enable_ollama_verification=False,
-            mcp_server_url="http://localhost:9999"  # Invalid URL to test graceful degradation
+            mcp_server_url="http://localhost:9999",  # Invalid URL to test graceful degradation
         )
 
-        assert result.get('status') in ['success', 'partial_failure'], \
-            "Synthesis should complete even without MCP"
+        assert result.get("status") in [
+            "success",
+            "partial_failure",
+        ], "Synthesis should complete even without MCP"
 
-        assert 'deepseek_result' in result, "Should have DeepSeek result"
-        assert 'claude_synthesis' in result, "Should have Claude synthesis"
+        assert "deepseek_result" in result, "Should have DeepSeek result"
+        assert "claude_synthesis" in result, "Should have Claude synthesis"
 
         print(f"✅ Synthesis without MCP completed (status: {result['status']})")
         print(f"   Cost: ${result.get('total_cost', 0):.6f}")
@@ -285,21 +291,24 @@ class TestE2EWorkflow:
             user_input=request,
             query_type="sql_optimization",
             enable_ollama_verification=False,
-            mcp_server_url=mcp_server.server_url
+            mcp_server_url=mcp_server.server_url,
         )
 
-        assert result.get('status') == 'success', "Synthesis should complete successfully"
+        assert (
+            result.get("status") == "success"
+        ), "Synthesis should complete successfully"
 
-        assert 'deepseek_result' in result, "Should have DeepSeek result"
-        assert 'claude_synthesis' in result, "Should have Claude synthesis"
-        assert 'mcp_context' in result, "Should have MCP context"
+        assert "deepseek_result" in result, "Should have DeepSeek result"
+        assert "claude_synthesis" in result, "Should have Claude synthesis"
+        assert "mcp_context" in result, "Should have MCP context"
 
         # Verify context was gathered
-        assert result['mcp_status'] == 'connected', "Should connect to MCP"
+        assert result["mcp_status"] == "connected", "Should connect to MCP"
 
         # Verify we got a code result
-        assert result.get('final_code') or result.get('final_explanation'), \
-            "Should have final output"
+        assert result.get("final_code") or result.get(
+            "final_explanation"
+        ), "Should have final output"
 
         print("✅ Full synthesis with MCP context completed")
         print(f"   Status: {result['status']}")
@@ -309,7 +318,7 @@ class TestE2EWorkflow:
         print(f"   Execution Time: {result.get('execution_time_seconds', 0):.2f}s")
 
         # Verify cost is reasonable
-        assert result.get('total_cost', 0) < 0.10, "Cost should be under $0.10"
+        assert result.get("total_cost", 0) < 0.10, "Cost should be under $0.10"
 
     async def test_09_result_persistence(self, mcp_server):
         """Test: Results are saved to files"""
@@ -323,14 +332,14 @@ class TestE2EWorkflow:
             query_type="general_analysis",
             enable_ollama_verification=False,
             output_dir=str(output_dir),
-            mcp_server_url=mcp_server.server_url
+            mcp_server_url=mcp_server.server_url,
         )
 
-        assert result.get('status') == 'success', "Synthesis should succeed"
+        assert result.get("status") == "success", "Synthesis should succeed"
 
         # Check if output file was created
-        if result.get('output_file'):
-            output_file = Path(result['output_file'])
+        if result.get("output_file"):
+            output_file = Path(result["output_file"])
             assert output_file.exists(), "Output file should exist"
             assert output_file.stat().st_size > 0, "Output file should not be empty"
 
@@ -352,12 +361,14 @@ class TestE2EWorkflow:
             user_input="Execute: DROP TABLE users;",  # Should be blocked
             query_type="sql_optimization",
             enable_ollama_verification=False,
-            mcp_server_url=mcp_server.server_url
+            mcp_server_url=mcp_server.server_url,
         )
 
         # Should complete (may warn about dangerous query)
-        assert result.get('status') in ['success', 'partial_failure'], \
-            "Should handle dangerous queries gracefully"
+        assert result.get("status") in [
+            "success",
+            "partial_failure",
+        ], "Should handle dangerous queries gracefully"
 
         print("✅ Error handling test passed")
 
@@ -367,7 +378,7 @@ class TestE2EWorkflow:
         requests = [
             "What is 2 + 2?",
             "What is the capital of France?",
-            "List 3 prime numbers"
+            "List 3 prime numbers",
         ]
 
         tasks = []
@@ -376,7 +387,7 @@ class TestE2EWorkflow:
                 user_input=req,
                 query_type="general_analysis",
                 enable_ollama_verification=False,
-                mcp_server_url=mcp_server.server_url
+                mcp_server_url=mcp_server.server_url,
             )
             tasks.append(task)
 
@@ -384,8 +395,11 @@ class TestE2EWorkflow:
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
         # Check all succeeded
-        successful = sum(1 for r in results
-                        if not isinstance(r, Exception) and r.get('status') == 'success')
+        successful = sum(
+            1
+            for r in results
+            if not isinstance(r, Exception) and r.get("status") == "success"
+        )
 
         assert successful >= 2, f"At least 2 of 3 concurrent requests should succeed"
 
@@ -401,18 +415,19 @@ class TestE2EWorkflow:
             user_input=request,
             query_type="general_analysis",
             enable_ollama_verification=False,
-            mcp_server_url=mcp_server.server_url
+            mcp_server_url=mcp_server.server_url,
         )
 
         end_time = time.time()
         total_time = end_time - start_time
 
-        assert result.get('status') == 'success', "Synthesis should succeed"
+        assert result.get("status") == "success", "Synthesis should succeed"
 
         # Performance assertions
         assert total_time < 30, f"Should complete in <30s (actual: {total_time:.2f}s)"
-        assert result.get('total_cost', 0) < 0.05, \
-            f"Cost should be <$0.05 (actual: ${result.get('total_cost', 0):.6f})"
+        assert (
+            result.get("total_cost", 0) < 0.05
+        ), f"Cost should be <$0.05 (actual: ${result.get('total_cost', 0):.6f})"
 
         print("✅ Performance metrics met")
         print(f"   Execution Time: {total_time:.2f}s (target: <30s)")
@@ -422,9 +437,9 @@ class TestE2EWorkflow:
 # Standalone test runner
 async def run_all_tests():
     """Run all tests without pytest"""
-    print("="*80)
+    print("=" * 80)
     print("NBA MCP Synthesis - End-to-End Integration Tests")
-    print("="*80)
+    print("=" * 80)
     print()
 
     manager = MCPServerManager()
@@ -442,8 +457,14 @@ async def run_all_tests():
             ("Database Query via MCP", test_suite.test_04_database_query_via_mcp),
             ("S3 Access via MCP", test_suite.test_05_s3_access_via_mcp),
             ("Table Schema via MCP", test_suite.test_06_table_schema_via_mcp),
-            ("Simple Synthesis (no MCP)", test_suite.test_07_simple_synthesis_without_mcp),
-            ("Full Synthesis (with MCP)", test_suite.test_08_synthesis_with_mcp_context),
+            (
+                "Simple Synthesis (no MCP)",
+                test_suite.test_07_simple_synthesis_without_mcp,
+            ),
+            (
+                "Full Synthesis (with MCP)",
+                test_suite.test_08_synthesis_with_mcp_context,
+            ),
             ("Result Persistence", test_suite.test_09_result_persistence),
             ("Error Handling", test_suite.test_10_error_handling),
             ("Concurrent Requests", test_suite.test_11_concurrent_requests),
@@ -473,9 +494,9 @@ async def run_all_tests():
                 print(f"   Error: {e}\n")
 
         # Summary
-        print("="*80)
+        print("=" * 80)
         print(f"Test Summary: {passed} passed, {failed} failed")
-        print("="*80)
+        print("=" * 80)
 
         return failed == 0
 

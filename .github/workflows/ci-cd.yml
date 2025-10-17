@@ -169,6 +169,50 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Full history for secret scanning
+
+      # Secret scanning with trufflehog
+      - name: Scan for secrets with trufflehog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --only-verified
+
+      # Scan with git-secrets
+      - name: Install git-secrets
+        run: |
+          if [[ "$OSTYPE" == "darwin"* ]]; then
+            brew install git-secrets
+          else
+            git clone https://github.com/awslabs/git-secrets.git /tmp/git-secrets
+            cd /tmp/git-secrets
+            sudo make install
+          fi
+
+      - name: Scan with git-secrets
+        run: |
+          git secrets --install
+          git secrets --register-aws
+          if [[ -f ".git-secrets-patterns" ]]; then
+            while IFS= read -r line; do
+              if [[ ! "$line" =~ ^# ]] && [[ -n "$line" ]]; then
+                git secrets --add "$line" || true
+              fi
+            done < .git-secrets-patterns
+          fi
+          git secrets --scan-history || exit 1
+
+      - name: Validate S3 Public Access
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
+        run: |
+          pip install boto3
+          python scripts/validate_s3_public_access.py --fail-on-public
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master

@@ -6,9 +6,9 @@ from .engine import WorkflowEngine, WorkflowStep, Workflow
 from .triggers import WorkflowTrigger, TriggerType
 
 __all__ = [
-    'WorkflowEngine',
-    'WorkflowStep',
-    'Workflow',
-    'WorkflowTrigger',
-    'TriggerType'
+    "WorkflowEngine",
+    "WorkflowStep",
+    "Workflow",
+    "WorkflowTrigger",
+    "TriggerType",
 ]

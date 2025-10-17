@@ -30,28 +30,38 @@ import atexit
 
 # Import our modules
 try:
-    from mcp_server.secrets_health_monitor import SecretsHealthMonitor, HealthCheckResult, SecretValidationResult
+    from mcp_server.secrets_health_monitor import (
+        SecretsHealthMonitor,
+        HealthCheckResult,
+        SecretValidationResult,
+    )
     from mcp_server.secrets_metrics_dashboard import MetricsDashboard
     from mcp_server.secrets_alerting_system import AlertManager, Alert, AlertSeverity
 except ImportError:
     # Fallback for when running as standalone script
     import sys
     import os
+
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    from mcp_server.secrets_health_monitor import SecretsHealthMonitor, HealthCheckResult, SecretValidationResult
+    from mcp_server.secrets_health_monitor import (
+        SecretsHealthMonitor,
+        HealthCheckResult,
+        SecretValidationResult,
+    )
     from mcp_server.secrets_metrics_dashboard import MetricsDashboard
     from mcp_server.secrets_alerting_system import AlertManager, Alert, AlertSeverity
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler('/tmp/secrets_integration.log'),
-        logging.StreamHandler()
-    ]
+        logging.FileHandler("/tmp/secrets_integration.log"),
+        logging.StreamHandler(),
+    ],
 )
 logger = logging.getLogger(__name__)
+
 
 class SecretsHealthIntegration:
     """Main integration class for secrets health system"""
@@ -107,12 +117,13 @@ class SecretsHealthIntegration:
 
         # Start alert processing thread
         self.alert_thread = threading.Thread(
-            target=self._alert_processing_loop,
-            daemon=True
+            target=self._alert_processing_loop, daemon=True
         )
         self.alert_thread.start()
 
-        logger.info(f"Started integrated secrets health monitoring (interval: {interval_seconds}s)")
+        logger.info(
+            f"Started integrated secrets health monitoring (interval: {interval_seconds}s)"
+        )
 
     def stop(self):
         """Stop the integrated monitoring system"""
@@ -139,7 +150,9 @@ class SecretsHealthIntegration:
 
                 if metrics and self.alerting_enabled:
                     # Process alerts
-                    alerts = self.alert_manager.process_metrics(metrics.get('metrics', {}))
+                    alerts = self.alert_manager.process_metrics(
+                        metrics.get("metrics", {})
+                    )
 
                     if alerts:
                         logger.info(f"Processed {len(alerts)} alerts")
@@ -176,7 +189,9 @@ class SecretsHealthIntegration:
             "secret_validations": [asdict(result) for result in validation_results],
             "metrics": asdict(metrics),
             "alert_statistics": self.alert_manager.get_alert_statistics(),
-            "overall_status": self._determine_overall_status(metrics, health_results, validation_results)
+            "overall_status": self._determine_overall_status(
+                metrics, health_results, validation_results
+            ),
         }
 
         # Update dashboard
@@ -189,10 +204,12 @@ class SecretsHealthIntegration:
 
         return report
 
-    def _determine_overall_status(self, metrics, health_results, validation_results) -> str:
+    def _determine_overall_status(
+        self, metrics, health_results, validation_results
+    ) -> str:
         """Determine overall system status"""
         # Check for critical health issues
-        critical_health = any(result.status == 'critical' for result in health_results)
+        critical_health = any(result.status == "critical" for result in health_results)
         critical_validation = any(not result.is_valid for result in validation_results)
 
         # Check metrics
@@ -229,13 +246,15 @@ class SecretsHealthIntegration:
             "project": self.project,
             "context": self.context,
             "report_period_hours": hours,
-            "current_status": current_metrics.get('overall_status', 'unknown'),
+            "current_status": current_metrics.get("overall_status", "unknown"),
             "current_metrics": current_metrics,
             "historical_data": history,
             "alert_history": [asdict(alert) for alert in alert_history],
             "alert_statistics": alert_stats,
             "trends": trends,
-            "recommendations": self._generate_recommendations(current_metrics, trends, alert_stats)
+            "recommendations": self._generate_recommendations(
+                current_metrics, trends, alert_stats
+            ),
         }
 
         return report
@@ -246,20 +265,31 @@ class SecretsHealthIntegration:
             return {"trend": "no_data", "message": "No historical data available"}
 
         # Extract metrics
-        health_scores = [entry.get('metrics', {}).get('overall_health_score', 0) for entry in history]
-        api_scores = [entry.get('metrics', {}).get('api_connectivity_score', 0) for entry in history]
-        response_times = [entry.get('metrics', {}).get('avg_response_time_ms', 0) for entry in history]
+        health_scores = [
+            entry.get("metrics", {}).get("overall_health_score", 0) for entry in history
+        ]
+        api_scores = [
+            entry.get("metrics", {}).get("api_connectivity_score", 0)
+            for entry in history
+        ]
+        response_times = [
+            entry.get("metrics", {}).get("avg_response_time_ms", 0) for entry in history
+        ]
 
         # Calculate trends
         health_trend = self._calculate_trend(health_scores)
         api_trend = self._calculate_trend(api_scores)
-        response_trend = self._calculate_trend(response_times, reverse=True)  # Lower is better
+        response_trend = self._calculate_trend(
+            response_times, reverse=True
+        )  # Lower is better
 
         return {
             "health_score_trend": health_trend,
             "api_connectivity_trend": api_trend,
             "response_time_trend": response_trend,
-            "overall_trend": self._determine_overall_trend(health_trend, api_trend, response_trend)
+            "overall_trend": self._determine_overall_trend(
+                health_trend, api_trend, response_trend
+            ),
         }
 
     def _calculate_trend(self, values: List[float], reverse: bool = False) -> str:
@@ -268,8 +298,8 @@ class SecretsHealthIntegration:
             return "insufficient_data"
 
         # Simple linear trend calculation
-        first_half = values[:len(values)//2]
-        second_half = values[len(values)//2:]
+        first_half = values[: len(values) // 2]
+        second_half = values[len(values) // 2 :]
 
         first_avg = sum(first_half) / len(first_half)
         second_avg = sum(second_half) / len(second_half)
@@ -285,7 +315,9 @@ class SecretsHealthIntegration:
         else:
             return "declining"
 
-    def _determine_overall_trend(self, health_trend: str, api_trend: str, response_trend: str) -> str:
+    def _determine_overall_trend(
+        self, health_trend: str, api_trend: str, response_trend: str
+    ) -> str:
         """Determine overall trend from individual trends"""
         trends = [health_trend, api_trend, response_trend]
 
@@ -298,47 +330,68 @@ class SecretsHealthIntegration:
         else:
             return "stable"
 
-    def _generate_recommendations(self, current_metrics: Dict[str, Any], trends: Dict[str, Any], alert_stats: Dict[str, Any]) -> List[str]:
+    def _generate_recommendations(
+        self,
+        current_metrics: Dict[str, Any],
+        trends: Dict[str, Any],
+        alert_stats: Dict[str, Any],
+    ) -> List[str]:
         """Generate recommendations based on current state"""
         recommendations = []
 
         # Health score recommendations
-        health_score = current_metrics.get('metrics', {}).get('overall_health_score', 0)
+        health_score = current_metrics.get("metrics", {}).get("overall_health_score", 0)
         if health_score < 70:
-            recommendations.append("Health score is below 70%. Review secret configurations and API connectivity.")
+            recommendations.append(
+                "Health score is below 70%. Review secret configurations and API connectivity."
+            )
 
         # API connectivity recommendations
-        api_score = current_metrics.get('metrics', {}).get('api_connectivity_score', 0)
+        api_score = current_metrics.get("metrics", {}).get("api_connectivity_score", 0)
         if api_score < 80:
-            recommendations.append("API connectivity is below 80%. Check API keys and network connectivity.")
+            recommendations.append(
+                "API connectivity is below 80%. Check API keys and network connectivity."
+            )
 
         # Response time recommendations
-        response_time = current_metrics.get('metrics', {}).get('avg_response_time_ms', 0)
+        response_time = current_metrics.get("metrics", {}).get(
+            "avg_response_time_ms", 0
+        )
         if response_time > 2000:
-            recommendations.append("Average response time exceeds 2 seconds. Consider optimizing API calls.")
+            recommendations.append(
+                "Average response time exceeds 2 seconds. Consider optimizing API calls."
+            )
 
         # Alert frequency recommendations
-        recent_alerts = alert_stats.get('recent_alerts_count', 0)
+        recent_alerts = alert_stats.get("recent_alerts_count", 0)
         if recent_alerts > 10:
-            recommendations.append("High alert frequency detected. Review alert thresholds and system stability.")
+            recommendations.append(
+                "High alert frequency detected. Review alert thresholds and system stability."
+            )
 
         # Trend-based recommendations
-        overall_trend = trends.get('overall_trend', 'stable')
-        if overall_trend == 'declining':
-            recommendations.append("System performance is declining. Investigate root causes.")
-        elif overall_trend == 'improving':
-            recommendations.append("System performance is improving. Continue current practices.")
+        overall_trend = trends.get("overall_trend", "stable")
+        if overall_trend == "declining":
+            recommendations.append(
+                "System performance is declining. Investigate root causes."
+            )
+        elif overall_trend == "improving":
+            recommendations.append(
+                "System performance is improving. Continue current practices."
+            )
 
         return recommendations
 
-    def export_report(self, report: Dict[str, Any], output_file: str, format: str = "json"):
+    def export_report(
+        self, report: Dict[str, Any], output_file: str, format: str = "json"
+    ):
         """Export comprehensive report"""
         if format.lower() == "json":
-            with open(output_file, 'w') as f:
+            with open(output_file, "w") as f:
                 json.dump(report, f, indent=2)
         elif format.lower() == "html":
             html_content = self._generate_html_report(report)
-            with open(output_file, 'w') as f:
+            with open(output_file, "w") as f:
                 f.write(html_content)
         else:
             raise ValueError(f"Unsupported format: {format}")
@@ -408,18 +461,31 @@ class SecretsHealthIntegration:
 
         return html
 
+
 def main():
     """Main entry point for secrets health integration"""
     parser = argparse.ArgumentParser(description="Secrets Health Integration")
     parser.add_argument("--project", default="nba-mcp-synthesis", help="Project name")
-    parser.add_argument("--context", default="production", help="Context (production/development/test)")
-    parser.add_argument("--start", action="store_true", help="Start integrated monitoring")
+    parser.add_argument(
+        "--context", default="production", help="Context (production/development/test)"
+    )
+    parser.add_argument(
+        "--start", action="store_true", help="Start integrated monitoring"
+    )
     parser.add_argument("--check", action="store_true", help="Run health check")
-    parser.add_argument("--report", action="store_true", help="Generate comprehensive report")
+    parser.add_argument(
+        "--report", action="store_true", help="Generate comprehensive report"
+    )
     parser.add_argument("--export", help="Export report to file")
-    parser.add_argument("--format", default="json", choices=["json", "html"], help="Export format")
-    parser.add_argument("--hours", type=int, default=24, help="Hours of history for report")
-    parser.add_argument("--interval", type=int, default=300, help="Monitoring interval in seconds")
+    parser.add_argument(
+        "--format", default="json", choices=["json", "html"], help="Export format"
+    )
+    parser.add_argument(
+        "--hours", type=int, default=24, help="Hours of history for report"
+    )
+    parser.add_argument(
+        "--interval", type=int, default=300, help="Monitoring interval in seconds"
+    )
 
     args = parser.parse_args()
 
@@ -446,13 +512,19 @@ def main():
 
         print(f"\n📊 Health Check Results:")
         print(f"  Overall Status: {report['overall_status'].upper()}")
-        print(f"  Health Score: {report['metrics'].get('overall_health_score', 0):.1f}%")
-        print(f"  API Connectivity: {report['metrics'].get('api_connectivity_score', 0):.1f}%")
-        print(f"  Response Time: {report['metrics'].get('avg_response_time_ms', 0):.1f}ms")
+        print(
+            f"  Health Score: {report['metrics'].get('overall_health_score', 0):.1f}%"
+        )
+        print(
+            f"  API Connectivity: {report['metrics'].get('api_connectivity_score', 0):.1f}%"
+        )
+        print(
+            f"  Response Time: {report['metrics'].get('avg_response_time_ms', 0):.1f}ms"
+        )
 
-        if report.get('triggered_alerts'):
+        if report.get("triggered_alerts"):
             print(f"\n🚨 Triggered Alerts: {len(report['triggered_alerts'])}")
-            for alert in report['triggered_alerts']:
+            for alert in report["triggered_alerts"]:
                 print(f"  • {alert['title']} ({alert['severity']})")
 
     elif args.report:
@@ -478,6 +550,7 @@ def main():
         print("Use --check to run a health check")
         print("Use --report to generate a comprehensive report")
         print("Use --export <file> to export report data")
+
 
 if __name__ == "__main__":
     main()

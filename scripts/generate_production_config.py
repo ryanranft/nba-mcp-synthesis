@@ -17,19 +17,22 @@ from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, asdict
 import yaml
 
+
 # Color codes for output
 class Colors:
-    RED = '\033[0;31m'
-    GREEN = '\033[0;32m'
-    YELLOW = '\033[1;33m'
-    BLUE = '\033[0;34m'
-    PURPLE = '\033[0;35m'
-    CYAN = '\033[0;36m'
-    NC = '\033[0m'  # No Color
+    RED = "\033[0;31m"
+    GREEN = "\033[0;32m"
+    YELLOW = "\033[1;33m"
+    BLUE = "\033[0;34m"
+    PURPLE = "\033[0;35m"
+    CYAN = "\033[0;36m"
+    NC = "\033[0m"  # No Color
+
 
 @dataclass
 class ProductionConfig:
     """Production configuration data structure"""
+
     # AWS Configuration
     aws_account_id: str
     aws_region: str
@@ -65,6 +68,7 @@ class ProductionConfig:
     enable_network_policies: bool
     enable_pod_security_standards: bool
 
+
 class ConfigGenerator:
     """Main configuration generator class"""
 
@@ -93,37 +97,43 @@ class ConfigGenerator:
 
     def validate_aws_account_id(self, account_id: str) -> bool:
         """Validate AWS account ID format"""
-        return bool(re.match(r'^\d{12}$', account_id))
+        return bool(re.match(r"^\d{12}$", account_id))
 
     def validate_domain_name(self, domain: str) -> bool:
         """Validate domain name format"""
-        pattern = r'^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$'
+        pattern = r"^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$"
         return bool(re.match(pattern, domain))
 
     def validate_certificate_arn(self, arn: str) -> bool:
         """Validate AWS Certificate Manager ARN format"""
-        pattern = r'^arn:aws:acm:[a-z0-9-]+:\d{12}:certificate/[a-f0-9-]+$'
+        pattern = r"^arn:aws:acm:[a-z0-9-]+:\d{12}:certificate/[a-f0-9-]+$"
         return bool(re.match(pattern, arn))
 
     def validate_url(self, url: str) -> bool:
         """Validate URL format"""
-        pattern = r'^https?://[^\s/$.?#].[^\s]*$'
+        pattern = r"^https?://[^\s/$.?#].[^\s]*$"
         return bool(re.match(pattern, url))
 
     def validate_password(self, password: str) -> bool:
         """Validate password strength"""
         if len(password) < 8:
             return False
-        if not re.search(r'[A-Z]', password):
+        if not re.search(r"[A-Z]", password):
             return False
-        if not re.search(r'[a-z]', password):
+        if not re.search(r"[a-z]", password):
             return False
-        if not re.search(r'\d', password):
+        if not re.search(r"\d", password):
             return False
         return True
 
-    def prompt_with_validation(self, prompt: str, validator_func, error_msg: str,
-                              required: bool = True, default: Optional[str] = None) -> str:
+    def prompt_with_validation(
+        self,
+        prompt: str,
+        validator_func,
+        error_msg: str,
+        required: bool = True,
+        default: Optional[str] = None,
+    ) -> str:
         """Prompt user for input with validation"""
         while True:
             if default:
@@ -154,21 +164,21 @@ class ConfigGenerator:
         aws_account_id = self.prompt_with_validation(
             "AWS Account ID (12 digits)",
             self.validate_aws_account_id,
-            "AWS Account ID must be exactly 12 digits"
+            "AWS Account ID must be exactly 12 digits",
         )
 
         aws_region = self.prompt_with_validation(
             "AWS Region",
-            lambda x: x in ['us-east-1', 'us-west-2', 'eu-west-1', 'ap-southeast-1'],
+            lambda x: x in ["us-east-1", "us-west-2", "eu-west-1", "ap-southeast-1"],
             "Please enter a valid AWS region",
-            default="us-east-1"
+            default="us-east-1",
         )
 
         cluster_name = self.prompt_with_validation(
             "EKS Cluster Name",
-            lambda x: len(x) > 0 and re.match(r'^[a-zA-Z0-9-]+$', x),
+            lambda x: len(x) > 0 and re.match(r"^[a-zA-Z0-9-]+$", x),
             "Cluster name must contain only alphanumeric characters and hyphens",
-            default="nba-mcp-synthesis-prod"
+            default="nba-mcp-synthesis-prod",
         )
 
         # Domain Configuration
@@ -176,134 +186,134 @@ class ConfigGenerator:
         domain_name = self.prompt_with_validation(
             "Domain Name (e.g., nba-mcp-synthesis.example.com)",
             self.validate_domain_name,
-            "Please enter a valid domain name"
+            "Please enter a valid domain name",
         )
 
         certificate_arn = self.prompt_with_validation(
             "AWS Certificate Manager ARN",
             self.validate_certificate_arn,
-            "Please enter a valid ACM certificate ARN"
+            "Please enter a valid ACM certificate ARN",
         )
 
         # Database Configuration
         self.log("\n=== Database Configuration ===", Colors.CYAN)
         db_instance_class = self.prompt_with_validation(
             "RDS Instance Class",
-            lambda x: x.startswith('db.'),
+            lambda x: x.startswith("db."),
             "Instance class must start with 'db.'",
-            default="db.t3.medium"
+            default="db.t3.medium",
         )
 
         db_engine = self.prompt_with_validation(
             "Database Engine",
-            lambda x: x in ['postgres', 'mysql'],
+            lambda x: x in ["postgres", "mysql"],
             "Please enter 'postgres' or 'mysql'",
-            default="postgres"
+            default="postgres",
         )
 
         db_name = self.prompt_with_validation(
             "Database Name",
-            lambda x: len(x) > 0 and re.match(r'^[a-zA-Z0-9_]+$', x),
+            lambda x: len(x) > 0 and re.match(r"^[a-zA-Z0-9_]+$", x),
             "Database name must contain only alphanumeric characters and underscores",
-            default="nba_simulator"
+            default="nba_simulator",
         )
 
-        db_backup_retention = int(self.prompt_with_validation(
-            "Backup Retention (days)",
-            lambda x: x.isdigit() and 1 <= int(x) <= 35,
-            "Backup retention must be between 1 and 35 days",
-            default="7"
-        ))
+        db_backup_retention = int(
+            self.prompt_with_validation(
+                "Backup Retention (days)",
+                lambda x: x.isdigit() and 1 <= int(x) <= 35,
+                "Backup retention must be between 1 and 35 days",
+                default="7",
+            )
+        )
 
         db_multi_az = self.prompt_with_validation(
             "Enable Multi-AZ deployment (y/n)",
-            lambda x: x.lower() in ['y', 'n', 'yes', 'no'],
+            lambda x: x.lower() in ["y", "n", "yes", "no"],
             "Please enter 'y' or 'n'",
-            default="y"
-        ).lower() in ['y', 'yes']
+            default="y",
+        ).lower() in ["y", "yes"]
 
         # Monitoring Configuration
         self.log("\n=== Monitoring Configuration ===", Colors.CYAN)
         grafana_admin_password = self.prompt_with_validation(
             "Grafana Admin Password",
             self.validate_password,
-            "Password must be at least 8 characters with uppercase, lowercase, and numbers"
+            "Password must be at least 8 characters with uppercase, lowercase, and numbers",
         )
 
         pagerduty_service_key = self.prompt_with_validation(
             "PagerDuty Service Key",
             lambda x: len(x) > 0,
-            "PagerDuty service key is required"
+            "PagerDuty service key is required",
         )
 
         slack_webhook_url = self.prompt_with_validation(
-            "Slack Webhook URL",
-            self.validate_url,
-            "Please enter a valid HTTPS URL"
+            "Slack Webhook URL", self.validate_url, "Please enter a valid HTTPS URL"
         )
 
         # Application Configuration
         self.log("\n=== Application Configuration ===", Colors.CYAN)
         namespace = self.prompt_with_validation(
             "Kubernetes Namespace",
-            lambda x: len(x) > 0 and re.match(r'^[a-z0-9-]+$', x),
+            lambda x: len(x) > 0 and re.match(r"^[a-z0-9-]+$", x),
             "Namespace must contain only lowercase letters, numbers, and hyphens",
-            default="nba-mcp-synthesis"
+            default="nba-mcp-synthesis",
         )
 
         deployment_name = self.prompt_with_validation(
             "Deployment Name",
-            lambda x: len(x) > 0 and re.match(r'^[a-z0-9-]+$', x),
+            lambda x: len(x) > 0 and re.match(r"^[a-z0-9-]+$", x),
             "Deployment name must contain only lowercase letters, numbers, and hyphens",
-            default="nba-mcp-synthesis"
+            default="nba-mcp-synthesis",
         )
 
         service_name = self.prompt_with_validation(
             "Service Name",
-            lambda x: len(x) > 0 and re.match(r'^[a-z0-9-]+$', x),
+            lambda x: len(x) > 0 and re.match(r"^[a-z0-9-]+$", x),
             "Service name must contain only lowercase letters, numbers, and hyphens",
-            default="nba-mcp-synthesis-service"
+            default="nba-mcp-synthesis-service",
         )
 
         image_repository = self.prompt_with_validation(
             "ECR Repository Name",
-            lambda x: len(x) > 0 and re.match(r'^[a-z0-9-]+$', x),
+            lambda x: len(x) > 0 and re.match(r"^[a-z0-9-]+$", x),
             "Repository name must contain only lowercase letters, numbers, and hyphens",
-            default="nba-mcp-synthesis"
+            default="nba-mcp-synthesis",
         )
 
         # Network Configuration
         self.log("\n=== Network Configuration ===", Colors.CYAN)
         vpc_cidr = self.prompt_with_validation(
             "VPC CIDR Block",
-            lambda x: re.match(r'^(\d{1,3}\.){3}\d{1,3}/\d{1,2}$', x),
+            lambda x: re.match(r"^(\d{1,3}\.){3}\d{1,3}/\d{1,2}$", x),
             "Please enter a valid CIDR block (e.g., 10.0.0.0/16)",
-            default="10.0.0.0/16"
+            default="10.0.0.0/16",
         )
 
         availability_zones_input = self.prompt_with_validation(
             "Availability Zones (comma-separated)",
-            lambda x: len(x.split(',')) >= 2,
+            lambda x: len(x.split(",")) >= 2,
             "Please enter at least 2 availability zones",
-            default=f"{aws_region}a,{aws_region}b,{aws_region}c"
+            default=f"{aws_region}a,{aws_region}b,{aws_region}c",
         )
-        availability_zones = [az.strip() for az in availability_zones_input.split(',')]
+        availability_zones = [az.strip() for az in availability_zones_input.split(",")]
 
         # Security Configuration
         self.log("\n=== Security Configuration ===", Colors.CYAN)
         enable_network_policies = self.prompt_with_validation(
             "Enable Network Policies (y/n)",
-            lambda x: x.lower() in ['y', 'n', 'yes', 'no'],
+            lambda x: x.lower() in ["y", "n", "yes", "no"],
             "Please enter 'y' or 'n'",
-            default="y"
-        ).lower() in ['y', 'yes']
+            default="y",
+        ).lower() in ["y", "yes"]
 
         enable_pod_security_standards = self.prompt_with_validation(
             "Enable Pod Security Standards (y/n)",
-            lambda x: x.lower() in ['y', 'n', 'yes', 'no'],
+            lambda x: x.lower() in ["y", "n", "yes", "no"],
             "Please enter 'y' or 'n'",
-            default="y"
-        ).lower() in ['y', 'yes']
+            default="y",
+        ).lower() in ["y", "yes"]
 
         return ProductionConfig(
             aws_account_id=aws_account_id,
@@ -326,7 +336,7 @@ class ConfigGenerator:
             vpc_cidr=vpc_cidr,
             availability_zones=availability_zones,
             enable_network_policies=enable_network_policies,
-            enable_pod_security_standards=enable_pod_security_standards
+            enable_pod_security_standards=enable_pod_security_standards,
         )
 
     def generate_terraform_vars(self) -> str:
@@ -359,9 +369,9 @@ enable_network_policies = {str(self.config.enable_network_policies).lower()}
 enable_pod_security_standards = {str(self.config.enable_pod_security_standards).lower()}
 
 # Monitoring Configuration
-grafana_admin_password = "{self.config.grafana_admin_password}"
-pagerduty_service_key = "{self.config.pagerduty_service_key}"
-slack_webhook_url = "{self.config.slack_webhook_url}"
+grafana_admin_password = "{self.config.grafana_admin_password}"  # pragma: allowlist secret
+pagerduty_service_key = "{self.config.pagerduty_service_key}"  # pragma: allowlist secret
+slack_webhook_url = "{self.config.slack_webhook_url}"  # pragma: allowlist secret
 """
         return tf_vars
 
@@ -481,7 +491,7 @@ spec:
         - name: shared-secrets
           emptyDir: {{}}
 """
-        manifests['deployment.yaml'] = deployment_manifest
+        manifests["deployment.yaml"] = deployment_manifest
 
         # Service manifest
         service_manifest = f"""apiVersion: v1
@@ -508,7 +518,7 @@ spec:
   selector:
     app: {self.config.deployment_name}
 """
-        manifests['service.yaml'] = service_manifest
+        manifests["service.yaml"] = service_manifest
 
         # Ingress manifest
         ingress_manifest = f"""apiVersion: networking.k8s.io/v1
@@ -555,7 +565,7 @@ spec:
                 port:
                   number: 9090
 """
-        manifests['ingress.yaml'] = ingress_manifest
+        manifests["ingress.yaml"] = ingress_manifest
 
         return manifests
 
@@ -568,7 +578,7 @@ spec:
 
         # Save Terraform variables
         tf_vars_path = self.output_dir / "secrets.tfvars"
-        with open(tf_vars_path, 'w') as f:
+        with open(tf_vars_path, "w") as f:
             f.write(self.generate_terraform_vars())
         self.log_success(f"Saved Terraform variables to {tf_vars_path}")
 
@@ -576,13 +586,13 @@ spec:
         manifests = self.generate_kubernetes_manifests()
         for filename, content in manifests.items():
             manifest_path = self.output_dir / filename
-            with open(manifest_path, 'w') as f:
+            with open(manifest_path, "w") as f:
                 f.write(content)
             self.log_success(f"Saved Kubernetes manifest to {manifest_path}")
 
         # Save configuration summary
         config_path = self.output_dir / "configuration.json"
-        with open(config_path, 'w') as f:
+        with open(config_path, "w") as f:
             json.dump(asdict(self.config), f, indent=2)
         self.log_success(f"Saved configuration summary to {config_path}")
 
@@ -595,8 +605,12 @@ spec:
         self.log(f"Domain Name: {self.config.domain_name}")
         self.log(f"Namespace: {self.config.namespace}")
         self.log(f"Database: {self.config.db_engine} ({self.config.db_instance_class})")
-        self.log(f"Network Policies: {'Enabled' if self.config.enable_network_policies else 'Disabled'}")
-        self.log(f"Pod Security Standards: {'Enabled' if self.config.enable_pod_security_standards else 'Disabled'}")
+        self.log(
+            f"Network Policies: {'Enabled' if self.config.enable_network_policies else 'Disabled'}"
+        )
+        self.log(
+            f"Pod Security Standards: {'Enabled' if self.config.enable_pod_security_standards else 'Disabled'}"
+        )
 
         self.log("\n=== Generated Files ===", Colors.PURPLE)
         self.log(f"Terraform Variables: {self.output_dir}/secrets.tfvars")
@@ -609,11 +623,18 @@ spec:
         self.log("3. Run infrastructure setup: ./scripts/setup_infrastructure.sh")
         self.log("4. Deploy application: kubectl apply -f k8s/")
 
+
 def main():
     """Main function"""
-    parser = argparse.ArgumentParser(description='Generate production configuration for NBA MCP Synthesis')
-    parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output')
-    parser.add_argument('-o', '--output-dir', help='Output directory for generated files')
+    parser = argparse.ArgumentParser(
+        description="Generate production configuration for NBA MCP Synthesis"
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Enable verbose output"
+    )
+    parser.add_argument(
+        "-o", "--output-dir", help="Output directory for generated files"
+    )
 
     args = parser.parse_args()
 
@@ -642,9 +663,10 @@ def main():
         generator.log_error(f"Configuration generation failed: {e}")
         if generator.verbose:
             import traceback
+
             traceback.print_exc()
         sys.exit(1)
 
+
 if __name__ == "__main__":
     main()
-

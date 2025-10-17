@@ -20,8 +20,10 @@ from sympy.parsing.sympy_parser import parse_expr
 
 logger = logging.getLogger(__name__)
 
+
 class FormulaType(Enum):
     """Types of formulas that can be extracted"""
+
     EFFICIENCY = "efficiency"
     RATE = "rate"
     COUNT = "count"
@@ -33,9 +35,11 @@ class FormulaType(Enum):
     INEQUALITY = "inequality"
     OTHER = "other"
 
+
 @dataclass
 class ExtractedFormula:
     """Represents an extracted formula with metadata"""
+
     formula_text: str
     formula_type: FormulaType
     variables: List[str]
@@ -45,6 +49,7 @@ class ExtractedFormula:
     latex_notation: Optional[str] = None
     sympy_expression: Optional[str] = None
     suggested_tools: List[str] = None
+
 
 class FormulaExtractor:
     """
@@ -58,58 +63,98 @@ class FormulaExtractor:
         """Initialize the formula extractor with pattern definitions"""
         self.formula_patterns = {
             # Common sports analytics patterns
-            r'([A-Z][A-Za-z_]*\s*=\s*[^=]+)': FormulaType.EQUATION,
-            r'([A-Z][A-Za-z_]*%\s*=\s*[^=]+)': FormulaType.PERCENTAGE,
-            r'([A-Z][A-Za-z_]*\s*/\s*\d+\s*=\s*[^=]+)': FormulaType.RATE,
-            r'([A-Z][A-Za-z_]*\s*\+\s*[A-Z][A-Za-z_]*\s*=\s*[^=]+)': FormulaType.COMPOSITE,
-            r'([A-Z][A-Za-z_]*\s*-\s*[A-Z][A-Za-z_]*\s*=\s*[^=]+)': FormulaType.DIFFERENTIAL,
-
+            r"([A-Z][A-Za-z_]*\s*=\s*[^=]+)": FormulaType.EQUATION,
+            r"([A-Z][A-Za-z_]*%\s*=\s*[^=]+)": FormulaType.PERCENTAGE,
+            r"([A-Z][A-Za-z_]*\s*/\s*\d+\s*=\s*[^=]+)": FormulaType.RATE,
+            r"([A-Z][A-Za-z_]*\s*\+\s*[A-Z][A-Za-z_]*\s*=\s*[^=]+)": FormulaType.COMPOSITE,
+            r"([A-Z][A-Za-z_]*\s*-\s*[A-Z][A-Za-z_]*\s*=\s*[^=]+)": FormulaType.DIFFERENTIAL,
             # LaTeX patterns
-            r'\\[a-zA-Z]+\{[^}]+\}': FormulaType.EQUATION,
-            r'\$[^$]+\$': FormulaType.EQUATION,
-            r'\$\$[^$]+\$\$': FormulaType.EQUATION,
-
+            r"\\[a-zA-Z]+\{[^}]+\}": FormulaType.EQUATION,
+            r"\$[^$]+\$": FormulaType.EQUATION,
+            r"\$\$[^$]+\$\$": FormulaType.EQUATION,
             # Mathematical expressions
-            r'([a-zA-Z_][a-zA-Z0-9_]*\s*[+\-*/]\s*[a-zA-Z_][a-zA-Z0-9_]*)': FormulaType.EQUATION,
-            r'([a-zA-Z_][a-zA-Z0-9_]*\s*=\s*[0-9.]+)': FormulaType.EQUATION,
+            r"([a-zA-Z_][a-zA-Z0-9_]*\s*[+\-*/]\s*[a-zA-Z_][a-zA-Z0-9_]*)": FormulaType.EQUATION,
+            r"([a-zA-Z_][a-zA-Z0-9_]*\s*=\s*[0-9.]+)": FormulaType.EQUATION,
         }
 
         # Variable mapping for sports analytics
         self.variable_mapping = {
-            'pts': 'PTS', 'points': 'PTS',
-            'fgm': 'FGM', 'field_goals_made': 'FGM',
-            'fga': 'FGA', 'field_goals_attempted': 'FGA',
-            '3pm': '3PM', 'three_pointers_made': '3PM',
-            'ftm': 'FTM', 'free_throws_made': 'FTM',
-            'fta': 'FTA', 'free_throws_attempted': 'FTA',
-            'oreb': 'OREB', 'offensive_rebounds': 'OREB',
-            'dreb': 'DREB', 'defensive_rebounds': 'DREB',
-            'ast': 'AST', 'assists': 'AST',
-            'stl': 'STL', 'steals': 'STL',
-            'blk': 'BLK', 'blocks': 'BLK',
-            'tov': 'TOV', 'turnovers': 'TOV',
-            'pf': 'PF', 'personal_fouls': 'PF',
-            'mp': 'MP', 'minutes_played': 'MP',
-            'per': 'PER', 'player_efficiency_rating': 'PER',
-            'ts': 'TS', 'true_shooting': 'TS',
-            'usg': 'USG', 'usage_rate': 'USG',
-            'ortg': 'ORtg', 'offensive_rating': 'ORtg',
-            'drtg': 'DRtg', 'defensive_rating': 'DRtg',
-            'pace': 'PACE',
-            'bpm': 'BPM', 'box_plus_minus': 'BPM',
-            'vorp': 'VORP', 'value_over_replacement_player': 'VORP',
-            'ws': 'WS', 'win_shares': 'WS',
+            "pts": "PTS",
+            "points": "PTS",
+            "fgm": "FGM",
+            "field_goals_made": "FGM",
+            "fga": "FGA",
+            "field_goals_attempted": "FGA",
+            "3pm": "3PM",
+            "three_pointers_made": "3PM",
+            "ftm": "FTM",
+            "free_throws_made": "FTM",
+            "fta": "FTA",
+            "free_throws_attempted": "FTA",
+            "oreb": "OREB",
+            "offensive_rebounds": "OREB",
+            "dreb": "DREB",
+            "defensive_rebounds": "DREB",
+            "ast": "AST",
+            "assists": "AST",
+            "stl": "STL",
+            "steals": "STL",
+            "blk": "BLK",
+            "blocks": "BLK",
+            "tov": "TOV",
+            "turnovers": "TOV",
+            "pf": "PF",
+            "personal_fouls": "PF",
+            "mp": "MP",
+            "minutes_played": "MP",
+            "per": "PER",
+            "player_efficiency_rating": "PER",
+            "ts": "TS",
+            "true_shooting": "TS",
+            "usg": "USG",
+            "usage_rate": "USG",
+            "ortg": "ORtg",
+            "offensive_rating": "ORtg",
+            "drtg": "DRtg",
+            "defensive_rating": "DRtg",
+            "pace": "PACE",
+            "bpm": "BPM",
+            "box_plus_minus": "BPM",
+            "vorp": "VORP",
+            "value_over_replacement_player": "VORP",
+            "ws": "WS",
+            "win_shares": "WS",
         }
 
         # Common sports analytics formula keywords
         self.sports_keywords = [
-            'efficiency', 'rating', 'percentage', 'rate', 'per', 'ts', 'usg',
-            'pace', 'plus_minus', 'win_shares', 'vorp', 'bpm', 'ortg', 'drtg',
-            'true_shooting', 'usage_rate', 'player_efficiency', 'defensive_rating',
-            'offensive_rating', 'net_rating', 'four_factors', 'clutch'
+            "efficiency",
+            "rating",
+            "percentage",
+            "rate",
+            "per",
+            "ts",
+            "usg",
+            "pace",
+            "plus_minus",
+            "win_shares",
+            "vorp",
+            "bpm",
+            "ortg",
+            "drtg",
+            "true_shooting",
+            "usage_rate",
+            "player_efficiency",
+            "defensive_rating",
+            "offensive_rating",
+            "net_rating",
+            "four_factors",
+            "clutch",
         ]
 
-    def extract_formulas_from_text(self, text: str, page_number: int = 0) -> List[ExtractedFormula]:
+    def extract_formulas_from_text(
+        self, text: str, page_number: int = 0
+    ) -> List[ExtractedFormula]:
         """
         Extract formulas from text content.
 
@@ -123,7 +168,7 @@ class FormulaExtractor:
         formulas = []
 
         # Split text into lines for better context
-        lines = text.split('\n')
+        lines = text.split("\n")
 
         for line_num, line in enumerate(lines):
             line = line.strip()
@@ -145,7 +190,9 @@ class FormulaExtractor:
                         variables = self._extract_variables(formula_text)
 
                         # Determine confidence based on context
-                        confidence = self._calculate_confidence(formula_text, line, formula_type)
+                        confidence = self._calculate_confidence(
+                            formula_text, line, formula_type
+                        )
 
                         # Get context (surrounding lines)
                         context = self._get_context(lines, line_num)
@@ -157,7 +204,9 @@ class FormulaExtractor:
                         sympy_expression = self._convert_to_sympy(formula_text)
 
                         # Suggest tools
-                        suggested_tools = self._suggest_tools(formula_text, formula_type)
+                        suggested_tools = self._suggest_tools(
+                            formula_text, formula_type
+                        )
 
                         formula = ExtractedFormula(
                             formula_text=formula_text,
@@ -168,7 +217,7 @@ class FormulaExtractor:
                             confidence=confidence,
                             latex_notation=latex_notation,
                             sympy_expression=sympy_expression,
-                            suggested_tools=suggested_tools
+                            suggested_tools=suggested_tools,
                         )
 
                         formulas.append(formula)
@@ -190,11 +239,11 @@ class FormulaExtractor:
             List of LaTeX formula strings
         """
         latex_patterns = [
-            r'\$([^$]+)\$',  # Inline math
-            r'\$\$([^$]+)\$\$',  # Display math
-            r'\\[a-zA-Z]+\{[^}]+\}',  # LaTeX commands
-            r'\\begin\{equation\}.*?\\end\{equation\}',  # Equation environment
-            r'\\begin\{align\}.*?\\end\{align\}',  # Align environment
+            r"\$([^$]+)\$",  # Inline math
+            r"\$\$([^$]+)\$\$",  # Display math
+            r"\\[a-zA-Z]+\{[^}]+\}",  # LaTeX commands
+            r"\\begin\{equation\}.*?\\end\{equation\}",  # Equation environment
+            r"\\begin\{align\}.*?\\end\{align\}",  # Align environment
         ]
 
         latex_formulas = []
@@ -202,7 +251,9 @@ class FormulaExtractor:
         for pattern in latex_patterns:
             matches = re.finditer(pattern, text, re.DOTALL | re.IGNORECASE)
             for match in matches:
-                latex_formulas.append(match.group(1) if match.groups() else match.group(0))
+                latex_formulas.append(
+                    match.group(1) if match.groups() else match.group(0)
+                )
 
         return latex_formulas
 
@@ -221,13 +272,13 @@ class FormulaExtractor:
             latex_str = latex_str.strip()
 
             # Remove common LaTeX formatting
-            latex_str = re.sub(r'\\[a-zA-Z]+\{([^}]+)\}', r'\1', latex_str)
-            latex_str = re.sub(r'\\frac\{([^}]+)\}\{([^}]+)\}', r'(\1)/(\2)', latex_str)
-            latex_str = re.sub(r'\\cdot', '*', latex_str)
-            latex_str = re.sub(r'\\times', '*', latex_str)
-            latex_str = re.sub(r'\\div', '/', latex_str)
-            latex_str = re.sub(r'\\pm', '+-', latex_str)
-            latex_str = re.sub(r'\\mp', '-+', latex_str)
+            latex_str = re.sub(r"\\[a-zA-Z]+\{([^}]+)\}", r"\1", latex_str)
+            latex_str = re.sub(r"\\frac\{([^}]+)\}\{([^}]+)\}", r"(\1)/(\2)", latex_str)
+            latex_str = re.sub(r"\\cdot", "*", latex_str)
+            latex_str = re.sub(r"\\times", "*", latex_str)
+            latex_str = re.sub(r"\\div", "/", latex_str)
+            latex_str = re.sub(r"\\pm", "+-", latex_str)
+            latex_str = re.sub(r"\\mp", "-+", latex_str)
 
             # Try to parse with SymPy
             try:
@@ -252,15 +303,15 @@ class FormulaExtractor:
             Dictionary with structure analysis
         """
         analysis = {
-            'has_equality': '=' in formula,
-            'has_inequality': any(op in formula for op in ['<', '>', '<=', '>=']),
-            'operators': re.findall(r'[+\-*/^]', formula),
-            'variables': self._extract_variables(formula),
-            'constants': re.findall(r'\b\d+\.?\d*\b', formula),
-            'complexity_score': len(re.findall(r'[+\-*/^()]', formula)),
-            'is_percentage': '%' in formula,
-            'is_ratio': '/' in formula and '=' in formula,
-            'is_composite': len(re.findall(r'[+\-]', formula)) > 1,
+            "has_equality": "=" in formula,
+            "has_inequality": any(op in formula for op in ["<", ">", "<=", ">="]),
+            "operators": re.findall(r"[+\-*/^]", formula),
+            "variables": self._extract_variables(formula),
+            "constants": re.findall(r"\b\d+\.?\d*\b", formula),
+            "complexity_score": len(re.findall(r"[+\-*/^()]", formula)),
+            "is_percentage": "%" in formula,
+            "is_ratio": "/" in formula and "=" in formula,
+            "is_composite": len(re.findall(r"[+\-]", formula)) > 1,
         }
 
         return analysis
@@ -277,26 +328,30 @@ class FormulaExtractor:
         """
         analysis = self.analyze_formula_structure(formula)
 
-        if analysis['has_equality'] and not analysis['has_inequality']:
-            if analysis['complexity_score'] > 5:
-                return 'algebra_simplify_expression'
+        if analysis["has_equality"] and not analysis["has_inequality"]:
+            if analysis["complexity_score"] > 5:
+                return "algebra_simplify_expression"
             else:
-                return 'algebra_solve_equation'
-        elif analysis['is_percentage'] or analysis['is_ratio']:
-            return 'algebra_sports_formula'
-        elif analysis['complexity_score'] > 10:
-            return 'algebra_simplify_expression'
+                return "algebra_solve_equation"
+        elif analysis["is_percentage"] or analysis["is_ratio"]:
+            return "algebra_sports_formula"
+        elif analysis["complexity_score"] > 10:
+            return "algebra_simplify_expression"
         else:
-            return 'algebra_render_latex'
+            return "algebra_render_latex"
 
     def _clean_formula_text(self, formula_text: str) -> str:
         """Clean and normalize formula text"""
         # Remove extra whitespace
-        formula_text = re.sub(r'\s+', ' ', formula_text.strip())
+        formula_text = re.sub(r"\s+", " ", formula_text.strip())
 
         # Remove common prefixes/suffixes
-        formula_text = re.sub(r'^(formula|equation|formula:)\s*', '', formula_text, flags=re.IGNORECASE)
-        formula_text = re.sub(r'\s*(formula|equation)$', '', formula_text, flags=re.IGNORECASE)
+        formula_text = re.sub(
+            r"^(formula|equation|formula:)\s*", "", formula_text, flags=re.IGNORECASE
+        )
+        formula_text = re.sub(
+            r"\s*(formula|equation)$", "", formula_text, flags=re.IGNORECASE
+        )
 
         return formula_text
 
@@ -306,31 +361,50 @@ class FormulaExtractor:
             return False
 
         # Must contain at least one variable or operator
-        has_variable = re.search(r'[a-zA-Z_][a-zA-Z0-9_]*', formula_text)
-        has_operator = re.search(r'[+\-*/=]', formula_text)
+        has_variable = re.search(r"[a-zA-Z_][a-zA-Z0-9_]*", formula_text)
+        has_operator = re.search(r"[+\-*/=]", formula_text)
 
         if not (has_variable or has_operator):
             return False
 
         # Check for sports analytics relevance
         formula_lower = formula_text.lower()
-        has_sports_keyword = any(keyword in formula_lower for keyword in self.sports_keywords)
+        has_sports_keyword = any(
+            keyword in formula_lower for keyword in self.sports_keywords
+        )
 
         # If it has sports keywords, it's likely valid
         if has_sports_keyword:
             return True
 
         # Otherwise, check for mathematical structure
-        return bool(re.search(r'[a-zA-Z_][a-zA-Z0-9_]*\s*[=+\-*/]', formula_text))
+        return bool(re.search(r"[a-zA-Z_][a-zA-Z0-9_]*\s*[=+\-*/]", formula_text))
 
     def _extract_variables(self, formula_text: str) -> List[str]:
         """Extract variables from formula text"""
         # Find all potential variables
-        variables = re.findall(r'\b[A-Za-z_][A-Za-z0-9_]*\b', formula_text)
+        variables = re.findall(r"\b[A-Za-z_][A-Za-z0-9_]*\b", formula_text)
 
         # Filter out common words and constants
-        common_words = {'and', 'or', 'the', 'of', 'in', 'to', 'for', 'with', 'by', 'per', 'rate', 'percentage'}
-        variables = [var for var in variables if var.lower() not in common_words and not var.isdigit()]
+        common_words = {
+            "and",
+            "or",
+            "the",
+            "of",
+            "in",
+            "to",
+            "for",
+            "with",
+            "by",
+            "per",
+            "rate",
+            "percentage",
+        }
+        variables = [
+            var
+            for var in variables
+            if var.lower() not in common_words and not var.isdigit()
+        ]
 
         # Map to standard notation
         mapped_variables = []
@@ -340,7 +414,9 @@ class FormulaExtractor:
 
         return list(set(mapped_variables))  # Remove duplicates
 
-    def _calculate_confidence(self, formula_text: str, context_line: str, formula_type: FormulaType) -> float:
+    def _calculate_confidence(
+        self, formula_text: str, context_line: str, formula_type: FormulaType
+    ) -> float:
         """Calculate confidence score for extracted formula"""
         confidence = 0.5  # Base confidence
 
@@ -348,15 +424,19 @@ class FormulaExtractor:
         formula_lower = formula_text.lower()
         context_lower = context_line.lower()
 
-        sports_keyword_count = sum(1 for keyword in self.sports_keywords if keyword in formula_lower or keyword in context_lower)
+        sports_keyword_count = sum(
+            1
+            for keyword in self.sports_keywords
+            if keyword in formula_lower or keyword in context_lower
+        )
         confidence += min(sports_keyword_count * 0.1, 0.3)
 
         # Increase confidence for mathematical structure
-        if '=' in formula_text:
+        if "=" in formula_text:
             confidence += 0.2
-        if any(op in formula_text for op in ['+', '-', '*', '/']):
+        if any(op in formula_text for op in ["+", "-", "*", "/"]):
             confidence += 0.1
-        if re.search(r'[A-Z][A-Za-z_]*', formula_text):  # Uppercase variables
+        if re.search(r"[A-Z][A-Za-z_]*", formula_text):  # Uppercase variables
             confidence += 0.1
 
         # Decrease confidence for very short or very long formulas
@@ -367,11 +447,13 @@ class FormulaExtractor:
 
         return min(max(confidence, 0.0), 1.0)
 
-    def _get_context(self, lines: List[str], line_num: int, context_lines: int = 2) -> str:
+    def _get_context(
+        self, lines: List[str], line_num: int, context_lines: int = 2
+    ) -> str:
         """Get context around a formula"""
         start = max(0, line_num - context_lines)
         end = min(len(lines), line_num + context_lines + 1)
-        return '\n'.join(lines[start:end])
+        return "\n".join(lines[start:end])
 
     def _convert_to_latex(self, formula_text: str) -> Optional[str]:
         """Convert formula to LaTeX notation"""
@@ -380,13 +462,13 @@ class FormulaExtractor:
             latex = formula_text
 
             # Convert common operators
-            latex = re.sub(r'\*', r' \\cdot ', latex)
-            latex = re.sub(r'/', r' \\frac{}{}', latex)
-            latex = re.sub(r'\^', r'^', latex)
+            latex = re.sub(r"\*", r" \\cdot ", latex)
+            latex = re.sub(r"/", r" \\frac{}{}", latex)
+            latex = re.sub(r"\^", r"^", latex)
 
             # Wrap in math mode
-            if not latex.startswith('$'):
-                latex = f'${latex}$'
+            if not latex.startswith("$"):
+                latex = f"${latex}$"
 
             return latex
         except Exception:
@@ -399,8 +481,10 @@ class FormulaExtractor:
             sympy_text = formula_text
 
             # Replace common patterns
-            sympy_text = re.sub(r'\^', '**', sympy_text)
-            sympy_text = re.sub(r'\b(\d+)\s*([a-zA-Z_][a-zA-Z0-9_]*)\b', r'\1*\2', sympy_text)
+            sympy_text = re.sub(r"\^", "**", sympy_text)
+            sympy_text = re.sub(
+                r"\b(\d+)\s*([a-zA-Z_][a-zA-Z0-9_]*)\b", r"\1*\2", sympy_text
+            )
 
             # Try to parse
             expr = parse_expr(sympy_text)
@@ -410,20 +494,26 @@ class FormulaExtractor:
 
     def _suggest_tools(self, formula_text: str, formula_type: FormulaType) -> List[str]:
         """Suggest appropriate tools for the formula"""
-        tools = ['formula_identify_type', 'formula_map_variables']
+        tools = ["formula_identify_type", "formula_map_variables"]
 
         if formula_type == FormulaType.EQUATION:
-            tools.extend(['algebra_solve_equation', 'algebra_simplify_expression'])
-        elif formula_type in [FormulaType.EFFICIENCY, FormulaType.PERCENTAGE, FormulaType.RATE]:
-            tools.append('algebra_sports_formula')
+            tools.extend(["algebra_solve_equation", "algebra_simplify_expression"])
+        elif formula_type in [
+            FormulaType.EFFICIENCY,
+            FormulaType.PERCENTAGE,
+            FormulaType.RATE,
+        ]:
+            tools.append("algebra_sports_formula")
         elif formula_type == FormulaType.COMPOSITE:
-            tools.extend(['algebra_simplify_expression', 'algebra_solve_equation'])
+            tools.extend(["algebra_simplify_expression", "algebra_solve_equation"])
 
-        tools.append('algebra_render_latex')
+        tools.append("algebra_render_latex")
 
         return tools
 
-    def _remove_duplicates(self, formulas: List[ExtractedFormula]) -> List[ExtractedFormula]:
+    def _remove_duplicates(
+        self, formulas: List[ExtractedFormula]
+    ) -> List[ExtractedFormula]:
         """Remove duplicate formulas"""
         seen = set()
         unique_formulas = []
@@ -442,18 +532,27 @@ class FormulaExtractor:
         """Manual conversion for complex LaTeX patterns"""
         try:
             # Handle fractions
-            latex_str = re.sub(r'\\frac\{([^}]+)\}\{([^}]+)\}', r'(\1)/(\2)', latex_str)
+            latex_str = re.sub(r"\\frac\{([^}]+)\}\{([^}]+)\}", r"(\1)/(\2)", latex_str)
 
             # Handle subscripts and superscripts
-            latex_str = re.sub(r'\^\{([^}]+)\}', r'**(\1)', latex_str)
-            latex_str = re.sub(r'\^([a-zA-Z0-9])', r'**\1', latex_str)
+            latex_str = re.sub(r"\^\{([^}]+)\}", r"**(\1)", latex_str)
+            latex_str = re.sub(r"\^([a-zA-Z0-9])", r"**\1", latex_str)
 
             # Handle Greek letters
             greek_map = {
-                '\\alpha': 'alpha', '\\beta': 'beta', '\\gamma': 'gamma',
-                '\\delta': 'delta', '\\epsilon': 'epsilon', '\\theta': 'theta',
-                '\\lambda': 'lambda', '\\mu': 'mu', '\\pi': 'pi', '\\sigma': 'sigma',
-                '\\tau': 'tau', '\\phi': 'phi', '\\omega': 'omega'
+                "\\alpha": "alpha",
+                "\\beta": "beta",
+                "\\gamma": "gamma",
+                "\\delta": "delta",
+                "\\epsilon": "epsilon",
+                "\\theta": "theta",
+                "\\lambda": "lambda",
+                "\\mu": "mu",
+                "\\pi": "pi",
+                "\\sigma": "sigma",
+                "\\tau": "tau",
+                "\\phi": "phi",
+                "\\omega": "omega",
             }
 
             for latex_greek, sympy_greek in greek_map.items():
@@ -462,7 +561,3 @@ class FormulaExtractor:
             return latex_str
         except Exception:
             return None
-
-
-
-

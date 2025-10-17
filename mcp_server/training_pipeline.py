@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 class PipelineStage(Enum):
     """Training pipeline stages"""
+
     DATA_VALIDATION = "data_validation"
     DATA_PREPARATION = "data_preparation"
     FEATURE_ENGINEERING = "feature_engineering"
@@ -28,6 +29,7 @@ class PipelineStage(Enum):
 
 class PipelineStatus(Enum):
     """Pipeline execution status"""
+
     PENDING = "pending"
     RUNNING = "running"
     SUCCESS = "success"
@@ -38,6 +40,7 @@ class PipelineStatus(Enum):
 @dataclass
 class PipelineStageResult:
     """Result from a pipeline stage"""
+
     stage: PipelineStage
     status: PipelineStatus
     start_time: datetime
@@ -51,6 +54,7 @@ class PipelineStageResult:
 @dataclass
 class TrainingPipelineRun:
     """Training pipeline execution run"""
+
     run_id: str
     pipeline_name: str
     start_time: datetime
@@ -110,7 +114,7 @@ class TrainingPipeline:
             pipeline_name=self.name,
             start_time=datetime.utcnow(),
             status=PipelineStatus.RUNNING,
-            config=self.config.copy()
+            config=self.config.copy(),
         )
 
         logger.info(f"Starting pipeline run: {run_id}")
@@ -123,7 +127,7 @@ class TrainingPipeline:
             PipelineStage.MODEL_TRAINING,
             PipelineStage.MODEL_EVALUATION,
             PipelineStage.MODEL_REGISTRATION,
-            PipelineStage.MODEL_DEPLOYMENT
+            PipelineStage.MODEL_DEPLOYMENT,
         ]
 
         previous_output = None
@@ -134,10 +138,7 @@ class TrainingPipeline:
                 continue
 
             stage_result = self._execute_stage(
-                stage,
-                self.stages[stage],
-                previous_output,
-                run
+                stage, self.stages[stage], previous_output, run
             )
 
             run.stage_results.append(stage_result)
@@ -171,13 +172,11 @@ class TrainingPipeline:
         stage: PipelineStage,
         func: Callable,
         input_data: Any,
-        run: TrainingPipelineRun
+        run: TrainingPipelineRun,
     ) -> PipelineStageResult:
         """Execute a single pipeline stage"""
         stage_result = PipelineStageResult(
-            stage=stage,
-            status=PipelineStatus.RUNNING,
-            start_time=datetime.utcnow()
+            stage=stage, status=PipelineStatus.RUNNING, start_time=datetime.utcnow()
         )
 
         logger.info(f"Executing stage: {stage.value}")
@@ -190,8 +189,8 @@ class TrainingPipeline:
             stage_result.output = output
 
             # Extract metrics if available
-            if isinstance(output, dict) and 'metrics' in output:
-                stage_result.metrics = output['metrics']
+            if isinstance(output, dict) and "metrics" in output:
+                stage_result.metrics = output["metrics"]
 
             logger.info(f"Stage {stage.value} completed successfully")
 
@@ -225,13 +224,13 @@ class TrainingPipeline:
                     "status": result.status.value,
                     "duration_seconds": result.duration_seconds,
                     "metrics": result.metrics,
-                    "error": result.error
+                    "error": result.error,
                 }
                 for result in run.stage_results
-            ]
+            ],
         }
 
-        with open(metadata_file, 'w') as f:
+        with open(metadata_file, "w") as f:
             json.dump(metadata, f, indent=2)
 
         logger.info(f"Saved run metadata to {metadata_file}")
@@ -246,14 +245,16 @@ class TrainingPipeline:
                 "end_time": run.end_time.isoformat() if run.end_time else None,
                 "duration_seconds": (
                     (run.end_time - run.start_time).total_seconds()
-                    if run.end_time else None
+                    if run.end_time
+                    else None
                 ),
-                "stages_completed": len([
-                    r for r in run.stage_results
-                    if r.status == PipelineStatus.SUCCESS
-                ])
+                "stages_completed": len(
+                    [r for r in run.stage_results if r.status == PipelineStatus.SUCCESS]
+                ),
             }
-            for run in sorted(self.runs, key=lambda r: r.start_time, reverse=True)[:limit]
+            for run in sorted(self.runs, key=lambda r: r.start_time, reverse=True)[
+                :limit
+            ]
         ]
 
 
@@ -265,7 +266,9 @@ if __name__ == "__main__":
 
     # Define stage functions
     def validate_data(input_data, config):
-        print(f"  → Validating data with config: {config.get('validation_rules', 'default')}")
+        print(
+            f"  → Validating data with config: {config.get('validation_rules', 'default')}"
+        )
         return {"status": "valid", "rows": 1000, "metrics": {"null_count": 5}}
 
     def prepare_data(input_data, config):
@@ -273,32 +276,31 @@ if __name__ == "__main__":
         return {
             "train": {"rows": 800},
             "test": {"rows": 200},
-            "metrics": {"train_size": 800, "test_size": 200}
+            "metrics": {"train_size": 800, "test_size": 200},
         }
 
     def engineer_features(input_data, config):
-        print(f"  → Engineering features (strategy: {config.get('feature_strategy', 'auto')})")
+        print(
+            f"  → Engineering features (strategy: {config.get('feature_strategy', 'auto')})"
+        )
         return {
             "features": ["points", "assists", "rebounds", "per"],
-            "metrics": {"feature_count": 4}
+            "metrics": {"feature_count": 4},
         }
 
     def train_model(input_data, config):
-        print(f"  → Training model (algorithm: {config.get('algorithm', 'random_forest')})")
+        print(
+            f"  → Training model (algorithm: {config.get('algorithm', 'random_forest')})"
+        )
         return {
             "model_id": "model_v1",
-            "metrics": {"accuracy": 0.92, "training_time": 45.3}
+            "metrics": {"accuracy": 0.92, "training_time": 45.3},
         }
 
     def evaluate_model(input_data, config):
         print(f"  → Evaluating model (threshold: {config.get('eval_threshold', 0.85)})")
         return {
-            "metrics": {
-                "accuracy": 0.92,
-                "precision": 0.89,
-                "recall": 0.91,
-                "f1": 0.90
-            }
+            "metrics": {"accuracy": 0.92, "precision": 0.89, "recall": 0.91, "f1": 0.90}
         }
 
     def register_model(input_data, config):
@@ -317,8 +319,8 @@ if __name__ == "__main__":
             "test_size": 0.2,
             "feature_strategy": "advanced",
             "algorithm": "gradient_boosting",
-            "eval_threshold": 0.85
-        }
+            "eval_threshold": 0.85,
+        },
     )
 
     # Add stages
@@ -370,4 +372,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("Training Pipeline Demo Complete!")
     print("=" * 80)
-

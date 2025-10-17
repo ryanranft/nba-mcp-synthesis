@@ -35,8 +35,10 @@ logger = logging.getLogger(__name__)
 # Data Structures
 # ============================================================================
 
+
 class DeploymentStatus(Enum):
     """Deployment status options"""
+
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     SUCCESS = "success"
@@ -44,23 +46,29 @@ class DeploymentStatus(Enum):
     ROLLED_BACK = "rolled_back"
     CANCELLED = "cancelled"
 
+
 class EnvironmentType(Enum):
     """Environment types"""
+
     DEVELOPMENT = "development"
     STAGING = "staging"
     PRODUCTION = "production"
     TESTING = "testing"
 
+
 class DeploymentStrategy(Enum):
     """Deployment strategies"""
+
     BLUE_GREEN = "blue_green"
     ROLLING = "rolling"
     CANARY = "canary"
     RECREATE = "recreate"
 
+
 @dataclass
 class DeploymentConfig:
     """Configuration for deployment"""
+
     environment: EnvironmentType
     strategy: DeploymentStrategy
     version: str
@@ -77,9 +85,11 @@ class DeploymentConfig:
     security_scan_enabled: bool = True
     performance_test_enabled: bool = True
 
+
 @dataclass
 class DeploymentResult:
     """Result of deployment operation"""
+
     deployment_id: str
     status: DeploymentStatus
     environment: EnvironmentType
@@ -95,9 +105,11 @@ class DeploymentResult:
     security_scan_passed: bool = False
     metadata: Dict[str, Any] = None
 
+
 @dataclass
 class HealthCheckResult:
     """Result of health check"""
+
     endpoint: str
     status_code: int
     response_time_ms: float
@@ -105,9 +117,11 @@ class HealthCheckResult:
     error_message: Optional[str] = None
     timestamp: datetime = None
 
+
 @dataclass
 class SecurityScanResult:
     """Result of security scan"""
+
     scan_type: str
     vulnerabilities_found: int
     critical_vulnerabilities: int
@@ -118,9 +132,11 @@ class SecurityScanResult:
     scan_duration_seconds: float
     recommendations: List[str] = None
 
+
 @dataclass
 class PerformanceTestResult:
     """Result of performance test"""
+
     test_name: str
     requests_per_second: float
     average_response_time_ms: float
@@ -131,9 +147,11 @@ class PerformanceTestResult:
     test_duration_seconds: float
     recommendations: List[str] = None
 
+
 # ============================================================================
 # Production Deployment Pipeline
 # ============================================================================
+
 
 class ProductionDeploymentPipeline:
     """
@@ -160,7 +178,7 @@ class ProductionDeploymentPipeline:
         environment: str,
         version: str,
         strategy: str = "rolling",
-        config: Optional[Dict[str, Any]] = None
+        config: Optional[Dict[str, Any]] = None,
     ) -> DeploymentResult:
         """
         Deploy application to specified environment
@@ -189,7 +207,9 @@ class ProductionDeploymentPipeline:
             self._validate_prerequisites(deployment_config)
 
             # Execute deployment strategy
-            result = self._execute_deployment(deployment_config, deployment_id, start_time)
+            result = self._execute_deployment(
+                deployment_config, deployment_id, start_time
+            )
 
             # Store deployment result
             self.deployments[deployment_id] = result
@@ -203,9 +223,7 @@ class ProductionDeploymentPipeline:
             )
 
     def rollback(
-        self,
-        deployment_id: str,
-        target_version: Optional[str] = None
+        self, deployment_id: str, target_version: Optional[str] = None
     ) -> DeploymentResult:
         """
         Rollback deployment to previous version
@@ -228,14 +246,16 @@ class ProductionDeploymentPipeline:
 
             # Determine target version
             if not target_version:
-                target_version = self._get_previous_version(original_deployment.environment)
+                target_version = self._get_previous_version(
+                    original_deployment.environment
+                )
 
             # Create rollback deployment
             rollback_config = DeploymentConfig(
                 environment=original_deployment.environment,
                 strategy=DeploymentStrategy.RECREATE,
                 version=target_version,
-                rollback_enabled=False  # Prevent rollback of rollback
+                rollback_enabled=False,  # Prevent rollback of rollback
             )
 
             # Execute rollback
@@ -246,12 +266,14 @@ class ProductionDeploymentPipeline:
             result.status = DeploymentStatus.ROLLED_BACK
 
             # Store rollback history
-            self.rollback_history.append({
-                "original_deployment_id": deployment_id,
-                "rollback_deployment_id": rollback_id,
-                "target_version": target_version,
-                "timestamp": datetime.now()
-            })
+            self.rollback_history.append(
+                {
+                    "original_deployment_id": deployment_id,
+                    "rollback_deployment_id": rollback_id,
+                    "target_version": target_version,
+                    "timestamp": datetime.now(),
+                }
+            )
 
             return result
 
@@ -262,14 +284,10 @@ class ProductionDeploymentPipeline:
                 EnvironmentType.PRODUCTION,
                 target_version or "unknown",
                 datetime.now(),
-                str(e)
+                str(e),
             )
 
-    def health_check(
-        self,
-        endpoint: str,
-        timeout: int = 30
-    ) -> HealthCheckResult:
+    def health_check(self, endpoint: str, timeout: int = 30) -> HealthCheckResult:
         """
         Perform health check on deployment
 
@@ -287,13 +305,15 @@ class ProductionDeploymentPipeline:
 
             # For test environments, simulate success for example.com domains
             if "example.com" in endpoint:
-                self.logger.info(f"Simulating health check success for test domain: {endpoint}")
+                self.logger.info(
+                    f"Simulating health check success for test domain: {endpoint}"
+                )
                 return HealthCheckResult(
                     endpoint=endpoint,
                     status_code=200,
                     response_time_ms=50,
                     healthy=True,
-                    timestamp=datetime.now()
+                    timestamp=datetime.now(),
                 )
 
             start_time = time.time()
@@ -308,7 +328,7 @@ class ProductionDeploymentPipeline:
                 status_code=response.status_code,
                 response_time_ms=response_time_ms,
                 healthy=healthy,
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
         except Exception as e:
@@ -319,13 +339,11 @@ class ProductionDeploymentPipeline:
                 response_time_ms=0,
                 healthy=False,
                 error_message=str(e),
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
     def security_scan(
-        self,
-        image_name: str,
-        scan_type: str = "vulnerability"
+        self, image_name: str, scan_type: str = "vulnerability"
     ) -> SecurityScanResult:
         """
         Perform security scan on container image
@@ -360,7 +378,9 @@ class ProductionDeploymentPipeline:
                 low_vulnerabilities=vulnerabilities["low"],
                 passed=passed,
                 scan_duration_seconds=scan_duration,
-                recommendations=self._generate_security_recommendations(vulnerabilities)
+                recommendations=self._generate_security_recommendations(
+                    vulnerabilities
+                ),
             )
 
         except Exception as e:
@@ -374,13 +394,11 @@ class ProductionDeploymentPipeline:
                 low_vulnerabilities=0,
                 passed=False,
                 scan_duration_seconds=0,
-                recommendations=[f"Security scan failed: {str(e)}"]
+                recommendations=[f"Security scan failed: {str(e)}"],
             )
 
     def performance_test(
-        self,
-        endpoint: str,
-        test_config: Optional[Dict[str, Any]] = None
+        self, endpoint: str, test_config: Optional[Dict[str, Any]] = None
     ) -> PerformanceTestResult:
         """
         Perform performance test on deployment
@@ -405,9 +423,9 @@ class ProductionDeploymentPipeline:
 
             # Determine if test passed
             passed = (
-                metrics["requests_per_second"] >= 100 and
-                metrics["average_response_time_ms"] <= 500 and
-                metrics["error_rate"] <= 0.01
+                metrics["requests_per_second"] >= 100
+                and metrics["average_response_time_ms"] <= 500
+                and metrics["error_rate"] <= 0.01
             )
 
             return PerformanceTestResult(
@@ -419,7 +437,7 @@ class ProductionDeploymentPipeline:
                 error_rate=metrics["error_rate"],
                 passed=passed,
                 test_duration_seconds=test_duration,
-                recommendations=self._generate_performance_recommendations(metrics)
+                recommendations=self._generate_performance_recommendations(metrics),
             )
 
         except Exception as e:
@@ -433,14 +451,16 @@ class ProductionDeploymentPipeline:
                 error_rate=1.0,
                 passed=False,
                 test_duration_seconds=0,
-                recommendations=[f"Performance test failed: {str(e)}"]
+                recommendations=[f"Performance test failed: {str(e)}"],
             )
 
     def get_deployment_status(self, deployment_id: str) -> Optional[DeploymentResult]:
         """Get status of specific deployment"""
         return self.deployments.get(deployment_id)
 
-    def list_deployments(self, environment: Optional[str] = None) -> List[DeploymentResult]:
+    def list_deployments(
+        self, environment: Optional[str] = None
+    ) -> List[DeploymentResult]:
         """List all deployments, optionally filtered by environment"""
         deployments = list(self.deployments.values())
 
@@ -461,7 +481,7 @@ class ProductionDeploymentPipeline:
                 "start_time": result.start_time.isoformat(),
                 "end_time": result.end_time.isoformat() if result.end_time else None,
                 "duration_seconds": result.duration_seconds,
-                "success": result.success
+                "success": result.success,
             }
             for result in self.deployments.values()
         ]
@@ -477,42 +497,38 @@ class ProductionDeploymentPipeline:
                 "development": {
                     "replicas": 1,
                     "cpu_limit": "500m",
-                    "memory_limit": "512Mi"
+                    "memory_limit": "512Mi",
                 },
-                "staging": {
-                    "replicas": 2,
-                    "cpu_limit": "1000m",
-                    "memory_limit": "1Gi"
-                },
+                "staging": {"replicas": 2, "cpu_limit": "1000m", "memory_limit": "1Gi"},
                 "production": {
                     "replicas": 3,
                     "cpu_limit": "2000m",
-                    "memory_limit": "2Gi"
-                }
+                    "memory_limit": "2Gi",
+                },
             },
             "deployment": {
                 "default_strategy": "rolling",
                 "health_check_path": "/health",
                 "health_check_timeout": 30,
                 "rollback_enabled": True,
-                "auto_rollback_on_failure": True
+                "auto_rollback_on_failure": True,
             },
             "security": {
                 "scan_enabled": True,
                 "critical_threshold": 0,
-                "high_threshold": 0
+                "high_threshold": 0,
             },
             "performance": {
                 "test_enabled": True,
                 "min_rps": 100,
                 "max_response_time_ms": 500,
-                "max_error_rate": 0.01
-            }
+                "max_error_rate": 0.01,
+            },
         }
 
         if os.path.exists(self.config_path):
             try:
-                with open(self.config_path, 'r') as f:
+                with open(self.config_path, "r") as f:
                     user_config = yaml.safe_load(f)
                     default_config.update(user_config)
             except Exception as e:
@@ -536,7 +552,7 @@ class ProductionDeploymentPipeline:
         environment: str,
         version: str,
         strategy: str,
-        config: Optional[Dict[str, Any]]
+        config: Optional[Dict[str, Any]],
     ) -> DeploymentConfig:
         """Create deployment configuration"""
         env_type = EnvironmentType(environment)
@@ -554,9 +570,11 @@ class ProductionDeploymentPipeline:
             memory_limit=env_config.get("memory_limit", "1Gi"),
             health_check_path=self.config["deployment"]["health_check_path"],
             rollback_enabled=self.config["deployment"]["rollback_enabled"],
-            auto_rollback_on_failure=self.config["deployment"]["auto_rollback_on_failure"],
+            auto_rollback_on_failure=self.config["deployment"][
+                "auto_rollback_on_failure"
+            ],
             security_scan_enabled=self.config["security"]["scan_enabled"],
-            performance_test_enabled=self.config["performance"]["test_enabled"]
+            performance_test_enabled=self.config["performance"]["test_enabled"],
         )
 
     def _validate_prerequisites(self, config: DeploymentConfig):
@@ -576,10 +594,7 @@ class ProductionDeploymentPipeline:
             raise ValueError("Insufficient resources for deployment")
 
     def _execute_deployment(
-        self,
-        config: DeploymentConfig,
-        deployment_id: str,
-        start_time: datetime
+        self, config: DeploymentConfig, deployment_id: str, start_time: datetime
     ) -> DeploymentResult:
         """Execute deployment based on strategy"""
         self.logger.info(f"Executing {config.strategy.value} deployment")
@@ -590,13 +605,21 @@ class ProductionDeploymentPipeline:
 
             # Execute strategy-specific deployment
             if config.strategy == DeploymentStrategy.BLUE_GREEN:
-                result = self._execute_blue_green_deployment(config, deployment_id, start_time)
+                result = self._execute_blue_green_deployment(
+                    config, deployment_id, start_time
+                )
             elif config.strategy == DeploymentStrategy.ROLLING:
-                result = self._execute_rolling_deployment(config, deployment_id, start_time)
+                result = self._execute_rolling_deployment(
+                    config, deployment_id, start_time
+                )
             elif config.strategy == DeploymentStrategy.CANARY:
-                result = self._execute_canary_deployment(config, deployment_id, start_time)
+                result = self._execute_canary_deployment(
+                    config, deployment_id, start_time
+                )
             else:  # RECREATE
-                result = self._execute_recreate_deployment(config, deployment_id, start_time)
+                result = self._execute_recreate_deployment(
+                    config, deployment_id, start_time
+                )
 
             # Post-deployment checks
             self._post_deployment_checks(config, result)
@@ -610,10 +633,7 @@ class ProductionDeploymentPipeline:
             )
 
     def _execute_blue_green_deployment(
-        self,
-        config: DeploymentConfig,
-        deployment_id: str,
-        start_time: datetime
+        self, config: DeploymentConfig, deployment_id: str, start_time: datetime
     ) -> DeploymentResult:
         """Execute blue-green deployment"""
         self.logger.info("Executing blue-green deployment")
@@ -634,14 +654,11 @@ class ProductionDeploymentPipeline:
             duration_seconds=duration,
             success=True,
             rollback_available=True,
-            metadata={"strategy": "blue_green", "steps_completed": 5}
+            metadata={"strategy": "blue_green", "steps_completed": 5},
         )
 
     def _execute_rolling_deployment(
-        self,
-        config: DeploymentConfig,
-        deployment_id: str,
-        start_time: datetime
+        self, config: DeploymentConfig, deployment_id: str, start_time: datetime
     ) -> DeploymentResult:
         """Execute rolling deployment"""
         self.logger.info("Executing rolling deployment")
@@ -662,14 +679,11 @@ class ProductionDeploymentPipeline:
             duration_seconds=duration,
             success=True,
             rollback_available=True,
-            metadata={"strategy": "rolling", "steps_completed": 7}
+            metadata={"strategy": "rolling", "steps_completed": 7},
         )
 
     def _execute_canary_deployment(
-        self,
-        config: DeploymentConfig,
-        deployment_id: str,
-        start_time: datetime
+        self, config: DeploymentConfig, deployment_id: str, start_time: datetime
     ) -> DeploymentResult:
         """Execute canary deployment"""
         self.logger.info("Executing canary deployment")
@@ -690,14 +704,11 @@ class ProductionDeploymentPipeline:
             duration_seconds=duration,
             success=True,
             rollback_available=True,
-            metadata={"strategy": "canary", "steps_completed": 9}
+            metadata={"strategy": "canary", "steps_completed": 9},
         )
 
     def _execute_recreate_deployment(
-        self,
-        config: DeploymentConfig,
-        deployment_id: str,
-        start_time: datetime
+        self, config: DeploymentConfig, deployment_id: str, start_time: datetime
     ) -> DeploymentResult:
         """Execute recreate deployment"""
         self.logger.info("Executing recreate deployment")
@@ -718,7 +729,7 @@ class ProductionDeploymentPipeline:
             duration_seconds=duration,
             success=True,
             rollback_available=True,
-            metadata={"strategy": "recreate", "steps_completed": 3}
+            metadata={"strategy": "recreate", "steps_completed": 3},
         )
 
     def _pre_deployment_checks(self, config: DeploymentConfig):
@@ -732,17 +743,26 @@ class ProductionDeploymentPipeline:
                 raise ValueError(f"Security scan failed: {scan_result.recommendations}")
 
         # Performance test (if staging)
-        if config.environment == EnvironmentType.STAGING and config.performance_test_enabled:
+        if (
+            config.environment == EnvironmentType.STAGING
+            and config.performance_test_enabled
+        ):
             test_result = self.performance_test("http://staging.example.com")
             if not test_result.passed:
-                raise ValueError(f"Performance test failed: {test_result.recommendations}")
+                raise ValueError(
+                    f"Performance test failed: {test_result.recommendations}"
+                )
 
-    def _post_deployment_checks(self, config: DeploymentConfig, result: DeploymentResult):
+    def _post_deployment_checks(
+        self, config: DeploymentConfig, result: DeploymentResult
+    ):
         """Perform post-deployment checks"""
         self.logger.info("Performing post-deployment checks")
 
         # Health check
-        health_endpoint = f"http://{config.environment.value}.example.com{config.health_check_path}"
+        health_endpoint = (
+            f"http://{config.environment.value}.example.com{config.health_check_path}"
+        )
         health_result = self.health_check(health_endpoint)
 
         result.health_check_passed = health_result.healthy
@@ -758,7 +778,7 @@ class ProductionDeploymentPipeline:
         environment: EnvironmentType,
         version: str,
         start_time: datetime,
-        error_message: str
+        error_message: str,
     ) -> DeploymentResult:
         """Create failed deployment result"""
         end_time = datetime.now()
@@ -774,7 +794,7 @@ class ProductionDeploymentPipeline:
             duration_seconds=duration,
             success=False,
             error_message=error_message,
-            rollback_available=True
+            rollback_available=True,
         )
 
     def _version_exists(self, version: str) -> bool:
@@ -797,18 +817,16 @@ class ProductionDeploymentPipeline:
         # Simulate getting previous version
         return "v1.0.0"
 
-    def _simulate_security_scan(self, image_name: str, scan_type: str) -> Dict[str, int]:
+    def _simulate_security_scan(
+        self, image_name: str, scan_type: str
+    ) -> Dict[str, int]:
         """Simulate security scan results"""
         # Simulate scan results - for testing, return clean results
-        return {
-            "total": 0,
-            "critical": 0,
-            "high": 0,
-            "medium": 0,
-            "low": 0
-        }
+        return {"total": 0, "critical": 0, "high": 0, "medium": 0, "low": 0}
 
-    def _simulate_performance_test(self, endpoint: str, config: Optional[Dict[str, Any]]) -> Dict[str, float]:
+    def _simulate_performance_test(
+        self, endpoint: str, config: Optional[Dict[str, Any]]
+    ) -> Dict[str, float]:
         """Simulate performance test results"""
         # Simulate performance metrics
         return {
@@ -816,10 +834,12 @@ class ProductionDeploymentPipeline:
             "average_response_time_ms": 300.0,
             "p95_response_time_ms": 500.0,
             "p99_response_time_ms": 800.0,
-            "error_rate": 0.005
+            "error_rate": 0.005,
         }
 
-    def _generate_security_recommendations(self, vulnerabilities: Dict[str, int]) -> List[str]:
+    def _generate_security_recommendations(
+        self, vulnerabilities: Dict[str, int]
+    ) -> List[str]:
         """Generate security recommendations"""
         recommendations = []
 
@@ -828,11 +848,15 @@ class ProductionDeploymentPipeline:
         if vulnerabilities["high"] > 0:
             recommendations.append("Address high-severity vulnerabilities")
         if vulnerabilities["medium"] > 0:
-            recommendations.append("Consider addressing medium-severity vulnerabilities")
+            recommendations.append(
+                "Consider addressing medium-severity vulnerabilities"
+            )
 
         return recommendations
 
-    def _generate_performance_recommendations(self, metrics: Dict[str, float]) -> List[str]:
+    def _generate_performance_recommendations(
+        self, metrics: Dict[str, float]
+    ) -> List[str]:
         """Generate performance recommendations"""
         recommendations = []
 
@@ -845,15 +869,17 @@ class ProductionDeploymentPipeline:
 
         return recommendations
 
+
 # ============================================================================
 # Standalone Functions for MCP Tools
 # ============================================================================
+
 
 def deploy_application(
     environment: str,
     version: str,
     strategy: str = "rolling",
-    config: Optional[Dict[str, Any]] = None
+    config: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Deploy application to specified environment
@@ -871,9 +897,9 @@ def deploy_application(
     result = pipeline.deploy(environment, version, strategy, config)
     return asdict(result)
 
+
 def rollback_deployment(
-    deployment_id: str,
-    target_version: Optional[str] = None
+    deployment_id: str, target_version: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Rollback deployment to previous version
@@ -889,10 +915,8 @@ def rollback_deployment(
     result = pipeline.rollback(deployment_id, target_version)
     return asdict(result)
 
-def check_deployment_health(
-    endpoint: str,
-    timeout: int = 30
-) -> Dict[str, Any]:
+
+def check_deployment_health(endpoint: str, timeout: int = 30) -> Dict[str, Any]:
     """
     Perform health check on deployment
 
@@ -907,10 +931,8 @@ def check_deployment_health(
     result = pipeline.health_check(endpoint, timeout)
     return asdict(result)
 
-def scan_security(
-    image_name: str,
-    scan_type: str = "vulnerability"
-) -> Dict[str, Any]:
+
+def scan_security(image_name: str, scan_type: str = "vulnerability") -> Dict[str, Any]:
     """
     Perform security scan on container image
 
@@ -925,9 +947,9 @@ def scan_security(
     result = pipeline.security_scan(image_name, scan_type)
     return asdict(result)
 
+
 def test_performance(
-    endpoint: str,
-    test_config: Optional[Dict[str, Any]] = None
+    endpoint: str, test_config: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
     """
     Perform performance test on deployment
@@ -943,11 +965,13 @@ def test_performance(
     result = pipeline.performance_test(endpoint, test_config)
     return asdict(result)
 
+
 def get_deployment_status(deployment_id: str) -> Optional[Dict[str, Any]]:
     """Get status of specific deployment"""
     pipeline = ProductionDeploymentPipeline()
     result = pipeline.get_deployment_status(deployment_id)
     return asdict(result) if result else None
+
 
 def list_deployments(environment: Optional[str] = None) -> List[Dict[str, Any]]:
     """List all deployments"""
@@ -955,17 +979,21 @@ def list_deployments(environment: Optional[str] = None) -> List[Dict[str, Any]]:
     results = pipeline.list_deployments(environment)
     return [asdict(result) for result in results]
 
+
 def get_deployment_history() -> List[Dict[str, Any]]:
     """Get deployment history"""
     pipeline = ProductionDeploymentPipeline()
     return pipeline.get_deployment_history()
 
+
 # ============================================================================
 # Logging Configuration
 # ============================================================================
 
+
 def log_operation(operation_name: str):
     """Decorator for logging operations"""
+
     def decorator(func):
         def wrapper(*args, **kwargs):
             logger.info(f"Starting {operation_name}")
@@ -976,5 +1004,7 @@ def log_operation(operation_name: str):
             except Exception as e:
                 logger.error(f"Failed {operation_name}: {e}")
                 raise
+
         return wrapper
+
     return decorator

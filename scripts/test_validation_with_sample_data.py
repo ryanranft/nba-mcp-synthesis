@@ -16,7 +16,7 @@ from data_quality.validator import DataValidator
 from data_quality.expectations import (
     create_game_expectations,
     create_player_expectations,
-    create_team_expectations
+    create_team_expectations,
 )
 
 
@@ -38,18 +38,18 @@ async def validate_with_sample_data():
     print("📊 Validating GAMES table...")
     games_df = pd.read_csv(fixtures_dir / "sample_games.csv")
     games_result = await validator.validate_table(
-        table_name="games",
-        data=games_df,
-        expectations=create_game_expectations()
+        table_name="games", data=games_df, expectations=create_game_expectations()
     )
 
     print(f"   Rows validated: {games_result['rows_validated']}")
     print(f"   Pass rate: {games_result['summary']['pass_rate']*100:.1f}%")
-    print(f"   Passed: {games_result['summary']['passed']}/{games_result['summary']['total_expectations']}")
+    print(
+        f"   Passed: {games_result['summary']['passed']}/{games_result['summary']['total_expectations']}"
+    )
 
-    if games_result['summary']['failed'] > 0:
+    if games_result["summary"]["failed"] > 0:
         print(f"   ⚠️  Failed expectations:")
-        for failure in games_result['failed_expectations']:
+        for failure in games_result["failed_expectations"]:
             print(f"      - {failure['expectation']} on {failure.get('column', 'N/A')}")
     else:
         print(f"   ✅ All expectations passed!")
@@ -59,18 +59,18 @@ async def validate_with_sample_data():
     print("📊 Validating PLAYERS table...")
     players_df = pd.read_csv(fixtures_dir / "sample_players.csv")
     players_result = await validator.validate_table(
-        table_name="players",
-        data=players_df,
-        expectations=create_player_expectations()
+        table_name="players", data=players_df, expectations=create_player_expectations()
     )
 
     print(f"   Rows validated: {players_result['rows_validated']}")
     print(f"   Pass rate: {players_result['summary']['pass_rate']*100:.1f}%")
-    print(f"   Passed: {players_result['summary']['passed']}/{players_result['summary']['total_expectations']}")
+    print(
+        f"   Passed: {players_result['summary']['passed']}/{players_result['summary']['total_expectations']}"
+    )
 
-    if players_result['summary']['failed'] > 0:
+    if players_result["summary"]["failed"] > 0:
         print(f"   ⚠️  Failed expectations:")
-        for failure in players_result['failed_expectations']:
+        for failure in players_result["failed_expectations"]:
             print(f"      - {failure['expectation']} on {failure.get('column', 'N/A')}")
     else:
         print(f"   ✅ All expectations passed!")
@@ -80,18 +80,18 @@ async def validate_with_sample_data():
     print("📊 Validating TEAMS table...")
     teams_df = pd.read_csv(fixtures_dir / "sample_teams.csv")
     teams_result = await validator.validate_table(
-        table_name="teams",
-        data=teams_df,
-        expectations=create_team_expectations()
+        table_name="teams", data=teams_df, expectations=create_team_expectations()
     )
 
     print(f"   Rows validated: {teams_result['rows_validated']}")
     print(f"   Pass rate: {teams_result['summary']['pass_rate']*100:.1f}%")
-    print(f"   Passed: {teams_result['summary']['passed']}/{teams_result['summary']['total_expectations']}")
+    print(
+        f"   Passed: {teams_result['summary']['passed']}/{teams_result['summary']['total_expectations']}"
+    )
 
-    if teams_result['summary']['failed'] > 0:
+    if teams_result["summary"]["failed"] > 0:
         print(f"   ⚠️  Failed expectations:")
-        for failure in teams_result['failed_expectations']:
+        for failure in teams_result["failed_expectations"]:
             print(f"      - {failure['expectation']} on {failure.get('column', 'N/A')}")
     else:
         print(f"   ✅ All expectations passed!")
@@ -103,10 +103,14 @@ async def validate_with_sample_data():
     print("=" * 80)
 
     overall_pass = (
-        games_result['summary']['pass_rate'] +
-        players_result['summary']['pass_rate'] +
-        teams_result['summary']['pass_rate']
-    ) / 3 * 100
+        (
+            games_result["summary"]["pass_rate"]
+            + players_result["summary"]["pass_rate"]
+            + teams_result["summary"]["pass_rate"]
+        )
+        / 3
+        * 100
+    )
 
     print(f"Overall Pass Rate: {overall_pass:.1f}%")
     print(f"Games: {games_result['summary']['pass_rate']*100:.1f}%")

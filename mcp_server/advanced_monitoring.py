@@ -38,6 +38,7 @@ logger = logging.getLogger(__name__)
 
 class ForecastMethod(Enum):
     """Forecasting methods"""
+
     MOVING_AVERAGE = "moving_average"
     EXPONENTIAL_SMOOTHING = "exponential_smoothing"
     LINEAR_REGRESSION = "linear_regression"
@@ -47,6 +48,7 @@ class ForecastMethod(Enum):
 @dataclass
 class TimeSeriesPoint:
     """Single time-series data point"""
+
     timestamp: datetime
     value: float
     metadata: Dict[str, Any] = field(default_factory=dict)
@@ -55,6 +57,7 @@ class TimeSeriesPoint:
 @dataclass
 class Forecast:
     """Forecast result"""
+
     timestamp: datetime
     predicted_value: float
     confidence_lower: float
@@ -73,9 +76,7 @@ class TimeSeriesForecaster:
         self.history.append(TimeSeriesPoint(timestamp, value))
 
     def forecast_moving_average(
-        self,
-        periods_ahead: int = 1,
-        window_size: int = 10
+        self, periods_ahead: int = 1, window_size: int = 10
     ) -> List[Forecast]:
         """Simple moving average forecast"""
         if len(self.history) < window_size:
@@ -86,7 +87,11 @@ class TimeSeriesForecaster:
 
         for i in range(periods_ahead):
             # Calculate moving average of last window_size points
-            window = values[-(window_size + i):len(values) - i] if i > 0 else values[-window_size:]
+            window = (
+                values[-(window_size + i) : len(values) - i]
+                if i > 0
+                else values[-window_size:]
+            )
             predicted = statistics.mean(window)
 
             # Estimate confidence interval (simplified)
@@ -97,20 +102,20 @@ class TimeSeriesForecaster:
             last_point = list(self.history)[-1]
             forecast_time = last_point.timestamp + timedelta(minutes=(i + 1))
 
-            forecasts.append(Forecast(
-                timestamp=forecast_time,
-                predicted_value=predicted,
-                confidence_lower=predicted - confidence_range,
-                confidence_upper=predicted + confidence_range,
-                method=ForecastMethod.MOVING_AVERAGE
-            ))
+            forecasts.append(
+                Forecast(
+                    timestamp=forecast_time,
+                    predicted_value=predicted,
+                    confidence_lower=predicted - confidence_range,
+                    confidence_upper=predicted + confidence_range,
+                    method=ForecastMethod.MOVING_AVERAGE,
+                )
+            )
 
         return forecasts
 
     def forecast_exponential_smoothing(
-        self,
-        periods_ahead: int = 1,
-        alpha: float = 0.3
+        self, periods_ahead: int = 1, alpha: float = 0.3
     ) -> List[Forecast]:
         """Exponential smoothing forecast"""
         if len(self.history) < 2:
@@ -138,20 +143,19 @@ class TimeSeriesForecaster:
             std_dev = statistics.stdev(residuals) if len(residuals) > 1 else 0
             confidence_range = 1.96 * std_dev
 
-            forecasts.append(Forecast(
-                timestamp=forecast_time,
-                predicted_value=predicted,
-                confidence_lower=predicted - confidence_range,
-                confidence_upper=predicted + confidence_range,
-                method=ForecastMethod.EXPONENTIAL_SMOOTHING
-            ))
+            forecasts.append(
+                Forecast(
+                    timestamp=forecast_time,
+                    predicted_value=predicted,
+                    confidence_lower=predicted - confidence_range,
+                    confidence_upper=predicted + confidence_range,
+                    method=ForecastMethod.EXPONENTIAL_SMOOTHING,
+                )
+            )
 
         return forecasts
 
-    def forecast_linear_regression(
-        self,
-        periods_ahead: int = 1
-    ) -> List[Forecast]:
+    def forecast_linear_regression(self, periods_ahead: int = 1) -> List[Forecast]:
         """Linear regression forecast"""
         if len(self.history) < 10:
             return []
@@ -167,7 +171,9 @@ class TimeSeriesForecaster:
         x_mean = statistics.mean(x_values)
         y_mean = statistics.mean(y_values)
 
-        numerator = sum((x_values[i] - x_mean) * (y_values[i] - y_mean) for i in range(n))
+        numerator = sum(
+            (x_values[i] - x_mean) * (y_values[i] - y_mean) for i in range(n)
+        )
         denominator = sum((x_values[i] - x_mean) ** 2 for i in range(n))
 
         slope = numerator / denominator if denominator != 0 else 0
@@ -183,17 +189,21 @@ class TimeSeriesForecaster:
             predicted = slope * x_forecast + intercept
 
             # Estimate confidence interval
-            residuals = [y_values[i] - (slope * x_values[i] + intercept) for i in range(n)]
+            residuals = [
+                y_values[i] - (slope * x_values[i] + intercept) for i in range(n)
+            ]
             std_dev = statistics.stdev(residuals) if len(residuals) > 1 else 0
             confidence_range = 1.96 * std_dev
 
-            forecasts.append(Forecast(
-                timestamp=forecast_time,
-                predicted_value=predicted,
-                confidence_lower=predicted - confidence_range,
-                confidence_upper=predicted + confidence_range,
-                method=ForecastMethod.LINEAR_REGRESSION
-            ))
+            forecasts.append(
+                Forecast(
+                    timestamp=forecast_time,
+                    predicted_value=predicted,
+                    confidence_lower=predicted - confidence_range,
+                    confidence_upper=predicted + confidence_range,
+                    method=ForecastMethod.LINEAR_REGRESSION,
+                )
+            )
 
         return forecasts
 
@@ -206,16 +216,16 @@ class AnomalyPredictor:
 
     def learn_pattern(self, pattern_type: str, conditions: Dict[str, Any]) -> None:
         """Learn anomaly pattern"""
-        self.patterns.append({
-            'type': pattern_type,
-            'conditions': conditions,
-            'learned_at': datetime.now()
-        })
+        self.patterns.append(
+            {
+                "type": pattern_type,
+                "conditions": conditions,
+                "learned_at": datetime.now(),
+            }
+        )
 
     def predict_anomaly_likelihood(
-        self,
-        current_metrics: Dict[str, float],
-        forecast_horizon_minutes: int = 60
+        self, current_metrics: Dict[str, float], forecast_horizon_minutes: int = 60
     ) -> Dict[str, Any]:
         """Predict likelihood of anomaly"""
 
@@ -224,9 +234,9 @@ class AnomalyPredictor:
         risk_factors = []
 
         # Check metric trends
-        cpu = current_metrics.get('cpu_percent', 0)
-        memory = current_metrics.get('memory_percent', 0)
-        latency = current_metrics.get('latency_ms', 0)
+        cpu = current_metrics.get("cpu_percent", 0)
+        memory = current_metrics.get("memory_percent", 0)
+        latency = current_metrics.get("latency_ms", 0)
 
         if cpu > 70:
             risk_score += 0.3
@@ -256,17 +266,19 @@ class AnomalyPredictor:
             risk_level = "LOW"
 
         return {
-            'risk_score': round(risk_score, 2),
-            'risk_level': risk_level,
-            'risk_factors': risk_factors,
-            'forecast_horizon_minutes': forecast_horizon_minutes,
-            'recommendation': self._get_recommendation(risk_level, risk_factors)
+            "risk_score": round(risk_score, 2),
+            "risk_level": risk_level,
+            "risk_factors": risk_factors,
+            "forecast_horizon_minutes": forecast_horizon_minutes,
+            "recommendation": self._get_recommendation(risk_level, risk_factors),
         }
 
     def _get_recommendation(self, risk_level: str, factors: List[str]) -> str:
         """Get recommendation based on risk"""
         if risk_level == "HIGH":
-            return "Immediate action recommended: Scale resources or investigate anomaly"
+            return (
+                "Immediate action recommended: Scale resources or investigate anomaly"
+            )
         elif risk_level == "MEDIUM":
             return "Monitor closely: Prepare to scale if trend continues"
         else:
@@ -283,7 +295,7 @@ class CapacityPlanner:
         self,
         current_capacity: float,
         target_utilization: float = 0.7,
-        planning_horizon_days: int = 30
+        planning_horizon_days: int = 30,
     ) -> Dict[str, Any]:
         """Plan capacity requirements"""
 
@@ -293,8 +305,8 @@ class CapacityPlanner:
 
         if not forecasts:
             return {
-                'status': 'insufficient_data',
-                'recommendation': 'Collect more data for accurate planning'
+                "status": "insufficient_data",
+                "recommendation": "Collect more data for accurate planning",
             }
 
         # Find peak demand
@@ -306,7 +318,9 @@ class CapacityPlanner:
 
         # Determine if scaling needed
         needs_scaling = required_capacity > current_capacity
-        scale_factor = required_capacity / current_capacity if current_capacity > 0 else 1.0
+        scale_factor = (
+            required_capacity / current_capacity if current_capacity > 0 else 1.0
+        )
 
         # When to scale
         if needs_scaling:
@@ -321,23 +335,20 @@ class CapacityPlanner:
             days_until_scale = None
 
         return {
-            'current_capacity': current_capacity,
-            'peak_forecast': round(peak_demand, 2),
-            'average_forecast': round(avg_demand, 2),
-            'required_capacity': round(required_capacity, 2),
-            'needs_scaling': needs_scaling,
-            'scale_factor': round(scale_factor, 2),
-            'days_until_scale_needed': days_until_scale,
-            'recommendation': self._get_capacity_recommendation(
+            "current_capacity": current_capacity,
+            "peak_forecast": round(peak_demand, 2),
+            "average_forecast": round(avg_demand, 2),
+            "required_capacity": round(required_capacity, 2),
+            "needs_scaling": needs_scaling,
+            "scale_factor": round(scale_factor, 2),
+            "days_until_scale_needed": days_until_scale,
+            "recommendation": self._get_capacity_recommendation(
                 needs_scaling, days_until_scale, scale_factor
-            )
+            ),
         }
 
     def _get_capacity_recommendation(
-        self,
-        needs_scaling: bool,
-        days_until: Optional[float],
-        scale_factor: float
+        self, needs_scaling: bool, days_until: Optional[float], scale_factor: float
     ) -> str:
         """Get capacity recommendation"""
         if not needs_scaling:
@@ -360,37 +371,37 @@ class HealthScorer:
         scores = {}
 
         # Performance score (0-100)
-        latency = metrics.get('latency_ms', 0)
+        latency = metrics.get("latency_ms", 0)
         if latency < 100:
             perf_score = 100
         elif latency < 500:
             perf_score = 100 - ((latency - 100) / 4)
         else:
             perf_score = max(0, 100 - ((latency - 100) / 2))
-        scores['performance'] = perf_score
+        scores["performance"] = perf_score
 
         # Availability score
-        uptime = metrics.get('uptime_percent', 100)
-        scores['availability'] = uptime
+        uptime = metrics.get("uptime_percent", 100)
+        scores["availability"] = uptime
 
         # Resource score
-        cpu = metrics.get('cpu_percent', 0)
-        memory = metrics.get('memory_percent', 0)
+        cpu = metrics.get("cpu_percent", 0)
+        memory = metrics.get("memory_percent", 0)
         resource_usage = max(cpu, memory)
         resource_score = max(0, 100 - resource_usage)
-        scores['resources'] = resource_score
+        scores["resources"] = resource_score
 
         # Error rate score
-        error_rate = metrics.get('error_rate_percent', 0)
+        error_rate = metrics.get("error_rate_percent", 0)
         error_score = max(0, 100 - (error_rate * 10))
-        scores['errors'] = error_score
+        scores["errors"] = error_score
 
         # Overall health (weighted average)
         overall_health = (
-            scores['performance'] * 0.3 +
-            scores['availability'] * 0.3 +
-            scores['resources'] * 0.2 +
-            scores['errors'] * 0.2
+            scores["performance"] * 0.3
+            + scores["availability"] * 0.3
+            + scores["resources"] * 0.2
+            + scores["errors"] * 0.2
         )
 
         # Health status
@@ -411,11 +422,11 @@ class HealthScorer:
             color = "red"
 
         return {
-            'overall_score': round(overall_health, 1),
-            'status': status,
-            'color': color,
-            'component_scores': {k: round(v, 1) for k, v in scores.items()},
-            'metrics': metrics
+            "overall_score": round(overall_health, 1),
+            "status": status,
+            "color": color,
+            "component_scores": {k: round(v, 1) for k, v in scores.items()},
+            "metrics": metrics,
         }
 
 
@@ -433,9 +444,7 @@ class AdvancedMonitoring:
         self.forecaster.add_point(timestamp, value)
 
     def get_monitoring_dashboard(
-        self,
-        current_metrics: Dict[str, float],
-        current_capacity: float = 100.0
+        self, current_metrics: Dict[str, float], current_capacity: float = 100.0
     ) -> Dict[str, Any]:
         """Get comprehensive monitoring dashboard"""
 
@@ -453,26 +462,29 @@ class AdvancedMonitoring:
         forecasts_lr = self.forecaster.forecast_linear_regression(periods_ahead=12)
 
         return {
-            'health': health,
-            'anomaly_prediction': anomaly,
-            'capacity_planning': capacity,
-            'forecasts': {
-                'moving_average': [
+            "health": health,
+            "anomaly_prediction": anomaly,
+            "capacity_planning": capacity,
+            "forecasts": {
+                "moving_average": [
                     {
-                        'timestamp': f.timestamp.isoformat(),
-                        'value': round(f.predicted_value, 2),
-                        'confidence': [round(f.confidence_lower, 2), round(f.confidence_upper, 2)]
+                        "timestamp": f.timestamp.isoformat(),
+                        "value": round(f.predicted_value, 2),
+                        "confidence": [
+                            round(f.confidence_lower, 2),
+                            round(f.confidence_upper, 2),
+                        ],
                     }
                     for f in forecasts_ma[:6]  # Next 6 periods
                 ],
-                'trend': [
+                "trend": [
                     {
-                        'timestamp': f.timestamp.isoformat(),
-                        'value': round(f.predicted_value, 2)
+                        "timestamp": f.timestamp.isoformat(),
+                        "value": round(f.predicted_value, 2),
                     }
                     for f in forecasts_lr[:6]
-                ]
-            }
+                ],
+            },
         }
 
 
@@ -496,20 +508,24 @@ if __name__ == "__main__":
 
     # Current metrics
     current_metrics = {
-        'latency_ms': 150,
-        'cpu_percent': 65,
-        'memory_percent': 70,
-        'uptime_percent': 99.9,
-        'error_rate_percent': 0.1
+        "latency_ms": 150,
+        "cpu_percent": 65,
+        "memory_percent": 70,
+        "uptime_percent": 99.9,
+        "error_rate_percent": 0.1,
     }
 
     # Get dashboard
     print("\n--- Monitoring Dashboard ---\n")
-    dashboard = monitoring.get_monitoring_dashboard(current_metrics, current_capacity=100)
+    dashboard = monitoring.get_monitoring_dashboard(
+        current_metrics, current_capacity=100
+    )
 
     # Health
     print("Health Status:")
-    print(f"  Overall: {dashboard['health']['overall_score']}/100 ({dashboard['health']['status']})")
+    print(
+        f"  Overall: {dashboard['health']['overall_score']}/100 ({dashboard['health']['status']})"
+    )
     print(f"  Performance: {dashboard['health']['component_scores']['performance']}")
     print(f"  Availability: {dashboard['health']['component_scores']['availability']}")
     print(f"  Resources: {dashboard['health']['component_scores']['resources']}")
@@ -526,4 +542,3 @@ if __name__ == "__main__":
     print(f"  Recommendation: {dashboard['capacity_planning']['recommendation']}")
 
     print("\n=== Demo Complete ===")
-

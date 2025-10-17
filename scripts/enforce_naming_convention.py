@@ -19,76 +19,117 @@ from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass
 import argparse
 
+
 @dataclass
 class NamingViolation:
     """Represents a naming convention violation"""
+
     file_path: str
     current_name: str
     suggested_name: str
     violation_type: str
     severity: str  # 'error', 'warning', 'info'
 
+
 @dataclass
 class ValidationResult:
     """Result of naming convention validation"""
+
     total_files: int
     compliant_files: int
     violations: List[NamingViolation]
     suggestions: Dict[str, str]
 
+
 class NamingConventionEnforcer:
     """Enforces context-rich naming convention for secrets"""
 
-    def __init__(self, base_path: str = "/Users/ryanranft/Desktop/++/big_cat_bets_assets"):
+    def __init__(
+        self, base_path: str = "/Users/ryanranft/Desktop/++/big_cat_bets_assets"
+    ):
         self.base_path = Path(base_path)
 
         # Define valid components
         self.valid_services = {
-            'GOOGLE', 'ANTHROPIC', 'OPENAI', 'DEEPSEEK', 'OLLAMA',
-            'SLACK', 'LINEAR', 'GITHUB', 'DISCORD',
-            'DB', 'AWS', 'REDIS', 'POSTGRES', 'MYSQL',
-            'JWT', 'OAUTH', 'API'
+            "GOOGLE",
+            "ANTHROPIC",
+            "OPENAI",
+            "DEEPSEEK",
+            "OLLAMA",
+            "SLACK",
+            "LINEAR",
+            "GITHUB",
+            "DISCORD",
+            "DB",
+            "AWS",
+            "REDIS",
+            "POSTGRES",
+            "MYSQL",
+            "JWT",
+            "OAUTH",
+            "API",
         }
 
         self.valid_resource_types = {
-            'API_KEY', 'SECRET_KEY', 'ACCESS_KEY', 'PRIVATE_KEY',
-            'PASSWORD', 'TOKEN', 'CERTIFICATE', 'CREDENTIAL',
-            'WEBHOOK_URL', 'CONNECTION_STRING', 'ENDPOINT',
-            'HOST', 'PORT', 'DATABASE', 'USERNAME', 'USER'
+            "API_KEY",
+            "SECRET_KEY",
+            "ACCESS_KEY",
+            "PRIVATE_KEY",
+            "PASSWORD",
+            "TOKEN",
+            "CERTIFICATE",
+            "CREDENTIAL",
+            "WEBHOOK_URL",
+            "CONNECTION_STRING",
+            "ENDPOINT",
+            "HOST",
+            "PORT",
+            "DATABASE",
+            "USERNAME",
+            "USER",
         }
 
         self.valid_projects = {
-            'NBA_MCP_SYNTHESIS', 'NBA_SIMULATOR_AWS', 'BIG_CAT_BETS_GLOBAL',
-            'MLB_SIMULATOR', 'NFL_SIMULATOR', 'NHL_SIMULATOR',
-            'BIG_CAT_BETS_NOTIFICATIONS', 'BIG_CAT_BETS_HFT'
+            "NBA_MCP_SYNTHESIS",
+            "NBA_SIMULATOR_AWS",
+            "BIG_CAT_BETS_GLOBAL",
+            "MLB_SIMULATOR",
+            "NFL_SIMULATOR",
+            "NHL_SIMULATOR",
+            "BIG_CAT_BETS_NOTIFICATIONS",
+            "BIG_CAT_BETS_HFT",
         }
 
         self.valid_contexts = {
-            'WORKFLOW', 'DEVELOPMENT', 'TEST', 'STAGING', 'PRODUCTION'
+            "WORKFLOW",
+            "DEVELOPMENT",
+            "TEST",
+            "STAGING",
+            "PRODUCTION",
         }
 
         # Common mappings for migration
         self.migration_mappings = {
-            'GOOGLE_API_KEY': 'GOOGLE_API_KEY',
-            'ANTHROPIC_API_KEY': 'ANTHROPIC_API_KEY',
-            'OPENAI_API_KEY': 'OPENAI_API_KEY',
-            'DEEPSEEK_API_KEY': 'DEEPSEEK_API_KEY',
-            'DB_PASSWORD': 'DB_PASSWORD',
-            'DB_HOST': 'DB_HOST',
-            'DB_PORT': 'DB_PORT',
-            'DB_NAME': 'DB_NAME',
-            'DB_USER': 'DB_USER',
-            'SLACK_WEBHOOK_URL': 'SLACK_WEBHOOK_URL',
-            'LINEAR_API_KEY': 'LINEAR_API_KEY',
-            'LINEAR_TEAM_ID': 'LINEAR_TEAM_ID',
-            'LINEAR_PROJECT_ID': 'LINEAR_PROJECT_ID',
-            'AWS_ACCESS_KEY_ID': 'AWS_ACCESS_KEY',
-            'AWS_SECRET_ACCESS_KEY': 'AWS_SECRET_KEY',
-            'S3_BUCKET': 'S3_BUCKET',
-            'RDS_HOST': 'DB_HOST',
-            'RDS_DATABASE': 'DB_NAME',
-            'RDS_USERNAME': 'DB_USER',
-            'RDS_PASSWORD': 'DB_PASSWORD'
+            "GOOGLE_API_KEY": "GOOGLE_API_KEY",
+            "ANTHROPIC_API_KEY": "ANTHROPIC_API_KEY",
+            "OPENAI_API_KEY": "OPENAI_API_KEY",
+            "DEEPSEEK_API_KEY": "DEEPSEEK_API_KEY",
+            "DB_PASSWORD": "DB_PASSWORD",
+            "DB_HOST": "DB_HOST",
+            "DB_PORT": "DB_PORT",
+            "DB_NAME": "DB_NAME",
+            "DB_USER": "DB_USER",
+            "SLACK_WEBHOOK_URL": "SLACK_WEBHOOK_URL",
+            "LINEAR_API_KEY": "LINEAR_API_KEY",
+            "LINEAR_TEAM_ID": "LINEAR_TEAM_ID",
+            "LINEAR_PROJECT_ID": "LINEAR_PROJECT_ID",
+            "AWS_ACCESS_KEY_ID": "AWS_ACCESS_KEY",
+            "AWS_SECRET_ACCESS_KEY": "AWS_SECRET_KEY",
+            "S3_BUCKET": "S3_BUCKET",
+            "RDS_HOST": "DB_HOST",
+            "RDS_DATABASE": "DB_NAME",
+            "RDS_USERNAME": "DB_USER",
+            "RDS_PASSWORD": "DB_PASSWORD",
         }
 
     def validate_all_secrets(self) -> ValidationResult:
@@ -103,7 +144,7 @@ class NamingConventionEnforcer:
             total_files += 1
 
             # Skip placeholder directories
-            if '_placeholder' in str(env_file):
+            if "_placeholder" in str(env_file):
                 continue
 
             secret_name = env_file.stem.upper()
@@ -121,10 +162,12 @@ class NamingConventionEnforcer:
             total_files=total_files,
             compliant_files=compliant_files,
             violations=violations,
-            suggestions=suggestions
+            suggestions=suggestions,
         )
 
-    def _validate_secret_name(self, name: str, file_path: str) -> Optional[NamingViolation]:
+    def _validate_secret_name(
+        self, name: str, file_path: str
+    ) -> Optional[NamingViolation]:
         """Validate a single secret name against naming convention"""
 
         # Skip if already follows convention
@@ -142,12 +185,12 @@ class NamingConventionEnforcer:
             current_name=name,
             suggested_name=suggested_name,
             violation_type=violation_type,
-            severity=severity
+            severity=severity,
         )
 
     def _is_compliant_name(self, name: str) -> bool:
         """Check if name follows the naming convention"""
-        parts = name.split('_')
+        parts = name.split("_")
 
         # Must have at least 4 parts
         if len(parts) < 4:
@@ -164,7 +207,7 @@ class NamingConventionEnforcer:
         """Generate a suggested name following the convention"""
 
         # Try to extract components from current name
-        parts = name.split('_')
+        parts = name.split("_")
 
         # Identify service
         service = None
@@ -222,26 +265,26 @@ class NamingConventionEnforcer:
 
         # Look for project indicators in path
         for part in reversed(path_parts):
-            if part.startswith('.env.'):
+            if part.startswith(".env."):
                 # Extract project from .env.{project}.{context}
-                env_parts = part.split('.')
+                env_parts = part.split(".")
                 if len(env_parts) >= 3:
                     project_part = env_parts[1]
-                    return project_part.upper().replace('-', '_')
+                    return project_part.upper().replace("-", "_")
 
             # Check for known project directories
-            if 'nba-mcp-synthesis' in part:
-                return 'NBA_MCP_SYNTHESIS'
-            elif 'nba-simulator-aws' in part:
-                return 'NBA_SIMULATOR_AWS'
-            elif 'big_cat_bets_global' in part:
-                return 'BIG_CAT_BETS_GLOBAL'
-            elif 'big_cat_bets_notifications' in part:
-                return 'BIG_CAT_BETS_NOTIFICATIONS'
-            elif 'big_cat_bets_hft' in part:
-                return 'BIG_CAT_BETS_HFT'
+            if "nba-mcp-synthesis" in part:
+                return "NBA_MCP_SYNTHESIS"
+            elif "nba-simulator-aws" in part:
+                return "NBA_SIMULATOR_AWS"
+            elif "big_cat_bets_global" in part:
+                return "BIG_CAT_BETS_GLOBAL"
+            elif "big_cat_bets_notifications" in part:
+                return "BIG_CAT_BETS_NOTIFICATIONS"
+            elif "big_cat_bets_hft" in part:
+                return "BIG_CAT_BETS_HFT"
 
-        return 'UNKNOWN_PROJECT'
+        return "UNKNOWN_PROJECT"
 
     def _extract_context_from_path(self, file_path: str) -> str:
         """Extract context from file path"""
@@ -249,23 +292,23 @@ class NamingConventionEnforcer:
 
         # Look for context in directory names
         for part in reversed(path_parts):
-            if part.startswith('.env.'):
+            if part.startswith(".env."):
                 # Extract context from .env.{project}.{context}
-                env_parts = part.split('.')
+                env_parts = part.split(".")
                 if len(env_parts) >= 3:
                     context_part = env_parts[2]
                     return context_part.upper()
 
             # Check for context directories
-            if part in ['production', 'development', 'test', 'staging']:
+            if part in ["production", "development", "test", "staging"]:
                 return part.upper()
 
-        return 'WORKFLOW'  # Default context
+        return "WORKFLOW"  # Default context
 
     def _classify_violation(self, name: str) -> Tuple[str, str]:
         """Classify the type and severity of a naming violation"""
 
-        parts = name.split('_')
+        parts = name.split("_")
 
         # Check for common issues
         if len(parts) < 2:
@@ -291,7 +334,11 @@ class NamingConventionEnforcer:
         report.append("")
 
         # Summary
-        compliance_rate = (result.compliant_files / result.total_files * 100) if result.total_files > 0 else 0
+        compliance_rate = (
+            (result.compliant_files / result.total_files * 100)
+            if result.total_files > 0
+            else 0
+        )
         report.append(f"📊 SUMMARY:")
         report.append(f"   Total files scanned: {result.total_files}")
         report.append(f"   Compliant files: {result.compliant_files}")
@@ -300,9 +347,9 @@ class NamingConventionEnforcer:
         report.append("")
 
         # Violations by severity
-        errors = [v for v in result.violations if v.severity == 'error']
-        warnings = [v for v in result.violations if v.severity == 'warning']
-        infos = [v for v in result.violations if v.severity == 'info']
+        errors = [v for v in result.violations if v.severity == "error"]
+        warnings = [v for v in result.violations if v.severity == "warning"]
+        infos = [v for v in result.violations if v.severity == "info"]
 
         if errors:
             report.append(f"❌ ERRORS ({len(errors)}):")
@@ -343,7 +390,11 @@ class NamingConventionEnforcer:
 
         return "\n".join(report)
 
-    def create_migration_script(self, result: ValidationResult, output_file: str = "migrate_naming_convention.sh") -> str:
+    def create_migration_script(
+        self,
+        result: ValidationResult,
+        output_file: str = "migrate_naming_convention.sh",
+    ) -> str:
         """Create a shell script to migrate files to new naming convention"""
 
         script_lines = [
@@ -356,41 +407,50 @@ class NamingConventionEnforcer:
             "echo '🔄 Starting naming convention migration...'",
             "",
             "# Create backup directory",
-            "BACKUP_DIR=\"/Users/ryanranft/Desktop/++/.migration_backup/$(date +%Y%m%d_%H%M%S)\"",
-            "mkdir -p \"$BACKUP_DIR\"",
-            "echo \"📁 Backup directory: $BACKUP_DIR\"",
+            'BACKUP_DIR="/Users/ryanranft/Desktop/++/.migration_backup/$(date +%Y%m%d_%H%M%S)"',
+            'mkdir -p "$BACKUP_DIR"',
+            'echo "📁 Backup directory: $BACKUP_DIR"',
             "",
         ]
 
         # Add migration commands
         for violation in result.violations:
-            if violation.severity in ['error', 'warning']:  # Only migrate errors and warnings
+            if violation.severity in [
+                "error",
+                "warning",
+            ]:  # Only migrate errors and warnings
                 old_path = violation.file_path
-                new_path = old_path.replace(violation.current_name.lower(), violation.suggested_name.lower())
+                new_path = old_path.replace(
+                    violation.current_name.lower(), violation.suggested_name.lower()
+                )
 
-                script_lines.extend([
-                    f"# Migrate {violation.current_name}",
-                    f"if [ -f \"{old_path}\" ]; then",
-                    f"    echo \"📝 Migrating {violation.current_name} -> {violation.suggested_name}\"",
-                    f"    cp \"{old_path}\" \"$BACKUP_DIR/\"",
-                    f"    mv \"{old_path}\" \"{new_path}\"",
-                    f"    echo \"✅ Migrated successfully\"",
-                    f"else",
-                    f"    echo \"⚠️  File not found: {old_path}\"",
-                    f"fi",
-                    "",
-                ])
+                script_lines.extend(
+                    [
+                        f"# Migrate {violation.current_name}",
+                        f'if [ -f "{old_path}" ]; then',
+                        f'    echo "📝 Migrating {violation.current_name} -> {violation.suggested_name}"',
+                        f'    cp "{old_path}" "$BACKUP_DIR/"',
+                        f'    mv "{old_path}" "{new_path}"',
+                        f'    echo "✅ Migrated successfully"',
+                        f"else",
+                        f'    echo "⚠️  File not found: {old_path}"',
+                        f"fi",
+                        "",
+                    ]
+                )
 
-        script_lines.extend([
-            "echo '✅ Migration complete!'",
-            "echo \"📁 Backup location: $BACKUP_DIR\"",
-            "echo '🔍 Run validation again to verify compliance'",
-        ])
+        script_lines.extend(
+            [
+                "echo '✅ Migration complete!'",
+                'echo "📁 Backup location: $BACKUP_DIR"',
+                "echo '🔍 Run validation again to verify compliance'",
+            ]
+        )
 
         script_content = "\n".join(script_lines)
 
         # Write script file
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             f.write(script_content)
 
         # Make executable
@@ -398,17 +458,24 @@ class NamingConventionEnforcer:
 
         return script_content
 
+
 def main():
     """Main function for command-line usage"""
-    parser = argparse.ArgumentParser(description="Enforce naming convention for secrets")
-    parser.add_argument("--base-path", default="/Users/ryanranft/Desktop/++/big_cat_bets_assets",
-                       help="Base path for secrets hierarchy")
-    parser.add_argument("--generate-migration", action="store_true",
-                       help="Generate migration script")
-    parser.add_argument("--output", default="migration_report.txt",
-                       help="Output file for report")
-    parser.add_argument("--verbose", "-v", action="store_true",
-                       help="Verbose output")
+    parser = argparse.ArgumentParser(
+        description="Enforce naming convention for secrets"
+    )
+    parser.add_argument(
+        "--base-path",
+        default="/Users/ryanranft/Desktop/++/big_cat_bets_assets",
+        help="Base path for secrets hierarchy",
+    )
+    parser.add_argument(
+        "--generate-migration", action="store_true", help="Generate migration script"
+    )
+    parser.add_argument(
+        "--output", default="migration_report.txt", help="Output file for report"
+    )
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
 
     args = parser.parse_args()
 
@@ -424,7 +491,7 @@ def main():
 
     # Output report
     if args.output:
-        with open(args.output, 'w') as f:
+        with open(args.output, "w") as f:
             f.write(report)
         print(f"📄 Report saved to: {args.output}")
     else:
@@ -438,17 +505,19 @@ def main():
 
     # Exit with error code if violations found
     if result.violations:
-        error_count = len([v for v in result.violations if v.severity == 'error'])
+        error_count = len([v for v in result.violations if v.severity == "error"])
         if error_count > 0:
             print(f"\n❌ Found {error_count} errors. Please fix before proceeding.")
             exit(1)
         else:
-            print(f"\n⚠️  Found {len(result.violations)} violations. Consider fixing for better compliance.")
+            print(
+                f"\n⚠️  Found {len(result.violations)} violations. Consider fixing for better compliance."
+            )
             exit(0)
     else:
         print("\n✅ All secrets follow naming convention!")
         exit(0)
 
+
 if __name__ == "__main__":
     main()
-

@@ -18,13 +18,14 @@ import logging
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler('/tmp/nba_mcp_synthesis_workflow.log'),
-        logging.StreamHandler()
-    ]
+        logging.FileHandler("/tmp/nba_mcp_synthesis_workflow.log"),
+        logging.StreamHandler(),
+    ],
 )
 logger = logging.getLogger(__name__)
+
 
 class SecretsValidator:
     """Validates secret formats and values"""
@@ -37,16 +38,16 @@ class SecretsValidator:
 
         key = key.strip()
 
-        if service.upper() == 'GOOGLE':
-            return key.startswith('AIza') and len(key) >= 30
-        elif service.upper() == 'OPENAI':
-            return key.startswith('sk-') and len(key) >= 40
-        elif service.upper() == 'ANTHROPIC':
-            return key.startswith('sk-ant-') and len(key) >= 40
-        elif service.upper() == 'DEEPSEEK':
-            return key.startswith('sk-') and len(key) >= 30
-        elif service.upper() == 'LINEAR':
-            return key.startswith('lin_api_') and len(key) >= 20
+        if service.upper() == "GOOGLE":
+            return key.startswith("AIza") and len(key) >= 30
+        elif service.upper() == "OPENAI":
+            return key.startswith("sk-") and len(key) >= 40
+        elif service.upper() == "ANTHROPIC":
+            return key.startswith("sk-ant-") and len(key) >= 40
+        elif service.upper() == "DEEPSEEK":
+            return key.startswith("sk-") and len(key) >= 30
+        elif service.upper() == "LINEAR":
+            return key.startswith("lin_api_") and len(key) >= 20
 
         return len(key) >= 8  # Generic validation
 
@@ -55,7 +56,9 @@ class SecretsValidator:
         """Validate webhook URL format"""
         if not url:
             return False
-        return url.startswith('https://hooks.slack.com/') or url.startswith('https://discord.com/api/webhooks/')
+        return url.startswith("https://hooks.slack.com/") or url.startswith(
+            "https://discord.com/api/webhooks/"
+        )
 
     @staticmethod
     def validate_uuid(uuid_str: str) -> bool:
@@ -63,8 +66,10 @@ class SecretsValidator:
         if not uuid_str:
             return False
         import re
-        uuid_pattern = r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+
+        uuid_pattern = r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
         return bool(re.match(uuid_pattern, uuid_str.lower()))
+
 
 class HealthChecker:
     """Performs health checks on loaded secrets"""
@@ -78,41 +83,45 @@ class HealthChecker:
         results = {}
 
         # Google API check
-        if 'GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW' in self.secrets:
+        if "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW" in self.secrets:
             try:
                 # Simple validation request
                 response = requests.get(
-                    'https://generativelanguage.googleapis.com/v1beta/models',
-                    params={'key': self.secrets['GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW']},
-                    timeout=5
+                    "https://generativelanguage.googleapis.com/v1beta/models",
+                    params={
+                        "key": self.secrets["GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW"]
+                    },
+                    timeout=5,
                 )
-                results['google_api'] = response.status_code == 200
+                results["google_api"] = response.status_code == 200
             except:
-                results['google_api'] = False
+                results["google_api"] = False
 
         # OpenAI API check
-        if 'OPENAI_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW' in self.secrets:
+        if "OPENAI_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW" in self.secrets:
             try:
                 response = requests.get(
-                    'https://api.openai.com/v1/models',
-                    headers={'Authorization': f'Bearer {self.secrets["OPENAI_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW"]}'},
-                    timeout=5
+                    "https://api.openai.com/v1/models",
+                    headers={
+                        "Authorization": f'Bearer {self.secrets["OPENAI_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW"]}'
+                    },
+                    timeout=5,
                 )
-                results['openai_api'] = response.status_code == 200
+                results["openai_api"] = response.status_code == 200
             except:
-                results['openai_api'] = False
+                results["openai_api"] = False
 
         # Slack webhook check
-        if 'SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW' in self.secrets:
+        if "SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW" in self.secrets:
             try:
                 response = requests.post(
-                    self.secrets['SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW'],
-                    json={'text': 'Health check test'},
-                    timeout=5
+                    self.secrets["SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW"],
+                    json={"text": "Health check test"},
+                    timeout=5,
                 )
-                results['slack_webhook'] = response.status_code == 200
+                results["slack_webhook"] = response.status_code == 200
             except:
-                results['slack_webhook'] = False
+                results["slack_webhook"] = False
 
         return results
 
@@ -121,12 +130,12 @@ class HealthChecker:
         results = {}
 
         for var_name, value in self.secrets.items():
-            if 'API_KEY' in var_name:
-                service = var_name.split('_')[0]
+            if "API_KEY" in var_name:
+                service = var_name.split("_")[0]
                 results[var_name] = SecretsValidator.validate_api_key(value, service)
-            elif 'WEBHOOK_URL' in var_name:
+            elif "WEBHOOK_URL" in var_name:
                 results[var_name] = SecretsValidator.validate_webhook_url(value)
-            elif 'TEAM_ID' in var_name or 'PROJECT_ID' in var_name:
+            elif "TEAM_ID" in var_name or "PROJECT_ID" in var_name:
                 results[var_name] = SecretsValidator.validate_uuid(value)
             else:
                 results[var_name] = len(value) >= 8
@@ -139,46 +148,51 @@ class HealthChecker:
         strength = self.check_secret_strength()
 
         return {
-            'timestamp': datetime.now().isoformat(),
-            'total_secrets': len(self.secrets),
-            'connectivity_checks': connectivity,
-            'strength_checks': strength,
-            'overall_health': all(connectivity.values()) and all(strength.values()),
-            'issues': [
+            "timestamp": datetime.now().isoformat(),
+            "total_secrets": len(self.secrets),
+            "connectivity_checks": connectivity,
+            "strength_checks": strength,
+            "overall_health": all(connectivity.values()) and all(strength.values()),
+            "issues": [
                 f"{service}: {'OK' if status else 'FAILED'}"
                 for service, status in {**connectivity, **strength}.items()
-            ]
+            ],
         }
+
 
 class SlackNotifier:
     """Handles Slack notifications for secrets loading"""
 
     def __init__(self, webhook_url: Optional[str] = None):
-        self.webhook_url = webhook_url or os.getenv('SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW')
+        self.webhook_url = webhook_url or os.getenv(
+            "SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW"
+        )
         self.enabled = bool(self.webhook_url)
 
-    def send_notification(self, message: str, level: str = 'info') -> bool:
+    def send_notification(self, message: str, level: str = "info") -> bool:
         """Send notification to Slack"""
         if not self.enabled:
             return False
 
         try:
             color_map = {
-                'success': '#36a64f',
-                'warning': '#ff9500',
-                'error': '#ff0000',
-                'info': '#36a64f'
+                "success": "#36a64f",
+                "warning": "#ff9500",
+                "error": "#ff0000",
+                "info": "#36a64f",
             }
 
             payload = {
-                'attachments': [{
-                    'color': color_map.get(level, '#36a64f'),
-                    'title': f'NBA MCP Synthesis - Secrets Loader',
-                    'text': message,
-                    'timestamp': int(time.time()),
-                    'footer': 'NBA MCP Synthesis Workflow',
-                    'footer_icon': 'https://platform.slack-edge.com/img/default_application_icon.png'
-                }]
+                "attachments": [
+                    {
+                        "color": color_map.get(level, "#36a64f"),
+                        "title": f"NBA MCP Synthesis - Secrets Loader",
+                        "text": message,
+                        "timestamp": int(time.time()),
+                        "footer": "NBA MCP Synthesis Workflow",
+                        "footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png",
+                    }
+                ]
             }
 
             response = requests.post(self.webhook_url, json=payload, timeout=10)
@@ -193,16 +207,19 @@ class SlackNotifier:
         message = f"✅ Successfully loaded {count} secrets\n"
         message += f"Health Status: {'🟢 Healthy' if health_summary['overall_health'] else '🟡 Issues detected'}\n"
 
-        if not health_summary['overall_health']:
-            issues = [issue for issue in health_summary['issues'] if 'FAILED' in issue]
+        if not health_summary["overall_health"]:
+            issues = [issue for issue in health_summary["issues"] if "FAILED" in issue]
             message += f"Issues: {', '.join(issues[:3])}"  # Show first 3 issues
 
-        return self.send_notification(message, 'success' if health_summary['overall_health'] else 'warning')
+        return self.send_notification(
+            message, "success" if health_summary["overall_health"] else "warning"
+        )
 
     def notify_secrets_error(self, error: str) -> bool:
         """Notify about secrets loading error"""
         message = f"❌ Secrets loading failed: {error}"
-        return self.send_notification(message, 'error')
+        return self.send_notification(message, "error")
+
 
 def load_workflow_secrets() -> Dict[str, str]:
     """
@@ -212,7 +229,9 @@ def load_workflow_secrets() -> Dict[str, str]:
         Dictionary of loaded environment variables
     """
     # Path to centralized secrets
-    secrets_dir = Path("/Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production")
+    secrets_dir = Path(
+        "/Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production"
+    )
 
     if not secrets_dir.exists():
         logger.error(f"Secrets directory not found: {secrets_dir}")
@@ -226,21 +245,25 @@ def load_workflow_secrets() -> Dict[str, str]:
     # Load each .env file with validation
     for env_file in secrets_dir.glob("*.env"):
         try:
-            with open(env_file, 'r') as f:
+            with open(env_file, "r") as f:
                 value = f.read().strip()
                 var_name = env_file.stem  # filename without .env extension
 
                 # Validate secret format
-                if 'API_KEY' in var_name:
-                    service = var_name.split('_')[0]
+                if "API_KEY" in var_name:
+                    service = var_name.split("_")[0]
                     if not SecretsValidator.validate_api_key(value, service):
-                        validation_errors.append(f"Invalid {service} API key format: {var_name}")
+                        validation_errors.append(
+                            f"Invalid {service} API key format: {var_name}"
+                        )
                         logger.warning(f"Invalid API key format for {var_name}")
-                elif 'WEBHOOK_URL' in var_name:
+                elif "WEBHOOK_URL" in var_name:
                     if not SecretsValidator.validate_webhook_url(value):
-                        validation_errors.append(f"Invalid webhook URL format: {var_name}")
+                        validation_errors.append(
+                            f"Invalid webhook URL format: {var_name}"
+                        )
                         logger.warning(f"Invalid webhook URL format for {var_name}")
-                elif 'TEAM_ID' in var_name or 'PROJECT_ID' in var_name:
+                elif "TEAM_ID" in var_name or "PROJECT_ID" in var_name:
                     if not SecretsValidator.validate_uuid(value):
                         validation_errors.append(f"Invalid UUID format: {var_name}")
                         logger.warning(f"Invalid UUID format for {var_name}")
@@ -269,15 +292,16 @@ def load_workflow_secrets() -> Dict[str, str]:
     print(f"\n🎉 Loaded {len(loaded_vars)} environment variables")
     return loaded_vars
 
+
 def verify_critical_vars() -> bool:
     """Verify that critical variables are loaded with enhanced validation"""
     critical_vars = [
-        'GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW',
-        'DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW',
-        'ANTHROPIC_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW',
-        'OPENAI_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW',
-        'SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW',
-        'LINEAR_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW'
+        "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW",
+        "DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW",
+        "ANTHROPIC_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW",
+        "OPENAI_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW",
+        "SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW",
+        "LINEAR_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW",
     ]
 
     missing = []
@@ -290,11 +314,11 @@ def verify_critical_vars() -> bool:
             continue
 
         # Additional validation for critical vars
-        if 'API_KEY' in var:
-            service = var.split('_')[0]
+        if "API_KEY" in var:
+            service = var.split("_")[0]
             if not SecretsValidator.validate_api_key(value, service):
                 invalid.append(f"{var} (invalid format)")
-        elif 'WEBHOOK_URL' in var:
+        elif "WEBHOOK_URL" in var:
             if not SecretsValidator.validate_webhook_url(value):
                 invalid.append(f"{var} (invalid URL format)")
 
@@ -311,6 +335,7 @@ def verify_critical_vars() -> bool:
     print("✅ All critical variables loaded and validated")
     return True
 
+
 def perform_health_checks(secrets: Dict[str, str]) -> Dict[str, Any]:
     """Perform comprehensive health checks on loaded secrets"""
     print("\n🔍 Performing health checks...")
@@ -321,21 +346,26 @@ def perform_health_checks(secrets: Dict[str, str]) -> Dict[str, Any]:
     # Display health check results
     print(f"📊 Health Summary:")
     print(f"   Total Secrets: {health_summary['total_secrets']}")
-    print(f"   Overall Health: {'🟢 Healthy' if health_summary['overall_health'] else '🟡 Issues detected'}")
+    print(
+        f"   Overall Health: {'🟢 Healthy' if health_summary['overall_health'] else '🟡 Issues detected'}"
+    )
 
-    if health_summary['connectivity_checks']:
+    if health_summary["connectivity_checks"]:
         print(f"   Connectivity Checks:")
-        for service, status in health_summary['connectivity_checks'].items():
+        for service, status in health_summary["connectivity_checks"].items():
             print(f"     {service}: {'✅' if status else '❌'}")
 
-    if health_summary['strength_checks']:
+    if health_summary["strength_checks"]:
         print(f"   Strength Checks:")
-        for var, status in health_summary['strength_checks'].items():
+        for var, status in health_summary["strength_checks"].items():
             print(f"     {var}: {'✅' if status else '❌'}")
 
     return health_summary
 
-def send_slack_notifications(secrets: Dict[str, str], health_summary: Dict[str, Any], error: Optional[str] = None):
+
+def send_slack_notifications(
+    secrets: Dict[str, str], health_summary: Dict[str, Any], error: Optional[str] = None
+):
     """Send Slack notifications about secrets loading status"""
     slack_notifier = SlackNotifier()
 
@@ -343,6 +373,7 @@ def send_slack_notifications(secrets: Dict[str, str], health_summary: Dict[str, 
         slack_notifier.notify_secrets_error(error)
     else:
         slack_notifier.notify_secrets_loaded(len(secrets), health_summary)
+
 
 if __name__ == "__main__":
     print("🔐 NBA MCP Synthesis - Loading Workflow Secrets (Enhanced)")

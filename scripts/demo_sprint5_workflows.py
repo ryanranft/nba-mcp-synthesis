@@ -20,28 +20,34 @@ sys.path.insert(0, str(project_root))
 
 from mcp_server.tools import math_helper, stats_helper, nba_metrics_helper
 
+
 # ANSI colors for output
 class Colors:
-    BLUE = '\033[94m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    CYAN = '\033[96m'
-    BOLD = '\033[1m'
-    RESET = '\033[0m'
+    BLUE = "\033[94m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    CYAN = "\033[96m"
+    BOLD = "\033[1m"
+    RESET = "\033[0m"
+
 
 def header(text):
     print(f"\n{Colors.CYAN}{Colors.BOLD}{'=' * 80}")
     print(f"{text}")
     print(f"{'=' * 80}{Colors.RESET}\n")
 
+
 def subheader(text):
     print(f"\n{Colors.BOLD}{text}{Colors.RESET}")
+
 
 def info(text):
     print(f"{Colors.BLUE}{text}{Colors.RESET}")
 
+
 def success(text):
     print(f"{Colors.GREEN}✓ {text}{Colors.RESET}")
+
 
 def metric(name, value, unit=""):
     print(f"  {Colors.BOLD}{name:30s}{Colors.RESET} {value:>10s} {unit}")
@@ -50,6 +56,7 @@ def metric(name, value, unit=""):
 # =============================================================================
 # Workflow 1: Player Efficiency Analysis
 # =============================================================================
+
 
 def workflow_player_efficiency():
     """Analyze a player's efficiency using multiple metrics"""
@@ -73,7 +80,7 @@ def workflow_player_efficiency():
         "fta": 460,
         "three_pm": 180,
         "turnovers": 195,
-        "minutes": 2016
+        "minutes": 2016,
     }
 
     subheader(f"Player: {player_name}")
@@ -82,10 +89,10 @@ def workflow_player_efficiency():
     print()
 
     # Calculate per-game averages using math tools
-    games = math_helper.round_number(stats['minutes'] / 36, 0)
-    ppg = math_helper.round_number(stats['points'] / games, 1)
-    rpg = math_helper.round_number(stats['rebounds'] / games, 1)
-    apg = math_helper.round_number(stats['assists'] / games, 1)
+    games = math_helper.round_number(stats["minutes"] / 36, 0)
+    ppg = math_helper.round_number(stats["points"] / games, 1)
+    rpg = math_helper.round_number(stats["rebounds"] / games, 1)
+    apg = math_helper.round_number(stats["assists"] / games, 1)
 
     subheader("Per-Game Averages")
     metric("Points Per Game", f"{ppg}")
@@ -101,13 +108,13 @@ def workflow_player_efficiency():
 
     # True Shooting %
     ts_pct = nba_metrics_helper.calculate_true_shooting(
-        stats['points'], stats['fga'], stats['fta']
+        stats["points"], stats["fga"], stats["fta"]
     )
     metric("True Shooting %", f"{ts_pct:.1%}", "(Good: >55%)")
 
     # Effective FG %
     efg_pct = nba_metrics_helper.calculate_effective_fg_pct(
-        stats['fgm'], stats['fga'], stats['three_pm']
+        stats["fgm"], stats["fga"], stats["three_pm"]
     )
     metric("Effective FG %", f"{efg_pct:.1%}", "(Adjusts for 3PT)")
 
@@ -135,6 +142,7 @@ def workflow_player_efficiency():
 # Workflow 2: Team Performance Comparison
 # =============================================================================
 
+
 def workflow_team_comparison():
     """Compare offensive and defensive efficiency of multiple teams"""
 
@@ -154,20 +162,17 @@ def workflow_team_comparison():
     results = []
     for team in teams:
         ortg = nba_metrics_helper.calculate_offensive_rating(
-            team['points_for'], team['poss']
+            team["points_for"], team["poss"]
         )
         drtg = nba_metrics_helper.calculate_defensive_rating(
-            team['points_against'], team['poss']
+            team["points_against"], team["poss"]
         )
         net_rating = math_helper.subtract(ortg, drtg)
         net_rating = math_helper.round_number(net_rating, 1)
 
-        results.append({
-            "name": team['name'],
-            "ortg": ortg,
-            "drtg": drtg,
-            "net_rating": net_rating
-        })
+        results.append(
+            {"name": team["name"], "ortg": ortg, "drtg": drtg, "net_rating": net_rating}
+        )
 
     # Display results
     subheader("Efficiency Ratings (per 100 possessions)")
@@ -175,23 +180,25 @@ def workflow_team_comparison():
     print(f"  {'-' * 60}")
 
     for r in results:
-        if r['net_rating'] > 5:
+        if r["net_rating"] > 5:
             assessment = "Championship Caliber"
-        elif r['net_rating'] > 2:
+        elif r["net_rating"] > 2:
             assessment = "Playoff Team"
-        elif r['net_rating'] > -2:
+        elif r["net_rating"] > -2:
             assessment = "Average"
         else:
             assessment = "Below Average"
 
-        print(f"  {r['name']:8s} {r['ortg']:8.1f} {r['drtg']:8.1f} {r['net_rating']:+8.1f}  {assessment:20s}")
+        print(
+            f"  {r['name']:8s} {r['ortg']:8.1f} {r['drtg']:8.1f} {r['net_rating']:+8.1f}  {assessment:20s}"
+        )
 
     # Statistical analysis of ratings
     subheader("League-Wide Statistics")
 
-    ortg_values = [r['ortg'] for r in results]
-    drtg_values = [r['drtg'] for r in results]
-    net_values = [r['net_rating'] for r in results]
+    ortg_values = [r["ortg"] for r in results]
+    drtg_values = [r["drtg"] for r in results]
+    net_values = [r["net_rating"] for r in results]
 
     ortg_mean = stats_helper.calculate_mean(ortg_values)
     drtg_mean = stats_helper.calculate_mean(drtg_values)
@@ -202,8 +209,8 @@ def workflow_team_comparison():
     metric("DRtg Range", f"{stats_helper.calculate_range(drtg_values):.1f}")
 
     # Find best offensive and defensive teams
-    best_offense = max(results, key=lambda x: x['ortg'])
-    best_defense = min(results, key=lambda x: x['drtg'])  # Lower is better for defense
+    best_offense = max(results, key=lambda x: x["ortg"])
+    best_defense = min(results, key=lambda x: x["drtg"])  # Lower is better for defense
 
     subheader("Standout Performers")
     success(f"Best Offense: {best_offense['name']} ({best_offense['ortg']:.1f} ORtg)")
@@ -216,6 +223,7 @@ def workflow_team_comparison():
 # Workflow 3: Statistical Distribution Analysis
 # =============================================================================
 
+
 def workflow_statistical_analysis():
     """Analyze the distribution of player statistics"""
 
@@ -226,11 +234,56 @@ def workflow_statistical_analysis():
 
     # Sample points-per-game data for 50 players
     ppg_data = [
-        28.5, 27.2, 25.8, 24.3, 22.7, 21.9, 20.5, 19.8, 18.4, 17.6,
-        16.9, 16.2, 15.7, 15.3, 14.8, 14.2, 13.8, 13.4, 12.9, 12.5,
-        12.1, 11.7, 11.3, 10.9, 10.5, 10.2, 9.8, 9.5, 9.1, 8.8,
-        8.5, 8.2, 7.9, 7.6, 7.3, 7.0, 6.7, 6.5, 6.2, 6.0,
-        5.8, 5.5, 5.3, 5.1, 4.8, 4.6, 4.4, 4.2, 4.0, 3.8
+        28.5,
+        27.2,
+        25.8,
+        24.3,
+        22.7,
+        21.9,
+        20.5,
+        19.8,
+        18.4,
+        17.6,
+        16.9,
+        16.2,
+        15.7,
+        15.3,
+        14.8,
+        14.2,
+        13.8,
+        13.4,
+        12.9,
+        12.5,
+        12.1,
+        11.7,
+        11.3,
+        10.9,
+        10.5,
+        10.2,
+        9.8,
+        9.5,
+        9.1,
+        8.8,
+        8.5,
+        8.2,
+        7.9,
+        7.6,
+        7.3,
+        7.0,
+        6.7,
+        6.5,
+        6.2,
+        6.0,
+        5.8,
+        5.5,
+        5.3,
+        5.1,
+        4.8,
+        4.6,
+        4.4,
+        4.2,
+        4.0,
+        3.8,
     ]
 
     # Calculate comprehensive statistics
@@ -260,10 +313,18 @@ def workflow_statistical_analysis():
     average_scorers = [x for x in ppg_data if 10 <= x < 15]
     bench_players = [x for x in ppg_data if x < 10]
 
-    print(f"  Elite Scorers (≥25 ppg): {len(elite_scorers)} players ({len(elite_scorers)/len(ppg_data)*100:.1f}%)")
-    print(f"  Good Scorers (15-24 ppg): {len(good_scorers)} players ({len(good_scorers)/len(ppg_data)*100:.1f}%)")
-    print(f"  Average Scorers (10-14 ppg): {len(average_scorers)} players ({len(average_scorers)/len(ppg_data)*100:.1f}%)")
-    print(f"  Bench Players (<10 ppg): {len(bench_players)} players ({len(bench_players)/len(ppg_data)*100:.1f}%)")
+    print(
+        f"  Elite Scorers (≥25 ppg): {len(elite_scorers)} players ({len(elite_scorers)/len(ppg_data)*100:.1f}%)"
+    )
+    print(
+        f"  Good Scorers (15-24 ppg): {len(good_scorers)} players ({len(good_scorers)/len(ppg_data)*100:.1f}%)"
+    )
+    print(
+        f"  Average Scorers (10-14 ppg): {len(average_scorers)} players ({len(average_scorers)/len(ppg_data)*100:.1f}%)"
+    )
+    print(
+        f"  Bench Players (<10 ppg): {len(bench_players)} players ({len(bench_players)/len(ppg_data)*100:.1f}%)"
+    )
 
     # Calculate averages for each tier
     subheader("Tier Averages")
@@ -287,6 +348,7 @@ def workflow_statistical_analysis():
 # Workflow 4: Shooting Efficiency Evaluation
 # =============================================================================
 
+
 def workflow_shooting_efficiency():
     """Evaluate and compare shooting efficiency of multiple players"""
 
@@ -296,83 +358,127 @@ def workflow_shooting_efficiency():
     print()
 
     players = [
-        {"name": "Player A", "pts": 1800, "fgm": 680, "fga": 1400, "3pm": 200, "fta": 420},
-        {"name": "Player B", "pts": 2100, "fgm": 780, "fga": 1650, "3pm": 150, "fta": 510},
-        {"name": "Player C", "pts": 1650, "fgm": 640, "fga": 1200, "3pm": 110, "fta": 370},
-        {"name": "Player D", "pts": 1920, "fgm": 720, "fga": 1480, "3pm": 180, "fta": 480},
-        {"name": "Player E", "pts": 1740, "fgm": 650, "fga": 1350, "3pm": 160, "fta": 440},
+        {
+            "name": "Player A",
+            "pts": 1800,
+            "fgm": 680,
+            "fga": 1400,
+            "3pm": 200,
+            "fta": 420,
+        },
+        {
+            "name": "Player B",
+            "pts": 2100,
+            "fgm": 780,
+            "fga": 1650,
+            "3pm": 150,
+            "fta": 510,
+        },
+        {
+            "name": "Player C",
+            "pts": 1650,
+            "fgm": 640,
+            "fga": 1200,
+            "3pm": 110,
+            "fta": 370,
+        },
+        {
+            "name": "Player D",
+            "pts": 1920,
+            "fgm": 720,
+            "fga": 1480,
+            "3pm": 180,
+            "fta": 480,
+        },
+        {
+            "name": "Player E",
+            "pts": 1740,
+            "fgm": 650,
+            "fga": 1350,
+            "3pm": 160,
+            "fta": 440,
+        },
     ]
 
     # Calculate efficiency metrics for each player
     results = []
     for player in players:
         # Traditional FG%
-        fg_pct = math_helper.divide(player['fgm'], player['fga'])
+        fg_pct = math_helper.divide(player["fgm"], player["fga"])
 
         # Effective FG% (accounts for 3-pointers)
         efg_pct = nba_metrics_helper.calculate_effective_fg_pct(
-            player['fgm'], player['fga'], player['3pm']
+            player["fgm"], player["fga"], player["3pm"]
         )
 
         # True Shooting % (accounts for free throws)
         ts_pct = nba_metrics_helper.calculate_true_shooting(
-            player['pts'], player['fga'], player['fta']
+            player["pts"], player["fga"], player["fta"]
         )
 
         # 3-point rate
         three_par = nba_metrics_helper.calculate_three_point_rate(
-            player['3pm'] * 2.5,  # Estimate attempts from makes
-            player['fga']
+            player["3pm"] * 2.5, player["fga"]  # Estimate attempts from makes
         )
 
-        results.append({
-            "name": player['name'],
-            "fg_pct": fg_pct,
-            "efg_pct": efg_pct,
-            "ts_pct": ts_pct,
-            "three_par": three_par
-        })
+        results.append(
+            {
+                "name": player["name"],
+                "fg_pct": fg_pct,
+                "efg_pct": efg_pct,
+                "ts_pct": ts_pct,
+                "three_par": three_par,
+            }
+        )
 
     # Display results
     subheader("Shooting Efficiency Comparison")
-    print(f"  {'Player':10s} {'FG%':>8s} {'eFG%':>8s} {'TS%':>8s} {'3PAr':>8s}  {'Grade':6s}")
+    print(
+        f"  {'Player':10s} {'FG%':>8s} {'eFG%':>8s} {'TS%':>8s} {'3PAr':>8s}  {'Grade':6s}"
+    )
     print(f"  {'-' * 65}")
 
     for r in results:
         # Grade based on TS%
-        if r['ts_pct'] > 0.60:
+        if r["ts_pct"] > 0.60:
             grade = "A"
-        elif r['ts_pct'] > 0.57:
+        elif r["ts_pct"] > 0.57:
             grade = "B+"
-        elif r['ts_pct'] > 0.55:
+        elif r["ts_pct"] > 0.55:
             grade = "B"
-        elif r['ts_pct'] > 0.52:
+        elif r["ts_pct"] > 0.52:
             grade = "C+"
         else:
             grade = "C"
 
-        print(f"  {r['name']:10s} {r['fg_pct']:7.1%} {r['efg_pct']:7.1%} "
-              f"{r['ts_pct']:7.1%} {r['three_par']:7.1%}  {grade:6s}")
+        print(
+            f"  {r['name']:10s} {r['fg_pct']:7.1%} {r['efg_pct']:7.1%} "
+            f"{r['ts_pct']:7.1%} {r['three_par']:7.1%}  {grade:6s}"
+        )
 
     # Statistical analysis
     subheader("League Average Comparison")
 
-    ts_values = [r['ts_pct'] for r in results]
+    ts_values = [r["ts_pct"] for r in results]
     ts_mean = stats_helper.calculate_mean(ts_values)
     ts_median = stats_helper.calculate_median(ts_values)
 
     metric("Average TS%", f"{ts_mean:.1%}")
     metric("Median TS%", f"{ts_median:.1%}")
 
-    best_shooter = max(results, key=lambda x: x['ts_pct'])
-    worst_shooter = min(results, key=lambda x: x['ts_pct'])
+    best_shooter = max(results, key=lambda x: x["ts_pct"])
+    worst_shooter = min(results, key=lambda x: x["ts_pct"])
 
     subheader("Efficiency Leaders")
-    success(f"Most Efficient: {best_shooter['name']} ({best_shooter['ts_pct']:.1%} TS%)")
-    info(f"Least Efficient: {worst_shooter['name']} ({worst_shooter['ts_pct']:.1%} TS%)")
+    success(
+        f"Most Efficient: {best_shooter['name']} ({best_shooter['ts_pct']:.1%} TS%)"
+    )
+    info(
+        f"Least Efficient: {worst_shooter['name']} ({worst_shooter['ts_pct']:.1%} TS%)"
+    )
 
     # Calculate efficiency gap
-    gap = math_helper.subtract(best_shooter['ts_pct'], worst_shooter['ts_pct'])
+    gap = math_helper.subtract(best_shooter["ts_pct"], worst_shooter["ts_pct"])
     gap_pct = math_helper.multiply(gap, 100)
     print(f"  Efficiency Gap: {gap_pct:.1f} percentage points")
 
@@ -382,6 +488,7 @@ def workflow_shooting_efficiency():
 # =============================================================================
 # Workflow 5: Season Trend Analysis
 # =============================================================================
+
 
 def workflow_season_trends():
     """Analyze how player performance changes over a season"""
@@ -393,8 +500,26 @@ def workflow_season_trends():
 
     # Game-by-game points (simulating a season progression)
     game_points = [
-        18, 22, 19, 25, 21, 24, 26, 23, 28, 30,  # Early season
-        27, 31, 29, 33, 28, 32, 30, 34, 31, 35   # Late season
+        18,
+        22,
+        19,
+        25,
+        21,
+        24,
+        26,
+        23,
+        28,
+        30,  # Early season
+        27,
+        31,
+        29,
+        33,
+        28,
+        32,
+        30,
+        34,
+        31,
+        35,  # Late season
     ]
 
     # Split into early and late season
@@ -420,10 +545,10 @@ def workflow_season_trends():
     # Calculate improvement
     subheader("Season Progression Analysis")
 
-    improvement = math_helper.subtract(late_summary['mean'], early_summary['mean'])
+    improvement = math_helper.subtract(late_summary["mean"], early_summary["mean"])
     improvement = math_helper.round_number(improvement, 1)
 
-    improvement_pct = math_helper.divide(improvement, early_summary['mean'])
+    improvement_pct = math_helper.divide(improvement, early_summary["mean"])
     improvement_pct = math_helper.multiply(improvement_pct, 100)
     improvement_pct = math_helper.round_number(improvement_pct, 1)
 
@@ -431,12 +556,16 @@ def workflow_season_trends():
     metric("Improvement %", f"+{improvement_pct:.1f}%")
 
     # Consistency analysis
-    if late_summary['std_dev'] < early_summary['std_dev']:
+    if late_summary["std_dev"] < early_summary["std_dev"]:
         consistency = "MORE consistent"
-        cons_change = math_helper.subtract(early_summary['std_dev'], late_summary['std_dev'])
+        cons_change = math_helper.subtract(
+            early_summary["std_dev"], late_summary["std_dev"]
+        )
     else:
         consistency = "LESS consistent"
-        cons_change = math_helper.subtract(late_summary['std_dev'], early_summary['std_dev'])
+        cons_change = math_helper.subtract(
+            late_summary["std_dev"], early_summary["std_dev"]
+        )
 
     print()
     print(f"  The player became {consistency} as the season progressed")
@@ -471,6 +600,7 @@ def workflow_season_trends():
 # =============================================================================
 # Main Demo Runner
 # =============================================================================
+
 
 def main():
     """Run all workflow demonstrations"""

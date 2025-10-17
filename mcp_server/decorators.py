@@ -16,11 +16,11 @@ from .exceptions import (
     EpubProcessingError,
     PdfProcessingError,
     S3AccessError,
-    RateLimitError
+    RateLimitError,
 )
 
 # Type variable for generic function return type
-T = TypeVar('T')
+T = TypeVar("T")
 
 # Global rate limit tracker
 RATE_LIMITS: Dict[str, List[int]] = defaultdict(list)
@@ -42,6 +42,7 @@ def handle_book_errors(func: Callable[..., T]) -> Callable[..., T]:
         async def read_book(params, ctx):
             ...
     """
+
     @wraps(func)
     async def wrapper(*args, **kwargs) -> T:
         try:
@@ -55,13 +56,11 @@ def handle_book_errors(func: Callable[..., T]) -> Callable[..., T]:
             raise
         except Exception as e:
             # Wrap unexpected exceptions
-            logger.error(f"Unexpected error in {func.__name__}: {type(e).__name__}: {e}")
-            raise BookProcessingError(
-                str(e),
-                "unknown",
-                func.__name__,
-                e
+            logger.error(
+                f"Unexpected error in {func.__name__}: {type(e).__name__}: {e}"
             )
+            raise BookProcessingError(str(e), "unknown", func.__name__, e)
+
     return wrapper
 
 
@@ -78,6 +77,7 @@ def handle_pdf_errors(func: Callable[..., T]) -> Callable[..., T]:
         async def extract_pdf_page(params, ctx):
             ...
     """
+
     @wraps(func)
     async def wrapper(*args, **kwargs) -> T:
         try:
@@ -87,12 +87,8 @@ def handle_pdf_errors(func: Callable[..., T]) -> Callable[..., T]:
             raise
         except Exception as e:
             logger.error(f"Unexpected error in {func.__name__}: {e}")
-            raise PdfProcessingError(
-                str(e),
-                "unknown",
-                func.__name__,
-                e
-            )
+            raise PdfProcessingError(str(e), "unknown", func.__name__, e)
+
     return wrapper
 
 
@@ -120,6 +116,7 @@ def rate_limited(category: str, max_requests: int, per_seconds: int):
     Raises:
         RateLimitError: If rate limit is exceeded
     """
+
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
@@ -139,9 +136,7 @@ def rate_limited(category: str, max_requests: int, per_seconds: int):
                     f"{len(RATE_LIMITS[category])}/{max_requests} requests in {per_seconds}s"
                 )
                 raise RateLimitError(
-                    f"Tool limit exceeded for {category}",
-                    max_requests,
-                    per_seconds
+                    f"Tool limit exceeded for {category}", max_requests, per_seconds
                 )
 
             # Add current request
@@ -212,7 +207,9 @@ def cached_result(cache_key_func: Callable):
     return decorator
 
 
-def retry_on_error(max_attempts: int = 3, delay_seconds: float = 1.0, backoff: float = 2.0):
+def retry_on_error(
+    max_attempts: int = 3, delay_seconds: float = 1.0, backoff: float = 2.0
+):
     """
     Decorator to retry function on failure with exponential backoff.
 
@@ -229,6 +226,7 @@ def retry_on_error(max_attempts: int = 3, delay_seconds: float = 1.0, backoff: f
         async def fetch_from_s3(params, ctx):
             ...
     """
+
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
@@ -264,6 +262,7 @@ def retry_on_error(max_attempts: int = 3, delay_seconds: float = 1.0, backoff: f
 
 # Utility functions for rate limiting
 
+
 def get_rate_limit_status(category: str) -> Dict[str, any]:
     """
     Get current rate limit status for a category.
@@ -286,7 +285,7 @@ def get_rate_limit_status(category: str) -> Dict[str, any]:
     return {
         "category": category,
         "current_requests": len(RATE_LIMITS[category]),
-        "timestamps": RATE_LIMITS[category]
+        "timestamps": RATE_LIMITS[category],
     }
 
 

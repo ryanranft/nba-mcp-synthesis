@@ -13,12 +13,12 @@ sys.path.insert(0, str(project_root))
 from mcp_server.tools import correlation_helper, timeseries_helper, nba_metrics_helper
 
 # ANSI colors
-GREEN = '\033[92m'
-RED = '\033[91m'
-YELLOW = '\033[93m'
-CYAN = '\033[96m'
-BOLD = '\033[1m'
-RESET = '\033[0m'
+GREEN = "\033[92m"
+RED = "\033[91m"
+YELLOW = "\033[93m"
+CYAN = "\033[96m"
+BOLD = "\033[1m"
+RESET = "\033[0m"
 
 
 class TestRunner:
@@ -79,23 +79,19 @@ def test_correlation_tools():
     x = [1, 2, 3, 4, 5]
     y = [2, 4, 6, 8, 10]
     model = correlation_helper.calculate_linear_regression(x, y)
-    runner.test("Regression slope", model['slope'], 2.0)
-    runner.test("Regression intercept", model['intercept'], 0.0)
-    runner.test("Regression R²", model['r_squared'], 1.0)
+    runner.test("Regression slope", model["slope"], 2.0)
+    runner.test("Regression intercept", model["intercept"], 0.0)
+    runner.test("Regression R²", model["r_squared"], 1.0)
 
     # Test 5: Predictions
     predictions = correlation_helper.predict_values(2.0, 0.0, [6, 7, 8])
     runner.test("Predictions", predictions, [12.0, 14.0, 16.0])
 
     # Test 6: Correlation matrix
-    data = {
-        "x": [1, 2, 3, 4, 5],
-        "y": [2, 4, 6, 8, 10],
-        "z": [5, 4, 3, 2, 1]
-    }
+    data = {"x": [1, 2, 3, 4, 5], "y": [2, 4, 6, 8, 10], "z": [5, 4, 3, 2, 1]}
     matrix = correlation_helper.calculate_correlation_matrix(data)
-    runner.test("Correlation matrix self-correlation", matrix['x']['x'], 1.0)
-    runner.test("Correlation matrix cross-correlation", matrix['x']['y'], 1.0)
+    runner.test("Correlation matrix self-correlation", matrix["x"]["x"], 1.0)
+    runner.test("Correlation matrix cross-correlation", matrix["x"]["y"], 1.0)
 
     return runner
 
@@ -121,14 +117,14 @@ def test_timeseries_tools():
     # Test 9: Trend detection - increasing
     data = [10, 12, 15, 17, 20]
     trend = timeseries_helper.detect_trend(data)
-    runner.test("Trend direction (increasing)", trend['trend'], "increasing")
-    runner.test("Trend slope positive", trend['slope'] > 0, True)
+    runner.test("Trend direction (increasing)", trend["trend"], "increasing")
+    runner.test("Trend slope positive", trend["slope"] > 0, True)
 
     # Test 10: Trend detection - decreasing
     data = [20, 18, 15, 12, 10]
     trend = timeseries_helper.detect_trend(data)
-    runner.test("Trend direction (decreasing)", trend['trend'], "decreasing")
-    runner.test("Trend slope negative", trend['slope'] < 0, True)
+    runner.test("Trend direction (decreasing)", trend["trend"], "decreasing")
+    runner.test("Trend slope negative", trend["slope"] < 0, True)
 
     # Test 11: Percent change
     pct_change = timeseries_helper.calculate_percent_change(120, 100)
@@ -160,17 +156,29 @@ def test_advanced_nba_metrics():
 
     # Test 14: Four Factors
     stats = {
-        "fgm": 3200, "fga": 7000, "three_pm": 1000,
-        "tov": 1100, "fta": 1800, "orb": 900,
-        "team_orb": 900, "opp_drb": 2800,
-        "opp_fgm": 2900, "opp_fga": 6800, "opp_three_pm": 800,
-        "opp_tov": 1200, "opp_fta": 1600, "drb": 2800,
-        "team_drb": 2800, "opp_orb": 850
+        "fgm": 3200,
+        "fga": 7000,
+        "three_pm": 1000,
+        "tov": 1100,
+        "fta": 1800,
+        "orb": 900,
+        "team_orb": 900,
+        "opp_drb": 2800,
+        "opp_fgm": 2900,
+        "opp_fga": 6800,
+        "opp_three_pm": 800,
+        "opp_tov": 1200,
+        "opp_fta": 1600,
+        "drb": 2800,
+        "team_drb": 2800,
+        "opp_orb": 850,
     }
     four_factors = nba_metrics_helper.calculate_four_factors(stats)
-    runner.test("Four Factors has offensive", 'offensive' in four_factors, True)
-    runner.test("Four Factors has defensive", 'defensive' in four_factors, True)
-    runner.test("Four Factors offensive eFG%", four_factors['offensive']['efg_pct'] > 0, True)
+    runner.test("Four Factors has offensive", "offensive" in four_factors, True)
+    runner.test("Four Factors has defensive", "defensive" in four_factors, True)
+    runner.test(
+        "Four Factors offensive eFG%", four_factors["offensive"]["efg_pct"] > 0, True
+    )
 
     # Test 15: Turnover percentage
     tov_pct = nba_metrics_helper.calculate_turnover_percentage(250, 1800, 600)
@@ -187,11 +195,7 @@ def test_advanced_nba_metrics():
     # Team: 240 MP/game × 82 = 19680 total, 3280 FGM
     # Player: 820 FGM
     ast_pct = nba_metrics_helper.calculate_assist_percentage(
-        assists=656,
-        minutes=2624,
-        team_minutes=19680,
-        team_fgm=3280,
-        player_fgm=820
+        assists=656, minutes=2624, team_minutes=19680, team_fgm=3280, player_fgm=820
     )
     # Formula: 100 × AST / [(MP / 5 × Team FGM) - Player FGM]
     # = 100 × 656 / [(2624/5 × 3280) - 820]
@@ -199,19 +203,13 @@ def test_advanced_nba_metrics():
 
     # Test 18: Steal percentage
     stl_pct = nba_metrics_helper.calculate_steal_percentage(
-        steals=120,
-        minutes=2000,
-        team_minutes=19680,
-        opp_possessions=8000
+        steals=120, minutes=2000, team_minutes=19680, opp_possessions=8000
     )
     runner.test("STL% calculation", stl_pct, 2.95)
 
     # Test 19: Block percentage
     blk_pct = nba_metrics_helper.calculate_block_percentage(
-        blocks=100,
-        minutes=2000,
-        team_minutes=19680,
-        opp_two_pa=5000
+        blocks=100, minutes=2000, team_minutes=19680, opp_two_pa=5000
     )
     runner.test("BLK% calculation", blk_pct, 3.94)
 
@@ -299,7 +297,7 @@ def main():
         test_correlation_tools(),
         test_timeseries_tools(),
         test_advanced_nba_metrics(),
-        test_edge_cases()
+        test_edge_cases(),
     ]
 
     return print_summary(runners)

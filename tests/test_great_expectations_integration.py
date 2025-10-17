@@ -10,11 +10,13 @@ import sys
 import os
 from pathlib import Path
 import pandas as pd
+from mcp_server.env_helper import get_hierarchical_env
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 
@@ -23,13 +25,22 @@ class TestGreatExpectationsConfiguration:
 
     def test_gx_config_file_exists(self):
         """Test: Great Expectations config file exists"""
-        gx_config = Path(__file__).parent.parent / "great_expectations" / "great_expectations.yml"
+        gx_config = (
+            Path(__file__).parent.parent
+            / "great_expectations"
+            / "great_expectations.yml"
+        )
         assert gx_config.exists(), "Great Expectations config file should exist"
         print("✅ Great Expectations config file exists")
 
     def test_gx_config_variables_exist(self):
         """Test: Config variables file exists"""
-        config_vars = Path(__file__).parent.parent / "great_expectations" / "uncommitted" / "config_variables.yml"
+        config_vars = (
+            Path(__file__).parent.parent
+            / "great_expectations"
+            / "uncommitted"
+            / "config_variables.yml"
+        )
         assert config_vars.exists(), "Config variables file should exist"
         print("✅ Config variables file exists")
 
@@ -40,7 +51,7 @@ class TestGreatExpectationsConfiguration:
         required_dirs = [
             gx_root / "expectations",
             gx_root / "checkpoints",
-            gx_root / "uncommitted"
+            gx_root / "uncommitted",
         ]
 
         for dir_path in required_dirs:
@@ -58,7 +69,12 @@ class TestDataValidatorIntegration:
         from data_quality.validator import DataValidator
 
         # Skip if database credentials not configured
-        if not all([os.getenv("RDS_HOST"), os.getenv("RDS_DATABASE")]):
+        if not all(
+            [
+                get_hierarchical_env("RDS_HOST", "NBA_MCP_SYNTHESIS", "WORKFLOW"),
+                get_hierarchical_env("RDS_DATABASE", "NBA_MCP_SYNTHESIS", "WORKFLOW"),
+            ]
+        ):
             pytest.skip("PostgreSQL credentials not configured")
 
         validator = DataValidator(use_configured_context=True)
@@ -83,31 +99,43 @@ class TestDataValidatorIntegration:
 
         validator = DataValidator(use_configured_context=False)
 
-        mock_data = pd.DataFrame({
-            'game_id': [1, 2, 3],
-            'home_team_score': [100, 105, 98],
-            'away_team_score': [95, 102, 100]
-        })
+        mock_data = pd.DataFrame(
+            {
+                "game_id": [1, 2, 3],
+                "home_team_score": [100, 105, 98],
+                "away_team_score": [95, 102, 100],
+            }
+        )
 
         expectations = [
-            {"type": "expect_column_values_to_not_be_null", "kwargs": {"column": "game_id"}},
-            {"type": "expect_column_values_to_be_unique", "kwargs": {"column": "game_id"}}
+            {
+                "type": "expect_column_values_to_not_be_null",
+                "kwargs": {"column": "game_id"},
+            },
+            {
+                "type": "expect_column_values_to_be_unique",
+                "kwargs": {"column": "game_id"},
+            },
         ]
 
         result = await validator.validate_table(
-            table_name="games_mock",
-            data=mock_data,
-            expectations=expectations
+            table_name="games_mock", data=mock_data, expectations=expectations
         )
 
-        assert result['success'] == True
-        assert result['summary']['passed'] == 2
+        assert result["success"] == True
+        assert result["summary"]["passed"] == 2
         print("✅ In-memory validation works")
 
     @pytest.mark.skipif(
-        not all([os.getenv("RDS_HOST"), os.getenv("RDS_DATABASE"),
-                os.getenv("RDS_USERNAME"), os.getenv("RDS_PASSWORD")]),
-        reason="PostgreSQL credentials not configured"
+        not all(
+            [
+                get_hierarchical_env("RDS_HOST", "NBA_MCP_SYNTHESIS", "WORKFLOW"),
+                get_hierarchical_env("RDS_DATABASE", "NBA_MCP_SYNTHESIS", "WORKFLOW"),
+                get_hierarchical_env("RDS_USERNAME", "NBA_MCP_SYNTHESIS", "WORKFLOW"),
+                get_hierarchical_env("RDS_PASSWORD", "NBA_MCP_SYNTHESIS", "WORKFLOW"),
+            ]
+        ),
+        reason="PostgreSQL credentials not configured",
     )
     @pytest.mark.asyncio
     async def test_postgres_connection_string_building(self):
@@ -119,8 +147,14 @@ class TestDataValidatorIntegration:
         try:
             connection_string = validator._build_postgres_connection_string()
             assert "postgresql+psycopg2://" in connection_string
-            assert os.getenv("RDS_HOST") in connection_string
-            assert os.getenv("RDS_DATABASE") in connection_string
+            assert (
+                get_hierarchical_env("RDS_HOST", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+                in connection_string
+            )
+            assert (
+                get_hierarchical_env("RDS_DATABASE", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+                in connection_string
+            )
             print("✅ PostgreSQL connection string built correctly")
         except ValueError as e:
             pytest.fail(f"Failed to build connection string: {e}")
@@ -147,21 +181,21 @@ class TestProductionWorkflows:
         workflow = ProductionDataQualityWorkflow(use_slack=False)
         workflow.validator.use_configured_context = False  # Use in-memory mode
 
-        mock_data = pd.DataFrame({
-            'game_id': [1, 2, 3],
-            'home_team_score': [100, 105, 98],
-            'away_team_score': [95, 102, 100]
-        })
+        mock_data = pd.DataFrame(
+            {
+                "game_id": [1, 2, 3],
+                "home_team_score": [100, 105, 98],
+                "away_team_score": [95, 102, 100],
+            }
+        )
 
         from data_quality.expectations import create_game_expectations
 
         result = await workflow.validator.validate_table(
-            table_name="games",
-            data=mock_data,
-            expectations=create_game_expectations()
+            table_name="games", data=mock_data, expectations=create_game_expectations()
         )
 
-        assert result['success'] == True
+        assert result["success"] == True
         print("✅ Workflow validates mock data correctly")
 
 
@@ -183,10 +217,15 @@ class TestEnvironmentConfiguration:
         """Test: PostgreSQL environment variables are available"""
         required_vars = ["RDS_HOST", "RDS_DATABASE", "RDS_USERNAME", "RDS_PASSWORD"]
 
-        missing_vars = [var for var in required_vars if not os.getenv(var)]
+        missing_vars = []
+        for var in required_vars:
+            if not get_hierarchical_env(var, "NBA_MCP_SYNTHESIS", "WORKFLOW"):
+                missing_vars.append(var)
 
         if missing_vars:
-            print(f"⚠️  Warning: Missing PostgreSQL variables: {', '.join(missing_vars)}")
+            print(
+                f"⚠️  Warning: Missing PostgreSQL variables: {', '.join(missing_vars)}"
+            )
             print("   (This is expected if database is not configured)")
         else:
             print("✅ All PostgreSQL environment variables are set")

@@ -38,6 +38,7 @@ logger = logging.getLogger(__name__)
 
 class ServiceStatus(Enum):
     """Service health status"""
+
     HEALTHY = "healthy"
     UNHEALTHY = "unhealthy"
     UNKNOWN = "unknown"
@@ -47,6 +48,7 @@ class ServiceStatus(Enum):
 @dataclass
 class ServiceInstance:
     """Service instance definition"""
+
     service_id: str
     service_name: str
     host: str
@@ -60,9 +62,11 @@ class ServiceInstance:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         data = asdict(self)
-        data['status'] = self.status.value
-        data['last_heartbeat'] = self.last_heartbeat.isoformat() if self.last_heartbeat else None
-        data['registered_at'] = self.registered_at.isoformat()
+        data["status"] = self.status.value
+        data["last_heartbeat"] = (
+            self.last_heartbeat.isoformat() if self.last_heartbeat else None
+        )
+        data["registered_at"] = self.registered_at.isoformat()
         return data
 
     @property
@@ -95,7 +99,9 @@ class ServiceRegistry:
         with self._lock:
             self.services[instance.service_id] = instance
             instance.last_heartbeat = datetime.now()
-            logger.info(f"Registered service: {instance.service_id} at {instance.address}")
+            logger.info(
+                f"Registered service: {instance.service_id} at {instance.address}"
+            )
             return True
 
     def deregister(self, service_id: str) -> bool:
@@ -124,25 +130,20 @@ class ServiceRegistry:
     def get_services_by_name(self, service_name: str) -> List[ServiceInstance]:
         """Get all instances of a service"""
         with self._lock:
-            return [
-                s for s in self.services.values()
-                if s.service_name == service_name
-            ]
+            return [s for s in self.services.values() if s.service_name == service_name]
 
     def get_healthy_services(self, service_name: str) -> List[ServiceInstance]:
         """Get healthy instances of a service"""
         return [
-            s for s in self.get_services_by_name(service_name)
+            s
+            for s in self.get_services_by_name(service_name)
             if s.is_healthy(self.heartbeat_timeout)
         ]
 
     def get_services_by_tag(self, tag: str) -> List[ServiceInstance]:
         """Get services with specific tag"""
         with self._lock:
-            return [
-                s for s in self.services.values()
-                if tag in s.tags
-            ]
+            return [s for s in self.services.values() if tag in s.tags]
 
     def list_all_services(self) -> List[ServiceInstance]:
         """List all registered services"""
@@ -154,7 +155,8 @@ class ServiceRegistry:
         removed = 0
         with self._lock:
             stale_ids = [
-                service_id for service_id, instance in self.services.items()
+                service_id
+                for service_id, instance in self.services.items()
                 if not instance.is_healthy(self.heartbeat_timeout)
             ]
             for service_id in stale_ids:
@@ -172,15 +174,16 @@ class ServiceDiscovery:
         self._round_robin_indexes: Dict[str, int] = {}
         self._lock = threading.Lock()
 
-    def discover(self, service_name: str, tags: Optional[List[str]] = None) -> Optional[ServiceInstance]:
+    def discover(
+        self, service_name: str, tags: Optional[List[str]] = None
+    ) -> Optional[ServiceInstance]:
         """Discover a healthy service instance using round-robin"""
         healthy_services = self.registry.get_healthy_services(service_name)
 
         # Filter by tags if provided
         if tags:
             healthy_services = [
-                s for s in healthy_services
-                if all(tag in s.tags for tag in tags)
+                s for s in healthy_services if all(tag in s.tags for tag in tags)
             ]
 
         if not healthy_services:
@@ -196,7 +199,9 @@ class ServiceDiscovery:
             instance = healthy_services[index % len(healthy_services)]
 
             # Increment for next call
-            self._round_robin_indexes[service_name] = (index + 1) % len(healthy_services)
+            self._round_robin_indexes[service_name] = (index + 1) % len(
+                healthy_services
+            )
 
         return instance
 
@@ -298,14 +303,13 @@ class ConsulClient:
             "Check": {
                 "HTTP": f"http://{instance.address}/health",
                 "Interval": "10s",
-                "Timeout": "5s"
-            }
+                "Timeout": "5s",
+            },
         }
 
         try:
             response = self.session.put(
-                f"{self.base_url}/agent/service/register",
-                json=payload
+                f"{self.base_url}/agent/service/register", json=payload
             )
             response.raise_for_status()
             logger.info(f"Registered service with Consul: {instance.service_id}")
@@ -332,7 +336,7 @@ class ConsulClient:
         try:
             response = self.session.get(
                 f"{self.base_url}/health/service/{service_name}",
-                params={"passing": "true"}
+                params={"passing": "true"},
             )
             response.raise_for_status()
             return response.json()
@@ -371,7 +375,7 @@ if __name__ == "__main__":
             host="localhost",
             port=8000,
             tags=["api", "production", "v1"],
-            metadata={"region": "us-east-1", "version": "1.0.0"}
+            metadata={"region": "us-east-1", "version": "1.0.0"},
         ),
         ServiceInstance(
             service_id="nba-mcp-2",
@@ -379,7 +383,7 @@ if __name__ == "__main__":
             host="localhost",
             port=8001,
             tags=["api", "production", "v1"],
-            metadata={"region": "us-east-1", "version": "1.0.0"}
+            metadata={"region": "us-east-1", "version": "1.0.0"},
         ),
         ServiceInstance(
             service_id="nba-analytics-1",
@@ -387,8 +391,8 @@ if __name__ == "__main__":
             host="localhost",
             port=9000,
             tags=["analytics", "ml"],
-            metadata={"region": "us-west-2", "version": "2.0.0"}
-        )
+            metadata={"region": "us-west-2", "version": "2.0.0"},
+        ),
     ]
 
     # Register services
@@ -405,7 +409,9 @@ if __name__ == "__main__":
     for i in range(5):
         instance = discovery.discover("nba-mcp-server")
         if instance:
-            print(f"Discovered (round {i+1}): {instance.service_id} at {instance.address}")
+            print(
+                f"Discovered (round {i+1}): {instance.service_id} at {instance.address}"
+            )
 
     # Discover all analytics services
     print("\n--- All Analytics Services ---")
@@ -433,4 +439,3 @@ if __name__ == "__main__":
     health_checker.stop()
 
     print("\n=== Demo Complete ===")
-

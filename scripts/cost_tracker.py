@@ -7,6 +7,7 @@ import os
 from datetime import datetime
 from typing import Dict, Optional
 
+
 class CostTracker:
     """Track API costs across analysis runs"""
 
@@ -17,7 +18,7 @@ class CostTracker:
             "google": 0.0,
             "deepseek": 0.0,
             "claude": 0.0,
-            "gpt4": 0.0
+            "gpt4": 0.0,
         }
         self.log_file = log_file
         self.session_start = datetime.now()
@@ -29,10 +30,12 @@ class CostTracker:
         """Load existing costs from log file"""
         if os.path.exists(self.log_file):
             try:
-                with open(self.log_file, 'r') as f:
+                with open(self.log_file, "r") as f:
                     data = json.load(f)
-                    self.total_spent = data.get('total_spent', 0.0)
-                    self.costs_by_model = data.get('costs_by_model', self.costs_by_model)
+                    self.total_spent = data.get("total_spent", 0.0)
+                    self.costs_by_model = data.get(
+                        "costs_by_model", self.costs_by_model
+                    )
             except Exception as e:
                 print(f"Warning: Could not load existing costs: {e}")
 
@@ -46,7 +49,9 @@ class CostTracker:
 
         # Check budget
         if self.total_spent > self.budget:
-            raise ValueError(f"Budget exceeded: ${self.total_spent:.2f} > ${self.budget:.2f}")
+            raise ValueError(
+                f"Budget exceeded: ${self.total_spent:.2f} > ${self.budget:.2f}"
+            )
 
         # Warn if approaching budget
         remaining = self.budget - self.total_spent
@@ -62,13 +67,13 @@ class CostTracker:
             "model": model,
             "cost": cost,
             "operation": operation,
-            "total_spent": self.total_spent
+            "total_spent": self.total_spent,
         }
 
         # Append to log file
         try:
-            with open(self.log_file, 'a') as f:
-                f.write(json.dumps(log_entry) + '\n')
+            with open(self.log_file, "a") as f:
+                f.write(json.dumps(log_entry) + "\n")
         except Exception as e:
             print(f"Warning: Could not log cost: {e}")
 
@@ -108,7 +113,3 @@ class CostTracker:
         """Estimate how many more books can be analyzed"""
         remaining = self.budget - self.total_spent
         return int(remaining / avg_cost_per_book) if avg_cost_per_book > 0 else 0
-
-
-
-

@@ -17,8 +17,9 @@ try:
         ProcessSource,
         notify_process_started,
         notify_process_completed,
-        notify_process_failed
+        notify_process_failed,
     )
+
     WORKFLOW_AVAILABLE = True
 except ImportError:
     WORKFLOW_AVAILABLE = False
@@ -30,7 +31,7 @@ def with_workflow_notifications(
     process_name: str,
     source: ProcessSource = ProcessSource.WORKFLOW_ENGINE,
     notify_slack: bool = True,
-    emit_events: bool = True
+    emit_events: bool = True,
 ):
     """
     Decorator to add workflow notifications to any async function
@@ -47,6 +48,7 @@ def with_workflow_notifications(
             # Your code here
             return results
     """
+
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
@@ -56,13 +58,14 @@ def with_workflow_notifications(
 
             # Generate process ID
             import uuid
+
             process_id = str(uuid.uuid4())
 
             # Extract metadata from function args/kwargs
             metadata = {
                 "function": func.__name__,
                 "args_count": len(args),
-                "kwargs_keys": list(kwargs.keys())
+                "kwargs_keys": list(kwargs.keys()),
             }
 
             # Add specific metadata based on kwargs
@@ -83,26 +86,27 @@ def with_workflow_notifications(
                 result_metadata = {}
                 if isinstance(result, dict):
                     # Extract useful info from result
-                    for key in ["status", "cost", "tokens_used", "row_count", "success"]:
+                    for key in [
+                        "status",
+                        "cost",
+                        "tokens_used",
+                        "row_count",
+                        "success",
+                    ]:
                         if key in result:
                             result_metadata[key] = result[key]
 
                 # Notify completion
                 if notify_slack:
                     notify_process_completed(
-                        process_id,
-                        process_name,
-                        source,
-                        result_metadata
+                        process_id, process_name, source, result_metadata
                     )
 
                 # Emit event
                 if emit_events:
                     trigger_manager = get_trigger_manager()
                     trigger_manager.emit_process_complete(
-                        process_name,
-                        source.value,
-                        result_metadata
+                        process_name, source.value, result_metadata
                     )
 
                 return result
@@ -111,17 +115,14 @@ def with_workflow_notifications(
                 # Notify failure
                 if notify_slack:
                     notify_process_failed(
-                        process_id,
-                        process_name,
-                        source,
-                        str(e),
-                        metadata
+                        process_id, process_name, source, str(e), metadata
                     )
 
                 # Re-raise exception
                 raise
 
         return wrapper
+
     return decorator
 
 
@@ -130,7 +131,7 @@ def notify_synthesis_complete(
     response: str,
     cost: float,
     source: str = "synthesis",
-    workflow_id: Optional[str] = None
+    workflow_id: Optional[str] = None,
 ):
     """
     Notify that a synthesis process has completed
@@ -151,7 +152,7 @@ def notify_synthesis_complete(
         response=response,
         cost=cost,
         source=source,
-        workflow_id=workflow_id
+        workflow_id=workflow_id,
     )
 
 
@@ -160,7 +161,7 @@ def notify_mcp_tool_complete(
     params: Dict[str, Any],
     result: Any,
     source: str = "mcp_server",
-    workflow_id: Optional[str] = None
+    workflow_id: Optional[str] = None,
 ):
     """
     Notify that an MCP tool has completed
@@ -181,7 +182,7 @@ def notify_mcp_tool_complete(
         params=params,
         result=result,
         source=source,
-        workflow_id=workflow_id
+        workflow_id=workflow_id,
     )
 
 
@@ -191,7 +192,7 @@ def notify_test_complete(
     tests_failed: int,
     coverage: Optional[float] = None,
     source: str = "pytest",
-    workflow_id: Optional[str] = None
+    workflow_id: Optional[str] = None,
 ):
     """
     Notify that a test suite has completed
@@ -214,7 +215,7 @@ def notify_test_complete(
         tests_failed=tests_failed,
         coverage=coverage,
         source=source,
-        workflow_id=workflow_id
+        workflow_id=workflow_id,
     )
 
 

@@ -94,7 +94,7 @@ try:
             "ftm": player[9],
             "fta": player[10],
             "turnovers": player[11],
-            "minutes": player[12]
+            "minutes": player[12],
         }
 
         per = nba_metrics_helper.calculate_per(stats)
@@ -102,7 +102,9 @@ try:
         # PER should be reasonable (between 0 and 50)
         assert 0 <= per <= 50, f"PER {per} is out of reasonable range"
 
-        print(f"   ✓ {player_name[:20]:20s} | PER: {per:5.1f} | Minutes: {stats['minutes']:.0f}")
+        print(
+            f"   ✓ {player_name[:20]:20s} | PER: {per:5.1f} | Minutes: {stats['minutes']:.0f}"
+        )
 
 except Exception as e:
     print(f"   ✗ PER calculation failed: {e}")
@@ -178,7 +180,9 @@ try:
         print(f"     - Q1: {summary['Q1']:.1f}")
         print(f"     - Q3: {summary['Q3']:.1f}")
     else:
-        print(f"   ℹ Not enough data for statistical analysis ({len(points_list)} players)")
+        print(
+            f"   ℹ Not enough data for statistical analysis ({len(points_list)} players)"
+        )
 
 except Exception as e:
     print(f"   ✗ Statistical analysis failed: {e}")
@@ -220,7 +224,9 @@ try:
 
             ppg = total_points / games
 
-            print(f"   ✓ {team_name:3s} | ORtg: {ortg:5.1f} | PPG: {ppg:5.1f} | Games: {games}")
+            print(
+                f"   ✓ {team_name:3s} | ORtg: {ortg:5.1f} | PPG: {ppg:5.1f} | Games: {games}"
+            )
     else:
         print("   ℹ No team data found")
 
@@ -244,7 +250,9 @@ try:
         avg_ppg = math_helper.divide(total_points, estimated_games)
         avg_ppg = math_helper.round_number(avg_ppg, 1)
 
-        print(f"   ✓ {player[1][:20]:20s} | ~{estimated_games:.0f} games | ~{avg_ppg} PPG")
+        print(
+            f"   ✓ {player[1][:20]:20s} | ~{estimated_games:.0f} games | ~{avg_ppg} PPG"
+        )
 
 except Exception as e:
     print(f"   ✗ Math operations failed: {e}")

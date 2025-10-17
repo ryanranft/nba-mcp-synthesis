@@ -21,8 +21,11 @@ import signal
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class ProcessInfo:
@@ -34,6 +37,7 @@ class ProcessInfo:
     runtime_seconds: float
     expected_max_runtime: int = 300  # 5 minutes default
 
+
 @dataclass
 class TestResult:
     test_name: str
@@ -44,6 +48,7 @@ class TestResult:
     api_keys_verified: bool
     recommendations: List[str]
 
+
 @dataclass
 class DeploymentStatus:
     deployment_id: str
@@ -53,6 +58,7 @@ class DeploymentStatus:
     process_count: int
     log_file_size: int
     errors_detected: List[str]
+
 
 class SelfHealingWorkflow:
     """Self-healing workflow that monitors, detects issues, patches, and redeploys."""
@@ -73,7 +79,9 @@ class SelfHealingWorkflow:
         self.max_retries = 3
 
         # Logging
-        self.log_file = f"logs/self_healing_workflow_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+        self.log_file = (
+            f"logs/self_healing_workflow_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+        )
         Path("logs").mkdir(exist_ok=True)
 
         logger.info("🔧 Self-Healing Workflow initialized")
@@ -102,7 +110,9 @@ class SelfHealingWorkflow:
                 deployment_status = await self.check_deployment_status()
 
                 # 4. Detect issues and patch
-                issues_detected = await self.detect_issues(running_processes, api_status, deployment_status)
+                issues_detected = await self.detect_issues(
+                    running_processes, api_status, deployment_status
+                )
 
                 if issues_detected:
                     logger.warning(f"⚠️ Detected {len(issues_detected)} issues")
@@ -115,7 +125,9 @@ class SelfHealingWorkflow:
                     await self.run_model_tests()
 
                 # 6. Log status
-                await self.log_status(iteration, running_processes, api_status, deployment_status)
+                await self.log_status(
+                    iteration, running_processes, api_status, deployment_status
+                )
 
                 # 7. Wait before next check
                 await asyncio.sleep(self.check_interval)
@@ -124,24 +136,35 @@ class SelfHealingWorkflow:
                 logger.error(f"❌ Error in monitoring iteration {iteration}: {e}")
                 await asyncio.sleep(self.check_interval)
 
-    async def detect_issues(self, processes: List[ProcessInfo], api_status: Dict, deployment_status: Dict) -> List[str]:
+    async def detect_issues(
+        self, processes: List[ProcessInfo], api_status: Dict, deployment_status: Dict
+    ) -> List[str]:
         """Detect issues in running processes, API keys, and deployments."""
         issues = []
 
         # Check for stuck processes
         for process in processes:
             if process.runtime_seconds > process.expected_max_runtime:
-                issues.append(f"Stuck process: {process.name} (PID {process.pid}) running for {process.runtime_seconds:.1f}s")
+                issues.append(
+                    f"Stuck process: {process.name} (PID {process.pid}) running for {process.runtime_seconds:.1f}s"
+                )
 
         # Check API key issues
         for api_name, status in api_status.items():
-            if not status.get('valid', False):
-                issues.append(f"Invalid API key: {api_name} - {status.get('error', 'Unknown error')}")
+            if not status.get("valid", False):
+                issues.append(
+                    f"Invalid API key: {api_name} - {status.get('error', 'Unknown error')}"
+                )
 
         # Check deployment issues
         for deployment_id, status in deployment_status.items():
-            if status.get('errors_detected'):
-                issues.extend([f"Deployment {deployment_id}: {error}" for error in status['errors_detected']])
+            if status.get("errors_detected"):
+                issues.extend(
+                    [
+                        f"Deployment {deployment_id}: {error}"
+                        for error in status["errors_detected"]
+                    ]
+                )
 
         return issues
 
@@ -172,7 +195,9 @@ class SelfHealingWorkflow:
         processes = await self.process_monitor.get_running_processes()
         for process in processes:
             if process.runtime_seconds > process.expected_max_runtime:
-                logger.info(f"🛑 Killing stuck process: {process.name} (PID {process.pid})")
+                logger.info(
+                    f"🛑 Killing stuck process: {process.name} (PID {process.pid})"
+                )
                 try:
                     os.kill(process.pid, signal.SIGKILL)
                     logger.info(f"✅ Killed process {process.pid}")
@@ -202,7 +227,7 @@ class SelfHealingWorkflow:
         """Run tests for all models."""
         logger.info("🧪 Running model tests...")
 
-        models_to_test = ['google', 'deepseek', 'claude', 'gpt4']
+        models_to_test = ["google", "deepseek", "claude", "gpt4"]
 
         for model in models_to_test:
             logger.info(f"🧪 Testing {model} model...")
@@ -214,17 +239,17 @@ class SelfHealingWorkflow:
 
                 test_result = TestResult(
                     test_name=f"{model}_model_test",
-                    success=result['success'],
-                    error_message=result.get('error'),
+                    success=result["success"],
+                    error_message=result.get("error"),
                     runtime_seconds=runtime,
                     timestamp=datetime.now().isoformat(),
-                    api_keys_verified=result.get('api_key_valid', False),
-                    recommendations=result.get('recommendations', [])
+                    api_keys_verified=result.get("api_key_valid", False),
+                    recommendations=result.get("recommendations", []),
                 )
 
                 self.test_results.append(test_result)
 
-                if result['success']:
+                if result["success"]:
                     logger.info(f"✅ {model} model test passed ({runtime:.1f}s)")
                 else:
                     logger.error(f"❌ {model} model test failed: {result.get('error')}")
@@ -238,7 +263,7 @@ class SelfHealingWorkflow:
                     runtime_seconds=time.time() - start_time,
                     timestamp=datetime.now().isoformat(),
                     api_keys_verified=False,
-                    recommendations=[]
+                    recommendations=[],
                 )
                 self.test_results.append(test_result)
 
@@ -292,38 +317,50 @@ if __name__ == "__main__":
 
             # Write test script
             test_file = f"temp_test_{model_name}.py"
-            with open(test_file, 'w') as f:
+            with open(test_file, "w") as f:
                 f.write(test_script)
 
             # Run test with timeout
             try:
                 result = subprocess.run(
-                    ['python3', test_file],
+                    ["python3", test_file],
                     capture_output=True,
                     text=True,
-                    timeout=60  # 1 minute timeout
+                    timeout=60,  # 1 minute timeout
                 )
 
                 if result.returncode == 0:
                     return json.loads(result.stdout)
                 else:
-                    return {'success': False, 'error': result.stderr, 'api_key_valid': False}
+                    return {
+                        "success": False,
+                        "error": result.stderr,
+                        "api_key_valid": False,
+                    }
 
             except subprocess.TimeoutExpired:
-                return {'success': False, 'error': 'Test timeout', 'api_key_valid': False}
+                return {
+                    "success": False,
+                    "error": "Test timeout",
+                    "api_key_valid": False,
+                }
             finally:
                 # Clean up test file
                 if os.path.exists(test_file):
                     os.remove(test_file)
 
         except Exception as e:
-            return {'success': False, 'error': str(e), 'api_key_valid': False}
+            return {"success": False, "error": str(e), "api_key_valid": False}
 
     async def should_run_tests(self) -> bool:
         """Determine if tests should be run."""
         # Run tests if no recent successful tests
-        recent_tests = [t for t in self.test_results
-                       if datetime.fromisoformat(t.timestamp) > datetime.now() - timedelta(minutes=10)]
+        recent_tests = [
+            t
+            for t in self.test_results
+            if datetime.fromisoformat(t.timestamp)
+            > datetime.now() - timedelta(minutes=10)
+        ]
 
         if not recent_tests:
             return True
@@ -346,9 +383,9 @@ if __name__ == "__main__":
             try:
                 stat = log_file.stat()
                 status[deployment_id] = {
-                    'last_modified': stat.st_mtime,
-                    'size': stat.st_size,
-                    'errors_detected': await self.detect_log_errors(log_file)
+                    "last_modified": stat.st_mtime,
+                    "size": stat.st_size,
+                    "errors_detected": await self.detect_log_errors(log_file),
                 }
             except Exception as e:
                 logger.error(f"❌ Error checking log file {log_file}: {e}")
@@ -359,63 +396,72 @@ if __name__ == "__main__":
         """Detect errors in log file."""
         errors = []
         try:
-            with open(log_file, 'r') as f:
+            with open(log_file, "r") as f:
                 lines = f.readlines()
                 for line in lines[-100:]:  # Check last 100 lines
-                    if 'ERROR' in line or '❌' in line or 'Failed' in line:
+                    if "ERROR" in line or "❌" in line or "Failed" in line:
                         errors.append(line.strip())
         except Exception as e:
             logger.error(f"❌ Error reading log file {log_file}: {e}")
 
         return errors
 
-    async def log_status(self, iteration: int, processes: List[ProcessInfo], api_status: Dict, deployment_status: Dict):
+    async def log_status(
+        self,
+        iteration: int,
+        processes: List[ProcessInfo],
+        api_status: Dict,
+        deployment_status: Dict,
+    ):
         """Log current status."""
         status = {
-            'iteration': iteration,
-            'timestamp': datetime.now().isoformat(),
-            'processes': [asdict(p) for p in processes],
-            'api_status': api_status,
-            'deployment_status': deployment_status,
-            'test_results': [asdict(t) for t in self.test_results[-10:]]  # Last 10 tests
+            "iteration": iteration,
+            "timestamp": datetime.now().isoformat(),
+            "processes": [asdict(p) for p in processes],
+            "api_status": api_status,
+            "deployment_status": deployment_status,
+            "test_results": [
+                asdict(t) for t in self.test_results[-10:]
+            ],  # Last 10 tests
         }
 
-        with open(self.log_file, 'a') as f:
-            f.write(json.dumps(status) + '\n')
+        with open(self.log_file, "a") as f:
+            f.write(json.dumps(status) + "\n")
+
 
 class ProcessMonitor:
     """Monitor running processes."""
 
     def __init__(self):
         self.target_processes = [
-            'automated_workflow.py',
-            'simplified_recursive_analysis.py',
-            'resilient_book_analyzer.py',
-            'four_model_book_analyzer.py',
-            'recursive_book_analysis.py'
+            "automated_workflow.py",
+            "simplified_recursive_analysis.py",
+            "resilient_book_analyzer.py",
+            "four_model_book_analyzer.py",
+            "recursive_book_analysis.py",
         ]
 
     async def get_running_processes(self) -> List[ProcessInfo]:
         """Get information about running processes."""
         processes = []
 
-        for proc in psutil.process_iter(['pid', 'name', 'create_time', 'cmdline']):
+        for proc in psutil.process_iter(["pid", "name", "create_time", "cmdline"]):
             try:
-                cmdline = ' '.join(proc.info['cmdline']) if proc.info['cmdline'] else ''
+                cmdline = " ".join(proc.info["cmdline"]) if proc.info["cmdline"] else ""
 
                 # Check if this is one of our target processes
                 for target in self.target_processes:
                     if target in cmdline:
-                        runtime = time.time() - proc.info['create_time']
+                        runtime = time.time() - proc.info["create_time"]
 
                         process_info = ProcessInfo(
-                            pid=proc.info['pid'],
-                            name=proc.info['name'],
-                            start_time=proc.info['create_time'],
+                            pid=proc.info["pid"],
+                            name=proc.info["name"],
+                            start_time=proc.info["create_time"],
                             command=cmdline,
-                            status='running',
+                            status="running",
                             runtime_seconds=runtime,
-                            expected_max_runtime=self._get_expected_runtime(target)
+                            expected_max_runtime=self._get_expected_runtime(target),
                         )
 
                         processes.append(process_info)
@@ -429,19 +475,25 @@ class ProcessMonitor:
     def _get_expected_runtime(self, process_name: str) -> int:
         """Get expected maximum runtime for a process."""
         runtime_map = {
-            'automated_workflow.py': 3600,  # 1 hour
-            'simplified_recursive_analysis.py': 300,  # 5 minutes
-            'resilient_book_analyzer.py': 300,  # 5 minutes
-            'four_model_book_analyzer.py': 300,  # 5 minutes
-            'recursive_book_analysis.py': 300,  # 5 minutes
+            "automated_workflow.py": 3600,  # 1 hour
+            "simplified_recursive_analysis.py": 300,  # 5 minutes
+            "resilient_book_analyzer.py": 300,  # 5 minutes
+            "four_model_book_analyzer.py": 300,  # 5 minutes
+            "recursive_book_analysis.py": 300,  # 5 minutes
         }
         return runtime_map.get(process_name, 300)
+
 
 class APIKeyValidator:
     """Validate API keys."""
 
     def __init__(self):
-        self.required_keys = ['GOOGLE_API_KEY', 'DEEPSEEK_API_KEY', 'ANTHROPIC_API_KEY', 'OPENAI_API_KEY']
+        self.required_keys = [
+            "GOOGLE_API_KEY",
+            "DEEPSEEK_API_KEY",
+            "ANTHROPIC_API_KEY",
+            "OPENAI_API_KEY",
+        ]
 
     async def validate_all_keys(self) -> Dict[str, Dict[str, Any]]:
         """Validate all required API keys."""
@@ -458,28 +510,29 @@ class APIKeyValidator:
             api_key = os.getenv(key_name)
 
             if not api_key:
-                return {'valid': False, 'error': 'Key not set'}
+                return {"valid": False, "error": "Key not set"}
 
             if len(api_key) < 10:
-                return {'valid': False, 'error': 'Key too short'}
+                return {"valid": False, "error": "Key too short"}
 
             # Basic format validation
-            if key_name == 'GOOGLE_API_KEY' and not api_key.startswith('AIza'):
-                return {'valid': False, 'error': 'Invalid Google API key format'}
+            if key_name == "GOOGLE_API_KEY" and not api_key.startswith("AIza"):
+                return {"valid": False, "error": "Invalid Google API key format"}
 
-            if key_name == 'DEEPSEEK_API_KEY' and not api_key.startswith('sk-'):
-                return {'valid': False, 'error': 'Invalid DeepSeek API key format'}
+            if key_name == "DEEPSEEK_API_KEY" and not api_key.startswith("sk-"):
+                return {"valid": False, "error": "Invalid DeepSeek API key format"}
 
-            if key_name == 'ANTHROPIC_API_KEY' and not api_key.startswith('sk-ant-'):
-                return {'valid': False, 'error': 'Invalid Anthropic API key format'}
+            if key_name == "ANTHROPIC_API_KEY" and not api_key.startswith("sk-ant-"):
+                return {"valid": False, "error": "Invalid Anthropic API key format"}
 
-            if key_name == 'OPENAI_API_KEY' and not api_key.startswith('sk-'):
-                return {'valid': False, 'error': 'Invalid OpenAI API key format'}
+            if key_name == "OPENAI_API_KEY" and not api_key.startswith("sk-"):
+                return {"valid": False, "error": "Invalid OpenAI API key format"}
 
-            return {'valid': True, 'error': None}
+            return {"valid": True, "error": None}
 
         except Exception as e:
-            return {'valid': False, 'error': str(e)}
+            return {"valid": False, "error": str(e)}
+
 
 class PatchManager:
     """Manage patches and fixes."""
@@ -494,10 +547,10 @@ class PatchManager:
         # Load from .env.workflow
         env_file = Path(".env.workflow")
         if env_file.exists():
-            with open(env_file, 'r') as f:
+            with open(env_file, "r") as f:
                 for line in f:
-                    if '=' in line and not line.startswith('#'):
-                        key, value = line.strip().split('=', 1)
+                    if "=" in line and not line.startswith("#"):
+                        key, value = line.strip().split("=", 1)
                         os.environ[key] = value
 
             logger.info("✅ API keys loaded from .env.workflow")
@@ -529,10 +582,14 @@ class PatchManager:
 
         # Launch new deployment
         cmd = [
-            'python3', 'scripts/automated_workflow.py',
-            '--config', 'config/books_to_analyze_all_ai_ml.json',
-            '--budget', '410.0',
-            '--output', 'analysis_results/'
+            "python3",
+            "scripts/automated_workflow.py",
+            "--config",
+            "config/books_to_analyze_all_ai_ml.json",
+            "--budget",
+            "410.0",
+            "--output",
+            "analysis_results/",
         ]
 
         # Add environment variables
@@ -544,16 +601,17 @@ class PatchManager:
             env=env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            preexec_fn=os.setsid
+            preexec_fn=os.setsid,
         )
 
         logger.info(f"🚀 Launched new deployment (PID: {process.pid})")
+
 
 async def main():
     """Main function."""
     workflow = SelfHealingWorkflow()
     await workflow.run_continuous_monitoring()
 
+
 if __name__ == "__main__":
     asyncio.run(main())
-

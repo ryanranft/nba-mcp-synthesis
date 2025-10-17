@@ -22,7 +22,7 @@ import logging
 from typing import Dict, Any, List
 
 # Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Import the visualization engine
 from mcp_server.tools.advanced_visualization_engine import (
@@ -35,12 +35,13 @@ from mcp_server.tools.advanced_visualization_engine import (
     VisualizationType,
     ChartType,
     ExportFormat,
-    VisualizationConfig
+    VisualizationConfig,
 )
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 class Phase93TestSuite(unittest.TestCase):
     """Test suite for Phase 9.3: Advanced Visualization Engine"""
@@ -53,12 +54,12 @@ class Phase93TestSuite(unittest.TestCase):
             "sin(x)",
             "x**2 + y**2",
             "x*y + 2*x + 3*y",
-            "exp(-x**2)"
+            "exp(-x**2)",
         ]
         self.test_data = {
             "x": list(range(1, 21)),
             "y": [i**2 for i in range(1, 21)],
-            "z": [i**3 for i in range(1, 21)]
+            "z": [i**3 for i in range(1, 21)],
         }
 
     def test_engine_initialization(self):
@@ -71,9 +72,9 @@ class Phase93TestSuite(unittest.TestCase):
         # Check capabilities
         capabilities = self.engine.get_visualization_capabilities()
         self.assertIsInstance(capabilities, dict)
-        self.assertIn('matplotlib_available', capabilities)
-        self.assertIn('plotly_available', capabilities)
-        self.assertIn('supported_formats', capabilities)
+        self.assertIn("matplotlib_available", capabilities)
+        self.assertIn("plotly_available", capabilities)
+        self.assertIn("supported_formats", capabilities)
 
         logger.info("✓ Engine initialization test passed")
 
@@ -86,7 +87,7 @@ class Phase93TestSuite(unittest.TestCase):
             formula=formula,
             visualization_type=VisualizationType.FORMULA_GRAPH,
             chart_type=ChartType.LINE,
-            export_format=ExportFormat.PNG
+            export_format=ExportFormat.PNG,
         )
 
         self.assertIsNotNone(result)
@@ -111,7 +112,7 @@ class Phase93TestSuite(unittest.TestCase):
             formula=formula,
             visualization_type=VisualizationType.THREE_DIMENSIONAL,
             chart_type=ChartType.SURFACE,
-            export_format=ExportFormat.PNG
+            export_format=ExportFormat.PNG,
         )
 
         self.assertIsNotNone(result)
@@ -126,15 +127,14 @@ class Phase93TestSuite(unittest.TestCase):
 
         data = {"x": list(range(10)), "y": [i**2 for i in range(10)]}
         result = self.engine.create_interactive_visualization(
-            data=data,
-            visualization_type=VisualizationType.INTERACTIVE_CHART
+            data=data, visualization_type=VisualizationType.INTERACTIVE_CHART
         )
 
         self.assertIsNotNone(result)
 
         # Check if plotly is available for interactive visualizations
         capabilities = self.engine.get_visualization_capabilities()
-        if capabilities.get('plotly_available', False):
+        if capabilities.get("plotly_available", False):
             self.assertTrue(result.success)
             self.assertIsNotNone(result.interactive_data)
             self.assertIsInstance(result.controls, list)
@@ -153,7 +153,7 @@ class Phase93TestSuite(unittest.TestCase):
             data=self.test_data,
             visualization_type=VisualizationType.DATA_PLOT,
             chart_type=ChartType.LINE,
-            export_format=ExportFormat.PNG
+            export_format=ExportFormat.PNG,
         )
 
         self.assertIsNotNone(result)
@@ -170,7 +170,7 @@ class Phase93TestSuite(unittest.TestCase):
             data=self.test_data,
             visualization_type=VisualizationType.DATA_PLOT,
             chart_type=ChartType.SCATTER,
-            export_format=ExportFormat.PNG
+            export_format=ExportFormat.PNG,
         )
 
         self.assertIsNotNone(result)
@@ -187,7 +187,7 @@ class Phase93TestSuite(unittest.TestCase):
             data=self.test_data,
             visualization_type=VisualizationType.DATA_PLOT,
             chart_type=ChartType.HEATMAP,
-            export_format=ExportFormat.PNG
+            export_format=ExportFormat.PNG,
         )
 
         self.assertIsNotNone(result)
@@ -204,18 +204,20 @@ class Phase93TestSuite(unittest.TestCase):
         relationships = [
             ("x**2", "x**3", "related"),
             ("x**2", "x**2 + x**3", "dependency"),
-            ("x**3", "x**2 + x**3", "dependency")
+            ("x**3", "x**2 + x**3", "dependency"),
         ]
 
         result = self.engine.visualize_formula_relationships(
             formulas=formulas,
             relationships=relationships,
-            export_format=ExportFormat.PNG
+            export_format=ExportFormat.PNG,
         )
 
         self.assertIsNotNone(result)
         self.assertTrue(result.success)
-        self.assertEqual(result.visualization_type, VisualizationType.FORMULA_RELATIONSHIP)
+        self.assertEqual(
+            result.visualization_type, VisualizationType.FORMULA_RELATIONSHIP
+        )
 
         logger.info("✓ Formula relationship visualization test passed")
 
@@ -230,7 +232,7 @@ class Phase93TestSuite(unittest.TestCase):
             result = self.engine.visualize_formula(
                 formula=formula,
                 visualization_type=VisualizationType.FORMULA_GRAPH,
-                export_format=export_format
+                export_format=export_format,
             )
 
             self.assertIsNotNone(result)
@@ -241,7 +243,7 @@ class Phase93TestSuite(unittest.TestCase):
             if export_format in [ExportFormat.PNG, ExportFormat.BASE64]:
                 # Only check if matplotlib is available
                 capabilities = self.engine.get_visualization_capabilities()
-                if capabilities.get('matplotlib_available', False):
+                if capabilities.get("matplotlib_available", False):
                     self.assertIsNotNone(result.image_data)
             elif export_format == ExportFormat.SVG:
                 # SVG might be in json_data or image_data
@@ -262,20 +264,20 @@ class Phase93TestSuite(unittest.TestCase):
             x_label="Custom X",
             y_label="Custom Y",
             grid=True,
-            legend=True
+            legend=True,
         )
 
         result = self.engine.visualize_formula(
             formula="x**2",
             visualization_type=VisualizationType.FORMULA_GRAPH,
             config=config,
-            export_format=ExportFormat.PNG
+            export_format=ExportFormat.PNG,
         )
 
         self.assertIsNotNone(result)
         self.assertTrue(result.success)
         self.assertIsNotNone(result.metadata)
-        self.assertIn('config', result.metadata)
+        self.assertIn("config", result.metadata)
 
         logger.info("✓ Custom configuration test passed")
 
@@ -286,7 +288,7 @@ class Phase93TestSuite(unittest.TestCase):
         # Test invalid formula
         result = self.engine.visualize_formula(
             formula="invalid_formula_xyz",
-            visualization_type=VisualizationType.FORMULA_GRAPH
+            visualization_type=VisualizationType.FORMULA_GRAPH,
         )
 
         # Should handle gracefully
@@ -295,8 +297,7 @@ class Phase93TestSuite(unittest.TestCase):
 
         # Test empty data
         result = self.engine.visualize_data(
-            data={},
-            visualization_type=VisualizationType.DATA_PLOT
+            data={}, visualization_type=VisualizationType.DATA_PLOT
         )
 
         self.assertIsNotNone(result)
@@ -313,41 +314,41 @@ class Phase93TestSuite(unittest.TestCase):
             formula="x**2",
             visualization_type="formula_graph",
             chart_type="line",
-            export_format="png"
+            export_format="png",
         )
 
         self.assertIsInstance(result, dict)
-        self.assertIn('visualization_id', result)
-        self.assertIn('success', result)
+        self.assertIn("visualization_id", result)
+        self.assertIn("success", result)
 
         # Test visualize_data standalone function
         result = visualize_data(
             data=self.test_data,
             visualization_type="data_plot",
             chart_type="line",
-            export_format="png"
+            export_format="png",
         )
 
         self.assertIsInstance(result, dict)
-        self.assertIn('visualization_id', result)
-        self.assertIn('success', result)
+        self.assertIn("visualization_id", result)
+        self.assertIn("success", result)
 
         # Test create_interactive_visualization standalone function
         result = create_interactive_visualization(
             data={"x": [1, 2, 3], "y": [1, 4, 9]},
-            visualization_type="interactive_chart"
+            visualization_type="interactive_chart",
         )
 
         self.assertIsInstance(result, dict)
-        self.assertIn('visualization_id', result)
-        self.assertIn('success', result)
+        self.assertIn("visualization_id", result)
+        self.assertIn("success", result)
 
         # Test get_visualization_capabilities standalone function
         result = get_visualization_capabilities()
 
         self.assertIsInstance(result, dict)
-        self.assertIn('matplotlib_available', result)
-        self.assertIn('plotly_available', result)
+        self.assertIn("matplotlib_available", result)
+        self.assertIn("plotly_available", result)
 
         logger.info("✓ Standalone functions test passed")
 
@@ -362,7 +363,7 @@ class Phase93TestSuite(unittest.TestCase):
             result = self.engine.visualize_formula(
                 formula=formula,
                 visualization_type=VisualizationType.FORMULA_GRAPH,
-                export_format=ExportFormat.PNG
+                export_format=ExportFormat.PNG,
             )
             self.assertTrue(result.success)
 
@@ -372,7 +373,9 @@ class Phase93TestSuite(unittest.TestCase):
         # Performance should be reasonable (less than 30 seconds for 3 visualizations)
         self.assertLess(total_time, 30.0)
 
-        logger.info(f"✓ Performance test passed: {total_time:.2f} seconds for 3 visualizations")
+        logger.info(
+            f"✓ Performance test passed: {total_time:.2f} seconds for 3 visualizations"
+        )
 
     def test_integration_with_sports_formulas(self):
         """Test integration with sports formulas"""
@@ -382,20 +385,21 @@ class Phase93TestSuite(unittest.TestCase):
         basketball_formulas = [
             "x*y",  # Simple relationship
             "x**2 + y**2",  # Distance formula
-            "x + y + z"  # Sum formula
+            "x + y + z",  # Sum formula
         ]
 
         for formula in basketball_formulas:
             result = self.engine.visualize_formula(
                 formula=formula,
                 visualization_type=VisualizationType.FORMULA_GRAPH,
-                export_format=ExportFormat.PNG
+                export_format=ExportFormat.PNG,
             )
 
             self.assertIsNotNone(result)
             self.assertTrue(result.success)
 
         logger.info("✓ Sports formulas integration test passed")
+
 
 def run_performance_test():
     """Run performance test"""
@@ -405,7 +409,7 @@ def run_performance_test():
     test_data = {
         "points": list(range(1, 101)),
         "rebounds": [i * 0.8 for i in range(1, 101)],
-        "assists": [i * 0.6 for i in range(1, 101)]
+        "assists": [i * 0.6 for i in range(1, 101)],
     }
 
     start_time = time.time()
@@ -415,7 +419,7 @@ def run_performance_test():
         data=test_data,
         visualization_type=VisualizationType.DATA_PLOT,
         chart_type=ChartType.LINE,
-        export_format=ExportFormat.PNG
+        export_format=ExportFormat.PNG,
     )
 
     end_time = time.time()
@@ -425,6 +429,7 @@ def run_performance_test():
     logger.info(f"Success: {result.success}")
 
     return visualization_time < 10.0  # Should complete within 10 seconds
+
 
 def main():
     """Main test function"""
@@ -465,11 +470,16 @@ def main():
     logger.info(f"Success Rate: {success_rate:.1f}%")
 
     if result.wasSuccessful() and performance_passed:
-        logger.info("\n🎉 ALL TESTS PASSED! Phase 9.3 implementation is working correctly.")
+        logger.info(
+            "\n🎉 ALL TESTS PASSED! Phase 9.3 implementation is working correctly."
+        )
         return True
     else:
-        logger.info(f"\n❌ {failed_tests + error_tests} tests failed. Please review the implementation.")
+        logger.info(
+            f"\n❌ {failed_tests + error_tests} tests failed. Please review the implementation."
+        )
         return False
+
 
 if __name__ == "__main__":
     success = main()

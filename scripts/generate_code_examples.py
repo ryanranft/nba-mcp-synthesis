@@ -31,11 +31,13 @@ class CodeExampleGenerator:
         """Load GitHub repository mappings."""
         config_path = "config/github_repo_mappings.json"
         if os.path.exists(config_path):
-            with open(config_path, 'r') as f:
+            with open(config_path, "r") as f:
                 return json.load(f)
         return {}
 
-    async def generate_code_examples(self, analysis_results: Dict, output_dir: str) -> Dict[str, Any]:
+    async def generate_code_examples(
+        self, analysis_results: Dict, output_dir: str
+    ) -> Dict[str, Any]:
         """
         Generate code examples from GitHub repositories based on analysis results.
 
@@ -57,8 +59,8 @@ class CodeExampleGenerator:
             "summary": {
                 "total_examples": 0,
                 "repositories_used": [],
-                "concepts_covered": []
-            }
+                "concepts_covered": [],
+            },
         }
 
         # Extract key concepts from analysis
@@ -83,8 +85,13 @@ class CodeExampleGenerator:
 
                     # Track concepts covered
                     for example in examples:
-                        if example.get("concept") not in code_examples["summary"]["concepts_covered"]:
-                            code_examples["summary"]["concepts_covered"].append(example.get("concept"))
+                        if (
+                            example.get("concept")
+                            not in code_examples["summary"]["concepts_covered"]
+                        ):
+                            code_examples["summary"]["concepts_covered"].append(
+                                example.get("concept")
+                            )
 
             except Exception as e:
                 logger.error(f"Failed to process repository {repo_name}: {e}")
@@ -93,14 +100,19 @@ class CodeExampleGenerator:
         code_examples["summary"]["total_examples"] = len(code_examples["examples"])
 
         # Save code examples
-        output_file = os.path.join(output_dir, f"code_examples_{analysis_results.get('book_title', 'unknown').replace(' ', '_')}.json")
-        with open(output_file, 'w') as f:
+        output_file = os.path.join(
+            output_dir,
+            f"code_examples_{analysis_results.get('book_title', 'unknown').replace(' ', '_')}.json",
+        )
+        with open(output_file, "w") as f:
             json.dump(code_examples, f, indent=2)
 
         logger.info(f"✅ Generated {len(code_examples['examples'])} code examples")
         return code_examples
 
-    async def _extract_repo_code_examples(self, repo_name: str, repo_metadata: Dict, key_concepts: List[str]) -> List[Dict]:
+    async def _extract_repo_code_examples(
+        self, repo_name: str, repo_metadata: Dict, key_concepts: List[str]
+    ) -> List[Dict]:
         """Extract code examples from a specific repository."""
         examples = []
 
@@ -134,7 +146,9 @@ class CodeExampleGenerator:
             logger.error(f"Failed to read repository content from {s3_path}: {e}")
             return ""
 
-    async def _search_concept_examples(self, repo_content: str, concept: str, repo_name: str, repo_metadata: Dict) -> List[Dict]:
+    async def _search_concept_examples(
+        self, repo_content: str, concept: str, repo_name: str, repo_metadata: Dict
+    ) -> List[Dict]:
         """Search for code examples related to a specific concept."""
         examples = []
 
@@ -145,74 +159,76 @@ class CodeExampleGenerator:
                 r"def.*fit\(",
                 r"def.*predict\(",
                 r"from sklearn",
-                r"import.*sklearn"
+                r"import.*sklearn",
             ],
             "deep-learning": [
                 r"import torch",
                 r"import tensorflow",
                 r"class.*Model",
                 r"def.*forward\(",
-                r"nn\.Module"
+                r"nn\.Module",
             ],
             "neural-networks": [
                 r"class.*Network",
                 r"def.*forward\(",
                 r"nn\.Linear",
                 r"nn\.ReLU",
-                r"torch\.nn"
+                r"torch\.nn",
             ],
             "regression": [
                 r"LinearRegression",
                 r"def.*regress",
                 r"from sklearn\.linear_model",
                 r"Ridge",
-                r"Lasso"
+                r"Lasso",
             ],
             "classification": [
                 r"RandomForestClassifier",
                 r"SVC",
                 r"LogisticRegression",
                 r"def.*classify",
-                r"from sklearn\.ensemble"
+                r"from sklearn\.ensemble",
             ],
             "clustering": [
                 r"KMeans",
                 r"DBSCAN",
                 r"def.*cluster",
-                r"from sklearn\.cluster"
+                r"from sklearn\.cluster",
             ],
             "bayesian": [
                 r"import pymc",
                 r"import pyro",
                 r"def.*bayesian",
                 r"posterior",
-                r"prior"
+                r"prior",
             ],
             "reinforcement-learning": [
                 r"class.*Agent",
                 r"def.*q_learning",
                 r"def.*policy",
                 r"import gym",
-                r"env\.step"
+                r"env\.step",
             ],
             "computer-vision": [
                 r"import cv2",
                 r"import PIL",
                 r"def.*detect",
                 r"def.*segment",
-                r"torchvision"
+                r"torchvision",
             ],
             "natural-language-processing": [
                 r"import nltk",
                 r"import spacy",
                 r"def.*tokenize",
                 r"def.*embed",
-                r"transformers"
-            ]
+                r"transformers",
+            ],
         }
 
         # Get patterns for the concept
-        patterns = concept_patterns.get(concept, [f"def.*{concept}", f"class.*{concept}"])
+        patterns = concept_patterns.get(
+            concept, [f"def.*{concept}", f"class.*{concept}"]
+        )
 
         # Search for patterns in content
         for pattern in patterns:
@@ -225,26 +241,30 @@ class CodeExampleGenerator:
                 context = repo_content[start:end]
 
                 # Extract code snippet
-                code_snippet = self._extract_code_snippet(context, match.start() - start)
+                code_snippet = self._extract_code_snippet(
+                    context, match.start() - start
+                )
 
                 if code_snippet:
-                    examples.append({
-                        "concept": concept,
-                        "repository": repo_name,
-                        "code_snippet": code_snippet,
-                        "pattern_matched": pattern,
-                        "context": context,
-                        "file_path": f"example_{concept}_{len(examples)}.py",
-                        "description": f"Implementation example for {concept} from {repo_name}",
-                        "priority": repo_metadata.get("priority", "medium"),
-                        "s3_path": repo_metadata.get("s3_path")
-                    })
+                    examples.append(
+                        {
+                            "concept": concept,
+                            "repository": repo_name,
+                            "code_snippet": code_snippet,
+                            "pattern_matched": pattern,
+                            "context": context,
+                            "file_path": f"example_{concept}_{len(examples)}.py",
+                            "description": f"Implementation example for {concept} from {repo_name}",
+                            "priority": repo_metadata.get("priority", "medium"),
+                            "s3_path": repo_metadata.get("s3_path"),
+                        }
+                    )
 
         return examples
 
     def _extract_code_snippet(self, context: str, match_position: int) -> Optional[str]:
         """Extract a clean code snippet from context."""
-        lines = context.split('\n')
+        lines = context.split("\n")
 
         # Find the line containing the match
         current_pos = 0
@@ -263,15 +283,19 @@ class CodeExampleGenerator:
         snippet_lines = lines[start_line:end_line]
 
         # Clean up the snippet
-        snippet = '\n'.join(snippet_lines).strip()
+        snippet = "\n".join(snippet_lines).strip()
 
         # Basic validation - should contain some code
-        if len(snippet) > 50 and ('def ' in snippet or 'class ' in snippet or 'import ' in snippet):
+        if len(snippet) > 50 and (
+            "def " in snippet or "class " in snippet or "import " in snippet
+        ):
             return snippet
 
         return None
 
-    async def generate_concept_summary(self, code_examples: Dict, output_dir: str) -> Dict[str, Any]:
+    async def generate_concept_summary(
+        self, code_examples: Dict, output_dir: str
+    ) -> Dict[str, Any]:
         """Generate a summary of concepts and their implementations."""
         concept_summary = {
             "timestamp": datetime.now().isoformat(),
@@ -280,8 +304,8 @@ class CodeExampleGenerator:
             "statistics": {
                 "total_examples": len(code_examples.get("examples", [])),
                 "total_concepts": 0,
-                "total_repositories": 0
-            }
+                "total_repositories": 0,
+            },
         }
 
         # Group examples by concept
@@ -294,7 +318,7 @@ class CodeExampleGenerator:
                 concept_summary["concepts"][concept] = {
                     "examples": [],
                     "repositories": set(),
-                    "total_examples": 0
+                    "total_examples": 0,
                 }
 
             concept_summary["concepts"][concept]["examples"].append(example)
@@ -306,7 +330,7 @@ class CodeExampleGenerator:
                 concept_summary["repositories"][repo] = {
                     "examples": [],
                     "concepts": set(),
-                    "total_examples": 0
+                    "total_examples": 0,
                 }
 
             concept_summary["repositories"][repo]["examples"].append(example)
@@ -321,15 +345,21 @@ class CodeExampleGenerator:
             repo_data["concepts"] = list(repo_data["concepts"])
 
         # Update statistics
-        concept_summary["statistics"]["total_concepts"] = len(concept_summary["concepts"])
-        concept_summary["statistics"]["total_repositories"] = len(concept_summary["repositories"])
+        concept_summary["statistics"]["total_concepts"] = len(
+            concept_summary["concepts"]
+        )
+        concept_summary["statistics"]["total_repositories"] = len(
+            concept_summary["repositories"]
+        )
 
         # Save concept summary
         summary_file = os.path.join(output_dir, "concept_summary.json")
-        with open(summary_file, 'w') as f:
+        with open(summary_file, "w") as f:
             json.dump(concept_summary, f, indent=2)
 
-        logger.info(f"✅ Generated concept summary: {concept_summary['statistics']['total_concepts']} concepts, {concept_summary['statistics']['total_repositories']} repositories")
+        logger.info(
+            f"✅ Generated concept summary: {concept_summary['statistics']['total_concepts']} concepts, {concept_summary['statistics']['total_repositories']} repositories"
+        )
 
         return concept_summary
 
@@ -350,21 +380,20 @@ async def main():
                 "name": "handson-ml3",
                 "metadata": {
                     "s3_path": "textbook-code/machine-learning/handson-ml3_complete.txt",
-                    "priority": "critical"
-                }
+                    "priority": "critical",
+                },
             }
-        ]
+        ],
     }
 
     output_dir = "code_examples"
     code_examples = await generator.generate_code_examples(analysis_results, output_dir)
-    concept_summary = await generator.generate_concept_summary(code_examples, output_dir)
+    concept_summary = await generator.generate_concept_summary(
+        code_examples, output_dir
+    )
 
     print("✅ Code example generation completed!")
 
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
-

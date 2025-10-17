@@ -8,7 +8,9 @@ import os
 import logging
 from four_model_book_analyzer import FourModelBookAnalyzer
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -19,7 +21,12 @@ async def test_four_model_analysis():
     logger.info("Starting 4-model analysis test...")
 
     # Check API keys
-    required_keys = ["GOOGLE_API_KEY", "DEEPSEEK_API_KEY", "ANTHROPIC_API_KEY", "OPENAI_API_KEY"]
+    required_keys = [
+        "GOOGLE_API_KEY",
+        "DEEPSEEK_API_KEY",
+        "ANTHROPIC_API_KEY",
+        "OPENAI_API_KEY",
+    ]
     missing_keys = [key for key in required_keys if not os.getenv(key)]
 
     if missing_keys:
@@ -83,7 +90,7 @@ async def test_four_model_analysis():
             - Shadow Deployment: Deploying a new model alongside an old one to observe its performance without impacting users.
             - Monitoring: Tracking model predictions, data drift, and system health.
             - Rollback Strategies: Quickly reverting to previous stable versions.
-            """
+            """,
         },
         {
             "id": "test_statistics_601",
@@ -153,8 +160,8 @@ async def test_four_model_analysis():
             - Model comparison
             - Decision making under uncertainty
             - Hierarchical modeling
-            """
-        }
+            """,
+        },
     ]
 
     analyzer = FourModelBookAnalyzer()
@@ -173,10 +180,14 @@ async def test_four_model_analysis():
             if result.success:
                 logger.info(f"\n--- {book['title']} Results ---")
                 logger.info(f"Total Cost: ${result.total_cost:.4f}")
-                logger.info(f"  Readers: ${result.google_cost + result.deepseek_cost:.4f}")
+                logger.info(
+                    f"  Readers: ${result.google_cost + result.deepseek_cost:.4f}"
+                )
                 logger.info(f"    Google Gemini: ${result.google_cost:.4f}")
                 logger.info(f"    DeepSeek: ${result.deepseek_cost:.4f}")
-                logger.info(f"  Synthesizers: ${result.claude_cost + result.gpt4_cost:.4f}")
+                logger.info(
+                    f"  Synthesizers: ${result.claude_cost + result.gpt4_cost:.4f}"
+                )
                 logger.info(f"    Claude: ${result.claude_cost:.4f}")
                 logger.info(f"    GPT-4: ${result.gpt4_cost:.4f}")
                 logger.info(f"Total Tokens: {result.total_tokens:,}")
@@ -185,8 +196,12 @@ async def test_four_model_analysis():
                 recommendations = result.recommendations
                 logger.info(f"Recommendations Found: {len(recommendations)}")
 
-                critical_count = sum(1 for r in recommendations if r.get('priority') == 'CRITICAL')
-                important_count = sum(1 for r in recommendations if r.get('priority') == 'IMPORTANT')
+                critical_count = sum(
+                    1 for r in recommendations if r.get("priority") == "CRITICAL"
+                )
+                important_count = sum(
+                    1 for r in recommendations if r.get("priority") == "IMPORTANT"
+                )
 
                 logger.info(f"  Critical (2/2 vote): {critical_count}")
                 logger.info(f"  Important (1/2 vote): {important_count}")
@@ -196,7 +211,9 @@ async def test_four_model_analysis():
                 for j, rec in enumerate(recommendations[:3], 1):
                     logger.info(f"{j}. {rec.get('title', 'Unknown')}")
                     logger.info(f"   Priority: {rec.get('priority', 'Unknown')}")
-                    logger.info(f"   Consensus: {rec.get('consensus_score', 'Unknown')}")
+                    logger.info(
+                        f"   Consensus: {rec.get('consensus_score', 'Unknown')}"
+                    )
                     logger.info(f"   Phase: {rec.get('mapped_phase', 'Unknown')}")
                     logger.info(f"   Time: {rec.get('time_estimate', 'Unknown')}")
                     logger.info("-" * 40)
@@ -208,7 +225,9 @@ async def test_four_model_analysis():
                 assert len(recommendations) > 0, "No recommendations were extracted."
                 assert result.total_cost > 0, "Cost was not tracked."
                 assert result.total_tokens > 0, "Tokens were not tracked."
-                assert critical_count + important_count == len(recommendations), "All recommendations should be Critical or Important"
+                assert critical_count + important_count == len(
+                    recommendations
+                ), "All recommendations should be Critical or Important"
 
                 logger.info(f"✅ Book {i} test completed successfully!")
 
@@ -228,7 +247,9 @@ async def test_four_model_analysis():
     logger.info(f"Total cost: ${total_cost:.4f}")
     logger.info(f"Total recommendations: {total_recommendations}")
     logger.info(f"Average cost per book: ${total_cost/len(sample_books):.4f}")
-    logger.info(f"Average recommendations per book: {total_recommendations/len(sample_books):.1f}")
+    logger.info(
+        f"Average recommendations per book: {total_recommendations/len(sample_books):.1f}"
+    )
 
     # Cost projection for full deployment
     estimated_books = 17

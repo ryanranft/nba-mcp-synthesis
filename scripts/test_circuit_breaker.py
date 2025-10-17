@@ -15,8 +15,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from scripts.four_model_book_analyzer import FourModelBookAnalyzer
 from circuit_breaker import circuit_manager
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 async def test_resilient_analysis():
     """Test the resilient analysis with circuit breaker."""
@@ -24,17 +27,17 @@ async def test_resilient_analysis():
 
     # Test book metadata
     test_book = {
-        'title': 'Test Book for Circuit Breaker',
-        'author': 'Test Author',
-        's3_path': 'books/test.pdf',
-        'content': """
+        "title": "Test Book for Circuit Breaker",
+        "author": "Test Author",
+        "s3_path": "books/test.pdf",
+        "content": """
         This is a test book about machine learning and basketball analytics.
         It covers topics like:
         - Statistical analysis of player performance
         - Machine learning models for game prediction
         - Data visualization techniques
         - Performance optimization strategies
-        """
+        """,
     }
 
     # Initialize analyzer
@@ -44,7 +47,9 @@ async def test_resilient_analysis():
     logger.info("🛡️ Circuit breaker status:")
     status = circuit_manager.get_circuit_breaker_status()
     for api_name, info in status.items():
-        logger.info(f"  {api_name}: {info['state']} (can_execute: {info['can_execute']})")
+        logger.info(
+            f"  {api_name}: {info['state']} (can_execute: {info['can_execute']})"
+        )
 
     logger.info(f"✅ Working APIs: {circuit_manager.get_working_apis()}")
     logger.info(f"🚫 Broken APIs: {list(circuit_manager.broken_apis)}")
@@ -66,9 +71,10 @@ async def test_resilient_analysis():
     logger.info("🛡️ Final circuit breaker status:")
     final_status = circuit_manager.get_circuit_breaker_status()
     for api_name, info in final_status.items():
-        logger.info(f"  {api_name}: {info['state']} (failures: {info['failure_count']})")
+        logger.info(
+            f"  {api_name}: {info['state']} (failures: {info['failure_count']})"
+        )
+
 
 if __name__ == "__main__":
     asyncio.run(test_resilient_analysis())
-
-

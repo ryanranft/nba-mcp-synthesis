@@ -24,8 +24,7 @@ sys.path.insert(0, str(project_root))
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -51,7 +50,7 @@ class Phase61TestSuite:
             self.test_formula_validation,
             self.test_database_building,
             self.test_formula_search,
-            self.test_integration_workflow
+            self.test_integration_workflow,
         ]
 
         for test_method in test_methods:
@@ -61,11 +60,9 @@ class Phase61TestSuite:
             except Exception as e:
                 logger.error(f"❌ {test_method.__name__} failed: {e}")
                 self.failed_tests += 1
-                self.test_results.append({
-                    'test': test_method.__name__,
-                    'status': 'FAILED',
-                    'error': str(e)
-                })
+                self.test_results.append(
+                    {"test": test_method.__name__, "status": "FAILED", "error": str(e)}
+                )
 
         self.print_summary()
 
@@ -87,7 +84,11 @@ class Phase61TestSuite:
             logger.info("✓ Pattern initialization successful")
 
             # Test enum imports
-            from mcp_server.tools.automated_book_analysis import FormulaCategory, FormulaComplexity
+            from mcp_server.tools.automated_book_analysis import (
+                FormulaCategory,
+                FormulaComplexity,
+            )
+
             self.assertIsNotNone(FormulaCategory.EFFICIENCY)
             self.assertIsNotNone(FormulaComplexity.SIMPLE)
             logger.info("✓ Enum classes imported successfully")
@@ -109,7 +110,7 @@ class Phase61TestSuite:
             mock_page_texts = [
                 "Player Efficiency Rating = (PTS + REB + AST + STL + BLK - FGA - FTA - TOV) / MP * 100",
                 "True Shooting Percentage = PTS / (2 * (FGA + 0.44 * FTA))",
-                "Usage Rate = ((FGA + 0.44 * FTA + TOV) * (TM_MP / 5)) / (MP * (TM_FGA + 0.44 * TM_FTA + TM_TOV)) * 100"
+                "Usage Rate = ((FGA + 0.44 * FTA + TOV) * (TM_MP / 5)) / (MP * (TM_FGA + 0.44 * TM_FTA + TM_TOV)) * 100",
             ]
 
             analyzer = aba.AutomatedBookAnalyzer()
@@ -117,7 +118,7 @@ class Phase61TestSuite:
                 page_texts=mock_page_texts,
                 book_title="Test Book",
                 book_author="Test Author",
-                confidence_threshold=0.3
+                confidence_threshold=0.3,
             )
 
             self.assertGreater(len(formulas), 0, "Should extract at least one formula")
@@ -127,7 +128,9 @@ class Phase61TestSuite:
             for formula in formulas:
                 self.assertGreaterEqual(formula.confidence_score, 0.0)
                 self.assertLessEqual(formula.confidence_score, 1.0)
-                logger.info(f"✓ Formula '{formula.formula_text[:50]}...' has confidence {formula.confidence_score:.2f}")
+                logger.info(
+                    f"✓ Formula '{formula.formula_text[:50]}...' has confidence {formula.confidence_score:.2f}"
+                )
 
             logger.info("✓ Formula extraction test passed")
 
@@ -141,25 +144,29 @@ class Phase61TestSuite:
 
         try:
             from mcp_server.tools import automated_book_analysis as aba
-            from mcp_server.tools.automated_book_analysis import ExtractedFormula, FormulaCategory, FormulaComplexity
+            from mcp_server.tools.automated_book_analysis import (
+                ExtractedFormula,
+                FormulaCategory,
+                FormulaComplexity,
+            )
 
             # Create test formulas
             test_formulas = [
                 ExtractedFormula(
                     formula_id="test_1",
                     formula_text="Player Efficiency Rating = (PTS + REB + AST) / MP",
-                    confidence_score=0.9
+                    confidence_score=0.9,
                 ),
                 ExtractedFormula(
                     formula_id="test_2",
                     formula_text="Field Goal Percentage = FGM / FGA * 100",
-                    confidence_score=0.8
+                    confidence_score=0.8,
                 ),
                 ExtractedFormula(
                     formula_id="test_3",
                     formula_text="Defensive Rating = Points Allowed / Possessions * 100",
-                    confidence_score=0.7
-                )
+                    confidence_score=0.7,
+                ),
             ]
 
             analyzer = aba.AutomatedBookAnalyzer()
@@ -170,13 +177,15 @@ class Phase61TestSuite:
                 self.assertIsInstance(formula.category, FormulaCategory)
                 self.assertIsInstance(formula.complexity, FormulaComplexity)
                 self.assertIsNotNone(formula.description)
-                logger.info(f"✓ Formula '{formula.formula_id}' categorized as {formula.category.value} ({formula.complexity.value})")
+                logger.info(
+                    f"✓ Formula '{formula.formula_id}' categorized as {formula.category.value} ({formula.complexity.value})"
+                )
 
             # Test statistics calculation
             stats = analyzer._calculate_analysis_statistics(categorized_formulas)
-            self.assertIn('by_category', stats)
-            self.assertIn('by_complexity', stats)
-            self.assertIn('average_confidence', stats)
+            self.assertIn("by_category", stats)
+            self.assertIn("by_complexity", stats)
+            self.assertIn("average_confidence", stats)
             logger.info(f"✓ Statistics calculated: {stats['by_category']}")
 
             logger.info("✓ Formula categorization test passed")
@@ -195,38 +204,40 @@ class Phase61TestSuite:
             # Test validation with mock formulas
             mock_formulas = [
                 {
-                    'formula_id': 'valid_1',
-                    'formula_text': 'PER = (PTS + REB + AST) / MP',
-                    'formula_sympy': 'PER',
-                    'confidence_score': 0.9
+                    "formula_id": "valid_1",
+                    "formula_text": "PER = (PTS + REB + AST) / MP",
+                    "formula_sympy": "PER",
+                    "confidence_score": 0.9,
                 },
                 {
-                    'formula_id': 'invalid_1',
-                    'formula_text': '',
-                    'formula_sympy': None,
-                    'confidence_score': 0.0
+                    "formula_id": "invalid_1",
+                    "formula_text": "",
+                    "formula_sympy": None,
+                    "confidence_score": 0.0,
                 },
                 {
-                    'formula_id': 'warning_1',
-                    'formula_text': 'Complex Formula = sqrt(x^2 + y^2)',
-                    'formula_sympy': None,
-                    'confidence_score': 0.6
-                }
+                    "formula_id": "warning_1",
+                    "formula_text": "Complex Formula = sqrt(x^2 + y^2)",
+                    "formula_sympy": None,
+                    "confidence_score": 0.6,
+                },
             ]
 
             result = aba.validate_extracted_formulas(mock_formulas)
 
             # Test validation results
-            self.assertEqual(result['status'], 'success')
-            self.assertIn('validation_results', result)
-            self.assertIn('validation_statistics', result)
+            self.assertEqual(result["status"], "success")
+            self.assertIn("validation_results", result)
+            self.assertIn("validation_statistics", result)
 
-            stats = result['validation_statistics']
-            self.assertGreaterEqual(stats['valid_formulas'], 0)
-            self.assertGreaterEqual(stats['invalid_formulas'], 0)
-            self.assertGreaterEqual(stats['warning_formulas'], 0)
+            stats = result["validation_statistics"]
+            self.assertGreaterEqual(stats["valid_formulas"], 0)
+            self.assertGreaterEqual(stats["invalid_formulas"], 0)
+            self.assertGreaterEqual(stats["warning_formulas"], 0)
 
-            logger.info(f"✓ Validation completed: {stats['valid_formulas']} valid, {stats['invalid_formulas']} invalid, {stats['warning_formulas']} warnings")
+            logger.info(
+                f"✓ Validation completed: {stats['valid_formulas']} valid, {stats['invalid_formulas']} invalid, {stats['warning_formulas']} warnings"
+            )
 
             logger.info("✓ Formula validation test passed")
 
@@ -242,44 +253,51 @@ class Phase61TestSuite:
             # Test database building with mock analysis results
             mock_analysis_results = [
                 {
-                    'book_title': 'Test Book 1',
-                    'book_author': 'Test Author 1',
-                    'formulas_found': 5,
-                    'formulas_by_category': {'efficiency': 2, 'shooting': 3},
-                    'average_confidence': 0.8
+                    "book_title": "Test Book 1",
+                    "book_author": "Test Author 1",
+                    "formulas_found": 5,
+                    "formulas_by_category": {"efficiency": 2, "shooting": 3},
+                    "average_confidence": 0.8,
                 },
                 {
-                    'book_title': 'Test Book 2',
-                    'book_author': 'Test Author 2',
-                    'formulas_found': 3,
-                    'formulas_by_category': {'defensive': 2, 'team': 1},
-                    'average_confidence': 0.7
-                }
+                    "book_title": "Test Book 2",
+                    "book_author": "Test Author 2",
+                    "formulas_found": 3,
+                    "formulas_by_category": {"defensive": 2, "team": 1},
+                    "average_confidence": 0.7,
+                },
             ]
 
             # Test database building logic
-            total_formulas = sum(result.get('formulas_found', 0) for result in mock_analysis_results)
+            total_formulas = sum(
+                result.get("formulas_found", 0) for result in mock_analysis_results
+            )
             total_books = len(mock_analysis_results)
 
             self.assertEqual(total_formulas, 8)
             self.assertEqual(total_books, 2)
 
             database_info = {
-                'status': 'success',
-                'database_summary': {
-                    'total_books': total_books,
-                    'total_formulas': total_formulas,
-                    'export_format': 'json',
-                    'include_metadata': True,
-                    'include_relationships': True
+                "status": "success",
+                "database_summary": {
+                    "total_books": total_books,
+                    "total_formulas": total_formulas,
+                    "export_format": "json",
+                    "include_metadata": True,
+                    "include_relationships": True,
                 },
-                'books_included': [result.get('book_title', 'Unknown') for result in mock_analysis_results]
+                "books_included": [
+                    result.get("book_title", "Unknown")
+                    for result in mock_analysis_results
+                ],
             }
 
-            self.assertEqual(database_info['database_summary']['total_formulas'], 8)
-            self.assertEqual(len(database_info['books_included']), 2)
+            self.assertEqual(database_info["database_summary"]["total_formulas"], 8)
+            self.assertEqual(len(database_info["books_included"]), 2)
 
-            logger.info(f"✓ Database built with {total_formulas} formulas from {total_books} books")
+            logger.info(
+                f"✓ Database built with {total_formulas} formulas from {total_books} books"
+            )
             logger.info("✓ Database building test passed")
 
         except Exception as e:
@@ -293,26 +311,30 @@ class Phase61TestSuite:
         try:
             # Test search functionality with mock data
             search_queries = [
-                {'query': 'efficiency', 'search_type': 'text'},
-                {'query': 'shooting', 'search_type': 'category'},
-                {'query': 'simple', 'search_type': 'complexity'},
-                {'query': 'PTS', 'search_type': 'variables'}
+                {"query": "efficiency", "search_type": "text"},
+                {"query": "shooting", "search_type": "category"},
+                {"query": "simple", "search_type": "complexity"},
+                {"query": "PTS", "search_type": "variables"},
             ]
 
             for search_params in search_queries:
                 search_results = {
-                    'status': 'success',
-                    'search_query': search_params['query'],
-                    'search_type': search_params['search_type'],
-                    'results_found': 0,  # Mock result
-                    'formulas': []
+                    "status": "success",
+                    "search_query": search_params["query"],
+                    "search_type": search_params["search_type"],
+                    "results_found": 0,  # Mock result
+                    "formulas": [],
                 }
 
-                self.assertEqual(search_results['status'], 'success')
-                self.assertEqual(search_results['search_query'], search_params['query'])
-                self.assertEqual(search_results['search_type'], search_params['search_type'])
+                self.assertEqual(search_results["status"], "success")
+                self.assertEqual(search_results["search_query"], search_params["query"])
+                self.assertEqual(
+                    search_results["search_type"], search_params["search_type"]
+                )
 
-                logger.info(f"✓ Search for '{search_params['query']}' ({search_params['search_type']}) completed")
+                logger.info(
+                    f"✓ Search for '{search_params['query']}' ({search_params['search_type']}) completed"
+                )
 
             logger.info("✓ Formula search test passed")
 
@@ -331,7 +353,7 @@ class Phase61TestSuite:
             mock_page_texts = [
                 "Player Efficiency Rating = (PTS + REB + AST + STL + BLK - FGA - FTA - TOV) / MP * 100",
                 "True Shooting Percentage = PTS / (2 * (FGA + 0.44 * FTA))",
-                "Usage Rate = ((FGA + 0.44 * FTA + TOV) * (TM_MP / 5)) / (MP * (TM_FGA + 0.44 * TM_FTA + TM_TOV)) * 100"
+                "Usage Rate = ((FGA + 0.44 * FTA + TOV) * (TM_MP / 5)) / (MP * (TM_FGA + 0.44 * TM_FTA + TM_TOV)) * 100",
             ]
 
             analyzer = aba.AutomatedBookAnalyzer()
@@ -341,7 +363,7 @@ class Phase61TestSuite:
                 page_texts=mock_page_texts,
                 book_title="Integration Test Book",
                 book_author="Test Author",
-                confidence_threshold=0.3
+                confidence_threshold=0.3,
             )
 
             self.assertGreater(len(formulas), 0)
@@ -357,19 +379,24 @@ class Phase61TestSuite:
             formula_dicts = [aba.asdict(formula) for formula in categorized_formulas]
             validation_result = aba.validate_extracted_formulas(formula_dicts)
 
-            self.assertEqual(validation_result['status'], 'success')
+            self.assertEqual(validation_result["status"], "success")
             logger.info(f"✓ Step 3: Validated formulas")
 
             # Step 4: Build database
             analysis_result = {
-                'book_title': 'Integration Test Book',
-                'book_author': 'Test Author',
-                'formulas_found': len(categorized_formulas),
-                'formulas_by_category': analyzer._calculate_analysis_statistics(categorized_formulas)['by_category'],
-                'average_confidence': sum(f.confidence_score for f in categorized_formulas) / len(categorized_formulas)
+                "book_title": "Integration Test Book",
+                "book_author": "Test Author",
+                "formulas_found": len(categorized_formulas),
+                "formulas_by_category": analyzer._calculate_analysis_statistics(
+                    categorized_formulas
+                )["by_category"],
+                "average_confidence": sum(
+                    f.confidence_score for f in categorized_formulas
+                )
+                / len(categorized_formulas),
             }
 
-            total_formulas = analysis_result['formulas_found']
+            total_formulas = analysis_result["formulas_found"]
             self.assertGreater(total_formulas, 0)
             logger.info(f"✓ Step 4: Built database with {total_formulas} formulas")
 
@@ -426,14 +453,18 @@ class Phase61TestSuite:
         if self.failed_tests > 0:
             logger.info("\nFailed Tests:")
             for result in self.test_results:
-                if result['status'] == 'FAILED':
+                if result["status"] == "FAILED":
                     logger.info(f"  - {result['test']}: {result['error']}")
 
-        success_rate = (self.passed_tests / (self.passed_tests + self.failed_tests)) * 100
+        success_rate = (
+            self.passed_tests / (self.passed_tests + self.failed_tests)
+        ) * 100
         logger.info(f"\nSuccess Rate: {success_rate:.1f}%")
 
         if self.failed_tests == 0:
-            logger.info("🎉 ALL TESTS PASSED! Phase 6.1 implementation is working correctly.")
+            logger.info(
+                "🎉 ALL TESTS PASSED! Phase 6.1 implementation is working correctly."
+            )
         else:
             logger.info("⚠️  Some tests failed. Please review the implementation.")
 

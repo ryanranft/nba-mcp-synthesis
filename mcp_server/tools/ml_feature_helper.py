@@ -15,26 +15,37 @@ from functools import wraps
 
 def log_operation(operation_name: str):
     """Decorator for structured logging of operations"""
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             try:
                 result = func(*args, **kwargs)
-                print(json.dumps({
-                    "operation": operation_name,
-                    "status": "success",
-                    "function": func.__name__
-                }))
+                print(
+                    json.dumps(
+                        {
+                            "operation": operation_name,
+                            "status": "success",
+                            "function": func.__name__,
+                        }
+                    )
+                )
                 return result
             except Exception as e:
-                print(json.dumps({
-                    "operation": operation_name,
-                    "status": "error",
-                    "function": func.__name__,
-                    "error": str(e)
-                }))
+                print(
+                    json.dumps(
+                        {
+                            "operation": operation_name,
+                            "status": "error",
+                            "function": func.__name__,
+                            "error": str(e),
+                        }
+                    )
+                )
                 raise
+
         return wrapper
+
     return decorator
 
 
@@ -42,11 +53,12 @@ def log_operation(operation_name: str):
 # Feature Normalization and Scaling
 # ============================================================================
 
+
 @log_operation("ml_normalize_features")
 def normalize_features(
     data: List[List[Union[int, float]]],
     method: str = "min-max",
-    feature_range: Tuple[float, float] = (0.0, 1.0)
+    feature_range: Tuple[float, float] = (0.0, 1.0),
 ) -> Dict[str, Any]:
     """
     Normalize/standardize features for machine learning.
@@ -109,18 +121,23 @@ def normalize_features(
         stats = {
             "min": min(feature_values),
             "max": max(feature_values),
-            "mean": sum(feature_values) / len(feature_values)
+            "mean": sum(feature_values) / len(feature_values),
         }
 
         # Calculate std dev
-        variance = sum((x - stats["mean"]) ** 2 for x in feature_values) / len(feature_values)
+        variance = sum((x - stats["mean"]) ** 2 for x in feature_values) / len(
+            feature_values
+        )
         stats["std"] = math.sqrt(variance)
 
         # Calculate median and IQR for robust scaling
         sorted_values = sorted(feature_values)
         median_idx = len(sorted_values) // 2
-        stats["median"] = sorted_values[median_idx] if len(sorted_values) % 2 == 1 else \
-                          (sorted_values[median_idx - 1] + sorted_values[median_idx]) / 2
+        stats["median"] = (
+            sorted_values[median_idx]
+            if len(sorted_values) % 2 == 1
+            else (sorted_values[median_idx - 1] + sorted_values[median_idx]) / 2
+        )
 
         q1_idx = len(sorted_values) // 4
         q3_idx = 3 * len(sorted_values) // 4
@@ -151,9 +168,13 @@ def normalize_features(
                     normalized_value = target_min
                 else:
                     # Min-max normalization
-                    normalized_value = (value - stats["min"]) / (stats["max"] - stats["min"])
+                    normalized_value = (value - stats["min"]) / (
+                        stats["max"] - stats["min"]
+                    )
                     # Scale to target range
-                    normalized_value = normalized_value * (target_max - target_min) + target_min
+                    normalized_value = (
+                        normalized_value * (target_max - target_min) + target_min
+                    )
 
                 normalized_sample.append(normalized_value)
 
@@ -222,8 +243,10 @@ def normalize_features(
             normalized_data.append(normalized_sample)
 
     else:
-        raise ValueError(f"Unknown normalization method: {method}. "
-                        f"Use 'min-max', 'z-score', 'robust', or 'max-abs'")
+        raise ValueError(
+            f"Unknown normalization method: {method}. "
+            f"Use 'min-max', 'z-score', 'robust', or 'max-abs'"
+        )
 
     return {
         "normalized_data": normalized_data,
@@ -231,7 +254,7 @@ def normalize_features(
         "statistics": statistics,
         "num_samples": n_samples,
         "num_features": n_features,
-        "feature_range": feature_range if method == "min-max" else None
+        "feature_range": feature_range if method == "min-max" else None,
     }
 
 
@@ -239,13 +262,14 @@ def normalize_features(
 # Feature Importance (Permutation Importance)
 # ============================================================================
 
+
 @log_operation("ml_feature_importance")
 def calculate_feature_importance(
     X: List[List[Union[int, float]]],
     y: List[Any],
     model_predictions: List[Any],
     n_repeats: int = 10,
-    random_seed: Optional[int] = None
+    random_seed: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
     Calculate feature importance using permutation importance.
@@ -311,6 +335,7 @@ def calculate_feature_importance(
     # Set random seed
     if random_seed is not None:
         import random
+
         random.seed(random_seed)
 
     import random
@@ -319,7 +344,9 @@ def calculate_feature_importance(
     n_features = len(X[0])
 
     # Calculate baseline accuracy
-    baseline_accuracy = sum(1 for i in range(n_samples) if model_predictions[i] == y[i]) / n_samples
+    baseline_accuracy = (
+        sum(1 for i in range(n_samples) if model_predictions[i] == y[i]) / n_samples
+    )
 
     # Calculate importance for each feature
     importance_scores = []
@@ -361,7 +388,9 @@ def calculate_feature_importance(
 
         # Average importance and calculate std
         avg_importance = sum(feature_importances) / len(feature_importances)
-        variance = sum((x - avg_importance) ** 2 for x in feature_importances) / len(feature_importances)
+        variance = sum((x - avg_importance) ** 2 for x in feature_importances) / len(
+            feature_importances
+        )
         std = math.sqrt(variance)
 
         importance_scores.append(avg_importance)
@@ -369,9 +398,7 @@ def calculate_feature_importance(
 
     # Rank features by importance
     feature_ranking = sorted(
-        range(n_features),
-        key=lambda i: importance_scores[i],
-        reverse=True
+        range(n_features), key=lambda i: importance_scores[i], reverse=True
     )
 
     return {
@@ -385,12 +412,14 @@ def calculate_feature_importance(
         "interpretation": {
             "high_importance": "Feature strongly affects predictions (>0.1)",
             "medium_importance": "Feature moderately affects predictions (0.05-0.1)",
-            "low_importance": "Feature weakly affects predictions (<0.05)"
-        }
+            "low_importance": "Feature weakly affects predictions (<0.05)",
+        },
     }
 
 
-def _calculate_correlation(x: List[Union[int, float]], y: List[Union[int, float]]) -> float:
+def _calculate_correlation(
+    x: List[Union[int, float]], y: List[Union[int, float]]
+) -> float:
     """
     Calculate Pearson correlation coefficient.
 
@@ -419,7 +448,9 @@ def _calculate_correlation(x: List[Union[int, float]], y: List[Union[int, float]
     return numerator / (denominator_x * denominator_y)
 
 
-def _calculate_variance_reduction(feature: List[Union[int, float]], labels: List[Any]) -> float:
+def _calculate_variance_reduction(
+    feature: List[Union[int, float]], labels: List[Any]
+) -> float:
     """
     Calculate variance reduction (information gain proxy).
 
@@ -437,7 +468,7 @@ def _calculate_variance_reduction(feature: List[Union[int, float]], labels: List
     total_impurity = 1.0
     for count in label_counts.values():
         p = count / total_samples
-        total_impurity -= p ** 2
+        total_impurity -= p**2
 
     # Split by median
     median = sorted(feature)[len(feature) // 2]
@@ -456,14 +487,15 @@ def _calculate_variance_reduction(feature: List[Union[int, float]], labels: List
         imp = 1.0
         for count in subset_counts.values():
             p = count / len(subset_labels)
-            imp -= p ** 2
+            imp -= p**2
         return imp
 
     left_impurity = impurity(left_labels)
     right_impurity = impurity(right_labels)
 
-    weighted_impurity = (len(left_labels) / total_samples) * left_impurity + \
-                       (len(right_labels) / total_samples) * right_impurity
+    weighted_impurity = (len(left_labels) / total_samples) * left_impurity + (
+        len(right_labels) / total_samples
+    ) * right_impurity
 
     # Variance reduction
     return total_impurity - weighted_impurity

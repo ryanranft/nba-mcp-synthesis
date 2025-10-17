@@ -13,14 +13,18 @@ from pathlib import Path
 
 try:
     from .resilience import retry_with_backoff, get_circuit_breaker
+
     RESILIENCE_AVAILABLE = True
 except ImportError:
     RESILIENCE_AVAILABLE = False
+
     # Fallback no-op decorator
     def retry_with_backoff(**kwargs):
         def decorator(func):
             return func
+
         return decorator
+
 
 logger = logging.getLogger(__name__)
 
@@ -50,9 +54,7 @@ class MCPClient:
         logger.info(f"MCP Client initialized for {server_url}")
 
     @retry_with_backoff(
-        max_retries=3,
-        base_delay=1.0,
-        retry_on=(ConnectionError, TimeoutError, OSError)
+        max_retries=3, base_delay=1.0, retry_on=(ConnectionError, TimeoutError, OSError)
     )
     async def connect(self, server_url: Optional[str] = None) -> bool:
         """
@@ -81,7 +83,7 @@ class MCPClient:
                 "fetch_s3_sample_data",
                 "get_glue_table_metadata",
                 "read_project_file",
-                "search_codebase"
+                "search_codebase",
             ]
 
             logger.info(f"Connected to MCP server: {self.server_url}")
@@ -94,9 +96,7 @@ class MCPClient:
             return False
 
     @retry_with_backoff(
-        max_retries=2,
-        base_delay=0.5,
-        retry_on=(ConnectionError, TimeoutError)
+        max_retries=2, base_delay=0.5, retry_on=(ConnectionError, TimeoutError)
     )
     async def call_tool(self, tool_name: str, params: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -128,7 +128,7 @@ class MCPClient:
                 "success": True,
                 "tool": tool_name,
                 "result": result,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:
@@ -137,14 +137,11 @@ class MCPClient:
                 "success": False,
                 "tool": tool_name,
                 "error": str(e),
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
     async def gather_context(
-        self,
-        query_type: str,
-        user_input: str,
-        code: Optional[str] = None
+        self, query_type: str, user_input: str, code: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Gather relevant context based on query type
@@ -164,7 +161,7 @@ class MCPClient:
             "user_input": user_input,
             "code": code,
             "metadata": {},
-            "gathered_at": datetime.now().isoformat()
+            "gathered_at": datetime.now().isoformat(),
         }
 
         try:
@@ -192,7 +189,9 @@ class MCPClient:
             context["error"] = str(e)
             return context
 
-    async def _gather_sql_context(self, user_input: str, sql_query: Optional[str]) -> Dict[str, Any]:
+    async def _gather_sql_context(
+        self, user_input: str, sql_query: Optional[str]
+    ) -> Dict[str, Any]:
         """Gather context for SQL optimization"""
         context = {}
 
@@ -203,7 +202,9 @@ class MCPClient:
         # Get schema for each table
         schemas = {}
         for table in tables:
-            schema_result = await self.call_tool("get_table_schema", {"table_name": table})
+            schema_result = await self.call_tool(
+                "get_table_schema", {"table_name": table}
+            )
             if schema_result["success"]:
                 schemas[table] = schema_result["result"]
 
@@ -212,7 +213,9 @@ class MCPClient:
         # Get table statistics
         stats = {}
         for table in tables:
-            stats_result = await self.call_tool("get_table_stats", {"table_name": table})
+            stats_result = await self.call_tool(
+                "get_table_stats", {"table_name": table}
+            )
             if stats_result["success"]:
                 stats[table] = stats_result["result"]
 
@@ -220,13 +223,17 @@ class MCPClient:
 
         # Get EXPLAIN plan if we have a full query
         if sql_query:
-            explain_result = await self.call_tool("get_explain_plan", {"sql_query": sql_query})
+            explain_result = await self.call_tool(
+                "get_explain_plan", {"sql_query": sql_query}
+            )
             if explain_result["success"]:
                 context["explain_plan"] = explain_result["result"]
 
         return context
 
-    async def _gather_code_context(self, user_input: str, code: Optional[str]) -> Dict[str, Any]:
+    async def _gather_code_context(
+        self, user_input: str, code: Optional[str]
+    ) -> Dict[str, Any]:
         """Gather context for code optimization"""
         context = {}
 
@@ -236,7 +243,9 @@ class MCPClient:
         # Read related files
         file_contents = {}
         for file_path in files:
-            file_result = await self.call_tool("read_project_file", {"file_path": file_path})
+            file_result = await self.call_tool(
+                "read_project_file", {"file_path": file_path}
+            )
             if file_result["success"]:
                 file_contents[file_path] = file_result["result"]
 
@@ -250,8 +259,7 @@ class MCPClient:
 
             for pattern in patterns[:3]:  # Limit to top 3 patterns
                 search_result = await self.call_tool(
-                    "search_codebase",
-                    {"pattern": pattern, "max_results": 5}
+                    "search_codebase", {"pattern": pattern, "max_results": 5}
                 )
                 if search_result["success"]:
                     search_results[pattern] = search_result["result"]
@@ -271,8 +279,7 @@ class MCPClient:
         sample_data = {}
         for table in tables:
             sample_result = await self.call_tool(
-                "fetch_s3_sample_data",
-                {"table_name": table, "sample_size": 100}
+                "fetch_s3_sample_data", {"table_name": table, "sample_size": 100}
             )
             if sample_result["success"]:
                 sample_data[table] = sample_result["result"]
@@ -283,8 +290,7 @@ class MCPClient:
         metadata = {}
         for table in tables:
             meta_result = await self.call_tool(
-                "get_glue_table_metadata",
-                {"table_name": table}
+                "get_glue_table_metadata", {"table_name": table}
             )
             if meta_result["success"]:
                 metadata[table] = meta_result["result"]
@@ -304,7 +310,9 @@ class MCPClient:
         # Get source schemas
         source_schemas = {}
         for table in sources:
-            schema_result = await self.call_tool("get_table_schema", {"table_name": table})
+            schema_result = await self.call_tool(
+                "get_table_schema", {"table_name": table}
+            )
             if schema_result["success"]:
                 source_schemas[table] = schema_result["result"]
 
@@ -313,7 +321,9 @@ class MCPClient:
         # Get target schemas
         target_schemas = {}
         for table in targets:
-            schema_result = await self.call_tool("get_table_schema", {"table_name": table})
+            schema_result = await self.call_tool(
+                "get_table_schema", {"table_name": table}
+            )
             if schema_result["success"]:
                 target_schemas[table] = schema_result["result"]
 
@@ -323,8 +333,7 @@ class MCPClient:
         sample_data = {}
         for table in sources:
             sample_result = await self.call_tool(
-                "fetch_s3_sample_data",
-                {"table_name": table, "sample_size": 50}
+                "fetch_s3_sample_data", {"table_name": table, "sample_size": 50}
             )
             if sample_result["success"]:
                 sample_data[table] = sample_result["result"]
@@ -333,7 +342,9 @@ class MCPClient:
 
         return context
 
-    async def _gather_debug_context(self, user_input: str, code: Optional[str]) -> Dict[str, Any]:
+    async def _gather_debug_context(
+        self, user_input: str, code: Optional[str]
+    ) -> Dict[str, Any]:
         """Gather context for debugging"""
         context = {}
 
@@ -346,7 +357,9 @@ class MCPClient:
         file_contents = {}
 
         for file_path in files:
-            file_result = await self.call_tool("read_project_file", {"file_path": file_path})
+            file_result = await self.call_tool(
+                "read_project_file", {"file_path": file_path}
+            )
             if file_result["success"]:
                 file_contents[file_path] = file_result["result"]
 
@@ -358,7 +371,9 @@ class MCPClient:
             schemas = {}
 
             for table in tables:
-                schema_result = await self.call_tool("get_table_schema", {"table_name": table})
+                schema_result = await self.call_tool(
+                    "get_table_schema", {"table_name": table}
+                )
                 if schema_result["success"]:
                     schemas[table] = schema_result["result"]
 
@@ -366,7 +381,9 @@ class MCPClient:
 
         return context
 
-    async def _gather_general_context(self, user_input: str, code: Optional[str]) -> Dict[str, Any]:
+    async def _gather_general_context(
+        self, user_input: str, code: Optional[str]
+    ) -> Dict[str, Any]:
         """Gather general context"""
         context = {}
 
@@ -375,7 +392,9 @@ class MCPClient:
         if tables:
             schemas = {}
             for table in tables[:3]:  # Limit to 3 tables
-                schema_result = await self.call_tool("get_table_schema", {"table_name": table})
+                schema_result = await self.call_tool(
+                    "get_table_schema", {"table_name": table}
+                )
                 if schema_result["success"]:
                     schemas[table] = schema_result["result"]
             context["schemas"] = schemas
@@ -385,7 +404,9 @@ class MCPClient:
         if files:
             file_contents = {}
             for file_path in files[:3]:  # Limit to 3 files
-                file_result = await self.call_tool("read_project_file", {"file_path": file_path})
+                file_result = await self.call_tool(
+                    "read_project_file", {"file_path": file_path}
+                )
                 if file_result["success"]:
                     file_contents[file_path] = file_result["result"]
             context["files"] = file_contents
@@ -394,15 +415,26 @@ class MCPClient:
 
     # Helper methods for extracting information
 
-    def _extract_table_names(self, text: str, source_type: Optional[str] = None) -> List[str]:
+    def _extract_table_names(
+        self, text: str, source_type: Optional[str] = None
+    ) -> List[str]:
         """Extract table names from text"""
         tables = []
 
         # Common NBA table patterns
         nba_tables = [
-            "player_stats", "team_stats", "game_logs", "play_by_play",
-            "shot_chart", "boxscores", "advanced_stats", "tracking_stats",
-            "games", "players", "teams", "seasons"
+            "player_stats",
+            "team_stats",
+            "game_logs",
+            "play_by_play",
+            "shot_chart",
+            "boxscores",
+            "advanced_stats",
+            "tracking_stats",
+            "games",
+            "players",
+            "teams",
+            "seasons",
         ]
 
         text_lower = text.lower()
@@ -413,22 +445,26 @@ class MCPClient:
                 tables.append(table)
 
         # Extract from SQL-like patterns (FROM clause)
-        from_pattern = r'FROM\s+([a-zA-Z_][a-zA-Z0-9_]*)'
+        from_pattern = r"FROM\s+([a-zA-Z_][a-zA-Z0-9_]*)"
         matches = re.findall(from_pattern, text, re.IGNORECASE)
         tables.extend(matches)
 
         # Extract from JOIN clauses
-        join_pattern = r'JOIN\s+([a-zA-Z_][a-zA-Z0-9_]*)'
+        join_pattern = r"JOIN\s+([a-zA-Z_][a-zA-Z0-9_]*)"
         matches = re.findall(join_pattern, text, re.IGNORECASE)
         tables.extend(matches)
 
         # Filter by source type if specified
         if source_type == "source":
             source_keywords = ["from", "source", "extract", "read"]
-            tables = [t for t in tables if any(k in text_lower for k in source_keywords)]
+            tables = [
+                t for t in tables if any(k in text_lower for k in source_keywords)
+            ]
         elif source_type == "target":
             target_keywords = ["to", "target", "load", "write", "insert"]
-            tables = [t for t in tables if any(k in text_lower for k in target_keywords)]
+            tables = [
+                t for t in tables if any(k in text_lower for k in target_keywords)
+            ]
 
         return list(set(tables))  # Remove duplicates
 
@@ -438,10 +474,10 @@ class MCPClient:
 
         # Pattern for file paths
         path_patterns = [
-            r'([/\\]?[\w-]+[/\\][\w-]+[/\\][\w.-]+\.py)',  # Python files
-            r'([/\\]?[\w-]+[/\\][\w-]+[/\\][\w.-]+\.sql)',  # SQL files
-            r'([/\\]?[\w-]+[/\\][\w-]+[/\\][\w.-]+\.json)',  # JSON files
-            r'`([^`]+\.(?:py|sql|json|yaml|yml))`',  # Files in backticks
+            r"([/\\]?[\w-]+[/\\][\w-]+[/\\][\w.-]+\.py)",  # Python files
+            r"([/\\]?[\w-]+[/\\][\w-]+[/\\][\w.-]+\.sql)",  # SQL files
+            r"([/\\]?[\w-]+[/\\][\w-]+[/\\][\w.-]+\.json)",  # JSON files
+            r"`([^`]+\.(?:py|sql|json|yaml|yml))`",  # Files in backticks
             r'"([^"]+\.(?:py|sql|json|yaml|yml))"',  # Files in quotes
         ]
 
@@ -456,17 +492,17 @@ class MCPClient:
         patterns = []
 
         # Extract function definitions
-        func_pattern = r'def\s+([a-zA-Z_][a-zA-Z0-9_]*)'
+        func_pattern = r"def\s+([a-zA-Z_][a-zA-Z0-9_]*)"
         functions = re.findall(func_pattern, code)
         patterns.extend(functions)
 
         # Extract class definitions
-        class_pattern = r'class\s+([a-zA-Z_][a-zA-Z0-9_]*)'
+        class_pattern = r"class\s+([a-zA-Z_][a-zA-Z0-9_]*)"
         classes = re.findall(class_pattern, code)
         patterns.extend(classes)
 
         # Extract important variable names (avoid common ones)
-        var_pattern = r'([a-zA-Z_][a-zA-Z0-9_]{4,})\s*='
+        var_pattern = r"([a-zA-Z_][a-zA-Z0-9_]{4,})\s*="
         variables = re.findall(var_pattern, code)
         common_vars = {"self", "data", "result", "value", "item", "temp"}
         patterns.extend([v for v in variables if v not in common_vars])
@@ -478,7 +514,7 @@ class MCPClient:
         error_info = {}
 
         # Extract error type
-        error_type_pattern = r'(\w+Error|\w+Exception):\s*(.+)'
+        error_type_pattern = r"(\w+Error|\w+Exception):\s*(.+)"
         match = re.search(error_type_pattern, text)
         if match:
             error_info["error_type"] = match.group(1)
@@ -489,8 +525,7 @@ class MCPClient:
         matches = re.findall(traceback_pattern, text)
         if matches:
             error_info["traceback"] = [
-                {"file": file, "line": int(line)}
-                for file, line in matches
+                {"file": file, "line": int(line)} for file, line in matches
             ]
 
         return error_info
@@ -510,10 +545,10 @@ class MCPClient:
                 "columns": [
                     {"name": "id", "type": "INTEGER", "nullable": False},
                     {"name": "name", "type": "VARCHAR(255)", "nullable": False},
-                    {"name": "value", "type": "NUMERIC", "nullable": True}
+                    {"name": "value", "type": "NUMERIC", "nullable": True},
                 ],
                 "primary_key": ["id"],
-                "indexes": ["idx_name"]
+                "indexes": ["idx_name"],
             }
 
         elif tool_name == "get_table_stats":
@@ -522,21 +557,21 @@ class MCPClient:
                 "row_count": 1000000,
                 "size_mb": 250.5,
                 "indexes": 3,
-                "last_analyzed": "2025-10-08T10:00:00Z"
+                "last_analyzed": "2025-10-08T10:00:00Z",
             }
 
         elif tool_name == "get_explain_plan":
             return {
                 "query": params.get("sql_query"),
                 "plan": "Seq Scan on table (cost=0.00..1000.00 rows=1000)",
-                "execution_time_ms": 150.5
+                "execution_time_ms": 150.5,
             }
 
         elif tool_name == "fetch_s3_sample_data":
             return {
                 "table": params.get("table_name"),
                 "sample_size": params.get("sample_size", 100),
-                "data": [{"id": 1, "value": 100}, {"id": 2, "value": 200}]
+                "data": [{"id": 1, "value": 100}, {"id": 2, "value": 200}],
             }
 
         elif tool_name == "get_glue_table_metadata":
@@ -544,13 +579,13 @@ class MCPClient:
                 "table": params.get("table_name"),
                 "location": f"s3://bucket/path/{params.get('table_name')}",
                 "format": "parquet",
-                "partitions": ["season", "team"]
+                "partitions": ["season", "team"],
             }
 
         elif tool_name == "read_project_file":
             return {
                 "file": params.get("file_path"),
-                "content": "# Sample file content\nprint('Hello NBA')"
+                "content": "# Sample file content\nprint('Hello NBA')",
             }
 
         elif tool_name == "search_codebase":
@@ -558,8 +593,8 @@ class MCPClient:
                 "pattern": params.get("pattern"),
                 "matches": [
                     {"file": "/path/to/file1.py", "line": 42},
-                    {"file": "/path/to/file2.py", "line": 105}
-                ]
+                    {"file": "/path/to/file2.py", "line": 105},
+                ],
             }
 
         elif tool_name == "query_rds_database":
@@ -569,10 +604,10 @@ class MCPClient:
                 "results": [
                     {"team_id": 1, "team_name": "Lakers", "wins": 47},
                     {"team_id": 2, "team_name": "Celtics", "wins": 45},
-                    {"team_id": 3, "team_name": "Warriors", "wins": 43}
+                    {"team_id": 3, "team_name": "Warriors", "wins": 43},
                 ],
                 "row_count": 3,
-                "execution_time_ms": 25.5
+                "execution_time_ms": 25.5,
             }
 
         else:
@@ -582,10 +617,22 @@ class MCPClient:
         """List all available tables"""
         # This is simulated - in production would query actual MCP server
         return [
-            "players", "teams", "games", "box_score_players", "box_score_teams",
-            "play_by_play", "player_game_stats", "team_game_stats",
-            "advanced_stats", "tracking_stats", "shot_chart", "lineups",
-            "injuries", "transactions", "schedules", "standings"
+            "players",
+            "teams",
+            "games",
+            "box_score_players",
+            "box_score_teams",
+            "play_by_play",
+            "player_game_stats",
+            "team_game_stats",
+            "advanced_stats",
+            "tracking_stats",
+            "shot_chart",
+            "lineups",
+            "injuries",
+            "transactions",
+            "schedules",
+            "standings",
         ]
 
     async def describe_table(self, table_name: str) -> Dict[str, Any]:

@@ -40,6 +40,7 @@ logger = logging.getLogger(__name__)
 
 class ErrorSeverity(Enum):
     """Error severity levels"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -48,6 +49,7 @@ class ErrorSeverity(Enum):
 
 class RecoveryStrategy(Enum):
     """Recovery strategy types"""
+
     RETRY = "retry"
     FALLBACK = "fallback"
     CIRCUIT_BREAK = "circuit_break"
@@ -58,14 +60,16 @@ class RecoveryStrategy(Enum):
 
 class CircuitState(Enum):
     """Circuit breaker states"""
+
     CLOSED = "closed"  # Normal operation
-    OPEN = "open"      # Failing, block requests
+    OPEN = "open"  # Failing, block requests
     HALF_OPEN = "half_open"  # Testing recovery
 
 
 @dataclass
 class ErrorRecord:
     """Record of an error occurrence"""
+
     error_id: str
     error_type: str
     error_message: str
@@ -81,6 +85,7 @@ class ErrorRecord:
 @dataclass
 class CircuitBreaker:
     """Circuit breaker for fault tolerance"""
+
     name: str
     failure_threshold: int = 5
     timeout_seconds: int = 60
@@ -117,7 +122,9 @@ class CircuitBreaker:
         elif self.state == CircuitState.CLOSED:
             self.failure_count += 1
             if self.failure_count >= self.failure_threshold:
-                logger.error(f"Circuit breaker '{self.name}' opened (threshold reached)")
+                logger.error(
+                    f"Circuit breaker '{self.name}' opened (threshold reached)"
+                )
                 self.state = CircuitState.OPEN
 
     def can_attempt(self) -> bool:
@@ -130,7 +137,9 @@ class CircuitBreaker:
             if self.last_failure_time:
                 elapsed = (datetime.now() - self.last_failure_time).total_seconds()
                 if elapsed >= self.timeout_seconds:
-                    logger.info(f"Circuit breaker '{self.name}' entering half-open state")
+                    logger.info(
+                        f"Circuit breaker '{self.name}' entering half-open state"
+                    )
                     self.state = CircuitState.HALF_OPEN
                     self.success_count = 0
                     return True
@@ -152,17 +161,14 @@ class ErrorRecoveryManager:
         self._lock = threading.RLock()
 
     def register_circuit_breaker(
-        self,
-        name: str,
-        failure_threshold: int = 5,
-        timeout_seconds: int = 60
+        self, name: str, failure_threshold: int = 5, timeout_seconds: int = 60
     ) -> CircuitBreaker:
         """Register a circuit breaker"""
         with self._lock:
             circuit = CircuitBreaker(
                 name=name,
                 failure_threshold=failure_threshold,
-                timeout_seconds=timeout_seconds
+                timeout_seconds=timeout_seconds,
             )
             self.circuit_breakers[name] = circuit
             logger.info(f"Registered circuit breaker: {name}")
@@ -182,7 +188,7 @@ class ErrorRecoveryManager:
         self,
         error: Exception,
         context: Optional[Dict[str, Any]] = None,
-        severity: ErrorSeverity = ErrorSeverity.MEDIUM
+        severity: ErrorSeverity = ErrorSeverity.MEDIUM,
     ) -> ErrorRecord:
         """Record an error occurrence"""
         error_record = ErrorRecord(
@@ -192,14 +198,16 @@ class ErrorRecoveryManager:
             severity=severity,
             occurred_at=datetime.now(),
             stack_trace=traceback.format_exc(),
-            context=context or {}
+            context=context or {},
         )
 
         with self._lock:
             self.error_history.append(error_record)
             self.error_counts[error_record.error_type] += 1
 
-        logger.error(f"Error recorded: {error_record.error_type} - {error_record.error_message}")
+        logger.error(
+            f"Error recorded: {error_record.error_type} - {error_record.error_message}"
+        )
         return error_record
 
     def attempt_recovery(self, error_record: ErrorRecord) -> bool:
@@ -246,35 +254,32 @@ class ErrorRecoveryManager:
             # Recent errors (last hour)
             one_hour_ago = datetime.now() - timedelta(hours=1)
             recent_errors = sum(
-                1 for error in self.error_history
-                if error.occurred_at > one_hour_ago
+                1 for error in self.error_history if error.occurred_at > one_hour_ago
             )
 
             # Recovery stats
             recovery_attempted = sum(
-                1 for error in self.error_history
-                if error.recovery_attempted
+                1 for error in self.error_history if error.recovery_attempted
             )
             recovery_successful = sum(
-                1 for error in self.error_history
-                if error.recovery_successful
+                1 for error in self.error_history if error.recovery_successful
             )
 
             return {
-                'total_errors': total_errors,
-                'by_type': dict(by_type),
-                'by_severity': dict(by_severity),
-                'recent_errors_1h': recent_errors,
-                'recovery_attempted': recovery_attempted,
-                'recovery_successful': recovery_successful,
-                'recovery_success_rate': (
+                "total_errors": total_errors,
+                "by_type": dict(by_type),
+                "by_severity": dict(by_severity),
+                "recent_errors_1h": recent_errors,
+                "recovery_attempted": recovery_attempted,
+                "recovery_successful": recovery_successful,
+                "recovery_success_rate": (
                     recovery_successful / recovery_attempted * 100
-                    if recovery_attempted > 0 else 0
+                    if recovery_attempted > 0
+                    else 0
                 ),
-                'circuit_breakers': {
-                    name: cb.state.value
-                    for name, cb in self.circuit_breakers.items()
-                }
+                "circuit_breakers": {
+                    name: cb.state.value for name, cb in self.circuit_breakers.items()
+                },
             }
 
     def clear_old_errors(self, days: int = 7) -> int:
@@ -284,8 +289,7 @@ class ErrorRecoveryManager:
         with self._lock:
             old_count = len(self.error_history)
             self.error_history = [
-                error for error in self.error_history
-                if error.occurred_at > cutoff
+                error for error in self.error_history if error.occurred_at > cutoff
             ]
             removed = old_count - len(self.error_history)
 
@@ -297,6 +301,7 @@ class ErrorRecoveryManager:
 
 def with_circuit_breaker(circuit_name: str, manager: ErrorRecoveryManager):
     """Decorator to apply circuit breaker pattern"""
+
     def decorator(func: Callable):
         def wrapper(*args, **kwargs):
             circuit = manager.get_circuit_breaker(circuit_name)
@@ -317,15 +322,15 @@ def with_circuit_breaker(circuit_name: str, manager: ErrorRecoveryManager):
                 raise
 
         return wrapper
+
     return decorator
 
 
 def with_retry(
-    max_attempts: int = 3,
-    backoff_seconds: float = 1.0,
-    backoff_multiplier: float = 2.0
+    max_attempts: int = 3, backoff_seconds: float = 1.0, backoff_multiplier: float = 2.0
 ):
     """Decorator for automatic retry with exponential backoff"""
+
     def decorator(func: Callable):
         def wrapper(*args, **kwargs):
             attempt = 0
@@ -337,20 +342,26 @@ def with_retry(
                 except Exception as e:
                     attempt += 1
                     if attempt >= max_attempts:
-                        logger.error(f"Max retry attempts ({max_attempts}) reached for {func.__name__}")
+                        logger.error(
+                            f"Max retry attempts ({max_attempts}) reached for {func.__name__}"
+                        )
                         raise
 
-                    logger.warning(f"Attempt {attempt}/{max_attempts} failed for {func.__name__}: {e}")
+                    logger.warning(
+                        f"Attempt {attempt}/{max_attempts} failed for {func.__name__}: {e}"
+                    )
                     logger.info(f"Retrying in {delay}s...")
                     time.sleep(delay)
                     delay *= backoff_multiplier
 
         return wrapper
+
     return decorator
 
 
 def with_fallback(fallback_func: Callable):
     """Decorator to provide fallback behavior"""
+
     def decorator(func: Callable):
         def wrapper(*args, **kwargs):
             try:
@@ -360,6 +371,7 @@ def with_fallback(fallback_func: Callable):
                 return fallback_func(*args, **kwargs)
 
         return wrapper
+
     return decorator
 
 
@@ -387,15 +399,14 @@ if __name__ == "__main__":
     # Register circuit breaker
     print("--- Circuit Breaker Demo ---")
     db_circuit = manager.register_circuit_breaker(
-        "database",
-        failure_threshold=3,
-        timeout_seconds=10
+        "database", failure_threshold=3, timeout_seconds=10
     )
 
     @with_circuit_breaker("database", manager)
     def query_database(query: str):
         """Simulate database query"""
         import random
+
         if random.random() < 0.7:  # 70% failure rate
             raise Exception("Database connection timeout")
         return f"Results for: {query}"
@@ -418,6 +429,7 @@ if __name__ == "__main__":
     def unreliable_api_call(player_id: int):
         """Simulate unreliable API"""
         import random
+
         if random.random() < 0.6:
             raise Exception("API timeout")
         return {"player_id": player_id, "stats": {"ppg": 25.5}}
@@ -457,7 +469,11 @@ if __name__ == "__main__":
             manager.record_error(
                 e,
                 context={"operation": "get_player", "player_id": i},
-                severity=ErrorSeverity.HIGH if isinstance(e, ConnectionError) else ErrorSeverity.MEDIUM
+                severity=(
+                    ErrorSeverity.HIGH
+                    if isinstance(e, ConnectionError)
+                    else ErrorSeverity.MEDIUM
+                ),
             )
 
     stats = manager.get_error_stats()
@@ -466,4 +482,3 @@ if __name__ == "__main__":
     print(f"By severity: {stats['by_severity']}")
 
     print("\n=== Demo Complete ===")
-

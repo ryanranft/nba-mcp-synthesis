@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 class ModelStage(Enum):
     """Model lifecycle stage"""
+
     DEVELOPMENT = "development"
     STAGING = "staging"
     PRODUCTION = "production"
@@ -26,6 +27,7 @@ class ModelStage(Enum):
 @dataclass
 class ModelVersion:
     """Model version metadata"""
+
     model_id: str
     version: str
     stage: ModelStage
@@ -62,7 +64,7 @@ class ModelRegistry:
         """Load registry from disk"""
         registry_file = self.registry_path / "registry.json"
         if registry_file.exists():
-            with open(registry_file, 'r') as f:
+            with open(registry_file, "r") as f:
                 data = json.load(f)
                 # Reconstruct ModelVersion objects
                 for model_id, versions in data.items():
@@ -81,7 +83,7 @@ class ModelRegistry:
                             artifact_path=v.get("artifact_path"),
                             description=v.get("description"),
                             tags=v.get("tags", {}),
-                            parent_version=v.get("parent_version")
+                            parent_version=v.get("parent_version"),
                         )
                         for v in versions
                     ]
@@ -107,12 +109,12 @@ class ModelRegistry:
                     "artifact_path": v.artifact_path,
                     "description": v.description,
                     "tags": v.tags,
-                    "parent_version": v.parent_version
+                    "parent_version": v.parent_version,
                 }
                 for v in versions
             ]
 
-        with open(registry_file, 'w') as f:
+        with open(registry_file, "w") as f:
             json.dump(data, f, indent=2)
 
         logger.debug(f"Saved registry to {registry_file}")
@@ -131,7 +133,7 @@ class ModelRegistry:
         description: Optional[str] = None,
         tags: Optional[Dict[str, str]] = None,
         parent_version: Optional[str] = None,
-        stage: ModelStage = ModelStage.DEVELOPMENT
+        stage: ModelStage = ModelStage.DEVELOPMENT,
     ) -> ModelVersion:
         """
         Register a new model version.
@@ -168,7 +170,7 @@ class ModelRegistry:
             artifact_path=artifact_path,
             description=description,
             tags=tags or {},
-            parent_version=parent_version
+            parent_version=parent_version,
         )
 
         if model_id not in self.models:
@@ -185,9 +187,7 @@ class ModelRegistry:
         return model_version
 
     def get_model_version(
-        self,
-        model_id: str,
-        version: Optional[str] = None
+        self, model_id: str, version: Optional[str] = None
     ) -> Optional[ModelVersion]:
         """
         Get specific model version or latest.
@@ -221,8 +221,7 @@ class ModelRegistry:
             return None
 
         prod_versions = [
-            v for v in self.models[model_id]
-            if v.stage == ModelStage.PRODUCTION
+            v for v in self.models[model_id] if v.stage == ModelStage.PRODUCTION
         ]
 
         if not prod_versions:
@@ -231,12 +230,7 @@ class ModelRegistry:
         # Return latest production version
         return sorted(prod_versions, key=lambda v: v.created_at, reverse=True)[0]
 
-    def promote_model(
-        self,
-        model_id: str,
-        version: str,
-        to_stage: ModelStage
-    ):
+    def promote_model(self, model_id: str, version: str, to_stage: ModelStage):
         """
         Promote model to a new stage.
 
@@ -263,7 +257,7 @@ class ModelRegistry:
         framework: Optional[str] = None,
         stage: Optional[ModelStage] = None,
         tags: Optional[Dict[str, str]] = None,
-        min_accuracy: Optional[float] = None
+        min_accuracy: Optional[float] = None,
     ) -> List[ModelVersion]:
         """
         Search for models by criteria.
@@ -333,14 +327,15 @@ class ModelRegistry:
         for versions in self.models.values():
             for version in versions:
                 stage_counts[version.stage.value] += 1
-                framework_counts[version.framework] = \
+                framework_counts[version.framework] = (
                     framework_counts.get(version.framework, 0) + 1
+                )
 
         return {
             "total_models": total_models,
             "total_versions": total_versions,
             "by_stage": stage_counts,
-            "by_framework": framework_counts
+            "by_framework": framework_counts,
         }
 
 
@@ -366,7 +361,7 @@ if __name__ == "__main__":
         metrics={"accuracy": 0.85, "f1": 0.83},
         hyperparameters={"n_estimators": 100, "max_depth": 10},
         description="Initial win prediction model",
-        stage=ModelStage.PRODUCTION
+        stage=ModelStage.PRODUCTION,
     )
 
     registry.register_model(
@@ -379,7 +374,7 @@ if __name__ == "__main__":
         hyperparameters={"n_estimators": 200, "learning_rate": 0.1},
         description="Improved model with gradient boosting",
         parent_version="1.0.0",
-        stage=ModelStage.STAGING
+        stage=ModelStage.STAGING,
     )
 
     print("✅ Registered 2 model versions")
@@ -407,14 +402,13 @@ if __name__ == "__main__":
     print("SEARCHING MODELS")
     print("=" * 80)
 
-    results = registry.search_models(
-        framework="sklearn",
-        min_accuracy=0.85
-    )
+    results = registry.search_models(framework="sklearn", min_accuracy=0.85)
     print(f"\nFound {len(results)} models (sklearn, accuracy >= 0.85):")
     for model in results:
-        print(f"  - {model.model_id} v{model.version}: "
-              f"accuracy={model.metrics.get('accuracy', 0):.2f}")
+        print(
+            f"  - {model.model_id} v{model.version}: "
+            f"accuracy={model.metrics.get('accuracy', 0):.2f}"
+        )
 
     # Registry stats
     print("\n" + "=" * 80)
@@ -425,11 +419,11 @@ if __name__ == "__main__":
     print(f"\nTotal Models: {stats['total_models']}")
     print(f"Total Versions: {stats['total_versions']}")
     print(f"\nBy Stage:")
-    for stage, count in stats['by_stage'].items():
+    for stage, count in stats["by_stage"].items():
         if count > 0:
             print(f"  - {stage}: {count}")
     print(f"\nBy Framework:")
-    for framework, count in stats['by_framework'].items():
+    for framework, count in stats["by_framework"].items():
         print(f"  - {framework}: {count}")
 
     print("\n" + "=" * 80)

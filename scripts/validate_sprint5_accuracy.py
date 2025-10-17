@@ -13,12 +13,13 @@ sys.path.insert(0, str(project_root))
 from mcp_server.tools import nba_metrics_helper, stats_helper
 
 # ANSI colors
-GREEN = '\033[92m'
-RED = '\033[91m'
-YELLOW = '\033[93m'
-CYAN = '\033[96m'
-BOLD = '\033[1m'
-RESET = '\033[0m'
+GREEN = "\033[92m"
+RED = "\033[91m"
+YELLOW = "\033[93m"
+CYAN = "\033[96m"
+BOLD = "\033[1m"
+RESET = "\033[0m"
+
 
 def validate_per():
     """Validate PER calculation with known values"""
@@ -37,7 +38,7 @@ def validate_per():
         "ftm": 549,
         "fta": 827,
         "turnovers": 235,
-        "minutes": 2367
+        "minutes": 2367,
     }
 
     our_per = nba_metrics_helper.calculate_per(giannis_stats)
@@ -48,22 +49,17 @@ def validate_per():
     print(f"  Note: Simplified formula (official uses pace adjustments)")
     print(f"  {GREEN}✓ Formula working correctly{RESET}")
 
+
 def validate_true_shooting():
     """Validate TS% calculation"""
     print(f"\n{BOLD}Validating TS% (True Shooting Percentage){RESET}")
 
     # Stephen Curry 2022-23
     # Known TS%: ~67.0%
-    curry_stats = {
-        "points": 2132,
-        "fga": 1449,
-        "fta": 343
-    }
+    curry_stats = {"points": 2132, "fga": 1449, "fta": 343}
 
     our_ts = nba_metrics_helper.calculate_true_shooting(
-        curry_stats["points"],
-        curry_stats["fga"],
-        curry_stats["fta"]
+        curry_stats["points"], curry_stats["fga"], curry_stats["fta"]
     )
     expected_ts = 0.670
     difference = abs(our_ts - expected_ts)
@@ -78,20 +74,17 @@ def validate_true_shooting():
     else:
         print(f"  {YELLOW}⚠ Check formula{RESET}")
 
+
 def validate_offensive_rating():
     """Validate ORtg calculation"""
     print(f"\n{BOLD}Validating ORtg (Offensive Rating){RESET}")
 
     # Boston Celtics 2022-23
     # Known ORtg: ~117.7
-    celtics_stats = {
-        "points": 9648,
-        "possessions": 8200  # Approximate
-    }
+    celtics_stats = {"points": 9648, "possessions": 8200}  # Approximate
 
     our_ortg = nba_metrics_helper.calculate_offensive_rating(
-        celtics_stats["points"],
-        celtics_stats["possessions"]
+        celtics_stats["points"], celtics_stats["possessions"]
     )
     expected_ortg = 117.7
     difference = abs(our_ortg - expected_ortg)
@@ -105,6 +98,7 @@ def validate_offensive_rating():
         print(f"  {GREEN}✓ Reasonable calculation{RESET}")
     else:
         print(f"  {YELLOW}⚠ May need possession adjustment{RESET}")
+
 
 def validate_stats():
     """Validate statistical calculations"""
@@ -127,7 +121,9 @@ def validate_stats():
     # Variance
     variance = stats_helper.calculate_variance(data)
     expected_variance = 250.0
-    assert variance == expected_variance, f"Variance incorrect: {variance} != {expected_variance}"
+    assert (
+        variance == expected_variance
+    ), f"Variance incorrect: {variance} != {expected_variance}"
     print(f"  Variance: {variance} {GREEN}✓{RESET}")
 
     # Std Dev
@@ -137,6 +133,7 @@ def validate_stats():
     print(f"  Std Dev: {std_dev:.2f} {GREEN}✓{RESET}")
 
     print(f"  {GREEN}✓ All statistical calculations accurate{RESET}")
+
 
 def main():
     print(f"{CYAN}{BOLD}")
@@ -164,6 +161,7 @@ def main():
     except Exception as e:
         print(f"\n{RED}✗ Validation failed: {e}{RESET}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

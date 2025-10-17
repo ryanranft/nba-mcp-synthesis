@@ -23,8 +23,10 @@ from .formula_intelligence import FormulaIntelligence
 
 logger = logging.getLogger(__name__)
 
+
 class FormulaComponentType(Enum):
     """Types of formula components"""
+
     VARIABLE = "variable"
     CONSTANT = "constant"
     OPERATOR = "operator"
@@ -34,25 +36,31 @@ class FormulaComponentType(Enum):
     POWER = "power"
     SUBSCRIPT = "subscript"
 
+
 class ValidationLevel(Enum):
     """Validation levels for formulas"""
+
     SYNTAX = "syntax"
     SEMANTIC = "semantic"
     SPORTS_CONTEXT = "sports_context"
     UNITS = "units"
 
+
 @dataclass
 class FormulaComponent:
     """Represents a component in a formula"""
+
     id: str
     type: FormulaComponentType
     value: str
     position: int
     metadata: Dict[str, Any] = None
 
+
 @dataclass
 class FormulaTemplate:
     """Represents a formula template"""
+
     name: str
     description: str
     template: str
@@ -60,17 +68,21 @@ class FormulaTemplate:
     category: str
     example_values: Dict[str, float] = None
 
+
 @dataclass
 class FormulaValidation:
     """Represents validation results for a formula"""
+
     is_valid: bool
     errors: List[str]
     warnings: List[str]
     suggestions: List[str]
     confidence: float
 
+
 # Alias for MCP tool compatibility
 ValidationResult = FormulaValidation
+
 
 class InteractiveFormulaBuilder:
     """
@@ -84,34 +96,105 @@ class InteractiveFormulaBuilder:
     def __init__(self):
         """Initialize the formula builder"""
         self.sports_variables = {
-            'PTS': {'description': 'Points', 'range': (0, 150), 'unit': 'points'},
-            'FGM': {'description': 'Field Goals Made', 'range': (0, 60), 'unit': 'shots'},
-            'FGA': {'description': 'Field Goals Attempted', 'range': (0, 100), 'unit': 'shots'},
-            '3PM': {'description': '3-Pointers Made', 'range': (0, 30), 'unit': 'shots'},
-            'FTM': {'description': 'Free Throws Made', 'range': (0, 40), 'unit': 'shots'},
-            'FTA': {'description': 'Free Throws Attempted', 'range': (0, 50), 'unit': 'shots'},
-            'OREB': {'description': 'Offensive Rebounds', 'range': (0, 30), 'unit': 'rebounds'},
-            'DREB': {'description': 'Defensive Rebounds', 'range': (0, 40), 'unit': 'rebounds'},
-            'AST': {'description': 'Assists', 'range': (0, 30), 'unit': 'assists'},
-            'STL': {'description': 'Steals', 'range': (0, 15), 'unit': 'steals'},
-            'BLK': {'description': 'Blocks', 'range': (0, 15), 'unit': 'blocks'},
-            'TOV': {'description': 'Turnovers', 'range': (0, 20), 'unit': 'turnovers'},
-            'PF': {'description': 'Personal Fouls', 'range': (0, 6), 'unit': 'fouls'},
-            'MP': {'description': 'Minutes Played', 'range': (0, 60), 'unit': 'minutes'},
-            'PER': {'description': 'Player Efficiency Rating', 'range': (0, 50), 'unit': 'rating'},
-            'TS': {'description': 'True Shooting', 'range': (0, 1), 'unit': 'percentage'},
-            'USG': {'description': 'Usage Rate', 'range': (0, 100), 'unit': 'percentage'},
-            'ORtg': {'description': 'Offensive Rating', 'range': (80, 130), 'unit': 'rating'},
-            'DRtg': {'description': 'Defensive Rating', 'range': (80, 130), 'unit': 'rating'},
-            'PACE': {'description': 'Pace', 'range': (80, 120), 'unit': 'possessions'},
-            'BPM': {'description': 'Box Plus/Minus', 'range': (-20, 20), 'unit': 'rating'},
-            'VORP': {'description': 'Value Over Replacement Player', 'range': (-5, 10), 'unit': 'rating'},
-            'WS': {'description': 'Win Shares', 'range': (-5, 25), 'unit': 'shares'},
+            "PTS": {"description": "Points", "range": (0, 150), "unit": "points"},
+            "FGM": {
+                "description": "Field Goals Made",
+                "range": (0, 60),
+                "unit": "shots",
+            },
+            "FGA": {
+                "description": "Field Goals Attempted",
+                "range": (0, 100),
+                "unit": "shots",
+            },
+            "3PM": {
+                "description": "3-Pointers Made",
+                "range": (0, 30),
+                "unit": "shots",
+            },
+            "FTM": {
+                "description": "Free Throws Made",
+                "range": (0, 40),
+                "unit": "shots",
+            },
+            "FTA": {
+                "description": "Free Throws Attempted",
+                "range": (0, 50),
+                "unit": "shots",
+            },
+            "OREB": {
+                "description": "Offensive Rebounds",
+                "range": (0, 30),
+                "unit": "rebounds",
+            },
+            "DREB": {
+                "description": "Defensive Rebounds",
+                "range": (0, 40),
+                "unit": "rebounds",
+            },
+            "AST": {"description": "Assists", "range": (0, 30), "unit": "assists"},
+            "STL": {"description": "Steals", "range": (0, 15), "unit": "steals"},
+            "BLK": {"description": "Blocks", "range": (0, 15), "unit": "blocks"},
+            "TOV": {"description": "Turnovers", "range": (0, 20), "unit": "turnovers"},
+            "PF": {"description": "Personal Fouls", "range": (0, 6), "unit": "fouls"},
+            "MP": {
+                "description": "Minutes Played",
+                "range": (0, 60),
+                "unit": "minutes",
+            },
+            "PER": {
+                "description": "Player Efficiency Rating",
+                "range": (0, 50),
+                "unit": "rating",
+            },
+            "TS": {
+                "description": "True Shooting",
+                "range": (0, 1),
+                "unit": "percentage",
+            },
+            "USG": {
+                "description": "Usage Rate",
+                "range": (0, 100),
+                "unit": "percentage",
+            },
+            "ORtg": {
+                "description": "Offensive Rating",
+                "range": (80, 130),
+                "unit": "rating",
+            },
+            "DRtg": {
+                "description": "Defensive Rating",
+                "range": (80, 130),
+                "unit": "rating",
+            },
+            "PACE": {"description": "Pace", "range": (80, 120), "unit": "possessions"},
+            "BPM": {
+                "description": "Box Plus/Minus",
+                "range": (-20, 20),
+                "unit": "rating",
+            },
+            "VORP": {
+                "description": "Value Over Replacement Player",
+                "range": (-5, 10),
+                "unit": "rating",
+            },
+            "WS": {"description": "Win Shares", "range": (-5, 25), "unit": "shares"},
         }
 
         self.formula_templates = self._initialize_templates()
-        self.operators = ['+', '-', '*', '/', '^', '**', '=', '>', '<', '>=', '<=']
-        self.functions = ['sqrt', 'log', 'ln', 'exp', 'sin', 'cos', 'tan', 'abs', 'max', 'min']
+        self.operators = ["+", "-", "*", "/", "^", "**", "=", ">", "<", ">=", "<="]
+        self.functions = [
+            "sqrt",
+            "log",
+            "ln",
+            "exp",
+            "sin",
+            "cos",
+            "tan",
+            "abs",
+            "max",
+            "min",
+        ]
 
     def _initialize_templates(self) -> List[FormulaTemplate]:
         """Initialize common sports analytics formula templates"""
@@ -122,23 +205,69 @@ class InteractiveFormulaBuilder:
                 template="PTS / (2 * (FGA + 0.44 * FTA))",
                 variables=["PTS", "FGA", "FTA"],
                 category="shooting",
-                example_values={"PTS": 25, "FGA": 15, "FTA": 5}
+                example_values={"PTS": 25, "FGA": 15, "FTA": 5},
             ),
             FormulaTemplate(
                 name="Player Efficiency Rating",
                 description="All-in-one basketball rating",
                 template="(FGM * 85.910 + STL * 53.897 + 3PM * 51.757 + FTM * 46.845 + BLK * 39.190 + OREB * 39.190 + AST * 34.677 + DREB * 14.707 - PF * 17.174 - (FTA - FTM) * 20.091 - (FGA - FGM) * 39.190 - TOV * 53.897) * (1 / MP)",
-                variables=["FGM", "STL", "3PM", "FTM", "BLK", "OREB", "AST", "DREB", "PF", "FTA", "FGA", "TOV", "MP"],
+                variables=[
+                    "FGM",
+                    "STL",
+                    "3PM",
+                    "FTM",
+                    "BLK",
+                    "OREB",
+                    "AST",
+                    "DREB",
+                    "PF",
+                    "FTA",
+                    "FGA",
+                    "TOV",
+                    "MP",
+                ],
                 category="advanced",
-                example_values={"FGM": 8, "STL": 2, "3PM": 2, "FTM": 5, "BLK": 1, "OREB": 1, "AST": 8, "DREB": 7, "PF": 2, "FTA": 6, "FGA": 18, "TOV": 3, "MP": 38}
+                example_values={
+                    "FGM": 8,
+                    "STL": 2,
+                    "3PM": 2,
+                    "FTM": 5,
+                    "BLK": 1,
+                    "OREB": 1,
+                    "AST": 8,
+                    "DREB": 7,
+                    "PF": 2,
+                    "FTA": 6,
+                    "FGA": 18,
+                    "TOV": 3,
+                    "MP": 38,
+                },
             ),
             FormulaTemplate(
                 name="Usage Rate",
                 description="Percentage of team plays used by player",
                 template="((FGA + 0.44 * FTA + TOV) * (TM_MP / 5)) / (MP * (TM_FGA + 0.44 * TM_FTA + TM_TOV)) * 100",
-                variables=["FGA", "FTA", "TOV", "TM_MP", "MP", "TM_FGA", "TM_FTA", "TM_TOV"],
+                variables=[
+                    "FGA",
+                    "FTA",
+                    "TOV",
+                    "TM_MP",
+                    "MP",
+                    "TM_FGA",
+                    "TM_FTA",
+                    "TM_TOV",
+                ],
                 category="advanced",
-                example_values={"FGA": 18, "FTA": 6, "TOV": 3, "TM_MP": 240, "MP": 38, "TM_FGA": 90, "TM_FTA": 25, "TM_TOV": 12}
+                example_values={
+                    "FGA": 18,
+                    "FTA": 6,
+                    "TOV": 3,
+                    "TM_MP": 240,
+                    "MP": 38,
+                    "TM_FGA": 90,
+                    "TM_FTA": 25,
+                    "TM_TOV": 12,
+                },
             ),
             FormulaTemplate(
                 name="Net Rating",
@@ -146,7 +275,7 @@ class InteractiveFormulaBuilder:
                 template="ORtg - DRtg",
                 variables=["ORtg", "DRtg"],
                 category="team",
-                example_values={"ORtg": 115, "DRtg": 108}
+                example_values={"ORtg": 115, "DRtg": 108},
             ),
             FormulaTemplate(
                 name="Effective Field Goal Percentage",
@@ -154,7 +283,7 @@ class InteractiveFormulaBuilder:
                 template="(FGM + 0.5 * 3PM) / FGA",
                 variables=["FGM", "3PM", "FGA"],
                 category="shooting",
-                example_values={"FGM": 8, "3PM": 2, "FGA": 18}
+                example_values={"FGM": 8, "3PM": 2, "FGA": 18},
             ),
             FormulaTemplate(
                 name="Assist Percentage",
@@ -162,7 +291,13 @@ class InteractiveFormulaBuilder:
                 template="(AST * (TM_MP / 5)) / (MP * (TM_FGM - FGM)) * 100",
                 variables=["AST", "TM_MP", "MP", "TM_FGM", "FGM"],
                 category="advanced",
-                example_values={"AST": 8, "TM_MP": 240, "MP": 38, "TM_FGM": 35, "FGM": 8}
+                example_values={
+                    "AST": 8,
+                    "TM_MP": 240,
+                    "MP": 38,
+                    "TM_FGM": 35,
+                    "FGM": 8,
+                },
             ),
             FormulaTemplate(
                 name="Rebound Percentage",
@@ -170,7 +305,13 @@ class InteractiveFormulaBuilder:
                 template="(REB * (TM_MP / 5)) / (MP * (TM_REB + OPP_REB)) * 100",
                 variables=["REB", "TM_MP", "MP", "TM_REB", "OPP_REB"],
                 category="advanced",
-                example_values={"REB": 8, "TM_MP": 240, "MP": 38, "TM_REB": 45, "OPP_REB": 42}
+                example_values={
+                    "REB": 8,
+                    "TM_MP": 240,
+                    "MP": 38,
+                    "TM_REB": 45,
+                    "OPP_REB": 42,
+                },
             ),
             FormulaTemplate(
                 name="Steal Percentage",
@@ -178,7 +319,7 @@ class InteractiveFormulaBuilder:
                 template="(STL * (TM_MP / 5)) / (MP * OPP_POSS) * 100",
                 variables=["STL", "TM_MP", "MP", "OPP_POSS"],
                 category="defensive",
-                example_values={"STL": 2, "TM_MP": 240, "MP": 38, "OPP_POSS": 100}
+                example_values={"STL": 2, "TM_MP": 240, "MP": 38, "OPP_POSS": 100},
             ),
             FormulaTemplate(
                 name="Block Percentage",
@@ -186,7 +327,7 @@ class InteractiveFormulaBuilder:
                 template="(BLK * (TM_MP / 5)) / (MP * OPP_2PA) * 100",
                 variables=["BLK", "TM_MP", "MP", "OPP_2PA"],
                 category="defensive",
-                example_values={"BLK": 1, "TM_MP": 240, "MP": 38, "OPP_2PA": 50}
+                example_values={"BLK": 1, "TM_MP": 240, "MP": 38, "OPP_2PA": 50},
             ),
             FormulaTemplate(
                 name="Turnover Percentage",
@@ -194,8 +335,8 @@ class InteractiveFormulaBuilder:
                 template="(TOV * (TM_MP / 5)) / (MP * (FGA + 0.44 * FTA + TOV)) * 100",
                 variables=["TOV", "TM_MP", "MP", "FGA", "FTA"],
                 category="advanced",
-                example_values={"TOV": 3, "TM_MP": 240, "MP": 38, "FGA": 18, "FTA": 6}
-            )
+                example_values={"TOV": 3, "TM_MP": 240, "MP": 38, "FGA": 18, "FTA": 6},
+            ),
         ]
         return templates
 
@@ -222,14 +363,18 @@ class InteractiveFormulaBuilder:
                 type=component_type,
                 value=token,
                 position=position,
-                metadata=self._get_token_metadata(token, component_type)
+                metadata=self._get_token_metadata(token, component_type),
             )
             components.append(component)
             position += 1
 
         return components
 
-    def validate_formula(self, formula_str: str, validation_level: ValidationLevel = ValidationLevel.SEMANTIC) -> ValidationResult:
+    def validate_formula(
+        self,
+        formula_str: str,
+        validation_level: ValidationLevel = ValidationLevel.SEMANTIC,
+    ) -> ValidationResult:
         """
         Validate a formula at the specified level.
 
@@ -246,7 +391,12 @@ class InteractiveFormulaBuilder:
         confidence = 1.0
 
         # Syntax validation
-        if validation_level in [ValidationLevel.SYNTAX, ValidationLevel.SEMANTIC, ValidationLevel.SPORTS_CONTEXT, ValidationLevel.UNITS]:
+        if validation_level in [
+            ValidationLevel.SYNTAX,
+            ValidationLevel.SEMANTIC,
+            ValidationLevel.SPORTS_CONTEXT,
+            ValidationLevel.UNITS,
+        ]:
             syntax_valid, syntax_errors = self._validate_syntax(formula_str)
             if not syntax_valid:
                 errors.extend(syntax_errors)
@@ -255,8 +405,14 @@ class InteractiveFormulaBuilder:
                 suggestions.append("Formula syntax is valid")
 
         # Semantic validation
-        if validation_level in [ValidationLevel.SEMANTIC, ValidationLevel.SPORTS_CONTEXT, ValidationLevel.UNITS]:
-            semantic_valid, semantic_errors, semantic_warnings = self._validate_semantics(formula_str)
+        if validation_level in [
+            ValidationLevel.SEMANTIC,
+            ValidationLevel.SPORTS_CONTEXT,
+            ValidationLevel.UNITS,
+        ]:
+            semantic_valid, semantic_errors, semantic_warnings = (
+                self._validate_semantics(formula_str)
+            )
             if not semantic_valid:
                 errors.extend(semantic_errors)
                 confidence -= 0.2
@@ -264,7 +420,9 @@ class InteractiveFormulaBuilder:
 
         # Sports context validation
         if validation_level in [ValidationLevel.SPORTS_CONTEXT, ValidationLevel.UNITS]:
-            sports_valid, sports_errors, sports_suggestions = self._validate_sports_context(formula_str)
+            sports_valid, sports_errors, sports_suggestions = (
+                self._validate_sports_context(formula_str)
+            )
             if not sports_valid:
                 errors.extend(sports_errors)
                 confidence -= 0.2
@@ -272,7 +430,9 @@ class InteractiveFormulaBuilder:
 
         # Units validation
         if validation_level == ValidationLevel.UNITS:
-            units_valid, units_errors, units_warnings = self._validate_units(formula_str)
+            units_valid, units_errors, units_warnings = self._validate_units(
+                formula_str
+            )
             if not units_valid:
                 errors.extend(units_errors)
                 confidence -= 0.1
@@ -285,7 +445,7 @@ class InteractiveFormulaBuilder:
             errors=errors,
             warnings=warnings,
             suggestions=suggestions,
-            confidence=confidence
+            confidence=confidence,
         )
 
     def suggest_completion(self, partial_formula: str, context: str = "") -> List[str]:
@@ -332,7 +492,9 @@ class InteractiveFormulaBuilder:
 
         return list(set(suggestions))  # Remove duplicates
 
-    def get_formula_preview(self, formula_str: str, variable_values: Dict[str, float] = None) -> Dict[str, Any]:
+    def get_formula_preview(
+        self, formula_str: str, variable_values: Dict[str, float] = None
+    ) -> Dict[str, Any]:
         """
         Get a preview of the formula with LaTeX rendering and calculation.
 
@@ -349,7 +511,7 @@ class InteractiveFormulaBuilder:
             "simplified": None,
             "calculated_value": None,
             "variables": [],
-            "error": None
+            "error": None,
         }
 
         try:
@@ -389,10 +551,16 @@ class InteractiveFormulaBuilder:
             List of FormulaTemplate objects
         """
         if category:
-            return [template for template in self.formula_templates if template.category == category]
+            return [
+                template
+                for template in self.formula_templates
+                if template.category == category
+            ]
         return self.formula_templates
 
-    def create_formula_from_template(self, template_name: str, variable_values: Dict[str, float]) -> Dict[str, Any]:
+    def create_formula_from_template(
+        self, template_name: str, variable_values: Dict[str, float]
+    ) -> Dict[str, Any]:
         """
         Create a formula from a template with provided variable values.
 
@@ -403,7 +571,9 @@ class InteractiveFormulaBuilder:
         Returns:
             Dictionary with formula information
         """
-        template = next((t for t in self.formula_templates if t.name == template_name), None)
+        template = next(
+            (t for t in self.formula_templates if t.name == template_name), None
+        )
         if not template:
             return {"error": f"Template '{template_name}' not found"}
 
@@ -429,7 +599,7 @@ class InteractiveFormulaBuilder:
             "substituted_formula": formula_str,
             "result": result,
             "variables_used": variable_values,
-            "description": template.description
+            "description": template.description,
         }
 
     def export_formula(self, formula_str: str, format_type: str = "latex") -> str:
@@ -453,12 +623,15 @@ class InteractiveFormulaBuilder:
             elif format_type == "sympy":
                 return str(expr)
             elif format_type == "json":
-                return json.dumps({
-                    "formula": formula_str,
-                    "latex": latex(expr),
-                    "variables": self._extract_variables(formula_str),
-                    "simplified": str(simplify(expr))
-                }, indent=2)
+                return json.dumps(
+                    {
+                        "formula": formula_str,
+                        "latex": latex(expr),
+                        "variables": self._extract_variables(formula_str),
+                        "simplified": str(simplify(expr)),
+                    },
+                    indent=2,
+                )
             else:
                 return f"Unsupported format: {format_type}"
 
@@ -476,7 +649,7 @@ class InteractiveFormulaBuilder:
                 if current_token:
                     tokens.append(current_token)
                     current_token = ""
-            elif char in self.operators + ['(', ')', '[', ']', '{', '}']:
+            elif char in self.operators + ["(", ")", "[", "]", "{", "}"]:
                 if current_token:
                     tokens.append(current_token)
                     current_token = ""
@@ -493,22 +666,27 @@ class InteractiveFormulaBuilder:
         """Classify a token as a component type"""
         if token in self.operators:
             return FormulaComponentType.OPERATOR
-        elif token in ['(', ')', '[', ']', '{', '}']:
+        elif token in ["(", ")", "[", "]", "{", "}"]:
             return FormulaComponentType.PARENTHESIS
         elif token in self.functions:
             return FormulaComponentType.FUNCTION
-        elif token.replace('.', '').replace('-', '').isdigit():
+        elif token.replace(".", "").replace("-", "").isdigit():
             return FormulaComponentType.CONSTANT
         elif token.upper() in self.sports_variables:
             return FormulaComponentType.VARIABLE
         else:
             return FormulaComponentType.VARIABLE  # Default to variable
 
-    def _get_token_metadata(self, token: str, component_type: FormulaComponentType) -> Dict[str, Any]:
+    def _get_token_metadata(
+        self, token: str, component_type: FormulaComponentType
+    ) -> Dict[str, Any]:
         """Get metadata for a token"""
         metadata = {"token": token, "type": component_type.value}
 
-        if component_type == FormulaComponentType.VARIABLE and token.upper() in self.sports_variables:
+        if (
+            component_type == FormulaComponentType.VARIABLE
+            and token.upper() in self.sports_variables
+        ):
             metadata.update(self.sports_variables[token.upper()])
 
         return metadata
@@ -520,9 +698,9 @@ class InteractiveFormulaBuilder:
         # Check for balanced parentheses
         paren_count = 0
         for char in formula_str:
-            if char == '(':
+            if char == "(":
                 paren_count += 1
-            elif char == ')':
+            elif char == ")":
                 paren_count -= 1
                 if paren_count < 0:
                     errors.append("Unmatched closing parenthesis")
@@ -534,14 +712,18 @@ class InteractiveFormulaBuilder:
         # Check for consecutive operators
         tokens = self._tokenize_formula(formula_str)
         for i in range(len(tokens) - 1):
-            if (tokens[i] in self.operators and
-                tokens[i+1] in self.operators and
-                not (tokens[i] in ['-', '+'] and tokens[i+1] in ['-', '+'])):
+            if (
+                tokens[i] in self.operators
+                and tokens[i + 1] in self.operators
+                and not (tokens[i] in ["-", "+"] and tokens[i + 1] in ["-", "+"])
+            ):
                 errors.append(f"Consecutive operators: {tokens[i]} {tokens[i+1]}")
 
         return len(errors) == 0, errors
 
-    def _validate_semantics(self, formula_str: str) -> Tuple[bool, List[str], List[str]]:
+    def _validate_semantics(
+        self, formula_str: str
+    ) -> Tuple[bool, List[str], List[str]]:
         """Validate formula semantics"""
         errors = []
         warnings = []
@@ -553,12 +735,14 @@ class InteractiveFormulaBuilder:
             errors.append(f"Semantic error: {str(e)}")
 
         # Check for division by zero potential
-        if '/' in formula_str and '0' in formula_str:
+        if "/" in formula_str and "0" in formula_str:
             warnings.append("Potential division by zero")
 
         return len(errors) == 0, errors, warnings
 
-    def _validate_sports_context(self, formula_str: str) -> Tuple[bool, List[str], List[str]]:
+    def _validate_sports_context(
+        self, formula_str: str
+    ) -> Tuple[bool, List[str], List[str]]:
         """Validate formula in sports analytics context"""
         errors = []
         suggestions = []
@@ -567,14 +751,20 @@ class InteractiveFormulaBuilder:
         sports_vars = [var for var in variables if var.upper() in self.sports_variables]
 
         if not sports_vars:
-            suggestions.append("Consider using sports analytics variables (PTS, FGM, FGA, etc.)")
+            suggestions.append(
+                "Consider using sports analytics variables (PTS, FGM, FGA, etc.)"
+            )
 
         # Check for common sports formula patterns
-        if 'PTS' in variables and 'FGA' in variables and 'FTA' in variables:
-            suggestions.append("This looks like a shooting efficiency formula - consider True Shooting Percentage")
+        if "PTS" in variables and "FGA" in variables and "FTA" in variables:
+            suggestions.append(
+                "This looks like a shooting efficiency formula - consider True Shooting Percentage"
+            )
 
-        if 'PER' in variables:
-            suggestions.append("PER is a complex formula - ensure all components are included")
+        if "PER" in variables:
+            suggestions.append(
+                "PER is a complex formula - ensure all components are included"
+            )
 
         return True, errors, suggestions
 
@@ -589,7 +779,7 @@ class InteractiveFormulaBuilder:
         for var in variables:
             if var.upper() in self.sports_variables:
                 var_info = self.sports_variables[var.upper()]
-                if 'unit' in var_info:
+                if "unit" in var_info:
                     warnings.append(f"Variable {var} has unit: {var_info['unit']}")
 
         return True, errors, warnings
@@ -600,13 +790,17 @@ class InteractiveFormulaBuilder:
         tokens = self._tokenize_formula(formula_str)
 
         for token in tokens:
-            if (self._classify_token(token) == FormulaComponentType.VARIABLE and
-                token.upper() in self.sports_variables):
+            if (
+                self._classify_token(token) == FormulaComponentType.VARIABLE
+                and token.upper() in self.sports_variables
+            ):
                 variables.append(token.upper())
 
         return list(set(variables))
 
-    def _calculate_formula(self, formula_str: str, variable_values: Dict[str, float]) -> float:
+    def _calculate_formula(
+        self, formula_str: str, variable_values: Dict[str, float]
+    ) -> float:
         """Calculate formula with given variable values"""
         # Substitute variables with values
         substituted = formula_str

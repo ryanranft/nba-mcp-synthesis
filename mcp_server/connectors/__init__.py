@@ -8,9 +8,4 @@ from mcp_server.connectors.s3_connector import S3Connector
 from mcp_server.connectors.glue_connector import GlueConnector
 from mcp_server.connectors.slack_notifier import SlackNotifier
 
-__all__ = [
-    'RDSConnector',
-    'S3Connector',
-    'GlueConnector',
-    'SlackNotifier'
-]
+__all__ = ["RDSConnector", "S3Connector", "GlueConnector", "SlackNotifier"]

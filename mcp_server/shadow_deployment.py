@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ShadowRequest:
     """Request sent to shadow model"""
+
     request_id: str
     timestamp: datetime
     inputs: Any
@@ -41,7 +42,7 @@ class ShadowDeploymentManager:
         primary_model_id: str,
         shadow_model_id: str,
         traffic_percentage: float = 100.0,
-        compare_predictions: bool = True
+        compare_predictions: bool = True,
     ):
         """
         Configure shadow deployment for a model.
@@ -62,7 +63,7 @@ class ShadowDeploymentManager:
             "enabled": True,
             "requests_shadowed": 0,
             "requests_matched": 0,
-            "requests_total": 0
+            "requests_total": 0,
         }
 
         logger.info(
@@ -93,7 +94,7 @@ class ShadowDeploymentManager:
         primary_model_id: str,
         inputs: Any,
         primary_predict_fn: callable,
-        shadow_predict_fn: callable
+        shadow_predict_fn: callable,
     ) -> Dict[str, Any]:
         """
         Execute shadow deployment.
@@ -126,10 +127,16 @@ class ShadowDeploymentManager:
             try:
                 start_shadow = datetime.utcnow()
                 shadow_result = shadow_predict_fn(inputs)
-                shadow_latency = (datetime.utcnow() - start_shadow).total_seconds() * 1000
+                shadow_latency = (
+                    datetime.utcnow() - start_shadow
+                ).total_seconds() * 1000
 
                 # Compare predictions
-                match = (primary_result == shadow_result) if config["compare_predictions"] else None
+                match = (
+                    (primary_result == shadow_result)
+                    if config["compare_predictions"]
+                    else None
+                )
                 if match:
                     config["requests_matched"] += 1
 
@@ -145,15 +152,17 @@ class ShadowDeploymentManager:
                     match=match if match is not None else True,
                     metadata={
                         "primary_model": primary_model_id,
-                        "shadow_model": config["shadow_model_id"]
-                    }
+                        "shadow_model": config["shadow_model_id"],
+                    },
                 )
 
                 self.shadow_requests.append(shadow_req)
 
                 # Limit stored requests
                 if len(self.shadow_requests) > self.max_requests_stored:
-                    self.shadow_requests = self.shadow_requests[-self.max_requests_stored:]
+                    self.shadow_requests = self.shadow_requests[
+                        -self.max_requests_stored :
+                    ]
 
                 logger.debug(
                     f"Shadow executed: match={match}, "
@@ -182,7 +191,8 @@ class ShadowDeploymentManager:
 
         # Calculate recent metrics
         recent_requests = [
-            r for r in self.shadow_requests[-1000:]
+            r
+            for r in self.shadow_requests[-1000:]
             if r.metadata.get("primary_model") == primary_model_id
         ]
 
@@ -190,7 +200,9 @@ class ShadowDeploymentManager:
             agreement_rate = None
             avg_latency_delta = None
         else:
-            agreement_rate = sum(1 for r in recent_requests if r.match) / len(recent_requests) * 100
+            agreement_rate = (
+                sum(1 for r in recent_requests if r.match) / len(recent_requests) * 100
+            )
             avg_latency_delta = sum(
                 r.shadow_latency_ms - r.primary_latency_ms for r in recent_requests
             ) / len(recent_requests)
@@ -205,10 +217,11 @@ class ShadowDeploymentManager:
             "requests_matched": config["requests_matched"],
             "shadow_percentage": (
                 config["requests_shadowed"] / config["requests_total"] * 100
-                if config["requests_total"] > 0 else 0
+                if config["requests_total"] > 0
+                else 0
             ),
             "agreement_rate_percent": agreement_rate,
-            "avg_latency_delta_ms": avg_latency_delta
+            "avg_latency_delta_ms": avg_latency_delta,
         }
 
     def promote_shadow(self, primary_model_id: str):
@@ -258,7 +271,7 @@ if __name__ == "__main__":
         primary_model_id="model_v1",
         shadow_model_id="model_v2",
         traffic_percentage=50.0,
-        compare_predictions=True
+        compare_predictions=True,
     )
 
     print("✅ Shadow deployment configured")
@@ -283,7 +296,7 @@ if __name__ == "__main__":
             primary_model_id="model_v1",
             inputs=inputs,
             primary_predict_fn=primary_predict,
-            shadow_predict_fn=shadow_predict
+            shadow_predict_fn=shadow_predict,
         )
 
     print(f"✅ Processed 100 requests")
@@ -307,12 +320,16 @@ if __name__ == "__main__":
     print("PROMOTION DECISION")
     print("=" * 80)
 
-    if metrics['agreement_rate_percent'] and metrics['agreement_rate_percent'] >= 95:
+    if metrics["agreement_rate_percent"] and metrics["agreement_rate_percent"] >= 95:
         print("✅ Shadow model is ready for promotion!")
-        print(f"   Agreement rate: {metrics['agreement_rate_percent']:.1f}% (threshold: 95%)")
+        print(
+            f"   Agreement rate: {metrics['agreement_rate_percent']:.1f}% (threshold: 95%)"
+        )
     else:
         print("⚠️  Shadow model needs more testing")
-        print(f"   Agreement rate: {metrics['agreement_rate_percent']:.1f}% (threshold: 95%)")
+        print(
+            f"   Agreement rate: {metrics['agreement_rate_percent']:.1f}% (threshold: 95%)"
+        )
 
     print("\n" + "=" * 80)
     print("Shadow Deployment Demo Complete!")

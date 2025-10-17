@@ -28,11 +28,11 @@ from scripts.recursive_book_analysis import BookManager
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler('pdf_to_text_conversion.log')
-    ]
+        logging.FileHandler("pdf_to_text_conversion.log"),
+    ],
 )
 logger = logging.getLogger(__name__)
 
@@ -45,20 +45,20 @@ BOOKS_TO_CONVERT = [
         "id": "sports_analytics",
         "title": "Sports Analytics",
         "pdf_s3_path": "books/Sports_Analytics.pdf",
-        "text_s3_path": "books/Sports_Analytics.txt"
+        "text_s3_path": "books/Sports_Analytics.txt",
     },
     {
         "id": "basketball_beyond_paper",
         "title": "Basketball Beyond Paper",
         "pdf_s3_path": "books/Basketball_Beyond_Paper.pdf",
-        "text_s3_path": "books/Basketball_Beyond_Paper.txt"
+        "text_s3_path": "books/Basketball_Beyond_Paper.txt",
     },
     {
         "id": "midrange_theory",
         "title": "The Midrange Theory",
         "pdf_s3_path": "books/The_Midrange_Theory.pdf",
-        "text_s3_path": "books/The_Midrange_Theory.txt"
-    }
+        "text_s3_path": "books/The_Midrange_Theory.txt",
+    },
 ]
 
 
@@ -66,12 +66,14 @@ def check_pdf_dependencies() -> bool:
     """Check if PDF processing libraries are available."""
     try:
         import PyPDF2
+
         logger.info("✅ PyPDF2 available")
         return True
     except ImportError:
         logger.error("❌ PyPDF2 not available. Installing...")
         try:
             import subprocess
+
             subprocess.check_call([sys.executable, "-m", "pip", "install", "PyPDF2"])
             logger.info("✅ PyPDF2 installed successfully")
             return True
@@ -80,7 +82,9 @@ def check_pdf_dependencies() -> bool:
             return False
 
 
-def extract_pdf_text_from_s3(book_manager: BookManager, pdf_s3_path: str) -> Optional[str]:
+def extract_pdf_text_from_s3(
+    book_manager: BookManager, pdf_s3_path: str
+) -> Optional[str]:
     """
     Download PDF from S3 and extract text content.
 
@@ -98,7 +102,7 @@ def extract_pdf_text_from_s3(book_manager: BookManager, pdf_s3_path: str) -> Opt
 
         # Download PDF from S3
         response = book_manager.s3_client.get_object(Bucket=S3_BUCKET, Key=pdf_s3_path)
-        pdf_content = response['Body'].read()
+        pdf_content = response["Body"].read()
 
         logger.info(f"📄 PDF downloaded ({len(pdf_content)} bytes)")
 
@@ -121,7 +125,9 @@ def extract_pdf_text_from_s3(book_manager: BookManager, pdf_s3_path: str) -> Opt
                     logger.info(f"   Processed {page_num + 1}/{total_pages} pages...")
 
             except Exception as e:
-                logger.warning(f"⚠️ Failed to extract text from page {page_num + 1}: {e}")
+                logger.warning(
+                    f"⚠️ Failed to extract text from page {page_num + 1}: {e}"
+                )
                 continue
 
         logger.info(f"✅ Text extraction completed ({len(text_content)} characters)")
@@ -132,7 +138,9 @@ def extract_pdf_text_from_s3(book_manager: BookManager, pdf_s3_path: str) -> Opt
         return None
 
 
-def upload_text_to_s3(book_manager: BookManager, text_content: str, text_s3_path: str) -> bool:
+def upload_text_to_s3(
+    book_manager: BookManager, text_content: str, text_s3_path: str
+) -> bool:
     """
     Upload extracted text to S3.
 
@@ -151,8 +159,8 @@ def upload_text_to_s3(book_manager: BookManager, text_content: str, text_s3_path
         book_manager.s3_client.put_object(
             Bucket=S3_BUCKET,
             Key=text_s3_path,
-            Body=text_content.encode('utf-8'),
-            ContentType='text/plain; charset=utf-8'
+            Body=text_content.encode("utf-8"),
+            ContentType="text/plain; charset=utf-8",
         )
 
         logger.info(f"✅ Text uploaded successfully ({len(text_content)} characters)")
@@ -212,7 +220,8 @@ def verify_text_uploads(book_manager: BookManager) -> None:
 
 def print_summary(results: Dict) -> None:
     """Print a summary of the conversion process."""
-    logger.info(f"""
+    logger.info(
+        f"""
 ╔══════════════════════════════════════════════════════════════════╗
 ║                    📊 CONVERSION SUMMARY                        ║
 ╚══════════════════════════════════════════════════════════════════╝
@@ -221,19 +230,23 @@ Successful Conversions: {len(results['successful'])}/3
 Failed Conversions: {len(results['failed'])}/3
 
 ✅ Successfully Converted:
-""")
+"""
+    )
 
     for book in results["successful"]:
         logger.info(f"   - {book['title']}")
 
     if results["failed"]:
-        logger.info(f"""
+        logger.info(
+            f"""
 ❌ Failed Conversions:
-""")
+"""
+        )
         for book in results["failed"]:
             logger.info(f"   - {book['title']}")
 
-    logger.info(f"""
+    logger.info(
+        f"""
 📝 Benefits of Text Format:
    - Better mathematical notation readability
    - Faster text processing
@@ -241,7 +254,8 @@ Failed Conversions: {len(results['failed'])}/3
    - Easier content analysis
 
 ═══════════════════════════════════════════════════════════════════
-""")
+"""
+    )
 
 
 def main():
@@ -257,10 +271,7 @@ def main():
     # Initialize book manager
     book_manager = BookManager(S3_BUCKET)
 
-    results = {
-        "successful": [],
-        "failed": []
-    }
+    results = {"successful": [], "failed": []}
 
     # Convert each book
     for book in BOOKS_TO_CONVERT:
@@ -287,7 +298,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-

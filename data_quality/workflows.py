@@ -16,15 +16,17 @@ load_dotenv()
 
 # Import validator
 from data_quality.validator import DataValidator
+from mcp_server.env_helper import get_hierarchical_env
 from data_quality.expectations import (
     create_game_expectations,
     create_player_expectations,
-    create_team_expectations
+    create_team_expectations,
 )
 
 # Optional: Slack notifications
 try:
     from mcp_server.connectors.slack_notifier import SlackNotifier
+
     SLACK_AVAILABLE = True
 except ImportError:
     SLACK_AVAILABLE = False
@@ -47,7 +49,9 @@ class ProductionDataQualityWorkflow:
         self.use_slack = use_slack and SLACK_AVAILABLE
 
         if self.use_slack:
-            webhook_url = os.getenv("SLACK_WEBHOOK_URL")
+            webhook_url = get_hierarchical_env(
+                "SLACK_WEBHOOK_URL", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+            )
             if webhook_url:
                 self.slack = SlackNotifier(webhook_url=webhook_url)
             else:
@@ -69,7 +73,7 @@ class ProductionDataQualityWorkflow:
         tables_to_validate = [
             ("games", create_game_expectations()),
             ("players", create_player_expectations()),
-            ("teams", create_team_expectations())
+            ("teams", create_team_expectations()),
         ]
 
         results = {}
@@ -81,8 +85,7 @@ class ProductionDataQualityWorkflow:
 
             try:
                 result = await self.validator.validate_table(
-                    table_name=table_name,
-                    expectations=expectations
+                    table_name=table_name, expectations=expectations
                 )
 
                 results[table_name] = result
@@ -92,32 +95,29 @@ class ProductionDataQualityWorkflow:
                     overall_pass_rate.append(pass_rate)
 
                     if pass_rate < 1.0:
-                        failed_tables.append({
-                            "table": table_name,
-                            "pass_rate": pass_rate,
-                            "failed_count": result["summary"]["failed"]
-                        })
+                        failed_tables.append(
+                            {
+                                "table": table_name,
+                                "pass_rate": pass_rate,
+                                "failed_count": result["summary"]["failed"],
+                            }
+                        )
                         logger.warning(
                             f"Table {table_name} has data quality issues: "
                             f"{pass_rate*100:.1f}% pass rate"
                         )
                 else:
-                    logger.error(f"Validation failed for table {table_name}: {result.get('error')}")
-                    failed_tables.append({
-                        "table": table_name,
-                        "error": result.get('error')
-                    })
+                    logger.error(
+                        f"Validation failed for table {table_name}: {result.get('error')}"
+                    )
+                    failed_tables.append(
+                        {"table": table_name, "error": result.get("error")}
+                    )
 
             except Exception as e:
                 logger.error(f"Error validating {table_name}: {e}")
-                results[table_name] = {
-                    "success": False,
-                    "error": str(e)
-                }
-                failed_tables.append({
-                    "table": table_name,
-                    "error": str(e)
-                })
+                results[table_name] = {"success": False, "error": str(e)}
+                failed_tables.append({"table": table_name, "error": str(e)})
 
         # Calculate overall summary
         summary = {
@@ -125,9 +125,13 @@ class ProductionDataQualityWorkflow:
             "tables_validated": len(tables_to_validate),
             "tables_passed": len(tables_to_validate) - len(failed_tables),
             "tables_failed": len(failed_tables),
-            "overall_pass_rate": sum(overall_pass_rate) / len(overall_pass_rate) if overall_pass_rate else 0,
+            "overall_pass_rate": (
+                sum(overall_pass_rate) / len(overall_pass_rate)
+                if overall_pass_rate
+                else 0
+            ),
             "failed_tables": failed_tables,
-            "results": results
+            "results": results,
         }
 
         # Send Slack alert if there are failures
@@ -137,9 +141,7 @@ class ProductionDataQualityWorkflow:
         return summary
 
     async def validate_table_incremental(
-        self,
-        table_name: str,
-        where_clause: Optional[str] = None
+        self, table_name: str, where_clause: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Validate only recent/new data in a table
@@ -162,10 +164,12 @@ class ProductionDataQualityWorkflow:
         # Query data
         try:
             import sqlalchemy as sa
+
             connection_string = self.validator._build_postgres_connection_string()
             engine = sa.create_engine(connection_string)
 
             import pandas as pd
+
             data = pd.read_sql(sql, engine)
             engine.dispose()
 
@@ -173,20 +177,16 @@ class ProductionDataQualityWorkflow:
 
         except Exception as e:
             logger.error(f"Failed to query incremental data: {e}")
-            return {
-                "success": False,
-                "error": f"Failed to query data: {str(e)}"
-            }
+            return {"success": False, "error": f"Failed to query data: {str(e)}"}
 
         # Get expectations for table
         from data_quality.expectations import get_expectations_for_table
+
         expectations = get_expectations_for_table(table_name)
 
         # Validate
         result = await self.validator.validate_table(
-            table_name=table_name,
-            data=data,
-            expectations=expectations
+            table_name=table_name, data=data, expectations=expectations
         )
 
         # Alert on failures
@@ -196,9 +196,7 @@ class ProductionDataQualityWorkflow:
         return result
 
     async def get_validation_history(
-        self,
-        table_name: Optional[str] = None,
-        days: int = 7
+        self, table_name: Optional[str] = None, days: int = 7
     ) -> Dict[str, Any]:
         """
         Get validation history from S3
@@ -218,7 +216,7 @@ class ProductionDataQualityWorkflow:
             "message": "Validation history retrieval not yet implemented",
             "note": "Validation results are stored in S3 automatically when using configured context",
             "s3_bucket": os.getenv("GX_S3_BUCKET"),
-            "s3_prefix": os.getenv("GX_S3_PREFIX")
+            "s3_prefix": os.getenv("GX_S3_PREFIX"),
         }
 
     async def _send_quality_alert(self, summary: Dict[str, Any]):
@@ -277,6 +275,7 @@ class ProductionDataQualityWorkflow:
 
 # Convenience functions
 
+
 async def validate_nba_database() -> Dict[str, Any]:
     """
     Validate entire NBA database
@@ -325,14 +324,20 @@ async def main():
     if len(sys.argv) > 1 and sys.argv[1] == "--incremental":
         # Incremental validation
         table = sys.argv[2] if len(sys.argv) > 2 else "games"
-        where = sys.argv[3] if len(sys.argv) > 3 else "created_at > NOW() - INTERVAL '1 day'"
+        where = (
+            sys.argv[3]
+            if len(sys.argv) > 3
+            else "created_at > NOW() - INTERVAL '1 day'"
+        )
 
         print(f"Running incremental validation for {table}...")
         result = await validate_recent_data(table, where)
 
         print(f"\nValidation Results:")
         print(f"  Pass Rate: {result['summary']['pass_rate']*100:.1f}%")
-        print(f"  Passed: {result['summary']['passed']}/{result['summary']['total_expectations']}")
+        print(
+            f"  Passed: {result['summary']['passed']}/{result['summary']['total_expectations']}"
+        )
         print(f"  Rows Validated: {result['rows_validated']}")
 
     else:

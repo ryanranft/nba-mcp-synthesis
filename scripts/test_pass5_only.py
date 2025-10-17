@@ -19,8 +19,7 @@ from generate_implementation_files import MCPImplementationGenerator
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -37,9 +36,9 @@ async def test_pass5_with_timeout():
         logger.error(f"❌ Master recommendations file not found: {master_recs_path}")
         return False
 
-    with open(master_recs_path, 'r') as f:
+    with open(master_recs_path, "r") as f:
         data = json.load(f)
-        recommendations = data.get('recommendations', [])
+        recommendations = data.get("recommendations", [])
 
     logger.info(f"📋 Loaded {len(recommendations)} recommendations")
 
@@ -52,7 +51,7 @@ async def test_pass5_with_timeout():
         generator = MCPImplementationGenerator(
             mcp_server_url="http://localhost:8000",  # Default MCP server
             output_base="/Users/ryanranft/nba-simulator-aws/docs/phases",
-            templates_dir="templates"
+            templates_dir="templates",
         )
         logger.info("✅ Generator initialized successfully")
     except Exception as e:
@@ -69,34 +68,44 @@ async def test_pass5_with_timeout():
     # Process recommendations with timeout protection
     for i, rec in enumerate(test_recommendations):
         try:
-            logger.info(f"🔧 Processing recommendation {i+1}/{len(test_recommendations)}: {rec.get('title', 'Untitled')}")
+            logger.info(
+                f"🔧 Processing recommendation {i+1}/{len(test_recommendations)}: {rec.get('title', 'Untitled')}"
+            )
 
             # Get phase from recommendation
-            phase = rec.get('phase', 0)
+            phase = rec.get("phase", 0)
 
             # Set timeout for each recommendation (30 seconds)
             try:
                 result = await asyncio.wait_for(
                     generator.generate_files_for_recommendation(rec, phase),
-                    timeout=30.0
+                    timeout=30.0,
                 )
 
-                if result.get('generated_files'):
+                if result.get("generated_files"):
                     implementations_generated += 1
-                    files_created += len(result.get('generated_files', []))
-                    logger.info(f"✅ Generated {len(result.get('generated_files', []))} files")
+                    files_created += len(result.get("generated_files", []))
+                    logger.info(
+                        f"✅ Generated {len(result.get('generated_files', []))} files"
+                    )
                 else:
-                    logger.warning(f"⚠️ Failed to generate implementation: {result.get('errors', ['Unknown error'])}")
+                    logger.warning(
+                        f"⚠️ Failed to generate implementation: {result.get('errors', ['Unknown error'])}"
+                    )
 
             except asyncio.TimeoutError:
-                logger.error(f"⏰ Timeout processing recommendation: {rec.get('title', 'Untitled')}")
+                logger.error(
+                    f"⏰ Timeout processing recommendation: {rec.get('title', 'Untitled')}"
+                )
                 continue
             except Exception as e:
                 logger.error(f"❌ Error processing recommendation: {e}")
                 continue
 
         except Exception as e:
-            logger.error(f"❌ Error generating implementation for {rec.get('title', 'Untitled')}: {e}")
+            logger.error(
+                f"❌ Error generating implementation for {rec.get('title', 'Untitled')}: {e}"
+            )
             continue
 
     # Results
@@ -104,7 +113,9 @@ async def test_pass5_with_timeout():
     logger.info("📊 Pass 5 Test Results:")
     logger.info(f"   Implementations generated: {implementations_generated}")
     logger.info(f"   Files created: {files_created}")
-    logger.info(f"   Success rate: {implementations_generated/len(test_recommendations)*100:.1f}%")
+    logger.info(
+        f"   Success rate: {implementations_generated/len(test_recommendations)*100:.1f}%"
+    )
 
     if implementations_generated > 0:
         logger.info("✅ Pass 5 test completed successfully!")
@@ -117,7 +128,9 @@ async def test_pass5_with_timeout():
 async def main():
     """Main test function."""
     try:
-        success = await asyncio.wait_for(test_pass5_with_timeout(), timeout=300.0)  # 5 minute total timeout
+        success = await asyncio.wait_for(
+            test_pass5_with_timeout(), timeout=300.0
+        )  # 5 minute total timeout
         return 0 if success else 1
     except asyncio.TimeoutError:
         logger.error("⏰ Overall test timeout (5 minutes)")
@@ -129,4 +142,3 @@ async def main():
 
 if __name__ == "__main__":
     exit(asyncio.run(main()))
-

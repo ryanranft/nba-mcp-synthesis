@@ -23,16 +23,20 @@ from .algebra_helper import get_sports_formula
 
 logger = logging.getLogger(__name__)
 
+
 class ValidationStatus(Enum):
     """Validation status levels"""
+
     VALID = "valid"
     WARNING = "warning"
     ERROR = "error"
     INCONSISTENT = "inconsistent"
     UNKNOWN = "unknown"
 
+
 class ValidationType(Enum):
     """Types of validation checks"""
+
     ACCURACY = "accuracy"
     CONSISTENCY = "consistency"
     CROSS_REFERENCE = "cross_reference"
@@ -40,9 +44,11 @@ class ValidationType(Enum):
     DOMAIN_SPECIFIC = "domain_specific"
     PERFORMANCE = "performance"
 
+
 @dataclass
 class ValidationResult:
     """Result of a validation check"""
+
     validation_id: str
     formula_id: str
     validation_type: ValidationType
@@ -54,9 +60,11 @@ class ValidationResult:
     timestamp: datetime
     source: Optional[str] = None
 
+
 @dataclass
 class FormulaReference:
     """Reference data for formula validation"""
+
     formula_id: str
     name: str
     formula: str
@@ -66,9 +74,11 @@ class FormulaReference:
     test_data: Optional[Dict[str, float]] = None
     description: Optional[str] = None
 
+
 @dataclass
 class ValidationReport:
     """Comprehensive validation report"""
+
     report_id: str
     formula_id: str
     overall_status: ValidationStatus
@@ -78,6 +88,7 @@ class ValidationReport:
     recommendations: List[str]
     created_at: datetime
     updated_at: datetime
+
 
 class FormulaValidationEngine:
     """
@@ -108,12 +119,22 @@ class FormulaValidationEngine:
                 source="Basketball on Paper",
                 page="Chapter 4",
                 test_data={
-                    "FGM": 10, "STL": 2, "3PM": 3, "FTM": 5, "BLK": 1,
-                    "OREB": 2, "AST": 8, "DREB": 6, "PF": 3, "FTA": 6,
-                    "FGA": 18, "TOV": 3, "MP": 35
+                    "FGM": 10,
+                    "STL": 2,
+                    "3PM": 3,
+                    "FTM": 5,
+                    "BLK": 1,
+                    "OREB": 2,
+                    "AST": 8,
+                    "DREB": 6,
+                    "PF": 3,
+                    "FTA": 6,
+                    "FGA": 18,
+                    "TOV": 3,
+                    "MP": 35,
                 },
                 expected_result=25.2,  # Approximate expected PER
-                description="Standard PER calculation with typical player stats"
+                description="Standard PER calculation with typical player stats",
             ),
             "true_shooting": FormulaReference(
                 formula_id="true_shooting",
@@ -121,11 +142,9 @@ class FormulaValidationEngine:
                 formula="PTS / (2 * (FGA + 0.44 * FTA))",
                 source="Basketball on Paper",
                 page="Chapter 3",
-                test_data={
-                    "PTS": 25, "FGA": 20, "FTA": 5
-                },
+                test_data={"PTS": 25, "FGA": 20, "FTA": 5},
                 expected_result=0.568,  # 56.8% TS%
-                description="True shooting percentage calculation"
+                description="True shooting percentage calculation",
             ),
             "usage_rate": FormulaReference(
                 formula_id="usage_rate",
@@ -134,11 +153,17 @@ class FormulaValidationEngine:
                 source="Basketball on Paper",
                 page="Chapter 5",
                 test_data={
-                    "FGA": 18, "FTA": 6, "TOV": 3, "MP": 35,
-                    "TM_MP": 240, "TM_FGA": 90, "TM_FTA": 25, "TM_TOV": 12
+                    "FGA": 18,
+                    "FTA": 6,
+                    "TOV": 3,
+                    "MP": 35,
+                    "TM_MP": 240,
+                    "TM_FGA": 90,
+                    "TM_FTA": 25,
+                    "TM_TOV": 12,
                 },
                 expected_result=28.5,  # Approximate usage rate
-                description="Usage rate calculation"
+                description="Usage rate calculation",
             ),
             "effective_fg": FormulaReference(
                 formula_id="effective_fg",
@@ -146,11 +171,9 @@ class FormulaValidationEngine:
                 formula="(FGM + 0.5 * 3PM) / FGA",
                 source="Basketball on Paper",
                 page="Chapter 3",
-                test_data={
-                    "FGM": 10, "3PM": 3, "FGA": 20
-                },
+                test_data={"FGM": 10, "3PM": 3, "FGA": 20},
                 expected_result=0.575,  # 57.5% eFG%
-                description="Effective field goal percentage"
+                description="Effective field goal percentage",
             ),
             "net_rating": FormulaReference(
                 formula_id="net_rating",
@@ -158,12 +181,10 @@ class FormulaValidationEngine:
                 formula="ORtg - DRtg",
                 source="Basketball on Paper",
                 page="Chapter 6",
-                test_data={
-                    "ORtg": 115.2, "DRtg": 108.5
-                },
+                test_data={"ORtg": 115.2, "DRtg": 108.5},
                 expected_result=6.7,
-                description="Net rating calculation"
-            )
+                description="Net rating calculation",
+            ),
         }
         return references
 
@@ -178,8 +199,8 @@ class FormulaValidationEngine:
             "required_validations": [
                 ValidationType.MATHEMATICAL,
                 ValidationType.ACCURACY,
-                ValidationType.CONSISTENCY
-            ]
+                ValidationType.CONSISTENCY,
+            ],
         }
 
     def validate_formula(
@@ -187,7 +208,7 @@ class FormulaValidationEngine:
         formula: str,
         formula_id: Optional[str] = None,
         test_data: Optional[Dict[str, float]] = None,
-        validation_types: Optional[List[ValidationType]] = None
+        validation_types: Optional[List[ValidationType]] = None,
     ) -> ValidationReport:
         """
         Perform comprehensive validation of a formula.
@@ -243,7 +264,7 @@ class FormulaValidationEngine:
                     message=f"Validation failed: {str(e)}",
                     details={"error": str(e)},
                     recommendations=["Fix formula syntax", "Check input data"],
-                    timestamp=now
+                    timestamp=now,
                 )
                 validations.append(error_result)
 
@@ -263,7 +284,7 @@ class FormulaValidationEngine:
             summary=summary,
             recommendations=recommendations,
             created_at=now,
-            updated_at=now
+            updated_at=now,
         )
 
         logger.info(f"Generated validation report {report_id} for formula {formula_id}")
@@ -296,7 +317,9 @@ class FormulaValidationEngine:
                 issues.append("Unmatched parentheses")
                 score -= 0.3
 
-            status = ValidationStatus.VALID if score >= 0.9 else ValidationStatus.WARNING
+            status = (
+                ValidationStatus.VALID if score >= 0.9 else ValidationStatus.WARNING
+            )
 
             return ValidationResult(
                 validation_id=str(uuid.uuid4()),
@@ -308,10 +331,14 @@ class FormulaValidationEngine:
                 details={
                     "parsed_expression": str(expr),
                     "issues": issues,
-                    "latex": latex(expr)
+                    "latex": latex(expr),
                 },
-                recommendations=["Fix mathematical issues"] if issues else ["Formula is mathematically sound"],
-                timestamp=datetime.now()
+                recommendations=(
+                    ["Fix mathematical issues"]
+                    if issues
+                    else ["Formula is mathematically sound"]
+                ),
+                timestamp=datetime.now(),
             )
 
         except Exception as e:
@@ -324,10 +351,15 @@ class FormulaValidationEngine:
                 message=f"Mathematical validation failed: {str(e)}",
                 details={"error": str(e)},
                 recommendations=["Fix formula syntax", "Check mathematical notation"],
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
-    def _validate_accuracy(self, formula: str, formula_id: str, test_data: Optional[Dict[str, float]] = None) -> ValidationResult:
+    def _validate_accuracy(
+        self,
+        formula: str,
+        formula_id: str,
+        test_data: Optional[Dict[str, float]] = None,
+    ) -> ValidationResult:
         """Validate formula accuracy against known results"""
         try:
             # Get reference data if available
@@ -348,14 +380,16 @@ class FormulaValidationEngine:
                     message="No test data available for accuracy validation",
                     details={"test_data_available": False},
                     recommendations=["Provide test data for accuracy validation"],
-                    timestamp=datetime.now()
+                    timestamp=datetime.now(),
                 )
 
             # Calculate formula result
             expr = parse_expr(formula, evaluate=False)
 
             # Check if all variables are provided
-            missing_vars = [str(s) for s in expr.free_symbols if str(s) not in test_data]
+            missing_vars = [
+                str(s) for s in expr.free_symbols if str(s) not in test_data
+            ]
             if missing_vars:
                 return ValidationResult(
                     validation_id=str(uuid.uuid4()),
@@ -366,17 +400,21 @@ class FormulaValidationEngine:
                     message=f"Missing variables for accuracy validation: {', '.join(missing_vars)}",
                     details={"missing_variables": missing_vars},
                     recommendations=["Provide values for all formula variables"],
-                    timestamp=datetime.now()
+                    timestamp=datetime.now(),
                 )
 
             # Calculate result
-            substituted_expr = expr.subs({sp.Symbol(k): v for k, v in test_data.items()})
+            substituted_expr = expr.subs(
+                {sp.Symbol(k): v for k, v in test_data.items()}
+            )
             calculated_result = float(substituted_expr)
 
             # Compare with expected result if available
             if expected_result is not None:
                 tolerance = self.validation_rules["accuracy_threshold"]
-                error_percent = abs(calculated_result - expected_result) / expected_result
+                error_percent = (
+                    abs(calculated_result - expected_result) / expected_result
+                )
 
                 if error_percent <= (1 - tolerance):
                     status = ValidationStatus.VALID
@@ -391,23 +429,31 @@ class FormulaValidationEngine:
                     "calculated_result": calculated_result,
                     "expected_result": expected_result,
                     "error_percent": error_percent,
-                    "test_data": test_data
+                    "test_data": test_data,
                 }
 
-                recommendations = ["Formula accuracy is acceptable"] if status == ValidationStatus.VALID else [
-                    "Check formula implementation",
-                    "Verify test data accuracy",
-                    "Compare with reference sources"
-                ]
+                recommendations = (
+                    ["Formula accuracy is acceptable"]
+                    if status == ValidationStatus.VALID
+                    else [
+                        "Check formula implementation",
+                        "Verify test data accuracy",
+                        "Compare with reference sources",
+                    ]
+                )
             else:
                 status = ValidationStatus.WARNING
                 score = 0.8
-                message = "Accuracy validation completed (no reference result available)"
+                message = (
+                    "Accuracy validation completed (no reference result available)"
+                )
                 details = {
                     "calculated_result": calculated_result,
-                    "test_data": test_data
+                    "test_data": test_data,
                 }
-                recommendations = ["Provide reference result for complete accuracy validation"]
+                recommendations = [
+                    "Provide reference result for complete accuracy validation"
+                ]
 
             return ValidationResult(
                 validation_id=str(uuid.uuid4()),
@@ -419,7 +465,7 @@ class FormulaValidationEngine:
                 details=details,
                 recommendations=recommendations,
                 timestamp=datetime.now(),
-                source=reference.source if reference else None
+                source=reference.source if reference else None,
             )
 
         except Exception as e:
@@ -432,7 +478,7 @@ class FormulaValidationEngine:
                 message=f"Accuracy validation failed: {str(e)}",
                 details={"error": str(e)},
                 recommendations=["Fix formula syntax", "Check test data format"],
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
     def _validate_consistency(self, formula: str, formula_id: str) -> ValidationResult:
@@ -450,8 +496,10 @@ class FormulaValidationEngine:
                     score=0.5,
                     message="No reference formula available for consistency validation",
                     details={"reference_available": False},
-                    recommendations=["Add reference formula for consistency validation"],
-                    timestamp=datetime.now()
+                    recommendations=[
+                        "Add reference formula for consistency validation"
+                    ],
+                    timestamp=datetime.now(),
                 )
 
             # Compare formulas (simplified comparison)
@@ -478,15 +526,19 @@ class FormulaValidationEngine:
                     "reference_formula": ref_formula,
                     "test_formula": formula,
                     "similarity_score": consistency_score,
-                    "reference_source": reference.source
+                    "reference_source": reference.source,
                 },
-                recommendations=["Formula is consistent with reference"] if status == ValidationStatus.VALID else [
-                    "Review formula implementation",
-                    "Check for calculation differences",
-                    "Verify formula source"
-                ],
+                recommendations=(
+                    ["Formula is consistent with reference"]
+                    if status == ValidationStatus.VALID
+                    else [
+                        "Review formula implementation",
+                        "Check for calculation differences",
+                        "Verify formula source",
+                    ]
+                ),
                 timestamp=datetime.now(),
-                source=reference.source
+                source=reference.source,
             )
 
         except Exception as e:
@@ -499,10 +551,12 @@ class FormulaValidationEngine:
                 message=f"Consistency validation failed: {str(e)}",
                 details={"error": str(e)},
                 recommendations=["Fix formula syntax", "Check reference data"],
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
-    def _validate_cross_reference(self, formula: str, formula_id: str) -> ValidationResult:
+    def _validate_cross_reference(
+        self, formula: str, formula_id: str
+    ) -> ValidationResult:
         """Validate formula against multiple sources"""
         try:
             # This would typically check against multiple books/sources
@@ -514,13 +568,17 @@ class FormulaValidationEngine:
             # Check against known references
             for ref_id, reference in self.formula_references.items():
                 if ref_id != formula_id and reference.formula:
-                    similarity = self._calculate_formula_similarity(formula, reference.formula)
+                    similarity = self._calculate_formula_similarity(
+                        formula, reference.formula
+                    )
                     if similarity > 0.5:  # Significant similarity
-                        cross_ref_sources.append({
-                            "source": reference.source,
-                            "formula_id": ref_id,
-                            "similarity": similarity
-                        })
+                        cross_ref_sources.append(
+                            {
+                                "source": reference.source,
+                                "formula_id": ref_id,
+                                "similarity": similarity,
+                            }
+                        )
                         consistency_scores.append(similarity)
 
             if not cross_ref_sources:
@@ -533,7 +591,7 @@ class FormulaValidationEngine:
                     message="No cross-reference sources found",
                     details={"cross_reference_sources": []},
                     recommendations=["Add more reference sources for cross-validation"],
-                    timestamp=datetime.now()
+                    timestamp=datetime.now(),
                 )
 
             avg_consistency = sum(consistency_scores) / len(consistency_scores)
@@ -556,14 +614,18 @@ class FormulaValidationEngine:
                 details={
                     "cross_reference_sources": cross_ref_sources,
                     "average_consistency": avg_consistency,
-                    "total_sources": len(cross_ref_sources)
+                    "total_sources": len(cross_ref_sources),
                 },
-                recommendations=["Formula is consistent across sources"] if status == ValidationStatus.VALID else [
-                    "Review formula variations",
-                    "Check source reliability",
-                    "Consider formula standardization"
-                ],
-                timestamp=datetime.now()
+                recommendations=(
+                    ["Formula is consistent across sources"]
+                    if status == ValidationStatus.VALID
+                    else [
+                        "Review formula variations",
+                        "Check source reliability",
+                        "Consider formula standardization",
+                    ]
+                ),
+                timestamp=datetime.now(),
             )
 
         except Exception as e:
@@ -576,10 +638,12 @@ class FormulaValidationEngine:
                 message=f"Cross-reference validation failed: {str(e)}",
                 details={"error": str(e)},
                 recommendations=["Fix validation system", "Check reference data"],
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
-    def _validate_domain_specific(self, formula: str, formula_id: str) -> ValidationResult:
+    def _validate_domain_specific(
+        self, formula: str, formula_id: str
+    ) -> ValidationResult:
         """Validate domain-specific constraints for sports analytics"""
         try:
             issues = []
@@ -600,7 +664,9 @@ class FormulaValidationEngine:
                     score -= 0.1
 
             # Check for shooting formulas
-            if any(term in formula_id.upper() for term in ["SHOOTING", "FG", "3P", "FT"]):
+            if any(
+                term in formula_id.upper() for term in ["SHOOTING", "FG", "3P", "FT"]
+            ):
                 if "FGA" not in formula and "ATTEMPTS" not in formula:
                     issues.append("Shooting formula should include attempts")
                     score -= 0.2
@@ -611,7 +677,9 @@ class FormulaValidationEngine:
                     issues.append("Defensive formula should consider opponent stats")
                     score -= 0.2
 
-            status = ValidationStatus.VALID if score >= 0.8 else ValidationStatus.WARNING
+            status = (
+                ValidationStatus.VALID if score >= 0.8 else ValidationStatus.WARNING
+            )
 
             return ValidationResult(
                 validation_id=str(uuid.uuid4()),
@@ -626,11 +694,15 @@ class FormulaValidationEngine:
                         "PER calculation includes minutes",
                         "Percentage calculation includes division",
                         "Shooting formula includes attempts",
-                        "Defensive formula considers opponents"
-                    ]
+                        "Defensive formula considers opponents",
+                    ],
                 },
-                recommendations=["Address domain-specific issues"] if issues else ["Formula follows domain conventions"],
-                timestamp=datetime.now()
+                recommendations=(
+                    ["Address domain-specific issues"]
+                    if issues
+                    else ["Formula follows domain conventions"]
+                ),
+                timestamp=datetime.now(),
             )
 
         except Exception as e:
@@ -643,10 +715,15 @@ class FormulaValidationEngine:
                 message=f"Domain-specific validation failed: {str(e)}",
                 details={"error": str(e)},
                 recommendations=["Fix domain validation", "Check formula structure"],
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
-    def _validate_performance(self, formula: str, formula_id: str, test_data: Optional[Dict[str, float]] = None) -> ValidationResult:
+    def _validate_performance(
+        self,
+        formula: str,
+        formula_id: str,
+        test_data: Optional[Dict[str, float]] = None,
+    ) -> ValidationResult:
         """Validate formula performance and efficiency"""
         try:
             import time
@@ -659,7 +736,9 @@ class FormulaValidationEngine:
 
             try:
                 expr = parse_expr(formula, evaluate=False)
-                substituted_expr = expr.subs({sp.Symbol(k): v for k, v in test_data.items()})
+                substituted_expr = expr.subs(
+                    {sp.Symbol(k): v for k, v in test_data.items()}
+                )
                 result = float(substituted_expr)
                 calculation_time = time.time() - start_time
             except Exception as e:
@@ -672,7 +751,7 @@ class FormulaValidationEngine:
                     message=f"Performance validation failed: {str(e)}",
                     details={"error": str(e)},
                     recommendations=["Fix formula syntax for performance testing"],
-                    timestamp=datetime.now()
+                    timestamp=datetime.now(),
                 )
 
             threshold = self.validation_rules["performance_threshold"]
@@ -680,11 +759,15 @@ class FormulaValidationEngine:
             if calculation_time <= threshold:
                 status = ValidationStatus.VALID
                 score = 1.0 - (calculation_time / threshold)
-                message = f"Performance validation passed (time: {calculation_time:.3f}s)"
+                message = (
+                    f"Performance validation passed (time: {calculation_time:.3f}s)"
+                )
             else:
                 status = ValidationStatus.WARNING
                 score = max(0.0, 1.0 - (calculation_time / threshold))
-                message = f"Performance validation warning (time: {calculation_time:.3f}s)"
+                message = (
+                    f"Performance validation warning (time: {calculation_time:.3f}s)"
+                )
 
             return ValidationResult(
                 validation_id=str(uuid.uuid4()),
@@ -697,14 +780,18 @@ class FormulaValidationEngine:
                     "calculation_time": calculation_time,
                     "threshold": threshold,
                     "test_data": test_data,
-                    "result": result
+                    "result": result,
                 },
-                recommendations=["Formula performance is acceptable"] if status == ValidationStatus.VALID else [
-                    "Consider optimizing formula",
-                    "Check for complex operations",
-                    "Review calculation efficiency"
-                ],
-                timestamp=datetime.now()
+                recommendations=(
+                    ["Formula performance is acceptable"]
+                    if status == ValidationStatus.VALID
+                    else [
+                        "Consider optimizing formula",
+                        "Check for complex operations",
+                        "Review calculation efficiency",
+                    ]
+                ),
+                timestamp=datetime.now(),
             )
 
         except Exception as e:
@@ -716,8 +803,11 @@ class FormulaValidationEngine:
                 score=0.0,
                 message=f"Performance validation failed: {str(e)}",
                 details={"error": str(e)},
-                recommendations=["Fix performance validation", "Check formula complexity"],
-                timestamp=datetime.now()
+                recommendations=[
+                    "Fix performance validation",
+                    "Check formula complexity",
+                ],
+                timestamp=datetime.now(),
             )
 
     def _calculate_formula_similarity(self, formula1: str, formula2: str) -> float:
@@ -740,7 +830,9 @@ class FormulaValidationEngine:
         except Exception:
             return 0.0
 
-    def _calculate_overall_status(self, validations: List[ValidationResult]) -> Tuple[ValidationStatus, float]:
+    def _calculate_overall_status(
+        self, validations: List[ValidationResult]
+    ) -> Tuple[ValidationStatus, float]:
         """Calculate overall validation status and score"""
         if not validations:
             return ValidationStatus.UNKNOWN, 0.0
@@ -752,7 +844,7 @@ class FormulaValidationEngine:
             ValidationType.CONSISTENCY: 0.2,
             ValidationType.CROSS_REFERENCE: 0.1,
             ValidationType.DOMAIN_SPECIFIC: 0.05,
-            ValidationType.PERFORMANCE: 0.05
+            ValidationType.PERFORMANCE: 0.05,
         }
 
         weighted_score = 0.0
@@ -793,7 +885,9 @@ class FormulaValidationEngine:
 
         return f"Validation completed: {', '.join(summary_parts)}"
 
-    def _generate_recommendations(self, validations: List[ValidationResult]) -> List[str]:
+    def _generate_recommendations(
+        self, validations: List[ValidationResult]
+    ) -> List[str]:
         """Generate overall recommendations"""
         recommendations = []
 
@@ -805,9 +899,21 @@ class FormulaValidationEngine:
         unique_recommendations = list(set(recommendations))
 
         # Prioritize error-related recommendations
-        error_recommendations = [r for r in unique_recommendations if any(word in r.lower() for word in ["fix", "error", "failed"])]
-        warning_recommendations = [r for r in unique_recommendations if any(word in r.lower() for word in ["check", "review", "consider"])]
-        other_recommendations = [r for r in unique_recommendations if r not in error_recommendations + warning_recommendations]
+        error_recommendations = [
+            r
+            for r in unique_recommendations
+            if any(word in r.lower() for word in ["fix", "error", "failed"])
+        ]
+        warning_recommendations = [
+            r
+            for r in unique_recommendations
+            if any(word in r.lower() for word in ["check", "review", "consider"])
+        ]
+        other_recommendations = [
+            r
+            for r in unique_recommendations
+            if r not in error_recommendations + warning_recommendations
+        ]
 
         return error_recommendations + warning_recommendations + other_recommendations
 
@@ -828,7 +934,3 @@ class FormulaValidationEngine:
     def get_validation_rules(self) -> Dict[str, Any]:
         """Get validation rules and thresholds"""
         return self.validation_rules
-
-
-
-

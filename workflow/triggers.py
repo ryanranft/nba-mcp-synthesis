@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 class TriggerType(Enum):
     """Types of workflow triggers"""
+
     PROCESS_COMPLETE = "process_complete"
     PROCESS_FAILED = "process_failed"
     MCP_TOOL_COMPLETE = "mcp_tool_complete"
@@ -30,6 +31,7 @@ class TriggerType(Enum):
 @dataclass
 class TriggerEvent:
     """Represents a trigger event"""
+
     event_type: TriggerType
     source: str
     timestamp: str
@@ -46,9 +48,7 @@ class WorkflowTrigger:
         self.max_log_size = 1000
 
     def register_trigger(
-        self,
-        trigger_type: TriggerType,
-        handler: Callable[[TriggerEvent], Any]
+        self, trigger_type: TriggerType, handler: Callable[[TriggerEvent], Any]
     ):
         """Register a trigger handler"""
         if trigger_type not in self.trigger_handlers:
@@ -62,7 +62,7 @@ class WorkflowTrigger:
         # Log event
         self.trigger_log.append(event)
         if len(self.trigger_log) > self.max_log_size:
-            self.trigger_log = self.trigger_log[-self.max_log_size:]
+            self.trigger_log = self.trigger_log[-self.max_log_size :]
 
         # Call handlers
         if event.event_type in self.trigger_handlers:
@@ -77,18 +77,15 @@ class WorkflowTrigger:
         process_name: str,
         source: str,
         results: Optional[Dict] = None,
-        workflow_id: Optional[str] = None
+        workflow_id: Optional[str] = None,
     ):
         """Convenience method to emit process complete event"""
         event = TriggerEvent(
             event_type=TriggerType.PROCESS_COMPLETE,
             source=source,
             timestamp=datetime.now().isoformat(),
-            data={
-                "process_name": process_name,
-                "results": results or {}
-            },
-            workflow_id=workflow_id
+            data={"process_name": process_name, "results": results or {}},
+            workflow_id=workflow_id,
         )
         self.emit_event(event)
 
@@ -98,19 +95,15 @@ class WorkflowTrigger:
         response: str,
         cost: float,
         source: str,
-        workflow_id: Optional[str] = None
+        workflow_id: Optional[str] = None,
     ):
         """Emit synthesis completion event"""
         event = TriggerEvent(
             event_type=TriggerType.SYNTHESIS_COMPLETE,
             source=source,
             timestamp=datetime.now().isoformat(),
-            data={
-                "query": query,
-                "response": response,
-                "cost": cost
-            },
-            workflow_id=workflow_id
+            data={"query": query, "response": response, "cost": cost},
+            workflow_id=workflow_id,
         )
         self.emit_event(event)
 
@@ -120,19 +113,15 @@ class WorkflowTrigger:
         params: Dict[str, Any],
         result: Any,
         source: str,
-        workflow_id: Optional[str] = None
+        workflow_id: Optional[str] = None,
     ):
         """Emit MCP tool completion event"""
         event = TriggerEvent(
             event_type=TriggerType.MCP_TOOL_COMPLETE,
             source=source,
             timestamp=datetime.now().isoformat(),
-            data={
-                "tool_name": tool_name,
-                "params": params,
-                "result": result
-            },
-            workflow_id=workflow_id
+            data={"tool_name": tool_name, "params": params, "result": result},
+            workflow_id=workflow_id,
         )
         self.emit_event(event)
 
@@ -143,7 +132,7 @@ class WorkflowTrigger:
         tests_failed: int,
         coverage: Optional[float] = None,
         source: str = "pytest",
-        workflow_id: Optional[str] = None
+        workflow_id: Optional[str] = None,
     ):
         """Emit test completion event"""
         event = TriggerEvent(
@@ -155,16 +144,14 @@ class WorkflowTrigger:
                 "tests_passed": tests_passed,
                 "tests_failed": tests_failed,
                 "coverage": coverage,
-                "success": tests_failed == 0
+                "success": tests_failed == 0,
             },
-            workflow_id=workflow_id
+            workflow_id=workflow_id,
         )
         self.emit_event(event)
 
     def get_recent_events(
-        self,
-        event_type: Optional[TriggerType] = None,
-        limit: int = 10
+        self, event_type: Optional[TriggerType] = None, limit: int = 10
     ) -> List[TriggerEvent]:
         """Get recent trigger events"""
         events = self.trigger_log

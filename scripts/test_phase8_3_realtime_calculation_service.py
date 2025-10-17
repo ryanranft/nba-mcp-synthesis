@@ -21,7 +21,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, List
 
 # Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from mcp_server.tools.realtime_calculation_service import (
     RealTimeCalculationService,
@@ -35,7 +35,7 @@ from mcp_server.tools.realtime_calculation_service import (
     DataSourceType,
     CalculationStatus,
     BatchStatus,
-    SyncFrequency
+    SyncFrequency,
 )
 
 
@@ -66,7 +66,7 @@ class Phase83TestSuite:
             self.test_error_handling,
             self.test_integration_with_sports_formulas,
             self.test_performance_benchmarks,
-            self.test_standalone_functions
+            self.test_standalone_functions,
         ]
 
         for test_method in test_methods:
@@ -78,11 +78,9 @@ class Phase83TestSuite:
             except Exception as e:
                 print(f"✗ {test_method.__name__} failed: {e}")
                 print()
-                self.test_results.append({
-                    "test": test_method.__name__,
-                    "status": "failed",
-                    "error": str(e)
-                })
+                self.test_results.append(
+                    {"test": test_method.__name__, "status": "failed", "error": str(e)}
+                )
 
         self.print_summary()
 
@@ -124,10 +122,12 @@ class Phase83TestSuite:
             formula_id="per",
             input_data={"points": 25, "rebounds": 10, "assists": 8},
             use_live_data=False,
-            cache_result=True
+            cache_result=True,
         )
 
-        assert calc_result["status"] == "success", "Real-time calculation should succeed"
+        assert (
+            calc_result["status"] == "success"
+        ), "Real-time calculation should succeed"
         assert "task_id" in calc_result, "Should include task ID"
         assert "result" in calc_result, "Should include calculation result"
         assert "calculation_time" in calc_result, "Should include calculation time"
@@ -138,10 +138,12 @@ class Phase83TestSuite:
             formula_id="true_shooting",
             input_data={"points": 30, "fga": 20, "fta": 5},
             use_live_data=True,
-            cache_result=True
+            cache_result=True,
         )
 
-        assert live_calc_result["status"] == "success", "Live data calculation should succeed"
+        assert (
+            live_calc_result["status"] == "success"
+        ), "Live data calculation should succeed"
         assert live_calc_result["used_live_data"], "Should use live data"
         assert live_calc_result["cached"], "Should cache result"
 
@@ -149,10 +151,12 @@ class Phase83TestSuite:
         timeout_calc_result = await self.service.calculate_formula_realtime(
             formula_id="per",
             input_data={"points": 25, "rebounds": 10, "assists": 8},
-            timeout_seconds=1
+            timeout_seconds=1,
         )
 
-        assert timeout_calc_result["status"] == "success", "Timeout calculation should succeed"
+        assert (
+            timeout_calc_result["status"] == "success"
+        ), "Timeout calculation should succeed"
 
         # Stop service
         await self.service.stop_service()
@@ -172,36 +176,44 @@ class Phase83TestSuite:
         # Generate test batch data
         batch_data = []
         for i in range(50):
-            batch_data.append({
-                "points": 20 + (i % 10),
-                "rebounds": 8 + (i % 5),
-                "assists": 5 + (i % 3)
-            })
+            batch_data.append(
+                {
+                    "points": 20 + (i % 10),
+                    "rebounds": 8 + (i % 5),
+                    "assists": 5 + (i % 3),
+                }
+            )
 
         # Test parallel batch processing
         parallel_result = await self.service.process_batch_calculations(
             formula_id="per",
             batch_data=batch_data,
             batch_size=10,
-            use_parallel_processing=True
+            use_parallel_processing=True,
         )
 
-        assert parallel_result["status"] == "success", "Parallel batch processing should succeed"
+        assert (
+            parallel_result["status"] == "success"
+        ), "Parallel batch processing should succeed"
         assert "job_id" in parallel_result, "Should include job ID"
         assert parallel_result["total_items"] == 50, "Should process all items"
         assert parallel_result["processed_items"] == 50, "Should process all items"
         assert "results" in parallel_result, "Should include results"
-        assert len(parallel_result["results"]) == 50, "Should have results for all items"
+        assert (
+            len(parallel_result["results"]) == 50
+        ), "Should have results for all items"
 
         # Test sequential batch processing
         sequential_result = await self.service.process_batch_calculations(
             formula_id="true_shooting",
             batch_data=batch_data[:20],  # Smaller batch for sequential
             batch_size=5,
-            use_parallel_processing=False
+            use_parallel_processing=False,
         )
 
-        assert sequential_result["status"] == "success", "Sequential batch processing should succeed"
+        assert (
+            sequential_result["status"] == "success"
+        ), "Sequential batch processing should succeed"
         assert sequential_result["total_items"] == 20, "Should process all items"
         assert sequential_result["processed_items"] == 20, "Should process all items"
 
@@ -215,7 +227,7 @@ class Phase83TestSuite:
             formula_id="per",
             batch_data=batch_data[:10],
             batch_size=3,
-            progress_callback=progress_callback
+            progress_callback=progress_callback,
         )
 
         assert callback_result["status"] == "success", "Progress callback should work"
@@ -241,7 +253,7 @@ class Phase83TestSuite:
             data_source="nba_api",
             sync_frequency="minute",
             data_types=["player_stats", "team_stats"],
-            auto_start=True
+            auto_start=True,
         )
 
         assert sync_result["status"] == "success", "Data sync setup should succeed"
@@ -256,11 +268,13 @@ class Phase83TestSuite:
             freq_result = await self.service.sync_live_data(
                 data_source=f"test_source_{frequency}",
                 sync_frequency=frequency,
-                auto_start=False
+                auto_start=False,
             )
 
             assert freq_result["status"] == "success", f"Should succeed for {frequency}"
-            assert freq_result["sync_frequency"] == frequency, f"Should match {frequency}"
+            assert (
+                freq_result["sync_frequency"] == frequency
+            ), f"Should match {frequency}"
 
         # Test service status with active syncs
         status_result = await self.service.get_service_status()
@@ -290,16 +304,24 @@ class Phase83TestSuite:
         running_status = await self.service.get_service_status()
         assert running_status["status"] == "success", "Status check should succeed"
         assert running_status["service_running"], "Service should be running"
-        assert "performance_metrics" in running_status, "Should include performance metrics"
+        assert (
+            "performance_metrics" in running_status
+        ), "Should include performance metrics"
         assert "live_data_points" in running_status, "Should include live data points"
-        assert "websocket_connections" in running_status, "Should include WebSocket connections"
+        assert (
+            "websocket_connections" in running_status
+        ), "Should include WebSocket connections"
 
         # Perform some operations to update metrics
-        await self.service.calculate_formula_realtime("per", {"points": 25, "rebounds": 10})
+        await self.service.calculate_formula_realtime(
+            "per", {"points": 25, "rebounds": 10}
+        )
 
         # Check updated status
         updated_status = await self.service.get_service_status()
-        assert updated_status["performance_metrics"]["calculations_performed"] > 0, "Should track calculations"
+        assert (
+            updated_status["performance_metrics"]["calculations_performed"] > 0
+        ), "Should track calculations"
 
         # Stop service
         await self.service.stop_service()
@@ -319,17 +341,24 @@ class Phase83TestSuite:
         # Perform some operations to generate metrics
         for i in range(10):
             await self.service.calculate_formula_realtime(
-                "per",
-                {"points": 20 + i, "rebounds": 8 + i, "assists": 5 + i}
+                "per", {"points": 20 + i, "rebounds": 8 + i, "assists": 5 + i}
             )
 
         # Test performance optimization
         optimization_result = await self.service.optimize_performance()
 
-        assert optimization_result["status"] == "success", "Performance optimization should succeed"
-        assert "optimizations_applied" in optimization_result, "Should include optimizations count"
-        assert "optimizations" in optimization_result, "Should include optimization details"
-        assert "performance_improvement" in optimization_result, "Should include improvement metric"
+        assert (
+            optimization_result["status"] == "success"
+        ), "Performance optimization should succeed"
+        assert (
+            "optimizations_applied" in optimization_result
+        ), "Should include optimizations count"
+        assert (
+            "optimizations" in optimization_result
+        ), "Should include optimization details"
+        assert (
+            "performance_improvement" in optimization_result
+        ), "Should include improvement metric"
 
         # Verify optimizations were applied
         optimizations = optimization_result["optimizations"]
@@ -337,9 +366,15 @@ class Phase83TestSuite:
 
         # Check specific optimization types
         optimization_types = [opt["type"] for opt in optimizations]
-        assert "cache_optimization" in optimization_types, "Should include cache optimization"
-        assert "batch_optimization" in optimization_types, "Should include batch optimization"
-        assert "sync_optimization" in optimization_types, "Should include sync optimization"
+        assert (
+            "cache_optimization" in optimization_types
+        ), "Should include cache optimization"
+        assert (
+            "batch_optimization" in optimization_types
+        ), "Should include batch optimization"
+        assert (
+            "sync_optimization" in optimization_types
+        ), "Should include sync optimization"
 
         # Stop service
         await self.service.stop_service()
@@ -355,17 +390,16 @@ class Phase83TestSuite:
 
         # Test calculation with invalid formula
         invalid_formula_result = await self.service.calculate_formula_realtime(
-            formula_id="invalid_formula",
-            input_data={"test": "data"}
+            formula_id="invalid_formula", input_data={"test": "data"}
         )
 
-        assert invalid_formula_result["status"] == "success", "Should handle invalid formula gracefully"
+        assert (
+            invalid_formula_result["status"] == "success"
+        ), "Should handle invalid formula gracefully"
 
         # Test batch processing with empty data
         empty_batch_result = await self.service.process_batch_calculations(
-            formula_id="per",
-            batch_data=[],
-            batch_size=10
+            formula_id="per", batch_data=[], batch_size=10
         )
 
         assert empty_batch_result["status"] == "success", "Should handle empty batch"
@@ -373,11 +407,12 @@ class Phase83TestSuite:
 
         # Test sync with invalid frequency
         invalid_sync_result = await self.service.sync_live_data(
-            data_source="test",
-            sync_frequency="invalid_frequency"
+            data_source="test", sync_frequency="invalid_frequency"
         )
 
-        assert invalid_sync_result["status"] == "success", "Should handle invalid frequency"
+        assert (
+            invalid_sync_result["status"] == "success"
+        ), "Should handle invalid frequency"
 
         # Test service operations when stopped
         await self.service.start_service()
@@ -389,7 +424,9 @@ class Phase83TestSuite:
         )
 
         # This should still work as the service handles the state internally
-        assert stopped_calc_result["status"] == "success", "Should handle stopped service gracefully"
+        assert (
+            stopped_calc_result["status"] == "success"
+        ), "Should handle stopped service gracefully"
 
         print("  ✓ Invalid formula handling")
         print("  ✓ Empty batch handling")
@@ -406,11 +443,14 @@ class Phase83TestSuite:
 
         # Test various sports formulas
         sports_formulas = [
-            ("per", {"points": 25, "rebounds": 10, "assists": 8, "steals": 2, "blocks": 1}),
+            (
+                "per",
+                {"points": 25, "rebounds": 10, "assists": 8, "steals": 2, "blocks": 1},
+            ),
             ("true_shooting", {"points": 30, "fga": 20, "fta": 5}),
             ("usage_rate", {"fga": 15, "fta": 5, "turnovers": 3, "minutes": 35}),
             ("defensive_rating", {"opp_points": 100, "opp_possessions": 90}),
-            ("pace", {"possessions": 95, "minutes": 48})
+            ("pace", {"possessions": 95, "minutes": 48}),
         ]
 
         for formula_id, input_data in sports_formulas:
@@ -418,32 +458,38 @@ class Phase83TestSuite:
                 formula_id=formula_id,
                 input_data=input_data,
                 use_live_data=True,
-                cache_result=True
+                cache_result=True,
             )
 
             assert result["status"] == "success", f"Should succeed for {formula_id}"
-            assert result["formula_id"] == formula_id, f"Should match formula ID for {formula_id}"
+            assert (
+                result["formula_id"] == formula_id
+            ), f"Should match formula ID for {formula_id}"
             assert "result" in result, f"Should have result for {formula_id}"
 
         # Test batch processing with sports formulas
         sports_batch_data = []
         for i in range(20):
-            sports_batch_data.append({
-                "points": 20 + (i % 15),
-                "rebounds": 8 + (i % 8),
-                "assists": 5 + (i % 6),
-                "steals": 1 + (i % 3),
-                "blocks": 0 + (i % 2)
-            })
+            sports_batch_data.append(
+                {
+                    "points": 20 + (i % 15),
+                    "rebounds": 8 + (i % 8),
+                    "assists": 5 + (i % 6),
+                    "steals": 1 + (i % 3),
+                    "blocks": 0 + (i % 2),
+                }
+            )
 
         batch_result = await self.service.process_batch_calculations(
             formula_id="per",
             batch_data=sports_batch_data,
             batch_size=5,
-            use_parallel_processing=True
+            use_parallel_processing=True,
         )
 
-        assert batch_result["status"] == "success", "Sports formula batch should succeed"
+        assert (
+            batch_result["status"] == "success"
+        ), "Sports formula batch should succeed"
         assert batch_result["total_items"] == 20, "Should process all sports data"
 
         # Stop service
@@ -465,8 +511,7 @@ class Phase83TestSuite:
         start_time = time.time()
         for i in range(50):
             await self.service.calculate_formula_realtime(
-                "per",
-                {"points": 20 + i, "rebounds": 8 + i, "assists": 5 + i}
+                "per", {"points": 20 + i, "rebounds": 8 + i, "assists": 5 + i}
             )
         calc_time = time.time() - start_time
         print(f"  Real-time Calculations: {calc_time:.2f}s (50 calculations)")
@@ -502,7 +547,9 @@ class Phase83TestSuite:
         opt_time = time.time() - start_time
         print(f"  Performance Optimization: {opt_time:.2f}s")
 
-        total_benchmark_time = calc_time + batch_time + sync_time + status_time + opt_time
+        total_benchmark_time = (
+            calc_time + batch_time + sync_time + status_time + opt_time
+        )
         print(f"  Total Benchmark Time: {total_benchmark_time:.2f}s")
 
         # Performance assertions
@@ -533,10 +580,10 @@ class Phase83TestSuite:
 
         # Test standalone batch processing
         batch_data = [{"points": 20 + i, "rebounds": 8 + i} for i in range(10)]
-        batch_result = await process_batch_calculations(
-            "per", batch_data, batch_size=5
-        )
-        assert batch_result["status"] == "success", "Standalone batch processing should work"
+        batch_result = await process_batch_calculations("per", batch_data, batch_size=5)
+        assert (
+            batch_result["status"] == "success"
+        ), "Standalone batch processing should work"
 
         # Test standalone data sync
         sync_result = await sync_live_data("test_source", "minute")
@@ -573,17 +620,21 @@ class Phase83TestSuite:
         print("=" * 60)
         print(f"Total test time: {total_time:.2f} seconds")
         print(f"Tests completed: {len(self.test_results) + 10}")  # 10 main tests
-        print(f"Failed tests: {len([r for r in self.test_results if r.get('status') == 'failed'])}")
+        print(
+            f"Failed tests: {len([r for r in self.test_results if r.get('status') == 'failed'])}"
+        )
         print()
 
         if self.test_results:
             print("Failed tests:")
             for result in self.test_results:
-                if result.get('status') == 'failed':
+                if result.get("status") == "failed":
                     print(f"  - {result['test']}: {result['error']}")
             print()
 
-        print("✓ Phase 8.3 Real-Time Calculation Service implementation completed successfully!")
+        print(
+            "✓ Phase 8.3 Real-Time Calculation Service implementation completed successfully!"
+        )
         print("✓ All core functionality tested and working")
         print("✓ Ready for production deployment")
 
@@ -596,6 +647,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
-

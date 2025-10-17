@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 class RegionStatus(Enum):
     """Status of deployment in a region"""
+
     INACTIVE = "inactive"
     DEPLOYING = "deploying"
     ACTIVE = "active"
@@ -27,6 +28,7 @@ class RegionStatus(Enum):
 
 class FailoverStrategy(Enum):
     """Failover strategy"""
+
     ACTIVE_PASSIVE = "active-passive"
     ACTIVE_ACTIVE = "active-active"
     NEAREST_REGION = "nearest-region"
@@ -35,6 +37,7 @@ class FailoverStrategy(Enum):
 @dataclass
 class RegionConfig:
     """Configuration for a region"""
+
     region_name: str
     priority: int  # 1 = primary, 2 = secondary, etc.
     status: RegionStatus = RegionStatus.INACTIVE
@@ -47,6 +50,7 @@ class RegionConfig:
 @dataclass
 class MultiRegionDeployment:
     """Multi-region deployment configuration"""
+
     deployment_id: str
     name: str
     regions: List[RegionConfig]
@@ -61,8 +65,7 @@ class MultiRegionManager:
 
     def __init__(self, config_file: Optional[str] = None):
         self.config_file = config_file or os.path.join(
-            os.path.dirname(__file__),
-            "multi_region_config.json"
+            os.path.dirname(__file__), "multi_region_config.json"
         )
         self.deployments: Dict[str, MultiRegionDeployment] = {}
         self.aws_clients: Dict[str, Any] = {}
@@ -73,7 +76,7 @@ class MultiRegionManager:
         """Load configuration from file"""
         if os.path.exists(self.config_file):
             try:
-                with open(self.config_file, 'r') as f:
+                with open(self.config_file, "r") as f:
                     data = json.load(f)
 
                 for deployment_data in data.get("deployments", []):
@@ -82,10 +85,14 @@ class MultiRegionManager:
                         deployment_id=deployment_data["deployment_id"],
                         name=deployment_data["name"],
                         regions=regions,
-                        failover_strategy=FailoverStrategy(deployment_data["failover_strategy"]),
+                        failover_strategy=FailoverStrategy(
+                            deployment_data["failover_strategy"]
+                        ),
                         primary_region=deployment_data["primary_region"],
-                        replication_enabled=deployment_data.get("replication_enabled", True),
-                        auto_failover=deployment_data.get("auto_failover", True)
+                        replication_enabled=deployment_data.get(
+                            "replication_enabled", True
+                        ),
+                        auto_failover=deployment_data.get("auto_failover", True),
                     )
                     self.deployments[deployment.deployment_id] = deployment
 
@@ -101,13 +108,13 @@ class MultiRegionManager:
                     {
                         **asdict(d),
                         "regions": [asdict(r) for r in d.regions],
-                        "failover_strategy": d.failover_strategy.value
+                        "failover_strategy": d.failover_strategy.value,
                     }
                     for d in self.deployments.values()
                 ]
             }
 
-            with open(self.config_file, 'w') as f:
+            with open(self.config_file, "w") as f:
                 json.dump(data, f, indent=2)
 
         except Exception as e:
@@ -119,7 +126,7 @@ class MultiRegionManager:
         name: str,
         regions: List[str],
         primary_region: str,
-        failover_strategy: FailoverStrategy = FailoverStrategy.ACTIVE_PASSIVE
+        failover_strategy: FailoverStrategy = FailoverStrategy.ACTIVE_PASSIVE,
     ) -> MultiRegionDeployment:
         """
         Create a new multi-region deployment
@@ -138,7 +145,7 @@ class MultiRegionManager:
             RegionConfig(
                 region_name=region,
                 priority=1 if region == primary_region else (regions.index(region) + 2),
-                status=RegionStatus.INACTIVE
+                status=RegionStatus.INACTIVE,
             )
             for region in regions
         ]
@@ -148,7 +155,7 @@ class MultiRegionManager:
             name=name,
             regions=region_configs,
             failover_strategy=failover_strategy,
-            primary_region=primary_region
+            primary_region=primary_region,
         )
 
         self.deployments[deployment_id] = deployment
@@ -164,10 +171,8 @@ class MultiRegionManager:
 
         try:
             import requests
-            response = requests.get(
-                region_config.health_check_url,
-                timeout=5
-            )
+
+            response = requests.get(region_config.health_check_url, timeout=5)
             is_healthy = response.status_code == 200
             region_config.is_healthy = is_healthy
             region_config.last_health_check = datetime.now().isoformat()
@@ -217,18 +222,29 @@ class MultiRegionManager:
 
         # Find target region
         if to_region:
-            target = next((r for r in deployment.regions if r.region_name == to_region), None)
+            target = next(
+                (r for r in deployment.regions if r.region_name == to_region), None
+            )
         else:
             # Auto-select next highest priority healthy region
             sorted_regions = sorted(deployment.regions, key=lambda r: r.priority)
-            target = next((r for r in sorted_regions if r.region_name != current.region_name and r.is_healthy), None)
+            target = next(
+                (
+                    r
+                    for r in sorted_regions
+                    if r.region_name != current.region_name and r.is_healthy
+                ),
+                None,
+            )
 
         if not target:
             logger.error("No suitable failover region found")
             return False
 
         # Perform failover
-        logger.info(f"Failing over from {current.region_name if current else 'none'} to {target.region_name}")
+        logger.info(
+            f"Failing over from {current.region_name if current else 'none'} to {target.region_name}"
+        )
 
         if current:
             current.status = RegionStatus.INACTIVE
@@ -256,9 +272,9 @@ def get_multi_region_manager() -> MultiRegionManager:
 
 # CLI for testing
 if __name__ == "__main__":
-    print("="*70)
+    print("=" * 70)
     print("Multi-Region Deployment - Demo")
-    print("="*70)
+    print("=" * 70)
     print()
 
     # Create manager
@@ -271,7 +287,7 @@ if __name__ == "__main__":
         name="NBA MCP Production",
         regions=["us-east-1", "us-west-2", "eu-west-1"],
         primary_region="us-east-1",
-        failover_strategy=FailoverStrategy.ACTIVE_PASSIVE
+        failover_strategy=FailoverStrategy.ACTIVE_PASSIVE,
     )
 
     print(f"  ✅ Created deployment: {deployment.deployment_id}")
@@ -282,9 +298,11 @@ if __name__ == "__main__":
     # Show regions
     print("Configured regions:")
     for region in deployment.regions:
-        print(f"  - {region.region_name} (priority: {region.priority}, status: {region.status.value})")
+        print(
+            f"  - {region.region_name} (priority: {region.priority}, status: {region.status.value})"
+        )
 
     print()
-    print("="*70)
+    print("=" * 70)
     print("✅ Multi-Region Deployment demo complete!")
-    print("="*70)
+    print("=" * 70)

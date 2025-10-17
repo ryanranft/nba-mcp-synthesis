@@ -10,14 +10,17 @@ import json
 import logging
 from pathlib import Path
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 def main():
     """Verify S3 and config are in sync."""
 
-    config_file = Path('config/books_to_analyze_all_ai_ml.json')
-    bucket = 'nba-mcp-books-20251011'
+    config_file = Path("config/books_to_analyze_all_ai_ml.json")
+    bucket = "nba-mcp-books-20251011"
 
     logger.info("Verifying S3 and configuration sync...")
     logger.info("=" * 80)
@@ -33,9 +36,9 @@ def main():
 
     # List S3 books
     try:
-        s3 = boto3.client('s3')
-        response = s3.list_objects_v2(Bucket=bucket, Prefix='books/')
-        s3_books = {obj['Key'] for obj in response.get('Contents', [])}
+        s3 = boto3.client("s3")
+        response = s3.list_objects_v2(Bucket=bucket, Prefix="books/")
+        s3_books = {obj["Key"] for obj in response.get("Contents", [])}
         logger.info(f"✅ Found {len(s3_books)} books in S3 bucket: {bucket}")
     except Exception as e:
         logger.error(f"❌ Failed to list S3 books: {e}")
@@ -45,13 +48,13 @@ def main():
     logger.info("\nVerifying configuration entries...")
     logger.info("-" * 80)
 
-    config_books = config.get('books', [])
+    config_books = config.get("books", [])
     verified_count = 0
     missing_count = 0
 
     for book in config_books:
-        s3_path = book['s3_path']
-        title = book['title']
+        s3_path = book["s3_path"]
+        title = book["title"]
 
         if s3_path in s3_books:
             logger.info(f"✅ {title}")
@@ -75,10 +78,7 @@ def main():
         logger.warning(f"⚠️  {missing_count} books need to be uploaded to S3")
         return False
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     success = main()
     exit(0 if success else 1)
-
-
-
-

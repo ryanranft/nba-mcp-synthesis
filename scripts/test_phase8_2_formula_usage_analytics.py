@@ -19,7 +19,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, List
 
 # Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from mcp_server.tools.formula_usage_analytics import (
     FormulaUsageAnalyticsEngine,
@@ -32,7 +32,7 @@ from mcp_server.tools.formula_usage_analytics import (
     create_usage_dashboard,
     UsageEventType,
     UserSegment,
-    AlertSeverity
+    AlertSeverity,
 )
 
 
@@ -64,7 +64,7 @@ class Phase82TestSuite:
             self.test_error_handling,
             self.test_integration_with_sports_formulas,
             self.test_performance_benchmarks,
-            self.test_standalone_functions
+            self.test_standalone_functions,
         ]
 
         for test_method in test_methods:
@@ -76,11 +76,9 @@ class Phase82TestSuite:
             except Exception as e:
                 print(f"✗ {test_method.__name__} failed: {e}")
                 print()
-                self.test_results.append({
-                    "test": test_method.__name__,
-                    "status": "failed",
-                    "error": str(e)
-                })
+                self.test_results.append(
+                    {"test": test_method.__name__, "status": "failed", "error": str(e)}
+                )
 
         self.print_summary()
 
@@ -95,7 +93,7 @@ class Phase82TestSuite:
             formula_id="per",
             duration=0.15,
             success=True,
-            metadata={"calculation_type": "player_stats"}
+            metadata={"calculation_type": "player_stats"},
         )
 
         assert event_id, "Event ID should be generated"
@@ -109,7 +107,7 @@ class Phase82TestSuite:
                 formula_id=f"formula_{i % 5}",
                 duration=0.1 + (i * 0.01),
                 success=i % 4 != 0,  # Some failures
-                metadata={"iteration": i}
+                metadata={"iteration": i},
             )
 
         assert len(self.engine.usage_events) == 11, "All events should be stored"
@@ -122,7 +120,7 @@ class Phase82TestSuite:
             duration=0.05,
             success=False,
             error_message="Formula not found",
-            metadata={"error_type": "validation"}
+            metadata={"error_type": "validation"},
         )
 
         assert error_event_id, "Error event should be tracked"
@@ -143,20 +141,32 @@ class Phase82TestSuite:
         analysis_result = self.engine.analyze_usage_patterns(
             tracking_period="week",
             include_performance_metrics=True,
-            include_user_behavior=True
+            include_user_behavior=True,
         )
 
         assert analysis_result["status"] == "success", "Analysis should succeed"
-        assert "usage_statistics" in analysis_result["analysis_results"], "Should include usage statistics"
-        assert "performance_metrics" in analysis_result["analysis_results"], "Should include performance metrics"
-        assert "user_behavior" in analysis_result["analysis_results"], "Should include user behavior"
-        assert "formula_popularity" in analysis_result["analysis_results"], "Should include formula popularity"
-        assert "trend_analysis" in analysis_result["analysis_results"], "Should include trend analysis"
+        assert (
+            "usage_statistics" in analysis_result["analysis_results"]
+        ), "Should include usage statistics"
+        assert (
+            "performance_metrics" in analysis_result["analysis_results"]
+        ), "Should include performance metrics"
+        assert (
+            "user_behavior" in analysis_result["analysis_results"]
+        ), "Should include user behavior"
+        assert (
+            "formula_popularity" in analysis_result["analysis_results"]
+        ), "Should include formula popularity"
+        assert (
+            "trend_analysis" in analysis_result["analysis_results"]
+        ), "Should include trend analysis"
 
         # Test different time periods
         for period in ["hour", "day", "month", "year", "all"]:
             period_result = self.engine.analyze_usage_patterns(tracking_period=period)
-            assert period_result["status"] == "success", f"Analysis should succeed for {period}"
+            assert (
+                period_result["status"] == "success"
+            ), f"Analysis should succeed for {period}"
 
         print("  ✓ Basic pattern analysis")
         print("  ✓ Multiple time periods")
@@ -175,27 +185,33 @@ class Phase82TestSuite:
             include_predictions=True,
             include_comparisons=True,
             confidence_threshold=0.7,
-            max_insights=10
+            max_insights=10,
         )
 
-        assert insights_result["status"] == "success", "Insights generation should succeed"
+        assert (
+            insights_result["status"] == "success"
+        ), "Insights generation should succeed"
         assert "insights" in insights_result, "Should include insights"
-        assert insights_result["insights_generated"] > 0, "Should generate some insights"
+        assert (
+            insights_result["insights_generated"] > 0
+        ), "Should generate some insights"
 
         # Test different insight categories
         for category in ["frequency", "performance", "trends", "patterns"]:
             category_result = self.engine.generate_usage_insights(
-                insight_categories=[category],
-                max_insights=5
+                insight_categories=[category], max_insights=5
             )
-            assert category_result["status"] == "success", f"Should succeed for {category}"
+            assert (
+                category_result["status"] == "success"
+            ), f"Should succeed for {category}"
 
         # Test confidence threshold filtering
         high_confidence_result = self.engine.generate_usage_insights(
-            confidence_threshold=0.9,
-            max_insights=5
+            confidence_threshold=0.9, max_insights=5
         )
-        assert high_confidence_result["status"] == "success", "High confidence filtering should work"
+        assert (
+            high_confidence_result["status"] == "success"
+        ), "High confidence filtering should work"
 
         print("  ✓ Basic insights generation")
         print("  ✓ Multiple insight categories")
@@ -213,13 +229,19 @@ class Phase82TestSuite:
             target_metrics=["avg_duration", "success_rate"],
             optimization_method="guided",
             include_ab_testing=True,
-            optimization_scope="formula"
+            optimization_scope="formula",
         )
 
         assert optimization_result["status"] == "success", "Optimization should succeed"
-        assert "recommendations" in optimization_result, "Should include recommendations"
-        assert "performance_analysis" in optimization_result, "Should include performance analysis"
-        assert "ab_testing_recommendations" in optimization_result, "Should include A/B testing recommendations"
+        assert (
+            "recommendations" in optimization_result
+        ), "Should include recommendations"
+        assert (
+            "performance_analysis" in optimization_result
+        ), "Should include performance analysis"
+        assert (
+            "ab_testing_recommendations" in optimization_result
+        ), "Should include A/B testing recommendations"
 
         # Test different optimization methods
         for method in ["automatic", "guided", "custom"]:
@@ -252,7 +274,7 @@ class Phase82TestSuite:
             include_visualizations=True,
             include_recommendations=True,
             include_benchmarks=True,
-            export_format="html"
+            export_format="html",
         )
 
         assert report_result["status"] == "success", "Report generation should succeed"
@@ -262,7 +284,9 @@ class Phase82TestSuite:
         # Test different report types
         for report_type in ["summary", "detailed", "executive", "technical", "custom"]:
             type_result = self.engine.generate_usage_report(report_type=report_type)
-            assert type_result["status"] == "success", f"Should succeed for {report_type}"
+            assert (
+                type_result["status"] == "success"
+            ), f"Should succeed for {report_type}"
 
         # Test different report periods
         for period in ["daily", "weekly", "monthly", "quarterly", "yearly"]:
@@ -272,7 +296,9 @@ class Phase82TestSuite:
         # Test different export formats
         for format_type in ["html", "pdf", "json", "csv", "excel"]:
             format_result = self.engine.generate_usage_report(export_format=format_type)
-            assert format_result["status"] == "success", f"Should succeed for {format_type}"
+            assert (
+                format_result["status"] == "success"
+            ), f"Should succeed for {format_type}"
 
         print("  ✓ Basic report generation")
         print("  ✓ Multiple report types")
@@ -288,7 +314,7 @@ class Phase82TestSuite:
         alert_conditions = [
             {"type": "high_usage", "threshold": 100, "period": "hour"},
             {"type": "error_rate", "threshold": 0.1, "period": "day"},
-            {"type": "slow_performance", "threshold": 1.0, "period": "hour"}
+            {"type": "slow_performance", "threshold": 1.0, "period": "hour"},
         ]
 
         alert_result = self.engine.setup_usage_alerts(
@@ -296,27 +322,31 @@ class Phase82TestSuite:
             alert_types=["email", "webhook", "dashboard"],
             alert_frequency="immediate",
             alert_thresholds={"high_usage": 100, "error_rate": 0.1},
-            include_context=True
+            include_context=True,
         )
 
         assert alert_result["status"] == "success", "Alert setup should succeed"
         assert "alert_setup" in alert_result, "Should include alert setup"
-        assert alert_result["conditions_configured"] == 3, "Should configure all conditions"
+        assert (
+            alert_result["conditions_configured"] == 3
+        ), "Should configure all conditions"
         assert alert_result["monitoring_active"], "Monitoring should be active"
 
         # Test different alert types
         for alert_type in ["email", "webhook", "dashboard", "sms"]:
             type_result = self.engine.setup_usage_alerts(
                 alert_conditions=[{"type": "test", "threshold": 1}],
-                alert_types=[alert_type]
+                alert_types=[alert_type],
             )
-            assert type_result["status"] == "success", f"Should succeed for {alert_type}"
+            assert (
+                type_result["status"] == "success"
+            ), f"Should succeed for {alert_type}"
 
         # Test different alert frequencies
         for frequency in ["immediate", "hourly", "daily", "weekly"]:
             freq_result = self.engine.setup_usage_alerts(
                 alert_conditions=[{"type": "test", "threshold": 1}],
-                alert_frequency=frequency
+                alert_frequency=frequency,
             )
             assert freq_result["status"] == "success", f"Should succeed for {frequency}"
 
@@ -333,14 +363,22 @@ class Phase82TestSuite:
         # Test dashboard creation
         dashboard_result = self.engine.create_usage_dashboard(
             dashboard_type="overview",
-            dashboard_sections=["usage_stats", "performance", "trends", "recommendations", "alerts"],
+            dashboard_sections=[
+                "usage_stats",
+                "performance",
+                "trends",
+                "recommendations",
+                "alerts",
+            ],
             refresh_interval=300,
             include_filters=True,
             include_exports=True,
-            customization_options={"theme": "dark", "layout": "grid"}
+            customization_options={"theme": "dark", "layout": "grid"},
         )
 
-        assert dashboard_result["status"] == "success", "Dashboard creation should succeed"
+        assert (
+            dashboard_result["status"] == "success"
+        ), "Dashboard creation should succeed"
         assert "dashboard_config" in dashboard_result, "Should include dashboard config"
         assert "dashboard_data" in dashboard_result, "Should include dashboard data"
         assert "visualizations" in dashboard_result, "Should include visualizations"
@@ -348,20 +386,30 @@ class Phase82TestSuite:
 
         # Test different dashboard types
         for dashboard_type in ["overview", "detailed", "real_time", "custom"]:
-            type_result = self.engine.create_usage_dashboard(dashboard_type=dashboard_type)
-            assert type_result["status"] == "success", f"Should succeed for {dashboard_type}"
+            type_result = self.engine.create_usage_dashboard(
+                dashboard_type=dashboard_type
+            )
+            assert (
+                type_result["status"] == "success"
+            ), f"Should succeed for {dashboard_type}"
 
         # Test different dashboard sections
         section_combinations = [
             ["usage_stats"],
             ["performance", "trends"],
-            ["usage_stats", "performance", "trends", "recommendations", "alerts"]
+            ["usage_stats", "performance", "trends", "recommendations", "alerts"],
         ]
 
         for sections in section_combinations:
-            section_result = self.engine.create_usage_dashboard(dashboard_sections=sections)
-            assert section_result["status"] == "success", f"Should succeed for sections: {sections}"
-            assert section_result["sections_count"] == len(sections), "Should include correct number of sections"
+            section_result = self.engine.create_usage_dashboard(
+                dashboard_sections=sections
+            )
+            assert (
+                section_result["status"] == "success"
+            ), f"Should succeed for sections: {sections}"
+            assert section_result["sections_count"] == len(
+                sections
+            ), "Should include correct number of sections"
 
         print("  ✓ Basic dashboard creation")
         print("  ✓ Multiple dashboard types")
@@ -374,33 +422,55 @@ class Phase82TestSuite:
         print("Testing error handling...")
 
         # Test invalid tracking period
-        invalid_period_result = self.engine.analyze_usage_patterns(tracking_period="invalid_period")
-        assert invalid_period_result["status"] == "success", "Should handle invalid period gracefully"
+        invalid_period_result = self.engine.analyze_usage_patterns(
+            tracking_period="invalid_period"
+        )
+        assert (
+            invalid_period_result["status"] == "success"
+        ), "Should handle invalid period gracefully"
 
         # Test empty insights categories
-        empty_categories_result = self.engine.generate_usage_insights(insight_categories=[])
-        assert empty_categories_result["status"] == "success", "Should handle empty categories"
+        empty_categories_result = self.engine.generate_usage_insights(
+            insight_categories=[]
+        )
+        assert (
+            empty_categories_result["status"] == "success"
+        ), "Should handle empty categories"
 
         # Test invalid optimization method
-        invalid_method_result = self.engine.optimize_usage_based_performance(optimization_method="invalid_method")
-        assert invalid_method_result["status"] == "success", "Should handle invalid method gracefully"
+        invalid_method_result = self.engine.optimize_usage_based_performance(
+            optimization_method="invalid_method"
+        )
+        assert (
+            invalid_method_result["status"] == "success"
+        ), "Should handle invalid method gracefully"
 
         # Test invalid report type
-        invalid_report_result = self.engine.generate_usage_report(report_type="invalid_type")
-        assert invalid_report_result["status"] == "success", "Should handle invalid report type"
+        invalid_report_result = self.engine.generate_usage_report(
+            report_type="invalid_type"
+        )
+        assert (
+            invalid_report_result["status"] == "success"
+        ), "Should handle invalid report type"
 
         # Test invalid alert conditions
         try:
             invalid_alerts_result = self.engine.setup_usage_alerts(alert_conditions=[])
             # If no exception is raised, check the result
-            assert invalid_alerts_result["status"] == "error", "Should handle empty alert conditions"
+            assert (
+                invalid_alerts_result["status"] == "error"
+            ), "Should handle empty alert conditions"
         except Exception as e:
             # If an exception is raised, that's also acceptable for this test
             print(f"  Note: Empty alert conditions raised exception: {e}")
 
         # Test invalid dashboard type
-        invalid_dashboard_result = self.engine.create_usage_dashboard(dashboard_type="invalid_type")
-        assert invalid_dashboard_result["status"] == "success", "Should handle invalid dashboard type"
+        invalid_dashboard_result = self.engine.create_usage_dashboard(
+            dashboard_type="invalid_type"
+        )
+        assert (
+            invalid_dashboard_result["status"] == "success"
+        ), "Should handle invalid dashboard type"
 
         print("  ✓ Invalid tracking period handling")
         print("  ✓ Empty insights categories handling")
@@ -415,7 +485,13 @@ class Phase82TestSuite:
         print("Testing integration with sports formulas...")
 
         # Track usage of various sports formulas
-        sports_formulas = ["per", "true_shooting", "usage_rate", "defensive_rating", "pace"]
+        sports_formulas = [
+            "per",
+            "true_shooting",
+            "usage_rate",
+            "defensive_rating",
+            "pace",
+        ]
 
         for i, formula in enumerate(sports_formulas):
             self.engine.track_usage_event(
@@ -424,34 +500,37 @@ class Phase82TestSuite:
                 formula_id=formula,
                 duration=0.1 + (i * 0.02),
                 success=True,
-                metadata={"sports_category": "basketball", "formula_type": "advanced"}
+                metadata={"sports_category": "basketball", "formula_type": "advanced"},
             )
 
         # Analyze patterns with sports formulas
         sports_analysis = self.engine.analyze_usage_patterns(
             tracking_period="day",
             formula_categories=["basketball"],
-            include_performance_metrics=True
+            include_performance_metrics=True,
         )
 
-        assert sports_analysis["status"] == "success", "Sports formula analysis should succeed"
+        assert (
+            sports_analysis["status"] == "success"
+        ), "Sports formula analysis should succeed"
 
         # Generate insights for sports formulas
         sports_insights = self.engine.generate_usage_insights(
-            insight_categories=["frequency", "performance"],
-            max_insights=5
+            insight_categories=["frequency", "performance"], max_insights=5
         )
 
-        assert sports_insights["status"] == "success", "Sports formula insights should succeed"
+        assert (
+            sports_insights["status"] == "success"
+        ), "Sports formula insights should succeed"
 
         # Generate report for sports formulas
         sports_report = self.engine.generate_usage_report(
-            report_type="detailed",
-            report_period="daily",
-            include_visualizations=True
+            report_type="detailed", report_period="daily", include_visualizations=True
         )
 
-        assert sports_report["status"] == "success", "Sports formula report should succeed"
+        assert (
+            sports_report["status"] == "success"
+        ), "Sports formula report should succeed"
 
         print("  ✓ Sports formula usage tracking")
         print("  ✓ Sports formula pattern analysis")
@@ -471,7 +550,7 @@ class Phase82TestSuite:
                 event_type=UsageEventType.FORMULA_CALCULATION,
                 formula_id=f"formula_{i % 20}",
                 duration=0.1,
-                success=True
+                success=True,
             )
         tracking_time = time.time() - start_time
         print(f"  Event Tracking: {tracking_time:.2f}s (100 events)")
@@ -481,7 +560,7 @@ class Phase82TestSuite:
         analysis_result = self.engine.analyze_usage_patterns(
             tracking_period="day",
             include_performance_metrics=True,
-            include_user_behavior=True
+            include_user_behavior=True,
         )
         analysis_time = time.time() - start_time
         print(f"  Pattern Analysis: {analysis_time:.2f}s")
@@ -489,8 +568,7 @@ class Phase82TestSuite:
         # Benchmark insights generation
         start_time = time.time()
         insights_result = self.engine.generate_usage_insights(
-            insight_categories=["frequency", "performance", "trends"],
-            max_insights=10
+            insight_categories=["frequency", "performance", "trends"], max_insights=10
         )
         insights_time = time.time() - start_time
         print(f"  Insights Generation: {insights_time:.2f}s")
@@ -498,8 +576,7 @@ class Phase82TestSuite:
         # Benchmark report generation
         start_time = time.time()
         report_result = self.engine.generate_usage_report(
-            report_type="summary",
-            include_visualizations=True
+            report_type="summary", include_visualizations=True
         )
         report_time = time.time() - start_time
         print(f"  Report Generation: {report_time:.2f}s")
@@ -512,7 +589,9 @@ class Phase82TestSuite:
         dashboard_time = time.time() - start_time
         print(f"  Dashboard Creation: {dashboard_time:.2f}s")
 
-        total_benchmark_time = tracking_time + analysis_time + insights_time + report_time + dashboard_time
+        total_benchmark_time = (
+            tracking_time + analysis_time + insights_time + report_time + dashboard_time
+        )
         print(f"  Total Benchmark Time: {total_benchmark_time:.2f}s")
 
         # Performance assertions
@@ -534,7 +613,7 @@ class Phase82TestSuite:
             event_type=UsageEventType.FORMULA_CALCULATION,
             formula_id="test_formula",
             duration=0.15,
-            success=True
+            success=True,
         )
         assert event_id, "Standalone event tracking should work"
 
@@ -548,7 +627,9 @@ class Phase82TestSuite:
 
         # Test standalone optimization
         optimization_result = optimize_usage_based_performance()
-        assert optimization_result["status"] == "success", "Standalone optimization should work"
+        assert (
+            optimization_result["status"] == "success"
+        ), "Standalone optimization should work"
 
         # Test standalone report generation
         report_result = generate_usage_report()
@@ -562,7 +643,9 @@ class Phase82TestSuite:
 
         # Test standalone dashboard creation
         dashboard_result = create_usage_dashboard()
-        assert dashboard_result["status"] == "success", "Standalone dashboard should work"
+        assert (
+            dashboard_result["status"] == "success"
+        ), "Standalone dashboard should work"
 
         print("  ✓ Standalone event tracking")
         print("  ✓ Standalone pattern analysis")
@@ -585,7 +668,7 @@ class Phase82TestSuite:
             UsageEventType.FORMULA_CALCULATION,
             UsageEventType.FORMULA_COMPARISON,
             UsageEventType.INSIGHT_GENERATION,
-            UsageEventType.REPORT_GENERATION
+            UsageEventType.REPORT_GENERATION,
         ]
 
         base_time = datetime.now() - timedelta(days=7)
@@ -597,7 +680,7 @@ class Phase82TestSuite:
                 formula_id=formulas[i % len(formulas)],
                 duration=0.1 + (i * 0.01),
                 success=i % 5 != 0,  # 80% success rate
-                metadata={"test_data": True, "iteration": i}
+                metadata={"test_data": True, "iteration": i},
             )
 
     def print_summary(self):
@@ -610,17 +693,21 @@ class Phase82TestSuite:
         print("=" * 60)
         print(f"Total test time: {total_time:.2f} seconds")
         print(f"Tests completed: {len(self.test_results) + 11}")  # 11 main tests
-        print(f"Failed tests: {len([r for r in self.test_results if r.get('status') == 'failed'])}")
+        print(
+            f"Failed tests: {len([r for r in self.test_results if r.get('status') == 'failed'])}"
+        )
         print()
 
         if self.test_results:
             print("Failed tests:")
             for result in self.test_results:
-                if result.get('status') == 'failed':
+                if result.get("status") == "failed":
                     print(f"  - {result['test']}: {result['error']}")
             print()
 
-        print("✓ Phase 8.2 Formula Usage Analytics implementation completed successfully!")
+        print(
+            "✓ Phase 8.2 Formula Usage Analytics implementation completed successfully!"
+        )
         print("✓ All core functionality tested and working")
         print("✓ Ready for production deployment")
 

@@ -23,11 +23,7 @@ class AnomalyDetector:
         """Add observation to historical data"""
         self.historical_data.append(value)
 
-    def detect_zscore(
-        self,
-        value: float,
-        threshold: float = 3.0
-    ) -> Dict[str, Any]:
+    def detect_zscore(self, value: float, threshold: float = 3.0) -> Dict[str, Any]:
         """
         Detect anomalies using Z-score method.
 
@@ -57,7 +53,7 @@ class AnomalyDetector:
             "threshold": threshold,
             "value": value,
             "mean": mean,
-            "stdev": stdev
+            "stdev": stdev,
         }
 
         if is_anomaly:
@@ -66,11 +62,7 @@ class AnomalyDetector:
 
         return result
 
-    def detect_iqr(
-        self,
-        value: float,
-        multiplier: float = 1.5
-    ) -> Dict[str, Any]:
+    def detect_iqr(self, value: float, multiplier: float = 1.5) -> Dict[str, Any]:
         """
         Detect anomalies using Interquartile Range (IQR) method.
 
@@ -103,7 +95,7 @@ class AnomalyDetector:
             "q3": q3,
             "iqr": iqr,
             "lower_bound": lower_bound,
-            "upper_bound": upper_bound
+            "upper_bound": upper_bound,
         }
 
         if is_anomaly:
@@ -116,10 +108,7 @@ class AnomalyDetector:
         return result
 
     def detect_moving_average(
-        self,
-        value: float,
-        window: int = 10,
-        threshold_std: float = 2.0
+        self, value: float, window: int = 10, threshold_std: float = 2.0
     ) -> Dict[str, Any]:
         """
         Detect anomalies using moving average deviation.
@@ -152,7 +141,7 @@ class AnomalyDetector:
             "moving_average": ma,
             "moving_std": ma_std,
             "deviation": deviation,
-            "threshold": threshold_std
+            "threshold": threshold_std,
         }
 
         if is_anomaly:
@@ -164,10 +153,7 @@ class AnomalyDetector:
 
         return result
 
-    def detect_ensemble(
-        self,
-        value: float
-    ) -> Dict[str, Any]:
+    def detect_ensemble(self, value: float) -> Dict[str, Any]:
         """
         Detect anomalies using ensemble of methods.
 
@@ -182,11 +168,13 @@ class AnomalyDetector:
         ma_result = self.detect_moving_average(value)
 
         # Count votes
-        votes = sum([
-            zscore_result.get("is_anomaly", False),
-            iqr_result.get("is_anomaly", False),
-            ma_result.get("is_anomaly", False)
-        ])
+        votes = sum(
+            [
+                zscore_result.get("is_anomaly", False),
+                iqr_result.get("is_anomaly", False),
+                ma_result.get("is_anomaly", False),
+            ]
+        )
 
         is_anomaly = votes >= 2  # Majority vote
 
@@ -199,8 +187,8 @@ class AnomalyDetector:
             "methods": {
                 "z-score": zscore_result.get("is_anomaly", False),
                 "iqr": iqr_result.get("is_anomaly", False),
-                "moving_average": ma_result.get("is_anomaly", False)
-            }
+                "moving_average": ma_result.get("is_anomaly", False),
+            },
         }
 
         if is_anomaly:
@@ -213,7 +201,7 @@ class AnomalyDetector:
         if not self.anomalies_detected:
             return {
                 "total_anomalies": 0,
-                "total_observations": len(self.historical_data)
+                "total_observations": len(self.historical_data),
             }
 
         methods = {}
@@ -224,9 +212,13 @@ class AnomalyDetector:
         return {
             "total_anomalies": len(self.anomalies_detected),
             "total_observations": len(self.historical_data),
-            "anomaly_rate": len(self.anomalies_detected) / len(self.historical_data) * 100 if self.historical_data else 0,
+            "anomaly_rate": (
+                len(self.anomalies_detected) / len(self.historical_data) * 100
+                if self.historical_data
+                else 0
+            ),
             "by_method": methods,
-            "recent_anomalies": self.anomalies_detected[-5:]
+            "recent_anomalies": self.anomalies_detected[-5:],
         }
 
 
@@ -244,6 +236,7 @@ if __name__ == "__main__":
     print("=" * 80)
 
     import random
+
     normal_data = [random.gauss(100, 10) for _ in range(100)]
     for value in normal_data:
         detector.add_observation(value)
@@ -259,7 +252,7 @@ if __name__ == "__main__":
         ("Normal", 105),
         ("Mild Outlier", 130),
         ("Strong Outlier", 160),
-        ("Extreme Low", 40)
+        ("Extreme Low", 40),
     ]
 
     for label, value in test_values:
@@ -267,8 +260,10 @@ if __name__ == "__main__":
 
         # Z-score
         z_result = detector.detect_zscore(value)
-        print(f"  Z-score: {'❌ ANOMALY' if z_result['is_anomaly'] else '✅ Normal'} "
-              f"(z={z_result.get('z_score', 0):.2f})")
+        print(
+            f"  Z-score: {'❌ ANOMALY' if z_result['is_anomaly'] else '✅ Normal'} "
+            f"(z={z_result.get('z_score', 0):.2f})"
+        )
 
         # IQR
         iqr_result = detector.detect_iqr(value)
@@ -280,8 +275,10 @@ if __name__ == "__main__":
 
         # Ensemble
         ensemble_result = detector.detect_ensemble(value)
-        print(f"  Ensemble: {'❌ ANOMALY' if ensemble_result['is_anomaly'] else '✅ Normal'} "
-              f"({ensemble_result['votes']}/3 votes)")
+        print(
+            f"  Ensemble: {'❌ ANOMALY' if ensemble_result['is_anomaly'] else '✅ Normal'} "
+            f"({ensemble_result['votes']}/3 votes)"
+        )
 
     # Anomaly report
     print("\n" + "=" * 80)
@@ -293,10 +290,9 @@ if __name__ == "__main__":
     print(f"Total Anomalies: {report['total_anomalies']}")
     print(f"Anomaly Rate: {report['anomaly_rate']:.2f}%")
     print(f"\nBy Method:")
-    for method, count in report['by_method'].items():
+    for method, count in report["by_method"].items():
         print(f"  - {method}: {count}")
 
     print("\n" + "=" * 80)
     print("Anomaly Detection Demo Complete!")
     print("=" * 80)
-

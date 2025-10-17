@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ValidationResult:
     """Result of a single validation check"""
+
     expectation: str
     passed: bool
     details: Dict[str, Any] = field(default_factory=dict)
@@ -26,6 +27,7 @@ class ValidationResult:
 @dataclass
 class DataQualityReport:
     """Comprehensive data quality report"""
+
     dataset_name: str
     total_expectations: int
     passed_expectations: int
@@ -75,21 +77,19 @@ class DataQualityValidator:
             passed=passed,
             details={
                 "column": column,
-                "available_columns": list(df.columns) if not passed else None
-            }
+                "available_columns": list(df.columns) if not passed else None,
+            },
         )
 
     def expect_column_values_to_be_unique(
-        self,
-        df: pd.DataFrame,
-        column: str
+        self, df: pd.DataFrame, column: str
     ) -> ValidationResult:
         """Expect all values in a column to be unique"""
         if column not in df.columns:
             return ValidationResult(
                 expectation=f"expect_column_values_to_be_unique('{column}')",
                 passed=False,
-                details={"error": f"Column '{column}' not found"}
+                details={"error": f"Column '{column}' not found"},
             )
 
         n_unique = df[column].nunique()
@@ -103,22 +103,19 @@ class DataQualityValidator:
                 "column": column,
                 "unique_count": n_unique,
                 "total_count": n_total,
-                "duplicate_count": n_total - n_unique if not passed else 0
-            }
+                "duplicate_count": n_total - n_unique if not passed else 0,
+            },
         )
 
     def expect_column_values_to_not_be_null(
-        self,
-        df: pd.DataFrame,
-        column: str,
-        max_null_ratio: float = 0.0
+        self, df: pd.DataFrame, column: str, max_null_ratio: float = 0.0
     ) -> ValidationResult:
         """Expect column values to not be null (or within threshold)"""
         if column not in df.columns:
             return ValidationResult(
                 expectation=f"expect_column_values_to_not_be_null('{column}')",
                 passed=False,
-                details={"error": f"Column '{column}' not found"}
+                details={"error": f"Column '{column}' not found"},
             )
 
         null_count = df[column].isnull().sum()
@@ -134,22 +131,19 @@ class DataQualityValidator:
                 "null_count": int(null_count),
                 "total_count": total_count,
                 "null_ratio": float(null_ratio),
-                "threshold": max_null_ratio
-            }
+                "threshold": max_null_ratio,
+            },
         )
 
     def expect_column_values_to_be_in_set(
-        self,
-        df: pd.DataFrame,
-        column: str,
-        value_set: set
+        self, df: pd.DataFrame, column: str, value_set: set
     ) -> ValidationResult:
         """Expect all column values to be in a specified set"""
         if column not in df.columns:
             return ValidationResult(
                 expectation=f"expect_column_values_to_be_in_set('{column}')",
                 passed=False,
-                details={"error": f"Column '{column}' not found"}
+                details={"error": f"Column '{column}' not found"},
             )
 
         unexpected_values = set(df[column].dropna().unique()) - value_set
@@ -161,9 +155,11 @@ class DataQualityValidator:
             details={
                 "column": column,
                 "expected_set": list(value_set),
-                "unexpected_values": list(unexpected_values) if unexpected_values else None,
-                "unexpected_count": len(unexpected_values)
-            }
+                "unexpected_values": (
+                    list(unexpected_values) if unexpected_values else None
+                ),
+                "unexpected_count": len(unexpected_values),
+            },
         )
 
     def expect_column_values_to_be_between(
@@ -173,14 +169,14 @@ class DataQualityValidator:
         min_value: Optional[float] = None,
         max_value: Optional[float] = None,
         strict_min: bool = False,
-        strict_max: bool = False
+        strict_max: bool = False,
     ) -> ValidationResult:
         """Expect column values to be within a numeric range"""
         if column not in df.columns:
             return ValidationResult(
                 expectation=f"expect_column_values_to_be_between('{column}')",
                 passed=False,
-                details={"error": f"Column '{column}' not found"}
+                details={"error": f"Column '{column}' not found"},
             )
 
         values = df[column].dropna()
@@ -217,23 +213,19 @@ class DataQualityValidator:
                 "min_violations": int(min_violations),
                 "max_violations": int(max_violations),
                 "actual_min": float(values.min()) if len(values) > 0 else None,
-                "actual_max": float(values.max()) if len(values) > 0 else None
-            }
+                "actual_max": float(values.max()) if len(values) > 0 else None,
+            },
         )
 
     def expect_column_mean_to_be_between(
-        self,
-        df: pd.DataFrame,
-        column: str,
-        min_value: float,
-        max_value: float
+        self, df: pd.DataFrame, column: str, min_value: float, max_value: float
     ) -> ValidationResult:
         """Expect column mean to be within a range"""
         if column not in df.columns:
             return ValidationResult(
                 expectation=f"expect_column_mean_to_be_between('{column}')",
                 passed=False,
-                details={"error": f"Column '{column}' not found"}
+                details={"error": f"Column '{column}' not found"},
             )
 
         mean_value = df[column].mean()
@@ -246,23 +238,19 @@ class DataQualityValidator:
                 "column": column,
                 "mean": float(mean_value),
                 "expected_min": min_value,
-                "expected_max": max_value
-            }
+                "expected_max": max_value,
+            },
         )
 
     def expect_column_stdev_to_be_between(
-        self,
-        df: pd.DataFrame,
-        column: str,
-        min_value: float,
-        max_value: float
+        self, df: pd.DataFrame, column: str, min_value: float, max_value: float
     ) -> ValidationResult:
         """Expect column standard deviation to be within a range"""
         if column not in df.columns:
             return ValidationResult(
                 expectation=f"expect_column_stdev_to_be_between('{column}')",
                 passed=False,
-                details={"error": f"Column '{column}' not found"}
+                details={"error": f"Column '{column}' not found"},
             )
 
         stdev_value = df[column].std()
@@ -275,15 +263,12 @@ class DataQualityValidator:
                 "column": column,
                 "stdev": float(stdev_value),
                 "expected_min": min_value,
-                "expected_max": max_value
-            }
+                "expected_max": max_value,
+            },
         )
 
     def expect_table_row_count_to_be_between(
-        self,
-        df: pd.DataFrame,
-        min_value: int,
-        max_value: int
+        self, df: pd.DataFrame, min_value: int, max_value: int
     ) -> ValidationResult:
         """Expect table row count to be within a range"""
         row_count = len(df)
@@ -295,14 +280,12 @@ class DataQualityValidator:
             details={
                 "row_count": row_count,
                 "expected_min": min_value,
-                "expected_max": max_value
-            }
+                "expected_max": max_value,
+            },
         )
 
     def expect_table_column_count_to_equal(
-        self,
-        df: pd.DataFrame,
-        expected_count: int
+        self, df: pd.DataFrame, expected_count: int
     ) -> ValidationResult:
         """Expect table to have a specific number of columns"""
         column_count = len(df.columns)
@@ -314,8 +297,8 @@ class DataQualityValidator:
             details={
                 "column_count": column_count,
                 "expected_count": expected_count,
-                "columns": list(df.columns)
-            }
+                "columns": list(df.columns),
+            },
         )
 
     def validate(self, df: pd.DataFrame) -> DataQualityReport:
@@ -337,11 +320,13 @@ class DataQualityValidator:
                 self.results.append(result)
             except Exception as e:
                 logger.error(f"Error running expectation: {e}")
-                self.results.append(ValidationResult(
-                    expectation=str(expectation_func),
-                    passed=False,
-                    details={"error": str(e)}
-                ))
+                self.results.append(
+                    ValidationResult(
+                        expectation=str(expectation_func),
+                        passed=False,
+                        details={"error": str(e)},
+                    )
+                )
 
         # Generate report
         passed_count = sum(1 for r in self.results if r.passed)
@@ -352,7 +337,7 @@ class DataQualityValidator:
             total_expectations=len(self.results),
             passed_expectations=passed_count,
             failed_expectations=failed_count,
-            results=self.results
+            results=self.results,
         )
 
         # Log summary
@@ -395,17 +380,19 @@ if __name__ == "__main__":
 
     # Create sample NBA dataset
     np.random.seed(42)
-    df = pd.DataFrame({
-        "player_id": range(1, 101),
-        "player_name": [f"Player {i}" for i in range(1, 101)],
-        "team": np.random.choice(["Lakers", "Warriors", "Celtics", "Heat"], 100),
-        "position": np.random.choice(["PG", "SG", "SF", "PF", "C"], 100),
-        "points_per_game": np.random.normal(15, 5, 100).clip(0, 35),
-        "rebounds_per_game": np.random.normal(7, 3, 100).clip(0, 20),
-        "assists_per_game": np.random.normal(5, 2, 100).clip(0, 15),
-        "age": np.random.normal(27, 4, 100).clip(19, 40).astype(int),
-        "salary": np.random.lognormal(16, 0.5, 100).astype(int)
-    })
+    df = pd.DataFrame(
+        {
+            "player_id": range(1, 101),
+            "player_name": [f"Player {i}" for i in range(1, 101)],
+            "team": np.random.choice(["Lakers", "Warriors", "Celtics", "Heat"], 100),
+            "position": np.random.choice(["PG", "SG", "SF", "PF", "C"], 100),
+            "points_per_game": np.random.normal(15, 5, 100).clip(0, 35),
+            "rebounds_per_game": np.random.normal(7, 3, 100).clip(0, 20),
+            "assists_per_game": np.random.normal(5, 2, 100).clip(0, 15),
+            "age": np.random.normal(27, 4, 100).clip(19, 40).astype(int),
+            "salary": np.random.lognormal(16, 0.5, 100).astype(int),
+        }
+    )
 
     # Add some data quality issues for testing
     df.loc[5, "points_per_game"] = None  # Missing value
@@ -430,9 +417,7 @@ if __name__ == "__main__":
     validator.add_expectation(
         lambda df: validator.expect_column_to_exist(df, "player_name")
     )
-    validator.add_expectation(
-        lambda df: validator.expect_column_to_exist(df, "team")
-    )
+    validator.add_expectation(lambda df: validator.expect_column_to_exist(df, "team"))
 
     # Uniqueness expectation
     validator.add_expectation(
@@ -441,10 +426,14 @@ if __name__ == "__main__":
 
     # Null value expectations
     validator.add_expectation(
-        lambda df: validator.expect_column_values_to_not_be_null(df, "player_name", max_null_ratio=0.0)
+        lambda df: validator.expect_column_values_to_not_be_null(
+            df, "player_name", max_null_ratio=0.0
+        )
     )
     validator.add_expectation(
-        lambda df: validator.expect_column_values_to_not_be_null(df, "points_per_game", max_null_ratio=0.01)
+        lambda df: validator.expect_column_values_to_not_be_null(
+            df, "points_per_game", max_null_ratio=0.01
+        )
     )
 
     # Value set expectations
@@ -503,4 +492,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("Data Quality Testing Complete!")
     print("=" * 80)
-

@@ -17,13 +17,14 @@ from contextvars import ContextVar
 from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
 
 # Context variable for request tracking
-request_id_var: ContextVar[Optional[str]] = ContextVar('request_id', default=None)
-client_id_var: ContextVar[Optional[str]] = ContextVar('client_id', default=None)
+request_id_var: ContextVar[Optional[str]] = ContextVar("request_id", default=None)
+client_id_var: ContextVar[Optional[str]] = ContextVar("client_id", default=None)
 
 
 # ==============================================================================
 # JSON Formatter
 # ==============================================================================
+
 
 class JSONFormatter(logging.Formatter):
     """
@@ -47,41 +48,61 @@ class JSONFormatter(logging.Formatter):
         """
         # Base log data
         log_data = {
-            'timestamp': datetime.utcnow().isoformat() + 'Z',
-            'level': record.levelname,
-            'logger': record.name,
-            'message': record.getMessage(),
-            'module': record.module,
-            'function': record.funcName,
-            'line': record.lineno
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "level": record.levelname,
+            "logger": record.name,
+            "message": record.getMessage(),
+            "module": record.module,
+            "function": record.funcName,
+            "line": record.lineno,
         }
 
         # Add request context
         request_id = request_id_var.get()
         if request_id:
-            log_data['request_id'] = request_id
+            log_data["request_id"] = request_id
 
         client_id = client_id_var.get()
         if client_id:
-            log_data['client_id'] = client_id
+            log_data["client_id"] = client_id
 
         # Add exception info if present
         if record.exc_info:
-            log_data['exception'] = {
-                'type': record.exc_info[0].__name__ if record.exc_info[0] else None,
-                'message': str(record.exc_info[1]) if record.exc_info[1] else None,
-                'traceback': self.formatException(record.exc_info)
+            log_data["exception"] = {
+                "type": record.exc_info[0].__name__ if record.exc_info[0] else None,
+                "message": str(record.exc_info[1]) if record.exc_info[1] else None,
+                "traceback": self.formatException(record.exc_info),
             }
 
         # Add extra fields
         if self.include_extra:
             # Add any extra fields passed to the logger
             for key, value in record.__dict__.items():
-                if key not in ['name', 'msg', 'args', 'created', 'filename', 'funcName',
-                               'levelname', 'levelno', 'lineno', 'module', 'msecs',
-                               'message', 'pathname', 'process', 'processName',
-                               'relativeCreated', 'thread', 'threadName', 'exc_info',
-                               'exc_text', 'stack_info', 'getMessage', 'taskName']:
+                if key not in [
+                    "name",
+                    "msg",
+                    "args",
+                    "created",
+                    "filename",
+                    "funcName",
+                    "levelname",
+                    "levelno",
+                    "lineno",
+                    "module",
+                    "msecs",
+                    "message",
+                    "pathname",
+                    "process",
+                    "processName",
+                    "relativeCreated",
+                    "thread",
+                    "threadName",
+                    "exc_info",
+                    "exc_text",
+                    "stack_info",
+                    "getMessage",
+                    "taskName",
+                ]:
                     try:
                         # Only include JSON-serializable values
                         json.dumps(value)
@@ -96,6 +117,7 @@ class JSONFormatter(logging.Formatter):
 # Human-Readable Formatter (for development)
 # ==============================================================================
 
+
 class ColoredFormatter(logging.Formatter):
     """
     Formatter with color coding for console output
@@ -104,23 +126,25 @@ class ColoredFormatter(logging.Formatter):
 
     # ANSI color codes
     COLORS = {
-        'DEBUG': '\033[36m',      # Cyan
-        'INFO': '\033[32m',       # Green
-        'WARNING': '\033[33m',    # Yellow
-        'ERROR': '\033[31m',      # Red
-        'CRITICAL': '\033[35m',   # Magenta
+        "DEBUG": "\033[36m",  # Cyan
+        "INFO": "\033[32m",  # Green
+        "WARNING": "\033[33m",  # Yellow
+        "ERROR": "\033[31m",  # Red
+        "CRITICAL": "\033[35m",  # Magenta
     }
-    RESET = '\033[0m'
-    BOLD = '\033[1m'
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
 
     def format(self, record: logging.LogRecord) -> str:
         """Format with colors"""
         # Color the level name
-        level_color = self.COLORS.get(record.levelname, '')
+        level_color = self.COLORS.get(record.levelname, "")
         colored_level = f"{level_color}{record.levelname:8}{self.RESET}"
 
         # Build formatted message
-        timestamp = datetime.fromtimestamp(record.created).strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        timestamp = datetime.fromtimestamp(record.created).strftime(
+            "%Y-%m-%d %H:%M:%S.%f"
+        )[:-3]
 
         # Add request ID if available
         request_id = request_id_var.get()
@@ -142,6 +166,7 @@ class ColoredFormatter(logging.Formatter):
 # ==============================================================================
 # Performance Metrics Logger
 # ==============================================================================
+
 
 class PerformanceLogger:
     """
@@ -167,11 +192,11 @@ class PerformanceLogger:
         self.logger.info(
             f"Completed: {operation}",
             extra={
-                'operation': operation,
-                'duration_ms': round(duration * 1000, 2),
-                'duration_seconds': round(duration, 3),
-                **extra_fields
-            }
+                "operation": operation,
+                "duration_ms": round(duration * 1000, 2),
+                "duration_seconds": round(duration, 3),
+                **extra_fields,
+            },
         )
         self.start_time = None
 
@@ -201,28 +226,29 @@ class PerformanceMeasurement:
             self.logger.error(
                 f"Failed: {self.operation}",
                 extra={
-                    'operation': self.operation,
-                    'duration_ms': round(duration * 1000, 2),
-                    'error': str(exc_val),
-                    'success': False
+                    "operation": self.operation,
+                    "duration_ms": round(duration * 1000, 2),
+                    "error": str(exc_val),
+                    "success": False,
                 },
-                exc_info=(exc_type, exc_val, exc_tb)
+                exc_info=(exc_type, exc_val, exc_tb),
             )
         else:
             # Log success with performance data
             self.logger.info(
                 f"Completed: {self.operation}",
                 extra={
-                    'operation': self.operation,
-                    'duration_ms': round(duration * 1000, 2),
-                    'success': True
-                }
+                    "operation": self.operation,
+                    "duration_ms": round(duration * 1000, 2),
+                    "success": True,
+                },
             )
 
 
 # ==============================================================================
 # Request Context Manager
 # ==============================================================================
+
 
 class RequestContext:
     """
@@ -235,7 +261,7 @@ class RequestContext:
         logger: logging.Logger,
         operation: str,
         client_id: Optional[str] = None,
-        request_id: Optional[str] = None
+        request_id: Optional[str] = None,
     ):
         self.logger = logger
         self.operation = operation
@@ -255,11 +281,11 @@ class RequestContext:
         self.logger.info(
             f"Request started: {self.operation}",
             extra={
-                'operation': self.operation,
-                'request_id': self.request_id,
-                'client_id': self.client_id,
-                'phase': 'start'
-            }
+                "operation": self.operation,
+                "request_id": self.request_id,
+                "client_id": self.client_id,
+                "phase": "start",
+            },
         )
 
         return self
@@ -272,28 +298,28 @@ class RequestContext:
             self.logger.error(
                 f"Request failed: {self.operation}",
                 extra={
-                    'operation': self.operation,
-                    'request_id': self.request_id,
-                    'client_id': self.client_id,
-                    'phase': 'error',
-                    'duration_ms': round(duration * 1000, 2),
-                    'error_type': exc_type.__name__,
-                    'error_message': str(exc_val),
-                    'success': False
+                    "operation": self.operation,
+                    "request_id": self.request_id,
+                    "client_id": self.client_id,
+                    "phase": "error",
+                    "duration_ms": round(duration * 1000, 2),
+                    "error_type": exc_type.__name__,
+                    "error_message": str(exc_val),
+                    "success": False,
                 },
-                exc_info=(exc_type, exc_val, exc_tb)
+                exc_info=(exc_type, exc_val, exc_tb),
             )
         else:
             self.logger.info(
                 f"Request completed: {self.operation}",
                 extra={
-                    'operation': self.operation,
-                    'request_id': self.request_id,
-                    'client_id': self.client_id,
-                    'phase': 'complete',
-                    'duration_ms': round(duration * 1000, 2),
-                    'success': True
-                }
+                    "operation": self.operation,
+                    "request_id": self.request_id,
+                    "client_id": self.client_id,
+                    "phase": "complete",
+                    "duration_ms": round(duration * 1000, 2),
+                    "success": True,
+                },
             )
 
         # Clear context variables
@@ -305,6 +331,7 @@ class RequestContext:
 # Logging Configuration
 # ==============================================================================
 
+
 def setup_logging(
     log_level: str = "INFO",
     log_dir: Optional[str] = None,
@@ -312,7 +339,7 @@ def setup_logging(
     enable_console: bool = True,
     enable_file: bool = True,
     max_file_size_mb: int = 100,
-    backup_count: int = 5
+    backup_count: int = 5,
 ) -> logging.Logger:
     """
     Setup structured logging for the application
@@ -363,7 +390,7 @@ def setup_logging(
         app_handler = RotatingFileHandler(
             app_log_file,
             maxBytes=max_file_size_mb * 1024 * 1024,
-            backupCount=backup_count
+            backupCount=backup_count,
         )
         app_handler.setLevel(logging.DEBUG)  # Log everything to file
         app_handler.setFormatter(JSONFormatter(include_extra=True))
@@ -374,7 +401,7 @@ def setup_logging(
         error_handler = RotatingFileHandler(
             error_log_file,
             maxBytes=max_file_size_mb * 1024 * 1024,
-            backupCount=backup_count
+            backupCount=backup_count,
         )
         error_handler.setLevel(logging.ERROR)
         error_handler.setFormatter(JSONFormatter(include_extra=True))
@@ -385,10 +412,10 @@ def setup_logging(
         perf_handler = RotatingFileHandler(
             perf_log_file,
             maxBytes=max_file_size_mb * 1024 * 1024,
-            backupCount=backup_count
+            backupCount=backup_count,
         )
         perf_handler.setLevel(logging.INFO)
-        perf_handler.addFilter(lambda record: hasattr(record, 'duration_ms'))
+        perf_handler.addFilter(lambda record: hasattr(record, "duration_ms"))
         perf_handler.setFormatter(JSONFormatter(include_extra=True))
         root_logger.addHandler(perf_handler)
 
@@ -397,10 +424,10 @@ def setup_logging(
         access_handler = RotatingFileHandler(
             access_log_file,
             maxBytes=max_file_size_mb * 1024 * 1024,
-            backupCount=backup_count
+            backupCount=backup_count,
         )
         access_handler.setLevel(logging.INFO)
-        access_handler.addFilter(lambda record: hasattr(record, 'request_id'))
+        access_handler.addFilter(lambda record: hasattr(record, "request_id"))
         access_handler.setFormatter(JSONFormatter(include_extra=True))
         root_logger.addHandler(access_handler)
 
@@ -408,12 +435,12 @@ def setup_logging(
     root_logger.info(
         "Logging configured",
         extra={
-            'log_level': log_level,
-            'log_dir': str(log_dir),
-            'json_enabled': enable_json,
-            'console_enabled': enable_console,
-            'file_enabled': enable_file
-        }
+            "log_level": log_level,
+            "log_dir": str(log_dir),
+            "json_enabled": enable_json,
+            "console_enabled": enable_console,
+            "file_enabled": enable_file,
+        },
     )
 
     return root_logger
@@ -422,6 +449,7 @@ def setup_logging(
 # ==============================================================================
 # Helper Functions
 # ==============================================================================
+
 
 def get_logger(name: str) -> logging.Logger:
     """
@@ -445,16 +473,12 @@ def log_request(logger: logging.Logger, operation: str, **kwargs):
         operation: Operation name
         **kwargs: Additional fields to log
     """
-    logger.info(
-        f"Request: {operation}",
-        extra={
-            'operation': operation,
-            **kwargs
-        }
-    )
+    logger.info(f"Request: {operation}", extra={"operation": operation, **kwargs})
 
 
-def log_performance(logger: logging.Logger, operation: str, duration_ms: float, **kwargs):
+def log_performance(
+    logger: logging.Logger, operation: str, duration_ms: float, **kwargs
+):
     """
     Log performance metrics
 
@@ -467,11 +491,11 @@ def log_performance(logger: logging.Logger, operation: str, duration_ms: float, 
     logger.info(
         f"Performance: {operation}",
         extra={
-            'operation': operation,
-            'duration_ms': round(duration_ms, 2),
-            'performance_metric': True,
-            **kwargs
-        }
+            "operation": operation,
+            "duration_ms": round(duration_ms, 2),
+            "performance_metric": True,
+            **kwargs,
+        },
     )
 
 
@@ -488,18 +512,19 @@ def log_error(logger: logging.Logger, operation: str, error: Exception, **kwargs
     logger.error(
         f"Error: {operation}",
         extra={
-            'operation': operation,
-            'error_type': type(error).__name__,
-            'error_message': str(error),
-            **kwargs
+            "operation": operation,
+            "error_type": type(error).__name__,
+            "error_message": str(error),
+            **kwargs,
         },
-        exc_info=True
+        exc_info=True,
     )
 
 
 # ==============================================================================
 # Example Usage
 # ==============================================================================
+
 
 def example_usage():
     """Example of using structured logging"""
@@ -508,7 +533,7 @@ def example_usage():
     setup_logging(
         log_level="DEBUG",
         enable_json=False,  # Use colored output for console
-        enable_file=True
+        enable_file=True,
     )
 
     # Get logger
@@ -521,7 +546,7 @@ def example_usage():
 
     # Example 2: Request context
     with RequestContext(logger, "process_query", client_id="client_123"):
-        logger.info("Processing query", extra={'query': 'SELECT * FROM games'})
+        logger.info("Processing query", extra={"query": "SELECT * FROM games"})
         time.sleep(0.1)  # Simulate work
 
     # Example 3: Performance measurement

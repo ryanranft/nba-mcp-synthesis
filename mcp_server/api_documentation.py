@@ -19,7 +19,7 @@ class APIDocumentationGenerator:
         self,
         title: str = "NBA MCP API",
         version: str = "1.0.0",
-        description: str = "NBA Machine Learning & Analytics API"
+        description: str = "NBA Machine Learning & Analytics API",
     ):
         """
         Initialize API documentation generator.
@@ -44,7 +44,7 @@ class APIDocumentationGenerator:
         parameters: Optional[List[Dict]] = None,
         request_body: Optional[Dict] = None,
         responses: Optional[Dict] = None,
-        tags: Optional[List[str]] = None
+        tags: Optional[List[str]] = None,
     ):
         """
         Add an API endpoint.
@@ -66,12 +66,13 @@ class APIDocumentationGenerator:
             "description": description or summary,
             "parameters": parameters or [],
             "request_body": request_body,
-            "responses": responses or {
+            "responses": responses
+            or {
                 "200": {"description": "Success"},
                 "400": {"description": "Bad Request"},
-                "500": {"description": "Internal Server Error"}
+                "500": {"description": "Internal Server Error"},
             },
-            "tags": tags or ["General"]
+            "tags": tags or ["General"],
         }
 
         self.endpoints.append(endpoint)
@@ -82,7 +83,7 @@ class APIDocumentationGenerator:
         name: str,
         properties: Dict[str, Dict],
         required: Optional[List[str]] = None,
-        description: Optional[str] = None
+        description: Optional[str] = None,
     ):
         """
         Add a data schema.
@@ -97,7 +98,7 @@ class APIDocumentationGenerator:
             "type": "object",
             "properties": properties,
             "required": required or [],
-            "description": description
+            "description": description,
         }
 
         logger.info(f"Added schema: {name}")
@@ -123,7 +124,7 @@ class APIDocumentationGenerator:
                 "description": endpoint["description"],
                 "tags": endpoint["tags"],
                 "parameters": endpoint["parameters"],
-                "responses": endpoint["responses"]
+                "responses": endpoint["responses"],
             }
 
             if endpoint["request_body"]:
@@ -134,12 +135,10 @@ class APIDocumentationGenerator:
             "info": {
                 "title": self.title,
                 "version": self.version,
-                "description": self.description
+                "description": self.description,
             },
             "paths": paths,
-            "components": {
-                "schemas": self.schemas
-            }
+            "components": {"schemas": self.schemas},
         }
 
         return spec
@@ -200,17 +199,15 @@ class APIDocumentationGenerator:
                     md += f"{schema['description']}\n\n"
                 md += "**Properties:**\n\n"
                 for prop_name, prop_def in schema["properties"].items():
-                    required = " (required)" if prop_name in schema.get("required", []) else ""
+                    required = (
+                        " (required)" if prop_name in schema.get("required", []) else ""
+                    )
                     md += f"- `{prop_name}`{required}: {prop_def.get('type', 'unknown')} - {prop_def.get('description', '')}\n"
                 md += "\n"
 
         return md
 
-    def save_documentation(
-        self,
-        format: str = "both",
-        output_dir: str = "./api_docs"
-    ):
+    def save_documentation(self, format: str = "both", output_dir: str = "./api_docs"):
         """
         Save documentation to files.
 
@@ -219,19 +216,20 @@ class APIDocumentationGenerator:
             output_dir: Output directory
         """
         from pathlib import Path
+
         Path(output_dir).mkdir(parents=True, exist_ok=True)
 
         if format in ["openapi", "both"]:
             spec = self.generate_openapi_spec()
             spec_file = Path(output_dir) / "openapi.json"
-            with open(spec_file, 'w') as f:
+            with open(spec_file, "w") as f:
                 json.dump(spec, f, indent=2)
             logger.info(f"Saved OpenAPI spec to {spec_file}")
 
         if format in ["markdown", "both"]:
             md = self.generate_markdown_docs()
             md_file = Path(output_dir) / "API.md"
-            with open(md_file, 'w') as f:
+            with open(md_file, "w") as f:
                 f.write(md)
             logger.info(f"Saved Markdown docs to {md_file}")
 
@@ -245,7 +243,7 @@ if __name__ == "__main__":
     doc_gen = APIDocumentationGenerator(
         title="NBA MCP API",
         version="1.0.0",
-        description="Machine Learning and Analytics API for NBA data"
+        description="Machine Learning and Analytics API for NBA data",
     )
 
     # Add schemas
@@ -258,10 +256,10 @@ if __name__ == "__main__":
         properties={
             "player_id": {"type": "string", "description": "Player identifier"},
             "season": {"type": "integer", "description": "Season year"},
-            "features": {"type": "array", "description": "Feature values"}
+            "features": {"type": "array", "description": "Feature values"},
         },
         required=["player_id", "season"],
-        description="Request for player performance prediction"
+        description="Request for player performance prediction",
     )
 
     doc_gen.add_schema(
@@ -270,9 +268,9 @@ if __name__ == "__main__":
             "prediction_id": {"type": "string", "description": "Prediction identifier"},
             "prediction": {"type": "number", "description": "Predicted value"},
             "confidence": {"type": "number", "description": "Confidence score (0-1)"},
-            "model_version": {"type": "string", "description": "Model version used"}
+            "model_version": {"type": "string", "description": "Model version used"},
         },
-        description="Prediction response"
+        description="Prediction response",
     )
 
     print("✅ Added 2 schemas")
@@ -301,12 +299,12 @@ if __name__ == "__main__":
                     "application/json": {
                         "schema": {"$ref": "#/components/schemas/PredictionResponse"}
                     }
-                }
+                },
             },
             "400": {"description": "Invalid request"},
-            "500": {"description": "Server error"}
+            "500": {"description": "Server error"},
         },
-        tags=["Predictions"]
+        tags=["Predictions"],
     )
 
     doc_gen.add_endpoint(
@@ -320,10 +318,10 @@ if __name__ == "__main__":
                 "in": "query",
                 "description": "Filter by stage (development, staging, production)",
                 "required": False,
-                "schema": {"type": "string"}
+                "schema": {"type": "string"},
             }
         ],
-        tags=["Models"]
+        tags=["Models"],
     )
 
     doc_gen.add_endpoint(
@@ -333,9 +331,9 @@ if __name__ == "__main__":
         description="Check API health status",
         responses={
             "200": {"description": "Healthy"},
-            "503": {"description": "Unhealthy"}
+            "503": {"description": "Unhealthy"},
         },
-        tags=["System"]
+        tags=["System"],
     )
 
     print("✅ Added 3 endpoints")
@@ -371,4 +369,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("API Documentation Demo Complete!")
     print("=" * 80)
-

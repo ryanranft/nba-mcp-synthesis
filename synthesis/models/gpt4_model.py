@@ -29,22 +29,26 @@ class GPT4Model:
     def __init__(self):
         """Initialize GPT-4 client"""
         # Try new naming convention first, then fallback to old
-        api_key = get_hierarchical_env("OPENAI_API_KEY", "NBA_MCP_SYNTHESIS", "WORKFLOW")
-        
+        api_key = get_hierarchical_env(
+            "OPENAI_API_KEY", "NBA_MCP_SYNTHESIS", "WORKFLOW"
+        )
+
         if not api_key:
             raise ValueError("OPENAI_API_KEY environment variable is not set")
 
         self.client = AsyncOpenAI(api_key=api_key)
         # Try new naming convention first, then fallback to old
-        self.model = (get_hierarchical_env("OPENAI_MODEL", "NBA_MCP_SYNTHESIS", "WORKFLOW") or
-                     "gpt-4-turbo-preview")  # Fallback to default
+        self.model = (
+            get_hierarchical_env("OPENAI_MODEL", "NBA_MCP_SYNTHESIS", "WORKFLOW")
+            or "gpt-4-turbo-preview"
+        )  # Fallback to default
         logger.info(f"Initialized GPT-4 model: {self.model}")
 
     async def synthesize_recommendations(
         self,
         raw_recommendations: List[Dict[str, Any]],
         book_metadata: Dict[str, Any],
-        existing_recommendations: Optional[List[Dict[str, Any]]] = None
+        existing_recommendations: Optional[List[Dict[str, Any]]] = None,
     ) -> Dict[str, Any]:
         """
         Synthesize raw recommendations into specific, implementable recommendations for the NBA Simulator AWS project.
@@ -63,7 +67,7 @@ class GPT4Model:
         prompt = self._build_synthesis_prompt(
             raw_recommendations=raw_recommendations,
             book_metadata=book_metadata,
-            existing_recommendations=existing_recommendations
+            existing_recommendations=existing_recommendations,
         )
 
         try:
@@ -71,7 +75,7 @@ class GPT4Model:
                 model=self.model,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.3,  # Low temperature for precise synthesis
-                max_tokens=4000
+                max_tokens=4000,
             )
 
             execution_time = (datetime.now() - start_time).total_seconds()
@@ -82,7 +86,9 @@ class GPT4Model:
             total_cost = input_cost + output_cost
 
             # Extract structured recommendations from GPT-4's response
-            synthesized_recommendations = self._extract_recommendations_from_response(response.choices[0].message.content)
+            synthesized_recommendations = self._extract_recommendations_from_response(
+                response.choices[0].message.content
+            )
 
             return {
                 "success": True,
@@ -94,7 +100,7 @@ class GPT4Model:
                 "tokens_output": response.usage.completion_tokens,
                 "cost": total_cost,
                 "processing_time": execution_time,
-                "stop_reason": response.choices[0].finish_reason
+                "stop_reason": response.choices[0].finish_reason,
             }
 
         except Exception as e:
@@ -103,19 +109,19 @@ class GPT4Model:
                 "success": False,
                 "model": "gpt4",
                 "error": str(e),
-                "processing_time": (datetime.now() - start_time).total_seconds()
+                "processing_time": (datetime.now() - start_time).total_seconds(),
             }
 
     def _build_synthesis_prompt(
         self,
         raw_recommendations: List[Dict[str, Any]],
         book_metadata: Dict[str, Any],
-        existing_recommendations: Optional[List[Dict[str, Any]]] = None
+        existing_recommendations: Optional[List[Dict[str, Any]]] = None,
     ) -> str:
         """Build prompt for implementation synthesis"""
 
-        title = book_metadata.get('title', 'Unknown')
-        author = book_metadata.get('author', 'Unknown')
+        title = book_metadata.get("title", "Unknown")
+        author = book_metadata.get("author", "Unknown")
 
         existing_context = ""
         if existing_recommendations:
@@ -201,14 +207,16 @@ IMPORTANT:
 Begin synthesis now:"""
         return prompt
 
-    def _extract_recommendations_from_response(self, response_text: str) -> List[Dict[str, Any]]:
+    def _extract_recommendations_from_response(
+        self, response_text: str
+    ) -> List[Dict[str, Any]]:
         """Extracts the JSON array of recommendations from the response text."""
         try:
-            json_start = response_text.find('```json')
-            json_end = response_text.rfind('```')
+            json_start = response_text.find("```json")
+            json_end = response_text.rfind("```")
 
             if json_start != -1 and json_end != -1 and json_end > json_start:
-                json_str = response_text[json_start + len('```json'):json_end].strip()
+                json_str = response_text[json_start + len("```json") : json_end].strip()
                 return json.loads(json_str)
             else:
                 logger.warning("No JSON block found in GPT-4 response.")

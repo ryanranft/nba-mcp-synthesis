@@ -38,15 +38,19 @@ logger = logging.getLogger(__name__)
 # Try to import Redis
 try:
     import redis
+
     REDIS_AVAILABLE = True
 except ImportError:
     REDIS_AVAILABLE = False
-    logger.warning("Redis not available. Distributed locks will use in-memory fallback.")
+    logger.warning(
+        "Redis not available. Distributed locks will use in-memory fallback."
+    )
 
 
 @dataclass
 class LockInfo:
     """Information about a lock"""
+
     lock_name: str
     owner_id: str
     acquired_at: datetime
@@ -60,12 +64,14 @@ class LockInfo:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'lock_name': self.lock_name,
-            'owner_id': self.owner_id,
-            'acquired_at': self.acquired_at.isoformat(),
-            'expires_at': self.expires_at.isoformat(),
-            'reentrant_count': self.reentrant_count,
-            'time_remaining_seconds': (self.expires_at - datetime.now()).total_seconds()
+            "lock_name": self.lock_name,
+            "owner_id": self.owner_id,
+            "acquired_at": self.acquired_at.isoformat(),
+            "expires_at": self.expires_at.isoformat(),
+            "reentrant_count": self.reentrant_count,
+            "time_remaining_seconds": (
+                self.expires_at - datetime.now()
+            ).total_seconds(),
         }
 
 
@@ -77,7 +83,7 @@ class DistributedLock:
         name: str,
         redis_client: Optional[Any] = None,
         timeout_seconds: int = 30,
-        auto_renew: bool = False
+        auto_renew: bool = False,
     ):
         self.name = name
         self.timeout_seconds = timeout_seconds
@@ -86,7 +92,9 @@ class DistributedLock:
 
         # Redis client
         if redis_client is None and REDIS_AVAILABLE:
-            self.redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
+            self.redis_client = redis.Redis(
+                host="localhost", port=6379, decode_responses=True
+            )
         else:
             self.redis_client = redis_client
 
@@ -107,10 +115,7 @@ class DistributedLock:
         try:
             # SET with NX (only if not exists) and EX (expiration)
             result = self.redis_client.set(
-                self.name,
-                self.owner_id,
-                nx=True,
-                ex=self.timeout_seconds
+                self.name, self.owner_id, nx=True, ex=self.timeout_seconds
             )
             return result is True
         except Exception as e:
@@ -152,11 +157,7 @@ class DistributedLock:
             end
             """
             result = self.redis_client.eval(
-                lua_script,
-                1,
-                self.name,
-                self.owner_id,
-                str(self.timeout_seconds)
+                lua_script, 1, self.name, self.owner_id, str(self.timeout_seconds)
             )
             return result == 1
         except Exception as e:
@@ -180,7 +181,7 @@ class DistributedLock:
                 lock_name=self.name,
                 owner_id=self.owner_id,
                 acquired_at=datetime.now(),
-                expires_at=datetime.now() + timedelta(seconds=self.timeout_seconds)
+                expires_at=datetime.now() + timedelta(seconds=self.timeout_seconds),
             )
             return True
 
@@ -210,7 +211,9 @@ class DistributedLock:
                         if self.name in self._local_locks:
                             lock_info = self._local_locks[self.name]
                             if lock_info.owner_id == self.owner_id:
-                                lock_info.expires_at = datetime.now() + timedelta(seconds=self.timeout_seconds)
+                                lock_info.expires_at = datetime.now() + timedelta(
+                                    seconds=self.timeout_seconds
+                                )
                                 success = True
                             else:
                                 success = False
@@ -241,7 +244,9 @@ class DistributedLock:
                 # Start auto-renewal if enabled
                 if self.auto_renew:
                     self._stop_renewal.clear()
-                    self._renewal_thread = threading.Thread(target=self._renewal_loop, daemon=True)
+                    self._renewal_thread = threading.Thread(
+                        target=self._renewal_loop, daemon=True
+                    )
                     self._renewal_thread.start()
 
                 return True
@@ -313,24 +318,29 @@ class ReadWriteLock:
         with self._read_ready:
             # Wait for no writers
             if not self._read_ready.wait_for(
-                lambda: self._writers == 0,
-                timeout=timeout
+                lambda: self._writers == 0, timeout=timeout
             ):
                 return False
 
             self._readers += 1
-            logger.debug(f"Read lock acquired for '{self.name}' (readers: {self._readers})")
+            logger.debug(
+                f"Read lock acquired for '{self.name}' (readers: {self._readers})"
+            )
             return True
 
     def release_read(self) -> bool:
         """Release read lock"""
         with self._lock:
             if self._readers <= 0:
-                logger.warning(f"Releasing read lock without acquisition: '{self.name}'")
+                logger.warning(
+                    f"Releasing read lock without acquisition: '{self.name}'"
+                )
                 return False
 
             self._readers -= 1
-            logger.debug(f"Read lock released for '{self.name}' (readers: {self._readers})")
+            logger.debug(
+                f"Read lock released for '{self.name}' (readers: {self._readers})"
+            )
 
             # Notify waiting writers if no more readers
             if self._readers == 0:
@@ -343,8 +353,7 @@ class ReadWriteLock:
         with self._write_ready:
             # Wait for no readers or writers
             if not self._write_ready.wait_for(
-                lambda: self._readers == 0 and self._writers == 0,
-                timeout=timeout
+                lambda: self._readers == 0 and self._writers == 0, timeout=timeout
             ):
                 return False
 
@@ -356,7 +365,9 @@ class ReadWriteLock:
         """Release write lock"""
         with self._lock:
             if self._writers <= 0:
-                logger.warning(f"Releasing write lock without acquisition: '{self.name}'")
+                logger.warning(
+                    f"Releasing write lock without acquisition: '{self.name}'"
+                )
                 return False
 
             self._writers -= 1
@@ -372,7 +383,7 @@ class ReadWriteLock:
 class LockManager:
     """Manage multiple distributed locks"""
 
-    def __init__(self, redis_host: str = 'localhost', redis_port: int = 6379):
+    def __init__(self, redis_host: str = "localhost", redis_port: int = 6379):
         self.locks: Dict[str, DistributedLock] = {}
         self._lock = threading.Lock()
 
@@ -380,9 +391,7 @@ class LockManager:
         if REDIS_AVAILABLE:
             try:
                 self.redis_client = redis.Redis(
-                    host=redis_host,
-                    port=redis_port,
-                    decode_responses=True
+                    host=redis_host, port=redis_port, decode_responses=True
                 )
                 self.redis_client.ping()
                 logger.info(f"Connected to Redis at {redis_host}:{redis_port}")
@@ -393,10 +402,7 @@ class LockManager:
             self.redis_client = None
 
     def get_lock(
-        self,
-        name: str,
-        timeout_seconds: int = 30,
-        auto_renew: bool = False
+        self, name: str, timeout_seconds: int = 30, auto_renew: bool = False
     ) -> DistributedLock:
         """Get or create a lock"""
         with self._lock:
@@ -405,15 +411,12 @@ class LockManager:
                     name=name,
                     redis_client=self.redis_client,
                     timeout_seconds=timeout_seconds,
-                    auto_renew=auto_renew
+                    auto_renew=auto_renew,
                 )
             return self.locks[name]
 
     def acquire_lock(
-        self,
-        name: str,
-        blocking: bool = True,
-        timeout: Optional[float] = None
+        self, name: str, blocking: bool = True, timeout: Optional[float] = None
     ) -> Optional[DistributedLock]:
         """Acquire a lock by name"""
         lock = self.get_lock(name)
@@ -503,6 +506,7 @@ if __name__ == "__main__":
 
     # Start multiple readers
     import concurrent.futures
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
         # Start readers
         futures = [executor.submit(read_operation, i) for i in range(3)]
@@ -513,4 +517,3 @@ if __name__ == "__main__":
         concurrent.futures.wait(futures)
 
     print("\n=== Demo Complete ===")
-

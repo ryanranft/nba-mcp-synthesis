@@ -18,7 +18,7 @@ import logging
 from typing import Dict, Any, List
 
 # Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Import the tools to test
 from mcp_server.tools.intelligent_error_correction import (
@@ -28,7 +28,7 @@ from mcp_server.tools.intelligent_error_correction import (
     generate_intelligent_suggestions,
     analyze_error_patterns,
     learn_from_error_cases,
-    IntelligentErrorCorrectionEngine
+    IntelligentErrorCorrectionEngine,
 )
 
 # Configure logging
@@ -66,7 +66,7 @@ class Phase76TestSuite:
                 "rebounds + assists",
                 "sqrt(points * rebounds)",
                 "log(points + 1)",
-            ]
+            ],
         }
 
         # Sample error cases for learning
@@ -75,20 +75,20 @@ class Phase76TestSuite:
                 "error_type": "syntax",
                 "formula": "points ==",
                 "correction": "points =",
-                "context": "assignment operation"
+                "context": "assignment operation",
             },
             {
                 "error_type": "semantic",
                 "formula": "points / 0",
                 "correction": "points / (0 + 1e-10)",
-                "context": "division by zero"
+                "context": "division by zero",
             },
             {
                 "error_type": "domain",
                 "formula": "field_goal_percentage > 1.5",
                 "correction": "field_goal_percentage > 1.0",
-                "context": "percentage validation"
-            }
+                "context": "percentage validation",
+            },
         ]
 
     def run_all_tests(self) -> Dict[str, Any]:
@@ -109,21 +109,27 @@ class Phase76TestSuite:
             self.test_error_learning,
             self.test_error_handling,
             self.test_integration_with_sports_formulas,
-            self.run_performance_benchmark
+            self.run_performance_benchmark,
         ]
 
         for test_method in test_methods:
             try:
                 test_method()
-                self.test_results.append({"test": test_method.__name__, "status": "passed"})
+                self.test_results.append(
+                    {"test": test_method.__name__, "status": "passed"}
+                )
             except Exception as e:
                 print(f"❌ {test_method.__name__} failed: {e}")
-                self.test_results.append({"test": test_method.__name__, "status": "failed", "error": str(e)})
+                self.test_results.append(
+                    {"test": test_method.__name__, "status": "failed", "error": str(e)}
+                )
 
         total_time = time.time() - start_time
 
         # Summary
-        passed_tests = sum(1 for result in self.test_results if result["status"] == "passed")
+        passed_tests = sum(
+            1 for result in self.test_results if result["status"] == "passed"
+        )
         total_tests = len(self.test_results)
 
         print("\n" + "=" * 60)
@@ -139,9 +145,9 @@ class Phase76TestSuite:
             "total_tests": total_tests,
             "passed_tests": passed_tests,
             "failed_tests": total_tests - passed_tests,
-            "success_rate": (passed_tests/total_tests)*100,
+            "success_rate": (passed_tests / total_tests) * 100,
             "total_time": total_time,
-            "test_results": self.test_results
+            "test_results": self.test_results,
         }
 
     def test_error_detection(self):
@@ -155,7 +161,7 @@ class Phase76TestSuite:
             error_types=["syntax"],
             include_suggestions=True,
             confidence_threshold=0.7,
-            domain_context="basketball"
+            domain_context="basketball",
         )
 
         assert result1["status"] == "success", "Error detection should succeed"
@@ -168,7 +174,7 @@ class Phase76TestSuite:
             context_type="formula",
             error_types=["semantic"],
             include_suggestions=True,
-            confidence_threshold=0.8
+            confidence_threshold=0.8,
         )
 
         assert result2["status"] == "success", "Semantic error detection should succeed"
@@ -179,7 +185,7 @@ class Phase76TestSuite:
             input_formula="field_goal_percentage > 1.5",
             context_type="formula",
             error_types=["domain"],
-            domain_context="basketball"
+            domain_context="basketball",
         )
 
         assert result3["status"] == "success", "Domain error detection should succeed"
@@ -189,10 +195,12 @@ class Phase76TestSuite:
             input_formula="points ==",
             context_type="formula",
             error_types=["syntax", "semantic", "logical"],
-            include_suggestions=True
+            include_suggestions=True,
         )
 
-        assert result4["status"] == "success", "Multiple error type detection should succeed"
+        assert (
+            result4["status"] == "success"
+        ), "Multiple error type detection should succeed"
 
         print("  ✓ Syntax error detection")
         print("  ✓ Semantic error detection")
@@ -209,7 +217,7 @@ class Phase76TestSuite:
             input_formula="points ==",
             context_type="formula",
             error_types=["syntax"],
-            include_suggestions=True
+            include_suggestions=True,
         )
 
         detected_errors = detection_result["errors"]
@@ -221,7 +229,7 @@ class Phase76TestSuite:
             preserve_intent=True,
             validation_level="comprehensive",
             include_explanations=True,
-            max_corrections=3
+            max_corrections=3,
         )
 
         assert result1["status"] == "success", "Automatic correction should succeed"
@@ -234,7 +242,7 @@ class Phase76TestSuite:
             preserve_intent=True,
             validation_level="basic",
             include_explanations=True,
-            max_corrections=2
+            max_corrections=2,
         )
 
         assert result2["status"] == "success", "Suggested correction should succeed"
@@ -246,7 +254,7 @@ class Phase76TestSuite:
             preserve_intent=True,
             validation_level="strict",
             include_explanations=True,
-            max_corrections=1
+            max_corrections=1,
         )
 
         assert result3["status"] == "success", "Interactive correction should succeed"
@@ -267,11 +275,11 @@ class Phase76TestSuite:
             validation_types=["syntax", "semantics", "mathematics"],
             test_data={
                 "points": [20.0, 25.0, 15.0],
-                "field_goal_attempts": [15.0, 20.0, 12.0]
+                "field_goal_attempts": [15.0, 20.0, 12.0],
             },
             expected_range={"result": (0.0, 1.0)},
             domain_constraints={"basketball": True},
-            include_performance_analysis=True
+            include_performance_analysis=True,
         )
 
         assert result1["status"] == "success", "Formula validation should succeed"
@@ -283,10 +291,12 @@ class Phase76TestSuite:
         result2 = validate_formula_comprehensively(
             formula_expression="points / 0",
             validation_types=["syntax", "semantics"],
-            include_performance_analysis=False
+            include_performance_analysis=False,
         )
 
-        assert result2["status"] == "success", "Invalid formula validation should succeed"
+        assert (
+            result2["status"] == "success"
+        ), "Invalid formula validation should succeed"
         assert result2["is_valid"] == False, "Should identify invalid formula"
         assert len(result2["errors"]) > 0, "Should detect errors in invalid formula"
 
@@ -294,7 +304,7 @@ class Phase76TestSuite:
         result3 = validate_formula_comprehensively(
             formula_expression="field_goal_percentage > 1.5",
             validation_types=["domain"],
-            domain_constraints={"basketball": True}
+            domain_constraints={"basketball": True},
         )
 
         assert result3["status"] == "success", "Domain validation should succeed"
@@ -314,13 +324,16 @@ class Phase76TestSuite:
             error_context={
                 "error_type": "syntax",
                 "formula": "points ==",
-                "position": (0, 8)
+                "position": (0, 8),
             },
             user_intent="Calculate player efficiency",
-            similar_formulas=["points = assists + rebounds", "points = field_goals * 2"],
+            similar_formulas=[
+                "points = assists + rebounds",
+                "points = field_goals * 2",
+            ],
             correction_history=[],
             suggestion_count=3,
-            include_alternatives=True
+            include_alternatives=True,
         )
 
         assert result1["status"] == "success", "Suggestion generation should succeed"
@@ -332,29 +345,33 @@ class Phase76TestSuite:
             error_context={
                 "error_type": "semantic",
                 "formula": "points / 0",
-                "message": "Division by zero"
+                "message": "Division by zero",
             },
             user_intent="Calculate shooting percentage",
             similar_formulas=["points / field_goal_attempts"],
             suggestion_count=2,
-            include_alternatives=True
+            include_alternatives=True,
         )
 
-        assert result2["status"] == "success", "Semantic suggestion generation should succeed"
+        assert (
+            result2["status"] == "success"
+        ), "Semantic suggestion generation should succeed"
 
         # Test domain error suggestions
         result3 = generate_intelligent_suggestions(
             error_context={
                 "error_type": "domain",
                 "formula": "field_goal_percentage > 1.5",
-                "message": "Percentage over 100%"
+                "message": "Percentage over 100%",
             },
             user_intent="Validate shooting statistics",
             suggestion_count=1,
-            include_alternatives=False
+            include_alternatives=False,
         )
 
-        assert result3["status"] == "success", "Domain suggestion generation should succeed"
+        assert (
+            result3["status"] == "success"
+        ), "Domain suggestion generation should succeed"
 
         print("  ✓ Basic suggestion generation")
         print("  ✓ Semantic error suggestions")
@@ -373,7 +390,7 @@ class Phase76TestSuite:
             include_pattern_analysis=True,
             include_statistical_analysis=True,
             include_context_analysis=True,
-            generate_report=False
+            generate_report=False,
         )
 
         assert result1["status"] == "success", "Pattern analysis should succeed"
@@ -383,7 +400,7 @@ class Phase76TestSuite:
         analysis_data = {
             "formulas": ["points ==", "points / 0", "field_goal_percentage > 1.5"],
             "error_types": ["syntax", "semantic", "domain"],
-            "context": "basketball analytics"
+            "context": "basketball analytics",
         }
 
         result2 = analyze_error_patterns(
@@ -392,7 +409,7 @@ class Phase76TestSuite:
             include_pattern_analysis=True,
             include_statistical_analysis=True,
             include_context_analysis=True,
-            generate_report=True
+            generate_report=True,
         )
 
         assert result2["status"] == "success", "Data analysis should succeed"
@@ -404,7 +421,7 @@ class Phase76TestSuite:
             include_pattern_analysis=False,
             include_statistical_analysis=False,
             include_context_analysis=True,
-            generate_report=False
+            generate_report=False,
         )
 
         assert result3["status"] == "success", "Surface analysis should succeed"
@@ -426,7 +443,7 @@ class Phase76TestSuite:
             update_model=True,
             validation_split=0.2,
             learning_rate=0.01,
-            epochs=5
+            epochs=5,
         )
 
         assert result1["status"] == "success", "Supervised learning should succeed"
@@ -439,7 +456,7 @@ class Phase76TestSuite:
             update_model=False,
             validation_split=0.3,
             learning_rate=0.005,
-            epochs=3
+            epochs=3,
         )
 
         assert result2["status"] == "success", "Unsupervised learning should succeed"
@@ -451,7 +468,7 @@ class Phase76TestSuite:
             update_model=True,
             validation_split=0.25,
             learning_rate=0.02,
-            epochs=10
+            epochs=10,
         )
 
         assert result3["status"] == "success", "Reinforcement learning should succeed"
@@ -468,9 +485,7 @@ class Phase76TestSuite:
 
         # Test empty formula
         result1 = detect_intelligent_errors(
-            input_formula="",
-            context_type="formula",
-            error_types=["syntax"]
+            input_formula="", context_type="formula", error_types=["syntax"]
         )
 
         assert result1["status"] == "error", "Should handle empty formula gracefully"
@@ -480,13 +495,23 @@ class Phase76TestSuite:
             input_formula="points + assists",
             context_type="formula",
             error_types=["invalid_type"],
-            include_suggestions=True
+            include_suggestions=True,
         )
 
-        assert result2["status"] == "success", "Should handle invalid error types gracefully"
+        assert (
+            result2["status"] == "success"
+        ), "Should handle invalid error types gracefully"
 
         # Test invalid correction strategy
-        detected_errors = [{"error_id": "test", "error_type": "syntax", "severity": "medium", "message": "Test error", "confidence": 0.8}]
+        detected_errors = [
+            {
+                "error_id": "test",
+                "error_type": "syntax",
+                "severity": "medium",
+                "message": "Test error",
+                "confidence": 0.8,
+            }
+        ]
 
         result3 = correct_intelligent_errors(
             detected_errors=detected_errors,
@@ -494,16 +519,18 @@ class Phase76TestSuite:
             preserve_intent=True,
             validation_level="basic",
             include_explanations=True,
-            max_corrections=1
+            max_corrections=1,
         )
 
-        assert result3["status"] == "success", "Should handle invalid correction strategy"
+        assert (
+            result3["status"] == "success"
+        ), "Should handle invalid correction strategy"
 
         # Test invalid validation types
         result4 = validate_formula_comprehensively(
             formula_expression="points + assists",
             validation_types=["invalid_type"],
-            include_performance_analysis=False
+            include_performance_analysis=False,
         )
 
         assert result4["status"] == "success", "Should handle invalid validation types"
@@ -532,19 +559,23 @@ class Phase76TestSuite:
                 input_formula=formula,
                 context_type="formula",
                 error_types=["syntax", "semantic", "domain"],
-                domain_context="basketball"
+                domain_context="basketball",
             )
 
-            assert detection_result["status"] == "success", f"Should detect errors in {formula}"
+            assert (
+                detection_result["status"] == "success"
+            ), f"Should detect errors in {formula}"
 
             # Test validation
             validation_result = validate_formula_comprehensively(
                 formula_expression=formula,
                 validation_types=["syntax", "semantics", "domain"],
-                domain_constraints={"basketball": True}
+                domain_constraints={"basketball": True},
             )
 
-            assert validation_result["status"] == "success", f"Should validate {formula}"
+            assert (
+                validation_result["status"] == "success"
+            ), f"Should validate {formula}"
 
         # Test domain-specific error detection
         domain_error_formula = "field_goal_percentage > 1.5"
@@ -552,7 +583,7 @@ class Phase76TestSuite:
             input_formula=domain_error_formula,
             context_type="formula",
             error_types=["domain"],
-            domain_context="basketball"
+            domain_context="basketball",
         )
 
         assert domain_result["status"] == "success", "Should detect domain errors"
@@ -575,7 +606,7 @@ class Phase76TestSuite:
             "points ==",
             "sqrt(-4)",
             "field_goal_percentage > 1.5",
-            "rebounds + assists + points"
+            "rebounds + assists + points",
         ]
 
         # Benchmark error detection
@@ -585,7 +616,7 @@ class Phase76TestSuite:
                 input_formula=formula,
                 context_type="formula",
                 error_types=["syntax", "semantic", "domain"],
-                domain_context="basketball"
+                domain_context="basketball",
             )
         detection_time = time.time() - start_time
         print(f"Error Detection: {detection_time:.2f}s ({len(test_formulas)} formulas)")
@@ -596,17 +627,19 @@ class Phase76TestSuite:
             validate_formula_comprehensively(
                 formula_expression=formula,
                 validation_types=["syntax", "semantics", "domain"],
-                domain_constraints={"basketball": True}
+                domain_constraints={"basketball": True},
             )
         validation_time = time.time() - start_time
-        print(f"Formula Validation: {validation_time:.2f}s ({len(test_formulas)} formulas)")
+        print(
+            f"Formula Validation: {validation_time:.2f}s ({len(test_formulas)} formulas)"
+        )
 
         # Benchmark suggestion generation
         start_time = time.time()
         for i in range(5):
             generate_intelligent_suggestions(
                 error_context={"error_type": "syntax", "formula": "test"},
-                suggestion_count=3
+                suggestion_count=3,
             )
         suggestion_time = time.time() - start_time
         print(f"Suggestion Generation: {suggestion_time:.2f}s (5 requests)")
@@ -618,7 +651,7 @@ class Phase76TestSuite:
             analysis_depth="deep",
             include_pattern_analysis=True,
             include_statistical_analysis=True,
-            include_context_analysis=True
+            include_context_analysis=True,
         )
         analysis_time = time.time() - start_time
         print(f"Pattern Analysis: {analysis_time:.2f}s")
@@ -629,12 +662,18 @@ class Phase76TestSuite:
             error_cases=self.sample_error_cases,
             learning_type="supervised",
             update_model=False,
-            epochs=3
+            epochs=3,
         )
         learning_time = time.time() - start_time
         print(f"Error Learning: {learning_time:.2f}s")
 
-        total_benchmark_time = detection_time + validation_time + suggestion_time + analysis_time + learning_time
+        total_benchmark_time = (
+            detection_time
+            + validation_time
+            + suggestion_time
+            + analysis_time
+            + learning_time
+        )
         print(f"\nTotal Benchmark Time: {total_benchmark_time:.2f}s")
 
         return {
@@ -643,7 +682,7 @@ class Phase76TestSuite:
             "suggestion_time": suggestion_time,
             "analysis_time": analysis_time,
             "learning_time": learning_time,
-            "total_benchmark_time": total_benchmark_time
+            "total_benchmark_time": total_benchmark_time,
         }
 
 
@@ -654,10 +693,14 @@ def main():
         results = test_suite.run_all_tests()
 
         if results["success_rate"] >= 80:
-            print(f"\n🎉 Phase 7.6 tests completed successfully! ({results['success_rate']:.1f}% pass rate)")
+            print(
+                f"\n🎉 Phase 7.6 tests completed successfully! ({results['success_rate']:.1f}% pass rate)"
+            )
             return 0
         else:
-            print(f"\n❌ Phase 7.6 tests had issues ({results['success_rate']:.1f}% pass rate)")
+            print(
+                f"\n❌ Phase 7.6 tests had issues ({results['success_rate']:.1f}% pass rate)"
+            )
             return 1
 
     except Exception as e:
@@ -668,6 +711,3 @@ def main():
 if __name__ == "__main__":
     exit_code = main()
     sys.exit(exit_code)
-
-
-

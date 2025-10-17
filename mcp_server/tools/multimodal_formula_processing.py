@@ -34,18 +34,24 @@ try:
     import cv2
     import pytesseract
     from PIL import Image
+
     IMAGE_PROCESSING_AVAILABLE = True
 except ImportError:
     IMAGE_PROCESSING_AVAILABLE = False
-    logging.warning("Image processing libraries not available. Install opencv-python, pytesseract, and Pillow for full functionality.")
+    logging.warning(
+        "Image processing libraries not available. Install opencv-python, pytesseract, and Pillow for full functionality."
+    )
 
 # Optional imports for advanced text processing
 try:
     import spacy
+
     TEXT_PROCESSING_AVAILABLE = True
 except ImportError:
     TEXT_PROCESSING_AVAILABLE = False
-    logging.warning("Advanced text processing not available. Install spacy for enhanced NLP capabilities.")
+    logging.warning(
+        "Advanced text processing not available. Install spacy for enhanced NLP capabilities."
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -53,31 +59,39 @@ logger = logging.getLogger(__name__)
 # Data Structures
 # ============================================================================
 
+
 class ProcessingMode(Enum):
     """Processing modes for multi-modal formula processing"""
+
     TEXT = "text"
     IMAGE = "image"
     DATA = "data"
     CROSS_MODAL = "cross_modal"
 
+
 class FormulaSource(Enum):
     """Source types for formulas"""
+
     TEXT_DESCRIPTION = "text_description"
     IMAGE_EXTRACTION = "image_extraction"
     DATA_PATTERN = "data_pattern"
     MANUAL_INPUT = "manual_input"
     CROSS_REFERENCE = "cross_reference"
 
+
 class ValidationStatus(Enum):
     """Validation status for formulas"""
+
     VALID = "valid"
     INVALID = "invalid"
     PARTIAL = "partial"
     PENDING = "pending"
 
+
 @dataclass
 class TextProcessingResult:
     """Result from text-based formula processing"""
+
     formula_id: str
     source_text: str
     extracted_formula: str
@@ -87,9 +101,11 @@ class TextProcessingResult:
     validation_status: ValidationStatus
     metadata: Dict[str, Any]
 
+
 @dataclass
 class ImageProcessingResult:
     """Result from image-based formula extraction"""
+
     formula_id: str
     image_source: str
     extracted_text: str
@@ -100,9 +116,11 @@ class ImageProcessingResult:
     validation_status: ValidationStatus
     metadata: Dict[str, Any]
 
+
 @dataclass
 class DataProcessingResult:
     """Result from data-driven formula generation"""
+
     formula_id: str
     data_source: str
     generated_formula: str
@@ -112,9 +130,11 @@ class DataProcessingResult:
     validation_status: ValidationStatus
     metadata: Dict[str, Any]
 
+
 @dataclass
 class CrossModalValidationResult:
     """Result from cross-modal formula validation"""
+
     formula_id: str
     validation_methods: List[str]
     consistency_score: float
@@ -124,9 +144,11 @@ class CrossModalValidationResult:
     recommendations: List[str]
     metadata: Dict[str, Any]
 
+
 # ============================================================================
 # Multi-Modal Formula Processing Engine
 # ============================================================================
+
 
 class MultiModalFormulaProcessor:
     """
@@ -153,7 +175,9 @@ class MultiModalFormulaProcessor:
             try:
                 self.nlp = spacy.load("en_core_web_sm")
             except OSError:
-                self.logger.warning("SpaCy English model not found. Using basic text processing.")
+                self.logger.warning(
+                    "SpaCy English model not found. Using basic text processing."
+                )
                 self.nlp = None
         else:
             self.nlp = None
@@ -164,23 +188,23 @@ class MultiModalFormulaProcessor:
         """Initialize text patterns for formula extraction"""
         return {
             "mathematical_expressions": [
-                r'([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([^=]+)',
-                r'([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*([^:]+)',
-                r'([a-zA-Z_][a-zA-Z0-9_]*)\s*is\s*([^.]+)',
-                r'([a-zA-Z_][a-zA-Z0-9_]*)\s*equals\s*([^.]+)',
-                r'([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([^=]+)',
+                r"([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([^=]+)",
+                r"([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*([^:]+)",
+                r"([a-zA-Z_][a-zA-Z0-9_]*)\s*is\s*([^.]+)",
+                r"([a-zA-Z_][a-zA-Z0-9_]*)\s*equals\s*([^.]+)",
+                r"([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([^=]+)",
             ],
             "basketball_metrics": [
-                r'(PER|TS%|Usage Rate|eFG%|ORtg|DRtg|Net Rating)',
-                r'(Player Efficiency Rating|True Shooting|Effective Field Goal)',
-                r'(Offensive Rating|Defensive Rating|Pace)',
-                r'(Win Shares|Box Plus/Minus|VORP)',
+                r"(PER|TS%|Usage Rate|eFG%|ORtg|DRtg|Net Rating)",
+                r"(Player Efficiency Rating|True Shooting|Effective Field Goal)",
+                r"(Offensive Rating|Defensive Rating|Pace)",
+                r"(Win Shares|Box Plus/Minus|VORP)",
             ],
             "mathematical_operators": [
-                r'[\+\-\*/\(\)\^]',
-                r'\b(sqrt|log|ln|exp|sin|cos|tan)\b',
-                r'\b(sum|average|mean|median|std)\b',
-            ]
+                r"[\+\-\*/\(\)\^]",
+                r"\b(sqrt|log|ln|exp|sin|cos|tan)\b",
+                r"\b(sum|average|mean|median|std)\b",
+            ],
         }
 
     def _initialize_image_processor(self) -> Optional[Any]:
@@ -190,10 +214,10 @@ class MultiModalFormulaProcessor:
 
         try:
             # Configure Tesseract for mathematical expressions
-            config = '--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+-*/()=^√∑∏∫∞≤≥≠±'
+            config = "--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+-*/()=^√∑∏∫∞≤≥≠±"
             return {
-                'tesseract_config': config,
-                'preprocessing_methods': ['grayscale', 'threshold', 'denoise']
+                "tesseract_config": config,
+                "preprocessing_methods": ["grayscale", "threshold", "denoise"],
             }
         except Exception as e:
             self.logger.error(f"Failed to initialize image processor: {e}")
@@ -207,7 +231,7 @@ class MultiModalFormulaProcessor:
         self,
         text: str,
         context: Optional[str] = None,
-        confidence_threshold: float = 0.7
+        confidence_threshold: float = 0.7,
     ) -> TextProcessingResult:
         """
         Process text to extract mathematical formulas
@@ -250,7 +274,9 @@ class MultiModalFormulaProcessor:
                     extraction_results.append(context_result)
 
             # Select best result
-            best_result = self._select_best_extraction(extraction_results, confidence_threshold)
+            best_result = self._select_best_extraction(
+                extraction_results, confidence_threshold
+            )
 
             if not best_result:
                 return TextProcessingResult(
@@ -261,25 +287,25 @@ class MultiModalFormulaProcessor:
                     confidence=0.0,
                     processing_method="none",
                     validation_status=ValidationStatus.INVALID,
-                    metadata={"error": "No valid formula extracted"}
+                    metadata={"error": "No valid formula extracted"},
                 )
 
             # Validate the extracted formula
-            validation_result = self._validate_formula(best_result['formula'])
+            validation_result = self._validate_formula(best_result["formula"])
 
             return TextProcessingResult(
                 formula_id=formula_id,
                 source_text=text,
-                extracted_formula=best_result['formula'],
-                variables=best_result['variables'],
-                confidence=best_result['confidence'],
-                processing_method=best_result['method'],
-                validation_status=validation_result['status'],
+                extracted_formula=best_result["formula"],
+                variables=best_result["variables"],
+                confidence=best_result["confidence"],
+                processing_method=best_result["method"],
+                validation_status=validation_result["status"],
                 metadata={
                     "extraction_methods": len(extraction_results),
                     "validation_details": validation_result,
-                    "context": context
-                }
+                    "context": context,
+                },
             )
 
         except Exception as e:
@@ -292,7 +318,7 @@ class MultiModalFormulaProcessor:
                 confidence=0.0,
                 processing_method="error",
                 validation_status=ValidationStatus.INVALID,
-                metadata={"error": str(e)}
+                metadata={"error": str(e)},
             )
 
     def _extract_direct_formula(self, text: str) -> Optional[Dict[str, Any]]:
@@ -300,8 +326,8 @@ class MultiModalFormulaProcessor:
         try:
             # Look for direct mathematical expressions
             math_patterns = [
-                r'([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([^=]+)',
-                r'([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*([^:]+)',
+                r"([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([^=]+)",
+                r"([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*([^:]+)",
             ]
 
             for pattern in math_patterns:
@@ -315,10 +341,10 @@ class MultiModalFormulaProcessor:
                         variables.append(variable)
 
                         return {
-                            'formula': f"{variable} = {expression.strip()}",
-                            'variables': variables,
-                            'confidence': 0.9,
-                            'method': 'direct_extraction'
+                            "formula": f"{variable} = {expression.strip()}",
+                            "variables": variables,
+                            "confidence": 0.9,
+                            "method": "direct_extraction",
                         }
                     except:
                         continue
@@ -345,17 +371,19 @@ class MultiModalFormulaProcessor:
                             if isinstance(match, tuple):
                                 var, expr = match
                                 formula_parts.append(f"{var} = {expr}")
-                                variables.extend(re.findall(r'[a-zA-Z_][a-zA-Z0-9_]*', expr))
+                                variables.extend(
+                                    re.findall(r"[a-zA-Z_][a-zA-Z0-9_]*", expr)
+                                )
                                 variables.append(var)
                             else:
                                 variables.append(match)
 
                         if formula_parts:
                             return {
-                                'formula': '; '.join(formula_parts),
-                                'variables': list(set(variables)),
-                                'confidence': 0.7,
-                                'method': f'pattern_{pattern_name}'
+                                "formula": "; ".join(formula_parts),
+                                "variables": list(set(variables)),
+                                "confidence": 0.7,
+                                "method": f"pattern_{pattern_name}",
                             }
 
             return None
@@ -377,19 +405,19 @@ class MultiModalFormulaProcessor:
             variables = []
 
             for token in doc:
-                if token.pos_ in ['NOUN', 'PROPN'] and token.text.isalpha():
+                if token.pos_ in ["NOUN", "PROPN"] and token.text.isalpha():
                     variables.append(token.text)
-                elif token.text in ['=', ':', 'is', 'equals']:
+                elif token.text in ["=", ":", "is", "equals"]:
                     # Found relationship indicator
                     continue
 
             # Try to construct formula from NLP analysis
             if variables:
                 return {
-                    'formula': f"formula_with_{len(variables)}_variables",
-                    'variables': variables,
-                    'confidence': 0.6,
-                    'method': 'nlp_extraction'
+                    "formula": f"formula_with_{len(variables)}_variables",
+                    "variables": variables,
+                    "confidence": 0.6,
+                    "method": "nlp_extraction",
                 }
 
             return None
@@ -398,25 +426,27 @@ class MultiModalFormulaProcessor:
             self.logger.error(f"NLP extraction failed: {e}")
             return None
 
-    def _extract_context_aware_formula(self, text: str, context: str) -> Optional[Dict[str, Any]]:
+    def _extract_context_aware_formula(
+        self, text: str, context: str
+    ) -> Optional[Dict[str, Any]]:
         """Extract formulas using context awareness"""
         try:
             # Basketball-specific formula extraction
-            if context.lower() in ['basketball', 'nba', 'sports']:
+            if context.lower() in ["basketball", "nba", "sports"]:
                 basketball_patterns = {
-                    'PER': r'Player Efficiency Rating|PER',
-                    'TS%': r'True Shooting|TS%',
-                    'Usage Rate': r'Usage Rate|USG%',
-                    'eFG%': r'Effective Field Goal|eFG%',
+                    "PER": r"Player Efficiency Rating|PER",
+                    "TS%": r"True Shooting|TS%",
+                    "Usage Rate": r"Usage Rate|USG%",
+                    "eFG%": r"Effective Field Goal|eFG%",
                 }
 
                 for metric, pattern in basketball_patterns.items():
                     if re.search(pattern, text, re.IGNORECASE):
                         return {
-                            'formula': f"{metric} calculation",
-                            'variables': [metric],
-                            'confidence': 0.8,
-                            'method': f'context_{context}'
+                            "formula": f"{metric} calculation",
+                            "variables": [metric],
+                            "confidence": 0.8,
+                            "method": f"context_{context}",
                         }
 
             return None
@@ -425,17 +455,19 @@ class MultiModalFormulaProcessor:
             self.logger.error(f"Context-aware extraction failed: {e}")
             return None
 
-    def _select_best_extraction(self, results: List[Dict[str, Any]], threshold: float) -> Optional[Dict[str, Any]]:
+    def _select_best_extraction(
+        self, results: List[Dict[str, Any]], threshold: float
+    ) -> Optional[Dict[str, Any]]:
         """Select the best extraction result based on confidence"""
         if not results:
             return None
 
         # Sort by confidence
-        sorted_results = sorted(results, key=lambda x: x['confidence'], reverse=True)
+        sorted_results = sorted(results, key=lambda x: x["confidence"], reverse=True)
 
         # Return the first result above threshold
         for result in sorted_results:
-            if result['confidence'] >= threshold:
+            if result["confidence"] >= threshold:
                 return result
 
         # If no result meets threshold, return the best one
@@ -449,7 +481,7 @@ class MultiModalFormulaProcessor:
         self,
         image_data: Union[str, bytes],
         image_format: str = "base64",
-        confidence_threshold: float = 0.7
+        confidence_threshold: float = 0.7,
     ) -> ImageProcessingResult:
         """
         Process image to extract mathematical formulas
@@ -475,7 +507,7 @@ class MultiModalFormulaProcessor:
                 confidence=0.0,
                 processing_method="unavailable",
                 validation_status=ValidationStatus.INVALID,
-                metadata={"error": "Image processing not available"}
+                metadata={"error": "Image processing not available"},
             )
 
         try:
@@ -502,8 +534,8 @@ class MultiModalFormulaProcessor:
                 metadata={
                     "image_size": image.size,
                     "image_mode": image.mode,
-                    "text_processing_result": asdict(text_result)
-                }
+                    "text_processing_result": asdict(text_result),
+                },
             )
 
         except Exception as e:
@@ -517,17 +549,19 @@ class MultiModalFormulaProcessor:
                 confidence=0.0,
                 processing_method="error",
                 validation_status=ValidationStatus.INVALID,
-                metadata={"error": str(e)}
+                metadata={"error": str(e)},
             )
 
-    def _convert_image_data(self, image_data: Union[str, bytes], image_format: str) -> Optional[Any]:
+    def _convert_image_data(
+        self, image_data: Union[str, bytes], image_format: str
+    ) -> Optional[Any]:
         """Convert image data to PIL Image"""
         try:
             if image_format == "base64":
                 if isinstance(image_data, str):
                     # Remove data URL prefix if present
-                    if image_data.startswith('data:image'):
-                        image_data = image_data.split(',')[1]
+                    if image_data.startswith("data:image"):
+                        image_data = image_data.split(",")[1]
 
                     image_bytes = base64.b64decode(image_data)
                 else:
@@ -554,7 +588,7 @@ class MultiModalFormulaProcessor:
             processed_image = self._preprocess_image(image)
 
             # Extract text using Tesseract
-            config = self.image_processor['tesseract_config']
+            config = self.image_processor["tesseract_config"]
             extracted_text = pytesseract.image_to_string(processed_image, config=config)
 
             return extracted_text.strip()
@@ -570,17 +604,19 @@ class MultiModalFormulaProcessor:
                 return image
 
             # Convert to grayscale
-            if image.mode != 'L':
-                image = image.convert('L')
+            if image.mode != "L":
+                image = image.convert("L")
 
             # Convert to numpy array for OpenCV processing
             img_array = np.array(image)
 
             # Apply preprocessing methods
-            for method in self.image_processor['preprocessing_methods']:
-                if method == 'threshold':
-                    _, img_array = cv2.threshold(img_array, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-                elif method == 'denoise':
+            for method in self.image_processor["preprocessing_methods"]:
+                if method == "threshold":
+                    _, img_array = cv2.threshold(
+                        img_array, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
+                    )
+                elif method == "denoise":
                     img_array = cv2.medianBlur(img_array, 3)
 
             return Image.fromarray(img_array)
@@ -598,7 +634,7 @@ class MultiModalFormulaProcessor:
         data: Dict[str, List[float]],
         target_variable: str,
         method: str = "regression",
-        confidence_threshold: float = 0.7
+        confidence_threshold: float = 0.7,
     ) -> DataProcessingResult:
         """
         Generate formulas from data patterns
@@ -620,7 +656,9 @@ class MultiModalFormulaProcessor:
             df = pd.DataFrame(data)
 
             if target_variable not in df.columns:
-                raise ValueError(f"Target variable '{target_variable}' not found in data")
+                raise ValueError(
+                    f"Target variable '{target_variable}' not found in data"
+                )
 
             # Generate formula based on method
             if method == "regression":
@@ -633,21 +671,21 @@ class MultiModalFormulaProcessor:
                 raise ValueError(f"Unknown method: {method}")
 
             # Validate generated formula
-            validation_result = self._validate_formula(result['formula'])
+            validation_result = self._validate_formula(result["formula"])
 
             return DataProcessingResult(
                 formula_id=formula_id,
                 data_source=f"data_{method}",
-                generated_formula=result['formula'],
-                variables=result['variables'],
-                accuracy=result['accuracy'],
+                generated_formula=result["formula"],
+                variables=result["variables"],
+                accuracy=result["accuracy"],
                 processing_method=method,
-                validation_status=validation_result['status'],
+                validation_status=validation_result["status"],
                 metadata={
                     "data_shape": df.shape,
-                    "method_details": result['details'],
-                    "validation_details": validation_result
-                }
+                    "method_details": result["details"],
+                    "validation_details": validation_result,
+                },
             )
 
         except Exception as e:
@@ -660,10 +698,12 @@ class MultiModalFormulaProcessor:
                 accuracy=0.0,
                 processing_method="error",
                 validation_status=ValidationStatus.INVALID,
-                metadata={"error": str(e)}
+                metadata={"error": str(e)},
             )
 
-    def _generate_regression_formula(self, df: pd.DataFrame, target: str) -> Dict[str, Any]:
+    def _generate_regression_formula(
+        self, df: pd.DataFrame, target: str
+    ) -> Dict[str, Any]:
         """Generate formula using regression analysis"""
         try:
             from sklearn.linear_model import LinearRegression
@@ -702,26 +742,28 @@ class MultiModalFormulaProcessor:
             accuracy = r2_score(y, y_pred)
 
             return {
-                'formula': formula,
-                'variables': variables,
-                'accuracy': max(0, accuracy),
-                'details': {
-                    'coefficients': model.coef_.tolist(),
-                    'intercept': model.intercept_,
-                    'r2_score': accuracy
-                }
+                "formula": formula,
+                "variables": variables,
+                "accuracy": max(0, accuracy),
+                "details": {
+                    "coefficients": model.coef_.tolist(),
+                    "intercept": model.intercept_,
+                    "r2_score": accuracy,
+                },
             }
 
         except Exception as e:
             self.logger.error(f"Regression formula generation failed: {e}")
             return {
-                'formula': f"{target} = error",
-                'variables': [target],
-                'accuracy': 0.0,
-                'details': {'error': str(e)}
+                "formula": f"{target} = error",
+                "variables": [target],
+                "accuracy": 0.0,
+                "details": {"error": str(e)},
             }
 
-    def _generate_correlation_formula(self, df: pd.DataFrame, target: str) -> Dict[str, Any]:
+    def _generate_correlation_formula(
+        self, df: pd.DataFrame, target: str
+    ) -> Dict[str, Any]:
         """Generate formula using correlation analysis"""
         try:
             # Calculate correlations
@@ -735,25 +777,27 @@ class MultiModalFormulaProcessor:
             formula = f"{target} ≈ {strongest_var} (correlation: {correlations[strongest_var]:.3f})"
 
             return {
-                'formula': formula,
-                'variables': [target, strongest_var],
-                'accuracy': abs(correlations[strongest_var]),
-                'details': {
-                    'correlations': correlations.to_dict(),
-                    'strongest_correlation': correlations[strongest_var]
-                }
+                "formula": formula,
+                "variables": [target, strongest_var],
+                "accuracy": abs(correlations[strongest_var]),
+                "details": {
+                    "correlations": correlations.to_dict(),
+                    "strongest_correlation": correlations[strongest_var],
+                },
             }
 
         except Exception as e:
             self.logger.error(f"Correlation formula generation failed: {e}")
             return {
-                'formula': f"{target} = error",
-                'variables': [target],
-                'accuracy': 0.0,
-                'details': {'error': str(e)}
+                "formula": f"{target} = error",
+                "variables": [target],
+                "accuracy": 0.0,
+                "details": {"error": str(e)},
             }
 
-    def _generate_pattern_formula(self, df: pd.DataFrame, target: str) -> Dict[str, Any]:
+    def _generate_pattern_formula(
+        self, df: pd.DataFrame, target: str
+    ) -> Dict[str, Any]:
         """Generate formula using pattern analysis"""
         try:
             # Simple pattern: mean-based formula
@@ -776,23 +820,23 @@ class MultiModalFormulaProcessor:
                 variables = [target]
 
             return {
-                'formula': formula,
-                'variables': variables,
-                'accuracy': 0.7,  # Pattern-based accuracy
-                'details': {
-                    'mean': target_mean,
-                    'std': target_std,
-                    'pattern_variables': pattern_vars
-                }
+                "formula": formula,
+                "variables": variables,
+                "accuracy": 0.7,  # Pattern-based accuracy
+                "details": {
+                    "mean": target_mean,
+                    "std": target_std,
+                    "pattern_variables": pattern_vars,
+                },
             }
 
         except Exception as e:
             self.logger.error(f"Pattern formula generation failed: {e}")
             return {
-                'formula': f"{target} = error",
-                'variables': [target],
-                'accuracy': 0.0,
-                'details': {'error': str(e)}
+                "formula": f"{target} = error",
+                "variables": [target],
+                "accuracy": 0.0,
+                "details": {"error": str(e)},
             }
 
     # ========================================================================
@@ -803,7 +847,7 @@ class MultiModalFormulaProcessor:
         self,
         formula_id: str,
         validation_methods: List[str],
-        confidence_threshold: float = 0.8
+        confidence_threshold: float = 0.8,
     ) -> CrossModalValidationResult:
         """
         Validate formula using multiple modalities
@@ -845,7 +889,9 @@ class MultiModalFormulaProcessor:
             discrepancies = self._identify_discrepancies(validation_results)
 
             # Generate recommendations
-            recommendations = self._generate_recommendations(validation_results, discrepancies)
+            recommendations = self._generate_recommendations(
+                validation_results, discrepancies
+            )
 
             # Determine overall validation status
             if consistency_score >= confidence_threshold:
@@ -865,8 +911,8 @@ class MultiModalFormulaProcessor:
                 recommendations=recommendations,
                 metadata={
                     "validation_results": validation_results,
-                    "threshold": confidence_threshold
-                }
+                    "threshold": confidence_threshold,
+                },
             )
 
         except Exception as e:
@@ -879,7 +925,7 @@ class MultiModalFormulaProcessor:
                 validation_status=ValidationStatus.INVALID,
                 discrepancies=[f"Validation error: {str(e)}"],
                 recommendations=["Fix validation error"],
-                metadata={"error": str(e)}
+                metadata={"error": str(e)},
             )
 
     def _validate_syntax(self, formula_id: str) -> Dict[str, Any]:
@@ -887,17 +933,17 @@ class MultiModalFormulaProcessor:
         try:
             # This would check syntax validity
             return {
-                'method': 'syntax',
-                'valid': True,
-                'score': 0.9,
-                'details': 'Syntax validation passed'
+                "method": "syntax",
+                "valid": True,
+                "score": 0.9,
+                "details": "Syntax validation passed",
             }
         except Exception as e:
             return {
-                'method': 'syntax',
-                'valid': False,
-                'score': 0.0,
-                'details': f'Syntax validation failed: {e}'
+                "method": "syntax",
+                "valid": False,
+                "score": 0.0,
+                "details": f"Syntax validation failed: {e}",
             }
 
     def _validate_semantics(self, formula_id: str) -> Dict[str, Any]:
@@ -905,17 +951,17 @@ class MultiModalFormulaProcessor:
         try:
             # This would check semantic validity
             return {
-                'method': 'semantics',
-                'valid': True,
-                'score': 0.8,
-                'details': 'Semantic validation passed'
+                "method": "semantics",
+                "valid": True,
+                "score": 0.8,
+                "details": "Semantic validation passed",
             }
         except Exception as e:
             return {
-                'method': 'semantics',
-                'valid': False,
-                'score': 0.0,
-                'details': f'Semantic validation failed: {e}'
+                "method": "semantics",
+                "valid": False,
+                "score": 0.0,
+                "details": f"Semantic validation failed: {e}",
             }
 
     def _validate_mathematical(self, formula_id: str) -> Dict[str, Any]:
@@ -923,17 +969,17 @@ class MultiModalFormulaProcessor:
         try:
             # This would check mathematical validity
             return {
-                'method': 'mathematical',
-                'valid': True,
-                'score': 0.85,
-                'details': 'Mathematical validation passed'
+                "method": "mathematical",
+                "valid": True,
+                "score": 0.85,
+                "details": "Mathematical validation passed",
             }
         except Exception as e:
             return {
-                'method': 'mathematical',
-                'valid': False,
-                'score': 0.0,
-                'details': f'Mathematical validation failed: {e}'
+                "method": "mathematical",
+                "valid": False,
+                "score": 0.0,
+                "details": f"Mathematical validation failed: {e}",
             }
 
     def _validate_domain(self, formula_id: str) -> Dict[str, Any]:
@@ -941,38 +987,44 @@ class MultiModalFormulaProcessor:
         try:
             # This would check domain-specific validity
             return {
-                'method': 'domain',
-                'valid': True,
-                'score': 0.75,
-                'details': 'Domain validation passed'
+                "method": "domain",
+                "valid": True,
+                "score": 0.75,
+                "details": "Domain validation passed",
             }
         except Exception as e:
             return {
-                'method': 'domain',
-                'valid': False,
-                'score': 0.0,
-                'details': f'Domain validation failed: {e}'
+                "method": "domain",
+                "valid": False,
+                "score": 0.0,
+                "details": f"Domain validation failed: {e}",
             }
 
-    def _calculate_consistency_score(self, validation_results: List[Dict[str, Any]]) -> float:
+    def _calculate_consistency_score(
+        self, validation_results: List[Dict[str, Any]]
+    ) -> float:
         """Calculate consistency score across validation methods"""
         if not validation_results:
             return 0.0
 
-        scores = [result.get('score', 0.0) for result in validation_results]
+        scores = [result.get("score", 0.0) for result in validation_results]
         return sum(scores) / len(scores)
 
-    def _identify_discrepancies(self, validation_results: List[Dict[str, Any]]) -> List[str]:
+    def _identify_discrepancies(
+        self, validation_results: List[Dict[str, Any]]
+    ) -> List[str]:
         """Identify discrepancies between validation methods"""
         discrepancies = []
 
         for result in validation_results:
-            if not result.get('valid', False):
+            if not result.get("valid", False):
                 discrepancies.append(f"{result['method']}: {result['details']}")
 
         return discrepancies
 
-    def _generate_recommendations(self, validation_results: List[Dict[str, Any]], discrepancies: List[str]) -> List[str]:
+    def _generate_recommendations(
+        self, validation_results: List[Dict[str, Any]], discrepancies: List[str]
+    ) -> List[str]:
         """Generate recommendations based on validation results"""
         recommendations = []
 
@@ -981,7 +1033,7 @@ class MultiModalFormulaProcessor:
 
         # Add specific recommendations based on validation results
         for result in validation_results:
-            if result.get('score', 0) < 0.7:
+            if result.get("score", 0) < 0.7:
                 recommendations.append(f"Improve {result['method']} validation")
 
         return recommendations
@@ -997,45 +1049,49 @@ class MultiModalFormulaProcessor:
             expr = parse_expr(formula)
 
             return {
-                'status': ValidationStatus.VALID,
-                'parsed': True,
-                'variables': [str(symbol) for symbol in expr.free_symbols],
-                'complexity': len(str(expr)),
-                'details': 'Formula parsed successfully'
+                "status": ValidationStatus.VALID,
+                "parsed": True,
+                "variables": [str(symbol) for symbol in expr.free_symbols],
+                "complexity": len(str(expr)),
+                "details": "Formula parsed successfully",
             }
 
         except Exception as e:
             return {
-                'status': ValidationStatus.INVALID,
-                'parsed': False,
-                'variables': [],
-                'complexity': 0,
-                'details': f'Formula validation failed: {str(e)}'
+                "status": ValidationStatus.INVALID,
+                "parsed": False,
+                "variables": [],
+                "complexity": 0,
+                "details": f"Formula validation failed: {str(e)}",
             }
 
     def get_processing_capabilities(self) -> Dict[str, Any]:
         """Get information about processing capabilities"""
         return {
-            'text_processing': True,
-            'image_processing': IMAGE_PROCESSING_AVAILABLE,
-            'nlp_processing': TEXT_PROCESSING_AVAILABLE,
-            'data_processing': True,
-            'cross_modal_validation': True,
-            'supported_formats': {
-                'text': ['plain_text', 'markdown'],
-                'image': ['png', 'jpg', 'jpeg', 'bmp', 'tiff'] if IMAGE_PROCESSING_AVAILABLE else [],
-                'data': ['json', 'csv', 'dict']
-            }
+            "text_processing": True,
+            "image_processing": IMAGE_PROCESSING_AVAILABLE,
+            "nlp_processing": TEXT_PROCESSING_AVAILABLE,
+            "data_processing": True,
+            "cross_modal_validation": True,
+            "supported_formats": {
+                "text": ["plain_text", "markdown"],
+                "image": (
+                    ["png", "jpg", "jpeg", "bmp", "tiff"]
+                    if IMAGE_PROCESSING_AVAILABLE
+                    else []
+                ),
+                "data": ["json", "csv", "dict"],
+            },
         }
+
 
 # ============================================================================
 # Standalone Functions for MCP Tools
 # ============================================================================
 
+
 def process_text_formula(
-    text: str,
-    context: Optional[str] = None,
-    confidence_threshold: float = 0.7
+    text: str, context: Optional[str] = None, confidence_threshold: float = 0.7
 ) -> Dict[str, Any]:
     """
     Process text to extract mathematical formulas
@@ -1052,10 +1108,11 @@ def process_text_formula(
     result = processor.process_text_formula(text, context, confidence_threshold)
     return asdict(result)
 
+
 def process_image_formula(
     image_data: Union[str, bytes],
     image_format: str = "base64",
-    confidence_threshold: float = 0.7
+    confidence_threshold: float = 0.7,
 ) -> Dict[str, Any]:
     """
     Process image to extract mathematical formulas
@@ -1069,14 +1126,17 @@ def process_image_formula(
         Dictionary with processing results
     """
     processor = MultiModalFormulaProcessor()
-    result = processor.process_image_formula(image_data, image_format, confidence_threshold)
+    result = processor.process_image_formula(
+        image_data, image_format, confidence_threshold
+    )
     return asdict(result)
+
 
 def process_data_formula(
     data: Dict[str, List[float]],
     target_variable: str,
     method: str = "regression",
-    confidence_threshold: float = 0.7
+    confidence_threshold: float = 0.7,
 ) -> Dict[str, Any]:
     """
     Generate formulas from data patterns
@@ -1091,13 +1151,14 @@ def process_data_formula(
         Dictionary with processing results
     """
     processor = MultiModalFormulaProcessor()
-    result = processor.process_data_formula(data, target_variable, method, confidence_threshold)
+    result = processor.process_data_formula(
+        data, target_variable, method, confidence_threshold
+    )
     return asdict(result)
 
+
 def validate_cross_modal_formula(
-    formula_id: str,
-    validation_methods: List[str],
-    confidence_threshold: float = 0.8
+    formula_id: str, validation_methods: List[str], confidence_threshold: float = 0.8
 ) -> Dict[str, Any]:
     """
     Validate formula using multiple modalities
@@ -1111,8 +1172,11 @@ def validate_cross_modal_formula(
         Dictionary with validation results
     """
     processor = MultiModalFormulaProcessor()
-    result = processor.validate_cross_modal(formula_id, validation_methods, confidence_threshold)
+    result = processor.validate_cross_modal(
+        formula_id, validation_methods, confidence_threshold
+    )
     return asdict(result)
+
 
 def get_multimodal_capabilities() -> Dict[str, Any]:
     """
@@ -1124,12 +1188,15 @@ def get_multimodal_capabilities() -> Dict[str, Any]:
     processor = MultiModalFormulaProcessor()
     return processor.get_processing_capabilities()
 
+
 # ============================================================================
 # Logging Configuration
 # ============================================================================
 
+
 def log_operation(operation_name: str):
     """Decorator for logging operations"""
+
     def decorator(func):
         def wrapper(*args, **kwargs):
             logger.info(f"Starting {operation_name}")
@@ -1140,5 +1207,7 @@ def log_operation(operation_name: str):
             except Exception as e:
                 logger.error(f"Failed {operation_name}: {e}")
                 raise
+
         return wrapper
+
     return decorator

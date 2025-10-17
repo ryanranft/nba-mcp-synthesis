@@ -18,6 +18,7 @@ import re
 try:
     import sympy as sp
     from sympy.parsing.sympy_parser import parse_expr
+
     SYMPY_AVAILABLE = True
 except ImportError:
     sp = None
@@ -28,6 +29,7 @@ try:
     from sklearn.preprocessing import PolynomialFeatures, StandardScaler
     from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
     from sklearn.model_selection import train_test_split
+
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False
@@ -45,9 +47,13 @@ logger = logging.getLogger(__name__)
 def check_dependencies():
     """Check if required dependencies are available"""
     if not SYMPY_AVAILABLE:
-        raise ToolError("SymPy is required for symbolic regression. Please install it: pip install sympy")
+        raise ToolError(
+            "SymPy is required for symbolic regression. Please install it: pip install sympy"
+        )
     if not SKLEARN_AVAILABLE:
-        raise ToolError("Scikit-learn is required for symbolic regression. Please install it: pip install scikit-learn")
+        raise ToolError(
+            "Scikit-learn is required for symbolic regression. Please install it: pip install scikit-learn"
+        )
 
 
 @log_operation("symbolic_regression_discover_formula")
@@ -62,7 +68,7 @@ def discover_formula_from_data(
     generations: int = 20,
     population_size: int = 500,
     tournament_size: int = 20,
-    random_state: Optional[int] = None
+    random_state: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
     Discovers a mathematical formula from given sports data using regression.
@@ -88,7 +94,9 @@ def discover_formula_from_data(
     """
     check_dependencies()
 
-    logger.info(f"Starting formula discovery for target '{target_variable}' with inputs {input_variables}")
+    logger.info(
+        f"Starting formula discovery for target '{target_variable}' with inputs {input_variables}"
+    )
 
     try:
         # Convert data to DataFrame
@@ -96,13 +104,17 @@ def discover_formula_from_data(
 
         # Validate inputs
         if target_variable not in df.columns:
-            raise ValidationError(f"Target variable '{target_variable}' not found in data")
+            raise ValidationError(
+                f"Target variable '{target_variable}' not found in data"
+            )
         for var in input_variables:
             if var not in df.columns:
                 raise ValidationError(f"Input variable '{var}' not found in data")
 
         if len(df) < 10:
-            raise ValidationError("Insufficient data points. Need at least 10 for regression")
+            raise ValidationError(
+                "Insufficient data points. Need at least 10 for regression"
+            )
 
         # Prepare data
         X = df[input_variables].values
@@ -152,7 +164,7 @@ def discover_formula_from_data(
                     for i, (coeff, feat) in enumerate(zip(coeffs, feature_names)):
                         if abs(coeff) > 1e-6:  # Only include significant terms
                             # Clean up feature name (x0^2 -> x0**2 for SymPy)
-                            feat_clean = feat.replace('^', '**').replace(' ', '*')
+                            feat_clean = feat.replace("^", "**").replace(" ", "*")
                             if coeff >= 0 and terms:
                                 terms.append(f"+ {coeff:.4f}*{feat_clean}")
                             else:
@@ -231,7 +243,7 @@ def discover_formula_from_data(
             "input_variables": input_variables,
             "target_variable": target_variable,
             "complexity": best_complexity,
-            "regression_type": regression_type
+            "regression_type": regression_type,
         }
 
     except Exception as e:
@@ -244,7 +256,7 @@ def validate_discovered_formula(
     formula: str,
     test_data: Dict[str, List[float]],
     target_variable: str,
-    threshold_r_squared: float = 0.7
+    threshold_r_squared: float = 0.7,
 ) -> Dict[str, Any]:
     """
     Validates a discovered formula against a test dataset.
@@ -270,15 +282,21 @@ def validate_discovered_formula(
         df_test = pd.DataFrame(test_data)
 
         if target_variable not in df_test.columns:
-            raise ValidationError(f"Target variable '{target_variable}' not found in test data")
+            raise ValidationError(
+                f"Target variable '{target_variable}' not found in test data"
+            )
 
         # Get input variables from formula
-        input_vars = [str(s) for s in sympy_formula.free_symbols if str(s) != target_variable]
+        input_vars = [
+            str(s) for s in sympy_formula.free_symbols if str(s) != target_variable
+        ]
 
         # Ensure all input variables are in test data
         for var in input_vars:
             if var not in df_test.columns:
-                raise ValidationError(f"Formula variable '{var}' not found in test data")
+                raise ValidationError(
+                    f"Formula variable '{var}' not found in test data"
+                )
 
         # Evaluate formula for each data point
         y_true = df_test[target_variable].values
@@ -326,7 +344,7 @@ def validate_discovered_formula(
             "validation_status": "success",
             "description": "Formula successfully validated against test data",
             "valid_predictions": int(np.sum(valid_mask)),
-            "total_predictions": len(y_true)
+            "total_predictions": len(y_true),
         }
 
     except Exception as e:
@@ -340,7 +358,7 @@ def generate_custom_metric(
     metric_name: str,
     description: str,
     variables: List[str],
-    parameters: Dict[str, float]
+    parameters: Dict[str, float],
 ) -> Dict[str, Any]:
     """
     Generates and registers a custom analytics metric.
@@ -361,10 +379,12 @@ def generate_custom_metric(
 
     # Validate inputs
     if not metric_name or not formula or not description or not variables:
-        raise ValidationError("Metric name, formula, description, and variables cannot be empty")
+        raise ValidationError(
+            "Metric name, formula, description, and variables cannot be empty"
+        )
 
     # Validate metric name format
-    if not re.match(r'^[a-zA-Z][a-zA-Z0-9_]*$', metric_name):
+    if not re.match(r"^[a-zA-Z][a-zA-Z0-9_]*$", metric_name):
         raise ValidationError(
             "Metric name must start with letter and contain only letters, numbers, and underscores"
         )
@@ -388,7 +408,7 @@ def generate_custom_metric(
         "variables": variables,
         "parameters": parameters,
         "message": f"Custom metric '{metric_name}' created successfully",
-        "note": "In production, this metric would be persisted to database/config"
+        "note": "In production, this metric would be persisted to database/config",
     }
 
 
@@ -398,7 +418,7 @@ def discover_formula_patterns(
     target_variable: str,
     discovery_method: str = "correlation",
     max_formulas: int = 10,
-    complexity_range: Tuple[int, int] = (1, 5)
+    complexity_range: Tuple[int, int] = (1, 5),
 ) -> Dict[str, Any]:
     """
     Discovers potential formula patterns from data using statistical methods.
@@ -415,13 +435,17 @@ def discover_formula_patterns(
     """
     check_dependencies()
 
-    logger.info(f"Discovering patterns for target '{target_variable}' using '{discovery_method}' method")
+    logger.info(
+        f"Discovering patterns for target '{target_variable}' using '{discovery_method}' method"
+    )
 
     try:
         df = pd.DataFrame(data)
 
         if target_variable not in df.columns:
-            raise ValidationError(f"Target variable '{target_variable}' not found in data")
+            raise ValidationError(
+                f"Target variable '{target_variable}' not found in data"
+            )
 
         input_vars = [col for col in df.columns if col != target_variable]
         if not input_vars:
@@ -431,18 +455,25 @@ def discover_formula_patterns(
 
         if discovery_method == "correlation":
             # Find correlations
-            correlations = df.corr()[target_variable].drop(target_variable).abs().sort_values(ascending=False)
+            correlations = (
+                df.corr()[target_variable]
+                .drop(target_variable)
+                .abs()
+                .sort_values(ascending=False)
+            )
 
             for var, corr in correlations.items():
                 if corr > 0.5:  # Strong correlation threshold
                     formula_suggestion = f"{target_variable} = c1 * {var} + c0"
-                    results.append({
-                        "pattern_type": "linear_correlation",
-                        "score": float(corr),
-                        "suggested_formula": formula_suggestion,
-                        "variables": [var, target_variable],
-                        "description": f"Strong linear correlation between {target_variable} and {var}"
-                    })
+                    results.append(
+                        {
+                            "pattern_type": "linear_correlation",
+                            "score": float(corr),
+                            "suggested_formula": formula_suggestion,
+                            "variables": [var, target_variable],
+                            "description": f"Strong linear correlation between {target_variable} and {var}",
+                        }
+                    )
 
         elif discovery_method == "polynomial":
             # Try polynomial relationships
@@ -450,7 +481,9 @@ def discover_formula_patterns(
                 X = df[[var]].values
                 y = df[target_variable].values
 
-                for degree in range(complexity_range[0], min(complexity_range[1] + 1, 4)):
+                for degree in range(
+                    complexity_range[0], min(complexity_range[1] + 1, 4)
+                ):
                     poly = PolynomialFeatures(degree=degree)
                     X_poly = poly.fit_transform(X)
 
@@ -464,29 +497,35 @@ def discover_formula_patterns(
                         coeffs = model.coef_
 
                         terms = []
-                        for coeff, feat in zip(coeffs[1:], feature_names[1:]):  # Skip intercept term
+                        for coeff, feat in zip(
+                            coeffs[1:], feature_names[1:]
+                        ):  # Skip intercept term
                             if abs(coeff) > 1e-6:
-                                feat_clean = feat.replace('^', '**')
+                                feat_clean = feat.replace("^", "**")
                                 terms.append(f"{coeff:.4f}*{feat_clean}")
 
                         formula_suggestion = f"{target_variable} = {' + '.join(terms)} + {model.intercept_:.4f}"
 
-                        results.append({
-                            "pattern_type": f"polynomial_degree_{degree}",
-                            "score": float(r2),
-                            "suggested_formula": formula_suggestion,
-                            "variables": [var, target_variable],
-                            "description": f"Polynomial relationship (degree {degree}) between {target_variable} and {var}"
-                        })
+                        results.append(
+                            {
+                                "pattern_type": f"polynomial_degree_{degree}",
+                                "score": float(r2),
+                                "suggested_formula": formula_suggestion,
+                                "variables": [var, target_variable],
+                                "description": f"Polynomial relationship (degree {degree}) between {target_variable} and {var}",
+                            }
+                        )
 
         else:
             raise ToolError(f"Discovery method '{discovery_method}' not supported")
 
         if not results:
-            raise ToolError("No significant formula patterns discovered with the given method and data")
+            raise ToolError(
+                "No significant formula patterns discovered with the given method and data"
+            )
 
         # Sort by score and limit
-        results = sorted(results, key=lambda x: x['score'], reverse=True)[:max_formulas]
+        results = sorted(results, key=lambda x: x["score"], reverse=True)[:max_formulas]
 
         logger.info(f"Discovered {len(results)} formula patterns")
 
@@ -495,7 +534,7 @@ def discover_formula_patterns(
             "discovered_patterns": results,
             "message": f"Successfully discovered {len(results)} formula patterns",
             "discovery_method": discovery_method,
-            "target_variable": target_variable
+            "target_variable": target_variable,
         }
 
     except Exception as e:

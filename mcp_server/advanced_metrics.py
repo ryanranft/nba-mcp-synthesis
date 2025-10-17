@@ -40,8 +40,9 @@ logger = logging.getLogger(__name__)
 
 class MetricType(Enum):
     """Metric types"""
+
     COUNTER = "counter"  # Monotonically increasing
-    GAUGE = "gauge"      # Can go up or down
+    GAUGE = "gauge"  # Can go up or down
     HISTOGRAM = "histogram"  # Distribution of values
     SUMMARY = "summary"  # Pre-calculated percentiles
 
@@ -49,6 +50,7 @@ class MetricType(Enum):
 @dataclass
 class MetricValue:
     """Single metric value"""
+
     value: float
     timestamp: datetime
     labels: Dict[str, str] = field(default_factory=dict)
@@ -57,6 +59,7 @@ class MetricValue:
 @dataclass
 class MetricSample:
     """Metric sample with labels"""
+
     name: str
     type: MetricType
     value: float
@@ -105,13 +108,15 @@ class Counter:
         with self._lock:
             for label_key, value in self.values.items():
                 labels = self._parse_label_key(label_key)
-                samples.append(MetricSample(
-                    name=self.name,
-                    type=MetricType.COUNTER,
-                    value=value,
-                    timestamp=datetime.now(),
-                    labels=labels
-                ))
+                samples.append(
+                    MetricSample(
+                        name=self.name,
+                        type=MetricType.COUNTER,
+                        value=value,
+                        timestamp=datetime.now(),
+                        labels=labels,
+                    )
+                )
         return samples
 
     def _parse_label_key(self, key: str) -> Dict[str, str]:
@@ -119,8 +124,8 @@ class Counter:
         if not key:
             return {}
         labels = {}
-        for pair in key.split(','):
-            k, v = pair.split('=')
+        for pair in key.split(","):
+            k, v = pair.split("=")
             labels[k] = v
         return labels
 
@@ -171,13 +176,15 @@ class Gauge:
         with self._lock:
             for label_key, value in self.values.items():
                 labels = self._parse_label_key(label_key)
-                samples.append(MetricSample(
-                    name=self.name,
-                    type=MetricType.GAUGE,
-                    value=value,
-                    timestamp=datetime.now(),
-                    labels=labels
-                ))
+                samples.append(
+                    MetricSample(
+                        name=self.name,
+                        type=MetricType.GAUGE,
+                        value=value,
+                        timestamp=datetime.now(),
+                        labels=labels,
+                    )
+                )
         return samples
 
     def _parse_label_key(self, key: str) -> Dict[str, str]:
@@ -185,8 +192,8 @@ class Gauge:
         if not key:
             return {}
         labels = {}
-        for pair in key.split(','):
-            k, v = pair.split('=')
+        for pair in key.split(","):
+            k, v = pair.split("=")
             labels[k] = v
         return labels
 
@@ -195,14 +202,27 @@ class Histogram:
     """Histogram metric (distribution of values)"""
 
     def __init__(
-        self,
-        name: str,
-        description: str = "",
-        buckets: Optional[List[float]] = None
+        self, name: str, description: str = "", buckets: Optional[List[float]] = None
     ):
         self.name = name
         self.description = description
-        self.buckets = buckets or [0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1.0, 2.5, 5.0, 7.5, 10.0, float('inf')]
+        self.buckets = buckets or [
+            0.005,
+            0.01,
+            0.025,
+            0.05,
+            0.075,
+            0.1,
+            0.25,
+            0.5,
+            0.75,
+            1.0,
+            2.5,
+            5.0,
+            7.5,
+            10.0,
+            float("inf"),
+        ]
 
         # Store observations per label set
         self.observations: Dict[str, List[float]] = defaultdict(list)
@@ -220,9 +240,7 @@ class Histogram:
             self.sums[key] += value
 
     def get_percentiles(
-        self,
-        percentiles: List[float],
-        labels: Optional[Dict[str, str]] = None
+        self, percentiles: List[float], labels: Optional[Dict[str, str]] = None
     ) -> Dict[float, float]:
         """Calculate percentiles"""
         key = self._label_key(labels)
@@ -240,7 +258,9 @@ class Histogram:
 
             return results
 
-    def get_histogram(self, labels: Optional[Dict[str, str]] = None) -> Dict[float, int]:
+    def get_histogram(
+        self, labels: Optional[Dict[str, str]] = None
+    ) -> Dict[float, int]:
         """Get histogram buckets"""
         key = self._label_key(labels)
         with self._lock:
@@ -261,21 +281,21 @@ class Histogram:
             obs = self.observations.get(key, [])
             if not obs:
                 return {
-                    'count': 0,
-                    'sum': 0.0,
-                    'mean': 0.0,
-                    'min': 0.0,
-                    'max': 0.0,
-                    'stddev': 0.0
+                    "count": 0,
+                    "sum": 0.0,
+                    "mean": 0.0,
+                    "min": 0.0,
+                    "max": 0.0,
+                    "stddev": 0.0,
                 }
 
             return {
-                'count': len(obs),
-                'sum': sum(obs),
-                'mean': statistics.mean(obs),
-                'min': min(obs),
-                'max': max(obs),
-                'stddev': statistics.stdev(obs) if len(obs) > 1 else 0.0
+                "count": len(obs),
+                "sum": sum(obs),
+                "mean": statistics.mean(obs),
+                "min": min(obs),
+                "max": max(obs),
+                "stddev": statistics.stdev(obs) if len(obs) > 1 else 0.0,
             }
 
     def _label_key(self, labels: Optional[Dict[str, str]]) -> str:
@@ -293,34 +313,40 @@ class Histogram:
                 labels = self._parse_label_key(label_key)
 
                 # Add count
-                samples.append(MetricSample(
-                    name=f"{self.name}_count",
-                    type=MetricType.HISTOGRAM,
-                    value=self.counts[label_key],
-                    timestamp=datetime.now(),
-                    labels=labels
-                ))
+                samples.append(
+                    MetricSample(
+                        name=f"{self.name}_count",
+                        type=MetricType.HISTOGRAM,
+                        value=self.counts[label_key],
+                        timestamp=datetime.now(),
+                        labels=labels,
+                    )
+                )
 
                 # Add sum
-                samples.append(MetricSample(
-                    name=f"{self.name}_sum",
-                    type=MetricType.HISTOGRAM,
-                    value=self.sums[label_key],
-                    timestamp=datetime.now(),
-                    labels=labels
-                ))
+                samples.append(
+                    MetricSample(
+                        name=f"{self.name}_sum",
+                        type=MetricType.HISTOGRAM,
+                        value=self.sums[label_key],
+                        timestamp=datetime.now(),
+                        labels=labels,
+                    )
+                )
 
                 # Add buckets
                 histogram = self.get_histogram(labels)
                 for bucket, count in histogram.items():
-                    bucket_labels = {**labels, 'le': str(bucket)}
-                    samples.append(MetricSample(
-                        name=f"{self.name}_bucket",
-                        type=MetricType.HISTOGRAM,
-                        value=count,
-                        timestamp=datetime.now(),
-                        labels=bucket_labels
-                    ))
+                    bucket_labels = {**labels, "le": str(bucket)}
+                    samples.append(
+                        MetricSample(
+                            name=f"{self.name}_bucket",
+                            type=MetricType.HISTOGRAM,
+                            value=count,
+                            timestamp=datetime.now(),
+                            labels=bucket_labels,
+                        )
+                    )
 
         return samples
 
@@ -329,8 +355,8 @@ class Histogram:
         if not key:
             return {}
         labels = {}
-        for pair in key.split(','):
-            k, v = pair.split('=')
+        for pair in key.split(","):
+            k, v = pair.split("=")
             labels[k] = v
         return labels
 
@@ -360,9 +386,7 @@ class TimeSeriesMetric:
             self.values.popleft()
 
     def get_range(
-        self,
-        start: Optional[datetime] = None,
-        end: Optional[datetime] = None
+        self, start: Optional[datetime] = None, end: Optional[datetime] = None
     ) -> List[MetricValue]:
         """Get values in time range"""
         if start is None:
@@ -371,10 +395,7 @@ class TimeSeriesMetric:
             end = datetime.now()
 
         with self._lock:
-            return [
-                v for v in self.values
-                if start <= v.timestamp <= end
-            ]
+            return [v for v in self.values if start <= v.timestamp <= end]
 
     def get_stats(self, window_seconds: int = 60) -> Dict[str, float]:
         """Get statistics for time window"""
@@ -384,20 +405,14 @@ class TimeSeriesMetric:
         values = [v.value for v in self.get_range(start, end)]
 
         if not values:
-            return {
-                'count': 0,
-                'mean': 0.0,
-                'min': 0.0,
-                'max': 0.0,
-                'rate': 0.0
-            }
+            return {"count": 0, "mean": 0.0, "min": 0.0, "max": 0.0, "rate": 0.0}
 
         return {
-            'count': len(values),
-            'mean': statistics.mean(values),
-            'min': min(values),
-            'max': max(values),
-            'rate': len(values) / window_seconds
+            "count": len(values),
+            "mean": statistics.mean(values),
+            "min": min(values),
+            "max": max(values),
+            "rate": len(values) / window_seconds,
         }
 
 
@@ -425,10 +440,7 @@ class MetricsRegistry:
             return self.gauges[name]
 
     def histogram(
-        self,
-        name: str,
-        description: str = "",
-        buckets: Optional[List[float]] = None
+        self, name: str, description: str = "", buckets: Optional[List[float]] = None
     ) -> Histogram:
         """Get or create histogram"""
         with self._lock:
@@ -456,10 +468,12 @@ class MetricsRegistry:
         """Get summary of all metrics"""
         with self._lock:
             return {
-                'counters': len(self.counters),
-                'gauges': len(self.gauges),
-                'histograms': len(self.histograms),
-                'total_metrics': len(self.counters) + len(self.gauges) + len(self.histograms)
+                "counters": len(self.counters),
+                "gauges": len(self.gauges),
+                "histograms": len(self.histograms),
+                "total_metrics": len(self.counters)
+                + len(self.gauges)
+                + len(self.histograms),
             }
 
 
@@ -489,10 +503,10 @@ if __name__ == "__main__":
     print("--- Counter Metrics ---\n")
     requests = registry.counter("http_requests_total", "Total HTTP requests")
 
-    requests.inc(labels={'method': 'GET', 'status': '200'})
-    requests.inc(labels={'method': 'GET', 'status': '200'})
-    requests.inc(labels={'method': 'POST', 'status': '201'})
-    requests.inc(amount=5, labels={'method': 'GET', 'status': '404'})
+    requests.inc(labels={"method": "GET", "status": "200"})
+    requests.inc(labels={"method": "GET", "status": "200"})
+    requests.inc(labels={"method": "POST", "status": "201"})
+    requests.inc(amount=5, labels={"method": "GET", "status": "404"})
 
     print(f"GET 200: {requests.get(labels={'method': 'GET', 'status': '200'})}")
     print(f"POST 201: {requests.get(labels={'method': 'POST', 'status': '201'})}")
@@ -513,7 +527,7 @@ if __name__ == "__main__":
     response_time = registry.histogram(
         "response_time_seconds",
         "HTTP response time in seconds",
-        buckets=[0.1, 0.5, 1.0, 2.0, 5.0, float('inf')]
+        buckets=[0.1, 0.5, 1.0, 2.0, 5.0, float("inf")],
     )
 
     # Simulate requests
@@ -556,4 +570,3 @@ if __name__ == "__main__":
     print(f"  Histograms: {summary['histograms']}")
 
     print("\n=== Demo Complete ===")
-

@@ -29,11 +29,11 @@ from scripts.recursive_book_analysis import AcsmConverter, BookManager
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler('sports_books_conversion.log')
-    ]
+        logging.FileHandler("sports_books_conversion.log"),
+    ],
 )
 logger = logging.getLogger(__name__)
 
@@ -47,22 +47,22 @@ SPORTS_BOOKS = [
         "title": "Sports Analytics",
         "acsm_path": "/Users/ryanranft/Downloads/Sports_Analytics-pdf.acsm",
         "s3_path": "books/Sports_Analytics.pdf",
-        "expected_pdf_name": "Sports_Analytics.pdf"
+        "expected_pdf_name": "Sports_Analytics.pdf",
     },
     {
         "id": "basketball_beyond_paper",
         "title": "Basketball Beyond Paper",
         "acsm_path": "/Users/ryanranft/Downloads/Basketball_Beyond_Paper-pdf.acsm",
         "s3_path": "books/Basketball_Beyond_Paper.pdf",
-        "expected_pdf_name": "Basketball_Beyond_Paper.pdf"
+        "expected_pdf_name": "Basketball_Beyond_Paper.pdf",
     },
     {
         "id": "midrange_theory",
         "title": "The Midrange Theory",
         "acsm_path": "/Users/ryanranft/Downloads/The_Midrange_Theory-pdf.acsm",
         "s3_path": "books/The_Midrange_Theory.pdf",
-        "expected_pdf_name": "The_Midrange_Theory.pdf"
-    }
+        "expected_pdf_name": "The_Midrange_Theory.pdf",
+    },
 ]
 
 
@@ -73,9 +73,13 @@ def check_prerequisites() -> bool:
     # Check Adobe Digital Editions
     converter = AcsmConverter()
     if not converter.is_ade_installed():
-        logger.error("❌ Adobe Digital Editions not found at /Applications/Adobe Digital Editions.app")
+        logger.error(
+            "❌ Adobe Digital Editions not found at /Applications/Adobe Digital Editions.app"
+        )
         logger.error("Please install Adobe Digital Editions from:")
-        logger.error("https://www.adobe.com/solutions/ebook/digital-editions/download.html")
+        logger.error(
+            "https://www.adobe.com/solutions/ebook/digital-editions/download.html"
+        )
         return False
 
     logger.info("✅ Adobe Digital Editions found")
@@ -112,7 +116,7 @@ def convert_and_upload_books() -> Dict[str, str]:
         "successful_conversions": [],
         "failed_conversions": [],
         "successful_uploads": [],
-        "failed_uploads": []
+        "failed_uploads": [],
     }
 
     for book in SPORTS_BOOKS:
@@ -157,7 +161,8 @@ def convert_and_upload_books() -> Dict[str, str]:
 
 def show_manual_instructions(book: Dict) -> None:
     """Display manual conversion instructions for a failed book."""
-    logger.info(f"""
+    logger.info(
+        f"""
 ╔══════════════════════════════════════════════════════════════════╗
 ║           ⚠️  MANUAL CONVERSION REQUIRED                         ║
 ╚══════════════════════════════════════════════════════════════════╝
@@ -175,7 +180,8 @@ Follow these steps:
 6. Re-run this script
 
 ═══════════════════════════════════════════════════════════════════
-""")
+"""
+    )
 
 
 def verify_uploads(results: Dict) -> None:
@@ -193,7 +199,8 @@ def verify_uploads(results: Dict) -> None:
 
 def print_summary(results: Dict) -> None:
     """Print a summary of the conversion and upload process."""
-    logger.info(f"""
+    logger.info(
+        f"""
 ╔══════════════════════════════════════════════════════════════════╗
 ║                    📊 CONVERSION SUMMARY                        ║
 ╚══════════════════════════════════════════════════════════════════╝
@@ -202,28 +209,35 @@ Successful Conversions: {len(results['successful_conversions'])}/3
 Successful Uploads: {len(results['successful_uploads'])}/3
 
 ✅ Successfully Processed:
-""")
+"""
+    )
 
     for book in results["successful_uploads"]:
         logger.info(f"   - {book['title']}")
 
     if results["failed_conversions"]:
-        logger.info(f"""
+        logger.info(
+            f"""
 ❌ Failed Conversions:
-""")
+"""
+        )
         for book in results["failed_conversions"]:
             logger.info(f"   - {book['title']}")
 
     if results["failed_uploads"]:
-        logger.info(f"""
+        logger.info(
+            f"""
 ❌ Failed Uploads:
-""")
+"""
+        )
         for book in results["failed_uploads"]:
             logger.info(f"   - {book['title']}")
 
-    logger.info(f"""
+    logger.info(
+        f"""
 ═══════════════════════════════════════════════════════════════════
-""")
+"""
+    )
 
 
 def main():
@@ -256,7 +270,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-

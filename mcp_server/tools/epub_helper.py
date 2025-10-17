@@ -15,6 +15,7 @@ from typing import List, Tuple, Dict, Union, Any, Optional
 
 try:
     from ebooklib import epub
+
     EBOOKLIB_AVAILABLE = True
 except ImportError:
     epub = None
@@ -22,6 +23,7 @@ except ImportError:
 
 try:
     from bs4 import BeautifulSoup, Comment
+
     BEAUTIFULSOUP_AVAILABLE = True
 except ImportError:
     BeautifulSoup = None
@@ -30,6 +32,7 @@ except ImportError:
 
 try:
     import html2text
+
     HTML2TEXT_AVAILABLE = True
 except ImportError:
     html2text = None
@@ -74,7 +77,7 @@ def get_all_epub_files(path: str) -> List[str]:
     if not os.path.exists(path):
         raise FileNotFoundError(f"Directory not found: {path}")
 
-    return [f for f in os.listdir(path) if f.lower().endswith('.epub')]
+    return [f for f in os.listdir(path) if f.lower().endswith(".epub")]
 
 
 @log_operation("epub_toc_extraction")
@@ -99,9 +102,7 @@ def get_toc(epub_path: str) -> List[Tuple[str, str]]:
     try:
         if not os.path.exists(epub_path):
             logger.error(
-                "EPUB file not found",
-                file_path=epub_path,
-                operation="toc_extraction"
+                "EPUB file not found", file_path=epub_path, operation="toc_extraction"
             )
             raise FileNotFoundError(f"EPUB file not found: {epub_path}")
 
@@ -109,7 +110,7 @@ def get_toc(epub_path: str) -> List[Tuple[str, str]]:
         logger.debug(
             "Starting EPUB TOC extraction",
             file_path=epub_path,
-            operation="toc_extraction"
+            operation="toc_extraction",
         )
         book = epub.read_epub(epub_path)
         toc = []
@@ -135,7 +136,7 @@ def get_toc(epub_path: str) -> List[Tuple[str, str]]:
             "EPUB TOC extraction completed",
             file_path=epub_path,
             operation="toc_extraction",
-            chapter_count=len(toc)
+            chapter_count=len(toc),
         )
         return toc
     except FileNotFoundError:
@@ -146,9 +147,11 @@ def get_toc(epub_path: str) -> List[Tuple[str, str]]:
             file_path=epub_path,
             operation="toc_extraction",
             error_type=type(e).__name__,
-            error_details=str(e)
+            error_details=str(e),
         )
-        raise EpubProcessingError("Failed to parse EPUB file", epub_path, "toc_extraction", e)
+        raise EpubProcessingError(
+            "Failed to parse EPUB file", epub_path, "toc_extraction", e
+        )
 
 
 @log_operation("epub_metadata_extraction")
@@ -176,7 +179,7 @@ def get_metadata(epub_path: str) -> Dict[str, Union[str, List[str]]]:
             logger.error(
                 "EPUB file not found",
                 file_path=epub_path,
-                operation="metadata_extraction"
+                operation="metadata_extraction",
             )
             raise FileNotFoundError(f"EPUB file not found: {epub_path}")
 
@@ -184,33 +187,33 @@ def get_metadata(epub_path: str) -> Dict[str, Union[str, List[str]]]:
         logger.debug(
             "Starting EPUB metadata extraction",
             file_path=epub_path,
-            operation="metadata_extraction"
+            operation="metadata_extraction",
         )
         book = epub.read_epub(epub_path)
         meta = {}
 
         # Standard metadata fields
         standard_fields = {
-            'title': 'title',
-            'language': 'language',
-            'identifier': 'identifier',
-            'date': 'date',
-            'publisher': 'publisher',
-            'description': 'description'
+            "title": "title",
+            "language": "language",
+            "identifier": "identifier",
+            "date": "date",
+            "publisher": "publisher",
+            "description": "description",
         }
 
         # Fields that may have multiple values
-        multi_fields = ['creator', 'contributor', 'subject']
+        multi_fields = ["creator", "contributor", "subject"]
 
         # Extract standard fields
         for field, dc_field in standard_fields.items():
-            items = book.get_metadata('DC', dc_field)
+            items = book.get_metadata("DC", dc_field)
             if items and len(items) > 0 and len(items[0]) > 0:
                 meta[field] = items[0][0]
 
         # Handle multi-value fields
         for field in multi_fields:
-            items = book.get_metadata('DC', field)
+            items = book.get_metadata("DC", field)
             if items:
                 meta[field] = [item[0] for item in items]
 
@@ -218,7 +221,7 @@ def get_metadata(epub_path: str) -> Dict[str, Union[str, List[str]]]:
             "EPUB metadata extraction completed",
             file_path=epub_path,
             operation="metadata_extraction",
-            metadata_fields=list(meta.keys())
+            metadata_fields=list(meta.keys()),
         )
         return meta
 
@@ -230,9 +233,11 @@ def get_metadata(epub_path: str) -> Dict[str, Union[str, List[str]]]:
             file_path=epub_path,
             operation="metadata_extraction",
             error_type=type(e).__name__,
-            error_details=str(e)
+            error_details=str(e),
         )
-        raise EpubProcessingError("Failed to parse EPUB file", epub_path, "metadata_extraction", e)
+        raise EpubProcessingError(
+            "Failed to parse EPUB file", epub_path, "metadata_extraction", e
+        )
 
 
 def read_epub(epub_path: str) -> Any:
@@ -293,10 +298,10 @@ def clean_html(html_str: str) -> str:
     """
     check_dependencies()
 
-    soup = BeautifulSoup(html_str, 'html.parser')
+    soup = BeautifulSoup(html_str, "html.parser")
 
     # Remove unnecessary tags
-    for tag in soup(['script', 'style', 'img', 'svg', 'iframe', 'video', 'nav']):
+    for tag in soup(["script", "style", "img", "svg", "iframe", "video", "nav"]):
         tag.decompose()
 
     # Remove HTML comments
@@ -305,7 +310,11 @@ def clean_html(html_str: str) -> str:
 
     # Remove empty tags (no text and no useful attributes)
     for tag in soup.find_all():
-        if not tag.get_text(strip=True) and not tag.find('img') and not tag.name == 'br':
+        if (
+            not tag.get_text(strip=True)
+            and not tag.find("img")
+            and not tag.name == "br"
+        ):
             tag.decompose()
 
     return str(soup)
@@ -349,7 +358,7 @@ def extract_chapter_html(book: Any, anchor_href: str) -> str:
     """
     logger.debug(f"Extracting chapter with improved logic: {anchor_href}")
 
-    href, anchor = anchor_href.split('#') if '#' in anchor_href else (anchor_href, None)
+    href, anchor = anchor_href.split("#") if "#" in anchor_href else (anchor_href, None)
 
     # Build TOC entries with level information
     toc_entries = []
@@ -369,13 +378,15 @@ def extract_chapter_html(book: Any, anchor_href: str) -> str:
     current_idx = None
     current_level = None
     for i, (title, toc_href, level) in enumerate(toc_entries):
-        if toc_href == anchor_href or (anchor_href in toc_href and '#' in anchor_href):
+        if toc_href == anchor_href or (anchor_href in toc_href and "#" in anchor_href):
             current_idx = i
             current_level = level
             break
 
     if current_idx is None:
-        raise EpubProcessingError(f"Chapter {anchor_href} not found in TOC", "unknown", "toc_lookup")
+        raise EpubProcessingError(
+            f"Chapter {anchor_href} not found in TOC", "unknown", "toc_lookup"
+        )
 
     # Find next chapter at same or higher level
     next_chapter_href = None
@@ -388,13 +399,15 @@ def extract_chapter_html(book: Any, anchor_href: str) -> str:
     # Get chapter content
     item = book.get_item_with_href(href)
     if item is None:
-        raise EpubProcessingError(f"Chapter file not found: {href}", "unknown", "chapter_file_lookup")
+        raise EpubProcessingError(
+            f"Chapter file not found: {href}", "unknown", "chapter_file_lookup"
+        )
 
-    soup = BeautifulSoup(item.get_content().decode('utf-8'), 'html.parser')
+    soup = BeautifulSoup(item.get_content().decode("utf-8"), "html.parser")
 
     # Helper function to get heading level
     def heading_level(tag_name):
-        if tag_name and tag_name.startswith('h') and tag_name[1:].isdigit():
+        if tag_name and tag_name.startswith("h") and tag_name[1:].isdigit():
             return int(tag_name[1:])
         return 7  # treat as lowest priority
 
@@ -403,7 +416,9 @@ def extract_chapter_html(book: Any, anchor_href: str) -> str:
     if anchor:
         start_elem = soup.find(id=anchor)
         if not start_elem:
-            raise EpubProcessingError(f"Anchor {anchor} not found in {href}", "unknown", "anchor_lookup")
+            raise EpubProcessingError(
+                f"Anchor {anchor} not found in {href}", "unknown", "anchor_lookup"
+            )
 
         start_level = heading_level(start_elem.name)
 
@@ -411,27 +426,37 @@ def extract_chapter_html(book: Any, anchor_href: str) -> str:
             if elem is start_elem:
                 elems.append(str(elem))
                 continue
-            if hasattr(elem, 'name') and elem.name and elem.name.startswith('h') and elem.name[1:].isdigit():
+            if (
+                hasattr(elem, "name")
+                and elem.name
+                and elem.name.startswith("h")
+                and elem.name[1:].isdigit()
+            ):
                 if heading_level(elem.name) <= start_level:
                     break
             elems.append(str(elem))
     else:
-        chapter_elem = soup.find(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+        chapter_elem = soup.find(["h1", "h2", "h3", "h4", "h5", "h6"])
         if chapter_elem:
             start_level = heading_level(chapter_elem.name)
             for elem in chapter_elem.next_elements:
                 if elem is chapter_elem:
                     elems.append(str(elem))
                     continue
-                if hasattr(elem, 'name') and elem.name and elem.name.startswith('h') and elem.name[1:].isdigit():
+                if (
+                    hasattr(elem, "name")
+                    and elem.name
+                    and elem.name.startswith("h")
+                    and elem.name[1:].isdigit()
+                ):
                     if heading_level(elem.name) <= start_level:
                         break
                 elems.append(str(elem))
         else:
-            body_elem = soup.find('body')
+            body_elem = soup.find("body")
             elems = [str(body_elem)] if body_elem else [str(soup)]
 
-    html = '\n'.join(elems)
+    html = "\n".join(elems)
     return clean_html(html)
 
 
@@ -464,14 +489,12 @@ def extract_chapter_plain_text(book: Any, anchor_href: str) -> str:
         Plain text chapter content
     """
     html = extract_chapter_html(book, anchor_href)
-    soup = BeautifulSoup(html, 'html.parser')
+    soup = BeautifulSoup(html, "html.parser")
     return soup.get_text()
 
 
 def extract_multiple_chapters(
-    book: Any,
-    anchor_list: List[str],
-    output: str = 'html'
+    book: Any, anchor_list: List[str], output: str = "html"
 ) -> List[Tuple[str, str]]:
     """
     Extract multiple chapters using improved extraction logic.
@@ -489,13 +512,15 @@ def extract_multiple_chapters(
     """
     results = []
     for href in anchor_list:
-        if output == 'html':
+        if output == "html":
             content = extract_chapter_html(book, href)
-        elif output == 'text':
+        elif output == "text":
             content = extract_chapter_plain_text(book, href)
-        elif output == 'markdown':
+        elif output == "markdown":
             content = extract_chapter_markdown(book, href)
         else:
-            raise ValueError(f"Invalid output format: {output}. Use 'html', 'text', or 'markdown'.")
+            raise ValueError(
+                f"Invalid output format: {output}. Use 'html', 'text', or 'markdown'."
+            )
         results.append((href, content))
     return results
