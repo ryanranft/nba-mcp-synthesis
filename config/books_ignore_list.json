@@ -1,0 +1,22 @@
+{
+  "ignore_patterns": [
+    "fintech-01-2-deep-dive-into-fintechv1.0.2.pdf",
+    "fintech-01-3-fintech-collaboration-v1.0.2.pdf",
+    "rstudio-ide.pdf",
+    "SSRN-id2181209.pdf",
+    "SSRN-id2492294.pdf"
+  ],
+  "ignore_titles": [
+    "fintech 01 2 deep dive into fintechv1.0.2",
+    "fintech 01 3 fintech collaboration v1.0.2",
+    "rstudio ide",
+    "SSRN id2181209",
+    "SSRN id2492294"
+  ],
+  "metadata": {
+    "last_updated": "2025-10-18",
+    "reason": "Excluded from analysis - not relevant to NBA prediction modeling",
+    "total_ignored": 5
+  }
+}
+

@@ -361,30 +361,6 @@
       }
     },
     {
-      "title": "SSRN id2181209",
-      "s3_path": "books/SSRN-id2181209.pdf",
-      "local_path": "books/SSRN-id2181209.pdf",
-      "category": "general",
-      "status": "pending",
-      "priority": 1,
-      "metadata": {
-        "file_size_bytes": 464433,
-        "last_modified": "2025-10-11T21:07:59+00:00"
-      }
-    },
-    {
-      "title": "SSRN id2492294",
-      "s3_path": "books/SSRN-id2492294.pdf",
-      "local_path": "books/SSRN-id2492294.pdf",
-      "category": "general",
-      "status": "pending",
-      "priority": 1,
-      "metadata": {
-        "file_size_bytes": 571229,
-        "last_modified": "2025-10-11T21:08:00+00:00"
-      }
-    },
-    {
       "title": "STATISTICS 601 Advanced Statistical Methods ( PDFDrive )",
       "s3_path": "books/STATISTICS 601 Advanced Statistical Methods ( PDFDrive ).pdf",
       "local_path": "books/STATISTICS 601 Advanced Statistical Methods ( PDFDrive ).pdf",
@@ -469,30 +445,6 @@
       }
     },
     {
-      "title": "fintech 01 2 deep dive into fintechv1.0.2",
-      "s3_path": "books/fintech-01-2-deep-dive-into-fintechv1.0.2.pdf",
-      "local_path": "books/fintech-01-2-deep-dive-into-fintechv1.0.2.pdf",
-      "category": "fintech",
-      "status": "pending",
-      "priority": 1,
-      "metadata": {
-        "file_size_bytes": 6972225,
-        "last_modified": "2025-10-18T03:52:44+00:00"
-      }
-    },
-    {
-      "title": "fintech 01 3 fintech collaboration v1.0.2",
-      "s3_path": "books/fintech-01-3-fintech-collaboration-v1.0.2.pdf",
-      "local_path": "books/fintech-01-3-fintech-collaboration-v1.0.2.pdf",
-      "category": "fintech",
-      "status": "pending",
-      "priority": 1,
-      "metadata": {
-        "file_size_bytes": 2874166,
-        "last_modified": "2025-10-18T03:52:44+00:00"
-      }
-    },
-    {
       "title": "machine learning",
       "s3_path": "books/machine_learning.pdf",
       "local_path": "books/machine_learning.pdf",
@@ -517,22 +469,10 @@
       }
     },
     {
-      "title": "rstudio ide",
-      "s3_path": "books/rstudio-ide.pdf",
-      "local_path": "books/rstudio-ide.pdf",
-      "category": "general",
-      "status": "pending",
-      "priority": 1,
-      "metadata": {
-        "file_size_bytes": 2906555,
-        "last_modified": "2025-10-11T21:03:49+00:00"
-      }
-    },
-    {
-      "title": "thesis",
+      "title": "Econometrics versus the Bookmakers An econometric approach to sports betting",
       "s3_path": "books/thesis.pdf",
       "local_path": "books/thesis.pdf",
-      "category": "general",
+      "category": "sports_analytics",
       "status": "pending",
       "priority": 1,
       "metadata": {
@@ -542,7 +482,7 @@
     }
   ],
   "metadata": {
-    "total_books": 23,
+    "total_books": 40,
     "categories": {
       "ml_ops": 1,
       "machine_learning": 1,

@@ -220,6 +220,49 @@ class BookManager:
         self.s3_bucket = s3_bucket
         self.s3_client = boto3.client("s3")
         self.converter = AcsmConverter()
+        self.ignore_list = self._load_ignore_list()
+
+    def _load_ignore_list(self) -> Dict:
+        """Load list of books to ignore from config file."""
+        ignore_file = Path(__file__).parent.parent / "config" / "books_ignore_list.json"
+        if ignore_file.exists():
+            import json
+            with open(ignore_file, 'r') as f:
+                return json.load(f)
+        return {"ignore_patterns": [], "ignore_titles": []}
+
+    def should_ignore_book(self, book_title: str, book_filename: str = None) -> bool:
+        """
+        Check if a book should be ignored based on ignore list.
+        
+        Args:
+            book_title: Title of the book (normalized)
+            book_filename: Filename of the book (optional)
+        
+        Returns:
+            True if book should be ignored, False otherwise
+        """
+        if not self.ignore_list:
+            return False
+        
+        # Normalize title for comparison
+        title_lower = book_title.lower().strip()
+        
+        # Check against ignore titles
+        for ignore_title in self.ignore_list.get("ignore_titles", []):
+            if ignore_title.lower() in title_lower:
+                logger.info(f"⏭️  Ignoring book: {book_title} (matches ignore list)")
+                return True
+        
+        # Check against ignore patterns (filenames)
+        if book_filename:
+            filename_lower = book_filename.lower().strip()
+            for ignore_pattern in self.ignore_list.get("ignore_patterns", []):
+                if ignore_pattern.lower() in filename_lower:
+                    logger.info(f"⏭️  Ignoring book: {book_filename} (matches ignore pattern)")
+                    return True
+        
+        return False
 
     def book_exists_in_s3(self, s3_key: str) -> bool:
         """Check if book exists in S3 bucket."""
@@ -265,6 +308,12 @@ class BookManager:
             logger.info(f"\n{'='*70}")
             logger.info(f"Processing: {book['title']}")
             logger.info(f"{'='*70}")
+
+            # Check if book should be ignored
+            book_filename = book.get("s3_path", "").split("/")[-1] if book.get("s3_path") else None
+            if self.should_ignore_book(book.get("title", ""), book_filename):
+                results["skipped"].append(book)
+                continue
 
             # Check if already marked as in S3
             if book.get("status") == "already_in_s3":
@@ -1654,6 +1703,12 @@ Examples:
     analysis_results = []
 
     for book in books_to_analyze:
+        # Check if book should be ignored
+        book_filename = book.get("s3_path", "").split("/")[-1] if book.get("s3_path") else None
+        if book_manager.should_ignore_book(book.get("title", ""), book_filename):
+            logger.info(f"⏭️  Skipping ignored book: {book['title']}")
+            continue
+        
         # Skip if needs conversion and wasn't converted
         if book in results["needs_conversion"] or book in results["skipped"]:
             logger.warning(

@@ -32,7 +32,7 @@ Based on actual implementation and testing results:
 | **Tier 2** | 4-5 days | TBD | $25-45 | **$0** (uses cached books) | ⏳ **NEXT** |
 | **Tier 3** | 5-7 days | TBD | $15-30 | **$0** (uses cached books) | ⏸️ **FUTURE** |
 
-**Total Investment to Date:** $29.40 (Tier 0 + Tier 1)  
+**Total Investment to Date:** $29.40 (Tier 0 + Tier 1)
 **Estimated Total for All Tiers:** $74.40 - $109.40 (one-time)
 
 **Key Insight:** After Tier 1, book analysis is **FREE** on re-runs due to caching. Tier 2 and Tier 3 only pay for NEW AI features (smart integration, monitoring, etc.), not re-analyzing books.
