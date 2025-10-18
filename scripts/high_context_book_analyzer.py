@@ -82,11 +82,21 @@ class HighContextBookAnalyzer:
     MAX_CHARS = 1_000_000  # 1M characters (~250k tokens, full book capability)
     MAX_TOKENS = 250_000   # Explicit token limit for tracking
 
-    def __init__(self, project: str = "nba-mcp-synthesis", context: str = "production"):
+    def __init__(self, project: str = "nba-mcp-synthesis", context: str = "production", enable_cache: bool = True):
         """Initialize with Gemini 1.5 Pro and Claude Sonnet 4."""
         logger.info(f"🚀 Initializing High-Context Book Analyzer")
         logger.info(f"📊 Max content: {self.MAX_CHARS:,} chars (~{self.MAX_TOKENS:,} tokens)")
         logger.info(f"🤖 Models: Gemini 1.5 Pro (2M context) + Claude Sonnet 4 (1M context)")
+
+        # Initialize cache
+        self.enable_cache = enable_cache
+        if enable_cache:
+            from scripts.result_cache import ResultCache
+            self.cache = ResultCache()
+            logger.info("💾 Cache enabled")
+        else:
+            self.cache = None
+            logger.info("⚠️  Cache disabled")
 
         # Load secrets
         logger.info(f"Loading secrets for project={project}, context={context}")
@@ -178,6 +188,16 @@ class HighContextBookAnalyzer:
                     error="No book content available",
                 )
 
+        # Check cache before expensive analysis
+        if self.enable_cache and self.cache:
+            content_hash = self.cache.get_content_hash(book_content)
+            cached_result = self.cache.get_cached('book_analysis', content_hash)
+            
+            if cached_result:
+                logger.info("💾 Using cached analysis result!")
+                # Convert cached dict back to HighContextAnalysisResult
+                return HighContextAnalysisResult(**cached_result)
+
         # Limit content size to MAX_CHARS
         original_length = len(book_content)
         if len(book_content) > self.MAX_CHARS:
@@ -232,7 +252,7 @@ class HighContextBookAnalyzer:
         logger.info(f"🎯 Consensus level: {consensus_level}")
         logger.info(f"💰 Pricing tier: {pricing_tier}")
 
-        return HighContextAnalysisResult(
+        result = HighContextAnalysisResult(
             success=True,
             recommendations=synthesized_recs,
             total_cost=total_cost,
@@ -246,6 +266,24 @@ class HighContextBookAnalyzer:
             content_chars=len(book_content),
             pricing_tier=pricing_tier,
         )
+
+        # Save to cache for future use
+        if self.enable_cache and self.cache:
+            content_hash = self.cache.get_content_hash(book_content)
+            self.cache.save_to_cache(
+                'book_analysis',
+                content_hash,
+                result.__dict__,
+                metadata={
+                    'book_title': book.get('title', 'Unknown'),
+                    'book_author': book.get('author', 'Unknown'),
+                    'analysis_date': datetime.now().isoformat(),
+                    'models_used': self.models_available,
+                    'content_length': len(book_content)
+                }
+            )
+
+        return result
 
     async def _run_gemini_analysis(
         self, content: str, metadata: Dict, timeout: int

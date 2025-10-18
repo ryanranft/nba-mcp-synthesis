@@ -560,13 +560,14 @@ class MasterRecommendations:
 class RecursiveAnalyzer:
     """Performs recursive MCP-based book analysis with intelligence layer."""
 
-    def __init__(self, config: Dict, use_high_context: bool = False):
+    def __init__(self, config: Dict, use_high_context: bool = False, enable_cache: bool = True):
         self.config = config
         self.s3_bucket = config["s3_bucket"]
         self.project_context = config["project_context"]
         self.convergence_threshold = config["convergence_threshold"]
         self.max_iterations = config["max_iterations"]
         self.use_high_context = use_high_context
+        self.enable_cache = enable_cache
 
         # Initialize project scanner
         self.project_paths = config.get(
@@ -588,6 +589,7 @@ class RecursiveAnalyzer:
         if use_high_context:
             logger.info("🚀 Using High-Context Analyzer (Gemini 1.5 Pro + Claude Sonnet 4)")
             logger.info("📊 Context: up to 250k tokens (~1M characters) per book")
+            logger.info(f"💾 Cache: {'enabled' if enable_cache else 'disabled'}")
         else:
             logger.info("🚀 Using Standard Analyzer (4 models, 25k tokens per book)")
 
@@ -927,7 +929,7 @@ Only include recommendations that are genuinely new or significantly different f
             logger.info("🤖 Running high-context analysis (Gemini 1.5 Pro + Claude Sonnet 4)...")
             from high_context_book_analyzer import HighContextBookAnalyzer
 
-            analyzer = HighContextBookAnalyzer()
+            analyzer = HighContextBookAnalyzer(enable_cache=self.enable_cache)
             analysis_result = await analyzer.analyze_book(book)
         else:
             logger.info("🤖 Running standard analysis (4 models)...")
@@ -1514,6 +1516,11 @@ Examples:
         action="store_true",
         help="Preview what would be analyzed without actually running analysis",
     )
+    parser.add_argument(
+        "--no-cache",
+        action="store_true",
+        help="Disable result caching (useful for testing or when book content changes)",
+    )
 
     args = parser.parse_args()
 
@@ -1602,7 +1609,11 @@ Examples:
     book_manager.print_summary(results)
 
     # Analyze books
-    analyzer = RecursiveAnalyzer(analysis_config, use_high_context=args.high_context)
+    analyzer = RecursiveAnalyzer(
+        analysis_config,
+        use_high_context=args.high_context,
+        enable_cache=not args.no_cache  # Invert --no-cache flag
+    )
     report_gen = RecommendationGenerator()
     plan_gen = PlanGenerator()
 
