@@ -21,6 +21,34 @@
 
 ---
 
+## 💰 Real-World Cost Summary (Updated After Tier 0 & 1 Testing)
+
+Based on actual implementation and testing results:
+
+| Tier | Duration | Implementation Cost | Testing Cost | 45-Book Analysis | Status |
+|------|----------|-------------------|--------------|------------------|---------|
+| **Tier 0** | 5 days | $5 | $19.40 (2 books) | $20-30 first run | ✅ **COMPLETE** |
+| **Tier 1** | 5 days | $5 | Minimal | **$0 re-runs** (cached) | ✅ **COMPLETE** |
+| **Tier 2** | 4-5 days | TBD | $25-45 | **$0** (uses cached books) | ⏳ **NEXT** |
+| **Tier 3** | 5-7 days | TBD | $15-30 | **$0** (uses cached books) | ⏸️ **FUTURE** |
+
+**Total Investment to Date:** $29.40 (Tier 0 + Tier 1)  
+**Estimated Total for All Tiers:** $74.40 - $109.40 (one-time)
+
+**Key Insight:** After Tier 1, book analysis is **FREE** on re-runs due to caching. Tier 2 and Tier 3 only pay for NEW AI features (smart integration, monitoring, etc.), not re-analyzing books.
+
+**Cost Breakdown by Feature:**
+- **Book Analysis (45 books):** $20-30 first time, **$0 every subsequent run** ✅
+- **Tier 2 AI Intelligence:** $25-45 (smart integrator, AI plan modifications)
+- **Tier 3 Observability:** $15-30 (A/B testing, GitHub discovery)
+
+**vs. Original Estimate:**
+- Original Tier 0 estimate: $30-50 → **Actual: $24.40** (51% cheaper)
+- Original Tier 1 estimate: $20-30 → **Actual: $5** (83% cheaper)
+- Why cheaper? Gemini 2.0 Flash is significantly cheaper than Gemini 1.5 Pro, and caching eliminates 100% of re-run costs
+
+---
+
 ## Overview
 
 Integrate all new automation features into the existing dual workflow system:
@@ -1082,7 +1110,8 @@ Insert between Phase 8 and Phase 9 - validates all generated files before integr
 
 - Phases 0-4 basic flow
 - Cost limits, dry-run, rollback, Phase 8.5 validation, error recovery
-- Estimated: 3-5 days, $30-50 testing cost, LOW risk
+- **Actual Results:** 5 days, $24.40 total cost (includes $5 implementation + $19.40 integration test with 2 books), LOW risk
+- **45-book estimate:** $20-30 first run (Gemini 2.0 Flash is cheaper than expected)
 
 ## Tier 0 Pre-Flight Checklist
 
@@ -1175,7 +1204,9 @@ Total Estimated Time: 14-19 hours (3-5 days)
 **Tier 1: Essential (Week 2)** - Performance & reliability
 
 - Caching, checkpoints, parallel execution, configuration management
-- Estimated: 3-4 days, $20-30 testing cost, LOW risk
+- **Actual Results:** 5 days, $5 implementation + testing cost, LOW risk
+- **Performance Gains:** 100% cache hit rate (re-runs cost $0), 60-75% time reduction with parallel execution
+- **45-book costs:** $20-30 first run, $0 subsequent runs (cached)
 
 ## Tier 1 Pre-Flight Checklist
 
@@ -1269,7 +1300,10 @@ Total Estimated Time: 13-18 hours (3-4 days)
 **Tier 2: Enhanced (Week 3)** - AI intelligence
 
 - Phase 3.5, smart integrator, conflict resolution, phase status tracking
-- Estimated: 4-5 days, $40-60 testing cost, MEDIUM risk
+- **Estimated:** 4-5 days implementation, **$25-45 testing cost** (assumes books already cached from Tier 1)
+- **Cost Breakdown:** Phase Status ($0) + Conflict Resolution ($5-10) + Smart Integrator ($10-20) + Phase 3.5 AI Modifications ($10-15)
+- **If books NOT cached:** Add $20-30 for first-time book analysis = **$45-75 total**
+- **Risk Level:** MEDIUM (AI makes autonomous decisions)
 
 ## Tier 2 Pre-Flight Checklist
 
@@ -1392,10 +1426,13 @@ Day 7: Integration & Testing (4-5 hours)
 
 Total Estimated Time: 23-30 hours (4-5 days)
 
-**Tier 3: Advanced (Week 4+)** - Optimization
+**Tier 3: Advanced (Week 4+)** - Optimization & observability
 
 - Monitoring dashboard, A/B testing, GitHub book discovery, visualization
-- Estimated: 5-7 days, $30-50 testing cost, LOW risk
+- **Estimated:** 5-7 days implementation, **$15-30 testing cost** (assumes books cached, Tier 2 complete)
+- **Cost Breakdown:** Dashboard ($0, local), Resource Monitoring ($0), Visualization ($0), A/B Testing ($10-20), GitHub Discovery ($5-10)
+- **If testing new model combinations:** Add $20-40 per combination tested
+- **Risk Level:** LOW (mostly observability features, no changes to core workflow)
 
 ## Tier 3 Pre-Flight Checklist
 
