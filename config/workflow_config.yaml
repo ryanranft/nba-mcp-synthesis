@@ -174,7 +174,7 @@ safety:
 
 # Parallel execution (Tier 1)
 parallel_execution:
-  enabled: false  # TODO: Tier 1 Day 4
+  enabled: false # TODO: Tier 1 Day 4
   max_workers: 4
   batch_size: 5
 

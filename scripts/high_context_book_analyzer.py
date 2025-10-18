@@ -192,7 +192,7 @@ class HighContextBookAnalyzer:
         if self.enable_cache and self.cache:
             content_hash = self.cache.get_content_hash(book_content)
             cached_result = self.cache.get_cached('book_analysis', content_hash)
-            
+
             if cached_result:
                 logger.info("💾 Using cached analysis result!")
                 # Convert cached dict back to HighContextAnalysisResult

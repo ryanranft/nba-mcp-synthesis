@@ -150,7 +150,7 @@ class Phase3ConsolidationBasic:
                 # Extract recommendations from iterations
                 for iteration in data.get('iterations', []):
                     recs_dict = iteration.get('recommendations', {})
-                    
+
                     # Iterate over all priority levels
                     for priority in ['critical', 'important', 'nice_to_have']:
                         for rec in recs_dict.get(priority, []):

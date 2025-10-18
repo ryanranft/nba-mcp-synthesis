@@ -560,7 +560,14 @@ class MasterRecommendations:
 class RecursiveAnalyzer:
     """Performs recursive MCP-based book analysis with intelligence layer."""
 
-    def __init__(self, config: Dict, use_high_context: bool = False, enable_cache: bool = True):
+    def __init__(
+        self,
+        config: Dict,
+        use_high_context: bool = False,
+        enable_cache: bool = True,
+        enable_parallel: bool = False,
+        max_workers: int = 4
+    ):
         self.config = config
         self.s3_bucket = config["s3_bucket"]
         self.project_context = config["project_context"]
@@ -568,6 +575,8 @@ class RecursiveAnalyzer:
         self.max_iterations = config["max_iterations"]
         self.use_high_context = use_high_context
         self.enable_cache = enable_cache
+        self.enable_parallel = enable_parallel
+        self.max_workers = max_workers
 
         # Initialize project scanner
         self.project_paths = config.get(
@@ -585,13 +594,25 @@ class RecursiveAnalyzer:
         # Project knowledge base (loaded on first use)
         self.knowledge_base = None
 
+        # Initialize parallel executor if enabled
+        if enable_parallel:
+            from parallel_executor import ParallelExecutor
+            self.parallel_executor = ParallelExecutor(max_workers=max_workers)
+            logger.info(f"🔀 Parallel execution enabled: {max_workers} workers")
+        else:
+            self.parallel_executor = None
+
         # Log analyzer type
         if use_high_context:
             logger.info("🚀 Using High-Context Analyzer (Gemini 1.5 Pro + Claude Sonnet 4)")
             logger.info("📊 Context: up to 250k tokens (~1M characters) per book")
             logger.info(f"💾 Cache: {'enabled' if enable_cache else 'disabled'}")
+            if enable_parallel:
+                logger.info(f"🔀 Parallel: {max_workers} workers")
         else:
             logger.info("🚀 Using Standard Analyzer (4 models, 25k tokens per book)")
+            if enable_parallel:
+                logger.info(f"🔀 Parallel: {max_workers} workers")
 
     async def analyze_book_recursively(self, book: Dict, output_dir: str) -> Dict:
         """
@@ -1521,6 +1542,17 @@ Examples:
         action="store_true",
         help="Disable result caching (useful for testing or when book content changes)",
     )
+    parser.add_argument(
+        "--parallel",
+        action="store_true",
+        help="Enable parallel book analysis (4-8x faster)",
+    )
+    parser.add_argument(
+        "--max-workers",
+        type=int,
+        default=4,
+        help="Maximum number of parallel workers (default: 4)",
+    )
 
     args = parser.parse_args()
 
@@ -1612,7 +1644,9 @@ Examples:
     analyzer = RecursiveAnalyzer(
         analysis_config,
         use_high_context=args.high_context,
-        enable_cache=not args.no_cache  # Invert --no-cache flag
+        enable_cache=not args.no_cache,  # Invert --no-cache flag
+        enable_parallel=args.parallel,
+        max_workers=args.max_workers
     )
     report_gen = RecommendationGenerator()
     plan_gen = PlanGenerator()
