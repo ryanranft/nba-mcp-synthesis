@@ -174,26 +174,29 @@ safety:
 
 # Parallel execution (Tier 1)
 parallel_execution:
-  enabled: false
+  enabled: false  # TODO: Tier 1 Day 4
   max_workers: 4
   batch_size: 5
 
-# Caching (Tier 1)
+# Caching (Tier 1) - ENABLED
 cache:
-  enabled: false
+  enabled: true
   cache_dir: "cache"
   ttl_hours: 168 # 7 days
+  max_size_gb: 5
 
   # What to cache
   cache_analysis: true
   cache_synthesis: true
 
-# Progress checkpoints (Tier 1)
+# Progress checkpoints (Tier 1) - ENABLED
 checkpoints:
-  enabled: false
+  enabled: true
   checkpoint_dir: "checkpoints"
   frequency_minutes: 5
   frequency_items: 10
+  ttl_hours: 24
+  max_checkpoints: 10
 
 # Resource monitoring (Tier 1)
 monitoring:
