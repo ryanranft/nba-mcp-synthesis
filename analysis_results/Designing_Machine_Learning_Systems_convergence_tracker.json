@@ -1,11 +1,11 @@
 {
   "book_title": "Designing Machine Learning Systems",
   "s3_path": "books/Designing Machine Learning Systems.pdf",
-  "start_time": "2025-10-18T16:47:56.270510",
+  "start_time": "2025-10-18T16:53:21.651538",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-18T16:48:33.531465",
+      "timestamp": "2025-10-18T16:54:04.142538",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -14,16 +14,754 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-18T16:48:35.534202",
+      "timestamp": "2025-10-18T16:54:34.476691",
       "recommendations": {
-        "critical": [],
-        "important": [],
+        "critical": [
+          {
+            "title": "Define and Track Business Objectives for NBA Analytics",
+            "description": "Establish clear business objectives (e.g., increase ticket sales, improve player performance analysis, enhance fan engagement) and link them to measurable ML metrics (e.g., prediction accuracy, recommendation click-through rate).",
+            "technical_details": "Use a KPI dashboarding tool to track business metrics. Map each ML model's performance to specific KPI improvements.",
+            "implementation_steps": [
+              "Step 1: Identify key business KPIs that the NBA analytics system can impact.",
+              "Step 2: Define how each ML model within the system will contribute to these KPIs.",
+              "Step 3: Establish a system for regularly monitoring and reporting on the link between ML model performance and business KPI trends."
+            ],
+            "expected_impact": "Ensures that ML efforts are aligned with business goals, leading to more effective and impactful analytics solutions. Prevents focusing solely on technical metrics.",
+            "priority": "CRITICAL",
+            "time_estimate": "24 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 2",
+            "category": "ML",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Adopt an Iterative Process for ML Model Development",
+            "description": "Implement an iterative development cycle that includes project scoping, data engineering, ML model development, deployment, monitoring, and business analysis, allowing for continuous improvement of the NBA analytics system.",
+            "technical_details": "Use a Kanban board to manage tasks in each stage of the cycle.  Define clear acceptance criteria for each stage. Use experiment tracking tools (e.g., MLflow, Weights & Biases) to manage model development.",
+            "implementation_steps": [
+              "Step 1: Define the stages of the iterative development cycle.",
+              "Step 2: Establish clear processes for each stage.",
+              "Step 3: Implement tools and workflows to support the cycle.",
+              "Step 4: Regularly review and refine the process based on team feedback."
+            ],
+            "expected_impact": "Enables continuous improvement of the NBA analytics system by iterating on all components, from data to model to deployment.",
+            "priority": "CRITICAL",
+            "time_estimate": "16 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 2",
+            "category": "ML",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Leverage Real-Time Transport with Kafka for NBA Stats",
+            "description": "Utilize Apache Kafka to ingest and process real-time NBA game statistics, player tracking data, and other streaming data sources. Enable low-latency analysis for live game insights and dynamic predictions.",
+            "technical_details": "Implement Kafka producers to ingest data from various sources. Configure Kafka topics for different data streams. Implement Kafka consumers to process and analyze data in real-time.",
+            "implementation_steps": [
+              "Step 1: Identify real-time data sources for NBA analytics.",
+              "Step 2: Implement Kafka producers to ingest data from these sources.",
+              "Step 3: Configure Kafka topics for different data streams.",
+              "Step 4: Implement Kafka consumers to process and analyze data in real-time."
+            ],
+            "expected_impact": "Provides real-time insights and enables dynamic predictions for live NBA games, improving fan engagement and decision-making.",
+            "priority": "CRITICAL",
+            "time_estimate": "48 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 3",
+            "category": "Data Processing",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Model Selection Strategy using Simplest Model",
+            "description": "When facing several algorithms that each solve the same problem, start from the simplest and increase the complexity only as needed to meet target performance. Simpler to debug. Good performance as well.",
+            "technical_details": "Start with classical ML and only upgrade if performance targets require deep learning. Simpler to deploy, easier to debug. Simplicity serves as the base case to which to compare more complex models.",
+            "implementation_steps": [
+              "Step 1: Implement a classical ML algorithm.",
+              "Step 2: Evaluate the performance of this model.",
+              "Step 3: If not performant enough, implement DL model.",
+              "Step 4: Compare DL model and classical model."
+            ],
+            "expected_impact": "Ensures a balance between model complexity, performance, and maintainability for NBA analytics tasks.",
+            "priority": "CRITICAL",
+            "time_estimate": "16 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 6",
+            "category": "ML",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Apply Experiment Tracking and Versioning",
+            "description": "Implement an experiment tracking and versioning system to manage ML experiments and model artifacts. Track hyperparameters, code versions, data versions, metrics, and other relevant information.",
+            "technical_details": "Use tools like MLflow, Weights & Biases, or DVC to track experiments and version artifacts. Establish naming conventions and organizational structure for tracking experiments effectively.",
+            "implementation_steps": [
+              "Step 1: Choose an experiment tracking and versioning tool.",
+              "Step 2: Integrate the tool into the ML workflow.",
+              "Step 3: Define conventions for tracking experiments and versioning artifacts.",
+              "Step 4: Regularly review and refine the tracking and versioning process."
+            ],
+            "expected_impact": "Improves reproducibility, collaboration, and model management, which leads to greater efficiency of team.",
+            "priority": "CRITICAL",
+            "time_estimate": "40 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 6",
+            "category": "ML",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Serve NBA Predictions as RESTful APIs with Fast API",
+            "description": "Expose NBA prediction models as RESTful APIs using frameworks like FastAPI for easy integration with downstream applications. Benefit from its low overhead and high performance.",
+            "technical_details": "Implement API endpoints for different prediction tasks (e.g., player performance prediction, game outcome forecasting). Use request-response cycle.",
+            "implementation_steps": [
+              "Step 1: Define the API endpoints for each prediction task.",
+              "Step 2: Implement the API endpoints using FastAPI.",
+              "Step 3: Deploy the API endpoints to a server or cloud platform.",
+              "Step 4: Secure and monitor the deployed API endpoints."
+            ],
+            "expected_impact": "Provides easy access to NBA predictions for downstream applications, enabling the development of data-driven products and services.",
+            "priority": "CRITICAL",
+            "time_estimate": "24 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 7",
+            "category": "Architecture",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Monitor Model Performance Metrics",
+            "description": "Continually monitor a wide range of model performance metrics to detect potential issues. Track metrics such as training loss, eval loss, training accuracy, eval accuracy and AUC.",
+            "technical_details": "Metrics must be as detailed as possible, tracking training and testing metrics from every layer of the model as a start.",
+            "implementation_steps": [
+              "Step 1: Add monitoring to training script.",
+              "Step 2: Add code to create logs of system performance metrics.",
+              "Step 3: Create logs with model prediction and ground truth label."
+            ],
+            "expected_impact": "Help to quickly debug errors and quickly see where things have gone wrong. Quick iteration and identification.",
+            "priority": "CRITICAL",
+            "time_estimate": "40 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 8",
+            "category": "Monitoring",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Implement Frequent Model Re-training to Combat Data Distribution Shifts",
+            "description": "Re-train the NBA analytical models automatically to combat data distribution shifts. Fresh data means that the model will be ready.",
+            "technical_details": "Train model and evaluate often. Every two hours. Then evaluate and deploy to see if performance changes.",
+            "implementation_steps": [
+              "Step 1: Create code for easy training.",
+              "Step 2: Create infrastructure for model testing.",
+              "Step 3: Continually and automatically deploy with the schedule."
+            ],
+            "expected_impact": "To ensure that the model remains fit for its purpose.",
+            "priority": "CRITICAL",
+            "time_estimate": "40 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 9",
+            "category": "ML",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Design the system to Adapt Quickly to Feedback",
+            "description": "Because a model will have to deal with many issues in production, set up the model so that there is constant feedback which results in a better product. High data quality and clear feedback.",
+            "technical_details": "Get user information on models' performance, create a feedback look.",
+            "implementation_steps": [
+              "Step 1: Set up a method for user feedback. Upvote / downvote, etc.",
+              "Step 2: Collect this data and create data for the model.",
+              "Step 3: Iterate.",
+              "Step 4: Test in production and create a baseline."
+            ],
+            "expected_impact": "If high user feedback can be acquired, quicker adaptation will increase use and trust.",
+            "priority": "CRITICAL",
+            "time_estimate": "40 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 9",
+            "category": "ML",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Implement Canary Releases for New Models",
+            "description": "Implement canary releases to reduce the risk of introducing a new model into production. Route a small percentage of traffic to the candidate model and monitor its performance before gradually increasing the traffic.",
+            "technical_details": "Use a load balancer to route traffic to the existing and candidate models. Monitor key metrics such as prediction accuracy, latency, and error rates.",
+            "implementation_steps": [
+              "Step 1: Deploy the candidate model alongside the existing model.",
+              "Step 2: Route a small percentage of traffic to the candidate model.",
+              "Step 3: Monitor the performance of the candidate model.",
+              "Step 4: Gradually increase the traffic to the candidate model if its performance is satisfactory.",
+              "Step 5: Abort the release if the candidate model\u2019s performance degrades."
+            ],
+            "expected_impact": "Reduces the risk of introducing a faulty model into production, minimizing the impact on users and the system.",
+            "priority": "CRITICAL",
+            "time_estimate": "32 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 9",
+            "category": "Testing",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Test Models with Bandits in Production",
+            "description": "Utilize bandits for test in production to route traffic to better performing models for a great user experience as you learn the data that works best.",
+            "technical_details": "Use bandit tests to determine the optimal set up.",
+            "implementation_steps": [
+              "Step 1: Set up a testing group.",
+              "Step 2: Monitor those with the tests and change as needed",
+              "Step 3: Record and analyze."
+            ],
+            "expected_impact": "Allows for data to be gained about models as better models are found for users.",
+            "priority": "CRITICAL",
+            "time_estimate": "40 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 9",
+            "category": "Testing",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Choose the Right Tools for Development",
+            "description": "To improve the efficiency of data scientists, invest heavily into a robust tool for development so that data scientists do not need to focus on the infrastructure.",
+            "technical_details": "Integrate the development process with version control software like git.",
+            "implementation_steps": [
+              "Step 1: Set up all tools into a standardized tool.",
+              "Step 2: Make them modular and customizable.",
+              "Step 3: Version control.",
+              "Step 4: Integrate into the development process and train data scientists."
+            ],
+            "expected_impact": "Data scientists can remain productive without dealing with infrastructure.",
+            "priority": "CRITICAL",
+            "time_estimate": "40 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 10",
+            "category": "Architecture",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Employ Test in Production Strategies",
+            "description": "Implement strategies for testing new model versions in production environments before making them fully available. Use techniques like A/B testing, canary deployments, and shadow deployments to evaluate performance and identify potential issues.",
+            "technical_details": "Use load balancers to slowly route traffic. Monitor a number of logs to evaluate and catch errors.",
+            "implementation_steps": [
+              "Step 1: Set up a testing group.",
+              "Step 2: Monitor those with the tests and change as needed",
+              "Step 3: Record and analyze."
+            ],
+            "expected_impact": "To lower the impact of broken or poor code while making sure the user experience does not suffer.",
+            "priority": "CRITICAL",
+            "time_estimate": "40 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 10",
+            "category": "Testing",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Make Build Versus Buy Decisions",
+            "description": "For all infrastructure, determine whether to build them in house or buy them to be as productive as possible and let specialists have expertise over the stack.",
+            "technical_details": "Evaluate needs and determine if in-house is better.",
+            "implementation_steps": [
+              "Step 1: Evaluate every point.",
+              "Step 2: Use team expertise to implement."
+            ],
+            "expected_impact": "To improve focus of employees on business metrics rather than infrastructure.",
+            "priority": "CRITICAL",
+            "time_estimate": "40 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 10",
+            "category": "Architecture",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Version Control for Code and Data",
+            "description": "Use an experiment tracking tool that provides tracking for both code changes and data changes. Important for model generation to ensure that all aspects are known and correct.",
+            "technical_details": "Use frameworks that allow changes from git to be merged with any workflow.",
+            "implementation_steps": [
+              "Step 1: Use version control for all data and code.",
+              "Step 2: Use framework where code changes are linked.",
+              "Step 3: Audit and track where code changes are implemented."
+            ],
+            "expected_impact": "Improved model performance, better organization, quick recovery if bad pushes exist.",
+            "priority": "CRITICAL",
+            "time_estimate": "40 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 11",
+            "category": "Testing",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          }
+        ],
+        "important": [
+          {
+            "title": "Implement Resource Scaling for NBA Data Processing",
+            "description": "Implement autoscaling for data processing and model training on AWS to handle varying data volumes and computational demands during peak seasons (e.g., playoffs, free agency periods).",
+            "technical_details": "Use AWS Auto Scaling groups for EC2 instances. Monitor CPU utilization, memory usage, and queue lengths to trigger scaling events.  Utilize spot instances for cost optimization.",
+            "implementation_steps": [
+              "Step 1: Define scaling policies based on resource utilization metrics.",
+              "Step 2: Configure AWS Auto Scaling groups to automatically adjust the number of instances.",
+              "Step 3: Implement monitoring to track the performance of the scaling policies."
+            ],
+            "expected_impact": "Ensures the system can handle increased data volumes and computational demands without performance degradation or cost overruns.",
+            "priority": "IMPORTANT",
+            "time_estimate": "40 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 2",
+            "category": "Architecture",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Standardize Data Formats Using Parquet for NBA Data",
+            "description": "Adopt Parquet as the standard data format for storing NBA game statistics, player data, and other relevant information. Benefit from its columnar storage, efficient compression, and flexible schema evolution.",
+            "technical_details": "Implement data pipelines to convert existing data into Parquet format. Configure data processing jobs (e.g., Spark, Flink) to read and write Parquet files.",
+            "implementation_steps": [
+              "Step 1: Identify existing data sources and their current formats.",
+              "Step 2: Implement data conversion pipelines to transform data into Parquet format.",
+              "Step 3: Update data processing jobs to use Parquet as the standard format."
+            ],
+            "expected_impact": "Reduces storage costs, improves query performance, and simplifies data processing for NBA analytics.",
+            "priority": "IMPORTANT",
+            "time_estimate": "32 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 3",
+            "category": "Data Processing",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Implement ETL (Extract, Transform, Load) with Data Validation for NBA Data",
+            "description": "Establish a robust ETL pipeline to extract data from various sources, transform it into a consistent format, and load it into a data warehouse. Include data validation steps to ensure data quality and prevent malformed data from entering the system.",
+            "technical_details": "Use Apache Airflow or similar workflow orchestration tools to manage the ETL pipeline. Implement data validation checks using Great Expectations or similar tools.",
+            "implementation_steps": [
+              "Step 1: Identify data sources and their formats.",
+              "Step 2: Implement data extraction and transformation logic.",
+              "Step 3: Define data validation rules and implement checks.",
+              "Step 4: Load transformed and validated data into the data warehouse."
+            ],
+            "expected_impact": "Ensures data quality and consistency, improving the reliability and accuracy of NBA analytics.",
+            "priority": "IMPORTANT",
+            "time_estimate": "40 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 3",
+            "category": "Data Processing",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Use Weighted Sampling for Training Data Creation",
+            "description": "Implement weighted sampling to address class imbalance in the NBA data (e.g., injuries, rare events). Assign higher weights to minority classes to ensure adequate representation in the training dataset.",
+            "technical_details": "Use the random.choices function in Python with specified weights. Experiment with different weighting schemes based on domain expertise and data analysis.",
+            "implementation_steps": [
+              "Step 1: Analyze the class distribution in the NBA data.",
+              "Step 2: Determine appropriate weights for each class.",
+              "Step 3: Implement weighted sampling using random.choices.",
+              "Step 4: Evaluate the impact of weighted sampling on model performance."
+            ],
+            "expected_impact": "Improves the performance of ML models on minority classes, leading to more accurate predictions for rare but important events.",
+            "priority": "IMPORTANT",
+            "time_estimate": "24 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 4",
+            "category": "Data Processing",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Apply Data Augmentation Techniques to Training Data",
+            "description": "Implement data augmentation techniques to expand the training dataset and improve model robustness. Common techniques include random cropping, flipping, rotating, adding noise, and synthesizing data.",
+            "technical_details": "Use libraries like Albumentations (for image data) and back translation or word synonym replacement (for text data) to apply data augmentation. Set a flag to use these techniques only when training.",
+            "implementation_steps": [
+              "Step 1: Identify appropriate data augmentation techniques for the specific data.",
+              "Step 2: Implement the techniques using libraries like Albumentations or NLTK.",
+              "Step 3: Evaluate the impact of data augmentation on model performance and tune parameters."
+            ],
+            "expected_impact": "Increases the size of the training dataset, reduces overfitting, and improves model generalization to unseen data.",
+            "priority": "IMPORTANT",
+            "time_estimate": "32 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 4",
+            "category": "Data Processing",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Handle Missing Values Using Multiple Imputation Techniques",
+            "description": "Address missing values in NBA data using a combination of imputation techniques. Fill missing categorical values with the most frequent value. Impute missing numerical values using the mean, median, or k-nearest neighbors imputation.",
+            "technical_details": "Use pandas to implement data cleaning and handling of missing values.",
+            "implementation_steps": [
+              "Step 1: Identify features with missing values.",
+              "Step 2: Determine the appropriate imputation strategy for each feature.",
+              "Step 3: Implement the imputation techniques using pandas.",
+              "Step 4: Evaluate the impact of imputation on model performance."
+            ],
+            "expected_impact": "Improves data quality and prevents biased or inaccurate model predictions due to missing values.",
+            "priority": "IMPORTANT",
+            "time_estimate": "24 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 5",
+            "category": "Data Processing",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Standardize Feature Scales",
+            "description": "Standardize the scales of numeric features by removing the mean and scaling to unit variance. Helps prevent features with larger scales from dominating model training and improves convergence.",
+            "technical_details": "Use scikit-learn\u2019s StandardScaler to standardize the numeric features.",
+            "implementation_steps": [
+              "Step 1: Identify the numeric features to standardize.",
+              "Step 2: Calculate the mean and standard deviation of each feature using only the training data.",
+              "Step 3: Standardize the features in all datasets using the calculated mean and standard deviation."
+            ],
+            "expected_impact": "More stable and faster training with increased chances of convergence and optimized model performance.",
+            "priority": "IMPORTANT",
+            "time_estimate": "8 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 5",
+            "category": "Data Processing",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Create Positional Embeddings for Sequential Data",
+            "description": "Implement positional embeddings for sequential data such as the sequence of plays in an NBA game, to capture the order and position of each element. Use pre-calculated or learned embeddings.",
+            "technical_details": "Use sine and cosine functions to generate pre-calculated embeddings. Alternatively, learn the embedding vectors during model training.",
+            "implementation_steps": [
+              "Step 1: Determine the maximum length of the sequence.",
+              "Step 2: Generate pre-calculated positional embeddings or learn the vectors during model training.",
+              "Step 3: Add the positional embeddings to the input data."
+            ],
+            "expected_impact": "Enables models to capture the order and position of elements in sequential data, which is crucial for tasks like play prediction and game outcome forecasting.",
+            "priority": "IMPORTANT",
+            "time_estimate": "24 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 5",
+            "category": "Data Processing",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Fine-Tune Pretrained Models",
+            "description": "Leverage pre-trained models (e.g., BERT for text data, ImageNet models for image data) and fine-tune them on NBA-specific data. This reduces the amount of data needed for training and improves model performance.",
+            "technical_details": "Download pre-trained models from repositories like Hugging Face Transformers or TensorFlow Hub.  Fine-tune the models on NBA-specific data using transfer learning techniques.",
+            "implementation_steps": [
+              "Step 1: Identify pre-trained models that are relevant to the NBA analytics tasks.",
+              "Step 2: Download the pre-trained models.",
+              "Step 3: Fine-tune the models on NBA-specific data.",
+              "Step 4: Evaluate the performance of the fine-tuned models."
+            ],
+            "expected_impact": "Improves model performance, reduces training time, and enables the use of complex models even with limited NBA-specific data.",
+            "priority": "IMPORTANT",
+            "time_estimate": "24 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 6",
+            "category": "ML",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Utilize Model Ensembles",
+            "description": "Create model ensembles to combine the strengths of multiple models and improve prediction accuracy. Use bagging, boosting, or stacking techniques to create the ensembles.",
+            "technical_details": "Experiment with different ensemble methods and base learners. Optimize the weights assigned to each base learner to maximize ensemble performance.",
+            "implementation_steps": [
+              "Step 1: Train multiple base learners.",
+              "Step 2: Choose an ensemble method (bagging, boosting, or stacking).",
+              "Step 3: Train the ensemble using the base learners.",
+              "Step 4: Evaluate the performance of the ensemble.",
+              "Step 5: Implement code to produce majority votes based on base cases."
+            ],
+            "expected_impact": "Improved prediction accuracy and robustness by combining the strengths of multiple models.",
+            "priority": "IMPORTANT",
+            "time_estimate": "32 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 6",
+            "category": "ML",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Utilize Batch Prediction for Daily NBA Analytics Reports",
+            "description": "Generate daily NBA analytics reports using batch prediction. Precompute key metrics, player statistics, and game outcome predictions overnight to ensure timely availability for analysts.",
+            "technical_details": "Use Apache Spark or similar data processing tools to precompute analytics reports. Store the results in a data warehouse for easy access.",
+            "implementation_steps": [
+              "Step 1: Identify the key metrics and statistics to include in the daily reports.",
+              "Step 2: Implement data processing jobs to precompute the metrics and statistics.",
+              "Step 3: Store the results in a data warehouse.",
+              "Step 4: Schedule the jobs to run overnight."
+            ],
+            "expected_impact": "Reduces the latency of generating daily NBA analytics reports, providing analysts with timely insights.",
+            "priority": "IMPORTANT",
+            "time_estimate": "32 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 7",
+            "category": "ML",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Implement Model Compression Techniques for Low-Latency Prediction",
+            "description": "Apply model compression techniques such as quantization, pruning, and knowledge distillation to reduce model size and improve inference speed, especially for models that require low latency. DistilBert is 40% the size and maintains 97% language understanding capabilities with 60% increase in speed.",
+            "technical_details": "Utilize TensorFlow Lite or similar tools to quantize and prune models. Train smaller student models to mimic larger teacher models.",
+            "implementation_steps": [
+              "Step 1: Choose the models to be compressed.",
+              "Step 2: Determine the appropriate compression techniques for each model.",
+              "Step 3: Apply compression techniques using tools like TensorFlow Lite.",
+              "Step 4: Evaluate the trade-off between model size, accuracy, and inference speed."
+            ],
+            "expected_impact": "Improves the efficiency of online prediction, enabling real-time insights and dynamic predictions for live NBA games.",
+            "priority": "IMPORTANT",
+            "time_estimate": "40 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 7",
+            "category": "Performance",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Implement Data Distribution Shift Detection",
+            "description": "Detect data distribution shifts by monitoring changes in feature distributions. Use statistical methods such as two-sample tests (e.g., Kolmogorov-Smirnov test) to identify statistically significant changes.",
+            "technical_details": "Compute summary statistics (mean, median, variance) for each feature. Implement Kolmogorov-Smirnov tests to detect differences between training and serving feature distributions.",
+            "implementation_steps": [
+              "Step 1: Compute summary statistics for each feature in the training data.",
+              "Step 2: Compute the same statistics for the serving data.",
+              "Step 3: Implement Kolmogorov-Smirnov tests to compare the distributions.",
+              "Step 4: Set up alerts to notify the team of significant distribution shifts."
+            ],
+            "expected_impact": "Enables timely detection of data distribution shifts, allowing the team to take corrective action and prevent model performance degradation.",
+            "priority": "IMPORTANT",
+            "time_estimate": "32 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 8",
+            "category": "Monitoring",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Avoid Data Driven Approach Limitations",
+            "description": "Recognize the data driven approach has many limitations that must be addressed for AI in NBA analytical models and the data from which it is derived. A high human level of knowledge must be involved to ensure that human biases do not create data.",
+            "technical_details": "Apply the human aspect with data validation and to ensure no sensitive information is applied.",
+            "implementation_steps": [
+              "Step 1: Add human element to data validation.",
+              "Step 2: Remove sensitive information that is not relevant."
+            ],
+            "expected_impact": "To create greater balance and reduce the negative and harmful impacts of biases in algorithms.",
+            "priority": "IMPORTANT",
+            "time_estimate": "40 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 11",
+            "category": "Security",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Create Model Cards",
+            "description": "Build documentation to model the processes and components utilized for testing to ensure validity. To ensure ethical practice and fairness.",
+            "technical_details": "For this, it is important to report model performance measures, datasets, ethical considerations, and caveats.",
+            "implementation_steps": [
+              "Step 1: Model and track results to ensure fairness.",
+              "Step 2: Report issues to stakeholders. ",
+              "Step 3: Perform testing frequently to ensure all aspects are ethical."
+            ],
+            "expected_impact": "To ensure that models are tested ethically.",
+            "priority": "IMPORTANT",
+            "time_estimate": "40 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 11",
+            "category": "Security",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          }
+        ],
         "nice_to_have": []
       }
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-18T16:48:37.597060",
+      "timestamp": "2025-10-18T16:54:45.407964",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -32,7 +770,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-18T16:48:39.497191",
+      "timestamp": "2025-10-18T16:54:47.210730",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -41,7 +779,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-18T16:48:41.283599",
+      "timestamp": "2025-10-18T16:54:53.164827",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -50,7 +788,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-18T16:48:42.980285",
+      "timestamp": "2025-10-18T16:54:55.137891",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -59,7 +797,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-18T16:48:44.772761",
+      "timestamp": "2025-10-18T16:54:56.892423",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -68,16 +806,720 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-18T16:48:46.563990",
+      "timestamp": "2025-10-18T16:55:32.357406",
       "recommendations": {
-        "critical": [],
-        "important": [],
+        "critical": [
+          {
+            "title": "Define Key Performance Indicators (KPIs) Tied to Business Objectives",
+            "description": "Establish clear business objectives (e.g., increase ticket sales, improve fan engagement) and translate them into measurable KPIs. This ensures ML efforts are aligned with organizational goals.",
+            "technical_details": "Utilize metrics like purchase-through rate, take-rate (quality plays/recommendations), and subscription cancellation rate.",
+            "implementation_steps": [
+              "Step 1: Identify core business objectives for the NBA team/league.",
+              "Step 2: Define KPIs that directly measure progress toward these objectives.",
+              "Step 3: Map ML model performance to these KPIs (e.g., increase in prediction accuracy results in X% increase in ticket sales)."
+            ],
+            "expected_impact": "Ensures that ML model development is directly tied to tangible business outcomes, maximizing ROI.",
+            "priority": "CRITICAL",
+            "time_estimate": "8 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 2. Introduction to Machine Learning Systems Design",
+            "category": "ML",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Employ User Behavior Data for Continual Learning",
+            "description": "Utilize streaming data on user interactions (e.g., game viewership, player stats viewed, ticket purchases) to continually retrain recommendation models, ensuring they adapt to changing fan preferences.",
+            "technical_details": "Implement a real-time data pipeline using Kafka/Kinesis and a stream processing engine (Flink/Spark Streaming) to capture user events. Use this data to periodically update recommendation models.",
+            "implementation_steps": [
+              "Step 1: Set up a streaming data pipeline to collect user behavior events.",
+              "Step 2: Implement logic to extract features and labels from these events.",
+              "Step 3: Configure a periodic retraining process using the streaming data."
+            ],
+            "expected_impact": "Improves the relevance and accuracy of recommendations, increasing fan engagement and revenue.",
+            "priority": "CRITICAL",
+            "time_estimate": "32 hours",
+            "dependencies": [
+              "Set up a real-time data pipeline (Rec 3)",
+              "Implement periodic model retraining (Rec 25)"
+            ],
+            "source_chapter": "Chapter 2. Introduction to Machine Learning Systems Design",
+            "category": "ML",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Utilize a Relational Data Model for Structured Data",
+            "description": "Store structured data like player profiles, team information, and game schedules in a relational database (e.g., PostgreSQL, MySQL) for efficient querying and data integrity.",
+            "technical_details": "Design a relational schema with appropriate tables, columns, and relationships. Enforce data integrity through constraints and foreign keys.",
+            "implementation_steps": [
+              "Step 1: Design the relational schema based on data requirements.",
+              "Step 2: Implement the schema in the chosen database.",
+              "Step 3: Migrate existing data to the new schema."
+            ],
+            "expected_impact": "Ensures data consistency, facilitates complex queries, and provides a robust foundation for analytical workloads.",
+            "priority": "CRITICAL",
+            "time_estimate": "40 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 3. Data Engineering Fundamentals",
+            "category": "Data Processing",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Implement ETL Processes for Data Transformation",
+            "description": "Develop ETL pipelines to extract data from various sources (APIs, databases), transform it into a consistent format, and load it into the data warehouse for analysis.",
+            "technical_details": "Use tools like Apache Spark or AWS Glue for data transformation. Schedule ETL jobs using Apache Airflow or similar workflow management tools.",
+            "implementation_steps": [
+              "Step 1: Identify data sources and their schemas.",
+              "Step 2: Design ETL pipelines to transform data into a consistent format.",
+              "Step 3: Schedule and monitor ETL jobs."
+            ],
+            "expected_impact": "Ensures data quality and consistency for downstream ML models and analytical dashboards.",
+            "priority": "CRITICAL",
+            "time_estimate": "40 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 3. Data Engineering Fundamentals",
+            "category": "Data Processing",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Detect Data Bias with Invariance Testing",
+            "description": "After training the ML model, perform invariance tests to make sure that race does not affect mortgage outcome, name does not impact resume ratings, and gender does not affect salary predictions.",
+            "technical_details": "Leverage domain and AI expertise to test model behavior for particular subgroups",
+            "implementation_steps": [
+              "Step 1: Identify protected features (e.g., race, gender).",
+              "Step 2: Iteratively change these features to assess what affects their influence on the output.",
+              "Step 3: Test with multiple test cases"
+            ],
+            "expected_impact": "Detect if algorithms discriminate sensitive population groups.",
+            "priority": "CRITICAL",
+            "time_estimate": "12 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 4. Training Data",
+            "category": "ML",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Monitor and alert on feature skew between training and test data.",
+            "description": "Calculate a measure of distance between feature distributions during training and in production, such as the Kolmogorov\u2013Smirnov test, and raise an alert if the distance exceeds a threshold. ",
+            "technical_details": "Store feature statistics during training and implement data validation on production features. Use Alibi Detect or similar tools.",
+            "implementation_steps": [
+              "Step 1: Get a range of tools that can perform tests that compare to data such as Kolmogorov-Smirnov.",
+              "Step 2: Validate on a test dataset.",
+              "Step 3: Monitor feature distributions during production."
+            ],
+            "expected_impact": "Detect and get alerts about dataset shift, which can then inform model updates.",
+            "priority": "CRITICAL",
+            "time_estimate": "24 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 8. Data Distribution Shifts and Monitoring",
+            "category": "Monitoring",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Implement Feature Monitoring Using Statistical Tests",
+            "description": "Continuously monitor feature distributions in production and use two-sample statistical tests (e.g., Kolmogorov-Smirnov) to detect significant shifts compared to the training data distribution. Alert if the shift exceeds a predefined threshold.",
+            "technical_details": "Store feature statistics during training and implement data validation on production features. Use Alibi Detect or similar tools.",
+            "implementation_steps": [
+              "Step 1: Calculate descriptive statistics (mean, std, quantiles) for training features.",
+              "Step 2: Implement a data validation pipeline to compute the same statistics on production data.",
+              "Step 3: Use a statistical test (e.g., KS test) to compare distributions.",
+              "Step 4: Alert if the test statistic exceeds a predefined threshold."
+            ],
+            "expected_impact": "Detect and get alerts about dataset shift, which can then inform model updates.",
+            "priority": "CRITICAL",
+            "time_estimate": "24 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 8. Data Distribution Shifts and Monitoring",
+            "category": "Monitoring",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Establish a Comprehensive Observability Strategy",
+            "description": "Implement a strategy to instrument systems to log unusual data for a deep diagnostic dive in cases of system deviation to quickly assess problems.",
+            "technical_details": "Add timers to functions, count the number of NaNs in features, track how inputs are transformed in systems.",
+            "implementation_steps": [
+              "Step 1: Instrument core features",
+              "Step 2: Create a logging mechanism that provides data to ML engineers for diagnostic runs.",
+              "Step 3: Automate logging and create triggers for notifications to ML engineers."
+            ],
+            "expected_impact": "Fast, reliable responses to model failure.",
+            "priority": "CRITICAL",
+            "time_estimate": "16 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 8. Data Distribution Shifts and Monitoring",
+            "category": "Monitoring",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Leverage Testing in Production",
+            "description": "Use A/B testing and MAB testing to ensure continual improvement in performance, reliability and safety as models improve.",
+            "technical_details": "When updates make material change to predictions, these changes can be tested using live and direct measures",
+            "implementation_steps": [
+              "Step 1: Create the automated testing pipeline.",
+              "Step 2: A/B test new models against old models to create a statistical basis.",
+              "Step 3: Conduct bandit testing for new models."
+            ],
+            "expected_impact": "With robust testing, it\u2019s possible to get 1-2% lift from having newer, safer models over time",
+            "priority": "CRITICAL",
+            "time_estimate": "32 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 9. Continual Learning and Test in Production",
+            "category": "Testing",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Create a model store",
+            "description": "Create a model store that not only stores the model in blob storage but also provides documentation on the model, such as model code and details, data, framework, tags, etc.",
+            "technical_details": "Provide metadata on the model, such as who the owner is.",
+            "implementation_steps": [
+              "Step 1: Build a model to show what models can be stored.",
+              "Step 2:  Store details regarding the models, such as who created them, what features are needed, and how to implement them.",
+              "Step 3: Run experiments and track their information."
+            ],
+            "expected_impact": "Easy discovery of models, and troubleshooting/ debugging for the models. ",
+            "priority": "CRITICAL",
+            "time_estimate": "40 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 10. Infrastructure and Tooling for MLOps",
+            "category": "ML",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini",
+                "gemini"
+              ],
+              "count": 2,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Create Feature Store for data sharing",
+            "description": "Use a centralized feature store to handle common tasks for multiple ML applications to share data, discover data, transform data, etc.",
+            "technical_details": "The feature store will reduce bugs, while maximizing team efficiency by reducing duplication in effort.",
+            "implementation_steps": [
+              "Step 1: Create a feature store based on all features in training data.",
+              "Step 2:  Use this feature store with the ML models.",
+              "Step 3: Have a location to store all the data."
+            ],
+            "expected_impact": "Faster experimentation, debugging, and greater efficiency.",
+            "priority": "CRITICAL",
+            "time_estimate": "40 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 10. Infrastructure and Tooling for MLOps",
+            "category": "ML",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Track Data Lineage",
+            "description": "Keep track of the origin of each of your data samples as well as labels, including: where the data came from, processing steps it went through, the version of model etc.",
+            "technical_details": "Each element of the datalake or pipeline must be thoroughly documented from an information perspective. Make this a required step for code to move into production.",
+            "implementation_steps": [
+              "Step 1: Implement tracking with each new code feature in ML project.",
+              "Step 2: Test that the metadata moves correctly into the data lineage system.",
+              "Step 3: Ensure it\u2019s human-readable (as much as possible) so that the data can be used easily when debugging."
+            ],
+            "expected_impact": "Allows discovery of biases and debugging to troubleshoot problems.",
+            "priority": "CRITICAL",
+            "time_estimate": "16 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 4. Training Data",
+            "category": "Data Processing",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Monitor and respond to alert systems with the right team members",
+            "description": "Alerts must be addressed by the right team members, from those well acquainted with data pipelines and ML training, to other team members. Code, data, and artifacts must be versioned. Models should be sufficiently reproducible, code well-documented. When a problem occurs, different contributors should be able to work together to identify the problem and implement a solution without finger-pointing.",
+            "technical_details": "Alert systems must be documented with proper instructions for team members to respond and coordinate.",
+            "implementation_steps": [
+              "Step 1: Develop an alert response document with all the right team members.",
+              "Step 2: Determine a team structure where responsibilities are made clear.",
+              "Step 3: Enable a positive environment."
+            ],
+            "expected_impact": "Improved team efficiency, quicker response times, and less time spent trying to understand how to perform duties",
+            "priority": "CRITICAL",
+            "time_estimate": "8 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 1. Overview of Machine Learning Systems",
+            "category": "Security",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Minimize bias for algorithms through model cards",
+            "description": "Algorithms can discriminate against people if not audited appropriately, leading to biases at scale. Therefore, incorporate all details surrounding algorithm testing, data sets for testing, and ethical implications in Model Cards.",
+            "technical_details": "Develop AI models to monitor health-care that detect skin cancer and diagnose diabetes.",
+            "implementation_steps": [
+              "Step 1: Incorporate model components (algorithms, code and data)",
+              "Step 2: Create datasets to test and assess potential sources of bias",
+              "Step 3: Be transparent about what data has been used."
+            ],
+            "expected_impact": "Ensure ethical treatment and use of algorithms by ensuring they do not create biases at scale.",
+            "priority": "CRITICAL",
+            "time_estimate": "32 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 1. Overview of Machine Learning Systems",
+            "category": "Security",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Balance between data collection needs and privacy restrictions",
+            "description": "For the consumer ML sector, there are benefits to data collection, and there are greater concerns for user privacy. Make changes for Apple or Android phones to reduce third-party usage and target data collection from all sources for consumers.",
+            "technical_details": "Companies must take steps to curb the usage of advertiser IDs.",
+            "implementation_steps": [
+              "Step 1: Adjust code so that it takes into consideration both Android and Apple use cases for ML data collection.",
+              "Step 2: Determine which are the core benefits from data collection for algorithms vs potential privacy leaks.",
+              "Step 3: Build algorithms to help ensure that users' data is protected"
+            ],
+            "expected_impact": "Users are happier using the tool because they know their data is protected, and therefore keep using the system",
+            "priority": "CRITICAL",
+            "time_estimate": "24 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 3. Data Engineering Fundamentals",
+            "category": "Security",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          }
+        ],
+        "important": [
+          {
+            "title": "Implement Autoscaling for Resource Management",
+            "description": "Configure AWS services (EC2, SageMaker, etc.) to automatically scale up and down based on workload demands. This optimizes resource utilization and minimizes costs.",
+            "technical_details": "Use AWS Auto Scaling Groups and CloudWatch metrics to monitor CPU utilization, memory usage, and request latency. Define scaling policies based on these metrics.",
+            "implementation_steps": [
+              "Step 1: Define autoscaling policies for each ML service component.",
+              "Step 2: Configure CloudWatch metrics to monitor resource usage.",
+              "Step 3: Test autoscaling policies under various load conditions."
+            ],
+            "expected_impact": "Reduces infrastructure costs by dynamically adjusting resources based on actual usage. Ensures system availability during peak seasons.",
+            "priority": "IMPORTANT",
+            "time_estimate": "16 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 2. Introduction to Machine Learning Systems Design",
+            "category": "Architecture",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Choose Appropriate Data Serialization Formats",
+            "description": "Select efficient data serialization formats like Parquet for analytical processing and JSON for API communications to optimize storage and transmission speeds.",
+            "technical_details": "Use Parquet for storing large datasets used in batch processing (e.g., player statistics, game logs). Utilize JSON for real-time communication between services.",
+            "implementation_steps": [
+              "Step 1: Profile existing data storage and communication patterns.",
+              "Step 2: Migrate batch data to Parquet format.",
+              "Step 3: Ensure APIs use JSON for data exchange."
+            ],
+            "expected_impact": "Reduces storage costs, improves query performance for analytical workloads, and enhances API responsiveness.",
+            "priority": "IMPORTANT",
+            "time_estimate": "24 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 3. Data Engineering Fundamentals",
+            "category": "Data Processing",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Implement Tiered Storage Based on Access Frequency",
+            "description": "Store frequently accessed data (e.g., recent game stats) in high-performance storage (AWS S3 Standard) and less frequently accessed historical data in low-cost storage (AWS S3 Glacier).",
+            "technical_details": "Automate data migration between storage tiers based on data access patterns. Implement policies to ensure data is moved to appropriate tiers.",
+            "implementation_steps": [
+              "Step 1: Analyze data access patterns to determine hot and cold data.",
+              "Step 2: Configure data lifecycle policies in AWS S3.",
+              "Step 3: Automate data migration between storage tiers."
+            ],
+            "expected_impact": "Reduces storage costs while maintaining performance for frequently accessed data.",
+            "priority": "IMPORTANT",
+            "time_estimate": "16 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 3. Data Engineering Fundamentals",
+            "category": "Architecture",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Use weighted sampling for imbalanced classes",
+            "description": "Use weighted sampling to adjust for imbalanced classes in the training data, such as assigning higher weights to rare events like player injuries, ensuring models don't primarily focus on the majority class and ignore the important but infrequent events. ",
+            "technical_details": "Implement in-memory data augmentation by increasing weights assigned to minority classes. Utilize `random.choices` in Python with adjusted weights.",
+            "implementation_steps": [
+              "Step 1: Calculate class distribution in the training dataset.",
+              "Step 2: Assign weights inversely proportional to class frequency.",
+              "Step 3: Use the weights during model training."
+            ],
+            "expected_impact": "Better prediction of rare but critical events.",
+            "priority": "IMPORTANT",
+            "time_estimate": "8 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 4. Training Data",
+            "category": "Data Processing",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Train for model robustness with data augmentation",
+            "description": "Add noise or perturb data that may be imperfectly collected. In cases of voice recognition, add or change audio features; in data related to players and injuries, add random data to assess potential risks due to incomplete data.",
+            "technical_details": "Mix in different kinds of random disturbances or search for minimum possible injection of noise for targeted attacks to see if models are robust to these",
+            "implementation_steps": [
+              "Step 1: Identify potential noise scenarios in data collection.",
+              "Step 2: Add/inject random noise",
+              "Step 3: Measure resulting influence on the output."
+            ],
+            "expected_impact": "ML models should work with all real-world data, including data that is imperfectly collected.",
+            "priority": "IMPORTANT",
+            "time_estimate": "24 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 4. Training Data",
+            "category": "ML",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Combine quality and engagement scores",
+            "description": "If a post is engaging but is of bad quality, should that post rank high or low? Develop a formula to rate and score and then weight posts by quality or engagement. You might weight engagement 70% and quality 30%, or change weighting as circumstances change.",
+            "technical_details": "Create models for each objective, quality and engagement, decoupling them to give the ability to adjust",
+            "implementation_steps": [
+              "Step 1: Use the ML model to predict the quality of posts.",
+              "Step 2: Use the ML model to predict the number of clicks for each post.",
+              "Step 3: Using a defined formula, give the posts scores and rank by score."
+            ],
+            "expected_impact": "Optimize for what your goal is as you gain experience: engagement, quality or both, while maintaining the ability to change.",
+            "priority": "IMPORTANT",
+            "time_estimate": "32 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 2. Introduction to Machine Learning Systems Design",
+            "category": "ML",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Implement the hashing trick to address changing categories",
+            "description": "Given you might need to encode various categories, such as product brands or locations, implement the hashing trick to encode changing data",
+            "technical_details": "Utilize the hashing trick to give high feature coverage as well as limit your memory. ",
+            "implementation_steps": [
+              "Step 1: Determine what features should be subject to the hashing trick.",
+              "Step 2: Implement a custom hashing function.",
+              "Step 3: Generate the hashed value of categories and then use it to determine the index of that category. "
+            ],
+            "expected_impact": "You will be able to easily apply features with little coding for dynamic data",
+            "priority": "IMPORTANT",
+            "time_estimate": "16 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 5. Feature Engineering",
+            "category": "ML",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Define Data Slice to detect model deviation",
+            "description": "Devise different ways to slice or subset your data. Some subsets might be more helpful for gaining insights. Compare results for data coming in with new data to compare if you model performs well. ",
+            "technical_details": "Have domain expertise to analyze and define new or updated features",
+            "implementation_steps": [
+              "Step 1: Use domain expertise to understand what could cause a model to fail or succeed.",
+              "Step 2: Determine relevant data for models to examine.",
+              "Step 3: Run ML models using different subsets of data to compare.",
+              "Step 4: Use different algorithms for evaluation.",
+              "Step 5: Reiterate."
+            ],
+            "expected_impact": "Gain key insights to improve model",
+            "priority": "IMPORTANT",
+            "time_estimate": "24 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 8. Data Distribution Shifts and Monitoring",
+            "category": "Monitoring",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Collect and Monitor User Feedback",
+            "description": "Implement mechanisms to collect explicit or implicit user feedback on model predictions (e.g., thumbs up/down, clicks, conversions). Monitor trends in user feedback to detect potential model degradation.",
+            "technical_details": "Design a feedback collection system that integrates with the application. Use metrics like click-through rate (CTR) and conversion rate to monitor model performance.",
+            "implementation_steps": [
+              "Step 1: Implement a feedback collection mechanism (e.g., thumbs up/down).",
+              "Step 2: Track feedback events and store them in a database.",
+              "Step 3: Implement a monitoring dashboard to visualize feedback trends."
+            ],
+            "expected_impact": "Detect model performance degradation based on user interaction patterns.",
+            "priority": "IMPORTANT",
+            "time_estimate": "32 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 8. Data Distribution Shifts and Monitoring",
+            "category": "Monitoring",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Leverage Continual Learning For ML Training",
+            "description": "Rather than train ML models from scratch, use continual learning techniques such as stateful training, which allows models to be continually updated based on micro-batches. With stateful training, it is possible to avoid storing data altogether. ",
+            "technical_details": "Have a model that continually updates with every incoming data sample and then deploy that model as an update.",
+            "implementation_steps": [
+              "Step 1: Set up real-time infrastructure.",
+              "Step 2: Ensure that ML models can adapt to incoming data streams.",
+              "Step 3: Create model and deploy code with automated process."
+            ],
+            "expected_impact": "Avoids model decay over time.  ",
+            "priority": "IMPORTANT",
+            "time_estimate": "40 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 9. Continual Learning and Test in Production",
+            "category": "ML",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Use Kubernetes For Container Orchestration",
+            "description": "Use Kubernetes to connect and have your containers talk to each other, use resources or memory, and spin down. Create a network for containers to communicate with each other.",
+            "technical_details": "Learn Kubernetes commands, ensure you know how to have a network and containers that can share resources with each other as well as spin down and spin up without issues.",
+            "implementation_steps": [
+              "Step 1: Use Kubernetes for small data batches.",
+              "Step 2:  Test connections.",
+              "Step 3: Create a schedule that has Kubernetes spin containers up and down without needing to be online."
+            ],
+            "expected_impact": "Reliable way to execute, manage, scale, and maintain containers. ",
+            "priority": "IMPORTANT",
+            "time_estimate": "40 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 10. Infrastructure and Tooling for MLOps",
+            "category": "Architecture",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Create a cloud development environment to accelerate iterations",
+            "description": "Move your development environment into the cloud so that your model can have the necessary resources, such as a large amount of memory or larger GPUs. ",
+            "technical_details": "The tools should allow easy integrations.",
+            "implementation_steps": [
+              "Step 1: Get a cloud environment, such as an EC2.",
+              "Step 2:  Integrate cloud environment with necessary tools.",
+              "Step 3: Test the new environment with several processes."
+            ],
+            "expected_impact": "Significant improvements in experimentation and iteration speed. ",
+            "priority": "IMPORTANT",
+            "time_estimate": "16 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 10. Infrastructure and Tooling for MLOps",
+            "category": "Architecture",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Form diverse teams",
+            "description": "Build Responsible AI by incorporating engineers with different backgrounds and expertise",
+            "technical_details": "People in different roles offer unique insights",
+            "implementation_steps": [
+              "Step 1: Establish a team composed of people from various backgrounds.",
+              "Step 2: Open up the ML project to as many sources of information as possible. This may involve asking SMEs for expertise."
+            ],
+            "expected_impact": "Gain better insights and perspectives to build responsible AI",
+            "priority": "IMPORTANT",
+            "time_estimate": "24 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 11. The Human Side of Machine Learning",
+            "category": "Security",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          },
+          {
+            "title": "Address differing stakeholder interests with multiple models",
+            "description": "When stakeholders have conflicting objectives (e.g., recommend restaurants users are most likely to order from vs recommend more expensive restaurants) create one model for each objective and combine their predictions, rather than creating one complex model.",
+            "technical_details": "Train A and B, and then use both models simultaneously to give predictions.",
+            "implementation_steps": [
+              "Step 1: Clearly define different objectives, such as the restaurants that users click on most.",
+              "Step 2: Train each model.",
+              "Step 3: Run both A and B to generate predictions."
+            ],
+            "expected_impact": "Can satisfy differing and potentially conflicting objectives, by making model development and maintenance easier. ",
+            "priority": "IMPORTANT",
+            "time_estimate": "32 hours",
+            "dependencies": [],
+            "source_chapter": "Chapter 1. Overview of Machine Learning Systems",
+            "category": "ML",
+            "_source": "gemini",
+            "_consensus": {
+              "sources": [
+                "gemini"
+              ],
+              "count": 1,
+              "both_agree": false
+            }
+          }
+        ],
         "nice_to_have": []
       }
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-18T16:48:48.296798",
+      "timestamp": "2025-10-18T16:55:41.723077",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -86,7 +1528,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-18T16:48:50.281845",
+      "timestamp": "2025-10-18T16:55:44.200901",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -95,7 +1537,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-18T16:48:52.254482",
+      "timestamp": "2025-10-18T16:55:45.978830",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -104,7 +1546,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-18T16:48:54.135226",
+      "timestamp": "2025-10-18T16:55:47.754298",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -113,7 +1555,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-18T16:48:55.786652",
+      "timestamp": "2025-10-18T16:55:49.636909",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -122,7 +1564,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-18T16:48:57.522465",
+      "timestamp": "2025-10-18T16:55:51.377760",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -131,7 +1573,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-18T16:49:34.676162",
+      "timestamp": "2025-10-18T16:55:53.049948",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -142,13 +1584,13 @@
   "convergence_achieved": false,
   "convergence_iteration": null,
   "total_recommendations": {
-    "critical": 0,
-    "important": 0,
+    "critical": 30,
+    "important": 29,
     "nice_to_have": 0
   },
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-18T16:49:34.676181",
+  "end_time": "2025-10-18T16:55:53.049968",
   "total_iterations": 15
 }

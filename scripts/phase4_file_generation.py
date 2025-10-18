@@ -431,14 +431,7 @@ python scripts/rollback_manager.py --restore [backup_id]
             logger.error("❌ No recommendations to process")
             return {'error': 'No recommendations found'}
 
-        # Create backup before proceeding
-        if not dry_run:
-            logger.info("📦 Creating backup...")
-            backup_id = self.rollback_mgr.create_backup(
-                phase='phase_4',
-                description="Before file generation"
-            )
-            logger.info(f"   ✅ Backup created: {backup_id}\n")
+        # Note: Backup is handled by orchestrator, not here
 
         # Generate files for each recommendation
         files_created = []
