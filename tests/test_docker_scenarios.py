@@ -247,3 +247,4 @@ class TestDockerScenarios:
             assert sm.validate_secrets() is True
             assert len(sm.secrets) == 1
             assert len(sm.aliases) == 1
+

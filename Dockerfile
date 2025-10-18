@@ -48,3 +48,4 @@ ENTRYPOINT ["/app/entrypoint.sh"]
 # Default command
 CMD ["python", "-m", "mcp_server.fastmcp_server"]
 
+

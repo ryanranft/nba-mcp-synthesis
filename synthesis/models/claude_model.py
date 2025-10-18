@@ -45,6 +45,97 @@ class ClaudeModel:
         )  # Fallback to default
         logger.info(f"Initialized Claude model: {self.model}")
 
+    async def analyze_book(
+        self,
+        book_content: str,
+        book_title: str,
+        book_metadata: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Analyze book content and extract recommendations.
+
+        Args:
+            book_content: Full book text content
+            book_title: Title of the book
+            book_metadata: Book metadata dictionary
+
+        Returns:
+            Dict with success, recommendations, cost, input_tokens
+        """
+        start_time = datetime.now()
+
+        prompt = f"""You are an expert technical analyst extracting actionable recommendations from technical books for NBA analytics and simulation systems.
+
+BOOK: "{book_title}"
+
+TASK: Analyze this book and extract specific, implementable recommendations for an NBA basketball analytics platform built on AWS.
+
+BOOK CONTENT:
+{book_content[:50000]}
+
+Extract 10-30 recommendations in JSON format:
+[
+  {{
+    "title": "Recommendation title",
+    "description": "What to implement",
+    "technical_details": "Implementation specifics",
+    "implementation_steps": ["Step 1", "Step 2"],
+    "priority": "CRITICAL|IMPORTANT|NICE-TO-HAVE",
+    "category": "ML|Statistics|Architecture|etc"
+  }}
+]
+
+Return ONLY the JSON array, no additional text."""
+
+        try:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=4096,
+                temperature=0.7,
+                messages=[{"role": "user", "content": prompt}]
+            )
+
+            content = response.content[0].text
+
+            # Extract JSON recommendations
+            try:
+                import re
+                json_match = re.search(r'\[.*\]', content, re.DOTALL)
+                if json_match:
+                    recommendations = json.loads(json_match.group(0))
+                else:
+                    recommendations = []
+            except:
+                recommendations = []
+
+            # Calculate cost (Claude pricing)
+            input_tokens = response.usage.input_tokens
+            output_tokens = response.usage.output_tokens
+            cost = (input_tokens / 1_000_000 * 3.0) + (output_tokens / 1_000_000 * 15.0)
+
+            processing_time = (datetime.now() - start_time).total_seconds()
+
+            logger.info(f"✅ Claude analyzed {book_title}: {len(recommendations)} recommendations")
+
+            return {
+                "success": True,
+                "recommendations": recommendations,
+                "cost": cost,
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
+                "processing_time": processing_time
+            }
+
+        except Exception as e:
+            logger.error(f"❌ Claude analysis failed: {str(e)}")
+            return {
+                "success": False,
+                "error": str(e),
+                "recommendations": [],
+                "cost": 0.0,
+                "input_tokens": 0
+            }
+
     async def synthesize(
         self,
         deepseek_result: str,

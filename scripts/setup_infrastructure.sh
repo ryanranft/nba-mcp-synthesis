@@ -340,3 +340,4 @@ trap 'log_error "Script failed at line $LINENO"' ERR
 parse_args "$@"
 main
 
+

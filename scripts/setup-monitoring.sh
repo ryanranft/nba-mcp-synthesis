@@ -235,3 +235,4 @@ echo "   journalctl -u nba-secrets-monitor -f"
 echo ""
 echo "⚙️  To configure alerts, edit: $MONITOR_DIR/config.json"
 
+

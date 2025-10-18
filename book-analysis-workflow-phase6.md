@@ -154,5 +154,27 @@ git checkout 3a1ef01 -- .
 
 ---
 
+## Workflow Divergence
+
+After Phase 9 completes, choose your improvement path:
+
+**Workflow A: MCP Improvement (Phases 10A-12A)**
+- Read AI/ML/programming books
+- Improve MCP tools, performance, and APIs
+- See: `WORKFLOW_A_MCP_IMPROVEMENT.md`
+
+**Workflow B: Simulator Improvement (Phases 10B-12B)**
+- Read sports analytics/econometrics/statistics books
+- Improve prediction accuracy for box scores, player stats, team stats
+- See: `WORKFLOW_B_SIMULATOR_IMPROVEMENT.md`
+
+**Both Workflows:**
+- Can run simultaneously on different book sets
+- Share Phases 0-9 infrastructure
+- See: `DUAL_WORKFLOW_QUICK_START.md`
+
+---
+
 **Phase 6 Status:** ✅ COMPLETE
 **Ready for Phase 7:** ✅ YES
+**Dual Workflow Documentation:** ✅ COMPLETE

@@ -49,6 +49,7 @@ class GPT4Model:
         raw_recommendations: List[Dict[str, Any]],
         book_metadata: Dict[str, Any],
         existing_recommendations: Optional[List[Dict[str, Any]]] = None,
+        book_content: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Synthesize raw recommendations into specific, implementable recommendations for the NBA Simulator AWS project.
@@ -68,6 +69,7 @@ class GPT4Model:
             raw_recommendations=raw_recommendations,
             book_metadata=book_metadata,
             existing_recommendations=existing_recommendations,
+            book_content=book_content,
         )
 
         try:
@@ -117,12 +119,37 @@ class GPT4Model:
         raw_recommendations: List[Dict[str, Any]],
         book_metadata: Dict[str, Any],
         existing_recommendations: Optional[List[Dict[str, Any]]] = None,
+        book_content: Optional[str] = None,
     ) -> str:
         """Build prompt for implementation synthesis"""
 
         title = book_metadata.get("title", "Unknown")
         author = book_metadata.get("author", "Unknown")
 
+        # If book_content is provided, analyze it directly
+        if book_content:
+            prompt = f"""You are an expert technical analyst extracting recommendations from technical books for NBA analytics systems.
+
+BOOK: {title}
+
+Analyze this book content and extract 10-30 actionable recommendations:
+
+{book_content[:50000]}
+
+Return JSON array format:
+[
+  {{
+    "title": "...",
+    "description": "...",
+    "priority": "CRITICAL|IMPORTANT|NICE-TO-HAVE",
+    "category": "ML|Statistics|Architecture|etc"
+  }}
+]
+
+Return ONLY the JSON array, no additional text."""
+            return prompt
+
+        # Original synthesis logic (synthesize from raw_recommendations)
         existing_context = ""
         if existing_recommendations:
             existing_context = f"""

@@ -501,8 +501,15 @@ class MasterRecommendations:
             new_rec = str(new_rec)
 
         for existing in self.recommendations["recommendations"]:
+            # Handle both string and dict titles (defensive coding)
+            existing_title = existing.get("title", "")
+            if isinstance(existing_title, dict):
+                # If title is a dict, try to extract string representation
+                existing_title = existing_title.get("text", str(existing_title))
+            existing_title = str(existing_title)
+
             similarity = SequenceMatcher(
-                None, new_rec.lower(), existing["title"].lower()
+                None, new_rec.lower(), existing_title.lower()
             ).ratio()
 
             if similarity >= threshold:
@@ -553,12 +560,13 @@ class MasterRecommendations:
 class RecursiveAnalyzer:
     """Performs recursive MCP-based book analysis with intelligence layer."""
 
-    def __init__(self, config: Dict):
+    def __init__(self, config: Dict, use_high_context: bool = False):
         self.config = config
         self.s3_bucket = config["s3_bucket"]
         self.project_context = config["project_context"]
         self.convergence_threshold = config["convergence_threshold"]
         self.max_iterations = config["max_iterations"]
+        self.use_high_context = use_high_context
 
         # Initialize project scanner
         self.project_paths = config.get(
@@ -575,6 +583,13 @@ class RecursiveAnalyzer:
 
         # Project knowledge base (loaded on first use)
         self.knowledge_base = None
+
+        # Log analyzer type
+        if use_high_context:
+            logger.info("🚀 Using High-Context Analyzer (Gemini 1.5 Pro + Claude Sonnet 4)")
+            logger.info("📊 Context: up to 250k tokens (~1M characters) per book")
+        else:
+            logger.info("🚀 Using Standard Analyzer (4 models, 25k tokens per book)")
 
     async def analyze_book_recursively(self, book: Dict, output_dir: str) -> Dict:
         """
@@ -907,37 +922,53 @@ Only include recommendations that are genuinely new or significantly different f
         Returns:
             Dict with categorized recommendations
         """
-        logger.info("🤖 Running resilient analysis (Google + DeepSeek only)...")
+        # Use appropriate analyzer based on configuration
+        if self.use_high_context:
+            logger.info("🤖 Running high-context analysis (Gemini 1.5 Pro + Claude Sonnet 4)...")
+            from high_context_book_analyzer import HighContextBookAnalyzer
 
-        # Import resilient analyzer
-        from resilient_book_analyzer import ResilientBookAnalyzer
+            analyzer = HighContextBookAnalyzer()
+            analysis_result = await analyzer.analyze_book(book)
+        else:
+            logger.info("🤖 Running standard analysis (4 models)...")
+            from resilient_book_analyzer import ResilientBookAnalyzer
 
-        analyzer = ResilientBookAnalyzer()
-        analysis_result = await analyzer.analyze_book(book)
+            analyzer = ResilientBookAnalyzer()
+            analysis_result = await analyzer.analyze_book(book)
 
         # Convert to expected format
         recommendations = {
             "critical": [
                 r
-                for r in synthesis_result.recommendations
+                for r in analysis_result.recommendations
                 if r.get("priority") == "CRITICAL"
             ],
             "important": [
                 r
-                for r in synthesis_result.recommendations
+                for r in analysis_result.recommendations
                 if r.get("priority") == "IMPORTANT"
             ],
             "nice_to_have": [],  # Only include Critical/Important from consensus
         }
 
         # Add cost tracking info
-        logger.info(f"💰 Analysis cost: ${synthesis_result.total_cost:.4f}")
-        logger.info(f"   Google: ${synthesis_result.google_cost:.4f}")
-        logger.info(f"   DeepSeek: ${synthesis_result.deepseek_cost:.4f}")
-        logger.info(f"   Claude: ${synthesis_result.claude_cost:.4f}")
-        logger.info(f"   GPT-4: ${synthesis_result.gpt4_cost:.4f}")
-        logger.info(f"🔢 Tokens used: {synthesis_result.total_tokens:,}")
-        logger.info(f"⏱️ Processing time: {synthesis_result.total_time:.1f}s")
+        logger.info(f"💰 Analysis cost: ${analysis_result.total_cost:.4f}")
+        if self.use_high_context:
+            # High-context analyzer (Gemini + Claude)
+            logger.info(f"   Gemini 1.5 Pro: ${analysis_result.gemini_cost:.4f}")
+            logger.info(f"   Claude Sonnet 4: ${analysis_result.claude_cost:.4f}")
+            logger.info(f"📊 Content analyzed: {analysis_result.content_chars:,} characters")
+            logger.info(f"💰 Pricing tier: {analysis_result.pricing_tier}")
+        else:
+            # Standard analyzer (4 models)
+            logger.info(f"   Google: ${analysis_result.google_cost:.4f}")
+            logger.info(f"   DeepSeek: ${analysis_result.deepseek_cost:.4f}")
+            logger.info(f"   Claude: ${analysis_result.claude_cost:.4f}")
+            logger.info(f"   GPT-4: ${analysis_result.gpt4_cost:.4f}")
+            logger.info(f"🤖 Models used: {', '.join(analysis_result.models_used)}")
+        logger.info(f"🔢 Tokens used: {analysis_result.total_tokens:,}")
+        logger.info(f"⏱️ Processing time: {analysis_result.total_time:.1f}s")
+        logger.info(f"🎯 Consensus: {analysis_result.consensus_level}")
 
         logger.info(
             f"  Found {sum(len(v) for v in recommendations.values())} recommendations"
@@ -1210,7 +1241,14 @@ class PlanGenerator:
         for iter_data in tracker["iterations"]:
             recs = iter_data["recommendations"]
             for category in ["critical", "important", "nice_to_have"]:
-                all_recs[category].update(recs.get(category, []))
+                # Add string titles to set (deduplicates automatically)
+                for rec in recs.get(category, []):
+                    # Extract title from dict or use string directly
+                    if isinstance(rec, dict):
+                        rec_title = rec.get("title", str(rec))
+                    else:
+                        rec_title = str(rec)
+                    all_recs[category].add(rec_title)
 
         # Generate plans for critical and important items
         plan_num = 1
@@ -1466,6 +1504,11 @@ Examples:
         default="analysis_results",
         help="Output directory for results",
     )
+    parser.add_argument(
+        "--high-context",
+        action="store_true",
+        help="Use high-context analyzer (Gemini 1.5 Pro + Claude Sonnet 4, reads up to 250k tokens)",
+    )
 
     args = parser.parse_args()
 
@@ -1535,7 +1578,7 @@ Examples:
     book_manager.print_summary(results)
 
     # Analyze books
-    analyzer = RecursiveAnalyzer(analysis_config)
+    analyzer = RecursiveAnalyzer(analysis_config, use_high_context=args.high_context)
     report_gen = RecommendationGenerator()
     plan_gen = PlanGenerator()
 

@@ -215,3 +215,4 @@ The init container is responsible for:
 14. **Implement proper health checks and probes**
 15. **Use TLS for all external communication**
 
+

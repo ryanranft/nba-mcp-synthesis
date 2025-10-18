@@ -438,3 +438,4 @@ kubectl scale deployment nba-mcp-synthesis --replicas=0 -n nba-mcp-synthesis
 
 Follow this guide step-by-step for a successful production deployment. Each phase includes validation steps to ensure everything is working correctly before proceeding to the next phase.
 
+

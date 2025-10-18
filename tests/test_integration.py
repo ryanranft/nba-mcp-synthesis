@@ -254,3 +254,4 @@ class TestSecretsManagerIntegration:
             # Verify logging worked
             assert len(sm.secrets) == 1
             assert len(sm.aliases) == 1
+

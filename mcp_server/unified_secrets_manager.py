@@ -223,13 +223,16 @@ class UnifiedSecretsManager:
                     secret_value = f.read().strip()
                     secret_name = env_file.stem.upper()
 
-                    # Validate naming convention
+                    # Load the secret/config value
+                    secrets[secret_name] = secret_value
+
+                    # Validate naming convention (log only, don't prevent loading)
                     if self._is_valid_naming_convention(secret_name):
-                        secrets[secret_name] = secret_value
                         logger.debug(f"Loaded {secret_name} from {level_name}")
                     else:
-                        logger.warning(
-                            f"Invalid naming convention for {secret_name} in {level_name}"
+                        # Log as debug instead of warning for config variables
+                        logger.debug(
+                            f"Loaded {secret_name} from {level_name} (non-standard naming)"
                         )
 
             except Exception as e:

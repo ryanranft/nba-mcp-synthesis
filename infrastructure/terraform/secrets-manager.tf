@@ -87,3 +87,4 @@ output "secrets_manager_policy_arn" {
   value       = aws_iam_policy.secrets_manager_access.arn
 }
 
+

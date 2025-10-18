@@ -1,0 +1,154 @@
+{
+  "book_title": "Hastie, Tibshirani, Friedman   \"Elements of Statistical Learning\"",
+  "s3_path": "books/Hastie, Tibshirani, Friedman - \"Elements of Statistical Learning\".pdf",
+  "start_time": "2025-10-18T08:49:06.273619",
+  "iterations": [
+    {
+      "iteration": 1,
+      "timestamp": "2025-10-18T08:51:21.064402",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 2,
+      "timestamp": "2025-10-18T08:53:42.531313",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 3,
+      "timestamp": "2025-10-18T08:56:04.079321",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 4,
+      "timestamp": "2025-10-18T08:58:23.609775",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 5,
+      "timestamp": "2025-10-18T09:00:35.670879",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 6,
+      "timestamp": "2025-10-18T09:02:43.489987",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 7,
+      "timestamp": "2025-10-18T09:05:05.306917",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 8,
+      "timestamp": "2025-10-18T09:07:27.186870",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 9,
+      "timestamp": "2025-10-18T09:09:41.552341",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 10,
+      "timestamp": "2025-10-18T09:12:04.673640",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 11,
+      "timestamp": "2025-10-18T09:14:26.950891",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 12,
+      "timestamp": "2025-10-18T09:16:48.997839",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 13,
+      "timestamp": "2025-10-18T09:19:10.854545",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 14,
+      "timestamp": "2025-10-18T09:21:29.056056",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 15,
+      "timestamp": "2025-10-18T09:23:50.719675",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    }
+  ],
+  "convergence_achieved": false,
+  "convergence_iteration": null,
+  "total_recommendations": {
+    "critical": 0,
+    "important": 0,
+    "nice_to_have": 0
+  },
+  "new_recommendations": 0,
+  "duplicate_recommendations": 0,
+  "improved_recommendations": 0,
+  "end_time": "2025-10-18T09:23:50.719723",
+  "total_iterations": 15
+}
