@@ -1,237 +1,12 @@
 {
   "phase": "phase_4_file_generation",
   "tier": 0,
-  "timestamp": "2025-10-18T17:01:54.050054",
-  "recommendations_processed": 49,
+  "timestamp": "2025-10-18T17:09:55.510523",
+  "recommendations_processed": 24,
   "files_created": [
     {
-      "recommendation": "Prioritize Business Objectives Over ML Metrics",
-      "directory": "implementation_plans/recommendations/rec_001_prioritize_business_objectives_over_ml_metrics",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Implement Reliability Mechanisms for Predictions",
-      "directory": "implementation_plans/recommendations/rec_002_implement_reliability_mechanisms_for_predictions",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Prioritize Data Understanding by Examining Data Sources",
-      "directory": "implementation_plans/recommendations/rec_003_prioritize_data_understanding_by_examining_data_so",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Address Data Leakage",
-      "directory": "implementation_plans/recommendations/rec_004_address_data_leakage",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Design for Scalability Using Resource Scaling",
-      "directory": "implementation_plans/recommendations/rec_005_design_for_scalability_using_resource_scaling",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Employ Column-Major Formats for Feature Access",
-      "directory": "implementation_plans/recommendations/rec_006_employ_column_major_formats_for_feature_access",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Integrate In-Memory Storage for Data Caching",
-      "directory": "implementation_plans/recommendations/rec_007_integrate_in_memory_storage_for_data_caching",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Implement a Pubsub System for Streaming Data",
-      "directory": "implementation_plans/recommendations/rec_008_implement_a_pubsub_system_for_streaming_data",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Incorporate Weighted Sampling to Account for Data Imbalance",
-      "directory": "implementation_plans/recommendations/rec_009_incorporate_weighted_sampling_to_account_for_data_",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Apply Importance Sampling for Distribution Correction",
-      "directory": "implementation_plans/recommendations/rec_010_apply_importance_sampling_for_distribution_correct",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Implement and Validate Invertibility and Data Integrity",
-      "directory": "implementation_plans/recommendations/rec_011_implement_and_validate_invertibility_and_data_inte",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Perform Directional Expectation Tests on Features",
-      "directory": "implementation_plans/recommendations/rec_012_perform_directional_expectation_tests_on_features",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Evaluate Sensitivity of Hyperparameters",
-      "directory": "implementation_plans/recommendations/rec_013_evaluate_sensitivity_of_hyperparameters",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Use F1 Score, Precision and Recall",
-      "directory": "implementation_plans/recommendations/rec_014_use_f1_score_precision_and_recall",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Evaluate using the AUC Curve",
-      "directory": "implementation_plans/recommendations/rec_015_evaluate_using_the_auc_curve",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Make Use of a Backup System for High Latency Queries",
-      "directory": "implementation_plans/recommendations/rec_016_make_use_of_a_backup_system_for_high_latency_queri",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Implement Invariant Tests to Validate Model Stability",
-      "directory": "implementation_plans/recommendations/rec_017_implement_invariant_tests_to_validate_model_stabil",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Incorporate a Push Deployment",
-      "directory": "implementation_plans/recommendations/rec_018_incorporate_a_push_deployment",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Combine the Use of Static Features",
-      "directory": "implementation_plans/recommendations/rec_019_combine_the_use_of_static_features",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Combine Stream and Batch Processing",
-      "directory": "implementation_plans/recommendations/rec_020_combine_stream_and_batch_processing",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Combine Manual Intervention and Automation",
-      "directory": "implementation_plans/recommendations/rec_021_combine_manual_intervention_and_automation",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Track Long Term and Local Factors",
-      "directory": "implementation_plans/recommendations/rec_022_track_long_term_and_local_factors",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Mitigate Biases by Understanding Trade-Offs",
-      "directory": "implementation_plans/recommendations/rec_023_mitigate_biases_by_understanding_trade_offs",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Set Performance and Reporting Goals",
-      "directory": "implementation_plans/recommendations/rec_024_set_performance_and_reporting_goals",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
-      "recommendation": "Leverage Data Lineage",
-      "directory": "implementation_plans/recommendations/rec_025_leverage_data_lineage",
-      "files": [
-        "README.md",
-        "implementation.py",
-        "INTEGRATION_GUIDE.md"
-      ]
-    },
-    {
       "recommendation": "Employ Logistic Regression for Predicting Game Outcomes",
-      "directory": "implementation_plans/recommendations/rec_026_employ_logistic_regression_for_predicting_game_out",
+      "directory": "implementation_plans/recommendations/rec_001_employ_logistic_regression_for_predicting_game_out",
       "files": [
         "README.md",
         "implementation.py",
@@ -240,7 +15,7 @@
     },
     {
       "recommendation": "Implement k-Nearest Neighbors (k-NN) for Player Similarity Analysis",
-      "directory": "implementation_plans/recommendations/rec_027_implement_k_nearest_neighbors_k_nn_for_player_simi",
+      "directory": "implementation_plans/recommendations/rec_002_implement_k_nearest_neighbors_k_nn_for_player_simi",
       "files": [
         "README.md",
         "implementation.py",
@@ -249,7 +24,7 @@
     },
     {
       "recommendation": "Implement Data Scrubbing Pipeline for Data Quality",
-      "directory": "implementation_plans/recommendations/rec_028_implement_data_scrubbing_pipeline_for_data_quality",
+      "directory": "implementation_plans/recommendations/rec_003_implement_data_scrubbing_pipeline_for_data_quality",
       "files": [
         "README.md",
         "implementation.py",
@@ -258,7 +33,7 @@
     },
     {
       "recommendation": "Implement Linear Regression for Player Performance Prediction",
-      "directory": "implementation_plans/recommendations/rec_029_implement_linear_regression_for_player_performance",
+      "directory": "implementation_plans/recommendations/rec_004_implement_linear_regression_for_player_performance",
       "files": [
         "README.md",
         "implementation.py",
@@ -267,7 +42,7 @@
     },
     {
       "recommendation": "Implement Linear Regression for Score Prediction",
-      "directory": "implementation_plans/recommendations/rec_030_implement_linear_regression_for_score_prediction",
+      "directory": "implementation_plans/recommendations/rec_005_implement_linear_regression_for_score_prediction",
       "files": [
         "README.md",
         "implementation.py",
@@ -276,7 +51,7 @@
     },
     {
       "recommendation": "Implement Data Scrubbing Pipeline",
-      "directory": "implementation_plans/recommendations/rec_031_implement_data_scrubbing_pipeline",
+      "directory": "implementation_plans/recommendations/rec_006_implement_data_scrubbing_pipeline",
       "files": [
         "README.md",
         "implementation.py",
@@ -285,7 +60,7 @@
     },
     {
       "recommendation": "Implement k-Nearest Neighbors for Player Classification",
-      "directory": "implementation_plans/recommendations/rec_032_implement_k_nearest_neighbors_for_player_classific",
+      "directory": "implementation_plans/recommendations/rec_007_implement_k_nearest_neighbors_for_player_classific",
       "files": [
         "README.md",
         "implementation.py",
@@ -294,7 +69,7 @@
     },
     {
       "recommendation": "Implement Feature Selection for Player Performance Prediction",
-      "directory": "implementation_plans/recommendations/rec_033_implement_feature_selection_for_player_performance",
+      "directory": "implementation_plans/recommendations/rec_008_implement_feature_selection_for_player_performance",
       "files": [
         "README.md",
         "implementation.py",
@@ -303,7 +78,7 @@
     },
     {
       "recommendation": "Implement Linear Regression for Player Performance Prediction",
-      "directory": "implementation_plans/recommendations/rec_034_implement_linear_regression_for_player_performance",
+      "directory": "implementation_plans/recommendations/rec_009_implement_linear_regression_for_player_performance",
       "files": [
         "README.md",
         "implementation.py",
@@ -312,7 +87,7 @@
     },
     {
       "recommendation": "Implement Data Scrubbing Pipeline",
-      "directory": "implementation_plans/recommendations/rec_035_implement_data_scrubbing_pipeline",
+      "directory": "implementation_plans/recommendations/rec_010_implement_data_scrubbing_pipeline",
       "files": [
         "README.md",
         "implementation.py",
@@ -321,7 +96,7 @@
     },
     {
       "recommendation": "Implement Feature Selection and Engineering",
-      "directory": "implementation_plans/recommendations/rec_036_implement_feature_selection_and_engineering",
+      "directory": "implementation_plans/recommendations/rec_011_implement_feature_selection_and_engineering",
       "files": [
         "README.md",
         "implementation.py",
@@ -330,7 +105,7 @@
     },
     {
       "recommendation": "Implement Linear Regression for Player Performance Prediction",
-      "directory": "implementation_plans/recommendations/rec_037_implement_linear_regression_for_player_performance",
+      "directory": "implementation_plans/recommendations/rec_012_implement_linear_regression_for_player_performance",
       "files": [
         "README.md",
         "implementation.py",
@@ -339,7 +114,7 @@
     },
     {
       "recommendation": "Implement Data Scrubbing Pipeline",
-      "directory": "implementation_plans/recommendations/rec_038_implement_data_scrubbing_pipeline",
+      "directory": "implementation_plans/recommendations/rec_013_implement_data_scrubbing_pipeline",
       "files": [
         "README.md",
         "implementation.py",
@@ -348,7 +123,7 @@
     },
     {
       "recommendation": "Implement Linear Regression for Player Performance Prediction",
-      "directory": "implementation_plans/recommendations/rec_039_implement_linear_regression_for_player_performance",
+      "directory": "implementation_plans/recommendations/rec_014_implement_linear_regression_for_player_performance",
       "files": [
         "README.md",
         "implementation.py",
@@ -357,7 +132,7 @@
     },
     {
       "recommendation": "Implement Data Scrubbing and Feature Engineering Pipeline",
-      "directory": "implementation_plans/recommendations/rec_040_implement_data_scrubbing_and_feature_engineering_p",
+      "directory": "implementation_plans/recommendations/rec_015_implement_data_scrubbing_and_feature_engineering_p",
       "files": [
         "README.md",
         "implementation.py",
@@ -366,7 +141,7 @@
     },
     {
       "recommendation": "Apply Logistic Regression for Predicting Game Outcomes",
-      "directory": "implementation_plans/recommendations/rec_041_apply_logistic_regression_for_predicting_game_outc",
+      "directory": "implementation_plans/recommendations/rec_016_apply_logistic_regression_for_predicting_game_outc",
       "files": [
         "README.md",
         "implementation.py",
@@ -375,7 +150,7 @@
     },
     {
       "recommendation": "Implement Data Scrubbing Pipeline",
-      "directory": "implementation_plans/recommendations/rec_042_implement_data_scrubbing_pipeline",
+      "directory": "implementation_plans/recommendations/rec_017_implement_data_scrubbing_pipeline",
       "files": [
         "README.md",
         "implementation.py",
@@ -384,7 +159,7 @@
     },
     {
       "recommendation": "Apply k-Nearest Neighbors for Player Similarity",
-      "directory": "implementation_plans/recommendations/rec_043_apply_k_nearest_neighbors_for_player_similarity",
+      "directory": "implementation_plans/recommendations/rec_018_apply_k_nearest_neighbors_for_player_similarity",
       "files": [
         "README.md",
         "implementation.py",
@@ -393,7 +168,7 @@
     },
     {
       "recommendation": "Implement Linear Regression for Player Performance Prediction",
-      "directory": "implementation_plans/recommendations/rec_044_implement_linear_regression_for_player_performance",
+      "directory": "implementation_plans/recommendations/rec_019_implement_linear_regression_for_player_performance",
       "files": [
         "README.md",
         "implementation.py",
@@ -402,7 +177,7 @@
     },
     {
       "recommendation": "Implement k-Nearest Neighbors (k-NN) for Player Similarity Analysis",
-      "directory": "implementation_plans/recommendations/rec_045_implement_k_nearest_neighbors_k_nn_for_player_simi",
+      "directory": "implementation_plans/recommendations/rec_020_implement_k_nearest_neighbors_k_nn_for_player_simi",
       "files": [
         "README.md",
         "implementation.py",
@@ -411,7 +186,7 @@
     },
     {
       "recommendation": "Implement Data Scrubbing Pipeline for Data Quality",
-      "directory": "implementation_plans/recommendations/rec_046_implement_data_scrubbing_pipeline_for_data_quality",
+      "directory": "implementation_plans/recommendations/rec_021_implement_data_scrubbing_pipeline_for_data_quality",
       "files": [
         "README.md",
         "implementation.py",
@@ -420,7 +195,7 @@
     },
     {
       "recommendation": "Implement Linear Regression for Player Performance Prediction",
-      "directory": "implementation_plans/recommendations/rec_047_implement_linear_regression_for_player_performance",
+      "directory": "implementation_plans/recommendations/rec_022_implement_linear_regression_for_player_performance",
       "files": [
         "README.md",
         "implementation.py",
@@ -429,7 +204,7 @@
     },
     {
       "recommendation": "Implement Data Scrubbing Pipeline",
-      "directory": "implementation_plans/recommendations/rec_048_implement_data_scrubbing_pipeline",
+      "directory": "implementation_plans/recommendations/rec_023_implement_data_scrubbing_pipeline",
       "files": [
         "README.md",
         "implementation.py",
@@ -438,7 +213,7 @@
     },
     {
       "recommendation": "Implement Linear Regression for Player Performance Prediction",
-      "directory": "implementation_plans/recommendations/rec_049_implement_linear_regression_for_player_performance",
+      "directory": "implementation_plans/recommendations/rec_024_implement_linear_regression_for_player_performance",
       "files": [
         "README.md",
         "implementation.py",
@@ -446,5 +221,5 @@
       ]
     }
   ],
-  "total_files": 147
+  "total_files": 72
 }
