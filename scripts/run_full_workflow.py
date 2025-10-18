@@ -61,7 +61,9 @@ class Tier0WorkflowOrchestrator:
     async def run_phase2(
         self,
         book_title: str,
-        dry_run: bool = False
+        dry_run: bool = False,
+        use_parallel: bool = False,
+        max_workers: int = 4
     ) -> bool:
         """
         Run Phase 2: Recursive Book Analysis.
@@ -69,6 +71,8 @@ class Tier0WorkflowOrchestrator:
         Args:
             book_title: Book to analyze
             dry_run: Preview without executing
+            use_parallel: Enable parallel execution
+            max_workers: Number of parallel workers
 
         Returns:
             True if successful
@@ -98,6 +102,11 @@ class Tier0WorkflowOrchestrator:
             '--book', book_title,
             '--high-context'  # Use high-context analyzer
         ]
+
+        # Add parallel flags if enabled
+        if use_parallel:
+            cmd.extend(['--parallel', '--max-workers', str(max_workers)])
+            logger.info(f"🔀 Parallel execution enabled: {max_workers} workers\n")
 
         if dry_run:
             cmd.append('--dry-run')
@@ -264,32 +273,39 @@ class Tier0WorkflowOrchestrator:
         self,
         book_title: str,
         dry_run: bool = False,
-        skip_validation: bool = False
+        skip_validation: bool = False,
+        use_parallel: bool = False,
+        max_workers: int = 4
     ) -> bool:
         """
-        Run complete Tier 0 workflow.
+        Run complete Tier 0/1 workflow.
 
         Args:
             book_title: Book to analyze
             dry_run: Preview without executing
             skip_validation: Skip Phase 8.5 validation
+            use_parallel: Enable parallel execution (Tier 1)
+            max_workers: Number of parallel workers (Tier 1)
 
         Returns:
             True if successful
         """
         start_time = datetime.now()
 
+        tier = "TIER 1" if use_parallel else "TIER 0"
         logger.info("\n" + "="*60)
-        logger.info("TIER 0 WORKFLOW - END-TO-END TEST")
+        logger.info(f"{tier} WORKFLOW - END-TO-END TEST")
         logger.info("="*60)
         logger.info(f"Book: {book_title}")
         logger.info(f"Dry Run: {dry_run}")
         logger.info(f"Skip Validation: {skip_validation}")
+        if use_parallel:
+            logger.info(f"Parallel: ENABLED ({max_workers} workers)")
         logger.info(f"Started: {start_time.isoformat()}")
         logger.info("="*60 + "\n")
 
         # Phase 2: Book Analysis
-        if not await self.run_phase2(book_title, dry_run):
+        if not await self.run_phase2(book_title, dry_run, use_parallel, max_workers):
             logger.error("\n❌ Workflow failed at Phase 2")
             return False
 
@@ -372,6 +388,17 @@ Examples:
         action="store_true",
         help="Skip Phase 8.5 validation"
     )
+    parser.add_argument(
+        "--parallel",
+        action="store_true",
+        help="Enable parallel execution (Tier 1 feature, 4-8x faster)"
+    )
+    parser.add_argument(
+        "--max-workers",
+        type=int,
+        default=4,
+        help="Maximum number of parallel workers (default: 4)"
+    )
 
     args = parser.parse_args()
 
@@ -382,7 +409,9 @@ Examples:
     success = await orchestrator.run_workflow(
         book_title=args.book,
         dry_run=args.dry_run,
-        skip_validation=args.skip_validation
+        skip_validation=args.skip_validation,
+        use_parallel=args.parallel,
+        max_workers=args.max_workers
     )
 
     if success:
