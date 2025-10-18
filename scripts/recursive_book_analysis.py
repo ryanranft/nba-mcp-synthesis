@@ -1509,6 +1509,11 @@ Examples:
         action="store_true",
         help="Use high-context analyzer (Gemini 1.5 Pro + Claude Sonnet 4, reads up to 250k tokens)",
     )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview what would be analyzed without actually running analysis",
+    )
 
     args = parser.parse_args()
 
@@ -1569,6 +1574,20 @@ Examples:
         logger.error("❌ Please specify --all or --book <title>")
         parser.print_help()
         sys.exit(1)
+
+    # Dry-run mode: Preview what would be analyzed
+    if args.dry_run:
+        logger.info("\n🔍 DRY RUN MODE - Preview of books to be analyzed:\n")
+        logger.info(f"Total books: {len(books_to_analyze)}")
+        logger.info(f"Analyzer: {'High-Context (Gemini + Claude)' if args.high_context else 'Standard (4 models)'}")
+        logger.info("\nBooks to analyze:")
+        for i, book in enumerate(books_to_analyze, 1):
+            exists = book_manager.book_exists_in_s3(book["s3_path"])
+            status = "✅" if exists else "⚠️  (needs upload)"
+            logger.info(f"  {i}. {book['title']} {status}")
+        logger.info("\n⚠️  No files will be analyzed or modified (dry run)")
+        logger.info("\nTo execute, run without --dry-run flag")
+        return
 
     # Upload books if needed
     logger.info("\n📤 Checking and uploading books to S3...\n")
