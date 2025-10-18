@@ -8,19 +8,18 @@
 workflow:
   # Which workflow to run (A = MCP improvement, B = Simulator improvement, dual = both)
   mode: B
-  
+
   # Enable full automation (Tier 2+ feature)
   auto_implement: false
-  
+
   # Enable prediction enhancements from BeyondMLR analysis (Tier 2+ feature)
   prediction_enhancements: false
-  
+
   # Number of books to analyze in test mode
   test_book_limit: 1
-  
+
   # Enable dry-run mode by default
   default_dry_run: false
-
 
 # ============================================================================
 # COST LIMITS (USD)
@@ -28,22 +27,21 @@ workflow:
 cost_limits:
   # Phase 2: Book analysis
   phase_2_analysis: 30.00
-  
+
   # Phase 3: Consolidation and synthesis
   phase_3_synthesis: 20.00
-  
+
   # Phase 3.5: AI-driven plan modifications (Tier 2+)
   phase_3_5_modifications: 15.00
-  
+
   # Phase 5: Prediction enhancements (Tier 2+)
   phase_5_predictions: 10.00
-  
+
   # Total workflow hard limit
   total_workflow: 75.00
-  
+
   # Require approval above this threshold (Tier 1+)
   approval_threshold: 10.00
-
 
 # ============================================================================
 # AI MODEL CONFIGURATION
@@ -55,38 +53,37 @@ models:
     temperature: 0.3
     max_tokens: 250000
     timeout_seconds: 180
-    
+
     # Pricing (per 1M tokens)
     pricing:
-      input_low_tier: 1.25   # < 128k tokens
+      input_low_tier: 1.25 # < 128k tokens
       output_low_tier: 2.50
-      input_high_tier: 2.50  # >= 128k tokens
+      input_high_tier: 2.50 # >= 128k tokens
       output_high_tier: 5.00
-  
+
   # Anthropic Claude (Backup for analysis, primary for synthesis)
   claude:
     model_name: "claude-sonnet-4"
     temperature: 0.3
     max_tokens: 200000
     timeout_seconds: 180
-    
+
     # Pricing (per 1M tokens)
     pricing:
       input: 3.00
       output: 15.00
-  
+
   # OpenAI GPT-4 (Secondary for synthesis)
   gpt4:
     model_name: "gpt-4-turbo"
     temperature: 0.3
     max_tokens: 128000
     timeout_seconds: 180
-    
+
     # Pricing (per 1M tokens)
     pricing:
       input: 10.00
       output: 30.00
-
 
 # ============================================================================
 # PHASE-SPECIFIC SETTINGS
@@ -95,41 +92,41 @@ phases:
   # Phase 2: Book Analysis
   phase_2:
     use_high_context: true
-    max_chars_per_book: 1000000  # 1M chars (~250k tokens)
+    max_chars_per_book: 1000000 # 1M chars (~250k tokens)
     max_tokens_per_book: 250000
-    
+
     # Analysis settings
     min_recommendations: 10
     max_recommendations: 60
-    
+
     # Convergence criteria
     convergence_threshold: 0.85
     max_iterations: 3
-  
+
   # Phase 3: Consolidation and Synthesis
   phase_3:
     # Deduplication settings
     similarity_threshold: 0.80
-    
+
     # Confidence scoring
     min_confidence: 0.70
-    
+
     # Synthesis models (comma-separated)
     synthesis_models: "claude,gpt4"
-  
+
   # Phase 4: File Generation
   phase_4:
     # Output directory
     output_dir: "implementation_plans"
-    
+
     # File generation settings
     generate_tests: true
-    generate_sql: true  # Only if database changes needed
-    
+    generate_sql: true # Only if database changes needed
+
     # Tier settings
-    tier_1_file_count: 6  # README, STATUS, RECS, implement, test, sql
-    tier_2_file_count: 3  # README, RECS, example
-  
+    tier_1_file_count: 6 # README, STATUS, RECS, implement, test, sql
+    tier_2_file_count: 3 # README, RECS, example
+
   # Phase 8.5: Pre-Integration Validation
   phase_8_5:
     # What to validate
@@ -137,13 +134,12 @@ phases:
     test_discovery: true
     import_check: true
     sql_validation: true
-    
+
     # Test execution (Tier 1+ feature)
     run_tests: false
-    
+
     # Fail workflow on validation error
     fail_on_error: false
-
 
 # ============================================================================
 # SAFETY FEATURES
@@ -154,23 +150,22 @@ safety:
     enabled: true
     backup_before_phase: true
     backup_retention_days: 7
-    
+
   # Error recovery
   error_recovery:
     enabled: true
     max_retries: 3
-    
+
     # Retry delays (seconds)
     api_timeout_backoff: 2
     rate_limit_backoff: 60
     network_error_backoff: 5
-  
+
   # Cost tracking
   cost_tracking:
     enabled: true
     save_reports: true
     report_dir: "cost_tracker"
-
 
 # ============================================================================
 # TIER 1+ FEATURES (Not implemented in Tier 0)
@@ -187,8 +182,8 @@ parallel_execution:
 cache:
   enabled: false
   cache_dir: "cache"
-  ttl_hours: 168  # 7 days
-  
+  ttl_hours: 168 # 7 days
+
   # What to cache
   cache_analysis: true
   cache_synthesis: true
@@ -206,7 +201,7 @@ monitoring:
   check_disk_space: true
   check_memory: true
   check_api_quotas: true
-  
+
   # Thresholds
   min_disk_gb: 10
   max_memory_percent: 80
@@ -219,21 +214,19 @@ ab_testing:
     - ["gemini", "gpt4"]
     - ["claude", "gpt4"]
 
-
 # ============================================================================
 # LOGGING
 # ============================================================================
 logging:
-  level: INFO  # DEBUG, INFO, WARNING, ERROR
+  level: INFO # DEBUG, INFO, WARNING, ERROR
   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-  
+
   # Log files
   file_logging: true
   log_dir: "logs"
-  
+
   # Separate logs by phase
   separate_phase_logs: true
-
 
 # ============================================================================
 # PATHS
@@ -242,18 +235,17 @@ paths:
   # Project roots
   mcp_synthesis: "/Users/ryanranft/nba-mcp-synthesis"
   simulator_aws: "/Users/ryanranft/nba-simulator-aws"
-  
+
   # Analysis outputs
   analysis_results: "analysis_results"
   implementation_plans: "implementation_plans"
-  
+
   # Books
   books_s3_bucket: "nba-mcp-books"
   books_s3_prefix: "books/"
-  
+
   # Backups
   backups_dir: "backups"
-
 
 # ============================================================================
 # FEATURE FLAGS (Tier 2+)
@@ -261,19 +253,18 @@ paths:
 features:
   # Phase 3.5: Intelligent Plan Editor
   intelligent_plan_editor: false
-  
+
   # Phase 3.5: Smart Integrator
   smart_integrator: false
-  
+
   # Phase 5: Prediction Enhancement Analyzer
   prediction_analyzer: false
-  
+
   # Phase Status Tracking System
   status_tracking: false
-  
+
   # Conflict resolution for AI disagreements
   conflict_resolution: false
-
 
 # ============================================================================
 # VALIDATION

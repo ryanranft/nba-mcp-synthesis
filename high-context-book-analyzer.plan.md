@@ -46,7 +46,7 @@ All AI-powered operations have built-in cost controls:
 ```python
 class CostSafetyManager:
     """Prevent runaway API costs."""
-    
+
     COST_LIMITS = {
         'phase_2_analysis': 30.00,      # Book analysis
         'phase_3_synthesis': 20.00,      # Claude + GPT-4 synthesis
@@ -54,7 +54,7 @@ class CostSafetyManager:
         'phase_5_predictions': 10.00,    # Prediction enhancements
         'total_workflow': 75.00          # Hard limit for entire workflow
     }
-    
+
     def check_cost_limit(self, phase: str, estimated_cost: float) -> bool:
         """Check if operation would exceed limit."""
         if estimated_cost > self.COST_LIMITS.get(phase, 10.00):
@@ -62,7 +62,7 @@ class CostSafetyManager:
             logger.error(f"   Limit: ${self.COST_LIMITS[phase]:.2f}")
             return False
         return True
-    
+
     def require_approval(self, operation: str, cost: float, plans_affected: int) -> bool:
         """Require human approval for expensive or impactful operations."""
         if cost > 10.00 or plans_affected > 5:
@@ -83,34 +83,34 @@ Phase 3.5 (AI Plan Modification) only runs when:
 async def should_run_phase3_5(synthesis_results: Dict, args: argparse.Namespace) -> bool:
     """
     Determine if Phase 3.5 should run.
-    
+
     Runs if:
     1. --enable-ai-plan-modification flag is explicitly set, OR
     2. Synthesis detected high-confidence opportunities (>80%), AND
     3. User approves estimated cost
     """
-    
+
     # Explicit flag always triggers
     if args.enable_ai_plan_modification:
         logger.info("✅ Phase 3.5 enabled via --enable-ai-plan-modification flag")
         return True
-    
+
     # Check for high-confidence opportunities
     opportunities = synthesis_results.get('modification_opportunities', [])
     high_confidence = [o for o in opportunities if o['confidence'] > 0.80]
-    
+
     if not high_confidence:
         logger.info("⏭️  Skipping Phase 3.5: No high-confidence opportunities found")
         return False
-    
+
     # Estimate cost
     estimated_cost = len(high_confidence) * 0.50  # $0.50 per modification
-    
+
     logger.info(f"🧠 Phase 3.5 opportunities detected:")
     logger.info(f"   High-confidence opportunities: {len(high_confidence)}")
     logger.info(f"   Estimated cost: ${estimated_cost:.2f}")
     logger.info(f"\n   Run Phase 3.5? (y/n): ")
-    
+
     # Default: require manual approval unless --yes flag set
     return args.yes or False
 ```
@@ -123,18 +123,18 @@ Reduced from 6 status values to 4 clear states:
 class PhaseStatusManager:
     """
     Simplified status tracking.
-    
+
     Status Values (4 total):
     - PENDING: Not yet started or blocked by dependencies
     - IN_PROGRESS: Currently running
     - COMPLETE: Finished successfully
     - FAILED: Failed and needs attention
-    
+
     Separate flags:
     - needs_rerun: Boolean flag for COMPLETE phases that need re-running
     - blocked_by: List of blocking dependencies for PENDING phases
     """
-    
+
     def _initialize_status(self) -> Dict:
         return {
             "phases": {
@@ -146,13 +146,13 @@ class PhaseStatusManager:
                 # ...
             }
         }
-    
+
     def mark_needs_rerun(self, phase: str, reason: str):
         """Mark completed phase for re-run."""
         if self.status['phases'][phase]['status'] != 'COMPLETE':
             logger.warning(f"Cannot mark {phase} for rerun: not yet complete")
             return
-        
+
         self.status['phases'][phase]['needs_rerun'] = True
         self.status['phases'][phase]['rerun_reason'] = reason
         logger.warning(f"⚠️  {phase} needs re-run: {reason}")
@@ -213,24 +213,24 @@ Safety mechanisms for human control:
 def emergency_stop():
     """Emergency stop for all running phases."""
     logger.error("🛑 EMERGENCY STOP INITIATED")
-    
+
     # Kill all Python processes running workflow scripts
     os.system("pkill -f 'python.*phase.*\\.py'")
     os.system("pkill -f 'python.*run_full_workflow\\.py'")
-    
+
     # Mark all in-progress phases as FAILED
     status_manager = PhaseStatusManager()
     for phase_id, data in status_manager.status['phases'].items():
         if data['status'] == 'IN_PROGRESS':
             status_manager.status['phases'][phase_id]['status'] = 'FAILED'
             status_manager.status['phases'][phase_id]['error'] = 'Emergency stop'
-    
+
     status_manager._save_and_log('all', 'EMERGENCY_STOP', 'User initiated emergency stop')
     logger.error("✅ All phases stopped")
 
 # Add to master orchestrator
 parser.add_argument('--skip-phase', action='append', help='Skip specific phases')
-parser.add_argument('--require-approval-per-plan', action='store_true', 
+parser.add_argument('--require-approval-per-plan', action='store_true',
                    help='Require approval for each plan modification')
 parser.add_argument('--yes', action='store_true', help='Auto-approve all prompts')
 ```
@@ -243,47 +243,47 @@ Real-time progress tracking:
 # scripts/workflow_monitor.py
 class WorkflowMonitor:
     """Real-time workflow monitoring and notifications."""
-    
+
     def __init__(self):
         self.dashboard_port = 8080
         self.start_time = datetime.now()
-    
+
     def start_dashboard(self):
         """Launch real-time progress dashboard at http://localhost:8080"""
         import flask
         app = flask.Flask(__name__)
-        
+
         @app.route('/')
         def dashboard():
             status = PhaseStatusManager().status
-            return flask.render_template('dashboard.html', 
+            return flask.render_template('dashboard.html',
                                         status=status,
                                         elapsed=datetime.now() - self.start_time)
-        
+
         # Run in background thread
-        threading.Thread(target=lambda: app.run(port=self.dashboard_port), 
+        threading.Thread(target=lambda: app.run(port=self.dashboard_port),
                         daemon=True).start()
-        
+
         logger.info(f"📊 Dashboard: http://localhost:{self.dashboard_port}")
-    
+
     def estimate_time_remaining(self) -> str:
         """Estimate time remaining based on current progress."""
         status_manager = PhaseStatusManager()
-        
-        completed = sum(1 for p in status_manager.status['phases'].values() 
+
+        completed = sum(1 for p in status_manager.status['phases'].values()
                        if p['status'] == 'COMPLETE')
         total = len(status_manager.status['phases'])
-        
+
         if completed == 0:
             return "Unknown"
-        
+
         elapsed = (datetime.now() - self.start_time).total_seconds()
         avg_time_per_phase = elapsed / completed
         remaining_phases = total - completed
-        
+
         remaining_seconds = avg_time_per_phase * remaining_phases
         return f"{remaining_seconds / 3600:.1f} hours"
-    
+
     def send_notification(self, event: str, message: str):
         """Send Slack/email notification (if configured)."""
         # Optional: integrate with Slack, email, etc.
@@ -311,31 +311,31 @@ from pathlib import Path
 class ResultCache:
     """
     Cache expensive AI operations to avoid redundant work.
-    
+
     Caching Strategy:
     - Book analysis cached by content hash
     - Synthesis cached by recommendation set hash
     - Plan generation cached by synthesis result hash
-    
+
     Benefits:
     - 80-90% cost reduction on re-runs
     - Faster iteration cycles
     - Consistent results
     """
-    
+
     def __init__(self, cache_dir: Path = Path("cache/")):
         self.cache_dir = cache_dir
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-    
+
     def get_content_hash(self, content: str) -> str:
         """Generate hash for content."""
         return hashlib.sha256(content.encode()).hexdigest()[:16]
-    
+
     def is_cached(self, operation: str, content_hash: str) -> bool:
         """Check if result is cached."""
         cache_file = self.cache_dir / f"{operation}_{content_hash}.json"
         return cache_file.exists()
-    
+
     def get_cached(self, operation: str, content_hash: str) -> Dict:
         """Retrieve cached result."""
         cache_file = self.cache_dir / f"{operation}_{content_hash}.json"
@@ -343,7 +343,7 @@ class ResultCache:
             logger.info(f"💾 Cache HIT: {operation} ({content_hash})")
             return json.loads(cache_file.read_text())
         return None
-    
+
     def save_to_cache(self, operation: str, content_hash: str, result: Dict):
         """Save result to cache."""
         cache_file = self.cache_dir / f"{operation}_{content_hash}.json"
@@ -354,22 +354,22 @@ class ResultCache:
 async def analyze_book(book_path: Path):
     """Analyze book with caching."""
     cache = ResultCache()
-    
+
     # Get content hash
     content = book_path.read_text()
     content_hash = cache.get_content_hash(content)
-    
+
     # Check cache
     cached = cache.get_cached('book_analysis', content_hash)
     if cached:
         return cached
-    
+
     # Perform analysis
     result = await expensive_analysis(content)
-    
+
     # Save to cache
     cache.save_to_cache('book_analysis', content_hash, result)
-    
+
     return result
 ```
 
@@ -382,24 +382,24 @@ Resume long-running operations from checkpoints:
 class CheckpointManager:
     """
     Save and restore progress for long-running phases.
-    
+
     Checkpoints saved every:
     - 5 minutes (time-based)
     - 10 items (count-based)
     - Before expensive operations
-    
+
     Recovery:
     - Automatic resume on restart
     - No data loss on interruption
     - Skip completed items
     """
-    
+
     def __init__(self, phase: str):
         self.phase = phase
         self.checkpoint_dir = Path(f"implementation_plans/checkpoints/{phase}")
         self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
         self.checkpoint_file = self.checkpoint_dir / "latest.json"
-    
+
     def save_checkpoint(self, progress: Dict):
         """Save current progress."""
         checkpoint = {
@@ -409,7 +409,7 @@ class CheckpointManager:
         }
         self.checkpoint_file.write_text(json.dumps(checkpoint, indent=2))
         logger.info(f"💾 Checkpoint saved: {self.phase}")
-    
+
     def load_checkpoint(self) -> Optional[Dict]:
         """Load last checkpoint."""
         if self.checkpoint_file.exists():
@@ -417,7 +417,7 @@ class CheckpointManager:
             logger.info(f"🔄 Resuming from checkpoint: {checkpoint['timestamp']}")
             return checkpoint['progress']
         return None
-    
+
     def clear_checkpoint(self):
         """Clear checkpoint after successful completion."""
         if self.checkpoint_file.exists():
@@ -427,7 +427,7 @@ class CheckpointManager:
 async def run_phase3_with_checkpoints():
     """Phase 3 with checkpoint support."""
     checkpoint_mgr = CheckpointManager('phase_3')
-    
+
     # Try to resume
     progress = checkpoint_mgr.load_checkpoint()
     if progress:
@@ -435,12 +435,12 @@ async def run_phase3_with_checkpoints():
         logger.info(f"Resuming from item {start_index}")
     else:
         start_index = 0
-    
+
     # Process items
     for i in range(start_index, len(all_recs)):
         # Process item
         result = await process_recommendation(all_recs[i])
-        
+
         # Save checkpoint every 10 items
         if i % 10 == 0:
             checkpoint_mgr.save_checkpoint({
@@ -448,7 +448,7 @@ async def run_phase3_with_checkpoints():
                 'total_items': len(all_recs),
                 'results_so_far': results
             })
-    
+
     # Clear checkpoint on success
     checkpoint_mgr.clear_checkpoint()
 ```
@@ -465,51 +465,51 @@ from concurrent.futures import ProcessPoolExecutor
 class ParallelExecutor:
     """
     Execute independent operations in parallel.
-    
+
     Performance Gains:
     - Phase 2: 4-8 books analyzed simultaneously
     - Phase 3: Batch recommendations in parallel
     - Phase 4: Generate multiple files simultaneously
-    
+
     Expected Speedup:
     - Total time: 8 hours → 2-3 hours (60-75% reduction)
     """
-    
+
     def __init__(self, max_workers: int = 4):
         self.max_workers = max_workers
-    
+
     async def parallel_book_analysis(self, books: List[Path]) -> List[Dict]:
         """Analyze multiple books in parallel."""
         logger.info(f"📚 Analyzing {len(books)} books in parallel ({self.max_workers} workers)")
-        
+
         # Split into batches
         batches = [books[i:i+self.max_workers] for i in range(0, len(books), self.max_workers)]
-        
+
         all_results = []
         for batch_num, batch in enumerate(batches, 1):
             logger.info(f"Batch {batch_num}/{len(batches)}: {len(batch)} books")
-            
+
             # Run batch in parallel
             tasks = [analyze_book(book) for book in batch]
             results = await asyncio.gather(*tasks)
             all_results.extend(results)
-        
+
         return all_results
-    
+
     async def parallel_synthesis(self, recommendations: List[Dict]) -> List[Dict]:
         """Synthesize multiple recommendations in parallel."""
         logger.info(f"🔨 Synthesizing {len(recommendations)} recommendations in parallel")
-        
+
         # Group by similarity to improve cache hits
         groups = self._group_similar_recommendations(recommendations)
-        
+
         # Process groups in parallel
         all_plans = []
         for group in groups:
             tasks = [synthesize_recommendation(rec) for rec in group]
             plans = await asyncio.gather(*tasks)
             all_plans.extend(plans)
-        
+
         return all_plans
 ```
 
@@ -536,12 +536,12 @@ models:
     model_name: gemini-2.0-flash-exp
     temperature: 0.3
     max_tokens: 250000
-  
+
   claude:
     model_name: claude-sonnet-4
     temperature: 0.3
     max_tokens: 200000
-  
+
   gpt4:
     model_name: gpt-4-turbo
     temperature: 0.3
@@ -569,18 +569,18 @@ import yaml
 
 class ConfigManager:
     """Load and validate workflow configuration."""
-    
+
     def __init__(self, config_path: Path = Path("config/workflow_config.yaml")):
         self.config = self._load_config(config_path)
-    
+
     def _load_config(self, path: Path) -> Dict:
         """Load YAML configuration."""
         if not path.exists():
             raise FileNotFoundError(f"Config not found: {path}")
-        
+
         with open(path) as f:
             return yaml.safe_load(f)
-    
+
     def get(self, key_path: str, default=None):
         """Get nested config value using dot notation."""
         keys = key_path.split('.')
@@ -601,15 +601,15 @@ Handle AI model disagreements:
 class ConflictResolver:
     """
     Resolve disagreements between AI models.
-    
+
     Agreement Threshold: 70% similarity
-    
+
     Actions:
     - >70% agreement: Accept consensus
     - 50-70% agreement: Flag for human review
     - <50% agreement: Require human decision
     """
-    
+
     async def resolve_synthesis_conflict(
         self,
         gemini_result: Dict,
@@ -617,31 +617,31 @@ class ConflictResolver:
         gpt4_result: Optional[Dict] = None
     ) -> Dict:
         """Resolve synthesis conflicts."""
-        
+
         # Calculate similarity
         similarity = self._calculate_similarity(gemini_result, claude_result)
-        
+
         if gpt4_result:
             similarity_gpt4 = self._calculate_similarity(gemini_result, gpt4_result)
             similarity = (similarity + similarity_gpt4) / 2
-        
+
         logger.info(f"Model agreement: {similarity:.1%}")
-        
+
         if similarity > 0.70:
             # High agreement - accept consensus
             logger.info("✅ High agreement - accepting consensus")
             return self._merge_results([gemini_result, claude_result])
-        
+
         elif similarity > 0.50:
             # Medium agreement - flag for review
             logger.warning("⚠️  Medium agreement - flagging for review")
             return self._create_review_prompt(gemini_result, claude_result)
-        
+
         else:
             # Low agreement - require human decision
             logger.error("❌ Low agreement - human decision required")
             return self._require_human_decision(gemini_result, claude_result)
-    
+
     def _calculate_similarity(self, result1: Dict, result2: Dict) -> float:
         """Calculate similarity between two results."""
         # Compare key fields
@@ -652,7 +652,7 @@ class ConflictResolver:
             'key_components': 0.3,
             'integration_points': 0.2
         }
-        
+
         for field, weight in weights.items():
             if field in result1 and field in result2:
                 field_similarity = self._text_similarity(
@@ -660,7 +660,7 @@ class ConflictResolver:
                     str(result2[field])
                 )
                 score += field_similarity * weight
-        
+
         return score
 ```
 
@@ -673,25 +673,25 @@ Comprehensive error recovery with retries:
 class ErrorRecoveryManager:
     """
     Automatic retry with exponential backoff.
-    
+
     Retry Configuration:
     - API timeout: 3 retries, 2s backoff
     - Rate limit: 5 retries, 60s backoff
     - JSON decode: 2 retries, 1s backoff
-    
+
     Fallback Strategies:
     - Use alternative model if primary fails
     - Save partial results before failing
     - Graceful degradation
     """
-    
+
     RETRY_CONFIG = {
         'api_timeout': {'retries': 3, 'backoff': 2},
         'rate_limit': {'retries': 5, 'backoff': 60},
         'json_decode': {'retries': 2, 'backoff': 1},
         'network_error': {'retries': 3, 'backoff': 5}
     }
-    
+
     async def execute_with_recovery(
         self,
         operation: Callable,
@@ -700,15 +700,15 @@ class ErrorRecoveryManager:
     ):
         """Execute operation with automatic recovery."""
         config = self.RETRY_CONFIG.get(error_type, {'retries': 2, 'backoff': 2})
-        
+
         for attempt in range(config['retries']):
             try:
                 result = await operation()
                 return result
-            
+
             except Exception as e:
                 logger.warning(f"Attempt {attempt + 1}/{config['retries']} failed: {e}")
-                
+
                 if attempt < config['retries'] - 1:
                     wait_time = config['backoff'] * (2 ** attempt)
                     logger.info(f"Retrying in {wait_time}s...")
@@ -731,22 +731,22 @@ Generate visual dependency graphs:
 class DependencyVisualizer:
     """
     Generate visual dependency graphs for phases.
-    
+
     Outputs:
     - Graphviz DOT format
     - Mermaid diagram
     - PNG/SVG images
-    
+
     Shows:
     - Phase dependencies
     - Critical path
     - Bottlenecks
     - Parallelization opportunities
     """
-    
+
     def generate_phase_graph(self) -> str:
         """Generate Mermaid diagram of phase dependencies."""
-        
+
         mermaid = """
 graph TD
     Phase0[Phase 0: Discovery] --> Phase1[Phase 1: Book Discovery]
@@ -759,16 +759,16 @@ graph TD
     Phase6 --> Phase7[Phase 7: Sequence Optimization]
     Phase7 --> Phase8[Phase 8: Progress Tracking]
     Phase8 --> Phase9[Phase 9: Integration]
-    
+
     Phase9 --> Phase10A[Phase 10A: MCP Validation]
     Phase9 --> Phase10B[Phase 10B: Model Validation]
-    
+
     Phase10A --> Phase11A[Phase 11A: Tool Optimization]
     Phase10B --> Phase11B[Phase 11B: Model Ensemble]
-    
+
     Phase11A --> Phase12A[Phase 12A: MCP Deploy]
     Phase11B --> Phase12B[Phase 12B: Simulator Deploy]
-    
+
     style Phase0 fill:#e1f5ff
     style Phase2 fill:#fff3e0
     style Phase3 fill:#fff3e0
@@ -776,7 +776,7 @@ graph TD
     style Phase9 fill:#f3e5f5
 """
         return mermaid
-    
+
     def identify_critical_path(self) -> List[str]:
         """Identify critical path through phases."""
         # Longest path from Phase 0 to Phase 12
@@ -797,19 +797,19 @@ Monitor API quotas and system resources:
 class ResourceMonitor:
     """
     Monitor resources to prevent hitting limits.
-    
+
     Monitors:
     - API quota usage (prevent rate limits)
     - Disk space (generated files can be large)
     - Memory usage (large book analysis)
     - Token usage per model
-    
+
     Alerts:
     - Warning at 80% of limit
     - Error at 95% of limit
     - Auto-pause at 100% of limit
     """
-    
+
     def __init__(self):
         self.api_quotas = {
             'gemini': {'limit': 1000000, 'used': 0},  # tokens per minute
@@ -818,24 +818,24 @@ class ResourceMonitor:
         }
         self.disk_limit_gb = 10
         self.memory_limit_gb = 8
-    
+
     def check_api_quota(self, model: str, tokens: int) -> bool:
         """Check if API quota allows this request."""
         quota = self.api_quotas[model]
-        
+
         if quota['used'] + tokens > quota['limit'] * 0.95:
             logger.error(f"❌ {model} quota exceeded: {quota['used']}/{quota['limit']}")
             return False
-        
+
         if quota['used'] + tokens > quota['limit'] * 0.80:
             logger.warning(f"⚠️  {model} quota at 80%: {quota['used']}/{quota['limit']}")
-        
+
         return True
-    
+
     def track_usage(self, model: str, tokens: int):
         """Track token usage."""
         self.api_quotas[model]['used'] += tokens
-    
+
     def reset_quotas(self):
         """Reset quotas (call every minute)."""
         for model in self.api_quotas:
@@ -854,22 +854,22 @@ parser.add_argument('--dry-run', action='store_true',
 # Example: Phase 4 with dry-run
 async def run_phase4(dry_run: bool = False):
     """Phase 4: File Generation"""
-    
+
     if dry_run:
         logger.info("🔍 DRY RUN MODE - Previewing file generation...")
-        
+
         # Show what would be created
         for plan in plans:
             output_dir = get_output_directory(plan)
             files = get_files_to_generate(plan)
-            
+
             logger.info(f"\nWould create in {output_dir}:")
             for file in files:
                 logger.info(f"  - {file['name']} ({file['size_estimate']} lines)")
-        
+
         logger.info("\n⚠️  No files created (dry run)")
         return
-    
+
     # Actually create files
     await generate_files(plans)
 ```
@@ -883,7 +883,7 @@ Add version metadata to generated files:
 class VersionTracker:
     """
     Track versions of generated files.
-    
+
     Metadata includes:
     - Generator version
     - Generation timestamp
@@ -891,7 +891,7 @@ class VersionTracker:
     - Model versions used
     - Configuration version
     """
-    
+
     def generate_file_header(self, context: Dict) -> str:
         """Generate version header for file."""
         return f'''"""
@@ -913,7 +913,7 @@ DO NOT EDIT THIS FILE MANUALLY
 Regenerate using: python scripts/{context['regenerate_command']}
 """
 '''
-    
+
     def _format_source_books(self, books: List[Dict]) -> str:
         """Format source book list."""
         lines = []
@@ -931,26 +931,26 @@ Auto-discover books from GitHub:
 class GitHubBookDiscovery:
     """
     Automatically discover and track technical books from GitHub.
-    
+
     Capabilities:
     - Clone book repositories (like BeyondMLR)
     - Track upstream changes
     - Auto-update when books are revised
     - Discover related books
-    
+
     Sources:
     - GitHub trending repositories
     - Curated book lists
     - Author repositories
     """
-    
+
     async def discover_books_from_github(self, query: str) -> List[Dict]:
         """Search GitHub for technical books."""
         logger.info(f"🔍 Searching GitHub for: {query}")
-        
+
         # Use GitHub API to search
         results = await self._github_search(query)
-        
+
         # Filter for books (look for patterns)
         books = []
         for repo in results:
@@ -961,24 +961,24 @@ class GitHubBookDiscovery:
                     'stars': repo['stargazers_count'],
                     'topics': repo['topics']
                 })
-        
+
         return books
-    
+
     async def auto_update_books(self):
         """Check for updates to cloned books."""
         books_dir = Path("books/")
-        
+
         for book_dir in books_dir.iterdir():
             if (book_dir / ".git").exists():
                 logger.info(f"Checking for updates: {book_dir.name}")
-                
+
                 # Git fetch and check if updates available
                 result = subprocess.run(
                     ['git', 'fetch', 'origin'],
                     cwd=book_dir,
                     capture_output=True
                 )
-                
+
                 # If updates available, re-analyze
                 if self._has_updates(book_dir):
                     logger.info(f"📚 Updates found for {book_dir.name}")
@@ -994,19 +994,19 @@ Track and optimize model combinations:
 class ModelABTester:
     """
     A/B test different model combinations.
-    
+
     Tracks:
     - Success rates per model combination
     - Cost per recommendation
     - Quality scores
     - Speed metrics
-    
+
     Optimization:
     - Automatically select best performing combination
     - Adapt based on task type
     - Balance cost vs quality
     """
-    
+
     def __init__(self):
         self.results_db = Path("implementation_plans/model_ab_test_results.json")
         self.combinations = [
@@ -1015,20 +1015,20 @@ class ModelABTester:
             {'name': 'gemini_gpt4', 'models': ['gemini', 'gpt4']},
             {'name': 'all_models', 'models': ['gemini', 'claude', 'gpt4']}
         ]
-    
+
     async def test_all_combinations(self, test_books: List[Path]):
         """Test all model combinations on sample books."""
         results = {}
-        
+
         for combo in self.combinations:
             logger.info(f"Testing combination: {combo['name']}")
-            
+
             # Run analysis with this combination
             combo_results = await self._analyze_with_combination(
                 test_books,
                 combo['models']
             )
-            
+
             results[combo['name']] = {
                 'success_rate': combo_results['success_rate'],
                 'avg_cost_per_book': combo_results['avg_cost'],
@@ -1036,20 +1036,20 @@ class ModelABTester:
                 'avg_quality_score': combo_results['quality'],
                 'avg_time_seconds': combo_results['time']
             }
-        
+
         # Save results
         self._save_results(results)
-        
+
         # Recommend best combination
         best = self._find_best_combination(results)
         logger.info(f"🏆 Best combination: {best}")
-        
+
         return results
-    
+
     def get_recommended_combination(self, optimization_goal: str = 'balanced') -> Dict:
         """Get recommended model combination based on historical data."""
         results = self._load_results()
-        
+
         if optimization_goal == 'cost':
             return min(results.items(), key=lambda x: x[1]['avg_cost_per_book'])
         elif optimization_goal == 'quality':

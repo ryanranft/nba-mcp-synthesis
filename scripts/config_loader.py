@@ -12,13 +12,13 @@ Tier 0 Features:
 
 Usage:
     from config_loader import ConfigLoader
-    
+
     config = ConfigLoader()
-    
+
     # Access values
     cost_limit = config.get_cost_limit('phase_2_analysis')
     model_name = config.get_model_config('gemini', 'model_name')
-    
+
     # Check features
     if config.is_feature_enabled('intelligent_plan_editor'):
         # Use advanced feature
@@ -36,14 +36,14 @@ logger = logging.getLogger(__name__)
 class ConfigLoader:
     """
     Loads and provides access to workflow configuration.
-    
+
     Features:
     - YAML config loading
     - Environment variable overrides
     - Type-safe accessors
     - Default fallbacks
     """
-    
+
     # Default configuration (fallback if file missing)
     DEFAULT_CONFIG = {
         'workflow': {
@@ -155,11 +155,11 @@ class ConfigLoader:
             'conflict_resolution': False
         }
     }
-    
+
     def __init__(self, config_path: Optional[Path] = None):
         """
         Initialize config loader.
-        
+
         Args:
             config_path: Path to workflow_config.yaml (defaults to config/workflow_config.yaml)
         """
@@ -167,74 +167,74 @@ class ConfigLoader:
             # Default: look in config/ directory relative to project root
             project_root = Path(__file__).parent.parent
             config_path = project_root / "config" / "workflow_config.yaml"
-        
+
         self.config_path = Path(config_path)
         self.config = self._load_config()
-        
+
         logger.debug(f"Configuration loaded from {self.config_path}")
-    
+
     def _load_config(self) -> Dict[str, Any]:
         """
         Load configuration from YAML file with fallback to defaults.
-        
+
         Returns:
             Configuration dictionary
         """
         if not self.config_path.exists():
             logger.warning(f"Config file not found at {self.config_path}, using defaults")
             return self.DEFAULT_CONFIG.copy()
-        
+
         try:
             with open(self.config_path, 'r') as f:
                 config = yaml.safe_load(f)
-            
+
             if not config:
                 logger.warning("Config file is empty, using defaults")
                 return self.DEFAULT_CONFIG.copy()
-            
+
             # Merge with defaults (config overrides defaults)
             merged = self._deep_merge(self.DEFAULT_CONFIG.copy(), config)
-            
+
             logger.info(f"✅ Configuration loaded from {self.config_path}")
             return merged
-        
+
         except Exception as e:
             logger.error(f"Error loading config from {self.config_path}: {e}")
             logger.warning("Using default configuration")
             return self.DEFAULT_CONFIG.copy()
-    
+
     def _deep_merge(self, base: Dict, override: Dict) -> Dict:
         """
         Deep merge two dictionaries (override takes precedence).
-        
+
         Args:
             base: Base dictionary
             override: Override dictionary
-        
+
         Returns:
             Merged dictionary
         """
         result = base.copy()
-        
+
         for key, value in override.items():
             if key in result and isinstance(result[key], dict) and isinstance(value, dict):
                 result[key] = self._deep_merge(result[key], value)
             else:
                 result[key] = value
-        
+
         return result
-    
+
     def get(self, *keys: str, default: Any = None) -> Any:
         """
         Get nested configuration value.
-        
+
         Args:
             *keys: Nested keys (e.g., 'cost_limits', 'phase_2_analysis')
             default: Default value if key not found
-        
+
         Returns:
             Configuration value or default
-        
+
         Examples:
             >>> config.get('cost_limits', 'phase_2_analysis')
             30.00
@@ -242,17 +242,17 @@ class ConfigLoader:
             'gemini-2.0-flash-exp'
         """
         value = self.config
-        
+
         for key in keys:
             if isinstance(value, dict) and key in value:
                 value = value[key]
             else:
                 return default
-        
+
         # Check for environment variable override
         env_var = '_'.join(['NBA_MCP'] + [k.upper() for k in keys])
         env_value = os.getenv(env_var)
-        
+
         if env_value is not None:
             # Try to convert to appropriate type
             if isinstance(value, bool):
@@ -268,97 +268,97 @@ class ConfigLoader:
                 except ValueError:
                     pass
             return env_value
-        
+
         return value
-    
+
     def get_cost_limit(self, phase: str) -> float:
         """
         Get cost limit for a specific phase.
-        
+
         Args:
             phase: Phase name (e.g., 'phase_2_analysis', 'total_workflow')
-        
+
         Returns:
             Cost limit in USD
         """
         return self.get('cost_limits', phase, default=0.0)
-    
+
     def get_model_config(self, model: str, key: str) -> Any:
         """
         Get model configuration value.
-        
+
         Args:
             model: Model name ('gemini', 'claude', 'gpt4')
             key: Configuration key
-        
+
         Returns:
             Configuration value
         """
         return self.get('models', model, key)
-    
+
     def get_phase_config(self, phase: str, key: str) -> Any:
         """
         Get phase configuration value.
-        
+
         Args:
             phase: Phase name (e.g., 'phase_2', 'phase_3')
             key: Configuration key
-        
+
         Returns:
             Configuration value
         """
         return self.get('phases', phase, key)
-    
+
     def is_feature_enabled(self, feature: str) -> bool:
         """
         Check if a feature is enabled.
-        
+
         Args:
             feature: Feature name
-        
+
         Returns:
             True if enabled
         """
         return self.get('features', feature, default=False)
-    
+
     def get_workflow_mode(self) -> str:
         """
         Get workflow mode (A, B, or dual).
-        
+
         Returns:
             Workflow mode
         """
         return self.get('workflow', 'mode', default='B')
-    
+
     def is_dry_run_default(self) -> bool:
         """
         Check if dry-run mode is enabled by default.
-        
+
         Returns:
             True if dry-run is default
         """
         return self.get('workflow', 'default_dry_run', default=False)
-    
+
     def get_safety_config(self, category: str, key: str) -> Any:
         """
         Get safety configuration value.
-        
+
         Args:
             category: Safety category ('rollback', 'error_recovery', 'cost_tracking')
             key: Configuration key
-        
+
         Returns:
             Configuration value
         """
         return self.get('safety', category, key)
-    
+
     def get_path(self, path_key: str) -> Path:
         """
         Get configured path.
-        
+
         Args:
             path_key: Path key (e.g., 'mcp_synthesis', 'implementation_plans')
-        
+
         Returns:
             Path object
         """
@@ -373,15 +373,15 @@ _global_config: Optional[ConfigLoader] = None
 def get_config() -> ConfigLoader:
     """
     Get global configuration instance.
-    
+
     Returns:
         ConfigLoader instance
     """
     global _global_config
-    
+
     if _global_config is None:
         _global_config = ConfigLoader()
-    
+
     return _global_config
 
 
@@ -409,39 +409,39 @@ def is_feature_enabled(feature: str) -> bool:
 if __name__ == "__main__":
     # Test configuration loading
     logging.basicConfig(level=logging.INFO)
-    
+
     logger.info("--- Testing ConfigLoader ---\n")
-    
+
     config = ConfigLoader()
-    
+
     # Test basic access
     logger.info(f"Workflow mode: {config.get_workflow_mode()}")
     logger.info(f"Phase 2 cost limit: ${config.get_cost_limit('phase_2_analysis'):.2f}")
     logger.info(f"Total workflow limit: ${config.get_cost_limit('total_workflow'):.2f}")
-    
+
     # Test model config
     logger.info(f"\nGemini model: {config.get_model_config('gemini', 'model_name')}")
     logger.info(f"Gemini max tokens: {config.get_model_config('gemini', 'max_tokens'):,}")
-    
+
     # Test phase config
     logger.info(f"\nPhase 2 high context: {config.get_phase_config('phase_2', 'use_high_context')}")
     logger.info(f"Phase 2 max chars: {config.get_phase_config('phase_2', 'max_chars_per_book'):,}")
-    
+
     # Test feature flags
     logger.info(f"\nIntelligent plan editor: {config.is_feature_enabled('intelligent_plan_editor')}")
     logger.info(f"Smart integrator: {config.is_feature_enabled('smart_integrator')}")
-    
+
     # Test safety config
     logger.info(f"\nRollback enabled: {config.get_safety_config('rollback', 'enabled')}")
     logger.info(f"Max retries: {config.get_safety_config('error_recovery', 'max_retries')}")
-    
+
     # Test paths
     logger.info(f"\nProject root: {config.get_path('mcp_synthesis')}")
     logger.info(f"Implementation plans: {config.get_path('implementation_plans')}")
-    
+
     # Test environment variable override
     os.environ['NBA_MCP_WORKFLOW_MODE'] = 'A'
     logger.info(f"\n(With env override) Workflow mode: {config.get_workflow_mode()}")
-    
+
     logger.info("\n--- ConfigLoader testing complete ---")
 

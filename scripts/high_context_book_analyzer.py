@@ -415,11 +415,13 @@ class HighContextBookAnalyzer:
             from io import BytesIO
 
             s3_client = boto3.client("s3")
-            bucket = "nba-data-lake"
-            s3_key = book.get("s3_key", "")
+            # Get S3 bucket from environment or book metadata
+            bucket = os.environ.get("NBA_MCP_S3_BUCKET") or book.get("s3_bucket", "nba-data-lake")
+            # Check both s3_path and s3_key for compatibility
+            s3_key = book.get("s3_path") or book.get("s3_key", "")
 
             if not s3_key:
-                logger.error("No S3 key provided for book")
+                logger.error(f"No S3 path/key provided for book: {book.get('title', 'Unknown')}")
                 return None
 
             logger.info(f"📥 Reading from S3: {s3_key}")

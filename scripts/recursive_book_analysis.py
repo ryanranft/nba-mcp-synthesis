@@ -1528,6 +1528,11 @@ Examples:
         "analysis_config", config_data.get("analysis_settings", {})
     )
 
+    # Add S3 bucket to each book metadata for analyzer
+    s3_bucket = analysis_config.get("s3_bucket", "nba-data-lake")
+    for book in books:
+        book["s3_bucket"] = s3_bucket
+
     # Create output directory
     os.makedirs(args.output_dir, exist_ok=True)
 

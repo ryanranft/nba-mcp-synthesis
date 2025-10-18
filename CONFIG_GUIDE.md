@@ -4,7 +4,7 @@
 
 The NBA MCP Synthesis workflows use a centralized YAML configuration file for all settings.
 
-**Config File:** `config/workflow_config.yaml`  
+**Config File:** `config/workflow_config.yaml`
 **Loader:** `scripts/config_loader.py`
 
 ---
@@ -109,7 +109,7 @@ models:
     pricing:
       input_low_tier: 1.25
       output_low_tier: 2.50
-  
+
   claude:
     model_name: "claude-sonnet-4"
     temperature: 0.3
@@ -118,7 +118,7 @@ models:
     pricing:
       input: 3.00
       output: 15.00
-  
+
   gpt4:
     model_name: "gpt-4-turbo"
     temperature: 0.3
@@ -156,19 +156,19 @@ phases:
     max_recommendations: 60
     convergence_threshold: 0.85
     max_iterations: 3
-  
+
   phase_3:
     similarity_threshold: 0.80
     min_confidence: 0.70
     synthesis_models: "claude,gpt4"
-  
+
   phase_4:
     output_dir: "implementation_plans"
     generate_tests: true
     generate_sql: true
     tier_1_file_count: 6
     tier_2_file_count: 3
-  
+
   phase_8_5:
     syntax_check: true
     test_discovery: true
@@ -195,14 +195,14 @@ safety:
     enabled: true
     backup_before_phase: true
     backup_retention_days: 7
-  
+
   error_recovery:
     enabled: true
     max_retries: 3
     api_timeout_backoff: 2
     rate_limit_backoff: 60
     network_error_backoff: 5
-  
+
   cost_tracking:
     enabled: true
     save_reports: true
@@ -517,7 +517,7 @@ if config.is_feature_enabled('smart_integrator'):
 
 ---
 
-**Last Updated:** 2025-10-18  
-**Version:** Tier 0 Day 4  
+**Last Updated:** 2025-10-18
+**Version:** Tier 0 Day 4
 **Status:** ✅ Configuration System Complete
 
