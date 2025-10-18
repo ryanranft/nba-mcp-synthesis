@@ -43,6 +43,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from cost_safety_manager import CostSafetyManager
 from rollback_manager import RollbackManager
 from error_recovery import ErrorRecoveryManager
+from checkpoint_manager import CheckpointManager
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +85,7 @@ class Phase3ConsolidationBasic:
         self.cost_mgr = CostSafetyManager()
         self.rollback_mgr = RollbackManager()
         self.recovery_mgr = ErrorRecoveryManager()
+        self.checkpoint_mgr = CheckpointManager(phase='phase_3', save_interval_seconds=300)  # 5 minutes
 
         logger.info("📊 Phase 3: Consolidation and Synthesis (Basic)")
         logger.info(f"   Analysis directory: {self.analysis_dir}")
@@ -112,6 +114,15 @@ class Phase3ConsolidationBasic:
 
         # Note: Backup is handled by orchestrator, not here
 
+        # Try to resume from checkpoint
+        checkpoint = self.checkpoint_mgr.get_latest_checkpoint()
+        if checkpoint:
+            logger.info(f"💾 Resuming from checkpoint (iteration {checkpoint['iteration']})\n")
+            # Return saved consolidated result if complete
+            if checkpoint['state'].get('complete', False):
+                logger.info("✅ Checkpoint shows consolidation already complete")
+                return checkpoint['state']['consolidated']
+
         # Find all analysis result files
         result_files = list(self.analysis_dir.glob("*_convergence_tracker.json"))
 
@@ -126,7 +137,7 @@ class Phase3ConsolidationBasic:
         all_recommendations = []
         book_sources = {}
 
-        for result_file in result_files:
+        for idx, result_file in enumerate(result_files, 1):
             try:
                 logger.info(f"   Loading: {result_file.name}")
 
@@ -148,6 +159,18 @@ class Phase3ConsolidationBasic:
                             rec['source_file'] = result_file.name
                             rec['priority'] = priority
                             all_recommendations.append(rec)
+
+                # Save checkpoint every 5 minutes (handled by checkpoint manager)
+                if not dry_run:
+                    self.checkpoint_mgr.save_checkpoint(
+                        iteration=idx,
+                        state={
+                            'processed_books': idx,
+                            'total_books': len(result_files),
+                            'recommendations_so_far': len(all_recommendations),
+                            'complete': False
+                        }
+                    )
 
             except Exception as e:
                 logger.error(f"   ❌ Error loading {result_file.name}: {e}")
@@ -217,6 +240,21 @@ class Phase3ConsolidationBasic:
 
         # Generate summary report
         self._generate_summary_report(consolidated)
+
+        # Save final checkpoint marking completion
+        self.checkpoint_mgr.save_checkpoint(
+            iteration=len(result_files),
+            state={
+                'complete': True,
+                'consolidated': consolidated
+            },
+            force=True
+        )
+
+        # Clean up old checkpoints (keep final one)
+        logger.info("🗑️  Cleaning up old checkpoints...")
+        stats = self.checkpoint_mgr.get_checkpoint_stats()
+        logger.info(f"   Kept {stats['valid_checkpoints']} checkpoint(s)\n")
 
         return consolidated
 
