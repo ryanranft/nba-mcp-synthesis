@@ -234,26 +234,26 @@ class BookManager:
     def should_ignore_book(self, book_title: str, book_filename: str = None) -> bool:
         """
         Check if a book should be ignored based on ignore list.
-        
+
         Args:
             book_title: Title of the book (normalized)
             book_filename: Filename of the book (optional)
-        
+
         Returns:
             True if book should be ignored, False otherwise
         """
         if not self.ignore_list:
             return False
-        
+
         # Normalize title for comparison
         title_lower = book_title.lower().strip()
-        
+
         # Check against ignore titles
         for ignore_title in self.ignore_list.get("ignore_titles", []):
             if ignore_title.lower() in title_lower:
                 logger.info(f"⏭️  Ignoring book: {book_title} (matches ignore list)")
                 return True
-        
+
         # Check against ignore patterns (filenames)
         if book_filename:
             filename_lower = book_filename.lower().strip()
@@ -261,7 +261,7 @@ class BookManager:
                 if ignore_pattern.lower() in filename_lower:
                     logger.info(f"⏭️  Ignoring book: {book_filename} (matches ignore pattern)")
                     return True
-        
+
         return False
 
     def book_exists_in_s3(self, s3_key: str) -> bool:
@@ -1708,7 +1708,7 @@ Examples:
         if book_manager.should_ignore_book(book.get("title", ""), book_filename):
             logger.info(f"⏭️  Skipping ignored book: {book['title']}")
             continue
-        
+
         # Skip if needs conversion and wasn't converted
         if book in results["needs_conversion"] or book in results["skipped"]:
             logger.warning(

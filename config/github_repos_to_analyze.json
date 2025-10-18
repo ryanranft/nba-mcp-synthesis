@@ -1,0 +1,370 @@
+{
+  "github_repositories": [
+    {
+      "title": "Hands-On Machine Learning 3rd Edition (handson-ml3)",
+      "s3_path": "textbook-code/machine-learning/handson-ml3_complete.txt",
+      "category": "machine_learning",
+      "textbook_match": "Hands-On_Machine_Learning_with_Scikit-Learn_Keras_and_Tensorflow_-_Aurelien_Geron.pdf",
+      "key_concepts": ["scikit-learn", "tensorflow", "keras", "ml-pipelines"],
+      "priority": 1,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "handson-ml3",
+        "github_url": "https://github.com/ageron/handson-ml3",
+        "stars": 11371,
+        "file_count": 1000,
+        "size_mb": 200,
+        "description": "Complete implementation of Hands-On Machine Learning book"
+      }
+    },
+    {
+      "title": "Probabilistic Machine Learning - PyProbML (pyprobml)",
+      "s3_path": "textbook-code/machine-learning/pyprobml_complete.txt",
+      "category": "machine_learning",
+      "textbook_match": "ML Machine Learning-A Probabilistic Perspective.pdf",
+      "key_concepts": ["bayesian-methods", "probabilistic-models", "vae", "gan"],
+      "priority": 1,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "pyprobml",
+        "github_url": "https://github.com/probml/pyprobml",
+        "stars": 6920,
+        "file_count": 500,
+        "size_mb": 100,
+        "description": "Python implementations for Probabilistic Machine Learning"
+      }
+    },
+    {
+      "title": "Elements of Statistical Learning Python Notebooks",
+      "s3_path": "textbook-code/statistical-learning/The-Elements-of-Statistical-Learning-Python-Notebooks_complete.txt",
+      "category": "statistical_learning",
+      "textbook_match": "The Elements of Statistical Learning - Data Mining, Inference, and Prediction.pdf",
+      "key_concepts": ["statistical-learning", "regression", "classification", "ensemble-methods"],
+      "priority": 1,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "The-Elements-of-Statistical-Learning-Python-Notebooks",
+        "github_url": "https://github.com/empathy87/The-Elements-of-Statistical-Learning-Python-Notebooks",
+        "stars": 901,
+        "file_count": 200,
+        "size_mb": 50,
+        "description": "Python implementations of ESL algorithms"
+      }
+    },
+    {
+      "title": "Dive into Deep Learning (d2l-en)",
+      "s3_path": "textbook-code/interactive-deep-learning/d2l-en_complete.txt",
+      "category": "deep_learning",
+      "textbook_match": "Deep Learning by Ian Goodfellow, Yoshua Bengio, Aaron Courville.pdf",
+      "key_concepts": ["pytorch", "tensorflow", "neural-networks", "transformer"],
+      "priority": 1,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "d2l-en",
+        "github_url": "https://github.com/d2l-ai/d2l-en",
+        "stars": 20000,
+        "file_count": 1000,
+        "size_mb": 200,
+        "description": "Interactive deep learning book with multi-framework support"
+      }
+    },
+    {
+      "title": "Fastai Book - Practical Deep Learning",
+      "s3_path": "textbook-code/practical-deep-learning/fastbook_complete.txt",
+      "category": "deep_learning",
+      "textbook_match": "General deep learning and practical ML books",
+      "key_concepts": ["fastai", "practical-deep-learning", "transfer-learning", "computer-vision"],
+      "priority": 1,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "fastbook",
+        "github_url": "https://github.com/fastai/fastbook",
+        "stars": 15000,
+        "file_count": 500,
+        "size_mb": 100,
+        "description": "Practical deep learning book with FastAI"
+      }
+    },
+    {
+      "title": "Deep Learning Book Notes",
+      "s3_path": "textbook-code/deep-learning/deepLearningBook-Notes_complete.txt",
+      "category": "deep_learning",
+      "textbook_match": "Deep Learning by Ian Goodfellow, Yoshua Bengio, Aaron Courville.pdf",
+      "key_concepts": ["deep-learning", "neural-networks", "optimization", "regularization"],
+      "priority": 2,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "deepLearningBook-Notes",
+        "github_url": "https://github.com/hadrienj/deepLearningBook-Notes",
+        "stars": 1782,
+        "file_count": 300,
+        "size_mb": 75,
+        "description": "Notes and implementations for Deep Learning book"
+      }
+    },
+    {
+      "title": "Generative Deep Learning 2nd Edition",
+      "s3_path": "textbook-code/generative-ai/Generative_Deep_Learning_2nd_Edition_complete.txt",
+      "category": "generative_ai",
+      "textbook_match": "Generative Deep Learning 2nd Edition.pdf",
+      "key_concepts": ["generative-models", "vae", "gan", "diffusion-models"],
+      "priority": 1,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "Generative_Deep_Learning_2nd_Edition",
+        "github_url": "https://github.com/davidADSP/Generative_Deep_Learning_2nd_Edition",
+        "stars": 1384,
+        "file_count": 400,
+        "size_mb": 80,
+        "description": "Complete implementations for Generative Deep Learning"
+      }
+    },
+    {
+      "title": "Building ML Powered Applications",
+      "s3_path": "textbook-code/machine-learning/ml-powered-applications_complete.txt",
+      "category": "mlops_production",
+      "textbook_match": "Building ML Powered Applications.pdf",
+      "key_concepts": ["mlops", "production-ml", "model-deployment", "monitoring"],
+      "priority": 2,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "ml-powered-applications",
+        "github_url": "https://github.com/hundredblocks/ml-powered-applications",
+        "stars": 688,
+        "file_count": 200,
+        "size_mb": 40,
+        "description": "Building ML-powered applications with production considerations"
+      }
+    },
+    {
+      "title": "Practical MLOps",
+      "s3_path": "textbook-code/mlops-production/practical_mlops_complete.txt",
+      "category": "mlops_production",
+      "textbook_match": "Practical MLOps.pdf",
+      "key_concepts": ["mlops", "ci-cd", "model-versioning", "monitoring"],
+      "priority": 2,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "practical_mlops",
+        "github_url": "https://github.com/matgonz/practical_mlops",
+        "stars": 4,
+        "file_count": 300,
+        "size_mb": 60,
+        "description": "Practical MLOps implementations and best practices"
+      }
+    },
+    {
+      "title": "Reinforcement Learning Notebooks (Sutton & Barto)",
+      "s3_path": "textbook-code/reinforcement-learning/Reinforcement-Learning-Notebooks_complete.txt",
+      "category": "reinforcement_learning",
+      "textbook_match": "Reinforcement Learning An Introduction.pdf",
+      "key_concepts": ["reinforcement-learning", "q-learning", "policy-gradient", "deep-q-networks"],
+      "priority": 1,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "Reinforcement-Learning-Notebooks",
+        "github_url": "https://github.com/Pulkit-Khandelwal/Reinforcement-Learning-Notebooks",
+        "stars": 1044,
+        "file_count": 400,
+        "size_mb": 80,
+        "description": "Complete RL algorithms from Sutton & Barto"
+      }
+    },
+    {
+      "title": "Wooldridge Econometrics R Package",
+      "s3_path": "textbook-code/econometrics/wooldridge_complete.txt",
+      "category": "econometrics",
+      "textbook_match": "Introductory Econometrics A Modern Approach.pdf",
+      "key_concepts": ["econometrics", "regression-analysis", "panel-data", "time-series"],
+      "priority": 2,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "wooldridge",
+        "github_url": "https://github.com/JustinMShea/wooldridge",
+        "stars": 217,
+        "file_count": 200,
+        "size_mb": 40,
+        "description": "Official R package with econometric datasets"
+      }
+    },
+    {
+      "title": "Python Causality Handbook",
+      "s3_path": "textbook-code/causal-inference/python-causality-handbook_complete.txt",
+      "category": "causal_inference",
+      "textbook_match": "Causal Inference The Mixtape.pdf",
+      "key_concepts": ["causal-inference", "treatment-effects", "instrumental-variables", "difference-in-differences"],
+      "priority": 2,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "python-causality-handbook",
+        "github_url": "https://github.com/matheusfacure/python-causality-handbook",
+        "stars": 3085,
+        "file_count": 300,
+        "size_mb": 60,
+        "description": "Python implementations for causal inference"
+      }
+    },
+    {
+      "title": "Computer Vision Szeliski",
+      "s3_path": "textbook-code/computer-vision/computer_vision_szeliski_complete.txt",
+      "category": "computer_vision",
+      "textbook_match": "Computer Vision Algorithms and Applications.pdf",
+      "key_concepts": ["computer-vision", "image-processing", "feature-detection", "object-detection"],
+      "priority": 2,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "computer_vision_szeliski",
+        "github_url": "https://github.com/gianscarpe/computer_vision_szeliski",
+        "stars": 3,
+        "file_count": 400,
+        "size_mb": 80,
+        "description": "Python implementations for Computer Vision book"
+      }
+    },
+    {
+      "title": "Machine Learning Tom Mitchell - Georgia Tech",
+      "s3_path": "textbook-code/classic-ml/cs7641_complete.txt",
+      "category": "classic_ml",
+      "textbook_match": "Machine Learning Tom Mitchell.pdf",
+      "key_concepts": ["machine-learning", "decision-trees", "neural-networks", "bayesian-learning"],
+      "priority": 2,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "cs7641",
+        "github_url": "https://github.com/shashir/cs7641",
+        "stars": 27,
+        "file_count": 200,
+        "size_mb": 40,
+        "description": "Georgia Tech ML course materials"
+      }
+    },
+    {
+      "title": "Mathematics for Computer Science",
+      "s3_path": "textbook-code/mathematical-foundations/lehman-math-cs_complete.txt",
+      "category": "mathematical_foundations",
+      "textbook_match": "Mathematics for Computer Science.pdf",
+      "key_concepts": ["discrete-mathematics", "probability", "graph-theory", "algorithms"],
+      "priority": 3,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "lehman-math-cs",
+        "github_url": "https://github.com/lair001/lehman-math-cs",
+        "stars": 39,
+        "file_count": 300,
+        "size_mb": 60,
+        "description": "Mathematics for CS implementations"
+      }
+    },
+    {
+      "title": "PyTorch Geometric - Graph Neural Networks",
+      "s3_path": "textbook-code/graph-neural-networks/pytorch_geometric_complete.txt",
+      "category": "graph_neural_networks",
+      "textbook_match": "General graph neural networks and geometric deep learning",
+      "key_concepts": ["graph-neural-networks", "geometric-deep-learning", "graph-convolution", "message-passing"],
+      "priority": 2,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "pytorch_geometric",
+        "github_url": "https://github.com/pyg-team/pytorch_geometric",
+        "stars": 22998,
+        "file_count": 500,
+        "size_mb": 100,
+        "description": "PyTorch Geometric implementations for GNNs"
+      }
+    },
+    {
+      "title": "Python Data Science Handbook",
+      "s3_path": "textbook-code/data-science-fundamentals/PythonDataScienceHandbook_complete.txt",
+      "category": "data_science_fundamentals",
+      "textbook_match": "Python Data Science Handbook.pdf",
+      "key_concepts": ["pandas", "numpy", "matplotlib", "data-manipulation"],
+      "priority": 1,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "PythonDataScienceHandbook",
+        "github_url": "https://github.com/jakevdp/PythonDataScienceHandbook",
+        "stars": 40000,
+        "file_count": 200,
+        "size_mb": 50,
+        "description": "Complete Jupyter notebooks for data science with Python"
+      }
+    },
+    {
+      "title": "Bayesian Data Analysis Python Demos",
+      "s3_path": "textbook-code/bayesian-methods/BDA_py_demos_complete.txt",
+      "category": "bayesian_methods",
+      "textbook_match": "Bayesian Data Analysis.pdf",
+      "key_concepts": ["bayesian-statistics", "mcmc", "hierarchical-models", "probabilistic-programming"],
+      "priority": 2,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "BDA_py_demos",
+        "github_url": "https://github.com/avehtari/BDA_py_demos",
+        "stars": 1000,
+        "file_count": 100,
+        "size_mb": 30,
+        "description": "Python demonstrations for Bayesian Data Analysis"
+      }
+    },
+    {
+      "title": "Designing Data-Intensive Applications References",
+      "s3_path": "textbook-code/system-design/ddia-references_complete.txt",
+      "category": "system_design",
+      "textbook_match": "Designing Data-Intensive Applications.pdf",
+      "key_concepts": ["system-design", "distributed-systems", "databases", "scalability"],
+      "priority": 3,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "ddia-references",
+        "github_url": "https://github.com/ept/ddia-references",
+        "stars": 2000,
+        "file_count": 50,
+        "size_mb": 20,
+        "description": "References for Designing Data-Intensive Applications"
+      }
+    },
+    {
+      "title": "Geocomputation with Python",
+      "s3_path": "textbook-code/geographic-analysis/geocompy_complete.txt",
+      "category": "geographic_analysis",
+      "textbook_match": "Geocomputation with Python.pdf",
+      "key_concepts": ["gis", "spatial-analysis", "geopandas", "cartography"],
+      "priority": 3,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "geocompy",
+        "github_url": "https://github.com/geocompx/geocompy",
+        "stars": 1500,
+        "file_count": 80,
+        "size_mb": 25,
+        "description": "Python implementations for Geocomputation"
+      }
+    },
+    {
+      "title": "Automate the Boring Stuff with Python",
+      "s3_path": "textbook-code/python-automation/automateboringstuff_complete.txt",
+      "category": "python_automation",
+      "textbook_match": "Automate the Boring Stuff with Python.pdf",
+      "key_concepts": ["python-automation", "web-scraping", "file-handling", "excel-automation"],
+      "priority": 3,
+      "status": "pending",
+      "metadata": {
+        "repo_name": "automateboringstuff",
+        "github_url": "https://github.com/automateboringstuff/automateboringstuff",
+        "stars": 5000,
+        "file_count": 40,
+        "size_mb": 15,
+        "description": "Python automation examples"
+      }
+    }
+  ],
+  "metadata": {
+    "total_repositories": 21,
+    "total_categories": 14,
+    "total_size_mb": 1500,
+    "last_updated": "2025-10-18",
+    "version": "1.0.0",
+    "description": "GitHub repositories for textbook companion code, configured for caching and analysis"
+  }
+}
+

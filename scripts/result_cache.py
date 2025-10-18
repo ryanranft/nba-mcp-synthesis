@@ -4,6 +4,7 @@ Result Cache - Content-based caching for expensive AI operations.
 
 Avoids redundant work by caching:
 - Book analysis results (by content hash)
+- GitHub repository analysis results (by content hash)
 - Synthesis results (by recommendation set hash)
 - Plan generation results (by synthesis hash)
 
@@ -13,7 +14,7 @@ Benefits:
 - Consistent results
 
 Cache Strategy:
-- Content-addressable: Hash book content, not filename
+- Content-addressable: Hash content, not filename
 - TTL: 7 days default (configurable)
 - Automatic invalidation on content changes
 - Size management: LRU eviction when >5GB
@@ -23,6 +24,8 @@ Usage:
 
     # Check cache
     cached = cache.get_cached('book_analysis', content_hash)
+    # OR for GitHub repos:
+    cached = cache.get_cached('github_repo_analysis', content_hash)
     if cached:
         return cached
 
@@ -31,6 +34,8 @@ Usage:
 
     # Save to cache
     cache.save_to_cache('book_analysis', content_hash, result)
+    # OR for GitHub repos:
+    cache.save_to_cache('github_repo_analysis', content_hash, result)
 """
 
 import hashlib
@@ -53,9 +58,12 @@ class ResultCache:
         ├── book_analysis/
         │   ├── abc123_metadata.json
         │   └── abc123_result.json
-        ├── synthesis/
+        ├── github_repo_analysis/
         │   ├── def456_metadata.json
         │   └── def456_result.json
+        ├── synthesis/
+        │   ├── ghi789_metadata.json
+        │   └── ghi789_result.json
         └── cache_index.json
     """
 
@@ -74,6 +82,7 @@ class ResultCache:
         # Create cache directories
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         (self.cache_dir / "book_analysis").mkdir(exist_ok=True)
+        (self.cache_dir / "github_repo_analysis").mkdir(exist_ok=True)
         (self.cache_dir / "synthesis").mkdir(exist_ok=True)
         (self.cache_dir / "plan_generation").mkdir(exist_ok=True)
 
