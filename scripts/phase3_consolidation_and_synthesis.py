@@ -138,11 +138,16 @@ class Phase3ConsolidationBasic:
 
                 # Extract recommendations from iterations
                 for iteration in data.get('iterations', []):
-                    for rec in iteration.get('recommendations', []):
-                        # Add source book info
-                        rec['source_book'] = book_title
-                        rec['source_file'] = result_file.name
-                        all_recommendations.append(rec)
+                    recs_dict = iteration.get('recommendations', {})
+                    
+                    # Iterate over all priority levels
+                    for priority in ['critical', 'important', 'nice_to_have']:
+                        for rec in recs_dict.get(priority, []):
+                            # Add source book info and priority
+                            rec['source_book'] = book_title
+                            rec['source_file'] = result_file.name
+                            rec['priority'] = priority
+                            all_recommendations.append(rec)
 
             except Exception as e:
                 logger.error(f"   ❌ Error loading {result_file.name}: {e}")
