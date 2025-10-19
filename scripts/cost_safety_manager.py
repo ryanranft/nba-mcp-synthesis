@@ -65,16 +65,16 @@ class CostSafetyManager:
     COST_LIMITS = {
         'phase_0_discovery': 1.00,
         'phase_1_book_discovery': 0.50,
-        'phase_2_analysis': 30.00,
-        'phase_3_synthesis': 20.00,
-        'phase_3.5_modifications': 15.00,
-        'phase_4_generation': 5.00,
+        'phase_2_analysis': 100.00,  # Increased for Tier 2 testing
+        'phase_3_synthesis': 50.00,  # Increased for Tier 2 testing
+        'phase_3.5_modifications': 30.00,  # Increased for Tier 2 testing
+        'phase_4_generation': 10.00,
         'phase_5_predictions': 10.00,
         'phase_6_status': 0.50,
         'phase_7_optimization': 1.00,
         'phase_8_tracking': 0.50,
         'phase_9_integration': 2.00,
-        'total_workflow': 75.00
+        'total_workflow': 200.00  # Increased for Tier 2 testing
     }
 
     def __init__(self, cost_log_path: Optional[Path] = None):

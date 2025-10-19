@@ -232,6 +232,8 @@ class Tier0WorkflowOrchestrator:
         """
         if not enable_ai_modifications:
             logger.info("\n⏭️  Skipping Phase 3.5 (AI modifications disabled)")
+            if not dry_run:
+                self.status_mgr.skip_phase("phase_3_5", "AI modifications disabled by user")
             return True
 
         logger.info("\n" + "="*60)
@@ -425,7 +427,7 @@ class Tier0WorkflowOrchestrator:
             tier = "TIER 1"
         else:
             tier = "TIER 0"
-        
+
         logger.info("\n" + "="*60)
         logger.info(f"{tier} WORKFLOW - END-TO-END TEST")
         logger.info("="*60)
