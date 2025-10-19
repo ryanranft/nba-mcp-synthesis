@@ -1,6 +1,6 @@
 # 📚 Master Summary: All Books Analysis
 
-**Generated:** 2025-10-18T22:45:37.584374
+**Generated:** 2025-10-18T23:21:17.477700
 **Total Books Analyzed:** 2
 
 ---
@@ -23,21 +23,21 @@
 
 ## 📖 Per-Book Results
 
-### ⏳ Designing Machine Learning Systems
+### ⏳ Basketball Beyond Paper
 
 - **Iterations:** 15
 - **Critical:** 0
 - **Important:** 0
 - **Nice-to-Have:** 0
-- **Report:** [Designing_Machine_Learning_Systems_RECOMMENDATIONS_COMPLETE.md](Designing_Machine_Learning_Systems_RECOMMENDATIONS_COMPLETE.md)
+- **Report:** [Basketball_Beyond_Paper_RECOMMENDATIONS_COMPLETE.md](Basketball_Beyond_Paper_RECOMMENDATIONS_COMPLETE.md)
 
-### ⏳ Designing Machine Learning Systems An Iterative Process for Production Ready Applications   Chip Huyen
+### ⏳ Basketball on Paper
 
 - **Iterations:** 15
 - **Critical:** 0
 - **Important:** 0
 - **Nice-to-Have:** 0
-- **Report:** [Designing_Machine_Learning_Systems_An_Iterative_Process_for_Production_Ready_Applications___Chip_Huyen_RECOMMENDATIONS_COMPLETE.md](Designing_Machine_Learning_Systems_An_Iterative_Process_for_Production_Ready_Applications___Chip_Huyen_RECOMMENDATIONS_COMPLETE.md)
+- **Report:** [Basketball_on_Paper_RECOMMENDATIONS_COMPLETE.md](Basketball_on_Paper_RECOMMENDATIONS_COMPLETE.md)
 
 ---
 
