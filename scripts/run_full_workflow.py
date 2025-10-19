@@ -35,6 +35,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from cost_safety_manager import CostSafetyManager
 from rollback_manager import RollbackManager
 from error_recovery import ErrorRecoveryManager
+from phase_status_manager import PhaseStatusManager
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +53,7 @@ class Tier0WorkflowOrchestrator:
         self.cost_mgr = CostSafetyManager()
         self.rollback_mgr = RollbackManager()
         self.recovery_mgr = ErrorRecoveryManager()
+        self.status_mgr = PhaseStatusManager()
 
         logger.info("🚀 Tier 0 Workflow Orchestrator")
         logger.info(f"   Budget: ${self.cost_mgr.COST_LIMITS['total_workflow']:.2f}")
@@ -81,10 +83,16 @@ class Tier0WorkflowOrchestrator:
         logger.info("PHASE 2: RECURSIVE BOOK ANALYSIS")
         logger.info("="*60 + "\n")
 
+        # Start phase tracking
+        if not dry_run:
+            self.status_mgr.start_phase("phase_2", "Phase 2: Book Analysis")
+
         # Check cost limit
         estimated_cost = 5.00  # Estimate for 1 book
         if not self.cost_mgr.check_cost_limit('phase_2_analysis', estimated_cost):
             logger.error("❌ Cost limit exceeded for Phase 2")
+            if not dry_run:
+                self.status_mgr.fail_phase("phase_2", "Cost limit exceeded")
             return False
 
         # Create backup
@@ -120,6 +128,7 @@ class Tier0WorkflowOrchestrator:
             return True
 
         try:
+            start_time = datetime.now()
             result = subprocess.run(
                 cmd,
                 capture_output=False,  # Show output in real-time
@@ -135,14 +144,20 @@ class Tier0WorkflowOrchestrator:
                     operation=f"Analyze {book_title}"
                 )
 
+                # Mark phase complete
+                duration = (datetime.now() - start_time).total_seconds()
+                self.status_mgr.complete_phase("phase_2", duration)
+
                 logger.info("\n✅ Phase 2 complete")
                 return True
             else:
                 logger.error(f"\n❌ Phase 2 failed with exit code {result.returncode}")
+                self.status_mgr.fail_phase("phase_2", f"Exit code {result.returncode}")
                 return False
 
         except Exception as e:
             logger.error(f"\n❌ Phase 2 error: {e}")
+            self.status_mgr.fail_phase("phase_2", str(e))
             return False
 
     async def run_phase3(self, dry_run: bool = False) -> bool:
@@ -159,6 +174,10 @@ class Tier0WorkflowOrchestrator:
         logger.info("PHASE 3: CONSOLIDATION AND SYNTHESIS")
         logger.info("="*60 + "\n")
 
+        # Start phase tracking
+        if not dry_run:
+            self.status_mgr.start_phase("phase_3", "Phase 3: Consolidation & Synthesis")
+
         # Import Phase 3 script
         from phase3_consolidation_and_synthesis import Phase3ConsolidationBasic
 
@@ -172,18 +191,27 @@ class Tier0WorkflowOrchestrator:
 
         # Run consolidation
         try:
+            start_time = datetime.now()
             phase3 = Phase3ConsolidationBasic()
             result = await phase3.consolidate_recommendations(dry_run=dry_run)
 
             if 'error' in result:
                 logger.error("\n❌ Phase 3 failed")
+                if not dry_run:
+                    self.status_mgr.fail_phase("phase_3", result.get('error', 'Unknown error'))
                 return False
+
+            # Mark phase complete
+            duration = (datetime.now() - start_time).total_seconds()
+            self.status_mgr.complete_phase("phase_3", duration)
 
             logger.info("\n✅ Phase 3 complete")
             return True
 
         except Exception as e:
             logger.error(f"\n❌ Phase 3 error: {e}")
+            if not dry_run:
+                self.status_mgr.fail_phase("phase_3", str(e))
             return False
 
     async def run_phase4(self, dry_run: bool = False) -> bool:
@@ -200,6 +228,10 @@ class Tier0WorkflowOrchestrator:
         logger.info("PHASE 4: FILE GENERATION")
         logger.info("="*60 + "\n")
 
+        # Start phase tracking
+        if not dry_run:
+            self.status_mgr.start_phase("phase_4", "Phase 4: File Generation")
+
         # Import Phase 4 script
         from phase4_file_generation import Phase4FileGenerationBasic
 
@@ -213,18 +245,27 @@ class Tier0WorkflowOrchestrator:
 
         # Run file generation
         try:
+            start_time = datetime.now()
             phase4 = Phase4FileGenerationBasic()
             result = await phase4.generate_files(dry_run=dry_run)
 
             if 'error' in result:
                 logger.error("\n❌ Phase 4 failed")
+                if not dry_run:
+                    self.status_mgr.fail_phase("phase_4", result.get('error', 'Unknown error'))
                 return False
+
+            # Mark phase complete
+            duration = (datetime.now() - start_time).total_seconds()
+            self.status_mgr.complete_phase("phase_4", duration)
 
             logger.info("\n✅ Phase 4 complete")
             return True
 
         except Exception as e:
             logger.error(f"\n❌ Phase 4 error: {e}")
+            if not dry_run:
+                self.status_mgr.fail_phase("phase_4", str(e))
             return False
 
     async def run_phase8_5(self, skip_tests: bool = False) -> bool:
@@ -241,6 +282,9 @@ class Tier0WorkflowOrchestrator:
         logger.info("PHASE 8.5: PRE-INTEGRATION VALIDATION")
         logger.info("="*60 + "\n")
 
+        # Start phase tracking
+        self.status_mgr.start_phase("phase_8_5", "Phase 8.5: Pre-Integration Validation")
+
         # Run validation script
         cmd = ['python3', 'scripts/phase8_5_validation.py']
 
@@ -252,6 +296,7 @@ class Tier0WorkflowOrchestrator:
         logger.info(f"Running: {' '.join(cmd)}\n")
 
         try:
+            start_time = datetime.now()
             result = subprocess.run(
                 cmd,
                 capture_output=False,
@@ -259,13 +304,19 @@ class Tier0WorkflowOrchestrator:
             )
 
             if result.returncode == 0:
+                # Mark phase complete
+                duration = (datetime.now() - start_time).total_seconds()
+                self.status_mgr.complete_phase("phase_8_5", duration)
+
                 logger.info("\n✅ Phase 8.5 validation passed")
                 return True
             else:
+                self.status_mgr.fail_phase("phase_8_5", "Validation failed")
                 logger.error("\n❌ Phase 8.5 validation failed")
                 return False
 
         except Exception as e:
+            self.status_mgr.fail_phase("phase_8_5", str(e))
             logger.error(f"\n❌ Phase 8.5 error: {e}")
             return False
 
@@ -344,12 +395,17 @@ class Tier0WorkflowOrchestrator:
         # Generate cost report
         self.cost_mgr.save_cost_report()
 
+        # Generate phase status report
+        self.status_mgr.generate_status_report()
+        logger.info("📊 Phase status report: implementation_plans/PHASE_STATUS_REPORT.md\n")
+
         logger.info("✅ Tier 0 workflow successful!")
         logger.info("\nNext steps:")
         logger.info("1. Review generated files in implementation_plans/")
         logger.info("2. Check PHASE3_SUMMARY.md and PHASE4_SUMMARY.json")
         logger.info("3. Review VALIDATION_REPORT.md")
-        logger.info("4. Ready for Tier 1 implementation!\n")
+        logger.info("4. Review PHASE_STATUS_REPORT.md")
+        logger.info("5. Ready for Tier 1 implementation!\n")
 
         return True
 
