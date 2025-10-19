@@ -660,13 +660,16 @@ class RecursiveAnalyzer:
         use_high_context: bool = False,
         enable_cache: bool = True,
         enable_parallel: bool = False,
-        max_workers: int = 4
+        max_workers: int = 4,
+        converge_until_done: bool = False
     ):
         self.config = config
         self.s3_bucket = config["s3_bucket"]
         self.project_context = config["project_context"]
         self.convergence_threshold = config["convergence_threshold"]
         self.max_iterations = config["max_iterations"]
+        self.converge_until_done = converge_until_done
+        self.safety_max_iterations = 100  # Safety cap for unlimited mode
         self.use_high_context = use_high_context
         self.enable_cache = enable_cache
         self.enable_parallel = enable_parallel
@@ -701,6 +704,10 @@ class RecursiveAnalyzer:
             logger.info("🚀 Using High-Context Analyzer (Gemini 1.5 Pro + Claude Sonnet 4)")
             logger.info("📊 Context: up to 250k tokens (~1M characters) per book")
             logger.info(f"💾 Cache: {'enabled' if enable_cache else 'disabled'}")
+            if converge_until_done:
+                logger.info(f"♾️  Convergence: Unlimited iterations (safety cap: {self.safety_max_iterations})")
+            else:
+                logger.info(f"🔄 Convergence: Standard ({self.max_iterations} iterations max)")
             if enable_parallel:
                 logger.info(f"🔀 Parallel: {max_workers} workers")
         else:
@@ -743,10 +750,17 @@ class RecursiveAnalyzer:
 
         consecutive_nice_only = 0
         iteration = 0
+        
+        # Determine effective max iterations
+        effective_max = self.safety_max_iterations if self.converge_until_done else self.max_iterations
+        iteration_display = "∞" if self.converge_until_done else str(self.max_iterations)
 
-        while iteration < self.max_iterations:
+        while iteration < effective_max:
             iteration += 1
-            logger.info(f"\n🔄 Iteration {iteration}/{self.max_iterations}")
+            if self.converge_until_done:
+                logger.info(f"\n🔄 Iteration {iteration} (converge-until-done mode, safety cap: {self.safety_max_iterations})")
+            else:
+                logger.info(f"\n🔄 Iteration {iteration}/{self.max_iterations}")
 
             # Run intelligent MCP analysis with deduplication
             recommendations = await self._analyze_with_mcp_and_intelligence(
@@ -802,6 +816,12 @@ class RecursiveAnalyzer:
 
         tracker["end_time"] = datetime.now().isoformat()
         tracker["total_iterations"] = iteration
+        
+        # Warn if safety cap was reached in unlimited mode
+        if self.converge_until_done and iteration >= self.safety_max_iterations and not tracker["convergence_achieved"]:
+            logger.warning(f"\n⚠️ Safety cap of {self.safety_max_iterations} iterations reached without convergence!")
+            logger.warning(f"   Found {tracker['total_recommendations']['critical']} critical + {tracker['total_recommendations']['important']} important recommendations")
+            logger.warning(f"   Consider reviewing convergence criteria or book complexity")
 
         # Save master recommendations
         self.master_recs.save_master()
@@ -1589,6 +1609,7 @@ Examples:
   python scripts/recursive_book_analysis.py --all
   python scripts/recursive_book_analysis.py --book "Econometric Analysis"
   python scripts/recursive_book_analysis.py --book "Sports Analytics,Basketball Beyond Paper"
+  python scripts/recursive_book_analysis.py --all --converge-until-done  # Run until convergence
   python scripts/recursive_book_analysis.py --check-s3
   python scripts/recursive_book_analysis.py --upload-only
   python scripts/recursive_book_analysis.py --convert-acsm
@@ -1655,6 +1676,11 @@ Examples:
         type=int,
         default=4,
         help="Maximum number of parallel workers (default: 4)",
+    )
+    parser.add_argument(
+        "--converge-until-done",
+        action="store_true",
+        help="Run unlimited iterations until convergence (safety cap: 100 iterations). Useful for comprehensive textbooks.",
     )
 
     args = parser.parse_args()
@@ -1730,6 +1756,10 @@ Examples:
         logger.info("\n🔍 DRY RUN MODE - Preview of books to be analyzed:\n")
         logger.info(f"Total books: {len(books_to_analyze)}")
         logger.info(f"Analyzer: {'High-Context (Gemini + Claude)' if args.high_context else 'Standard (4 models)'}")
+        if args.converge_until_done:
+            logger.info(f"Convergence mode: ♾️  Unlimited (safety cap: 100 iterations)")
+        else:
+            logger.info(f"Convergence mode: Standard (15 iterations max)")
         logger.info("\nBooks to analyze:")
         for i, book in enumerate(books_to_analyze, 1):
             exists = book_manager.book_exists_in_s3(book["s3_path"])
@@ -1752,7 +1782,8 @@ Examples:
         use_high_context=args.high_context,
         enable_cache=not args.no_cache,  # Invert --no-cache flag
         enable_parallel=args.parallel,
-        max_workers=args.max_workers
+        max_workers=args.max_workers,
+        converge_until_done=args.converge_until_done
     )
     report_gen = RecommendationGenerator()
     plan_gen = PlanGenerator()
