@@ -98,9 +98,10 @@ class Tier0WorkflowOrchestrator:
 
         # Create backup
         if not dry_run:
+            backup_desc = f"Before analyzing {book_title if book_title else 'all books'}"
             backup_id = self.rollback_mgr.create_backup(
                 phase='phase_2',
-                description=f"Before analyzing {book_title}"
+                description=backup_desc
             )
             logger.info(f"📦 Backup created: {backup_id}\n")
 
@@ -108,9 +109,14 @@ class Tier0WorkflowOrchestrator:
         cmd = [
             'python3',
             'scripts/recursive_book_analysis.py',
-            '--book', book_title,
             '--high-context'  # Use high-context analyzer
         ]
+
+        # Add book filter or --all flag
+        if book_title:
+            cmd.extend(['--book', book_title])
+        else:
+            cmd.append('--all')
 
         # Add parallel flags if enabled
         if use_parallel:
@@ -142,7 +148,7 @@ class Tier0WorkflowOrchestrator:
                 self.cost_mgr.track_cost(
                     'phase_2_analysis',
                     actual_cost,
-                    operation=f"Analyze {book_title}"
+                    operation=f"Analyze {book_title if book_title else 'all books'}"
                 )
 
                 # Mark phase complete
