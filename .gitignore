@@ -319,6 +319,13 @@ api_keys.json
 .env.development
 .env.test
 .env.production
+.env.google_cloud
+.env.billing
+
+# Billing reports with sensitive IDs
+billing_report_*.json
+billing_report_*.md
+*_billing_account_*.json
 .env.staging
 config.local.json
 config.local.yaml
