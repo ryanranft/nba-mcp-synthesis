@@ -103,7 +103,7 @@ Once billing export is configured:
 # Total Gemini costs for today
 bq query --use_legacy_sql=false \
 "SELECT SUM(cost) as total_cost
- FROM \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.${BIGQUERY_BILLING_EXPORT_TABLE}\`
+ FROM \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.gcp_billing_export_v1_01C3B6_61505E_CB6F45\`
  WHERE _PARTITIONDATE = CURRENT_DATE()
    AND service.description = 'Generative Language API'"
 
@@ -113,7 +113,7 @@ bq query --use_legacy_sql=false \
    sku.description,
    SUM(cost) as cost_usd,
    SUM(usage.amount) as tokens
- FROM \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.${BIGQUERY_BILLING_EXPORT_TABLE}\`
+ FROM \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.gcp_billing_export_v1_01C3B6_61505E_CB6F45\`
  WHERE _PARTITIONDATE = '2025-10-18'
    AND service.description = 'Generative Language API'
  GROUP BY sku.description
@@ -129,7 +129,7 @@ bq query --use_legacy_sql=false \
 | **Project ID** | ${GOOGLE_CLOUD_PROJECT_ID_PRIMARY} |
 | **Billing Account** | ${GOOGLE_CLOUD_BILLING_ACCOUNT_ID} |
 | **BigQuery Dataset** | billing_export (once created) |
-| **Table Name** | ${BIGQUERY_BILLING_EXPORT_TABLE} |
+| **Table Name** | gcp_billing_export_v1_01C3B6_61505E_CB6F45 |
 | **Account Email** | ryanranft56@gmail.com |
 
 ---

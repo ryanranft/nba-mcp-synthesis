@@ -31,9 +31,9 @@ echo "  3. Replace Google Cloud IDs with placeholders"
 echo "  4. Clean up refs and force garbage collection"
 echo ""
 echo "Sensitive data to be scrubbed:"
-echo "  - Project ID: ${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}"
-echo "  - Project ID: ${GOOGLE_CLOUD_PROJECT_ID_SECONDARY}"
-echo "  - Billing ID: ${GOOGLE_CLOUD_BILLING_ACCOUNT_ID}"
+echo "  - Project ID: gen-lang-client-0453895548"
+echo "  - Project ID: gen-lang-client-0677055559"
+echo "  - Billing ID: 01C3B6-61505E-CB6F45"
 echo ""
 read -p "Do you want to proceed? (yes/no): " -r
 echo
@@ -68,10 +68,10 @@ echo "Step 3: Creating replacement patterns..."
 
 # Create a temporary file with replacements
 cat > /tmp/google-cloud-replacements.txt << 'EOF'
-${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}==>${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}
-${GOOGLE_CLOUD_PROJECT_ID_SECONDARY}==>${GOOGLE_CLOUD_PROJECT_ID_SECONDARY}
-${GOOGLE_CLOUD_BILLING_ACCOUNT_ID}==>${GOOGLE_CLOUD_BILLING_ACCOUNT_ID}
-${BIGQUERY_BILLING_EXPORT_TABLE}==>${BIGQUERY_BILLING_EXPORT_TABLE}
+gen-lang-client-0453895548==>${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}
+gen-lang-client-0677055559==>${GOOGLE_CLOUD_PROJECT_ID_SECONDARY}
+01C3B6-61505E-CB6F45==>${GOOGLE_CLOUD_BILLING_ACCOUNT_ID}
+gcp_billing_export_v1_01C3B6_61505E_CB6F45==>${BIGQUERY_BILLING_EXPORT_TABLE}
 EOF
 
 echo "${GREEN}✅ Replacement patterns created${NC}"
@@ -134,9 +134,9 @@ else
     #
     # git filter-branch --force --tree-filter '
     #     find . -type f \( -name "*.md" -o -name "*.json" -o -name "*.py" \) -exec sed -i "" \
-    #         -e "s/${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}/\${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}/g" \
-    #         -e "s/${GOOGLE_CLOUD_PROJECT_ID_SECONDARY}/\${GOOGLE_CLOUD_PROJECT_ID_SECONDARY}/g" \
-    #         -e "s/${GOOGLE_CLOUD_BILLING_ACCOUNT_ID}/\${GOOGLE_CLOUD_BILLING_ACCOUNT_ID}/g" \
+    #         -e "s/gen-lang-client-0453895548/\${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}/g" \
+    #         -e "s/gen-lang-client-0677055559/\${GOOGLE_CLOUD_PROJECT_ID_SECONDARY}/g" \
+    #         -e "s/01C3B6-61505E-CB6F45/\${GOOGLE_CLOUD_BILLING_ACCOUNT_ID}/g" \
     #         {} + 2>/dev/null || true
     # ' --tag-name-filter cat -- --all
     
@@ -155,12 +155,12 @@ echo "${GREEN}✅ Refs cleaned${NC}"
 # Step 6: Verify removal
 echo ""
 echo "Step 6: Verifying removal..."
-FOUND_COUNT=$(git log --all --source --full-history -S "${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}" | wc -l)
+FOUND_COUNT=$(git log --all --source --full-history -S "gen-lang-client-0453895548" | wc -l)
 if [ "$FOUND_COUNT" -eq 0 ]; then
     echo "${GREEN}✅ Verification passed: No Google Cloud IDs found in history${NC}"
 else
     echo "${RED}⚠️  Warning: Some occurrences may still exist. Count: $FOUND_COUNT${NC}"
-    echo "Run: git log --all -S '${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}' to inspect"
+    echo "Run: git log --all -S 'gen-lang-client-0453895548' to inspect"
 fi
 
 # Step 7: Summary

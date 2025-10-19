@@ -91,11 +91,11 @@ bq update --source billing_export \
 bq ls ${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}:billing_export
 
 # You should see something like:
-# ${BIGQUERY_BILLING_EXPORT_TABLE}
+# gcp_billing_export_v1_01C3B6_61505E_CB6F45
 # gcp_billing_export_resource_v1_01C3B6_61505E_CB6F45 (detailed, if enabled)
 ```
 
-The table name will be: `${BIGQUERY_BILLING_EXPORT_TABLE}`
+The table name will be: `gcp_billing_export_v1_01C3B6_61505E_CB6F45`
 
 ### 3.2 Basic Cost Queries
 
@@ -106,7 +106,7 @@ bq query --use_legacy_sql=false \
 "SELECT
    SUM(cost) + SUM(IFNULL((SELECT SUM(c.amount) FROM UNNEST(credits) c), 0)) as total_cost
  FROM
-   \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.${BIGQUERY_BILLING_EXPORT_TABLE}\`
+   \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.gcp_billing_export_v1_01C3B6_61505E_CB6F45\`
  WHERE
    _PARTITIONDATE = CURRENT_DATE()"
 ```
@@ -121,7 +121,7 @@ bq query --use_legacy_sql=false \
    SUM(usage.amount) as total_usage,
    usage.unit as unit
  FROM
-   \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.${BIGQUERY_BILLING_EXPORT_TABLE}\`
+   \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.gcp_billing_export_v1_01C3B6_61505E_CB6F45\`
  WHERE
    _PARTITIONDATE = CURRENT_DATE()
    AND service.description LIKE '%Generative%'
@@ -140,7 +140,7 @@ bq query --use_legacy_sql=false \
    SUM(usage.amount) as usage_amount,
    usage.unit
  FROM
-   \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.${BIGQUERY_BILLING_EXPORT_TABLE}\`
+   \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.gcp_billing_export_v1_01C3B6_61505E_CB6F45\`
  WHERE
    _PARTITIONDATE = '2025-10-18'
    AND service.description = 'Generative Language API'
@@ -161,7 +161,7 @@ bq query --use_legacy_sql=false \
    usage.unit,
    ROUND(SUM(cost) / NULLIF(SUM(usage.amount), 0) * 1000000, 4) as cost_per_million_tokens
  FROM
-   \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.${BIGQUERY_BILLING_EXPORT_TABLE}\`
+   \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.gcp_billing_export_v1_01C3B6_61505E_CB6F45\`
  WHERE
    _PARTITIONDATE = '2025-10-18'
    AND service.description = 'Generative Language API'
@@ -180,7 +180,7 @@ bq query --use_legacy_sql=false \
    service.description,
    SUM(cost) as daily_cost
  FROM
-   \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.${BIGQUERY_BILLING_EXPORT_TABLE}\`
+   \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.gcp_billing_export_v1_01C3B6_61505E_CB6F45\`
  WHERE
    _PARTITIONDATE BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY) AND CURRENT_DATE()
    AND service.description = 'Generative Language API'
@@ -212,7 +212,7 @@ from datetime import datetime, timedelta
 # Configuration
 PROJECT_ID = "${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}"
 DATASET = "billing_export"
-TABLE = "${BIGQUERY_BILLING_EXPORT_TABLE}"
+TABLE = "gcp_billing_export_v1_01C3B6_61505E_CB6F45"
 
 def query_bigquery(sql):
     """Execute BigQuery query and return results as JSON."""
@@ -490,14 +490,14 @@ bq ls ${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}:billing_export
 # Query today's Gemini costs
 bq query --use_legacy_sql=false \
 "SELECT SUM(cost) as total_cost
- FROM \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.${BIGQUERY_BILLING_EXPORT_TABLE}\`
+ FROM \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.gcp_billing_export_v1_01C3B6_61505E_CB6F45\`
  WHERE _PARTITIONDATE = CURRENT_DATE()
    AND service.description = 'Generative Language API'"
 
 # Check latest data available
 bq query --use_legacy_sql=false \
 "SELECT MAX(_PARTITIONDATE) as latest_date
- FROM \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.${BIGQUERY_BILLING_EXPORT_TABLE}\`"
+ FROM \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.gcp_billing_export_v1_01C3B6_61505E_CB6F45\`"
 ```
 
 ---

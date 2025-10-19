@@ -18,7 +18,7 @@ from typing import Optional, List, Dict
 # Configuration
 PROJECT_ID = "${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}"
 DATASET = "billing_export"
-TABLE = "${BIGQUERY_BILLING_EXPORT_TABLE}"
+TABLE = "gcp_billing_export_v1_01C3B6_61505E_CB6F45"
 
 
 def query_bigquery(sql: str) -> Optional[List[Dict]]:

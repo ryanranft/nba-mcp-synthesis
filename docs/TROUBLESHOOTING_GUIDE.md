@@ -169,7 +169,7 @@ hexdump -C /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat
 echo "your_google_api_key_here" > /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW.env
 
 # Fix OpenAI API key
-echo "your_openai_api_key_here" > /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/OPENAI_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW.env
+echo "${OPENAI_API_KEY}" > /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/OPENAI_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW.env
 
 # Set proper permissions
 chmod 600 /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production/*.env

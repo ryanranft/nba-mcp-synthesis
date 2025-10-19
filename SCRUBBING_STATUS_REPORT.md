@@ -14,10 +14,10 @@ Git history scrubbing was successfully completed locally using BFG Repo-Cleaner.
 
 ## What Was Successfully Scrubbed
 
-##***REMOVED*** - ✅ CLEANED
-- `${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}` → `${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}`
-- `${GOOGLE_CLOUD_PROJECT_ID_SECONDARY}` → `${GOOGLE_CLOUD_PROJECT_ID_SECONDARY}`
-- `${GOOGLE_CLOUD_BILLING_ACCOUNT_ID}` → `${GOOGLE_CLOUD_BILLING_ACCOUNT_ID}`
+### Google Cloud IDs - ✅ CLEANED
+- `gen-lang-client-0453895548` → `${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}`
+- `gen-lang-client-0677055559` → `${GOOGLE_CLOUD_PROJECT_ID_SECONDARY}`
+- `01C3B6-61505E-CB6F45` → `${GOOGLE_CLOUD_BILLING_ACCOUNT_ID}`
 
 ### Files Cleaned (9 files, 20 object IDs changed)
 1. `BILLING_SETUP_STATUS.md`

@@ -282,7 +282,7 @@ cd /Users/ryanranft/nba-mcp-synthesis
 
 # Example fix:
 # Before:
-# os.environ['DEEPSEEK_API_KEY'] = '${DEEPSEEK_API_KEY_REVOKED}'
+# os.environ['DEEPSEEK_API_KEY'] = 'sk-aa81ae6224d34e26b9aa5ff223536bf6'
 
 # After:
 # from mcp_server.unified_secrets_manager import get_secret
