@@ -213,7 +213,10 @@ class Phase35AIPlanModification:
 
         for plan_file in plans_dir.glob("*.json"):
             # Skip non-plan files
-            if plan_file.name.startswith('PHASE') or plan_file.name.startswith('phase_') or plan_file.name.startswith('nba_'):
+            if (plan_file.name.startswith('PHASE') or 
+                plan_file.name.startswith('phase_') or 
+                plan_file.name.startswith('nba_') or
+                plan_file.name == 'plan_operations.json'):
                 continue
 
             try:
@@ -234,7 +237,7 @@ class Phase35AIPlanModification:
         """Detect recommendations not covered by existing plans."""
         gaps = []
 
-        recommendations = synthesis_data.get('recommendations', [])
+        recommendations = synthesis_data.get('consensus_recommendations', [])
         plan_titles = [p.get('title', '').lower() for p in current_plans]
 
         for rec in recommendations:
