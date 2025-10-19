@@ -479,6 +479,160 @@
         "file_size_bytes": 1579624,
         "last_modified": "2025-10-11T21:08:01+00:00"
       }
+    },
+    {
+      "title": "Anaconda-Sponsored Manning Generative-AI-in-Action",
+      "s3_path": "books/Anaconda-Sponsored_Manning_Generative-AI-in-Action.pdf",
+      "local_path": "books/Anaconda-Sponsored_Manning_Generative-AI-in-Action.pdf",
+      "category": "machine_learning",
+      "status": "pending",
+      "priority": 2,
+      "metadata": {
+        "file_size_bytes": 29012677,
+        "discovered_by": "smart_discovery",
+        "confidence": 0.6,
+        "source_repo": "unknown"
+      }
+    },
+    {
+      "title": "Applied-Machine-Learning-and-AI-for-Engineers",
+      "s3_path": "books/Applied-Machine-Learning-and-AI-for-Engineers.pdf",
+      "local_path": "books/Applied-Machine-Learning-and-AI-for-Engineers.pdf",
+      "category": "machine_learning",
+      "status": "pending",
+      "priority": 2,
+      "metadata": {
+        "file_size_bytes": 13498194,
+        "discovered_by": "smart_discovery",
+        "confidence": 0.6,
+        "source_repo": "unknown"
+      }
+    },
+    {
+      "title": "Designing Machine Learning Systems An Iterative Process for Production-Ready Applications - Chip Huyen",
+      "s3_path": "books/Designing_Machine_Learning_Systems_An_Iterative_Process_for_Production-Ready_Applications_-_Chip_Huyen.pdf",
+      "local_path": "books/Designing_Machine_Learning_Systems_An_Iterative_Process_for_Production-Ready_Applications_-_Chip_Huyen.pdf",
+      "category": "machine_learning",
+      "status": "pending",
+      "priority": 2,
+      "metadata": {
+        "file_size_bytes": 10003687,
+        "discovered_by": "smart_discovery",
+        "confidence": 0.6,
+        "source_repo": "unknown"
+      }
+    },
+    {
+      "title": "Hands-On Generative AI with Transformers and Diffusion",
+      "s3_path": "books/Hands-On Generative AI with Transformers and Diffusion.pdf",
+      "local_path": "books/Hands-On Generative AI with Transformers and Diffusion.pdf",
+      "category": "machine_learning",
+      "status": "pending",
+      "priority": 2,
+      "metadata": {
+        "file_size_bytes": 36554479,
+        "discovered_by": "smart_discovery",
+        "confidence": 0.6,
+        "source_repo": "unknown"
+      }
+    },
+    {
+      "title": "Hands-On Machine Learning with Scikit-Learn Keras and Tensorflow - Aurelien Geron",
+      "s3_path": "books/Hands-On_Machine_Learning_with_Scikit-Learn_Keras_and_Tensorflow_-_Aurelien_Geron.pdf",
+      "local_path": "books/Hands-On_Machine_Learning_with_Scikit-Learn_Keras_and_Tensorflow_-_Aurelien_Geron.pdf",
+      "category": "machine_learning",
+      "status": "pending",
+      "priority": 2,
+      "metadata": {
+        "file_size_bytes": 32234760,
+        "discovered_by": "smart_discovery",
+        "confidence": 0.6,
+        "source_repo": "unknown"
+      }
+    },
+    {
+      "title": "Hastie, Tibshirani, Friedman - \"Elements of Statistical Learning\"",
+      "s3_path": "books/Hastie, Tibshirani, Friedman - \"Elements of Statistical Learning\".pdf",
+      "local_path": "books/Hastie, Tibshirani, Friedman - \"Elements of Statistical Learning\".pdf",
+      "category": "statistics",
+      "status": "pending",
+      "priority": 2,
+      "metadata": {
+        "file_size_bytes": 13303613,
+        "discovered_by": "smart_discovery",
+        "confidence": 0.625,
+        "source_repo": "unknown"
+      }
+    },
+    {
+      "title": "James-H.-Stock-Mark-W.-Watson-Introduction-to-Econometrics-Global-Edition-Pearson-Education-Limited-2020",
+      "s3_path": "books/James-H.-Stock-Mark-W.-Watson-Introduction-to-Econometrics-Global-Edition-Pearson-Education-Limited-2020.pdf",
+      "local_path": "books/James-H.-Stock-Mark-W.-Watson-Introduction-to-Econometrics-Global-Edition-Pearson-Education-Limited-2020.pdf",
+      "category": "econometrics",
+      "status": "pending",
+      "priority": 2,
+      "metadata": {
+        "file_size_bytes": 30355436,
+        "discovered_by": "smart_discovery",
+        "confidence": 0.625,
+        "source_repo": "unknown"
+      }
+    },
+    {
+      "title": "ML Machine Learning-A Probabilistic Perspective",
+      "s3_path": "books/ML Machine Learning-A Probabilistic Perspective.pdf",
+      "local_path": "books/ML Machine Learning-A Probabilistic Perspective.pdf",
+      "category": "machine_learning",
+      "status": "pending",
+      "priority": 2,
+      "metadata": {
+        "file_size_bytes": 26942669,
+        "discovered_by": "smart_discovery",
+        "confidence": 0.7,
+        "source_repo": "unknown"
+      }
+    },
+    {
+      "title": "Practical MLOps Operationalizing Machine Learning Models",
+      "s3_path": "books/Practical MLOps_ Operationalizing Machine Learning Models.pdf",
+      "local_path": "books/Practical MLOps_ Operationalizing Machine Learning Models.pdf",
+      "category": "machine_learning",
+      "status": "pending",
+      "priority": 2,
+      "metadata": {
+        "file_size_bytes": 78980375,
+        "discovered_by": "smart_discovery",
+        "confidence": 0.7,
+        "source_repo": "unknown"
+      }
+    },
+    {
+      "title": "Probabilistic Machine Learning Advanced Topics... (Z-Library)",
+      "s3_path": "books/Probabilistic Machine Learning Advanced Topics... (Z-Library).pdf",
+      "local_path": "books/Probabilistic Machine Learning Advanced Topics... (Z-Library).pdf",
+      "category": "machine_learning",
+      "status": "pending",
+      "priority": 2,
+      "metadata": {
+        "file_size_bytes": 144370004,
+        "discovered_by": "smart_discovery",
+        "confidence": 0.6,
+        "source_repo": "unknown"
+      }
+    },
+    {
+      "title": "microeconometrics-methods-and-applications-1b0z9bykeq",
+      "s3_path": "books/microeconometrics-methods-and-applications-1b0z9bykeq.pdf",
+      "local_path": "books/microeconometrics-methods-and-applications-1b0z9bykeq.pdf",
+      "category": "econometrics",
+      "status": "pending",
+      "priority": 2,
+      "metadata": {
+        "file_size_bytes": 7076329,
+        "discovered_by": "smart_discovery",
+        "confidence": 0.625,
+        "source_repo": "unknown"
+      }
     }
   ],
   "metadata": {
@@ -524,5 +678,6 @@
       "/Users/ryanranft/nba-mcp-synthesis",
       "/Users/ryanranft/nba-simulator-aws"
     ]
-  }
+  },
+  "total_books": 51
 }

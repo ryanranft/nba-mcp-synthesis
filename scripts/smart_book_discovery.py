@@ -117,11 +117,21 @@ class SmartBookDiscovery:
         with open(self.books_config_path) as f:
             data = json.load(f)
 
-        # Flatten all categories into a single dict
+        # Handle both old and new config formats
         all_books = {}
-        for category, books in data.get('books_by_category', {}).items():
-            for book in books:
-                all_books[book] = category
+        
+        # New format: {"books": [{"title": "...", "category": "..."}]}
+        if 'books' in data and isinstance(data['books'], list):
+            for book in data['books']:
+                title = book.get('title', '')
+                category = book.get('category', 'uncategorized')
+                all_books[title] = category
+        
+        # Old format: {"books_by_category": {"category": ["title1", "title2"]}}
+        elif 'books_by_category' in data:
+            for category, books in data['books_by_category'].items():
+                for book in books:
+                    all_books[book] = category
 
         return all_books
 
@@ -333,18 +343,42 @@ class SmartBookDiscovery:
                 skipped_duplicate += 1
                 continue
 
-            # Add to appropriate category
-            if book.category not in config['books_by_category']:
-                config['books_by_category'][book.category] = []
+            # Handle both old and new config formats
+            if 'books' in config and isinstance(config['books'], list):
+                # New format: append to books array
+                new_book = {
+                    "title": book.title,
+                    "s3_path": book.s3_path,
+                    "local_path": book.s3_path.replace('books/', 'books/', 1),
+                    "category": book.category,
+                    "status": "pending",
+                    "priority": 2,  # Lower priority for auto-discovered books
+                    "metadata": {
+                        "file_size_bytes": int(book.file_size_mb * 1024 * 1024),
+                        "discovered_by": "smart_discovery",
+                        "confidence": book.confidence,
+                        "source_repo": book.source_repo
+                    }
+                }
+                config['books'].append(new_book)
+                logger.info(f"  ✅ Added: {book.title} → {book.category}")
+                added += 1
+            
+            elif 'books_by_category' in config:
+                # Old format: append to category list
+                if book.category not in config['books_by_category']:
+                    config['books_by_category'][book.category] = []
+                config['books_by_category'][book.category].append(book.title)
+                logger.info(f"  ✅ Added: {book.title} → {book.category}")
+                added += 1
 
-            config['books_by_category'][book.category].append(book.title)
-            logger.info(f"  ✅ Added: {book.title} → {book.category}")
-            added += 1
-
-        # Update total count
-        config['total_books'] = sum(
-            len(books) for books in config['books_by_category'].values()
-        )
+        # Update metadata
+        if 'books' in config and isinstance(config['books'], list):
+            config['total_books'] = len(config['books'])
+        elif 'books_by_category' in config:
+            config['total_books'] = sum(
+                len(books) for books in config['books_by_category'].values()
+            )
 
         # Save if not dry run
         if not dry_run:
@@ -467,11 +501,17 @@ async def main():
         type=Path,
         help='Output path for discovery report'
     )
+    parser.add_argument(
+        '--bucket',
+        type=str,
+        default='nba-mcp-books-20251011',
+        help='S3 bucket to scan (default: nba-mcp-books-20251011)'
+    )
 
     args = parser.parse_args()
 
     # Initialize discovery system
-    discovery = SmartBookDiscovery()
+    discovery = SmartBookDiscovery(s3_bucket=args.bucket)
 
     logger.info(f"======================================================================")
     logger.info(f"SMART BOOK DISCOVERY")
