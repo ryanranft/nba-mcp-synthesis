@@ -1,0 +1,26 @@
+{
+  "id": "demo_plan_1",
+  "title": "Implement Panel Data Analysis",
+  "description": "Add fixed effects models for player analysis",
+  "priority": "critical",
+  "estimated_effort": "high",
+  "created_at": "2025-10-18T21:40:34.259731",
+  "created_by": "ai",
+  "confidence": 0.95,
+  "reason": "AI identified gap in current analytics",
+  "notes": "AI-enhanced: Increased priority due to dependency analysis",
+  "modifications": [
+    {
+      "timestamp": "2025-10-18T21:40:34.261013",
+      "modified_by": "ai",
+      "fields": [
+        "priority",
+        "estimated_effort",
+        "notes"
+      ],
+      "reason": "Dependencies analysis shows this is critical path",
+      "confidence": 0.88
+    }
+  ],
+  "last_modified_at": "2025-10-18T21:40:34.261018"
+}
