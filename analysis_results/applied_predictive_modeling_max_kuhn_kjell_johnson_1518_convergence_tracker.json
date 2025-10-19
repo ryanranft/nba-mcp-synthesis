@@ -1,0 +1,154 @@
+{
+  "book_title": "applied predictive modeling max kuhn kjell johnson 1518",
+  "s3_path": "books/applied-predictive-modeling-max-kuhn-kjell-johnson_1518.pdf",
+  "start_time": "2025-10-18T19:26:10.498137",
+  "iterations": [
+    {
+      "iteration": 1,
+      "timestamp": "2025-10-18T19:26:12.775942",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 2,
+      "timestamp": "2025-10-18T19:26:15.732955",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 3,
+      "timestamp": "2025-10-18T19:26:17.829211",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 4,
+      "timestamp": "2025-10-18T19:26:19.975456",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 5,
+      "timestamp": "2025-10-18T19:26:22.380731",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 6,
+      "timestamp": "2025-10-18T19:26:24.743237",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 7,
+      "timestamp": "2025-10-18T19:26:26.883642",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 8,
+      "timestamp": "2025-10-18T19:26:29.015663",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 9,
+      "timestamp": "2025-10-18T19:26:31.155829",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 10,
+      "timestamp": "2025-10-18T19:26:33.374206",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 11,
+      "timestamp": "2025-10-18T19:26:35.493309",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 12,
+      "timestamp": "2025-10-18T19:26:37.652612",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 13,
+      "timestamp": "2025-10-18T19:26:39.921087",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 14,
+      "timestamp": "2025-10-18T19:26:42.047209",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    },
+    {
+      "iteration": 15,
+      "timestamp": "2025-10-18T19:26:44.333338",
+      "recommendations": {
+        "critical": [],
+        "important": [],
+        "nice_to_have": []
+      }
+    }
+  ],
+  "convergence_achieved": false,
+  "convergence_iteration": null,
+  "total_recommendations": {
+    "critical": 0,
+    "important": 0,
+    "nice_to_have": 0
+  },
+  "new_recommendations": 0,
+  "duplicate_recommendations": 0,
+  "improved_recommendations": 0,
+  "end_time": "2025-10-18T19:26:44.333352",
+  "total_iterations": 15
+}

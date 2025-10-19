@@ -1,11 +1,11 @@
 {
   "book_title": "Hands On Machine Learning with Scikit Learn Keras and Tensorflow   Aurelien Geron",
   "s3_path": "books/Hands-On_Machine_Learning_with_Scikit-Learn_Keras_and_Tensorflow_-_Aurelien_Geron.pdf",
-  "start_time": "2025-10-18T07:48:56.096370",
+  "start_time": "2025-10-18T19:00:55.264380",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-18T07:51:04.114316",
+      "timestamp": "2025-10-18T19:01:00.581294",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -14,7 +14,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-18T07:53:12.004350",
+      "timestamp": "2025-10-18T19:01:12.045726",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -23,7 +23,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-18T07:55:10.625117",
+      "timestamp": "2025-10-18T19:01:14.955952",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -32,7 +32,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-18T07:57:13.334225",
+      "timestamp": "2025-10-18T19:01:18.072934",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -41,7 +41,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-18T07:59:21.246372",
+      "timestamp": "2025-10-18T19:01:21.145594",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -50,7 +50,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-18T08:01:14.004329",
+      "timestamp": "2025-10-18T19:01:24.048346",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -59,7 +59,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-18T08:03:14.924249",
+      "timestamp": "2025-10-18T19:01:26.903379",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -68,7 +68,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-18T08:05:18.813770",
+      "timestamp": "2025-10-18T19:01:29.788947",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -77,7 +77,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-18T08:07:26.652390",
+      "timestamp": "2025-10-18T19:01:32.693972",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -86,7 +86,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-18T08:09:34.476613",
+      "timestamp": "2025-10-18T19:01:35.651667",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -95,7 +95,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-18T08:11:27.771005",
+      "timestamp": "2025-10-18T19:01:38.493916",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -104,7 +104,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-18T08:13:32.398835",
+      "timestamp": "2025-10-18T19:01:41.440498",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -113,7 +113,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-18T08:15:40.231183",
+      "timestamp": "2025-10-18T19:01:44.353080",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -122,7 +122,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-18T08:17:38.420889",
+      "timestamp": "2025-10-18T19:01:47.218221",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -131,7 +131,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-18T08:19:30.076634",
+      "timestamp": "2025-10-18T19:01:50.019122",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -149,6 +149,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-18T08:19:30.076680",
+  "end_time": "2025-10-18T19:01:50.019139",
   "total_iterations": 15
 }

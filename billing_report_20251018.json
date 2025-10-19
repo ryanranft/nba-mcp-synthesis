@@ -1,0 +1,78 @@
+{
+  "report_date": "2025-10-18",
+  "report_time": "2025-10-18T19:28:59.113588",
+  "analysis_progress": {
+    "books_analyzed": 36,
+    "total_books": 40,
+    "completion_percentage": 90.0,
+    "books_remaining": 4
+  },
+  "cache_statistics": {
+    "total_api_calls": 525,
+    "cache_hits": 300,
+    "non_cached_calls": 225,
+    "cache_hit_rate": 57.1
+  },
+  "log_based_estimates": {
+    "gemini": {
+      "model": "gemini-2.0-flash-exp",
+      "total_calls": 525,
+      "non_cached_calls": 225,
+      "log_estimate_usd": 112.43,
+      "per_book_usd": 3.12
+    },
+    "claude": {
+      "model": "claude-3-7-sonnet",
+      "total_calls": 525,
+      "non_cached_calls": 75,
+      "log_estimate_usd": 43.4,
+      "per_book_usd": 1.21
+    },
+    "total_log_estimate_usd": 155.83,
+    "note": "Log estimates are 2.5-3.6x higher than actual billing"
+  },
+  "estimated_actual_costs": {
+    "conservative_estimate": {
+      "method": "\u00f7 2.5",
+      "gemini_usd": 44.97,
+      "claude_usd": 17.36,
+      "total_usd": 62.33
+    },
+    "optimistic_estimate": {
+      "method": "\u00f7 3.6",
+      "gemini_usd": 31.23,
+      "claude_usd": 12.06,
+      "total_usd": 43.29
+    },
+    "most_likely_estimate": {
+      "method": "\u00f7 3.0",
+      "gemini_usd": 37.48,
+      "claude_usd": 14.47,
+      "total_usd": 51.94
+    }
+  },
+  "projected_final_costs_40_books": {
+    "log_based_projection": {
+      "cost_so_far_usd": 155.83,
+      "per_book_usd": 4.33,
+      "remaining_cost_usd": 17.31,
+      "total_40_books_usd": 173.14
+    },
+    "actual_cost_projection": {
+      "cost_so_far_usd": 51.94,
+      "per_book_usd": 1.44,
+      "remaining_cost_usd": 5.77,
+      "total_40_books_usd": 57.71
+    }
+  },
+  "billing_verification_urls": {
+    "google_cloud": "https://console.cloud.google.com/billing/${GOOGLE_CLOUD_BILLING_ACCOUNT_ID}/reports",
+    "anthropic": "https://console.anthropic.com/settings/usage"
+  },
+  "google_cloud_details": {
+    "project_id": "${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}",
+    "billing_account": "${GOOGLE_CLOUD_BILLING_ACCOUNT_ID}",
+    "account_email": "ryanranft56@gmail.com",
+    "enabled_api": "generativelanguage.googleapis.com"
+  }
+}

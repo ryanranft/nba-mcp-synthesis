@@ -1,11 +1,11 @@
 {
   "book_title": "2008 Angrist Pischke MostlyHarmlessEconometrics",
   "s3_path": "books/2008 Angrist Pischke MostlyHarmlessEconometrics.pdf",
-  "start_time": "2025-10-18T00:38:04.819131",
+  "start_time": "2025-10-18T18:29:19.105130",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-18T00:40:25.135138",
+      "timestamp": "2025-10-18T18:31:56.163571",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -14,7 +14,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-18T00:42:50.086090",
+      "timestamp": "2025-10-18T18:31:57.228010",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -23,7 +23,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-18T00:44:28.710774",
+      "timestamp": "2025-10-18T18:31:58.226522",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -32,7 +32,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-18T00:46:49.819128",
+      "timestamp": "2025-10-18T18:31:59.213684",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -41,7 +41,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-18T00:48:53.932818",
+      "timestamp": "2025-10-18T18:32:00.221372",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -50,7 +50,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-18T00:51:14.576014",
+      "timestamp": "2025-10-18T18:32:01.194720",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -59,7 +59,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-18T00:53:30.771062",
+      "timestamp": "2025-10-18T18:32:02.170004",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -68,7 +68,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-18T00:55:51.041555",
+      "timestamp": "2025-10-18T18:32:03.132583",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -77,7 +77,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-18T00:58:08.806408",
+      "timestamp": "2025-10-18T18:32:04.102924",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -86,7 +86,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-18T01:00:23.075091",
+      "timestamp": "2025-10-18T18:32:05.061346",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -95,7 +95,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-18T01:02:35.753531",
+      "timestamp": "2025-10-18T18:32:06.025894",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -104,7 +104,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-18T01:04:49.920599",
+      "timestamp": "2025-10-18T18:32:07.008886",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -113,7 +113,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-18T01:07:09.536592",
+      "timestamp": "2025-10-18T18:32:07.948033",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -122,7 +122,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-18T01:09:06.346898",
+      "timestamp": "2025-10-18T18:32:08.969030",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -131,7 +131,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-18T01:11:17.884580",
+      "timestamp": "2025-10-18T18:32:10.008366",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -149,6 +149,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-18T01:11:17.884642",
+  "end_time": "2025-10-18T18:32:10.008391",
   "total_iterations": 15
 }

@@ -1,11 +1,11 @@
 {
   "book_title": "Bishop Pattern Recognition and Machine Learning 2006",
   "s3_path": "books/Bishop-Pattern-Recognition-and-Machine-Learning-2006.pdf",
-  "start_time": "2025-10-18T03:17:15.185736",
+  "start_time": "2025-10-18T18:38:57.545500",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-18T03:19:48.943875",
+      "timestamp": "2025-10-18T18:39:04.333308",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -14,7 +14,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-18T03:22:13.252816",
+      "timestamp": "2025-10-18T18:39:10.178843",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -23,7 +23,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-18T03:24:33.879690",
+      "timestamp": "2025-10-18T18:39:16.105494",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -32,7 +32,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-18T03:26:55.224053",
+      "timestamp": "2025-10-18T18:39:22.793071",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -41,7 +41,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-18T03:29:23.628183",
+      "timestamp": "2025-10-18T18:39:29.084971",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -50,7 +50,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-18T03:31:49.744030",
+      "timestamp": "2025-10-18T18:39:35.412441",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -59,7 +59,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-18T03:34:17.490099",
+      "timestamp": "2025-10-18T18:39:42.313930",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -68,7 +68,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-18T03:36:32.327550",
+      "timestamp": "2025-10-18T18:39:49.457048",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -77,7 +77,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-18T03:38:55.781451",
+      "timestamp": "2025-10-18T18:39:56.041555",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -86,7 +86,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-18T03:41:20.943335",
+      "timestamp": "2025-10-18T18:40:01.939380",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -95,7 +95,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-18T03:43:38.094925",
+      "timestamp": "2025-10-18T18:40:07.894135",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -104,7 +104,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-18T03:45:45.209740",
+      "timestamp": "2025-10-18T18:40:13.959559",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -113,7 +113,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-18T03:47:53.212186",
+      "timestamp": "2025-10-18T18:40:21.527557",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -122,7 +122,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-18T03:50:02.679528",
+      "timestamp": "2025-10-18T18:40:27.912240",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -131,7 +131,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-18T03:52:11.995801",
+      "timestamp": "2025-10-18T18:40:35.708966",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -149,6 +149,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-18T03:52:11.995850",
+  "end_time": "2025-10-18T18:40:35.708985",
   "total_iterations": 15
 }

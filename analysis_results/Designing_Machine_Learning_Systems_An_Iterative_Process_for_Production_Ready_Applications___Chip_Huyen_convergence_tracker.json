@@ -1,11 +1,11 @@
 {
   "book_title": "Designing Machine Learning Systems An Iterative Process for Production Ready Applications   Chip Huyen",
   "s3_path": "books/Designing_Machine_Learning_Systems_An_Iterative_Process_for_Production-Ready_Applications_-_Chip_Huyen.pdf",
-  "start_time": "2025-10-18T17:09:34.153333",
+  "start_time": "2025-10-18T18:42:57.579905",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-18T17:09:35.298643",
+      "timestamp": "2025-10-18T18:42:58.869340",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -14,7 +14,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-18T17:09:36.419486",
+      "timestamp": "2025-10-18T18:42:59.988593",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -23,7 +23,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-18T17:09:37.549851",
+      "timestamp": "2025-10-18T18:43:01.239387",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -32,7 +32,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-18T17:09:38.717431",
+      "timestamp": "2025-10-18T18:43:02.564238",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -41,7 +41,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-18T17:09:39.860249",
+      "timestamp": "2025-10-18T18:43:03.734112",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -50,7 +50,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-18T17:09:40.982179",
+      "timestamp": "2025-10-18T18:43:04.837313",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -59,7 +59,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-18T17:09:42.102598",
+      "timestamp": "2025-10-18T18:43:06.015519",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -68,7 +68,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-18T17:09:43.201653",
+      "timestamp": "2025-10-18T18:43:07.262936",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -77,7 +77,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-18T17:09:48.348487",
+      "timestamp": "2025-10-18T18:43:08.556229",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -86,7 +86,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-18T17:09:49.493870",
+      "timestamp": "2025-10-18T18:43:09.839201",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -95,7 +95,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-18T17:09:50.628206",
+      "timestamp": "2025-10-18T18:43:15.222616",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -104,7 +104,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-18T17:09:51.762893",
+      "timestamp": "2025-10-18T18:43:16.347568",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -113,7 +113,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-18T17:09:52.916209",
+      "timestamp": "2025-10-18T18:43:17.506736",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -122,7 +122,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-18T17:09:54.045450",
+      "timestamp": "2025-10-18T18:43:18.663689",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -131,7 +131,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-18T17:09:55.156091",
+      "timestamp": "2025-10-18T18:43:19.796155",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -149,6 +149,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-18T17:09:55.156134",
+  "end_time": "2025-10-18T18:43:19.796175",
   "total_iterations": 15
 }
