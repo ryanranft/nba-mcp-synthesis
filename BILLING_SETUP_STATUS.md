@@ -1,7 +1,7 @@
 # Billing Setup Status
 
-**Last Updated**: 2025-10-18 19:50 UTC  
-**Status**: ✅ Dataset Created | ⏳ Awaiting Export Configuration
+**Last Updated**: 2025-10-18 20:15 UTC  
+**Status**: ✅ Dataset Created | ✅ Export Configured | ⏳ Awaiting Data Population
 
 ---
 
@@ -29,36 +29,35 @@ Status:       Ready for billing export
 
 ---
 
-## 🔄 Current Step
+## ✅ Billing Export Configured!
 
-### Configure Billing Export in Web Console
+### Standard Usage Cost Export: ENABLED ✅
 
-**Action Required**: Enable billing export to start sending data to BigQuery
+**Configured**: 2025-10-18 20:10 UTC  
+**Project**: nba-mcp-synthesis (${GOOGLE_CLOUD_PROJECT_ID_PRIMARY})  
+**Dataset**: billing_export  
+**Location**: US  
+**Status**: Tables being created (5-10 minutes)
 
-**Link**: https://console.cloud.google.com/billing/${GOOGLE_CLOUD_BILLING_ACCOUNT_ID}/export
-
-**Steps**:
-1. Click "EDIT SETTINGS" under "BigQuery export"
-2. Select project: `${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}`
-3. Select dataset: `billing_export`
-4. Verify location: `US`
-5. (Optional) Enable "Detailed usage cost"
-6. Click "SAVE"
-
-**Time Required**: ~2 minutes
+**Next Action**: Wait 24 hours for data population, then query costs via terminal
 
 ---
 
 ## ⏳ Pending Steps
 
-### 4. Wait for Data Population ⏳
-- **Timeline**: 24 hours after export configuration
+### 4. Verify Export Tables Created ⏳ (In 10 minutes)
+- **Timeline**: 5-10 minutes after export configuration
+- **Command**: `bq ls ${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}:billing_export`
+- **Expected**: Table `${BIGQUERY_BILLING_EXPORT_TABLE}` appears
+
+### 5. Wait for Data Population ⏳ (24 hours)
+- **Timeline**: 24 hours after export configuration (October 19, 2025)
 - **What happens**: Google Cloud automatically:
-  - Creates billing export tables
+  - Populates billing export tables with cost data
   - Backfills historical data (if available)
   - Updates daily with new costs
 
-### 5. Verify Export Setup ⏳
+### 6. Verify Export Setup ⏳ (After 24 hours)
 ```bash
 # Check if tables were created (run after 24 hours)
 bq ls ${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}:billing_export
@@ -174,5 +173,5 @@ Based on Claude billing screenshot ($8.95 over several days) and log overestimat
 
 ---
 
-**Status**: ✅ 3 of 6 steps complete | 🔄 Step 4 in progress | ⏳ 2 steps pending
+**Status**: ✅ 4 of 6 steps complete | ⏳ Step 5 in progress (waiting 24 hours) | ⏳ 1 step pending
 
