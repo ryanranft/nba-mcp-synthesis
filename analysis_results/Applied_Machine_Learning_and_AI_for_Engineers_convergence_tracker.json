@@ -1,11 +1,11 @@
 {
   "book_title": "Applied Machine Learning and AI for Engineers",
   "s3_path": "books/Applied-Machine-Learning-and-AI-for-Engineers.pdf",
-  "start_time": "2025-10-18T18:34:07.287636",
+  "start_time": "2025-10-18T23:57:07.638342",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-18T18:34:46.164427",
+      "timestamp": "2025-10-18T23:57:09.213771",
       "recommendations": {
         "critical": [
           {
@@ -574,7 +574,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-18T18:34:55.698070",
+      "timestamp": "2025-10-18T23:57:19.379683",
       "recommendations": {
         "critical": [
           {
@@ -1143,7 +1143,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-18T18:35:05.437490",
+      "timestamp": "2025-10-18T23:57:30.095211",
       "recommendations": {
         "critical": [
           {
@@ -1712,7 +1712,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-18T18:35:16.190942",
+      "timestamp": "2025-10-18T23:57:39.978561",
       "recommendations": {
         "critical": [
           {
@@ -2281,7 +2281,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-18T18:35:25.726656",
+      "timestamp": "2025-10-18T23:57:49.648396",
       "recommendations": {
         "critical": [
           {
@@ -2850,7 +2850,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-18T18:35:35.202949",
+      "timestamp": "2025-10-18T23:57:59.359908",
       "recommendations": {
         "critical": [
           {
@@ -3419,7 +3419,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-18T18:35:45.931967",
+      "timestamp": "2025-10-18T23:58:09.511608",
       "recommendations": {
         "critical": [
           {
@@ -3988,7 +3988,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-18T18:35:55.532139",
+      "timestamp": "2025-10-18T23:58:19.692102",
       "recommendations": {
         "critical": [
           {
@@ -4557,7 +4557,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-18T18:36:05.493622",
+      "timestamp": "2025-10-18T23:58:30.357571",
       "recommendations": {
         "critical": [
           {
@@ -5126,7 +5126,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-18T18:36:15.946581",
+      "timestamp": "2025-10-18T23:58:40.531127",
       "recommendations": {
         "critical": [
           {
@@ -5695,7 +5695,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-18T18:36:25.549146",
+      "timestamp": "2025-10-18T23:58:50.433946",
       "recommendations": {
         "critical": [
           {
@@ -6264,7 +6264,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-18T18:36:35.068663",
+      "timestamp": "2025-10-18T23:59:00.200266",
       "recommendations": {
         "critical": [
           {
@@ -6833,7 +6833,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-18T18:36:46.576046",
+      "timestamp": "2025-10-18T23:59:10.289566",
       "recommendations": {
         "critical": [
           {
@@ -7402,7 +7402,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-18T18:36:56.353967",
+      "timestamp": "2025-10-18T23:59:20.490631",
       "recommendations": {
         "critical": [
           {
@@ -7971,7 +7971,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-18T18:37:05.866712",
+      "timestamp": "2025-10-18T23:59:32.267813",
       "recommendations": {
         "critical": [
           {
@@ -8549,6 +8549,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-18T18:37:14.026905",
+  "end_time": "2025-10-18T23:59:41.308507",
   "total_iterations": 15
 }

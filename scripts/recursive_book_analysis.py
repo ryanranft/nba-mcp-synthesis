@@ -396,14 +396,14 @@ Total processed:        {sum(len(v) for v in results.values())} books
     def filter_books_by_titles(self, books: List[Dict], title_filter: Optional[str]) -> List[Dict]:
         """
         Filter books by title(s) with smart matching.
-        
+
         Args:
             books: List of book dictionaries
             title_filter: Comma-separated titles, or None for all books
-            
+
         Returns:
             Filtered list of books
-            
+
         Matching rules:
         - None/empty: Return all books
         - Single title: Match if title contains 50%+ of search words
@@ -413,28 +413,28 @@ Total processed:        {sum(len(v) for v in results.values())} books
         """
         if not title_filter:
             return books
-        
+
         search_titles = [t.strip() for t in title_filter.split(',')]
         matched_books = []
-        
+
         for search_title in search_titles:
             search_words = set(search_title.lower().split())
-            
+
             for book in books:
                 book_title = book.get('title', '').lower()
                 book_words = set(book_title.split())
-                
+
                 # Calculate word overlap
                 overlap = search_words & book_words
                 overlap_ratio = len(overlap) / len(search_words) if search_words else 0
-                
+
                 # Match if >= 50% of search words appear in book title
                 # AND search has 2+ words OR exact single-word match
                 if overlap_ratio >= 0.5 and (len(search_words) > 1 or search_title.lower() == book_title):
                     if book not in matched_books:
                         matched_books.append(book)
                         logger.info(f"✅ Matched: \"{book.get('title')}\" for search \"{search_title}\"")
-                        
+
         return matched_books
 
 
@@ -750,7 +750,7 @@ class RecursiveAnalyzer:
 
         consecutive_nice_only = 0
         iteration = 0
-        
+
         # Determine effective max iterations
         effective_max = self.safety_max_iterations if self.converge_until_done else self.max_iterations
         iteration_display = "∞" if self.converge_until_done else str(self.max_iterations)
@@ -816,7 +816,7 @@ class RecursiveAnalyzer:
 
         tracker["end_time"] = datetime.now().isoformat()
         tracker["total_iterations"] = iteration
-        
+
         # Warn if safety cap was reached in unlimited mode
         if self.converge_until_done and iteration >= self.safety_max_iterations and not tracker["convergence_achieved"]:
             logger.warning(f"\n⚠️ Safety cap of {self.safety_max_iterations} iterations reached without convergence!")

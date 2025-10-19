@@ -3,7 +3,7 @@
 **Status:** ⏳ PENDING IMPLEMENTATION
 **Source Book:** building machine learning powered applications going from idea to product
 **Category:** Statistics
-**Created:** 2025-10-18T23:21:18.244885
+**Created:** 2025-10-19T01:45:41.446573
 
 ---
 
@@ -93,5 +93,5 @@ This implementation should be used when:
 
 ---
 
-**Last Updated:** 2025-10-18T23:21:18.244890
+**Last Updated:** 2025-10-19T01:45:41.446578
 **Maintained By:** NBA MCP Synthesis Project

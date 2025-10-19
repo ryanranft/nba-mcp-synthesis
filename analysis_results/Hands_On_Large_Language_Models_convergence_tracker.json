@@ -1,11 +1,11 @@
 {
   "book_title": "Hands On Large Language Models",
   "s3_path": "books/Hands-On_Large_Language_Models.pdf",
-  "start_time": "2025-10-18T18:58:07.248951",
+  "start_time": "2025-10-19T00:13:50.393879",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-18T18:58:39.849445",
+      "timestamp": "2025-10-19T00:13:52.025017",
       "recommendations": {
         "critical": [
           {
@@ -515,7 +515,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-18T18:58:48.986501",
+      "timestamp": "2025-10-19T00:14:01.007413",
       "recommendations": {
         "critical": [
           {
@@ -1025,7 +1025,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-18T18:58:58.747485",
+      "timestamp": "2025-10-19T00:14:09.954383",
       "recommendations": {
         "critical": [
           {
@@ -1535,7 +1535,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-18T18:59:07.781300",
+      "timestamp": "2025-10-19T00:14:18.923767",
       "recommendations": {
         "critical": [
           {
@@ -2045,7 +2045,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-18T18:59:17.026524",
+      "timestamp": "2025-10-19T00:14:27.737834",
       "recommendations": {
         "critical": [
           {
@@ -2555,7 +2555,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-18T18:59:26.212408",
+      "timestamp": "2025-10-19T00:14:36.976324",
       "recommendations": {
         "critical": [
           {
@@ -3065,7 +3065,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-18T18:59:35.073781",
+      "timestamp": "2025-10-19T00:14:46.537835",
       "recommendations": {
         "critical": [
           {
@@ -3575,7 +3575,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-18T18:59:44.378394",
+      "timestamp": "2025-10-19T00:14:57.490695",
       "recommendations": {
         "critical": [
           {
@@ -4085,7 +4085,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-18T18:59:53.162911",
+      "timestamp": "2025-10-19T00:15:07.462435",
       "recommendations": {
         "critical": [
           {
@@ -4595,7 +4595,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-18T19:00:02.146065",
+      "timestamp": "2025-10-19T00:15:18.954547",
       "recommendations": {
         "critical": [
           {
@@ -5105,7 +5105,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-18T19:00:10.981517",
+      "timestamp": "2025-10-19T00:15:28.909917",
       "recommendations": {
         "critical": [
           {
@@ -5615,7 +5615,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-18T19:00:20.418829",
+      "timestamp": "2025-10-19T00:15:39.932246",
       "recommendations": {
         "critical": [
           {
@@ -6125,7 +6125,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-18T19:00:29.537973",
+      "timestamp": "2025-10-19T00:15:49.857909",
       "recommendations": {
         "critical": [
           {
@@ -6635,7 +6635,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-18T19:00:38.304304",
+      "timestamp": "2025-10-19T00:15:58.924306",
       "recommendations": {
         "critical": [
           {
@@ -7145,7 +7145,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-18T19:00:47.217357",
+      "timestamp": "2025-10-19T00:16:07.961690",
       "recommendations": {
         "critical": [
           {
@@ -7664,6 +7664,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-18T19:00:55.241394",
+  "end_time": "2025-10-19T00:16:15.984614",
   "total_iterations": 15
 }

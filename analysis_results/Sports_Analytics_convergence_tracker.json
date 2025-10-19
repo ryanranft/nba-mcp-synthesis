@@ -1,11 +1,11 @@
 {
   "book_title": "Sports Analytics",
   "s3_path": "books/Sports_Analytics.pdf",
-  "start_time": "2025-10-18T19:25:14.675601",
+  "start_time": "2025-10-19T00:36:17.978003",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-18T19:25:15.831841",
+      "timestamp": "2025-10-19T00:36:18.842881",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -14,7 +14,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-18T19:25:16.577781",
+      "timestamp": "2025-10-19T00:36:19.487050",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -23,7 +23,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-18T19:25:17.171280",
+      "timestamp": "2025-10-19T00:36:20.161756",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -32,7 +32,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-18T19:25:17.825346",
+      "timestamp": "2025-10-19T00:36:20.972206",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -41,7 +41,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-18T19:25:18.467091",
+      "timestamp": "2025-10-19T00:36:21.651713",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -50,7 +50,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-18T19:25:19.176261",
+      "timestamp": "2025-10-19T00:36:22.299848",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -59,7 +59,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-18T19:25:19.835797",
+      "timestamp": "2025-10-19T00:36:22.930271",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -68,7 +68,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-18T19:25:20.506284",
+      "timestamp": "2025-10-19T00:36:23.618660",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -77,7 +77,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-18T19:25:21.144420",
+      "timestamp": "2025-10-19T00:36:24.293980",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -86,7 +86,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-18T19:25:21.752494",
+      "timestamp": "2025-10-19T00:36:24.962141",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -95,7 +95,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-18T19:25:22.378272",
+      "timestamp": "2025-10-19T00:36:25.635388",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -104,7 +104,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-18T19:25:23.041475",
+      "timestamp": "2025-10-19T00:36:26.321091",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -113,7 +113,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-18T19:25:23.696576",
+      "timestamp": "2025-10-19T00:36:26.996314",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -122,7 +122,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-18T19:25:24.330413",
+      "timestamp": "2025-10-19T00:36:27.647326",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -131,7 +131,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-18T19:25:25.036497",
+      "timestamp": "2025-10-19T00:36:28.291245",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -149,6 +149,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-18T19:25:25.036571",
+  "end_time": "2025-10-19T00:36:28.291271",
   "total_iterations": 15
 }
