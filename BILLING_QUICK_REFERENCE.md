@@ -102,9 +102,9 @@ Once billing export is configured:
 ```bash
 # Total Gemini costs for today
 bq query --use_legacy_sql=false \
-"SELECT SUM(cost) as total_cost 
- FROM \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.${BIGQUERY_BILLING_EXPORT_TABLE}\` 
- WHERE _PARTITIONDATE = CURRENT_DATE() 
+"SELECT SUM(cost) as total_cost
+ FROM \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.${BIGQUERY_BILLING_EXPORT_TABLE}\`
+ WHERE _PARTITIONDATE = CURRENT_DATE()
    AND service.description = 'Generative Language API'"
 
 # Detailed breakdown by SKU
@@ -113,7 +113,7 @@ bq query --use_legacy_sql=false \
    sku.description,
    SUM(cost) as cost_usd,
    SUM(usage.amount) as tokens
- FROM \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.${BIGQUERY_BILLING_EXPORT_TABLE}\` 
+ FROM \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.${BIGQUERY_BILLING_EXPORT_TABLE}\`
  WHERE _PARTITIONDATE = '2025-10-18'
    AND service.description = 'Generative Language API'
  GROUP BY sku.description
@@ -146,7 +146,7 @@ export PATH="/opt/homebrew/share/google-cloud-sdk/bin:$PATH"
 **Solution**: BigQuery billing export hasn't been configured yet. Follow setup steps above.
 
 ### "Permission denied"
-**Solution**: 
+**Solution**:
 ```bash
 gcloud auth login
 gcloud auth application-default login
@@ -181,7 +181,7 @@ gcloud auth application-default login
 
 ---
 
-**Last Updated**: October 18, 2025  
-**Status**: Documentation complete, awaiting BigQuery export configuration  
+**Last Updated**: October 18, 2025
+**Status**: Documentation complete, awaiting BigQuery export configuration
 **Estimated Setup Time**: 5 minutes + 24 hour wait
 

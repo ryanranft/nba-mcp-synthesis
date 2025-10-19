@@ -1,8 +1,12 @@
 # BigQuery Billing Export Setup Guide
 
-**Purpose**: Enable programmatic cost querying via terminal for Gemini API usage  
-**Project**: ${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}  
+**Status**: ✅ Dataset Created | ⏳ Awaiting Export Configuration  
+**Dataset Created**: 2025-10-18 19:50 UTC
+
+**Purpose**: Enable programmatic cost querying via terminal for Gemini API usage
+**Project**: ${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}
 **Billing Account**: ${GOOGLE_CLOUD_BILLING_ACCOUNT_ID}
+**Dataset**: billing_export (US location)
 
 ---
 
@@ -218,13 +222,13 @@ def query_bigquery(sql):
         "--format=json",
         sql
     ]
-    
+
     result = subprocess.run(cmd, capture_output=True, text=True)
-    
+
     if result.returncode != 0:
         print(f"Error querying BigQuery: {result.stderr}", file=sys.stderr)
         return None
-    
+
     return json.loads(result.stdout) if result.stdout else []
 
 def get_gemini_costs_today():
@@ -246,7 +250,7 @@ def get_gemini_costs_today():
     ORDER BY
       cost_usd DESC
     """
-    
+
     return query_bigquery(sql)
 
 def get_gemini_costs_date_range(start_date, end_date):
@@ -266,7 +270,7 @@ def get_gemini_costs_date_range(start_date, end_date):
     ORDER BY
       date DESC
     """
-    
+
     return query_bigquery(sql)
 
 def print_cost_report(results, title):
@@ -274,23 +278,23 @@ def print_cost_report(results, title):
     print("=" * 80)
     print(title)
     print("=" * 80)
-    
+
     if not results:
         print("No data available yet. BigQuery export may not be set up or data is pending.")
         return
-    
+
     total_cost = 0
     for row in results:
         cost = float(row.get('cost_usd', 0))
         total_cost += cost
-        
+
         if 'sku' in row:
             print(f"\n{row['sku']}:")
             print(f"  Cost: ${cost:.4f}")
             print(f"  Usage: {row.get('usage_amount', 0):,.0f} {row.get('unit', 'units')}")
         elif 'date' in row:
             print(f"{row['date']}: ${cost:.2f} ({row.get('total_tokens', 0):,.0f} tokens)")
-    
+
     print(f"\n{'='*80}")
     print(f"TOTAL: ${total_cost:.2f}")
     print(f"{'='*80}")
@@ -298,30 +302,30 @@ def print_cost_report(results, title):
 def main():
     """Main function."""
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="Check Gemini API costs from BigQuery")
     parser.add_argument('--today', action='store_true', help="Show today's costs")
     parser.add_argument('--yesterday', action='store_true', help="Show yesterday's costs")
     parser.add_argument('--last-7-days', action='store_true', help="Show last 7 days")
     parser.add_argument('--date', type=str, help="Show costs for specific date (YYYY-MM-DD)")
-    
+
     args = parser.parse_args()
-    
+
     if args.today or not any([args.yesterday, args.last_7_days, args.date]):
         results = get_gemini_costs_today()
         print_cost_report(results, "Gemini API Costs - TODAY")
-    
+
     if args.yesterday:
         yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
         results = get_gemini_costs_date_range(yesterday, yesterday)
         print_cost_report(results, f"Gemini API Costs - {yesterday}")
-    
+
     if args.last_7_days:
         end_date = datetime.now().strftime('%Y-%m-%d')
         start_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
         results = get_gemini_costs_date_range(start_date, end_date)
         print_cost_report(results, f"Gemini API Costs - Last 7 Days ({start_date} to {end_date})")
-    
+
     if args.date:
         results = get_gemini_costs_date_range(args.date, args.date)
         print_cost_report(results, f"Gemini API Costs - {args.date}")
@@ -380,13 +384,13 @@ Update `/Users/ryanranft/nba-mcp-synthesis/scripts/run_full_workflow.py`:
 def verify_actual_costs():
     """Compare estimated vs actual costs."""
     logger.info("Verifying actual costs from BigQuery...")
-    
+
     result = subprocess.run(
         ["python3", "scripts/check_gemini_costs.py", "--today"],
         capture_output=True,
         text=True
     )
-    
+
     if result.returncode == 0:
         logger.info(f"Actual costs:\n{result.stdout}")
     else:
@@ -463,11 +467,11 @@ gcloud auth application-default login
 
 Once set up, you'll be able to:
 
-✅ **Query exact Gemini costs** within hours of usage  
-✅ **Breakdown costs** by input/output tokens and pricing tier  
-✅ **Track daily/weekly/monthly** spending trends  
-✅ **Automate cost reports** in your workflows  
-✅ **Set up budget alerts** for cost overruns  
+✅ **Query exact Gemini costs** within hours of usage
+✅ **Breakdown costs** by input/output tokens and pricing tier
+✅ **Track daily/weekly/monthly** spending trends
+✅ **Automate cost reports** in your workflows
+✅ **Set up budget alerts** for cost overruns
 ✅ **Compare log estimates vs actual billing** (validate 3x overestimation factor)
 
 ---
@@ -485,14 +489,14 @@ bq ls ${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}:billing_export
 
 # Query today's Gemini costs
 bq query --use_legacy_sql=false \
-"SELECT SUM(cost) as total_cost 
- FROM \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.${BIGQUERY_BILLING_EXPORT_TABLE}\` 
- WHERE _PARTITIONDATE = CURRENT_DATE() 
+"SELECT SUM(cost) as total_cost
+ FROM \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.${BIGQUERY_BILLING_EXPORT_TABLE}\`
+ WHERE _PARTITIONDATE = CURRENT_DATE()
    AND service.description = 'Generative Language API'"
 
 # Check latest data available
 bq query --use_legacy_sql=false \
-"SELECT MAX(_PARTITIONDATE) as latest_date 
+"SELECT MAX(_PARTITIONDATE) as latest_date
  FROM \`${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}.billing_export.${BIGQUERY_BILLING_EXPORT_TABLE}\`"
 ```
 
@@ -507,7 +511,7 @@ bq query --use_legacy_sql=false \
 
 ---
 
-**Last Updated**: October 18, 2025  
-**Status**: Documentation ready, awaiting BigQuery export configuration  
+**Last Updated**: October 18, 2025
+**Status**: Documentation ready, awaiting BigQuery export configuration
 **Next Step**: Configure billing export in Google Cloud Console (Step 1.2)
 
