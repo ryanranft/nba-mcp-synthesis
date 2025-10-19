@@ -3,7 +3,7 @@
 **Status:** ⏳ PENDING IMPLEMENTATION
 **Source Book:** Applied Machine Learning and AI for Engineers
 **Category:** Statistics
-**Created:** 2025-10-18T22:45:38.583427
+**Created:** 2025-10-18T23:21:18.228220
 
 ---
 
@@ -93,5 +93,5 @@ This implementation should be used when:
 
 ---
 
-**Last Updated:** 2025-10-18T22:45:38.583431
+**Last Updated:** 2025-10-18T23:21:18.228224
 **Maintained By:** NBA MCP Synthesis Project

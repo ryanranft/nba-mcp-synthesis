@@ -119,14 +119,14 @@ class SmartBookDiscovery:
 
         # Handle both old and new config formats
         all_books = {}
-        
+
         # New format: {"books": [{"title": "...", "category": "..."}]}
         if 'books' in data and isinstance(data['books'], list):
             for book in data['books']:
                 title = book.get('title', '')
                 category = book.get('category', 'uncategorized')
                 all_books[title] = category
-        
+
         # Old format: {"books_by_category": {"category": ["title1", "title2"]}}
         elif 'books_by_category' in data:
             for category, books in data['books_by_category'].items():
@@ -363,7 +363,7 @@ class SmartBookDiscovery:
                 config['books'].append(new_book)
                 logger.info(f"  ✅ Added: {book.title} → {book.category}")
                 added += 1
-            
+
             elif 'books_by_category' in config:
                 # Old format: append to category list
                 if book.category not in config['books_by_category']:

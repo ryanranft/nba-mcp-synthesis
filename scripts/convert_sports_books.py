@@ -2,13 +2,14 @@
 """
 Convert Sports Analytics Books from ACSM to PDF and Upload to S3
 
-This script converts 3 sports analytics books from ACSM files to PDFs using Adobe Digital Editions,
+This script converts 4 sports analytics books from ACSM files to PDFs using Adobe Digital Editions,
 then uploads them to the S3 bucket nba-mcp-books-20251011.
 
 Books to process:
 1. Sports Analytics
 2. Basketball Beyond Paper
 3. The Midrange Theory
+4. Basketball on Paper
 """
 
 import os
@@ -40,7 +41,7 @@ logger = logging.getLogger(__name__)
 # S3 bucket configuration
 S3_BUCKET = "nba-mcp-books-20251011"
 
-# Define the 3 sports analytics books to process
+# Define the 4 sports analytics books to process
 SPORTS_BOOKS = [
     {
         "id": "sports_analytics",
@@ -62,6 +63,13 @@ SPORTS_BOOKS = [
         "acsm_path": "/Users/ryanranft/Downloads/The_Midrange_Theory-pdf.acsm",
         "s3_path": "books/The_Midrange_Theory.pdf",
         "expected_pdf_name": "The_Midrange_Theory.pdf",
+    },
+    {
+        "id": "basketball_on_paper",
+        "title": "Basketball on Paper",
+        "acsm_path": "/Users/ryanranft/Downloads/Basketball_on_Paper-pdf (1).acsm",
+        "s3_path": "books/Basketball_on_Paper.pdf",
+        "expected_pdf_name": "Basketball_on_Paper.pdf",
     },
 ]
 
@@ -205,8 +213,8 @@ def print_summary(results: Dict) -> None:
 ║                    📊 CONVERSION SUMMARY                        ║
 ╚══════════════════════════════════════════════════════════════════╝
 
-Successful Conversions: {len(results['successful_conversions'])}/3
-Successful Uploads: {len(results['successful_uploads'])}/3
+Successful Conversions: {len(results['successful_conversions'])}/4
+Successful Uploads: {len(results['successful_uploads'])}/4
 
 ✅ Successfully Processed:
 """
@@ -260,7 +268,7 @@ def main():
     print_summary(results)
 
     # Exit with appropriate code
-    if len(results["successful_uploads"]) == 3:
+    if len(results["successful_uploads"]) == 4:
         logger.info("🎉 All books successfully processed!")
         sys.exit(0)
     else:

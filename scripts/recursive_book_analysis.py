@@ -9,6 +9,7 @@ and generates implementation plans.
 Usage:
     python scripts/recursive_book_analysis.py --all
     python scripts/recursive_book_analysis.py --book "Econometric Analysis"
+    python scripts/recursive_book_analysis.py --book "Sports Analytics,Basketball Beyond Paper"
     python scripts/recursive_book_analysis.py --check-s3
     python scripts/recursive_book_analysis.py --upload-only
     python scripts/recursive_book_analysis.py --convert-acsm
@@ -391,6 +392,50 @@ Total processed:        {sum(len(v) for v in results.values())} books
             for book in results["failed"]:
                 print(f"  - {book['title']}")
             print()
+
+    def filter_books_by_titles(self, books: List[Dict], title_filter: Optional[str]) -> List[Dict]:
+        """
+        Filter books by title(s) with smart matching.
+        
+        Args:
+            books: List of book dictionaries
+            title_filter: Comma-separated titles, or None for all books
+            
+        Returns:
+            Filtered list of books
+            
+        Matching rules:
+        - None/empty: Return all books
+        - Single title: Match if title contains 50%+ of search words
+        - Multiple titles: Match any
+        - Case-insensitive
+        - Prevents single-word matches (e.g., "Basketball" won't match "Basketball Beyond Paper")
+        """
+        if not title_filter:
+            return books
+        
+        search_titles = [t.strip() for t in title_filter.split(',')]
+        matched_books = []
+        
+        for search_title in search_titles:
+            search_words = set(search_title.lower().split())
+            
+            for book in books:
+                book_title = book.get('title', '').lower()
+                book_words = set(book_title.split())
+                
+                # Calculate word overlap
+                overlap = search_words & book_words
+                overlap_ratio = len(overlap) / len(search_words) if search_words else 0
+                
+                # Match if >= 50% of search words appear in book title
+                # AND search has 2+ words OR exact single-word match
+                if overlap_ratio >= 0.5 and (len(search_words) > 1 or search_title.lower() == book_title):
+                    if book not in matched_books:
+                        matched_books.append(book)
+                        logger.info(f"✅ Matched: \"{book.get('title')}\" for search \"{search_title}\"")
+                        
+        return matched_books
 
 
 class ProjectScanner:
@@ -999,11 +1044,19 @@ Only include recommendations that are genuinely new or significantly different f
             logger.info("🤖 Running high-context analysis (Gemini 1.5 Pro + Claude Sonnet 4)...")
             from high_context_book_analyzer import HighContextBookAnalyzer
 
+            # Inject S3 bucket into book metadata if not already present
+            if 's3_bucket' not in book:
+                book['s3_bucket'] = self.s3_bucket
+
             analyzer = HighContextBookAnalyzer(enable_cache=self.enable_cache)
             analysis_result = await analyzer.analyze_book(book)
         else:
             logger.info("🤖 Running standard analysis (4 models)...")
             from resilient_book_analyzer import ResilientBookAnalyzer
+
+            # Inject S3 bucket into book metadata if not already present
+            if 's3_bucket' not in book:
+                book['s3_bucket'] = self.s3_bucket
 
             analyzer = ResilientBookAnalyzer()
             analysis_result = await analyzer.analyze_book(book)
@@ -1535,6 +1588,7 @@ async def main():
 Examples:
   python scripts/recursive_book_analysis.py --all
   python scripts/recursive_book_analysis.py --book "Econometric Analysis"
+  python scripts/recursive_book_analysis.py --book "Sports Analytics,Basketball Beyond Paper"
   python scripts/recursive_book_analysis.py --check-s3
   python scripts/recursive_book_analysis.py --upload-only
   python scripts/recursive_book_analysis.py --convert-acsm
@@ -1545,7 +1599,7 @@ Examples:
     parser.add_argument(
         "--all", action="store_true", help="Analyze all books in configuration"
     )
-    parser.add_argument("--book", type=str, help="Analyze specific book by title")
+    parser.add_argument("--book", type=str, help="Analyze specific book(s) by title. Use comma-separated for multiple (e.g., 'Designing,Sports')")
     parser.add_argument(
         "--check-s3", action="store_true", help="Check which books are in S3"
     )
@@ -1617,7 +1671,7 @@ Examples:
     )
 
     # Add S3 bucket to each book metadata for analyzer
-    s3_bucket = analysis_config.get("s3_bucket", "nba-data-lake")
+    s3_bucket = analysis_config.get("s3_bucket", "nba-mcp-books-20251011")
     for book in books:
         book["s3_bucket"] = s3_bucket
 
@@ -1659,10 +1713,13 @@ Examples:
     # Filter books if specific book requested
     books_to_analyze = books
     if args.book:
-        books_to_analyze = [b for b in books if args.book.lower() in b["title"].lower()]
+        logger.info(f"🔍 Filtering books with search: \"{args.book}\"\n")
+        books_to_analyze = book_manager.filter_books_by_titles(books, args.book)
         if not books_to_analyze:
-            logger.error(f"❌ Book not found: {args.book}")
+            logger.error(f"❌ No books matched search: \"{args.book}\"")
+            logger.error("Hint: Use partial titles, comma-separated for multiple (e.g., 'Designing,Sports')")
             sys.exit(1)
+        logger.info(f"✅ Found {len(books_to_analyze)} matching book(s)\n")
     elif not args.all:
         logger.error("❌ Please specify --all or --book <title>")
         parser.print_help()

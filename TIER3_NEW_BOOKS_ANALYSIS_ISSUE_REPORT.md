@@ -1,8 +1,8 @@
 # Tier 3 New Books Analysis - Issue Report
 
-**Date:** 2025-10-18  
-**Status:** ⚠️ Partial Failure  
-**Cost:** $63.05  
+**Date:** 2025-10-18
+**Status:** ⚠️ Partial Failure
+**Cost:** $63.05
 **Result:** 0 new recommendations extracted
 
 ---
@@ -21,9 +21,9 @@ Attempted to analyze 51 books (40 existing + 11 newly discovered) but encountere
 
 ### Issue 1: Corrupted Book File - Basketball on Paper
 
-**File:** `books/Basketball_on_Paper.pdf`  
-**Expected Size:** ~5-15 MB (typical for a PDF book)  
-**Actual Size:** 943 bytes  
+**File:** `books/Basketball_on_Paper.pdf`
+**Expected Size:** ~5-15 MB (typical for a PDF book)
+**Actual Size:** 943 bytes
 **Error:** `Failed to open stream` (file is corrupted or a placeholder)
 
 **Evidence from config:**
@@ -44,15 +44,15 @@ Attempted to analyze 51 books (40 existing + 11 newly discovered) but encountere
 
 ### Issue 2: Basketball Beyond Paper - S3 Read Error
 
-**File:** `books/Basketball_Beyond_Paper.pdf`  
-**Size:** 4,677,013 bytes (4.7 MB - normal size)  
-**Error:** `Failed to open stream`  
+**File:** `books/Basketball_Beyond_Paper.pdf`
+**Size:** 4,677,013 bytes (4.7 MB - normal size)
+**Error:** `Failed to open stream`
 **Possible Cause:** S3 bucket mismatch or permission issue
 
 ### Issue 3: Limited Book Selection
 
-**Expected:** Analyze all 51 books  
-**Actual:** Only 2 books attempted  
+**Expected:** Analyze all 51 books
+**Actual:** Only 2 books attempted
 **Possible Cause:** `--book "All"` argument not working as expected in `run_full_workflow.py`
 
 ---
@@ -150,8 +150,8 @@ aws s3 ls s3://nba-mcp-books-20251011/books/Basketball_on_Paper.pdf --human-read
 3. Fix book selection logic (15 min)
 4. Re-run analysis with proper filtering (25-30 min)
 
-**Cost:** $16.50 (11 new books)  
-**Time:** ~60 minutes total  
+**Cost:** $16.50 (11 new books)
+**Time:** ~60 minutes total
 **Value:** Complete 51-book catalog analysis
 
 ### Option B: Manual Book Selection
@@ -160,8 +160,8 @@ aws s3 ls s3://nba-mcp-books-20251011/books/Basketball_on_Paper.pdf --human-read
 2. Skip corrupted/problematic books
 3. Focus on high-value books first
 
-**Cost:** $1.50 per book  
-**Time:** ~2-3 min per book  
+**Cost:** $1.50 per book
+**Time:** ~2-3 min per book
 **Value:** Targeted analysis, avoid problematic books
 
 ### Option C: Skip New Books for Now
@@ -170,8 +170,8 @@ aws s3 ls s3://nba-mcp-books-20251011/books/Basketball_on_Paper.pdf --human-read
 2. Address new books later after fixes
 3. Focus on implementing recommendations from existing 40 books
 
-**Cost:** $0  
-**Time:** Immediate  
+**Cost:** $0
+**Time:** Immediate
 **Value:** Proceed with known-good data
 
 ---

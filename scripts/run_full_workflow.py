@@ -508,8 +508,14 @@ async def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Test with 1 book
+  # Analyze single book (partial match)
   python scripts/run_full_workflow.py --book "Machine Learning Systems"
+
+  # Analyze multiple books (comma-separated)
+  python scripts/run_full_workflow.py --book "Sports Analytics,Basketball Beyond Paper"
+
+  # Analyze all books (no --book flag)
+  python scripts/run_full_workflow.py --parallel
 
   # Dry-run mode
   python scripts/run_full_workflow.py --book "Machine Learning Systems" --dry-run
@@ -522,8 +528,8 @@ Examples:
     parser.add_argument(
         "--book",
         type=str,
-        required=True,
-        help="Book title to analyze (partial match)"
+        default=None,
+        help="Book title(s) to analyze. Use comma-separated for multiple (e.g., 'Designing,Sports'). Leave empty to analyze all books."
     )
     parser.add_argument(
         "--dry-run",

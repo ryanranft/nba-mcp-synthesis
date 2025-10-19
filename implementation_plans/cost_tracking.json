@@ -107,12 +107,21 @@
       "actual_cost": 4.85,
       "approved_by": "automatic",
       "notes": ""
+    },
+    {
+      "timestamp": "2025-10-18T23:21:17.702736",
+      "phase": "phase_2_analysis",
+      "operation": "Analyze All",
+      "estimated_cost": 4.85,
+      "actual_cost": 4.85,
+      "approved_by": "automatic",
+      "notes": ""
     }
   ],
   "phase_totals": {
-    "phase_2_analysis": 58.20000000000001
+    "phase_2_analysis": 63.05000000000001
   },
-  "total_cost": 58.20000000000001,
+  "total_cost": 63.05000000000001,
   "created_at": "2025-10-18T16:43:37.701247",
-  "last_updated": "2025-10-18T22:45:37.834827"
+  "last_updated": "2025-10-18T23:21:17.702809"
 }

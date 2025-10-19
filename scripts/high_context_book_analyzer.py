@@ -454,7 +454,7 @@ class HighContextBookAnalyzer:
 
             s3_client = boto3.client("s3")
             # Get S3 bucket from environment or book metadata
-            bucket = os.environ.get("NBA_MCP_S3_BUCKET") or book.get("s3_bucket", "nba-data-lake")
+            bucket = os.environ.get("NBA_MCP_S3_BUCKET") or book.get("s3_bucket", "nba-mcp-books-20251011")
             # Check both s3_path and s3_key for compatibility
             s3_key = book.get("s3_path") or book.get("s3_key", "")
 
