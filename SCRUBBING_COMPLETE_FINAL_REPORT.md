@@ -1,7 +1,7 @@
 # Git History Scrubbing - Final Report
 
-**Date**: 2025-10-18 21:15 UTC  
-**Status**: ✅ **COMPLETE**  
+**Date**: 2025-10-18 21:15 UTC
+**Status**: ✅ **COMPLETE**
 **Outcome**: SUCCESS
 
 ---
@@ -17,15 +17,15 @@ Successfully completed comprehensive Git history scrubbing to remove all exposed
 ### Phase 1: Sensitive Data Identification ✅
 
 **Exposed in Commit 9e4ed46:**
-1. Google/Gemini API Key: `AIzaSyBM06CTfl13BSCeIzzPHNMAe13aaWaXkq8`
-2. Anthropic API Key: `sk-ant-api03-iV6kxRWkQ6JTb0Mh...R1MhBgAA`
-3. OpenAI API Key: `sk-proj-n0vYpupv55G5XMivhq...kRcA`
-4. DeepSeek API Key: `sk-aa81ae6224d34e26b9aa5ff223536bf6`
-5. Slack Webhook: `https://hooks.slack.com/services/[REDACTED]`
+1. Google/Gemini API Key: `${GOOGLE_API_KEY_REVOKED}`
+2. Anthropic API Key: `${ANTHROPIC_API_KEY_REVOKED}`
+3. OpenAI API Key: `${OPENAI_API_KEY_REVOKED}`
+4. DeepSeek API Key: `${DEEPSEEK_API_KEY_REVOKED}`
+5. Slack Webhook: `${SLACK_WEBHOOK_URL_REVOKED}`
 
 **Exposed in Multiple Commits:**
-- Google Cloud Project IDs: `gen-lang-client-0453895548`, `gen-lang-client-0677055559`
-- Billing Account ID: `01C3B6-61505E-CB6F45`
+- Google Cloud Project IDs: `${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}`, `${GOOGLE_CLOUD_PROJECT_ID_SECONDARY}`
+- Billing Account ID: `${GOOGLE_CLOUD_BILLING_ACCOUNT_ID}`
 
 ---
 
@@ -43,7 +43,7 @@ Successfully completed comprehensive Git history scrubbing to remove all exposed
 
 ### Phase 3: BFG Repo-Cleaner Scrubbing ✅
 
-**Tool**: BFG Repo-Cleaner 1.15.0  
+**Tool**: BFG Repo-Cleaner 1.15.0
 **Method**: Text replacement with environment variable placeholders
 
 **Statistics**:
@@ -72,22 +72,22 @@ Successfully completed comprehensive Git history scrubbing to remove all exposed
 
 **Replacement Patterns Applied**:
 ```
-gen-lang-client-0453895548 → ${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}
-gen-lang-client-0677055559 → ${GOOGLE_CLOUD_PROJECT_ID_SECONDARY}
-01C3B6-61505E-CB6F45 → ${GOOGLE_CLOUD_BILLING_ACCOUNT_ID}
-AIzaSyBM06CTfl13BSCeIzzPHNMAe13aaWaXkq8 → ${GOOGLE_API_KEY_REVOKED}
-sk-aa81ae6224d34e26b9aa5ff223536bf6 → ${DEEPSEEK_API_KEY_REVOKED}
-sk-ant-api03-iV6kxRWkQ6JTb0Mh...R1MhBgAA → ${ANTHROPIC_API_KEY_REVOKED}
-sk-proj-n0vYpupv55G5XMivhq...kRcA → ${OPENAI_API_KEY_REVOKED}
-https://hooks.slack.com/services/.../p40Y2BStgONHP1RnR1XpW94W → ${SLACK_WEBHOOK_URL_REVOKED}
+[PROJECT_ID_1] → ${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}
+[PROJECT_ID_2] → ${GOOGLE_CLOUD_PROJECT_ID_SECONDARY}
+[BILLING_ID] → ${GOOGLE_CLOUD_BILLING_ACCOUNT_ID}
+[GOOGLE_KEY] → ${GOOGLE_API_KEY_REVOKED}
+[DEEPSEEK_KEY] → ${DEEPSEEK_API_KEY_REVOKED}
+[ANTHROPIC_KEY] → ${ANTHROPIC_API_KEY_REVOKED}
+[OPENAI_KEY] → ${OPENAI_API_KEY_REVOKED}
+[SLACK_WEBHOOK] → ${SLACK_WEBHOOK_URL_REVOKED}
 ```
 
 ---
 
 ### Phase 4: GitHub Force Push ✅
 
-**Method**: Force push with GitHub secret scanning bypass  
-**Bypass URL**: Used GitHub's secret scanning bypass for revoked keys  
+**Method**: Force push with GitHub secret scanning bypass
+**Bypass URL**: Used GitHub's secret scanning bypass for revoked keys
 **Result**: SUCCESS
 
 **Branches Updated**:
@@ -109,13 +109,13 @@ big_cat_bets_simulators/NBA/nba-mcp-synthesis/
 
 **New Keys Created**:
 1. ✅ `ANTHROPIC_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW.env` (109 bytes)
-   - New key: `sk-ant-api03-_yHHtZKcDFIXQOjY156Xk...5Uu0lQAA`
-   
+   - New key: `${ANTHROPIC_API_KEY_ACTIVE}`
+
 2. ✅ `DEEPSEEK_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW.env` (36 bytes)
-   - New key: `sk-4ea4e7ba850944e1a34e28b3484613dd`
-   
+   - New key: `${DEEPSEEK_API_KEY_ACTIVE}`
+
 3. ✅ `SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW.env` (82 bytes)
-   - New webhook: `https://hooks.slack.com/services/[REDACTED-NEW]`
+   - New webhook: `${SLACK_WEBHOOK_URL_ACTIVE}`
 
 **Permissions**: 600 (read/write for owner only)
 
@@ -130,13 +130,13 @@ big_cat_bets_simulators/NBA/nba-mcp-synthesis/
 **Scrubbing Verification Results**:
 ```bash
 # Checked Git history for sensitive data
-git log --all -S "gen-lang-client-0453895548"  → 1 result (safe: documentation)
-git log --all -S "sk-ant-api03-iV6kxRWkQ6JTb0Mh"  → 0 results ✅
-git log --all -S "sk-proj-n0vYpupv55G5XMivhq"  → 0 results ✅
-git log --all -S "p40Y2BStgONHP1RnR1XpW94W"  → 0 results ✅
+git log --all -S "[PROJECT_ID]"  → 1 result (safe: documentation)
+git log --all -S "[ANTHROPIC_KEY]"  → 0 results ✅
+git log --all -S "[OPENAI_KEY]"  → 0 results ✅
+git log --all -S "[SLACK_WEBHOOK]"  → 0 results ✅
 ```
 
-**Remaining References**: 
+**Remaining References**:
 - 8 occurrences in documentation files (`COMPREHENSIVE_SCRUBBING_PLAN.md`, `SCRUBBING_STATUS_REPORT.md`)
 - These are **safe** - they document the scrubbing process itself
 
@@ -179,8 +179,8 @@ git log --all -S "p40Y2BStgONHP1RnR1XpW94W"  → 0 results ✅
 
 ## Backup Information
 
-**Backup Location**: `/Users/ryanranft/nba-mcp-synthesis-backup-20251018-204942`  
-**Backup Status**: ✅ Safe (original state preserved)  
+**Backup Location**: `/Users/ryanranft/nba-mcp-synthesis-backup-20251018-204942`
+**Backup Status**: ✅ Safe (original state preserved)
 **Retention**: Keep until fully verified (recommend 7 days)
 
 ---
@@ -261,16 +261,16 @@ To verify scrubbing at any time:
 cd /Users/ryanranft/nba-mcp-synthesis
 
 # Check for old Google Cloud IDs (should be 0 or only in docs)
-git log --all -S "gen-lang-client-0453895548" --oneline
+git log --all -S "[PROJECT_ID]" --oneline
 
 # Check for old Anthropic key (should be 0)
-git log --all -S "sk-ant-api03-iV6kxRWkQ6JTb0Mh" --oneline
+git log --all -S "[ANTHROPIC_KEY]" --oneline
 
 # Check for old OpenAI key (should be 0)
-git log --all -S "sk-proj-n0vYpupv55G5XMivhq" --oneline
+git log --all -S "[OPENAI_KEY]" --oneline
 
 # Check for old Slack webhook (should be 0)
-git log --all -S "p40Y2BStgONHP1RnR1XpW94W" --oneline
+git log --all -S "[SLACK_WEBHOOK]" --oneline
 ```
 
 ---
@@ -291,15 +291,15 @@ If you encounter any issues related to this scrubbing:
 
 All exposed API keys and Google Cloud IDs have been removed from Git history, revoked, and replaced with new credentials stored securely according to the SECRETS_STRUCTURE.md format. The repository is now clean and secure.
 
-**Total Time**: ~1 hour 15 minutes  
-**Files Cleaned**: 15 files across 105 commits  
-**Keys Revoked**: 5 API keys  
-**New Keys Created**: 3 API keys  
+**Total Time**: ~1 hour 15 minutes
+**Files Cleaned**: 15 files across 105 commits
+**Keys Revoked**: 5 API keys
+**New Keys Created**: 3 API keys
 **Verification**: ✅ Passed all checks
 
 ---
 
-**Report Generated**: 2025-10-18 21:15 UTC  
-**Status**: COMPLETE ✅  
+**Report Generated**: 2025-10-18 21:15 UTC
+**Status**: COMPLETE ✅
 **Next Review**: October 25, 2025 (verify no billing anomalies)
 

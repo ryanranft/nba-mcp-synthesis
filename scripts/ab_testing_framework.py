@@ -51,7 +51,7 @@ class TestResult:
     """Results from testing a single model configuration."""
     config_name: str
     book_title: str
-    
+
     # Quality Metrics
     recommendations_found: int
     critical_count: int
@@ -59,21 +59,21 @@ class TestResult:
     nice_to_have_count: int
     convergence_achieved: bool
     iterations_required: int
-    
+
     # Cost Metrics
     total_cost_usd: float
     gemini_cost_usd: float
     claude_cost_usd: float
-    
+
     # Performance Metrics
     processing_time_seconds: float
     tokens_used: int
     cache_hits: int
-    
+
     # Content Metrics
     characters_analyzed: int
     pages_analyzed: int
-    
+
     # Timestamp
     timestamp: str = datetime.now().isoformat()
 
@@ -82,7 +82,7 @@ class ABTestingFramework:
     """
     Framework for running A/B tests on different model combinations.
     """
-    
+
     # Predefined test configurations
     CONFIGS = {
         "gemini_only": ModelConfig(
@@ -116,11 +116,11 @@ class ABTestingFramework:
             similarity_threshold=0.85
         ),
     }
-    
+
     def __init__(self, results_dir: Path = Path("ab_testing_results")):
         """
         Initialize the A/B testing framework.
-        
+
         Args:
             results_dir: Directory to store test results
         """
@@ -128,7 +128,7 @@ class ABTestingFramework:
         self.results_dir.mkdir(exist_ok=True, parents=True)
         logger.info(f"A/B Testing Framework initialized")
         logger.info(f"Results directory: {self.results_dir}")
-    
+
     async def run_single_test(
         self,
         config: ModelConfig,
@@ -137,20 +137,20 @@ class ABTestingFramework:
     ) -> TestResult:
         """
         Run a single A/B test with the specified configuration.
-        
+
         Args:
             config: Model configuration to test
             book_path: Path to the book file
             book_title: Title of the book
-        
+
         Returns:
             TestResult with all metrics
         """
         logger.info(f"🧪 Running test: {config.name} on {book_title}")
-        
+
         # TODO: Integrate with actual high_context_book_analyzer
         # For now, return mock results for framework testing
-        
+
         # This would normally call:
         # from scripts.high_context_book_analyzer import HighContextBookAnalyzer
         # analyzer = HighContextBookAnalyzer(
@@ -160,7 +160,7 @@ class ABTestingFramework:
         #     similarity_threshold=config.similarity_threshold
         # )
         # result = await analyzer.analyze_book(book_path, book_title)
-        
+
         # Mock result for now
         result = TestResult(
             config_name=config.name,
@@ -180,13 +180,13 @@ class ABTestingFramework:
             characters_analyzed=500000,
             pages_analyzed=250
         )
-        
+
         logger.info(f"  ✅ Test complete: {result.recommendations_found} recommendations")
         logger.info(f"  💰 Cost: ${result.total_cost_usd:.4f}")
         logger.info(f"  ⏱️  Time: {result.processing_time_seconds:.1f}s")
-        
+
         return result
-    
+
     async def run_comparison_test(
         self,
         config_names: List[str],
@@ -195,32 +195,32 @@ class ABTestingFramework:
     ) -> Dict[str, List[TestResult]]:
         """
         Run A/B comparison across multiple configurations and books.
-        
+
         Args:
             config_names: Names of configurations to test
             book_paths: List of book paths
             book_titles: List of book titles
-        
+
         Returns:
             Dictionary mapping config names to lists of test results
         """
         logger.info(f"🚀 Starting A/B comparison test")
         logger.info(f"  Configurations: {', '.join(config_names)}")
         logger.info(f"  Books: {len(book_paths)}")
-        
+
         results = {config_name: [] for config_name in config_names}
-        
+
         for book_path, book_title in zip(book_paths, book_titles):
             logger.info(f"\n📚 Testing book: {book_title}")
-            
+
             for config_name in config_names:
                 config = self.CONFIGS[config_name]
                 result = await self.run_single_test(config, book_path, book_title)
                 results[config_name].append(result)
-        
+
         logger.info(f"\n✅ A/B test complete!")
         return results
-    
+
     def generate_comparison_report(
         self,
         results: Dict[str, List[TestResult]],
@@ -228,16 +228,16 @@ class ABTestingFramework:
     ) -> str:
         """
         Generate a comprehensive comparison report.
-        
+
         Args:
             results: Dictionary of test results by configuration
             output_path: Optional path to save the report
-        
+
         Returns:
             Markdown-formatted report
         """
         logger.info(f"📊 Generating comparison report...")
-        
+
         report_lines = [
             "# A/B Testing Comparison Report",
             f"\n**Generated**: {datetime.now().isoformat()}",
@@ -245,38 +245,38 @@ class ABTestingFramework:
             f"**Books Analyzed**: {len(next(iter(results.values())))}",
             "\n---\n"
         ]
-        
+
         # Summary Table
         report_lines.append("## Summary Comparison\n")
         report_lines.append("| Configuration | Avg Recommendations | Avg Cost | Avg Time | Quality Score |")
         report_lines.append("|--------------|---------------------|----------|----------|---------------|")
-        
+
         for config_name, test_results in results.items():
             avg_recs = sum(r.recommendations_found for r in test_results) / len(test_results)
             avg_cost = sum(r.total_cost_usd for r in test_results) / len(test_results)
             avg_time = sum(r.processing_time_seconds for r in test_results) / len(test_results)
-            
+
             # Calculate quality score (critical * 3 + important * 2 + nice * 1)
             avg_quality = sum(
                 r.critical_count * 3 + r.important_count * 2 + r.nice_to_have_count
                 for r in test_results
             ) / len(test_results)
-            
+
             report_lines.append(
                 f"| {config_name} | {avg_recs:.1f} | ${avg_cost:.4f} | {avg_time:.1f}s | {avg_quality:.1f} |"
             )
-        
+
         # Detailed Metrics
         report_lines.append("\n## Detailed Metrics\n")
-        
+
         for config_name, test_results in results.items():
             config = self.CONFIGS[config_name]
             report_lines.append(f"### {config_name}\n")
             report_lines.append(f"**Description**: {config.description}\n")
-            
+
             report_lines.append("| Book | Recs | Critical | Important | Nice | Cost | Time | Convergence |")
             report_lines.append("|------|------|----------|-----------|------|------|------|-------------|")
-            
+
             for result in test_results:
                 convergence = "✅" if result.convergence_achieved else "❌"
                 report_lines.append(
@@ -285,26 +285,26 @@ class ABTestingFramework:
                     f"{result.nice_to_have_count} | ${result.total_cost_usd:.4f} | "
                     f"{result.processing_time_seconds:.1f}s | {convergence} |"
                 )
-            
+
             report_lines.append("")
-        
+
         # Cost Analysis
         report_lines.append("## Cost Analysis\n")
-        
+
         for config_name, test_results in results.items():
             total_cost = sum(r.total_cost_usd for r in test_results)
             total_gemini = sum(r.gemini_cost_usd for r in test_results)
             total_claude = sum(r.claude_cost_usd for r in test_results)
-            
+
             report_lines.append(f"### {config_name}")
             report_lines.append(f"- Total Cost: ${total_cost:.4f}")
             report_lines.append(f"- Gemini Cost: ${total_gemini:.4f} ({total_gemini/total_cost*100:.1f}%)")
             report_lines.append(f"- Claude Cost: ${total_claude:.4f} ({total_claude/total_cost*100:.1f}%)")
             report_lines.append("")
-        
+
         # Recommendations
         report_lines.append("## Recommendations\n")
-        
+
         # Find best configurations
         best_quality_config = max(
             results.items(),
@@ -313,33 +313,33 @@ class ABTestingFramework:
                 for r in x[1]
             ) / len(x[1])
         )[0]
-        
+
         best_cost_config = min(
             results.items(),
             key=lambda x: sum(r.total_cost_usd for r in x[1]) / len(x[1])
         )[0]
-        
+
         best_speed_config = min(
             results.items(),
             key=lambda x: sum(r.processing_time_seconds for r in x[1]) / len(x[1])
         )[0]
-        
+
         report_lines.append(f"- **Best Quality**: `{best_quality_config}`")
         report_lines.append(f"- **Lowest Cost**: `{best_cost_config}`")
         report_lines.append(f"- **Fastest**: `{best_speed_config}`")
         report_lines.append("")
-        
+
         report = "\n".join(report_lines)
-        
+
         # Save report if path provided
         if output_path:
             output_path.parent.mkdir(parents=True, exist_ok=True)
             with open(output_path, 'w') as f:
                 f.write(report)
             logger.info(f"📝 Report saved: {output_path}")
-        
+
         return report
-    
+
     def save_results_json(
         self,
         results: Dict[str, List[TestResult]],
@@ -347,7 +347,7 @@ class ABTestingFramework:
     ):
         """
         Save raw results as JSON for further analysis.
-        
+
         Args:
             results: Dictionary of test results
             output_path: Path to save JSON file
@@ -355,23 +355,23 @@ class ABTestingFramework:
         if output_path is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             output_path = self.results_dir / f"ab_test_{timestamp}.json"
-        
+
         # Convert dataclasses to dicts
         json_results = {
             config_name: [asdict(result) for result in test_results]
             for config_name, test_results in results.items()
         }
-        
+
         with open(output_path, 'w') as f:
             json.dump(json_results, f, indent=2)
-        
+
         logger.info(f"💾 Results saved: {output_path}")
 
 
 async def main():
     """Main entry point for A/B testing."""
     import argparse
-    
+
     parser = argparse.ArgumentParser(
         description="A/B Testing Framework for Model Combinations"
     )
@@ -392,12 +392,12 @@ async def main():
         type=Path,
         help='Output path for report (default: ab_testing_results/report_TIMESTAMP.md)'
     )
-    
+
     args = parser.parse_args()
-    
+
     # Initialize framework
     framework = ABTestingFramework()
-    
+
     # Define test configurations based on test type
     if args.test == 'gemini-vs-claude':
         config_names = ['gemini_only', 'claude_only']
@@ -405,39 +405,39 @@ async def main():
         config_names = ['gemini_only', 'gemini_claude_consensus', 'gemini_claude_high_consensus']
     else:  # 'all'
         config_names = list(framework.CONFIGS.keys())
-    
+
     # Mock book data for testing
     # TODO: Replace with actual book discovery
     book_paths = [f"books/book_{i}.pdf" for i in range(args.books)]
     book_titles = [f"Test Book {i+1}" for i in range(args.books)]
-    
+
     logger.info(f"======================================================================")
     logger.info(f"A/B TESTING: {args.test}")
     logger.info(f"======================================================================")
     logger.info(f"Configurations: {', '.join(config_names)}")
     logger.info(f"Books: {args.books}")
     logger.info(f"======================================================================")
-    
+
     # Run tests
     results = await framework.run_comparison_test(
         config_names=config_names,
         book_paths=book_paths,
         book_titles=book_titles
     )
-    
+
     # Generate report
     if args.output:
         report_path = args.output
     else:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         report_path = framework.results_dir / f"ab_test_report_{timestamp}.md"
-    
+
     report = framework.generate_comparison_report(results, report_path)
-    
+
     # Save JSON results
     json_path = report_path.with_suffix('.json')
     framework.save_results_json(results, json_path)
-    
+
     logger.info(f"\n======================================================================")
     logger.info(f"A/B Testing Complete!")
     logger.info(f"======================================================================")

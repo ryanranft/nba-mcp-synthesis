@@ -46,14 +46,14 @@ class ConflictResolution:
 class ConflictResolver:
     """
     Resolve conflicts between multiple model outputs.
-    
+
     Features:
     - Similarity-based consensus
     - Weighted voting by model reliability
     - Tie-breaking strategies
     - Disagreement tracking
     - Quality metrics
-    
+
     Example:
         >>> resolver = ConflictResolver(similarity_threshold=0.7)
         >>> outputs = [gemini_output, claude_output, gpt4_output]
@@ -61,7 +61,7 @@ class ConflictResolver:
         >>> print(f"Consensus: {resolution.consensus_reached}")
         >>> print(f"Agreement: {resolution.agreement_level:.1%}")
     """
-    
+
     def __init__(
         self,
         similarity_threshold: float = 0.7,
@@ -70,7 +70,7 @@ class ConflictResolver:
     ):
         """
         Initialize conflict resolver.
-        
+
         Args:
             similarity_threshold: Minimum similarity for consensus (default: 0.7)
             model_weights: Reliability weights per model (default: equal weights)
@@ -78,7 +78,7 @@ class ConflictResolver:
         """
         self.similarity_threshold = similarity_threshold
         self.enable_tie_breaking = enable_tie_breaking
-        
+
         # Default model weights (equal if not specified)
         self.model_weights = model_weights or {
             'gemini': 1.0,
@@ -86,26 +86,26 @@ class ConflictResolver:
             'gpt4': 1.0,
             'deepseek': 0.8  # Slightly lower weight based on historical performance
         }
-        
+
         logger.info(f"ConflictResolver initialized")
         logger.info(f"  Similarity threshold: {similarity_threshold}")
         logger.info(f"  Model weights: {self.model_weights}")
-    
+
     def resolve(self, model_outputs: List[ModelOutput]) -> ConflictResolution:
         """
         Resolve conflicts between model outputs.
-        
+
         Args:
             model_outputs: List of outputs from different models
-        
+
         Returns:
             ConflictResolution with consensus recommendations
         """
         logger.info(f"Resolving conflicts from {len(model_outputs)} models")
-        
+
         if len(model_outputs) == 0:
             raise ValueError("No model outputs provided")
-        
+
         if len(model_outputs) == 1:
             # No conflict possible with single model
             return ConflictResolution(
@@ -116,18 +116,18 @@ class ConflictResolver:
                 resolution_method="single_model",
                 model_votes={}
             )
-        
+
         # Step 1: Find similar recommendations across models
         recommendation_clusters = self._cluster_similar_recommendations(model_outputs)
-        
+
         # Step 2: Vote on each cluster using weighted voting
         consensus_recommendations = []
         disagreements = []
         model_votes = {}
-        
+
         for cluster_id, cluster in enumerate(recommendation_clusters):
             vote_result = self._weighted_vote(cluster, model_outputs)
-            
+
             if vote_result['consensus']:
                 consensus_recommendations.append(vote_result['recommendation'])
                 model_votes[f"rec_{cluster_id}"] = vote_result['supporting_models']
@@ -137,14 +137,14 @@ class ConflictResolver:
                     'recommendations': cluster,
                     'vote_result': vote_result
                 })
-        
+
         # Step 3: Calculate overall agreement level
         total_recs = len(consensus_recommendations) + len(disagreements)
         agreement_level = len(consensus_recommendations) / total_recs if total_recs > 0 else 0.0
-        
+
         # Step 4: Determine if consensus was reached
         consensus_reached = agreement_level >= self.similarity_threshold
-        
+
         # Step 5: Apply tie-breaking if needed
         resolution_method = "weighted_voting"
         if not consensus_reached and self.enable_tie_breaking:
@@ -154,10 +154,10 @@ class ConflictResolver:
                 agreement_level = (len(consensus_recommendations) / total_recs) if total_recs > 0 else 0.0
                 consensus_reached = agreement_level >= self.similarity_threshold
                 resolution_method = "tie_breaking"
-        
+
         logger.info(f"Resolution complete: {len(consensus_recommendations)} consensus, {len(disagreements)} disagreements")
         logger.info(f"Agreement level: {agreement_level:.1%}")
-        
+
         return ConflictResolution(
             consensus_reached=consensus_reached,
             final_recommendations=consensus_recommendations,
@@ -166,17 +166,17 @@ class ConflictResolver:
             resolution_method=resolution_method,
             model_votes=model_votes
         )
-    
+
     def _cluster_similar_recommendations(
         self,
         model_outputs: List[ModelOutput]
     ) -> List[List[Dict[str, Any]]]:
         """
         Cluster similar recommendations from different models.
-        
+
         Args:
             model_outputs: Outputs from all models
-        
+
         Returns:
             List of clusters, where each cluster contains similar recommendations
         """
@@ -188,69 +188,69 @@ class ConflictResolver:
                 rec_with_source['_source_model'] = output.model_name
                 rec_with_source['_confidence'] = output.confidence
                 all_recommendations.append(rec_with_source)
-        
+
         if not all_recommendations:
             return []
-        
+
         # Cluster by similarity
         clusters = []
         used_indices = set()
-        
+
         for i, rec1 in enumerate(all_recommendations):
             if i in used_indices:
                 continue
-            
+
             # Start new cluster
             cluster = [rec1]
             used_indices.add(i)
-            
+
             # Find similar recommendations
             for j, rec2 in enumerate(all_recommendations):
                 if j in used_indices:
                     continue
-                
+
                 similarity = self._calculate_similarity(rec1, rec2)
                 if similarity >= self.similarity_threshold:
                     cluster.append(rec2)
                     used_indices.add(j)
-            
+
             clusters.append(cluster)
-        
+
         logger.debug(f"Clustered {len(all_recommendations)} recommendations into {len(clusters)} clusters")
-        
+
         return clusters
-    
+
     def _calculate_similarity(self, rec1: Dict[str, Any], rec2: Dict[str, Any]) -> float:
         """
         Calculate similarity between two recommendations.
-        
+
         Args:
             rec1: First recommendation
             rec2: Second recommendation
-        
+
         Returns:
             Similarity score (0.0 to 1.0)
         """
         # Compare text fields
         text1 = self._extract_text_for_comparison(rec1)
         text2 = self._extract_text_for_comparison(rec2)
-        
+
         # Use sequence matcher for text similarity
         similarity = SequenceMatcher(None, text1.lower(), text2.lower()).ratio()
-        
+
         return similarity
-    
+
     def _extract_text_for_comparison(self, rec: Dict[str, Any]) -> str:
         """Extract text from recommendation for comparison."""
         text_parts = []
-        
+
         # Common fields to compare
         for field in ['title', 'description', 'recommendation', 'content', 'text']:
             if field in rec:
                 text_parts.append(str(rec[field]))
-        
+
         return ' '.join(text_parts)
-    
+
     def _weighted_vote(
         self,
         cluster: List[Dict[str, Any]],
@@ -258,56 +258,56 @@ class ConflictResolver:
     ) -> Dict[str, Any]:
         """
         Perform weighted voting on a cluster of similar recommendations.
-        
+
         Args:
             cluster: Cluster of similar recommendations
             model_outputs: Original model outputs for weight lookup
-        
+
         Returns:
             Dict with consensus status and chosen recommendation
         """
         if not cluster:
             return {'consensus': False, 'recommendation': None, 'supporting_models': []}
-        
+
         # Calculate weighted votes
         model_votes = Counter()
         confidence_sum = {}
-        
+
         for rec in cluster:
             model_name = rec.get('_source_model', 'unknown')
             weight = self.model_weights.get(model_name, 1.0)
             confidence = rec.get('_confidence', 1.0)
-            
+
             # Vote weighted by model reliability and confidence
             vote_strength = weight * confidence
             model_votes[model_name] += vote_strength
-            
+
             if model_name not in confidence_sum:
                 confidence_sum[model_name] = []
             confidence_sum[model_name].append(confidence)
-        
+
         # Find recommendation with highest weighted vote
         if not model_votes:
             return {'consensus': False, 'recommendation': None, 'supporting_models': []}
-        
+
         best_model = model_votes.most_common(1)[0][0]
         best_rec = next((rec for rec in cluster if rec.get('_source_model') == best_model), cluster[0])
-        
+
         # Check if consensus exists (>50% of weighted votes)
         total_weight = sum(model_votes.values())
         best_weight = model_votes[best_model]
         consensus = (best_weight / total_weight) >= 0.5
-        
+
         # List supporting models
         supporting_models = [model for model, weight in model_votes.items() if weight > 0]
-        
+
         return {
             'consensus': consensus,
             'recommendation': best_rec,
             'supporting_models': supporting_models,
             'vote_strength': best_weight / total_weight
         }
-    
+
     def _tie_breaking(
         self,
         disagreements: List[Dict[str, Any]],
@@ -315,42 +315,42 @@ class ConflictResolver:
     ) -> Dict[str, Any]:
         """
         Apply tie-breaking strategies for disagreements.
-        
+
         Strategies:
         1. Majority rule (even if below threshold)
         2. Highest confidence model
         3. Merge complementary recommendations
-        
+
         Args:
             disagreements: List of unresolved disagreements
             model_outputs: Original model outputs
-        
+
         Returns:
             Dict with resolved recommendations
         """
         resolved = []
-        
+
         for disagreement in disagreements:
             cluster = disagreement['recommendations']
-            
+
             # Strategy 1: Pick highest confidence recommendation
             max_confidence = 0.0
             best_rec = None
-            
+
             for rec in cluster:
                 confidence = rec.get('_confidence', 0.0)
                 if confidence > max_confidence:
                     max_confidence = confidence
                     best_rec = rec
-            
+
             if best_rec:
                 resolved.append(best_rec)
-        
+
         return {
             'success': len(resolved) > 0,
             'resolved_recommendations': resolved
         }
-    
+
     def generate_disagreement_report(
         self,
         resolution: ConflictResolution,
@@ -358,11 +358,11 @@ class ConflictResolver:
     ) -> str:
         """
         Generate a report of disagreements and resolution process.
-        
+
         Args:
             resolution: Conflict resolution result
             output_file: Optional file to save report
-        
+
         Returns:
             Report as string
         """
@@ -373,13 +373,13 @@ class ConflictResolver:
         lines.append(f"**Agreement Level**: {resolution.agreement_level:.1%}")
         lines.append(f"**Resolution Method**: {resolution.resolution_method}")
         lines.append("")
-        
+
         lines.append("## Summary")
         lines.append("")
         lines.append(f"- **Consensus Recommendations**: {len(resolution.final_recommendations)}")
         lines.append(f"- **Disagreements**: {len(resolution.disagreements)}")
         lines.append("")
-        
+
         if resolution.disagreements:
             lines.append("## Disagreements")
             lines.append("")
@@ -389,33 +389,33 @@ class ConflictResolver:
                 lines.append(f"- **Cluster ID**: {disagreement['cluster_id']}")
                 lines.append(f"- **Number of Variants**: {len(disagreement['recommendations'])}")
                 lines.append("")
-        
+
         if resolution.model_votes:
             lines.append("## Model Agreement")
             lines.append("")
             for rec_id, models in resolution.model_votes.items():
                 lines.append(f"- **{rec_id}**: {', '.join(models)}")
             lines.append("")
-        
+
         report = '\n'.join(lines)
-        
+
         if output_file:
             with open(output_file, 'w') as f:
                 f.write(report)
             logger.info(f"Disagreement report saved to {output_file}")
-        
+
         return report
 
 
 if __name__ == "__main__":
     # Demo usage
     logging.basicConfig(level=logging.INFO)
-    
+
     print("=" * 70)
     print("CONFLICT RESOLVER DEMO")
     print("=" * 70)
     print()
-    
+
     # Create test model outputs
     gemini_output = ModelOutput(
         model_name="gemini",
@@ -426,7 +426,7 @@ if __name__ == "__main__":
         confidence=0.9,
         raw_output="..."
     )
-    
+
     claude_output = ModelOutput(
         model_name="claude",
         recommendations=[
@@ -436,7 +436,7 @@ if __name__ == "__main__":
         confidence=0.85,
         raw_output="..."
     )
-    
+
     gpt4_output = ModelOutput(
         model_name="gpt4",
         recommendations=[
@@ -446,13 +446,13 @@ if __name__ == "__main__":
         confidence=0.8,
         raw_output="..."
     )
-    
+
     # Initialize resolver
     resolver = ConflictResolver(similarity_threshold=0.7)
-    
+
     # Resolve conflicts
     resolution = resolver.resolve([gemini_output, claude_output, gpt4_output])
-    
+
     # Print results
     print(f"Consensus Reached: {resolution.consensus_reached}")
     print(f"Agreement Level: {resolution.agreement_level:.1%}")
@@ -460,11 +460,11 @@ if __name__ == "__main__":
     print(f"Consensus Recommendations: {len(resolution.final_recommendations)}")
     print(f"Disagreements: {len(resolution.disagreements)}")
     print()
-    
+
     # Generate report
     report = resolver.generate_disagreement_report(resolution)
     print(report)
-    
+
     print("=" * 70)
     print("Demo complete!")
     print("=" * 70)

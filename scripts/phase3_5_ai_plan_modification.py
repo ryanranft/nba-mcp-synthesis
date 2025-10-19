@@ -213,8 +213,8 @@ class Phase35AIPlanModification:
 
         for plan_file in plans_dir.glob("*.json"):
             # Skip non-plan files
-            if (plan_file.name.startswith('PHASE') or 
-                plan_file.name.startswith('phase_') or 
+            if (plan_file.name.startswith('PHASE') or
+                plan_file.name.startswith('phase_') or
                 plan_file.name.startswith('nba_') or
                 plan_file.name == 'plan_operations.json'):
                 continue

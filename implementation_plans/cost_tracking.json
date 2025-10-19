@@ -53,12 +53,66 @@
       "actual_cost": 4.85,
       "approved_by": "automatic",
       "notes": ""
+    },
+    {
+      "timestamp": "2025-10-18T21:59:06.699654",
+      "phase": "phase_2_analysis",
+      "operation": "Analyze Designing",
+      "estimated_cost": 4.85,
+      "actual_cost": 4.85,
+      "approved_by": "automatic",
+      "notes": ""
+    },
+    {
+      "timestamp": "2025-10-18T22:01:22.931772",
+      "phase": "phase_2_analysis",
+      "operation": "Analyze Designing",
+      "estimated_cost": 4.85,
+      "actual_cost": 4.85,
+      "approved_by": "automatic",
+      "notes": ""
+    },
+    {
+      "timestamp": "2025-10-18T22:03:40.187354",
+      "phase": "phase_2_analysis",
+      "operation": "Analyze Designing",
+      "estimated_cost": 4.85,
+      "actual_cost": 4.85,
+      "approved_by": "automatic",
+      "notes": ""
+    },
+    {
+      "timestamp": "2025-10-18T22:14:35.028919",
+      "phase": "phase_2_analysis",
+      "operation": "Analyze Designing",
+      "estimated_cost": 4.85,
+      "actual_cost": 4.85,
+      "approved_by": "automatic",
+      "notes": ""
+    },
+    {
+      "timestamp": "2025-10-18T22:24:01.414088",
+      "phase": "phase_2_analysis",
+      "operation": "Analyze Designing",
+      "estimated_cost": 4.85,
+      "actual_cost": 4.85,
+      "approved_by": "automatic",
+      "notes": ""
+    },
+    {
+      "timestamp": "2025-10-18T22:45:37.834772",
+      "phase": "phase_2_analysis",
+      "operation": "Analyze Designing",
+      "estimated_cost": 4.85,
+      "actual_cost": 4.85,
+      "approved_by": "automatic",
+      "notes": ""
     }
   ],
   "phase_totals": {
-    "phase_2_analysis": 29.1
+    "phase_2_analysis": 58.20000000000001
   },
-  "total_cost": 29.1,
+  "total_cost": 58.20000000000001,
   "created_at": "2025-10-18T16:43:37.701247",
-  "last_updated": "2025-10-18T17:09:55.376158"
+  "last_updated": "2025-10-18T22:45:37.834827"
 }

@@ -1,12 +1,12 @@
 {
   "phase": "phase_4_file_generation",
   "tier": 0,
-  "timestamp": "2025-10-18T17:09:55.510523",
-  "recommendations_processed": 24,
+  "timestamp": "2025-10-18T22:45:38.620890",
+  "recommendations_processed": 218,
   "files_created": [
     {
-      "recommendation": "Employ Logistic Regression for Predicting Game Outcomes",
-      "directory": "implementation_plans/recommendations/rec_001_employ_logistic_regression_for_predicting_game_out",
+      "recommendation": "Implement Continuous Integration for Data Validation",
+      "directory": "implementation_plans/recommendations/rec_001_implement_continuous_integration_for_data_validati",
       "files": [
         "README.md",
         "implementation.py",
@@ -14,8 +14,8 @@
       ]
     },
     {
-      "recommendation": "Implement k-Nearest Neighbors (k-NN) for Player Similarity Analysis",
-      "directory": "implementation_plans/recommendations/rec_002_implement_k_nearest_neighbors_k_nn_for_player_simi",
+      "recommendation": "Automate Feature Store Updates with CI/CD",
+      "directory": "implementation_plans/recommendations/rec_002_automate_feature_store_updates_with_cicd",
       "files": [
         "README.md",
         "implementation.py",
@@ -23,8 +23,467 @@
       ]
     },
     {
-      "recommendation": "Implement Data Scrubbing Pipeline for Data Quality",
-      "directory": "implementation_plans/recommendations/rec_003_implement_data_scrubbing_pipeline_for_data_quality",
+      "recommendation": "Implement Containerized Workflows for Model Training",
+      "directory": "implementation_plans/recommendations/rec_003_implement_containerized_workflows_for_model_traini",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Monitor Model Performance with Drift Detection",
+      "directory": "implementation_plans/recommendations/rec_004_monitor_model_performance_with_drift_detection",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Automate Model Retraining with ML Pipelines",
+      "directory": "implementation_plans/recommendations/rec_005_automate_model_retraining_with_ml_pipelines",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Version Control for ML Models and Code",
+      "directory": "implementation_plans/recommendations/rec_006_implement_version_control_for_ml_models_and_code",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Canary Deployments for Model Rollouts",
+      "directory": "implementation_plans/recommendations/rec_007_implement_canary_deployments_for_model_rollouts",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Utilize ONNX for Model Interoperability",
+      "directory": "implementation_plans/recommendations/rec_008_utilize_onnx_for_model_interoperability",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Input Data Scaling Validation",
+      "directory": "implementation_plans/recommendations/rec_009_implement_input_data_scaling_validation",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Secure MLOps Workflows with Key Management Services",
+      "directory": "implementation_plans/recommendations/rec_010_secure_mlops_workflows_with_key_management_service",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Test Suites for Trained Models",
+      "directory": "implementation_plans/recommendations/rec_011_implement_test_suites_for_trained_models",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Health Checks for Microservices",
+      "directory": "implementation_plans/recommendations/rec_012_implement_health_checks_for_microservices",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Capture ML Metadata",
+      "directory": "implementation_plans/recommendations/rec_013_capture_ml_metadata",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Employ Generalized Linear Models (GLMs) for Predicting Game Outcomes",
+      "directory": "implementation_plans/recommendations/rec_014_employ_generalized_linear_models_glms_for_predicti",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Assess Model Fit with Analysis of Residuals",
+      "directory": "implementation_plans/recommendations/rec_015_assess_model_fit_with_analysis_of_residuals",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Employ Cross-Validation for Model Selection and Validation",
+      "directory": "implementation_plans/recommendations/rec_016_employ_cross_validation_for_model_selection_and_va",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Design and Implement MCMC Algorithms to Compute Posterior Distributions",
+      "directory": "implementation_plans/recommendations/rec_017_design_and_implement_mcmc_algorithms_to_compute_po",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Compare Models of Player Valuation with Cross-Validation Methods",
+      "directory": "implementation_plans/recommendations/rec_018_compare_models_of_player_valuation_with_cross_vali",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Evaluate the Goodness of Fit of the MCMC Chain using GBR Diagnostics and other convergence metrics",
+      "directory": "implementation_plans/recommendations/rec_019_evaluate_the_goodness_of_fit_of_the_mcmc_chain_usi",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Simple Random Sampling for Initial Data Exploration",
+      "directory": "implementation_plans/recommendations/rec_020_implement_simple_random_sampling_for_initial_data_",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Employ Stratified Sampling to Account for Team and Player Variations",
+      "directory": "implementation_plans/recommendations/rec_021_employ_stratified_sampling_to_account_for_team_and",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Evaluate Treatment Effects with Experimental Design Principles for Lineup Optimization",
+      "directory": "implementation_plans/recommendations/rec_022_evaluate_treatment_effects_with_experimental_desig",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Utilize Permutation Tests to Validate Player Impact on Team Performance",
+      "directory": "implementation_plans/recommendations/rec_023_utilize_permutation_tests_to_validate_player_impac",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Construct Exponential Family Distributions for Player Statistics Modeling",
+      "directory": "implementation_plans/recommendations/rec_024_construct_exponential_family_distributions_for_pla",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Mixed Models to Capture Team-Specific Effects on Player Performance",
+      "directory": "implementation_plans/recommendations/rec_025_implement_mixed_models_to_capture_team_specific_ef",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Use Assessment Through Simulation to Generate Reference Distributions",
+      "directory": "implementation_plans/recommendations/rec_026_use_assessment_through_simulation_to_generate_refe",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Conduct Sensitivity Analysis to Test the Robustness of the Bayesian Model to the Prior",
+      "directory": "implementation_plans/recommendations/rec_027_conduct_sensitivity_analysis_to_test_the_robustnes",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Sequential Bayesian Inference to Refine Real-Time Player Valuations",
+      "directory": "implementation_plans/recommendations/rec_028_implement_sequential_bayesian_inference_to_refine_",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Conjugate Priors for Faster Posterior Updates in Real-Time Analyses",
+      "directory": "implementation_plans/recommendations/rec_029_implement_conjugate_priors_for_faster_posterior_up",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Test the Sensitivity to Starting Points for Iterative Optimization Procedures",
+      "directory": "implementation_plans/recommendations/rec_030_test_the_sensitivity_to_starting_points_for_iterat",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement an FTI Architecture for NBA Data Pipelines",
+      "directory": "implementation_plans/recommendations/rec_031_implement_an_fti_architecture_for_nba_data_pipelin",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Use Poetry for Dependency Management",
+      "directory": "implementation_plans/recommendations/rec_032_use_poetry_for_dependency_management",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Store Raw Data in a NoSQL Database",
+      "directory": "implementation_plans/recommendations/rec_033_store_raw_data_in_a_nosql_database",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement a RAG Feature Pipeline",
+      "directory": "implementation_plans/recommendations/rec_034_implement_a_rag_feature_pipeline",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Create an Instruction Dataset for NBA Analysis",
+      "directory": "implementation_plans/recommendations/rec_035_create_an_instruction_dataset_for_nba_analysis",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Full Fine-Tuning, LoRA, and QLoRA Techniques",
+      "directory": "implementation_plans/recommendations/rec_036_implement_full_fine_tuning_lora_and_qlora_techniqu",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Filtered Vector Search",
+      "directory": "implementation_plans/recommendations/rec_037_implement_filtered_vector_search",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Deploy LLM Microservice using AWS SageMaker",
+      "directory": "implementation_plans/recommendations/rec_038_deploy_llm_microservice_using_aws_sagemaker",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Build Business Microservice with FastAPI",
+      "directory": "implementation_plans/recommendations/rec_039_build_business_microservice_with_fastapi",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Set Up MongoDB Serverless for Data Storage",
+      "directory": "implementation_plans/recommendations/rec_040_set_up_mongodb_serverless_for_data_storage",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Set Up Qdrant Cloud as a Vector Database",
+      "directory": "implementation_plans/recommendations/rec_041_set_up_qdrant_cloud_as_a_vector_database",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Deploy ZenML Pipelines to AWS using ZenML Cloud",
+      "directory": "implementation_plans/recommendations/rec_042_deploy_zenml_pipelines_to_aws_using_zenml_cloud",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Continuous Integration (CI) Pipeline with GitHub Actions",
+      "directory": "implementation_plans/recommendations/rec_043_implement_continuous_integration_ci_pipeline_with_",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Data Collection Pipeline with Dispatcher and Crawlers",
+      "directory": "implementation_plans/recommendations/rec_044_implement_data_collection_pipeline_with_dispatcher",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Use Qdrant as a Logical Feature Store",
+      "directory": "implementation_plans/recommendations/rec_045_use_qdrant_as_a_logical_feature_store",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Leverage LLM-as-a-Judge for Evaluating NBA Content",
+      "directory": "implementation_plans/recommendations/rec_046_leverage_llm_as_a_judge_for_evaluating_nba_content",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Create and Fine-Tune with Preference Datasets",
+      "directory": "implementation_plans/recommendations/rec_047_create_and_fine_tune_with_preference_datasets",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Query Expansion for Enhanced Retrieval",
+      "directory": "implementation_plans/recommendations/rec_048_implement_query_expansion_for_enhanced_retrieval",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Re-Ranking with Cross-Encoders",
+      "directory": "implementation_plans/recommendations/rec_049_implement_re_ranking_with_cross_encoders",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Autoscaling for SageMaker Endpoint",
+      "directory": "implementation_plans/recommendations/rec_050_implement_autoscaling_for_sagemaker_endpoint",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Add Prompt Monitoring and Logging with Opik",
+      "directory": "implementation_plans/recommendations/rec_051_add_prompt_monitoring_and_logging_with_opik",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement an Alerting System with ZenML",
+      "directory": "implementation_plans/recommendations/rec_052_implement_an_alerting_system_with_zenml",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Represent Player and Team Data as Vectors",
+      "directory": "implementation_plans/recommendations/rec_053_represent_player_and_team_data_as_vectors",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Apply the Chain Rule Correctly During Backpropagation",
+      "directory": "implementation_plans/recommendations/rec_054_apply_the_chain_rule_correctly_during_backpropagat",
       "files": [
         "README.md",
         "implementation.py",
@@ -33,7 +492,7 @@
     },
     {
       "recommendation": "Implement Linear Regression for Player Performance Prediction",
-      "directory": "implementation_plans/recommendations/rec_004_implement_linear_regression_for_player_performance",
+      "directory": "implementation_plans/recommendations/rec_055_implement_linear_regression_for_player_performance",
       "files": [
         "README.md",
         "implementation.py",
@@ -41,8 +500,8 @@
       ]
     },
     {
-      "recommendation": "Implement Linear Regression for Score Prediction",
-      "directory": "implementation_plans/recommendations/rec_005_implement_linear_regression_for_score_prediction",
+      "recommendation": "Use PCA for Dimensionality Reduction of Player Statistics",
+      "directory": "implementation_plans/recommendations/rec_056_use_pca_for_dimensionality_reduction_of_player_sta",
       "files": [
         "README.md",
         "implementation.py",
@@ -50,8 +509,8 @@
       ]
     },
     {
-      "recommendation": "Implement Data Scrubbing Pipeline",
-      "directory": "implementation_plans/recommendations/rec_006_implement_data_scrubbing_pipeline",
+      "recommendation": "Implement a Gaussian Mixture Model for Player Clustering",
+      "directory": "implementation_plans/recommendations/rec_057_implement_a_gaussian_mixture_model_for_player_clus",
       "files": [
         "README.md",
         "implementation.py",
@@ -59,8 +518,8 @@
       ]
     },
     {
-      "recommendation": "Implement k-Nearest Neighbors for Player Classification",
-      "directory": "implementation_plans/recommendations/rec_007_implement_k_nearest_neighbors_for_player_classific",
+      "recommendation": "Employ Support Vector Machines for Player Role Classification",
+      "directory": "implementation_plans/recommendations/rec_058_employ_support_vector_machines_for_player_role_cla",
       "files": [
         "README.md",
         "implementation.py",
@@ -68,8 +527,8 @@
       ]
     },
     {
-      "recommendation": "Implement Feature Selection for Player Performance Prediction",
-      "directory": "implementation_plans/recommendations/rec_008_implement_feature_selection_for_player_performance",
+      "recommendation": "Check Linear Independence of Features",
+      "directory": "implementation_plans/recommendations/rec_059_check_linear_independence_of_features",
       "files": [
         "README.md",
         "implementation.py",
@@ -77,8 +536,8 @@
       ]
     },
     {
-      "recommendation": "Implement Linear Regression for Player Performance Prediction",
-      "directory": "implementation_plans/recommendations/rec_009_implement_linear_regression_for_player_performance",
+      "recommendation": "Implement Automatic Differentiation",
+      "directory": "implementation_plans/recommendations/rec_060_implement_automatic_differentiation",
       "files": [
         "README.md",
         "implementation.py",
@@ -86,8 +545,8 @@
       ]
     },
     {
-      "recommendation": "Implement Data Scrubbing Pipeline",
-      "directory": "implementation_plans/recommendations/rec_010_implement_data_scrubbing_pipeline",
+      "recommendation": "Implement an Iterative Solver for Least Squares",
+      "directory": "implementation_plans/recommendations/rec_061_implement_an_iterative_solver_for_least_squares",
       "files": [
         "README.md",
         "implementation.py",
@@ -95,8 +554,8 @@
       ]
     },
     {
-      "recommendation": "Implement Feature Selection and Engineering",
-      "directory": "implementation_plans/recommendations/rec_011_implement_feature_selection_and_engineering",
+      "recommendation": "Implement Cross Validation",
+      "directory": "implementation_plans/recommendations/rec_062_implement_cross_validation",
       "files": [
         "README.md",
         "implementation.py",
@@ -104,8 +563,8 @@
       ]
     },
     {
-      "recommendation": "Implement Linear Regression for Player Performance Prediction",
-      "directory": "implementation_plans/recommendations/rec_012_implement_linear_regression_for_player_performance",
+      "recommendation": "Incorporate a regularization parameter",
+      "directory": "implementation_plans/recommendations/rec_063_incorporate_a_regularization_parameter",
       "files": [
         "README.md",
         "implementation.py",
@@ -113,8 +572,8 @@
       ]
     },
     {
-      "recommendation": "Implement Data Scrubbing Pipeline",
-      "directory": "implementation_plans/recommendations/rec_013_implement_data_scrubbing_pipeline",
+      "recommendation": "Model Player Activity using State-Space Models",
+      "directory": "implementation_plans/recommendations/rec_064_model_player_activity_using_state_space_models",
       "files": [
         "README.md",
         "implementation.py",
@@ -122,8 +581,8 @@
       ]
     },
     {
-      "recommendation": "Implement Linear Regression for Player Performance Prediction",
-      "directory": "implementation_plans/recommendations/rec_014_implement_linear_regression_for_player_performance",
+      "recommendation": "Model Selection for Regression",
+      "directory": "implementation_plans/recommendations/rec_065_model_selection_for_regression",
       "files": [
         "README.md",
         "implementation.py",
@@ -131,8 +590,8 @@
       ]
     },
     {
-      "recommendation": "Implement Data Scrubbing and Feature Engineering Pipeline",
-      "directory": "implementation_plans/recommendations/rec_015_implement_data_scrubbing_and_feature_engineering_p",
+      "recommendation": "Develop a Supervised Learning Model for Game Outcome Prediction",
+      "directory": "implementation_plans/recommendations/rec_066_develop_a_supervised_learning_model_for_game_outco",
       "files": [
         "README.md",
         "implementation.py",
@@ -140,8 +599,8 @@
       ]
     },
     {
-      "recommendation": "Apply Logistic Regression for Predicting Game Outcomes",
-      "directory": "implementation_plans/recommendations/rec_016_apply_logistic_regression_for_predicting_game_outc",
+      "recommendation": "Use Gradient Boosting Machines (GBMs) for Injury Prediction",
+      "directory": "implementation_plans/recommendations/rec_067_use_gradient_boosting_machines_gbms_for_injury_pre",
       "files": [
         "README.md",
         "implementation.py",
@@ -149,8 +608,8 @@
       ]
     },
     {
-      "recommendation": "Implement Data Scrubbing Pipeline",
-      "directory": "implementation_plans/recommendations/rec_017_implement_data_scrubbing_pipeline",
+      "recommendation": "Implement k-Fold Cross-Validation for Robust Model Evaluation",
+      "directory": "implementation_plans/recommendations/rec_068_implement_k_fold_cross_validation_for_robust_model",
       "files": [
         "README.md",
         "implementation.py",
@@ -158,8 +617,8 @@
       ]
     },
     {
-      "recommendation": "Apply k-Nearest Neighbors for Player Similarity",
-      "directory": "implementation_plans/recommendations/rec_018_apply_k_nearest_neighbors_for_player_similarity",
+      "recommendation": "Implement Monitoring and Alerting for Machine Learning Models",
+      "directory": "implementation_plans/recommendations/rec_069_implement_monitoring_and_alerting_for_machine_lear",
       "files": [
         "README.md",
         "implementation.py",
@@ -167,8 +626,8 @@
       ]
     },
     {
-      "recommendation": "Implement Linear Regression for Player Performance Prediction",
-      "directory": "implementation_plans/recommendations/rec_019_implement_linear_regression_for_player_performance",
+      "recommendation": "Store Data in a System for Scalability and Reproducibility",
+      "directory": "implementation_plans/recommendations/rec_070_store_data_in_a_system_for_scalability_and_reprodu",
       "files": [
         "README.md",
         "implementation.py",
@@ -176,8 +635,8 @@
       ]
     },
     {
-      "recommendation": "Implement k-Nearest Neighbors (k-NN) for Player Similarity Analysis",
-      "directory": "implementation_plans/recommendations/rec_020_implement_k_nearest_neighbors_k_nn_for_player_simi",
+      "recommendation": "Implement k-Means Clustering for Player Performance Segmentation",
+      "directory": "implementation_plans/recommendations/rec_071_implement_k_means_clustering_for_player_performanc",
       "files": [
         "README.md",
         "implementation.py",
@@ -185,8 +644,8 @@
       ]
     },
     {
-      "recommendation": "Implement Data Scrubbing Pipeline for Data Quality",
-      "directory": "implementation_plans/recommendations/rec_021_implement_data_scrubbing_pipeline_for_data_quality",
+      "recommendation": "Implement Linear Regression for Player Salary Prediction",
+      "directory": "implementation_plans/recommendations/rec_072_implement_linear_regression_for_player_salary_pred",
       "files": [
         "README.md",
         "implementation.py",
@@ -194,8 +653,8 @@
       ]
     },
     {
-      "recommendation": "Implement Linear Regression for Player Performance Prediction",
-      "directory": "implementation_plans/recommendations/rec_022_implement_linear_regression_for_player_performance",
+      "recommendation": "Develop a Binary Classification Model for Predicting Player Success",
+      "directory": "implementation_plans/recommendations/rec_073_develop_a_binary_classification_model_for_predicti",
       "files": [
         "README.md",
         "implementation.py",
@@ -203,8 +662,8 @@
       ]
     },
     {
-      "recommendation": "Implement Data Scrubbing Pipeline",
-      "directory": "implementation_plans/recommendations/rec_023_implement_data_scrubbing_pipeline",
+      "recommendation": "Utilize Precision and Recall for Evaluating Player Performance Classifiers",
+      "directory": "implementation_plans/recommendations/rec_074_utilize_precision_and_recall_for_evaluating_player",
       "files": [
         "README.md",
         "implementation.py",
@@ -212,8 +671,1295 @@
       ]
     },
     {
-      "recommendation": "Implement Linear Regression for Player Performance Prediction",
-      "directory": "implementation_plans/recommendations/rec_024_implement_linear_regression_for_player_performance",
+      "recommendation": "Implement One-Hot Encoding for Categorical Features (Team, Position)",
+      "directory": "implementation_plans/recommendations/rec_075_implement_one_hot_encoding_for_categorical_feature",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Text Vectorization with Padding and Tokenization for Player Descriptions",
+      "directory": "implementation_plans/recommendations/rec_076_text_vectorization_with_padding_and_tokenization_f",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Data Normalization for SVM-Based Player Evaluation",
+      "directory": "implementation_plans/recommendations/rec_077_implement_data_normalization_for_svm_based_player_",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Employ Grid Search to Optimize SVM Hyperparameters for Prospect Evaluation",
+      "directory": "implementation_plans/recommendations/rec_078_employ_grid_search_to_optimize_svm_hyperparameters",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Use PCA for Feature Reduction in High-Dimensional Player Performance Data",
+      "directory": "implementation_plans/recommendations/rec_079_use_pca_for_feature_reduction_in_high_dimensional_",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Apply PCA for Anomaly Detection of Player Performance",
+      "directory": "implementation_plans/recommendations/rec_080_apply_pca_for_anomaly_detection_of_player_performa",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement ONNX Runtime for Cross-Platform Deployment of ML Models",
+      "directory": "implementation_plans/recommendations/rec_081_implement_onnx_runtime_for_cross_platform_deployme",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Employ Flask to Create an API for Game Outcome Prediction",
+      "directory": "implementation_plans/recommendations/rec_082_employ_flask_to_create_an_api_for_game_outcome_pre",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Leverage Containerization for Scalable Model Deployment",
+      "directory": "implementation_plans/recommendations/rec_083_leverage_containerization_for_scalable_model_deplo",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Dropout Layers in Deep Learning Models to Prevent Overfitting",
+      "directory": "implementation_plans/recommendations/rec_084_implement_dropout_layers_in_deep_learning_models_t",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Use Transfer Learning with MobileNetV2 for Real-Time Performance",
+      "directory": "implementation_plans/recommendations/rec_085_use_transfer_learning_with_mobilenetv2_for_real_ti",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Use the Early Stopping Callback to Optimize Training Time",
+      "directory": "implementation_plans/recommendations/rec_086_use_the_early_stopping_callback_to_optimize_traini",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Integrate ML Model Evaluation into the CI/CD Pipeline for Automated Testing",
+      "directory": "implementation_plans/recommendations/rec_087_integrate_ml_model_evaluation_into_the_cicd_pipeli",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement a Data Validation Process to Ensure Data Quality",
+      "directory": "implementation_plans/recommendations/rec_088_implement_a_data_validation_process_to_ensure_data",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Normalization for Input Data",
+      "directory": "implementation_plans/recommendations/rec_089_implement_normalization_for_input_data",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Batch Normalization",
+      "directory": "implementation_plans/recommendations/rec_090_implement_batch_normalization",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Leverage the Keras Functional API",
+      "directory": "implementation_plans/recommendations/rec_091_leverage_the_keras_functional_api",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Inspect and Interrogate attention to predict future data based on existing data.",
+      "directory": "implementation_plans/recommendations/rec_092_inspect_and_interrogate_attention_to_predict_futur",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Perform extensive error analysis on outputs to reduce hallucination rate.",
+      "directory": "implementation_plans/recommendations/rec_093_perform_extensive_error_analysis_on_outputs_to_red",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Utilize ReLU-based Activation Functions",
+      "directory": "implementation_plans/recommendations/rec_094_utilize_relu_based_activation_functions",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Experiment with Dropout Regularization",
+      "directory": "implementation_plans/recommendations/rec_095_experiment_with_dropout_regularization",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Utilize Conv2D Layers to Process Basketball Court Images",
+      "directory": "implementation_plans/recommendations/rec_096_utilize_conv2d_layers_to_process_basketball_court_",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Build a Variational Autoencoder (VAE) for Player Embeddings",
+      "directory": "implementation_plans/recommendations/rec_097_build_a_variational_autoencoder_vae_for_player_emb",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Wasserstein GAN with Gradient Penalty (WGAN-GP) for Improved GAN Training Stability",
+      "directory": "implementation_plans/recommendations/rec_098_implement_wasserstein_gan_with_gradient_penalty_wg",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Evaluate RNN Extensions: GRUs",
+      "directory": "implementation_plans/recommendations/rec_099_evaluate_rnn_extensions_grus",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Model Joint and Conditional Probability for Better Player Trajectory Prediction",
+      "directory": "implementation_plans/recommendations/rec_100_model_joint_and_conditional_probability_for_better",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement a diffusion model for more complex game-state generation",
+      "directory": "implementation_plans/recommendations/rec_101_implement_a_diffusion_model_for_more_complex_game_",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Utilize attention to model NBA game play",
+      "directory": "implementation_plans/recommendations/rec_102_utilize_attention_to_model_nba_game_play",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Compare the use of recurrent and attentional models",
+      "directory": "implementation_plans/recommendations/rec_103_compare_the_use_of_recurrent_and_attentional_model",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Determine best-guess strategies for modeling a car environment in World Models.",
+      "directory": "implementation_plans/recommendations/rec_104_determine_best_guess_strategies_for_modeling_a_car",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Create data with a model to save time.",
+      "directory": "implementation_plans/recommendations/rec_105_create_data_with_a_model_to_save_time",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Use a Text Vector Encoding on descriptions and compare",
+      "directory": "implementation_plans/recommendations/rec_106_use_a_text_vector_encoding_on_descriptions_and_com",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Train the network with specific types of rewards",
+      "directory": "implementation_plans/recommendations/rec_107_train_the_network_with_specific_types_of_rewards",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Monitor average reward scores over different test sets.",
+      "directory": "implementation_plans/recommendations/rec_108_monitor_average_reward_scores_over_different_test_",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Design a model with a wide range of testability",
+      "directory": "implementation_plans/recommendations/rec_109_design_a_model_with_a_wide_range_of_testability",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Evaluate GAN Performance with Fr\u00e9chet Inception Distance (FID)",
+      "directory": "implementation_plans/recommendations/rec_110_evaluate_gan_performance_with_fr\u00e9chet_inception_di",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Data-Constrained Training Datasets With Synthetic Examples (DCGAN)",
+      "directory": "implementation_plans/recommendations/rec_111_data_constrained_training_datasets_with_synthetic_",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement a GAN for Simulating Player Movement Trajectories",
+      "directory": "implementation_plans/recommendations/rec_112_implement_a_gan_for_simulating_player_movement_tra",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement a DCGAN to Synthesize Basketball Court Scenarios",
+      "directory": "implementation_plans/recommendations/rec_113_implement_a_dcgan_to_synthesize_basketball_court_s",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Apply Batch Normalization in Discriminator Networks for Enhanced Stability",
+      "directory": "implementation_plans/recommendations/rec_114_apply_batch_normalization_in_discriminator_network",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Gradient Penalty for Wasserstein GAN (WGAN-GP)",
+      "directory": "implementation_plans/recommendations/rec_115_implement_gradient_penalty_for_wasserstein_gan_wga",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Progressive Growing for High-Resolution Basketball Analytics Visualizations",
+      "directory": "implementation_plans/recommendations/rec_116_progressive_growing_for_high_resolution_basketball",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Utilize TensorFlow Hub for Rapid Prototyping with Pretrained GAN Models",
+      "directory": "implementation_plans/recommendations/rec_117_utilize_tensorflow_hub_for_rapid_prototyping_with_",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Semi-Supervised GAN for Player Classification",
+      "directory": "implementation_plans/recommendations/rec_118_implement_semi_supervised_gan_for_player_classific",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Build a Conditional GAN for Generating Targeted Player Profiles",
+      "directory": "implementation_plans/recommendations/rec_119_build_a_conditional_gan_for_generating_targeted_pl",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Data Augmentation on Imbalanced Datasets using DCGAN",
+      "directory": "implementation_plans/recommendations/rec_120_implement_data_augmentation_on_imbalanced_datasets",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Monitor Loss of Originality of Classification Data Sets and Create Data Sets that Emphasize Particular Features of Interest",
+      "directory": "implementation_plans/recommendations/rec_121_monitor_loss_of_originality_of_classification_data",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Utilize a Relativistic Discriminator for Enhanced Training Stability",
+      "directory": "implementation_plans/recommendations/rec_122_utilize_a_relativistic_discriminator_for_enhanced_",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement an Anomaly Detection System with VAEs and GANs",
+      "directory": "implementation_plans/recommendations/rec_123_implement_an_anomaly_detection_system_with_vaes_an",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Utilize Object-Oriented Programming for Managing CycleGAN Complexity",
+      "directory": "implementation_plans/recommendations/rec_124_utilize_object_oriented_programming_for_managing_c",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Initial Heuristics-Based Prototype for NBA Player Performance Prediction",
+      "directory": "implementation_plans/recommendations/rec_125_implement_initial_heuristics_based_prototype_for_n",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Automated Data Validation with Pandas and Great Expectations for NBA Stats",
+      "directory": "implementation_plans/recommendations/rec_126_automated_data_validation_with_pandas_and_great_ex",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Time-Based Data Splitting for NBA Game Data",
+      "directory": "implementation_plans/recommendations/rec_127_implement_time_based_data_splitting_for_nba_game_d",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Establish a Baseline Model and Regularly Evaluate Performance",
+      "directory": "implementation_plans/recommendations/rec_128_establish_a_baseline_model_and_regularly_evaluate_",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement A/B Testing for Real-Time Evaluation of Recommendation Systems",
+      "directory": "implementation_plans/recommendations/rec_129_implement_ab_testing_for_real_time_evaluation_of_r",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Filter Test for a Productionized Model",
+      "directory": "implementation_plans/recommendations/rec_130_filter_test_for_a_productionized_model",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Create a Monitoring System to Log Data Points Through the Pipeline",
+      "directory": "implementation_plans/recommendations/rec_131_create_a_monitoring_system_to_log_data_points_thro",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Compare Data Distribution to Training Data",
+      "directory": "implementation_plans/recommendations/rec_132_compare_data_distribution_to_training_data",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Validate Data Flow by Visualizing Feature Statistics",
+      "directory": "implementation_plans/recommendations/rec_133_validate_data_flow_by_visualizing_feature_statisti",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement and Monitor Prediction Calibration",
+      "directory": "implementation_plans/recommendations/rec_134_implement_and_monitor_prediction_calibration",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Feature Importance Analysis to Identify Predictive Factors",
+      "directory": "implementation_plans/recommendations/rec_135_implement_feature_importance_analysis_to_identify_",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Apply k-Means Clustering for Identifying Player Archetypes",
+      "directory": "implementation_plans/recommendations/rec_136_apply_k_means_clustering_for_identifying_player_ar",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Active Learning for Data Augmentation",
+      "directory": "implementation_plans/recommendations/rec_137_implement_active_learning_for_data_augmentation",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Utilize Ensemble Models for Robust Predictions",
+      "directory": "implementation_plans/recommendations/rec_138_utilize_ensemble_models_for_robust_predictions",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Counterfactual Evaluation to Reduce Action Bias in Recommender Systems",
+      "directory": "implementation_plans/recommendations/rec_139_implement_counterfactual_evaluation_to_reduce_acti",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Data Provenance Tracking for Reproducible ML Pipelines",
+      "directory": "implementation_plans/recommendations/rec_140_implement_data_provenance_tracking_for_reproducibl",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement a Two-Model System for Scoring and Classification",
+      "directory": "implementation_plans/recommendations/rec_141_implement_a_two_model_system_for_scoring_and_class",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Build System-Level Checks for Action Outputs",
+      "directory": "implementation_plans/recommendations/rec_142_build_system_level_checks_for_action_outputs",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Canary Development to Test Model Performance",
+      "directory": "implementation_plans/recommendations/rec_143_implement_canary_development_to_test_model_perform",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement a Ranking Model to Predict Top Prospects",
+      "directory": "implementation_plans/recommendations/rec_144_implement_a_ranking_model_to_predict_top_prospects",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Train a Model to Predict Player Injury Risk",
+      "directory": "implementation_plans/recommendations/rec_145_train_a_model_to_predict_player_injury_risk",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Train an 'Error Model' to Identify Poor-Performing Data Slices",
+      "directory": "implementation_plans/recommendations/rec_146_train_an_error_model_to_identify_poor_performing_d",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement a Real-Time Fraud Detection Model for NBA Ticket Purchases",
+      "directory": "implementation_plans/recommendations/rec_147_implement_a_real_time_fraud_detection_model_for_nb",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Add Test Function to Validate Predictions",
+      "directory": "implementation_plans/recommendations/rec_148_add_test_function_to_validate_predictions",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Extended Bradley-Terry Model for Match Outcome Prediction",
+      "directory": "implementation_plans/recommendations/rec_149_implement_extended_bradley_terry_model_for_match_o",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement a Betting Edge Calculation Module",
+      "directory": "implementation_plans/recommendations/rec_150_implement_a_betting_edge_calculation_module",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Backtest and Validate Model Performance",
+      "directory": "implementation_plans/recommendations/rec_151_backtest_and_validate_model_performance",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Automate Data Collection and ETL Processes",
+      "directory": "implementation_plans/recommendations/rec_152_automate_data_collection_and_etl_processes",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement a Prediction Function",
+      "directory": "implementation_plans/recommendations/rec_153_implement_a_prediction_function",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Create a Looping Mechanism to Generate Estimates for an Entire Season",
+      "directory": "implementation_plans/recommendations/rec_154_create_a_looping_mechanism_to_generate_estimates_f",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Maximize Expected Value by Choosing the Best Odds",
+      "directory": "implementation_plans/recommendations/rec_155_maximize_expected_value_by_choosing_the_best_odds",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Test the Model Empirically in Real Time",
+      "directory": "implementation_plans/recommendations/rec_156_test_the_model_empirically_in_real_time",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Incorporate Team Salaries as a Covariate in the Model",
+      "directory": "implementation_plans/recommendations/rec_157_incorporate_team_salaries_as_a_covariate_in_the_mo",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Define and Implement Value Thresholds for Bet Placement",
+      "directory": "implementation_plans/recommendations/rec_158_define_and_implement_value_thresholds_for_bet_plac",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Real-time Prediction Service",
+      "directory": "implementation_plans/recommendations/rec_159_implement_real_time_prediction_service",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Monitor Model Performance and Data Quality",
+      "directory": "implementation_plans/recommendations/rec_160_monitor_model_performance_and_data_quality",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Data Validation and Cleaning Procedures",
+      "directory": "implementation_plans/recommendations/rec_161_implement_data_validation_and_cleaning_procedures",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement A/B Testing for Model Variants",
+      "directory": "implementation_plans/recommendations/rec_162_implement_ab_testing_for_model_variants",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Parameter Optimization using R's optim Function",
+      "directory": "implementation_plans/recommendations/rec_163_implement_parameter_optimization_using_rs_optim_fu",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Develop a Log-Likelihood Function for Maximum Likelihood Estimation",
+      "directory": "implementation_plans/recommendations/rec_164_develop_a_log_likelihood_function_for_maximum_like",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Automate the Model Fitting Process",
+      "directory": "implementation_plans/recommendations/rec_165_automate_the_model_fitting_process",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Compare Model Performance with Linear and Logarithmic Salaries",
+      "directory": "implementation_plans/recommendations/rec_166_compare_model_performance_with_linear_and_logarith",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Evaluate the Effect of Home Advantage",
+      "directory": "implementation_plans/recommendations/rec_167_evaluate_the_effect_of_home_advantage",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Integrate Recent Form as a Covariate",
+      "directory": "implementation_plans/recommendations/rec_168_integrate_recent_form_as_a_covariate",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Rolling Window Backtesting",
+      "directory": "implementation_plans/recommendations/rec_169_implement_rolling_window_backtesting",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement a System to Handle Data Latency",
+      "directory": "implementation_plans/recommendations/rec_170_implement_a_system_to_handle_data_latency",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Document the Codebase Thoroughly",
+      "directory": "implementation_plans/recommendations/rec_171_document_the_codebase_thoroughly",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Subword Tokenization with BPE or WordPiece",
+      "directory": "implementation_plans/recommendations/rec_172_implement_subword_tokenization_with_bpe_or_wordpie",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Use Token Embeddings as Input to Language Models",
+      "directory": "implementation_plans/recommendations/rec_173_use_token_embeddings_as_input_to_language_models",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Parallel Token Processing and KV Cache",
+      "directory": "implementation_plans/recommendations/rec_174_implement_parallel_token_processing_and_kv_cache",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Utilize Sentence Transformers for Supervised Classification",
+      "directory": "implementation_plans/recommendations/rec_175_utilize_sentence_transformers_for_supervised_class",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Fine-Tune Generative Models with Human Preferences",
+      "directory": "implementation_plans/recommendations/rec_176_fine_tune_generative_models_with_human_preferences",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Improve Outputs with Step-by-Step Thinking",
+      "directory": "implementation_plans/recommendations/rec_177_improve_outputs_with_step_by_step_thinking",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Add Context to Chatbot",
+      "directory": "implementation_plans/recommendations/rec_178_add_context_to_chatbot",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement a Two-Pass Process to Improve Search Quality",
+      "directory": "implementation_plans/recommendations/rec_179_implement_a_two_pass_process_to_improve_search_qua",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Increase Information Availability",
+      "directory": "implementation_plans/recommendations/rec_180_increase_information_availability",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Combine Several Chains",
+      "directory": "implementation_plans/recommendations/rec_181_combine_several_chains",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Experiment with Temperature and Top_p Sampling",
+      "directory": "implementation_plans/recommendations/rec_182_experiment_with_temperature_and_top_p_sampling",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Zero-Shot Classification with Cosine Similarity",
+      "directory": "implementation_plans/recommendations/rec_183_implement_zero_shot_classification_with_cosine_sim",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Use Flan-T5 for Sentiment Analysis",
+      "directory": "implementation_plans/recommendations/rec_184_use_flan_t5_for_sentiment_analysis",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Employ TF-IDF as a Baseline for Text Clustering",
+      "directory": "implementation_plans/recommendations/rec_185_employ_tf_idf_as_a_baseline_for_text_clustering",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Use Test Cases to Help Validate Outputs",
+      "directory": "implementation_plans/recommendations/rec_186_use_test_cases_to_help_validate_outputs",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Utilize Hybrid Searches",
+      "directory": "implementation_plans/recommendations/rec_187_utilize_hybrid_searches",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Combine Retrieval-Augmented Generation (RAG) and the LLM",
+      "directory": "implementation_plans/recommendations/rec_188_combine_retrieval_augmented_generation_rag_and_the",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Make a Robust Architecture",
+      "directory": "implementation_plans/recommendations/rec_189_make_a_robust_architecture",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Develop Special Tokenizers",
+      "directory": "implementation_plans/recommendations/rec_190_develop_special_tokenizers",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Enhance the System by Using External APIs",
+      "directory": "implementation_plans/recommendations/rec_191_enhance_the_system_by_using_external_apis",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement MLOps Pipeline to Serve Image Search Model",
+      "directory": "implementation_plans/recommendations/rec_192_implement_mlops_pipeline_to_serve_image_search_mod",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Establish Robust Monitoring for Prompt and Generation Fidelity",
+      "directory": "implementation_plans/recommendations/rec_193_establish_robust_monitoring_for_prompt_and_generat",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Filter Training Datasets",
+      "directory": "implementation_plans/recommendations/rec_194_filter_training_datasets",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Use High-level Utilities",
+      "directory": "implementation_plans/recommendations/rec_195_use_high_level_utilities",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Set Data Source for Models",
+      "directory": "implementation_plans/recommendations/rec_196_set_data_source_for_models",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Track Toxicity to Maintain Integrity",
+      "directory": "implementation_plans/recommendations/rec_197_track_toxicity_to_maintain_integrity",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Data Representation with Autoencoders for Efficient Feature Extraction",
+      "directory": "implementation_plans/recommendations/rec_198_implement_data_representation_with_autoencoders_fo",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Contrastive Learning with CLIP for Semantic NBA Image Search",
+      "directory": "implementation_plans/recommendations/rec_199_implement_contrastive_learning_with_clip_for_seman",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Experiment with Different Noise Schedules in Diffusion Models for NBA game generation",
+      "directory": "implementation_plans/recommendations/rec_200_experiment_with_different_noise_schedules_in_diffu",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Leverage Latent Diffusion for Generating High-Resolution NBA Action Shots",
+      "directory": "implementation_plans/recommendations/rec_201_leverage_latent_diffusion_for_generating_high_reso",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement Classifier-Free Guidance in Stable Diffusion for NBA Content Generation",
+      "directory": "implementation_plans/recommendations/rec_202_implement_classifier_free_guidance_in_stable_diffu",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Evaluate Generative Performance Using Fr\u00e9chet Inception Distance (FID)",
+      "directory": "implementation_plans/recommendations/rec_203_evaluate_generative_performance_using_fr\u00e9chet_ince",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Fine-tune DistilBERT for Player Position Classification",
+      "directory": "implementation_plans/recommendations/rec_204_fine_tune_distilbert_for_player_position_classific",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Use TrainingHistory Callback for Better Model Insight",
+      "directory": "implementation_plans/recommendations/rec_205_use_traininghistory_callback_for_better_model_insi",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Use LoRA Adapters for Specialized Video Generation",
+      "directory": "implementation_plans/recommendations/rec_206_use_lora_adapters_for_specialized_video_generation",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Evaluate with a Zero-Shot Set-Up",
+      "directory": "implementation_plans/recommendations/rec_207_evaluate_with_a_zero_shot_set_up",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Assess Prompt Template Impact",
+      "directory": "implementation_plans/recommendations/rec_208_assess_prompt_template_impact",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Use Data Augmentation to Improve Training.",
+      "directory": "implementation_plans/recommendations/rec_209_use_data_augmentation_to_improve_training",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Implement BERT Model",
+      "directory": "implementation_plans/recommendations/rec_210_implement_bert_model",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Ensure Homogenous Text and Image Data.",
+      "directory": "implementation_plans/recommendations/rec_211_ensure_homogenous_text_and_image_data",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Train Model With Two Objectives",
+      "directory": "implementation_plans/recommendations/rec_212_train_model_with_two_objectives",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Apply Sigmoid Activation for Pixel Values",
+      "directory": "implementation_plans/recommendations/rec_213_apply_sigmoid_activation_for_pixel_values",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Generate Test Cases That Represent the Entire Dataset",
+      "directory": "implementation_plans/recommendations/rec_214_generate_test_cases_that_represent_the_entire_data",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Use Attention Mechanisms",
+      "directory": "implementation_plans/recommendations/rec_215_use_attention_mechanisms",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Model with Gaussian Distributions.",
+      "directory": "implementation_plans/recommendations/rec_216_model_with_gaussian_distributions",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Track Mean opinion score (MOS) for data visualization",
+      "directory": "implementation_plans/recommendations/rec_217_track_mean_opinion_score_mos_for_data_visualizatio",
+      "files": [
+        "README.md",
+        "implementation.py",
+        "INTEGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "recommendation": "Use Chain of thought with LLMs",
+      "directory": "implementation_plans/recommendations/rec_218_use_chain_of_thought_with_llms",
       "files": [
         "README.md",
         "implementation.py",
@@ -221,5 +1967,5 @@
       ]
     }
   ],
-  "total_files": 72
+  "total_files": 654
 }

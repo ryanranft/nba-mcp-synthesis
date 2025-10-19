@@ -230,7 +230,7 @@ class PhaseStatusManager:
             )
         else:
             self.phases[phase_id].state = PhaseState.SKIPPED
-        
+
         self.phases[phase_id].rerun_reason = reason
         self._save_status()
         logger.info(f"⏭️  Skipped {phase_id}: {reason}")
