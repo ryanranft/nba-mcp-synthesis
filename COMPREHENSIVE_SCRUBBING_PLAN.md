@@ -1,7 +1,7 @@
 # Comprehensive Scrubbing Plan - Option A
 
-**Created**: 2025-10-18 20:55 UTC  
-**Status**: 🚨 **URGENT - Real API Keys Exposed**  
+**Created**: 2025-10-18 20:55 UTC
+**Status**: 🚨 **URGENT - Real API Keys Exposed**
 **Severity**: HIGH
 
 ---
@@ -124,7 +124,7 @@ open "https://api.slack.com/apps"
 # 3. Delete the webhook URL
 ```
 
-**⏱️ Total Time**: 10 minutes  
+**⏱️ Total Time**: 10 minutes
 **Status**: ⏳ **PENDING - DO THIS FIRST**
 
 ---
@@ -347,7 +347,7 @@ Scrubbing is complete when:
 
 **Next Step**: Start with Phase 1 - Revoke API Keys **NOW**
 
-**Time to Complete**: ~1 hour  
-**Safety**: Backup created, can restore if needed  
+**Time to Complete**: ~1 hour
+**Safety**: Backup created, can restore if needed
 **Result**: Completely clean history, all secrets removed
 
