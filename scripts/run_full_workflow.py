@@ -36,6 +36,7 @@ from cost_safety_manager import CostSafetyManager
 from rollback_manager import RollbackManager
 from error_recovery import ErrorRecoveryManager
 from phase_status_manager import PhaseStatusManager
+from phase3_5_ai_plan_modification import Phase35AIPlanModification
 
 logger = logging.getLogger(__name__)
 
@@ -214,6 +215,78 @@ class Tier0WorkflowOrchestrator:
                 self.status_mgr.fail_phase("phase_3", str(e))
             return False
 
+    async def run_phase3_5(
+        self,
+        dry_run: bool = False,
+        enable_ai_modifications: bool = True
+    ) -> bool:
+        """
+        Run Phase 3.5: AI Plan Modifications.
+
+        Args:
+            dry_run: Preview without executing
+            enable_ai_modifications: Allow AI to modify plans
+
+        Returns:
+            True if successful
+        """
+        if not enable_ai_modifications:
+            logger.info("\n⏭️  Skipping Phase 3.5 (AI modifications disabled)")
+            return True
+
+        logger.info("\n" + "="*60)
+        logger.info("PHASE 3.5: AI PLAN MODIFICATIONS")
+        logger.info("="*60 + "\n")
+
+        # Start phase tracking
+        if not dry_run:
+            self.status_mgr.start_phase("phase_3_5", "Phase 3.5: AI Plan Modifications")
+
+        # Create backup
+        if not dry_run:
+            backup_id = self.rollback_mgr.create_backup(
+                phase='phase_3_5',
+                description="Before AI plan modifications"
+            )
+            logger.info(f"📦 Backup created: {backup_id}\n")
+
+        # Run AI modifications
+        try:
+            start_time = datetime.now()
+            phase3_5 = Phase35AIPlanModification(
+                auto_approve_threshold=0.85,
+                enable_auto_add=True,
+                enable_auto_modify=True,
+                enable_auto_delete=False,  # Conservative
+                enable_auto_merge=True
+            )
+
+            result = await phase3_5.run_ai_modifications(
+                synthesis_file=None,  # Will use default Phase 3 output
+                dry_run=dry_run
+            )
+
+            if not dry_run:
+                duration = (datetime.now() - start_time).total_seconds()
+                self.status_mgr.complete_phase("phase_3_5", duration)
+
+            logger.info("\n✅ Phase 3.5 complete")
+            logger.info(f"   Plans added: {result['plans_added']}")
+            logger.info(f"   Plans modified: {result['plans_modified']}")
+            logger.info(f"   Plans deleted: {result['plans_deleted']}")
+            logger.info(f"   Plans merged: {result['plans_merged']}")
+
+            if 'approvals_needed' in result and result['approvals_needed']:
+                logger.warning(f"\n⚠️  {len(result['approvals_needed'])} operations need approval")
+
+            return True
+
+        except Exception as e:
+            logger.error(f"\n❌ Phase 3.5 error: {e}")
+            if not dry_run:
+                self.status_mgr.fail_phase("phase_3_5", str(e))
+            return False
+
     async def run_phase4(self, dry_run: bool = False) -> bool:
         """
         Run Phase 4: File Generation.
@@ -326,10 +399,11 @@ class Tier0WorkflowOrchestrator:
         dry_run: bool = False,
         skip_validation: bool = False,
         use_parallel: bool = False,
-        max_workers: int = 4
+        max_workers: int = 4,
+        skip_ai_modifications: bool = False
     ) -> bool:
         """
-        Run complete Tier 0/1 workflow.
+        Run complete Tier 0/1/2 workflow.
 
         Args:
             book_title: Book to analyze
@@ -337,13 +411,21 @@ class Tier0WorkflowOrchestrator:
             skip_validation: Skip Phase 8.5 validation
             use_parallel: Enable parallel execution (Tier 1)
             max_workers: Number of parallel workers (Tier 1)
+            skip_ai_modifications: Skip Phase 3.5 AI modifications (Tier 2)
 
         Returns:
             True if successful
         """
         start_time = datetime.now()
 
-        tier = "TIER 1" if use_parallel else "TIER 0"
+        # Determine tier
+        if not skip_ai_modifications:
+            tier = "TIER 2"
+        elif use_parallel:
+            tier = "TIER 1"
+        else:
+            tier = "TIER 0"
+        
         logger.info("\n" + "="*60)
         logger.info(f"{tier} WORKFLOW - END-TO-END TEST")
         logger.info("="*60)
@@ -352,6 +434,8 @@ class Tier0WorkflowOrchestrator:
         logger.info(f"Skip Validation: {skip_validation}")
         if use_parallel:
             logger.info(f"Parallel: ENABLED ({max_workers} workers)")
+        if not skip_ai_modifications:
+            logger.info("AI Modifications: ENABLED (Phase 3.5)")
         logger.info(f"Started: {start_time.isoformat()}")
         logger.info("="*60 + "\n")
 
@@ -368,6 +452,11 @@ class Tier0WorkflowOrchestrator:
         # Phase 3: Consolidation
         if not await self.run_phase3(dry_run):
             logger.error("\n❌ Workflow failed at Phase 3")
+            return False
+
+        # Phase 3.5: AI Plan Modifications (Tier 2 feature)
+        if not await self.run_phase3_5(dry_run, enable_ai_modifications=not skip_ai_modifications):
+            logger.error("\n❌ Workflow failed at Phase 3.5")
             return False
 
         # Phase 4: File Generation
@@ -455,6 +544,11 @@ Examples:
         default=4,
         help="Maximum number of parallel workers (default: 4)"
     )
+    parser.add_argument(
+        "--skip-ai-modifications",
+        action="store_true",
+        help="Skip Phase 3.5: AI Plan Modifications (Tier 2 feature)"
+    )
 
     args = parser.parse_args()
 
@@ -467,7 +561,8 @@ Examples:
         dry_run=args.dry_run,
         skip_validation=args.skip_validation,
         use_parallel=args.parallel,
-        max_workers=args.max_workers
+        max_workers=args.max_workers,
+        skip_ai_modifications=args.skip_ai_modifications
     )
 
     if success:
