@@ -1,0 +1,6951 @@
+{
+  "project_root": "/Users/ryanranft/nba-simulator-aws",
+  "total_modules": 233,
+  "total_lines": 105127,
+  "modules": {
+    "assess_data": {
+      "path": "scripts/assess_data.py",
+      "name": "assess_data",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "logging",
+        "dotenv",
+        "typing",
+        "os",
+        "datetime",
+        "collections",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "connect",
+        "assess_database_info",
+        "get_all_tables",
+        "assess_table",
+        "analyze_season_completeness",
+        "analyze_eras",
+        "generate_summary",
+        "run_assessment",
+        "save_results",
+        "main"
+      ],
+      "lines_of_code": 515,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "validate_secrets_security": {
+      "path": "scripts/validate_secrets_security.py",
+      "name": "validate_secrets_security",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "re",
+        "sys",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "subprocess"
+      ],
+      "key_functions": [
+        "scan_for_hardcoded_secrets",
+        "check_unified_secrets_usage",
+        "check_orphaned_env_files",
+        "generate_report",
+        "main"
+      ],
+      "lines_of_code": 418,
+      "integration_points": []
+    },
+    "validate_s3_public_access": {
+      "path": "scripts/validate_s3_public_access.py",
+      "name": "validate_s3_public_access",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "re",
+        "json",
+        "typing",
+        "botocore",
+        "pathlib",
+        "os",
+        "datetime",
+        "boto3"
+      ],
+      "key_functions": [
+        "get_buckets_from_env",
+        "check_bucket_public_access_block",
+        "check_bucket_acl",
+        "check_bucket_policy",
+        "check_object_acls",
+        "generate_s3_security_report",
+        "validate_all_buckets",
+        "main"
+      ],
+      "lines_of_code": 558,
+      "integration_points": []
+    },
+    "test_security_scanning": {
+      "path": "scripts/test_security_scanning.py",
+      "name": "test_security_scanning",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "tempfile",
+        "pathlib",
+        "os",
+        "subprocess",
+        "boto3"
+      ],
+      "key_functions": [
+        "test_git_secrets",
+        "test_detect_secrets",
+        "test_trufflehog",
+        "test_pre_commit",
+        "test_baseline_file",
+        "test_patterns_file",
+        "test_s3_validation",
+        "main"
+      ],
+      "lines_of_code": 252,
+      "integration_points": []
+    },
+    "extract_espn_hoopr_game_mapping": {
+      "path": "scripts/mapping/extract_espn_hoopr_game_mapping.py",
+      "name": "extract_espn_hoopr_game_mapping",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "re",
+        "sys",
+        "json",
+        "sqlite3",
+        "pathlib",
+        "os",
+        "datetime",
+        "dotenv",
+        "csv",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "extract_espn_id_from_uid",
+        "extract_mapping_from_hoopr",
+        "save_to_csv",
+        "save_to_json",
+        "save_to_rds",
+        "print_summary",
+        "main"
+      ],
+      "lines_of_code": 365,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "causal_inference_pipeline": {
+      "path": "scripts/analysis/causal_inference_pipeline.py",
+      "name": "causal_inference_pipeline",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "json",
+        "logging",
+        "typing",
+        "pathlib",
+        "scipy",
+        "os",
+        "datetime",
+        "numpy",
+        "statsmodels",
+        "pandas"
+      ],
+      "key_functions": [
+        "difference_in_differences",
+        "propensity_score_matching",
+        "instrumental_variables",
+        "fixed_effects_regression",
+        "treatment_effect_heterogeneity",
+        "generate_report",
+        "demo_causal_inference"
+      ],
+      "lines_of_code": 1008,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "bayesian_analysis_pipeline": {
+      "path": "scripts/analysis/bayesian_analysis_pipeline.py",
+      "name": "bayesian_analysis_pipeline",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "json",
+        "logging",
+        "typing",
+        "pymc",
+        "pathlib",
+        "scipy",
+        "os",
+        "datetime",
+        "numpy",
+        "arviz",
+        "pandas"
+      ],
+      "key_functions": [
+        "hierarchical_model",
+        "shrinkage_estimation",
+        "credible_interval",
+        "posterior_predictive",
+        "bayes_factor",
+        "generate_report",
+        "demo_bayesian_analysis"
+      ],
+      "lines_of_code": 884,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "panel_data_quality_monitor": {
+      "path": "scripts/analysis/panel_data_quality_monitor.py",
+      "name": "panel_data_quality_monitor",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "dataclasses",
+        "json",
+        "logging",
+        "warnings",
+        "typing",
+        "scipy",
+        "os",
+        "datetime",
+        "numpy",
+        "collections",
+        "time",
+        "psycopg2",
+        "pandas"
+      ],
+      "key_functions": [
+        "connect_db",
+        "validate_panel_structure",
+        "check_completeness",
+        "detect_duplicates",
+        "check_temporal_consistency",
+        "detect_outliers",
+        "calculate_quality_score",
+        "validate_from_postgresql",
+        "validate_dataframe",
+        "generate_report"
+      ],
+      "lines_of_code": 830,
+      "integration_points": [
+        "data_processing",
+        "database",
+        "feature_engineering"
+      ]
+    },
+    "advanced_statistical_testing": {
+      "path": "scripts/analysis/advanced_statistical_testing.py",
+      "name": "advanced_statistical_testing",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "json",
+        "logging",
+        "typing",
+        "pathlib",
+        "scipy",
+        "os",
+        "datetime",
+        "numpy",
+        "pandas"
+      ],
+      "key_functions": [
+        "hypothesis_test",
+        "confidence_interval",
+        "bootstrap_test",
+        "multiple_testing_correction",
+        "effect_size",
+        "generate_report",
+        "main"
+      ],
+      "lines_of_code": 635,
+      "integration_points": [
+        "data_processing",
+        "machine_learning"
+      ]
+    },
+    "statistical_model_validation": {
+      "path": "scripts/analysis/statistical_model_validation.py",
+      "name": "statistical_model_validation",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "json",
+        "logging",
+        "typing",
+        "pathlib",
+        "scipy",
+        "os",
+        "datetime",
+        "numpy",
+        "statsmodels",
+        "pandas"
+      ],
+      "key_functions": [
+        "add_constant",
+        "hausman_test",
+        "breusch_pagan_test",
+        "durbin_watson_test",
+        "unit_root_tests",
+        "normality_tests",
+        "run_all_tests",
+        "generate_report",
+        "main"
+      ],
+      "lines_of_code": 644,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "feature_engineering"
+      ]
+    },
+    "comprehensive_data_analysis": {
+      "path": "scripts/analysis/comprehensive_data_analysis.py",
+      "name": "comprehensive_data_analysis",
+      "purpose": "No description",
+      "dependencies": [
+        "pathlib",
+        "random",
+        "json",
+        "typing"
+      ],
+      "key_functions": [
+        "check_pbp_data",
+        "check_box_score_data",
+        "check_team_stats_data",
+        "check_schedule_data",
+        "analyze_directory",
+        "main"
+      ],
+      "lines_of_code": 322,
+      "integration_points": []
+    },
+    "check_data_availability": {
+      "path": "scripts/analysis/check_data_availability.py",
+      "name": "check_data_availability",
+      "purpose": "No description",
+      "dependencies": [
+        "json",
+        "typing",
+        "pathlib",
+        "os",
+        "random"
+      ],
+      "key_functions": [
+        "check_pbp_file",
+        "check_box_score_file",
+        "check_schedule_file",
+        "check_team_stats_file",
+        "analyze_directory",
+        "main"
+      ],
+      "lines_of_code": 399,
+      "integration_points": []
+    },
+    "data_quality_validator": {
+      "path": "scripts/analysis/data_quality_validator.py",
+      "name": "data_quality_validator",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "json",
+        "logging",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "collections",
+        "random",
+        "boto3",
+        "pandas"
+      ],
+      "key_functions": [
+        "analyze_file_counts",
+        "analyze_date_coverage",
+        "validate_json_quality",
+        "analyze_data_completeness",
+        "generate_quality_report",
+        "run_full_analysis",
+        "main"
+      ],
+      "lines_of_code": 497,
+      "integration_points": [
+        "data_processing"
+      ]
+    },
+    "compare_espn_local_vs_rds": {
+      "path": "scripts/analysis/compare_espn_local_vs_rds.py",
+      "name": "compare_espn_local_vs_rds",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "dotenv",
+        "sqlite3",
+        "pathlib",
+        "os",
+        "datetime",
+        "collections",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "connect_local",
+        "connect_rds",
+        "get_local_summary",
+        "get_rds_summary",
+        "find_missing_games",
+        "analyze_data_quality",
+        "generate_report",
+        "main"
+      ],
+      "lines_of_code": 491,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "__init__": {
+      "path": "scripts/ml_features/__init__.py",
+      "name": "__init__",
+      "purpose": "No description",
+      "dependencies": [],
+      "key_functions": [],
+      "lines_of_code": 1,
+      "integration_points": []
+    },
+    "espn_processor": {
+      "path": "scripts/pbp_to_boxscore/espn_processor.py",
+      "name": "espn_processor",
+      "purpose": "No description",
+      "dependencies": [
+        "",
+        "json",
+        "logging",
+        "typing",
+        "botocore",
+        "pathlib",
+        "datetime",
+        "boto3"
+      ],
+      "key_functions": [
+        "load_game_data",
+        "get_initial_state",
+        "parse_event",
+        "get_actual_box_score",
+        "process_game_from_s3",
+        "process_games_batch",
+        "process_season"
+      ],
+      "lines_of_code": 450,
+      "integration_points": []
+    },
+    "enhanced_ml_integration": {
+      "path": "scripts/pbp_to_boxscore/enhanced_ml_integration.py",
+      "name": "enhanced_ml_integration",
+      "purpose": "No description",
+      "dependencies": [
+        "traceback",
+        "sys",
+        "json",
+        "logging",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "numpy",
+        "pickle",
+        "collections",
+        "pandas"
+      ],
+      "key_functions": [
+        "create_temporal_features",
+        "predict_quarter_outcome",
+        "predict_player_performance",
+        "predict_game_outcome",
+        "train_models",
+        "get_feature_importance",
+        "update_feature_importance",
+        "get_model_performance"
+      ],
+      "lines_of_code": 703,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "robust_storage_test": {
+      "path": "scripts/pbp_to_boxscore/robust_storage_test.py",
+      "name": "robust_storage_test",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "logging",
+        "typing",
+        "os",
+        "signal",
+        "datetime",
+        "scripts",
+        "threading",
+        "time"
+      ],
+      "key_functions": [
+        "call",
+        "timeout_handler",
+        "with_timeout",
+        "decorator",
+        "wrapper",
+        "test_import",
+        "test_initialization",
+        "test_cache_functionality",
+        "test_rds_connection",
+        "test_s3_connection"
+      ],
+      "lines_of_code": 322,
+      "integration_points": []
+    },
+    "test_hoopr_cross_validation": {
+      "path": "scripts/pbp_to_boxscore/test_hoopr_cross_validation.py",
+      "name": "test_hoopr_cross_validation",
+      "purpose": "No description",
+      "dependencies": [
+        "logging",
+        "sys",
+        "os",
+        "scripts"
+      ],
+      "key_functions": [
+        "test_cross_validation",
+        "test_event_parsing"
+      ],
+      "lines_of_code": 193,
+      "integration_points": []
+    },
+    "quick_storage_test": {
+      "path": "scripts/pbp_to_boxscore/quick_storage_test.py",
+      "name": "quick_storage_test",
+      "purpose": "No description",
+      "dependencies": [
+        "traceback",
+        "sys",
+        "json",
+        "logging",
+        "pathlib",
+        "os",
+        "datetime",
+        "scripts"
+      ],
+      "key_functions": [
+        "quick_storage_test"
+      ],
+      "lines_of_code": 74,
+      "integration_points": []
+    },
+    "enhanced_storage_system": {
+      "path": "scripts/pbp_to_boxscore/enhanced_storage_system.py",
+      "name": "enhanced_storage_system",
+      "purpose": "No description",
+      "dependencies": [
+        "traceback",
+        "sys",
+        "threading",
+        "json",
+        "logging",
+        "hashlib",
+        "typing",
+        "pathlib",
+        "os",
+        "pyarrow",
+        "datetime",
+        "pickle",
+        "dotenv",
+        "time",
+        "psycopg2",
+        "boto3",
+        "collections",
+        "pandas"
+      ],
+      "key_functions": [
+        "store_to_rds",
+        "store_to_s3_parquet",
+        "store_to_local_cache",
+        "get_from_cache",
+        "store_snapshots",
+        "get_snapshots",
+        "get_storage_stats",
+        "cleanup_old_cache",
+        "test_storage_system",
+        "get_storage_health_report"
+      ],
+      "lines_of_code": 947,
+      "integration_points": [
+        "data_processing",
+        "database",
+        "feature_engineering"
+      ]
+    },
+    "enhanced_betting_integration": {
+      "path": "scripts/pbp_to_boxscore/enhanced_betting_integration.py",
+      "name": "enhanced_betting_integration",
+      "purpose": "No description",
+      "dependencies": [
+        "traceback",
+        "sys",
+        "json",
+        "logging",
+        "typing",
+        "os",
+        "datetime",
+        "numpy",
+        "collections",
+        "math",
+        "pandas"
+      ],
+      "key_functions": [
+        "calculate_quarter_odds",
+        "calculate_kelly_bet_size",
+        "calculate_spread_betting",
+        "calculate_total_betting",
+        "track_bet",
+        "resolve_bet",
+        "calculate_roi",
+        "get_betting_recommendations",
+        "get_performance_analytics"
+      ],
+      "lines_of_code": 696,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "phase_9_master_agent": {
+      "path": "scripts/pbp_to_boxscore/phase_9_master_agent.py",
+      "name": "phase_9_master_agent",
+      "purpose": "No description",
+      "dependencies": [
+        "sqlite3",
+        "os",
+        "scripts",
+        "betting_integration",
+        "time",
+        "psycopg2",
+        "math",
+        "sys",
+        "kaggle_processor",
+        "logging",
+        "numpy",
+        "dotenv",
+        "subprocess",
+        "pandas",
+        "json",
+        "botocore",
+        "storage_system",
+        "datetime",
+        "typing",
+        "pathlib"
+      ],
+      "key_functions": [
+        "run_phase_9_3_nba_api_processor",
+        "load_game_data",
+        "parse_event",
+        "get_initial_state",
+        "get_actual_box_score",
+        "test_nba_api_processor",
+        "run_phase_9_4_kaggle_processor",
+        "load_game_data",
+        "parse_event",
+        "get_initial_state"
+      ],
+      "lines_of_code": 1490,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "database",
+        "feature_engineering"
+      ]
+    },
+    "base_processor": {
+      "path": "scripts/pbp_to_boxscore/base_processor.py",
+      "name": "base_processor",
+      "purpose": "No description",
+      "dependencies": [
+        "",
+        "dataclasses",
+        "logging",
+        "typing",
+        "abc",
+        "datetime",
+        "copy"
+      ],
+      "key_functions": [
+        "load_game_data",
+        "parse_event",
+        "get_initial_state",
+        "get_actual_box_score",
+        "process_game",
+        "verify_final_box_score"
+      ],
+      "lines_of_code": 563,
+      "integration_points": []
+    },
+    "enhanced_nba_api_processor": {
+      "path": "scripts/pbp_to_boxscore/enhanced_nba_api_processor.py",
+      "name": "enhanced_nba_api_processor",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "re",
+        "json",
+        "logging",
+        "typing",
+        "botocore",
+        "os",
+        "scripts",
+        "datetime",
+        "boto3"
+      ],
+      "key_functions": [
+        "load_game_data",
+        "parse_event",
+        "get_initial_state",
+        "get_actual_box_score"
+      ],
+      "lines_of_code": 537,
+      "integration_points": [
+        "api",
+        "feature_engineering"
+      ]
+    },
+    "box_score_snapshot": {
+      "path": "scripts/pbp_to_boxscore/box_score_snapshot.py",
+      "name": "box_score_snapshot",
+      "purpose": "No description",
+      "dependencies": [
+        "copy",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "key_functions": [
+        "to_dict",
+        "validate",
+        "to_dict",
+        "to_dict",
+        "validate",
+        "is_valid",
+        "get_score_differential",
+        "get_on_court_players",
+        "get_team_players",
+        "to_dict"
+      ],
+      "lines_of_code": 418,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "enhanced_advanced_metrics": {
+      "path": "scripts/pbp_to_boxscore/enhanced_advanced_metrics.py",
+      "name": "enhanced_advanced_metrics",
+      "purpose": "No description",
+      "dependencies": [
+        "traceback",
+        "sys",
+        "json",
+        "logging",
+        "typing",
+        "os",
+        "datetime",
+        "numpy",
+        "scripts",
+        "math"
+      ],
+      "key_functions": [
+        "calculate_true_shooting_percentage",
+        "calculate_per",
+        "calculate_possessions",
+        "calculate_offensive_rating",
+        "calculate_defensive_rating",
+        "calculate_net_rating",
+        "calculate_win_probability",
+        "calculate_usage_rate",
+        "calculate_pace",
+        "calculate_efficiency_differential"
+      ],
+      "lines_of_code": 660,
+      "integration_points": [
+        "machine_learning",
+        "feature_engineering"
+      ]
+    },
+    "enhanced_kaggle_processor": {
+      "path": "scripts/pbp_to_boxscore/enhanced_kaggle_processor.py",
+      "name": "enhanced_kaggle_processor",
+      "purpose": "No description",
+      "dependencies": [
+        "traceback",
+        "sys",
+        "re",
+        "logging",
+        "typing",
+        "sqlite3",
+        "pathlib",
+        "os",
+        "scripts",
+        "datetime"
+      ],
+      "key_functions": [
+        "load_game_data",
+        "parse_event",
+        "get_initial_state",
+        "get_actual_box_score",
+        "get_historical_games",
+        "get_season_summary"
+      ],
+      "lines_of_code": 731,
+      "integration_points": [
+        "database",
+        "feature_engineering"
+      ]
+    },
+    "batch_process_espn": {
+      "path": "scripts/pbp_to_boxscore/batch_process_espn.py",
+      "name": "batch_process_espn",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "logging",
+        "typing",
+        "subprocess",
+        "pathlib",
+        "os",
+        "datetime",
+        "scripts",
+        "time"
+      ],
+      "key_functions": [
+        "setup_logging",
+        "get_espn_game_ids_for_season",
+        "process_batch",
+        "main"
+      ],
+      "lines_of_code": 330,
+      "integration_points": []
+    },
+    "simple_cache_test": {
+      "path": "scripts/pbp_to_boxscore/simple_cache_test.py",
+      "name": "simple_cache_test",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "threading",
+        "logging",
+        "os",
+        "datetime",
+        "scripts",
+        "collections"
+      ],
+      "key_functions": [
+        "test_import",
+        "test_initialization",
+        "test_cache_functionality",
+        "run_all_tests",
+        "get_summary",
+        "main"
+      ],
+      "lines_of_code": 176,
+      "integration_points": []
+    },
+    "final_storage_test": {
+      "path": "scripts/pbp_to_boxscore/final_storage_test.py",
+      "name": "final_storage_test",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "logging",
+        "scripts",
+        "os",
+        "datetime"
+      ],
+      "key_functions": [
+        "final_storage_test"
+      ],
+      "lines_of_code": 152,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "hoopr_processor": {
+      "path": "scripts/pbp_to_boxscore/hoopr_processor.py",
+      "name": "hoopr_processor",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "logging",
+        "typing",
+        "os",
+        "datetime",
+        "scripts",
+        "dotenv",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "load_game_data",
+        "parse_event",
+        "get_initial_state",
+        "get_actual_box_score",
+        "cross_validate_with_espn",
+        "process_hoopr_games_batch"
+      ],
+      "lines_of_code": 588,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "multi_source_integrator": {
+      "path": "scripts/integration/multi_source_integrator.py",
+      "name": "multi_source_integrator",
+      "purpose": "No description",
+      "dependencies": [
+        "traceback",
+        "sys",
+        "dataclasses",
+        "json",
+        "logging",
+        "typing",
+        "sqlite3",
+        "pathlib",
+        "os",
+        "datetime",
+        "numpy",
+        "collections",
+        "boto3",
+        "pandas"
+      ],
+      "key_functions": [
+        "integrate_espn_data",
+        "integrate_basketball_reference_data",
+        "integrate_nba_api_data",
+        "integrate_kaggle_data",
+        "calculate_derived_features",
+        "create_unified_features",
+        "save_unified_features",
+        "main"
+      ],
+      "lines_of_code": 762,
+      "integration_points": [
+        "data_processing",
+        "database",
+        "feature_engineering"
+      ]
+    },
+    "working_multi_source_integrator": {
+      "path": "scripts/integration/working_multi_source_integrator.py",
+      "name": "working_multi_source_integrator",
+      "purpose": "No description",
+      "dependencies": [
+        "traceback",
+        "sys",
+        "dataclasses",
+        "json",
+        "logging",
+        "typing",
+        "sqlite3",
+        "pathlib",
+        "os",
+        "datetime",
+        "numpy",
+        "collections",
+        "boto3",
+        "pandas"
+      ],
+      "key_functions": [
+        "create_mock_features",
+        "save_unified_features",
+        "generate_feature_summary",
+        "main"
+      ],
+      "lines_of_code": 523,
+      "integration_points": [
+        "data_processing",
+        "database",
+        "feature_engineering"
+      ]
+    },
+    "fill_historical_gaps": {
+      "path": "scripts/etl/fill_historical_gaps.py",
+      "name": "fill_historical_gaps",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "sqlite3",
+        "pathlib",
+        "sportsdataverse",
+        "datetime",
+        "collections",
+        "csv",
+        "pandas"
+      ],
+      "key_functions": [
+        "load_gap_list",
+        "check_hoopr_api_availability",
+        "load_season_from_hoopr",
+        "load_schedule_to_db",
+        "load_pbp_to_db",
+        "fill_gaps_for_season",
+        "export_unavailable_games",
+        "fill_all_gaps",
+        "main"
+      ],
+      "lines_of_code": 555,
+      "integration_points": [
+        "data_processing",
+        "database"
+      ]
+    },
+    "extract_teams_by_year": {
+      "path": "scripts/etl/extract_teams_by_year.py",
+      "name": "extract_teams_by_year",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "typing",
+        "os",
+        "psycopg2",
+        "boto3"
+      ],
+      "key_functions": [
+        "validate_environment",
+        "get_s3_files_for_year",
+        "extract_teams_from_json",
+        "scan_year_for_teams",
+        "main"
+      ],
+      "lines_of_code": 355,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "load_local_json_to_rds": {
+      "path": "scripts/etl/load_local_json_to_rds.py",
+      "name": "load_local_json_to_rds",
+      "purpose": "No description",
+      "dependencies": [
+        "json",
+        "logging",
+        "dotenv",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "numpy",
+        "collections",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "connect",
+        "create_tables",
+        "check_data_quality",
+        "load_player_tracking",
+        "load_game_advanced",
+        "load_player_dashboards",
+        "load_comprehensive",
+        "print_quality_report",
+        "run"
+      ],
+      "lines_of_code": 675,
+      "integration_points": [
+        "database",
+        "api",
+        "feature_engineering"
+      ]
+    },
+    "create_possession_panel_from_kaggle": {
+      "path": "scripts/etl/create_possession_panel_from_kaggle.py",
+      "name": "create_possession_panel_from_kaggle",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "traceback",
+        "sys",
+        "re",
+        "logging",
+        "io",
+        "os",
+        "datetime",
+        "numpy",
+        "time",
+        "psycopg2",
+        "pandas"
+      ],
+      "key_functions": [
+        "is_end_of_free_throw_sequence",
+        "is_possession_end",
+        "extract_points_from_event",
+        "categorize_result",
+        "get_games_to_process",
+        "load_game_events",
+        "process_game",
+        "aggregate_possession",
+        "build_panel",
+        "write_to_database"
+      ],
+      "lines_of_code": 784,
+      "integration_points": [
+        "data_processing",
+        "database",
+        "feature_engineering"
+      ]
+    },
+    "extract_kaggle_to_temporal": {
+      "path": "scripts/etl/extract_kaggle_to_temporal.py",
+      "name": "extract_kaggle_to_temporal",
+      "purpose": "No description",
+      "dependencies": [
+        "json",
+        "pytz",
+        "sqlite3",
+        "pathlib",
+        "datetime",
+        "numpy",
+        "pandas"
+      ],
+      "key_functions": [
+        "extract_player_biographical",
+        "parse_height",
+        "parse_wall_clock_time",
+        "parse_game_clock",
+        "extract_temporal_events",
+        "print_summary",
+        "main"
+      ],
+      "lines_of_code": 381,
+      "integration_points": [
+        "data_processing",
+        "database"
+      ]
+    },
+    "extract_espn_pbp_data": {
+      "path": "scripts/etl/extract_espn_pbp_data.py",
+      "name": "extract_espn_pbp_data",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "dataclasses",
+        "json",
+        "asyncio",
+        "logging",
+        "aiofiles",
+        "typing",
+        "sqlite3",
+        "pathlib",
+        "os",
+        "datetime",
+        "collections"
+      ],
+      "key_functions": [
+        "extract_game_data",
+        "process_files",
+        "analyze_gaps",
+        "main"
+      ],
+      "lines_of_code": 476,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "analyze_espn_coverage": {
+      "path": "scripts/etl/analyze_espn_coverage.py",
+      "name": "analyze_espn_coverage",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "logging",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "get_db_connection",
+        "get_season_statistics",
+        "get_team_statistics",
+        "get_play_statistics",
+        "calculate_expected_games",
+        "analyze_coverage",
+        "save_coverage_report",
+        "save_missing_games_report",
+        "print_summary",
+        "main"
+      ],
+      "lines_of_code": 413,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "structured_output_framework": {
+      "path": "scripts/etl/structured_output_framework.py",
+      "name": "structured_output_framework",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "dataclasses",
+        "json",
+        "logging",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "numpy",
+        "enum",
+        "pandas"
+      ],
+      "key_functions": [
+        "validate",
+        "coerce",
+        "transform",
+        "validate_record",
+        "coerce_record",
+        "get_field",
+        "to_dict",
+        "extract_records",
+        "export_to_json",
+        "export_to_csv"
+      ],
+      "lines_of_code": 674,
+      "integration_points": [
+        "data_processing",
+        "feature_engineering"
+      ]
+    },
+    "scraper_error_handler": {
+      "path": "scripts/etl/scraper_error_handler.py",
+      "name": "scraper_error_handler",
+      "purpose": "No description",
+      "dependencies": [],
+      "key_functions": [],
+      "lines_of_code": 1,
+      "integration_points": []
+    },
+    "scrape_basketball_reference_mock": {
+      "path": "scripts/etl/scrape_basketball_reference_mock.py",
+      "name": "scrape_basketball_reference_mock",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "logging",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "time",
+        "random"
+      ],
+      "key_functions": [
+        "scrape_date_range",
+        "main"
+      ],
+      "lines_of_code": 542,
+      "integration_points": [
+        "feature_engineering"
+      ]
+    },
+    "espn_async_scraper": {
+      "path": "scripts/etl/espn_async_scraper.py",
+      "name": "espn_async_scraper",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "asyncio",
+        "logging",
+        "typing",
+        "pathlib",
+        "scripts",
+        "datetime",
+        "time"
+      ],
+      "key_functions": [],
+      "lines_of_code": 365,
+      "integration_points": [
+        "api"
+      ]
+    },
+    "phase_1_0_quality_agent": {
+      "path": "scripts/etl/phase_1_0_quality_agent.py",
+      "name": "phase_1_0_quality_agent",
+      "purpose": "No description",
+      "dependencies": [
+        "ssl",
+        "sys",
+        "re",
+        "json",
+        "asyncio",
+        "logging",
+        "aiohttp",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "collections",
+        "time",
+        "boto3",
+        "pandas"
+      ],
+      "key_functions": [
+        "generate_quality_report",
+        "log_progress",
+        "main"
+      ],
+      "lines_of_code": 478,
+      "integration_points": [
+        "data_processing"
+      ]
+    },
+    "scrape_missing_hoopr_games": {
+      "path": "scripts/etl/scrape_missing_hoopr_games.py",
+      "name": "scrape_missing_hoopr_games",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "csv",
+        "typing",
+        "sqlite3",
+        "pathlib",
+        "datetime",
+        "sportsdataverse",
+        "time"
+      ],
+      "key_functions": [
+        "load_gap_list",
+        "scrape_game_from_hoopr",
+        "load_to_hoopr_database",
+        "scrape_and_fill_gaps",
+        "verify_hoopr_coverage",
+        "main"
+      ],
+      "lines_of_code": 414,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "test_master_game_list": {
+      "path": "scripts/etl/test_master_game_list.py",
+      "name": "test_master_game_list",
+      "purpose": "No description",
+      "dependencies": [
+        "build_master_game_list_robust",
+        "sys",
+        "time"
+      ],
+      "key_functions": [
+        "test_season",
+        "main"
+      ],
+      "lines_of_code": 124,
+      "integration_points": []
+    },
+    "scraper_config": {
+      "path": "scripts/etl/scraper_config.py",
+      "name": "scraper_config",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "dataclasses",
+        "logging",
+        "typing",
+        "yaml",
+        "pathlib",
+        "os",
+        "scraper_config"
+      ],
+      "key_functions": [
+        "load_configs",
+        "get_scraper_config",
+        "get_all_scraper_names",
+        "update_scraper_config",
+        "save_configs",
+        "validate_config",
+        "load_config",
+        "get_scraper_config",
+        "create_config_from_env"
+      ],
+      "lines_of_code": 572,
+      "integration_points": [
+        "api"
+      ]
+    },
+    "data_validators": {
+      "path": "scripts/etl/data_validators.py",
+      "name": "data_validators",
+      "purpose": "No description",
+      "dependencies": [
+        "re",
+        "dataclasses",
+        "sys",
+        "json",
+        "asyncio",
+        "logging",
+        "jsonschema",
+        "bs4",
+        "typing",
+        "data_validators",
+        "pathlib",
+        "abc",
+        "datetime"
+      ],
+      "key_functions": [
+        "add_error",
+        "add_warning",
+        "calculate_quality_score",
+        "validate_schema",
+        "get_validation_summary"
+      ],
+      "lines_of_code": 981,
+      "integration_points": []
+    },
+    "phase_1_1_integration_agent": {
+      "path": "scripts/etl/phase_1_1_integration_agent.py",
+      "name": "phase_1_1_integration_agent",
+      "purpose": "No description",
+      "dependencies": [
+        "ssl",
+        "sys",
+        "json",
+        "asyncio",
+        "logging",
+        "aiohttp",
+        "typing",
+        "sqlite3",
+        "pathlib",
+        "os",
+        "datetime",
+        "numpy",
+        "collections",
+        "time",
+        "psycopg2",
+        "pandas"
+      ],
+      "key_functions": [
+        "connect_to_database",
+        "generate_integration_report",
+        "log_progress",
+        "main"
+      ],
+      "lines_of_code": 639,
+      "integration_points": [
+        "data_processing",
+        "database",
+        "feature_engineering"
+      ]
+    },
+    "extract_espn_pbp_optimized": {
+      "path": "scripts/etl/extract_espn_pbp_optimized.py",
+      "name": "extract_espn_pbp_optimized",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "dataclasses",
+        "multiprocessing",
+        "json",
+        "logging",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "collections",
+        "concurrent"
+      ],
+      "key_functions": [
+        "extract_single_file",
+        "extract_game_info",
+        "extract_plays",
+        "filter_files_by_seasons",
+        "check_file_season",
+        "process_files_parallel",
+        "save_game_data",
+        "main"
+      ],
+      "lines_of_code": 410,
+      "integration_points": []
+    },
+    "provenance_tracker": {
+      "path": "scripts/etl/provenance_tracker.py",
+      "name": "provenance_tracker",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "dataclasses",
+        "uuid",
+        "json",
+        "asyncio",
+        "provenance_tracker",
+        "hashlib",
+        "logging",
+        "typing",
+        "platform",
+        "botocore",
+        "pathlib",
+        "getpass",
+        "datetime",
+        "boto3"
+      ],
+      "key_functions": [
+        "to_dict",
+        "from_dict",
+        "generate_data_id",
+        "calculate_content_hash",
+        "get_lineage_path",
+        "get_ancestors",
+        "get_descendants",
+        "get_lineage_summary",
+        "export_lineage",
+        "get_full_lineage"
+      ],
+      "lines_of_code": 627,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "fixed_nba_api_scraper": {
+      "path": "scripts/etl/fixed_nba_api_scraper.py",
+      "name": "fixed_nba_api_scraper",
+      "purpose": "No description",
+      "dependencies": [
+        "ssl",
+        "json",
+        "logging",
+        "typing",
+        "pathlib",
+        "urllib3",
+        "requests",
+        "time"
+      ],
+      "key_functions": [
+        "test_connectivity",
+        "test_playbyplay_endpoint",
+        "scrape_recent_games",
+        "scrape_game_playbyplay",
+        "run_comprehensive_test",
+        "main"
+      ],
+      "lines_of_code": 299,
+      "integration_points": [
+        "api"
+      ]
+    },
+    "hoopr_incremental_scraper": {
+      "path": "scripts/etl/hoopr_incremental_scraper.py",
+      "name": "hoopr_incremental_scraper",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "sqlite3",
+        "pathlib",
+        "datetime",
+        "sportsdataverse",
+        "pandas"
+      ],
+      "key_functions": [
+        "get_latest_game_date",
+        "get_current_season",
+        "game_exists",
+        "load_schedule_to_db",
+        "load_pbp_to_db",
+        "scrape_incremental",
+        "main"
+      ],
+      "lines_of_code": 421,
+      "integration_points": [
+        "data_processing",
+        "database"
+      ]
+    },
+    "scrape_missing_games": {
+      "path": "scripts/etl/scrape_missing_games.py",
+      "name": "scrape_missing_games",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "ssl",
+        "re",
+        "asyncio",
+        "json",
+        "logging",
+        "aiohttp",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime"
+      ],
+      "key_functions": [
+        "save_game_data",
+        "print_statistics"
+      ],
+      "lines_of_code": 280,
+      "integration_points": []
+    },
+    "smart_retry_strategies": {
+      "path": "scripts/etl/smart_retry_strategies.py",
+      "name": "smart_retry_strategies",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "dataclasses",
+        "smart_retry_strategies",
+        "asyncio",
+        "logging",
+        "typing",
+        "pathlib",
+        "abc",
+        "datetime",
+        "time",
+        "random",
+        "enum"
+      ],
+      "key_functions": [
+        "classify_error",
+        "calculate_delay",
+        "get_retry_stats",
+        "update_retry_config",
+        "get_state",
+        "reset",
+        "get_learning_summary"
+      ],
+      "lines_of_code": 590,
+      "integration_points": []
+    },
+    "load_espn_pbp_to_rds": {
+      "path": "scripts/etl/load_espn_pbp_to_rds.py",
+      "name": "load_espn_pbp_to_rds",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "multiprocessing",
+        "asyncio",
+        "json",
+        "logging",
+        "typing",
+        "asyncpg",
+        "pathlib",
+        "os",
+        "datetime",
+        "concurrent"
+      ],
+      "key_functions": [
+        "print_statistics"
+      ],
+      "lines_of_code": 342,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "espn_missing_pbp_scraper": {
+      "path": "scripts/etl/espn_missing_pbp_scraper.py",
+      "name": "espn_missing_pbp_scraper",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "asyncio",
+        "logging",
+        "typing",
+        "pathlib",
+        "scripts",
+        "datetime",
+        "time"
+      ],
+      "key_functions": [
+        "get_progress_summary"
+      ],
+      "lines_of_code": 545,
+      "integration_points": []
+    },
+    "process_kaggle_historical": {
+      "path": "scripts/etl/process_kaggle_historical.py",
+      "name": "process_kaggle_historical",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "zipfile",
+        "logging",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "requests",
+        "kaggle",
+        "pandas"
+      ],
+      "key_functions": [
+        "process_all",
+        "main"
+      ],
+      "lines_of_code": 554,
+      "integration_points": [
+        "data_processing",
+        "feature_engineering"
+      ]
+    },
+    "scrape_basketball_reference": {
+      "path": "scripts/etl/scrape_basketball_reference.py",
+      "name": "scrape_basketball_reference",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "bs4",
+        "boto3",
+        "pathlib",
+        "requests",
+        "datetime",
+        "time",
+        "pandas"
+      ],
+      "key_functions": [
+        "scrape_season_schedule",
+        "scrape_team_stats",
+        "scrape_player_stats",
+        "main"
+      ],
+      "lines_of_code": 274,
+      "integration_points": [
+        "data_processing"
+      ]
+    },
+    "load_validated_espn_pbp": {
+      "path": "scripts/etl/load_validated_espn_pbp.py",
+      "name": "load_validated_espn_pbp",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "logging",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "get_db_connection",
+        "init_database",
+        "determine_nba_season",
+        "get_validated_files",
+        "extract_game_info",
+        "extract_plays",
+        "load_game_batch",
+        "load_plays_batch",
+        "save_checkpoint",
+        "load_checkpoint"
+      ],
+      "lines_of_code": 626,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "scrape_nba_stats_api": {
+      "path": "scripts/etl/scrape_nba_stats_api.py",
+      "name": "scrape_nba_stats_api",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "pathlib",
+        "datetime",
+        "requests",
+        "time",
+        "boto3"
+      ],
+      "key_functions": [
+        "get_scoreboard",
+        "get_boxscore",
+        "get_playbyplay",
+        "save_json",
+        "upload_to_s3",
+        "scrape_date",
+        "scrape_date_range",
+        "main"
+      ],
+      "lines_of_code": 389,
+      "integration_points": [
+        "api"
+      ]
+    },
+    "deduplication_manager": {
+      "path": "scripts/etl/deduplication_manager.py",
+      "name": "deduplication_manager",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "dataclasses",
+        "json",
+        "asyncio",
+        "hashlib",
+        "logging",
+        "aiofiles",
+        "typing",
+        "botocore",
+        "sqlite3",
+        "pathlib",
+        "os",
+        "datetime",
+        "deduplication_manager",
+        "boto3"
+      ],
+      "key_functions": [
+        "calculate_hash",
+        "calculate_file_hash"
+      ],
+      "lines_of_code": 548,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "verify_with_nba_stats": {
+      "path": "scripts/etl/verify_with_nba_stats.py",
+      "name": "verify_with_nba_stats",
+      "purpose": "No description",
+      "dependencies": [
+        "re",
+        "json",
+        "typing",
+        "botocore",
+        "pathlib",
+        "datetime",
+        "requests",
+        "time",
+        "random",
+        "boto3"
+      ],
+      "key_functions": [
+        "decode_espn_game_id",
+        "load_team_mapping",
+        "get_nba_id_from_abbr",
+        "get_abbr_from_nba_id",
+        "get_random_game_sample",
+        "get_espn_schedule_data",
+        "get_nba_stats_scoreboard",
+        "extract_espn_games",
+        "extract_nba_games",
+        "match_and_compare_games"
+      ],
+      "lines_of_code": 634,
+      "integration_points": [
+        "api"
+      ]
+    },
+    "basketball_reference_pbp_backfill": {
+      "path": "scripts/etl/basketball_reference_pbp_backfill.py",
+      "name": "basketball_reference_pbp_backfill",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "json",
+        "logging",
+        "bs4",
+        "typing",
+        "botocore",
+        "sqlite3",
+        "requests",
+        "datetime",
+        "time",
+        "boto3"
+      ],
+      "key_functions": [
+        "rate_limit_wait",
+        "get_pending_games",
+        "fetch_pbp_for_game",
+        "upload_to_s3_bucket",
+        "load_to_database",
+        "process_game",
+        "run",
+        "cleanup",
+        "main"
+      ],
+      "lines_of_code": 468,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "scrape_bref_tier1_incremental": {
+      "path": "scripts/etl/scrape_bref_tier1_incremental.py",
+      "name": "scrape_bref_tier1_incremental",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "re",
+        "json",
+        "logging",
+        "bs4",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "requests",
+        "collections",
+        "time",
+        "boto3"
+      ],
+      "key_functions": [
+        "save",
+        "mark_in_progress",
+        "mark_completed",
+        "mark_failed",
+        "is_completed",
+        "get_stats",
+        "scrape_player_game_logs",
+        "get_top_players",
+        "print_summary",
+        "main"
+      ],
+      "lines_of_code": 589,
+      "integration_points": [
+        "feature_engineering"
+      ]
+    },
+    "expand_nba_stats_scraper": {
+      "path": "scripts/etl/expand_nba_stats_scraper.py",
+      "name": "expand_nba_stats_scraper",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "nba_api",
+        "json",
+        "logging",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "time"
+      ],
+      "key_functions": [
+        "scrape_seasons",
+        "main"
+      ],
+      "lines_of_code": 596,
+      "integration_points": [
+        "api",
+        "feature_engineering"
+      ]
+    },
+    "create_possession_panel_from_nba_api": {
+      "path": "scripts/etl/create_possession_panel_from_nba_api.py",
+      "name": "create_possession_panel_from_nba_api",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "json",
+        "logging",
+        "io",
+        "pathlib",
+        "os",
+        "datetime",
+        "psycopg2",
+        "pandas"
+      ],
+      "key_functions": [
+        "is_possession_end",
+        "categorize_possession_result",
+        "extract_possessions_from_game",
+        "main"
+      ],
+      "lines_of_code": 414,
+      "integration_points": [
+        "data_processing",
+        "database",
+        "api"
+      ]
+    },
+    "build_master_game_list": {
+      "path": "scripts/etl/build_master_game_list.py",
+      "name": "build_master_game_list",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "1946-2025",
+        "logging",
+        "basketball_reference_web_scraper",
+        "sqlite3",
+        "datetime",
+        "time"
+      ],
+      "key_functions": [
+        "rate_limit_wait",
+        "get_priority_for_season",
+        "get_league_abbr",
+        "scrape_season_schedule",
+        "insert_games",
+        "run",
+        "cleanup",
+        "main"
+      ],
+      "lines_of_code": 284,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "scrape_nba_api_team_dashboards": {
+      "path": "scripts/etl/scrape_nba_api_team_dashboards.py",
+      "name": "scrape_nba_api_team_dashboards",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "nba_api",
+        "json",
+        "logging",
+        "typing",
+        "mlflow",
+        "pathlib",
+        "requests",
+        "datetime",
+        "time"
+      ],
+      "key_functions": [
+        "get_all_teams",
+        "scrape_team_dashboards",
+        "run"
+      ],
+      "lines_of_code": 274,
+      "integration_points": [
+        "api",
+        "feature_engineering"
+      ]
+    },
+    "scrape_basketball_reference_full": {
+      "path": "scripts/etl/scrape_basketball_reference_full.py",
+      "name": "scrape_basketball_reference_full",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "ssl",
+        "sys",
+        "asyncio",
+        "json",
+        "logging",
+        "basketball_reference_web_scraper",
+        "aiohttp",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "requests",
+        "time"
+      ],
+      "key_functions": [
+        "scrape_date_range",
+        "main"
+      ],
+      "lines_of_code": 446,
+      "integration_points": [
+        "feature_engineering"
+      ]
+    },
+    "integrate_basketball_reference_aggregate": {
+      "path": "scripts/etl/integrate_basketball_reference_aggregate.py",
+      "name": "integrate_basketball_reference_aggregate",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "json",
+        "typing",
+        "sqlite3",
+        "pathlib",
+        "datetime",
+        "collections",
+        "boto3"
+      ],
+      "key_functions": [
+        "parse_team_name",
+        "parse_position",
+        "download_aggregate_data_from_s3",
+        "create_aggregate_database",
+        "load_season_totals_to_database",
+        "load_advanced_totals_to_database",
+        "load_standings_to_database",
+        "run_data_quality_checks",
+        "main"
+      ],
+      "lines_of_code": 672,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "nba_api_incremental_simple": {
+      "path": "scripts/etl/nba_api_incremental_simple.py",
+      "name": "nba_api_incremental_simple",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "logging",
+        "pathlib",
+        "datetime",
+        "requests",
+        "time",
+        "boto3"
+      ],
+      "key_functions": [
+        "get_date_range",
+        "get_games_for_date",
+        "get_play_by_play",
+        "get_box_score",
+        "upload_to_s3",
+        "scrape_date",
+        "run",
+        "main"
+      ],
+      "lines_of_code": 265,
+      "integration_points": [
+        "database",
+        "api"
+      ]
+    },
+    "scrape_nba_api_player_tracking": {
+      "path": "scripts/etl/scrape_nba_api_player_tracking.py",
+      "name": "scrape_nba_api_player_tracking",
+      "purpose": "No description",
+      "dependencies": [
+        "nba_api",
+        "json",
+        "logging",
+        "typing",
+        "mlflow",
+        "pathlib",
+        "requests",
+        "datetime",
+        "time"
+      ],
+      "key_functions": [
+        "get_all_players",
+        "scrape_player_tracking",
+        "run"
+      ],
+      "lines_of_code": 266,
+      "integration_points": [
+        "api",
+        "feature_engineering"
+      ]
+    },
+    "scrape_failed_games_by_id": {
+      "path": "scripts/etl/scrape_failed_games_by_id.py",
+      "name": "scrape_failed_games_by_id",
+      "purpose": "No description",
+      "dependencies": [
+        "ssl",
+        "json",
+        "asyncio",
+        "logging",
+        "aiohttp",
+        "typing",
+        "pathlib",
+        "os",
+        "time"
+      ],
+      "key_functions": [
+        "main"
+      ],
+      "lines_of_code": 267,
+      "integration_points": []
+    },
+    "scrape_nba_api_matchups_defense": {
+      "path": "scripts/etl/scrape_nba_api_matchups_defense.py",
+      "name": "scrape_nba_api_matchups_defense",
+      "purpose": "No description",
+      "dependencies": [
+        "nba_api",
+        "json",
+        "logging",
+        "pathlib",
+        "requests",
+        "datetime",
+        "time"
+      ],
+      "key_functions": [
+        "scrape_league_endpoints",
+        "run"
+      ],
+      "lines_of_code": 110,
+      "integration_points": [
+        "api"
+      ]
+    },
+    "test_basketball_reference_api": {
+      "path": "scripts/etl/test_basketball_reference_api.py",
+      "name": "test_basketball_reference_api",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "logging",
+        "basketball_reference_web_scraper",
+        "datetime",
+        "time"
+      ],
+      "key_functions": [
+        "test_basic_connectivity",
+        "test_historical_season",
+        "test_rate_limits",
+        "test_different_endpoints",
+        "test_user_agent",
+        "test_package_version",
+        "main"
+      ],
+      "lines_of_code": 272,
+      "integration_points": [
+        "api"
+      ]
+    },
+    "scrape_nba_api_comprehensive": {
+      "path": "scripts/etl/scrape_nba_api_comprehensive.py",
+      "name": "scrape_nba_api_comprehensive",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "traceback",
+        "sys",
+        "nba_api",
+        "json",
+        "pathlib",
+        "datetime",
+        "time",
+        "boto3"
+      ],
+      "key_functions": [
+        "check_season_complete",
+        "create_season_checkpoint",
+        "save_json",
+        "upload_to_s3",
+        "scrape_endpoint",
+        "scrape_league_dashboards",
+        "scrape_advanced_boxscores",
+        "scrape_player_tracking",
+        "scrape_hustle_stats",
+        "scrape_draft_data"
+      ],
+      "lines_of_code": 680,
+      "integration_points": [
+        "api",
+        "feature_engineering"
+      ]
+    },
+    "extract_pbp_local": {
+      "path": "scripts/etl/extract_pbp_local.py",
+      "name": "extract_pbp_local",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "typing",
+        "os",
+        "psycopg2",
+        "boto3"
+      ],
+      "key_functions": [
+        "validate_environment",
+        "get_game_ids_for_year",
+        "extract_pbp_data",
+        "process_year",
+        "main"
+      ],
+      "lines_of_code": 330,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "create_possession_panel_from_pbpstats": {
+      "path": "scripts/etl/create_possession_panel_from_pbpstats.py",
+      "name": "create_possession_panel_from_pbpstats",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "traceback",
+        "sys",
+        "os",
+        "datetime",
+        "pbpstats",
+        "psycopg2",
+        "pandas"
+      ],
+      "key_functions": [
+        "get_db_connection",
+        "create_table",
+        "get_all_game_ids",
+        "normalize_game_id",
+        "time_to_seconds",
+        "process_game_with_pbpstats",
+        "save_to_database",
+        "main"
+      ],
+      "lines_of_code": 421,
+      "integration_points": [
+        "data_processing",
+        "database",
+        "feature_engineering"
+      ]
+    },
+    "scrape_basketball_reference_transactions": {
+      "path": "scripts/etl/scrape_basketball_reference_transactions.py",
+      "name": "scrape_basketball_reference_transactions",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "re",
+        "json",
+        "logging",
+        "bs4",
+        "typing",
+        "pathlib",
+        "datetime",
+        "requests",
+        "time",
+        "urllib",
+        "boto3"
+      ],
+      "key_functions": [
+        "scrape_season",
+        "scrape_range",
+        "main"
+      ],
+      "lines_of_code": 567,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "nba_api_async_scraper": {
+      "path": "scripts/etl/nba_api_async_scraper.py",
+      "name": "nba_api_async_scraper",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "nba_api",
+        "json",
+        "asyncio",
+        "logging",
+        "typing",
+        "pathlib",
+        "scripts",
+        "datetime",
+        "time"
+      ],
+      "key_functions": [
+        "get_circuit_breaker_status"
+      ],
+      "lines_of_code": 510,
+      "integration_points": [
+        "api"
+      ]
+    },
+    "scrape_missing_espn_data": {
+      "path": "scripts/etl/scrape_missing_espn_data.py",
+      "name": "scrape_missing_espn_data",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "pathlib",
+        "os",
+        "datetime",
+        "requests",
+        "time",
+        "boto3"
+      ],
+      "key_functions": [
+        "get_schedule",
+        "get_box_score",
+        "get_play_by_play",
+        "save_json",
+        "upload_to_s3",
+        "scrape_date",
+        "scrape_date_range",
+        "main"
+      ],
+      "lines_of_code": 343,
+      "integration_points": []
+    },
+    "scrape_hoopr_nba_stats": {
+      "path": "scripts/etl/scrape_hoopr_nba_stats.py",
+      "name": "scrape_hoopr_nba_stats",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "pathlib",
+        "datetime",
+        "sportsdataverse",
+        "time",
+        "boto3"
+      ],
+      "key_functions": [
+        "save_json",
+        "upload_to_s3",
+        "scrape_pbp",
+        "scrape_team_box",
+        "scrape_player_box",
+        "scrape_schedule",
+        "scrape_all_loaders",
+        "main"
+      ],
+      "lines_of_code": 408,
+      "integration_points": [
+        "api",
+        "feature_engineering"
+      ]
+    },
+    "partition_by_year": {
+      "path": "scripts/etl/partition_by_year.py",
+      "name": "partition_by_year",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "typing",
+        "game_id_decoder",
+        "pathlib",
+        "collections",
+        "boto3"
+      ],
+      "key_functions": [
+        "list_files",
+        "partition_files",
+        "copy_to_partition",
+        "partition_data_type",
+        "print_summary",
+        "main"
+      ],
+      "lines_of_code": 287,
+      "integration_points": []
+    },
+    "identify_missing_games": {
+      "path": "scripts/etl/identify_missing_games.py",
+      "name": "identify_missing_games",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "json",
+        "logging",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "requests",
+        "collections",
+        "time"
+      ],
+      "key_functions": [
+        "get_nba_schedule",
+        "get_existing_games",
+        "identify_missing_games",
+        "analyze_all_seasons",
+        "save_missing_games_report",
+        "print_summary",
+        "main"
+      ],
+      "lines_of_code": 375,
+      "integration_points": [
+        "api"
+      ]
+    },
+    "download_kaggle_basketball": {
+      "path": "scripts/etl/download_kaggle_basketball.py",
+      "name": "download_kaggle_basketball",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "sqlite3",
+        "pathlib",
+        "os",
+        "datetime",
+        "subprocess",
+        "pandas"
+      ],
+      "key_functions": [
+        "check_kaggle_credentials",
+        "download_dataset",
+        "find_database_file",
+        "extract_player_biographical",
+        "extract_game_data",
+        "print_summary",
+        "main"
+      ],
+      "lines_of_code": 305,
+      "integration_points": [
+        "data_processing",
+        "database"
+      ]
+    },
+    "adaptive_rate_limiter": {
+      "path": "scripts/etl/adaptive_rate_limiter.py",
+      "name": "adaptive_rate_limiter",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "dataclasses",
+        "asyncio",
+        "logging",
+        "typing",
+        "pathlib",
+        "datetime",
+        "adaptive_rate_limiter",
+        "time",
+        "enum"
+      ],
+      "key_functions": [
+        "get_tokens_available",
+        "get_capacity",
+        "get_rate_limit_info",
+        "get_success_rate",
+        "get_recent_success_rate",
+        "reset",
+        "get_limiter",
+        "get_all_rate_info",
+        "get_domain_stats",
+        "get_recent_alerts"
+      ],
+      "lines_of_code": 491,
+      "integration_points": []
+    },
+    "game_id_decoder": {
+      "path": "scripts/etl/game_id_decoder.py",
+      "name": "game_id_decoder",
+      "purpose": "No description",
+      "dependencies": [
+        "re",
+        "typing",
+        "pyspark",
+        "datetime"
+      ],
+      "key_functions": [
+        "decode_game_id",
+        "extract_year_from_filename",
+        "get_season_from_game_id",
+        "decode_game_id_udf"
+      ],
+      "lines_of_code": 349,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "hoopr_incremental_simple": {
+      "path": "scripts/etl/hoopr_incremental_simple.py",
+      "name": "hoopr_incremental_simple",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "logging",
+        "pathlib",
+        "datetime",
+        "sportsdataverse",
+        "time",
+        "boto3"
+      ],
+      "key_functions": [
+        "get_date_range",
+        "get_schedule_for_date",
+        "get_play_by_play",
+        "upload_to_s3",
+        "scrape_date",
+        "run",
+        "main"
+      ],
+      "lines_of_code": 222,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "scrape_basketball_reference_tier1": {
+      "path": "scripts/etl/scrape_basketball_reference_tier1.py",
+      "name": "scrape_basketball_reference_tier1",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "re",
+        "json",
+        "logging",
+        "hashlib",
+        "bs4",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "requests",
+        "collections",
+        "time",
+        "urllib",
+        "boto3"
+      ],
+      "key_functions": [
+        "replace_comment",
+        "scrape_player_game_logs",
+        "print_summary",
+        "main"
+      ],
+      "lines_of_code": 565,
+      "integration_points": []
+    },
+    "basketball_reference_daily_box_scores": {
+      "path": "scripts/etl/basketball_reference_daily_box_scores.py",
+      "name": "basketball_reference_daily_box_scores",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "logging",
+        "sqlite3",
+        "datetime",
+        "requests",
+        "subprocess"
+      ],
+      "key_functions": [
+        "get_yesterday",
+        "get_games_from_espn",
+        "determine_season",
+        "insert_games_to_progress_table",
+        "run_box_score_scraper",
+        "main"
+      ],
+      "lines_of_code": 309,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "espn_incremental_simple": {
+      "path": "scripts/etl/espn_incremental_simple.py",
+      "name": "espn_incremental_simple",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "logging",
+        "pathlib",
+        "datetime",
+        "requests",
+        "time",
+        "boto3"
+      ],
+      "key_functions": [
+        "get_date_range",
+        "get_schedule",
+        "get_play_by_play",
+        "upload_to_s3",
+        "scrape_date",
+        "run",
+        "main"
+      ],
+      "lines_of_code": 216,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "scrape_basketball_reference_complete": {
+      "path": "scripts/etl/scrape_basketball_reference_complete.py",
+      "name": "scrape_basketball_reference_complete",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "logging",
+        "basketball_reference_web_scraper",
+        "typing",
+        "pathlib",
+        "datetime",
+        "time",
+        "boto3"
+      ],
+      "key_functions": [
+        "scrape_schedules",
+        "scrape_player_box_scores",
+        "scrape_team_box_scores",
+        "scrape_season_totals",
+        "scrape_advanced_totals",
+        "scrape_standings",
+        "scrape_play_by_play",
+        "main"
+      ],
+      "lines_of_code": 842,
+      "integration_points": []
+    },
+    "phase_1c_historical_agent": {
+      "path": "scripts/etl/phase_1c_historical_agent.py",
+      "name": "phase_1c_historical_agent",
+      "purpose": "No description",
+      "dependencies": [
+        "ssl",
+        "sys",
+        "json",
+        "asyncio",
+        "logging",
+        "config",
+        "aiohttp",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "time"
+      ],
+      "key_functions": [
+        "log_progress",
+        "main"
+      ],
+      "lines_of_code": 317,
+      "integration_points": [
+        "api"
+      ]
+    },
+    "create_possession_panel_with_hoopr_lineups": {
+      "path": "scripts/etl/create_possession_panel_with_hoopr_lineups.py",
+      "name": "create_possession_panel_with_hoopr_lineups",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "traceback",
+        "sys",
+        "re",
+        "logging",
+        "io",
+        "os",
+        "datetime",
+        "numpy",
+        "collections",
+        "time",
+        "psycopg2",
+        "pandas"
+      ],
+      "key_functions": [
+        "initialize_from_hoopr",
+        "update_lineup",
+        "get_current_lineups",
+        "is_end_of_free_throw_sequence",
+        "is_possession_end",
+        "categorize_result",
+        "get_games_to_process",
+        "load_game_events",
+        "process_game",
+        "aggregate_possession"
+      ],
+      "lines_of_code": 916,
+      "integration_points": [
+        "data_processing",
+        "database"
+      ]
+    },
+    "analyze_data_coverage": {
+      "path": "scripts/etl/analyze_data_coverage.py",
+      "name": "analyze_data_coverage",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "json",
+        "logging",
+        "typing",
+        "statistics",
+        "pathlib",
+        "os",
+        "datetime",
+        "collections"
+      ],
+      "key_functions": [
+        "analyze_extracted_data",
+        "get_expected_games_per_season",
+        "identify_coverage_gaps",
+        "analyze_date_distribution",
+        "analyze_team_coverage",
+        "generate_coverage_report",
+        "print_coverage_summary",
+        "main"
+      ],
+      "lines_of_code": 331,
+      "integration_points": []
+    },
+    "scrape_basketball_reference_fixed": {
+      "path": "scripts/etl/scrape_basketball_reference_fixed.py",
+      "name": "scrape_basketball_reference_fixed",
+      "purpose": "No description",
+      "dependencies": [
+        "json",
+        "logging",
+        "pathlib",
+        "requests",
+        "datetime",
+        "time",
+        "random"
+      ],
+      "key_functions": [
+        "rotate_user_agent",
+        "scrape_season_stats",
+        "run"
+      ],
+      "lines_of_code": 142,
+      "integration_points": [
+        "api"
+      ]
+    },
+    "create_possession_panel_from_espn": {
+      "path": "scripts/etl/create_possession_panel_from_espn.py",
+      "name": "create_possession_panel_from_espn",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "traceback",
+        "sys",
+        "logging",
+        "io",
+        "os",
+        "datetime",
+        "numpy",
+        "dotenv",
+        "time",
+        "psycopg2",
+        "pandas"
+      ],
+      "key_functions": [
+        "is_possession_end",
+        "extract_points_from_event",
+        "categorize_result",
+        "get_games_to_process",
+        "load_game_events",
+        "process_game",
+        "aggregate_possession",
+        "build_panel",
+        "write_to_database",
+        "close"
+      ],
+      "lines_of_code": 717,
+      "integration_points": [
+        "data_processing",
+        "database",
+        "feature_engineering"
+      ]
+    },
+    "basketball_reference_pbp_discovery": {
+      "path": "scripts/etl/basketball_reference_pbp_discovery.py",
+      "name": "basketball_reference_pbp_discovery",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "json",
+        "logging",
+        "bs4",
+        "typing",
+        "os",
+        "requests",
+        "datetime",
+        "time",
+        "random"
+      ],
+      "key_functions": [
+        "rate_limit_wait",
+        "get_sample_games_for_season",
+        "check_pbp_for_game",
+        "test_season",
+        "run",
+        "generate_report",
+        "main"
+      ],
+      "lines_of_code": 386,
+      "integration_points": []
+    },
+    "async_scraper_base": {
+      "path": "scripts/etl/async_scraper_base.py",
+      "name": "async_scraper_base",
+      "purpose": "No description",
+      "dependencies": [
+        "ssl",
+        "sys",
+        "dataclasses",
+        "aiofiles",
+        "asyncio",
+        "logging",
+        "json",
+        "hashlib",
+        "aiohttp",
+        "typing",
+        "yaml",
+        "pathlib",
+        "abc",
+        "datetime",
+        "os",
+        "time",
+        "boto3"
+      ],
+      "key_functions": [
+        "success_rate",
+        "elapsed_time",
+        "requests_per_second",
+        "session",
+        "generate_content_hash",
+        "create_config_from_yaml",
+        "create_config_from_env"
+      ],
+      "lines_of_code": 490,
+      "integration_points": []
+    },
+    "scrape_nba_api_player_dashboards": {
+      "path": "scripts/etl/scrape_nba_api_player_dashboards.py",
+      "name": "scrape_nba_api_player_dashboards",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "nba_api",
+        "json",
+        "logging",
+        "typing",
+        "mlflow",
+        "pathlib",
+        "requests",
+        "datetime",
+        "time"
+      ],
+      "key_functions": [
+        "get_all_players",
+        "scrape_player_dashboards",
+        "run"
+      ],
+      "lines_of_code": 278,
+      "integration_points": [
+        "api",
+        "feature_engineering"
+      ]
+    },
+    "scrape_basketball_reference_comprehensive": {
+      "path": "scripts/etl/scrape_basketball_reference_comprehensive.py",
+      "name": "scrape_basketball_reference_comprehensive",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "re",
+        "json",
+        "logging",
+        "bs4",
+        "typing",
+        "pathlib",
+        "datetime",
+        "requests",
+        "collections",
+        "time",
+        "urllib",
+        "boto3"
+      ],
+      "key_functions": [
+        "scrape_draft",
+        "scrape_per_game",
+        "scrape_shooting",
+        "scrape_play_by_play",
+        "scrape_team_ratings",
+        "scrape_playoffs",
+        "scrape_coaches",
+        "scrape_standings_by_date",
+        "scrape_awards",
+        "scrape_season"
+      ],
+      "lines_of_code": 725,
+      "integration_points": []
+    },
+    "phase_1_7_nba_stats_agent": {
+      "path": "scripts/etl/phase_1_7_nba_stats_agent.py",
+      "name": "phase_1_7_nba_stats_agent",
+      "purpose": "No description",
+      "dependencies": [
+        "ssl",
+        "sys",
+        "json",
+        "asyncio",
+        "logging",
+        "aiohttp",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "collections",
+        "time",
+        "pandas"
+      ],
+      "key_functions": [
+        "generate_integration_report",
+        "log_progress",
+        "main"
+      ],
+      "lines_of_code": 499,
+      "integration_points": [
+        "data_processing",
+        "database",
+        "api"
+      ]
+    },
+    "bbref_tier_1_agent": {
+      "path": "scripts/etl/bbref_tier_1_agent.py",
+      "name": "bbref_tier_1_agent",
+      "purpose": "No description",
+      "dependencies": [
+        "ssl",
+        "sys",
+        "re",
+        "json",
+        "asyncio",
+        "logging",
+        "bs4",
+        "aiohttp",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "collections",
+        "time",
+        "pandas"
+      ],
+      "key_functions": [
+        "generate_collection_report",
+        "log_progress",
+        "main"
+      ],
+      "lines_of_code": 589,
+      "integration_points": [
+        "data_processing"
+      ]
+    },
+    "scrape_hoopr_complete_all_endpoints": {
+      "path": "scripts/etl/scrape_hoopr_complete_all_endpoints.py",
+      "name": "scrape_hoopr_complete_all_endpoints",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "pathlib",
+        "tqdm",
+        "datetime",
+        "sportsdataverse",
+        "time",
+        "boto3"
+      ],
+      "key_functions": [
+        "save_json",
+        "upload_to_s3",
+        "call_endpoint_safe",
+        "scrape_bulk_loaders",
+        "scrape_game_endpoints",
+        "scrape_league_endpoints",
+        "scrape_static_endpoints",
+        "scrape_all",
+        "main"
+      ],
+      "lines_of_code": 668,
+      "integration_points": [
+        "api"
+      ]
+    },
+    "basketball_reference_box_score_scraper": {
+      "path": "scripts/etl/basketball_reference_box_score_scraper.py",
+      "name": "basketball_reference_box_score_scraper",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "traceback",
+        "re",
+        "json",
+        "logging",
+        "bs4",
+        "typing",
+        "botocore",
+        "sqlite3",
+        "requests",
+        "datetime",
+        "time",
+        "boto3"
+      ],
+      "key_functions": [
+        "rate_limit_wait",
+        "get_pending_games",
+        "fetch_box_score_page",
+        "parse_box_score",
+        "upload_to_s3_bucket",
+        "load_to_database",
+        "update_scraping_progress",
+        "scrape_game",
+        "run",
+        "cleanup"
+      ],
+      "lines_of_code": 683,
+      "integration_points": [
+        "database",
+        "feature_engineering"
+      ]
+    },
+    "create_glue_etl_job": {
+      "path": "scripts/etl/create_glue_etl_job.py",
+      "name": "create_glue_etl_job",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "os",
+        "boto3"
+      ],
+      "key_functions": [],
+      "lines_of_code": 137,
+      "integration_points": [
+        "database",
+        "api"
+      ]
+    },
+    "scrape_nba_api_playbyplay_only": {
+      "path": "scripts/etl/scrape_nba_api_playbyplay_only.py",
+      "name": "scrape_nba_api_playbyplay_only",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "traceback",
+        "sys",
+        "nba_api",
+        "json",
+        "pathlib",
+        "datetime",
+        "time",
+        "boto3"
+      ],
+      "key_functions": [
+        "get_season_games",
+        "scrape_play_by_play",
+        "save_play_by_play",
+        "upload_to_s3",
+        "scrape_season",
+        "main"
+      ],
+      "lines_of_code": 304,
+      "integration_points": [
+        "api"
+      ]
+    },
+    "scrape_basketball_reference_html": {
+      "path": "scripts/etl/scrape_basketball_reference_html.py",
+      "name": "scrape_basketball_reference_html",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "logging",
+        "bs4",
+        "typing",
+        "pathlib",
+        "datetime",
+        "requests",
+        "time",
+        "urllib",
+        "boto3"
+      ],
+      "key_functions": [
+        "scrape_season",
+        "scrape_range",
+        "main"
+      ],
+      "lines_of_code": 579,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "merge_all_sources": {
+      "path": "scripts/etl/merge_all_sources.py",
+      "name": "merge_all_sources",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "dataclasses",
+        "json",
+        "logging",
+        "boto3",
+        "typing",
+        "sqlite3",
+        "pathlib",
+        "os",
+        "datetime",
+        "numpy",
+        "psycopg2",
+        "pandas"
+      ],
+      "key_functions": [
+        "extract_espn_data",
+        "extract_nba_stats_data",
+        "extract_hoopr_data",
+        "extract_basketball_reference_data",
+        "extract_kaggle_data",
+        "transform_and_load_players",
+        "transform_and_load_teams",
+        "process_season",
+        "process_all_seasons",
+        "main"
+      ],
+      "lines_of_code": 742,
+      "integration_points": [
+        "data_processing",
+        "database"
+      ]
+    },
+    "validate_espn_pbp_files": {
+      "path": "scripts/etl/validate_espn_pbp_files.py",
+      "name": "validate_espn_pbp_files",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "logging",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "concurrent",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "get_db_connection",
+        "init_database",
+        "determine_nba_season",
+        "validate_file",
+        "store_validation_results",
+        "save_validation_report",
+        "process_files_batch",
+        "main"
+      ],
+      "lines_of_code": 442,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "create_player_id_mapping": {
+      "path": "scripts/etl/create_player_id_mapping.py",
+      "name": "create_player_id_mapping",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "logging",
+        "pathlib",
+        "os",
+        "datetime",
+        "psycopg2",
+        "pandas",
+        "difflib"
+      ],
+      "key_functions": [
+        "string_similarity",
+        "normalize_name",
+        "extract_espn_players",
+        "get_nba_api_games_with_players",
+        "match_games_by_date_teams",
+        "match_players_within_games",
+        "create_mapping_table",
+        "main"
+      ],
+      "lines_of_code": 500,
+      "integration_points": [
+        "data_processing",
+        "database"
+      ]
+    },
+    "master_data_collection_agent": {
+      "path": "scripts/etl/master_data_collection_agent.py",
+      "name": "master_data_collection_agent",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "nba_api",
+        "json",
+        "asyncio",
+        "logging",
+        "typing",
+        "psutil",
+        "subprocess",
+        "pathlib",
+        "os",
+        "datetime",
+        "requests",
+        "time",
+        "random"
+      ],
+      "key_functions": [
+        "load_status",
+        "save_status",
+        "create_phase_script",
+        "get_all_players",
+        "scrape_player_dashboards",
+        "run",
+        "get_all_players",
+        "scrape_player_tracking",
+        "run",
+        "get_all_teams"
+      ],
+      "lines_of_code": 1395,
+      "integration_points": [
+        "api",
+        "feature_engineering"
+      ]
+    },
+    "build_unified_database": {
+      "path": "scripts/etl/build_unified_database.py",
+      "name": "build_unified_database",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "json",
+        "typing",
+        "sqlite3",
+        "pathlib",
+        "datetime",
+        "collections"
+      ],
+      "key_functions": [
+        "load_game_mapping",
+        "get_all_unique_games",
+        "calculate_quality_score",
+        "populate_source_coverage",
+        "populate_quality_scores",
+        "print_summary",
+        "main"
+      ],
+      "lines_of_code": 446,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "scrape_nba_api_game_advanced": {
+      "path": "scripts/etl/scrape_nba_api_game_advanced.py",
+      "name": "scrape_nba_api_game_advanced",
+      "purpose": "No description",
+      "dependencies": [
+        "nba_api",
+        "json",
+        "logging",
+        "typing",
+        "mlflow",
+        "pathlib",
+        "requests",
+        "datetime",
+        "time"
+      ],
+      "key_functions": [
+        "get_games_for_season",
+        "scrape_game_advanced",
+        "run"
+      ],
+      "lines_of_code": 260,
+      "integration_points": [
+        "api",
+        "feature_engineering"
+      ]
+    },
+    "integrate_basketball_reference": {
+      "path": "scripts/etl/integrate_basketball_reference.py",
+      "name": "integrate_basketball_reference",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "json",
+        "typing",
+        "sqlite3",
+        "pathlib",
+        "datetime",
+        "collections",
+        "boto3"
+      ],
+      "key_functions": [
+        "download_schedules_from_s3",
+        "create_bbref_database",
+        "parse_team_name",
+        "load_schedules_to_database",
+        "run_data_quality_checks",
+        "integrate_into_unified_database",
+        "main"
+      ],
+      "lines_of_code": 526,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "basketball_reference_async_scraper": {
+      "path": "scripts/etl/basketball_reference_async_scraper.py",
+      "name": "basketball_reference_async_scraper",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "asyncio",
+        "logging",
+        "typing",
+        "pathlib",
+        "scripts",
+        "datetime",
+        "time"
+      ],
+      "key_functions": [],
+      "lines_of_code": 410,
+      "integration_points": []
+    },
+    "scrape_kaggle_database_expansion": {
+      "path": "scripts/etl/scrape_kaggle_database_expansion.py",
+      "name": "scrape_kaggle_database_expansion",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "typing",
+        "sqlite3",
+        "pathlib",
+        "os",
+        "datetime",
+        "pandas"
+      ],
+      "key_functions": [
+        "get_table_info",
+        "extract_table",
+        "extract_all_missing_tables",
+        "main"
+      ],
+      "lines_of_code": 324,
+      "integration_points": [
+        "data_processing",
+        "database",
+        "feature_engineering"
+      ]
+    },
+    "intelligent_extraction": {
+      "path": "scripts/etl/intelligent_extraction.py",
+      "name": "intelligent_extraction",
+      "purpose": "No description",
+      "dependencies": [
+        "re",
+        "dataclasses",
+        "sys",
+        "asyncio",
+        "json",
+        "logging",
+        "jsonschema",
+        "bs4",
+        "typing",
+        "intelligent_extraction",
+        "pathlib",
+        "abc",
+        "datetime",
+        "google"
+      ],
+      "key_functions": [
+        "validate_data",
+        "add_strategy"
+      ],
+      "lines_of_code": 796,
+      "integration_points": [
+        "machine_learning"
+      ]
+    },
+    "validate_lineup_tracking": {
+      "path": "scripts/etl/validate_lineup_tracking.py",
+      "name": "validate_lineup_tracking",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "json",
+        "logging",
+        "pathlib",
+        "collections",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "load_play_by_play_events",
+        "get_event_participants",
+        "validate_possession_lineups",
+        "update_database_with_results",
+        "main"
+      ],
+      "lines_of_code": 280,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "espn_incremental_scraper": {
+      "path": "scripts/etl/espn_incremental_scraper.py",
+      "name": "espn_incremental_scraper",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "sqlite3",
+        "pathlib",
+        "requests",
+        "datetime",
+        "time"
+      ],
+      "key_functions": [
+        "get_latest_game_date",
+        "get_schedule",
+        "get_play_by_play",
+        "game_exists",
+        "load_game_to_db",
+        "scrape_incremental",
+        "main"
+      ],
+      "lines_of_code": 426,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "scrape_espn_additional": {
+      "path": "scripts/etl/scrape_espn_additional.py",
+      "name": "scrape_espn_additional",
+      "purpose": "No description",
+      "dependencies": [
+        "json",
+        "logging",
+        "pathlib",
+        "requests",
+        "datetime",
+        "time"
+      ],
+      "key_functions": [
+        "scrape_espn_endpoints",
+        "run"
+      ],
+      "lines_of_code": 158,
+      "integration_points": [
+        "api"
+      ]
+    },
+    "nba_api_reverse_scraper": {
+      "path": "scripts/etl/nba_api_reverse_scraper.py",
+      "name": "nba_api_reverse_scraper",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "traceback",
+        "sys",
+        "nba_api",
+        "json",
+        "pathlib",
+        "datetime",
+        "time",
+        "boto3"
+      ],
+      "key_functions": [
+        "scrape_season_reverse",
+        "scrape_reverse_chronological",
+        "print_statistics",
+        "main"
+      ],
+      "lines_of_code": 330,
+      "integration_points": [
+        "api"
+      ]
+    },
+    "extract_boxscores_local": {
+      "path": "scripts/etl/extract_boxscores_local.py",
+      "name": "extract_boxscores_local",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "typing",
+        "os",
+        "datetime",
+        "psycopg2",
+        "boto3"
+      ],
+      "key_functions": [
+        "validate_environment",
+        "safe_int",
+        "parse_percentage",
+        "parse_minutes",
+        "parse_datetime",
+        "get_team_stats",
+        "extract_game_info",
+        "extract_player_stats",
+        "get_game_ids_for_year",
+        "process_year"
+      ],
+      "lines_of_code": 573,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "extract_schedule_local": {
+      "path": "scripts/etl/extract_schedule_local.py",
+      "name": "extract_schedule_local",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "typing",
+        "os",
+        "datetime",
+        "psycopg2",
+        "boto3"
+      ],
+      "key_functions": [
+        "validate_environment",
+        "get_s3_files_for_year",
+        "extract_teams_data",
+        "extract_game_data",
+        "process_year",
+        "main"
+      ],
+      "lines_of_code": 636,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "modular_tools": {
+      "path": "scripts/etl/modular_tools.py",
+      "name": "modular_tools",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "dataclasses",
+        "asyncio",
+        "json",
+        "aiofiles",
+        "logging",
+        "aiohttp",
+        "typing",
+        "pathlib",
+        "abc",
+        "modular_tools",
+        "datetime",
+        "scripts",
+        "time",
+        "boto3"
+      ],
+      "key_functions": [
+        "get_stats",
+        "get_all_checkpoints",
+        "get_all_stats"
+      ],
+      "lines_of_code": 661,
+      "integration_points": []
+    },
+    "build_master_game_list_robust": {
+      "path": "scripts/etl/build_master_game_list_robust.py",
+      "name": "build_master_game_list_robust",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "re",
+        "logging",
+        "bs4",
+        "sqlite3",
+        "requests",
+        "datetime",
+        "time"
+      ],
+      "key_functions": [
+        "rate_limit_wait",
+        "get_priority_for_season",
+        "get_league_abbr",
+        "extract_game_id_from_url",
+        "parse_date_from_game_id",
+        "scrape_month_schedule",
+        "scrape_season_schedule",
+        "insert_games",
+        "run",
+        "cleanup"
+      ],
+      "lines_of_code": 472,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "scraper_telemetry": {
+      "path": "scripts/etl/scraper_telemetry.py",
+      "name": "scraper_telemetry",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "dataclasses",
+        "uuid",
+        "json",
+        "asyncio",
+        "logging",
+        "boto3",
+        "prometheus_client",
+        "typing",
+        "scraper_telemetry",
+        "contextlib",
+        "pathlib",
+        "datetime",
+        "time",
+        "enum"
+      ],
+      "key_functions": [
+        "to_dict",
+        "success_rate",
+        "elapsed_time",
+        "throughput_items_per_second",
+        "validation_pass_rate",
+        "duplicate_rate",
+        "record_request",
+        "record_data_item",
+        "record_data_stored",
+        "record_error"
+      ],
+      "lines_of_code": 606,
+      "integration_points": [
+        "api"
+      ]
+    },
+    "phase_9_2_hoopr_agent": {
+      "path": "scripts/etl/phase_9_2_hoopr_agent.py",
+      "name": "phase_9_2_hoopr_agent",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "json",
+        "asyncio",
+        "logging",
+        "typing",
+        "subprocess",
+        "pathlib",
+        "os",
+        "datetime",
+        "collections",
+        "time",
+        "psycopg2",
+        "pandas"
+      ],
+      "key_functions": [
+        "connect_to_database",
+        "generate_processing_report",
+        "log_progress",
+        "main"
+      ],
+      "lines_of_code": 414,
+      "integration_points": [
+        "data_processing",
+        "database"
+      ]
+    },
+    "glue_etl_extract_schedule": {
+      "path": "scripts/etl/glue_etl_extract_schedule.py",
+      "name": "glue_etl_extract_schedule",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "pyspark",
+        "awsglue"
+      ],
+      "key_functions": [
+        "extract_games"
+      ],
+      "lines_of_code": 237,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "extract_espn_local_to_temporal_v2": {
+      "path": "scripts/etl/extract_espn_local_to_temporal_v2.py",
+      "name": "extract_espn_local_to_temporal_v2",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "json",
+        "typing",
+        "pathlib",
+        "datetime",
+        "pandas"
+      ],
+      "key_functions": [
+        "parse_espn_pbp_file",
+        "extract_players_from_box_score",
+        "process_all_espn_data",
+        "main"
+      ],
+      "lines_of_code": 324,
+      "integration_points": [
+        "data_processing"
+      ]
+    },
+    "create_possession_panel_with_lineups": {
+      "path": "scripts/etl/create_possession_panel_with_lineups.py",
+      "name": "create_possession_panel_with_lineups",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "traceback",
+        "json",
+        "logging",
+        "pathlib",
+        "os",
+        "datetime",
+        "collections",
+        "psycopg2",
+        "pandas",
+        "sqlalchemy"
+      ],
+      "key_functions": [
+        "process_substitution",
+        "set_starting_lineup",
+        "get_lineup",
+        "get_lineup_hash",
+        "load_starting_lineups_from_boxscore",
+        "infer_starting_lineups",
+        "extract_possessions_with_lineups",
+        "is_possession_end",
+        "categorize_result",
+        "main"
+      ],
+      "lines_of_code": 698,
+      "integration_points": [
+        "data_processing",
+        "database",
+        "feature_engineering"
+      ]
+    },
+    "fixed_espn_scraper": {
+      "path": "scripts/etl/fixed_espn_scraper.py",
+      "name": "fixed_espn_scraper",
+      "purpose": "No description",
+      "dependencies": [
+        "ssl",
+        "json",
+        "logging",
+        "typing",
+        "pathlib",
+        "urllib3",
+        "requests",
+        "time"
+      ],
+      "key_functions": [
+        "test_connectivity",
+        "test_playbyplay_endpoint",
+        "scrape_game_playbyplay",
+        "scrape_failed_games",
+        "run_comprehensive_test",
+        "main"
+      ],
+      "lines_of_code": 420,
+      "integration_points": [
+        "api"
+      ]
+    },
+    "scrape_basketball_reference_additional": {
+      "path": "scripts/etl/scrape_basketball_reference_additional.py",
+      "name": "scrape_basketball_reference_additional",
+      "purpose": "No description",
+      "dependencies": [
+        "json",
+        "logging",
+        "pathlib",
+        "requests",
+        "datetime",
+        "time",
+        "random"
+      ],
+      "key_functions": [
+        "rotate_user_agent",
+        "scrape_additional_endpoints",
+        "run"
+      ],
+      "lines_of_code": 134,
+      "integration_points": [
+        "api"
+      ]
+    },
+    "complete_schema_update": {
+      "path": "scripts/etl/complete_schema_update.py",
+      "name": "complete_schema_update",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "psycopg2",
+        "os"
+      ],
+      "key_functions": [
+        "get_existing_columns",
+        "main"
+      ],
+      "lines_of_code": 147,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "scrape_nba_lineups": {
+      "path": "scripts/etl/scrape_nba_lineups.py",
+      "name": "scrape_nba_lineups",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "nba_api",
+        "json",
+        "logging",
+        "pathlib",
+        "datetime",
+        "time"
+      ],
+      "key_functions": [
+        "scrape_season_lineups",
+        "scrape_all_seasons",
+        "get_game_lineups",
+        "parse_lineup_string",
+        "main"
+      ],
+      "lines_of_code": 262,
+      "integration_points": [
+        "api"
+      ]
+    },
+    "phase_1_11_deduplication_agent": {
+      "path": "scripts/etl/phase_1_11_deduplication_agent.py",
+      "name": "phase_1_11_deduplication_agent",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "json",
+        "asyncio",
+        "logging",
+        "hashlib",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "collections",
+        "time",
+        "psycopg2",
+        "pandas"
+      ],
+      "key_functions": [
+        "connect_to_database",
+        "load_data_from_sources",
+        "identify_duplicates",
+        "resolve_conflicts",
+        "generate_deduplication_report",
+        "log_progress",
+        "main"
+      ],
+      "lines_of_code": 557,
+      "integration_points": [
+        "data_processing",
+        "database"
+      ]
+    },
+    "basketball_reference_incremental_scraper": {
+      "path": "scripts/etl/basketball_reference_incremental_scraper.py",
+      "name": "basketball_reference_incremental_scraper",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "logging",
+        "basketball_reference_web_scraper",
+        "typing",
+        "pathlib",
+        "datetime",
+        "time",
+        "boto3"
+      ],
+      "key_functions": [
+        "get_current_season",
+        "scrape_season_totals",
+        "scrape_advanced_totals",
+        "scrape_incremental",
+        "main"
+      ],
+      "lines_of_code": 405,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "verify_local_cloud_sync": {
+      "path": "scripts/utils/verify_local_cloud_sync.py",
+      "name": "verify_local_cloud_sync",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "traceback",
+        "sys",
+        "json",
+        "hashlib",
+        "typing",
+        "pathlib",
+        "datetime",
+        "subprocess"
+      ],
+      "key_functions": [
+        "verify_all",
+        "main"
+      ],
+      "lines_of_code": 557,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "compare_espn_hoopr_local": {
+      "path": "scripts/utils/compare_espn_hoopr_local.py",
+      "name": "compare_espn_hoopr_local",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "traceback",
+        "sys",
+        "typing",
+        "sqlite3",
+        "pathlib",
+        "os",
+        "datetime"
+      ],
+      "key_functions": [
+        "connect_databases",
+        "compare_summary",
+        "detailed_comparison",
+        "export_report",
+        "close_connections",
+        "main"
+      ],
+      "lines_of_code": 635,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "compare_espn_databases": {
+      "path": "scripts/utils/compare_espn_databases.py",
+      "name": "compare_espn_databases",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "traceback",
+        "sys",
+        "typing",
+        "sqlite3",
+        "os",
+        "datetime",
+        "dotenv",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "connect_local",
+        "connect_rds",
+        "get_local_statistics",
+        "get_rds_statistics",
+        "compare_databases_summary",
+        "compare_databases",
+        "detailed_comparison",
+        "export_missing_games",
+        "close_connections",
+        "main"
+      ],
+      "lines_of_code": 545,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "generate_scraper_docs": {
+      "path": "scripts/utils/generate_scraper_docs.py",
+      "name": "generate_scraper_docs",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "re",
+        "dataclasses",
+        "sys",
+        "json",
+        "logging",
+        "typing",
+        "inspect",
+        "ast",
+        "pathlib",
+        "os",
+        "datetime"
+      ],
+      "key_functions": [
+        "extract_module_doc",
+        "generate_module_doc",
+        "generate_module_doc",
+        "generate_all_docs"
+      ],
+      "lines_of_code": 636,
+      "integration_points": []
+    },
+    "validate_nba_api_files": {
+      "path": "scripts/utils/validate_nba_api_files.py",
+      "name": "validate_nba_api_files",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "typing",
+        "pathlib"
+      ],
+      "key_functions": [
+        "log",
+        "validate_json_file",
+        "validate_season_files",
+        "delete_invalid_files",
+        "print_summary",
+        "main"
+      ],
+      "lines_of_code": 306,
+      "integration_points": [
+        "api",
+        "feature_engineering"
+      ]
+    },
+    "update_data_catalog": {
+      "path": "scripts/utils/update_data_catalog.py",
+      "name": "update_data_catalog",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "re",
+        "sys",
+        "various",
+        "typing",
+        "sqlite3",
+        "os",
+        "datetime",
+        "subprocess"
+      ],
+      "key_functions": [
+        "load_catalog",
+        "save_catalog",
+        "update_field",
+        "update_last_updated",
+        "get_espn_statistics",
+        "update_espn_statistics",
+        "get_s3_statistics",
+        "verify_catalog_consistency",
+        "update_hoopr_progress",
+        "refresh_all_sources"
+      ],
+      "lines_of_code": 517,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "cross_validate_espn_hoopr_with_mapping": {
+      "path": "scripts/utils/cross_validate_espn_hoopr_with_mapping.py",
+      "name": "cross_validate_espn_hoopr_with_mapping",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "json",
+        "sqlite3",
+        "pathlib",
+        "datetime",
+        "collections",
+        "csv"
+      ],
+      "key_functions": [
+        "load_mapping",
+        "get_espn_games",
+        "get_hoopr_games",
+        "identify_gaps",
+        "identify_discrepancies",
+        "export_gaps",
+        "print_summary",
+        "main"
+      ],
+      "lines_of_code": 444,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "train_models_with_mlops": {
+      "path": "scripts/ml/train_models_with_mlops.py",
+      "name": "train_models_with_mlops",
+      "purpose": "No description",
+      "dependencies": [
+        "implement_ml_systems_2",
+        "sys",
+        "sklearn",
+        "xgboost",
+        "mlflow",
+        "implement_ml_systems_1",
+        "io",
+        "os",
+        "datetime",
+        "numpy",
+        "lightgbm",
+        "pickle",
+        "boto3",
+        "pandas"
+      ],
+      "key_functions": [
+        "setup_mlops",
+        "load_data",
+        "check_test_drift",
+        "scale_features",
+        "train_model",
+        "train_all_models",
+        "compare_and_register_models",
+        "save_to_s3",
+        "print_summary",
+        "run"
+      ],
+      "lines_of_code": 512,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "unified_feature_extractor": {
+      "path": "scripts/ml/unified_feature_extractor.py",
+      "name": "unified_feature_extractor",
+      "purpose": "No description",
+      "dependencies": [
+        "dataclasses",
+        "json",
+        "logging",
+        "typing",
+        "pathlib",
+        "scripts",
+        "datetime",
+        "numpy",
+        "boto3",
+        "pandas"
+      ],
+      "key_functions": [
+        "extract_espn_features",
+        "extract_nba_stats_features",
+        "extract_hoopr_features",
+        "extract_bref_features",
+        "calculate_derived_features",
+        "extract_all_features",
+        "main"
+      ],
+      "lines_of_code": 727,
+      "integration_points": [
+        "data_processing",
+        "feature_engineering"
+      ]
+    },
+    "monitoring_dashboard": {
+      "path": "scripts/ml/monitoring_dashboard.py",
+      "name": "monitoring_dashboard",
+      "purpose": "No description",
+      "dependencies": [
+        "sklearn",
+        "warnings",
+        "mlflow",
+        "datetime",
+        "numpy",
+        "pickle",
+        "pandas"
+      ],
+      "key_functions": [
+        "evaluate_performance",
+        "check_feature_drift",
+        "generate_report",
+        "main"
+      ],
+      "lines_of_code": 257,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "train_model_for_predictions": {
+      "path": "scripts/ml/train_model_for_predictions.py",
+      "name": "train_model_for_predictions",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "sklearn",
+        "warnings",
+        "mlflow",
+        "scripts",
+        "datetime",
+        "numpy",
+        "pickle",
+        "pandas"
+      ],
+      "key_functions": [
+        "load_historical_games_with_outcomes",
+        "prepare_training_features",
+        "train_model",
+        "save_model",
+        "main"
+      ],
+      "lines_of_code": 360,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "feature_selection": {
+      "path": "scripts/ml/feature_selection.py",
+      "name": "feature_selection",
+      "purpose": "No description",
+      "dependencies": [
+        "sklearn",
+        "pandas",
+        "matplotlib",
+        "numpy"
+      ],
+      "key_functions": [],
+      "lines_of_code": 233,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "temporal_cross_validation": {
+      "path": "scripts/ml/temporal_cross_validation.py",
+      "name": "temporal_cross_validation",
+      "purpose": "No description",
+      "dependencies": [
+        "sklearn",
+        "warnings",
+        "pandas",
+        "numpy"
+      ],
+      "key_functions": [],
+      "lines_of_code": 242,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "feature_store": {
+      "path": "scripts/ml/feature_store.py",
+      "name": "feature_store",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "dataclasses",
+        "json",
+        "logging",
+        "hashlib",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "numpy",
+        "enum",
+        "pandas"
+      ],
+      "key_functions": [
+        "to_dict",
+        "add_feature",
+        "to_dict",
+        "register_feature_group",
+        "write_offline_features",
+        "read_offline_features",
+        "write_online_features",
+        "read_online_features",
+        "get_point_in_time_features",
+        "get_feature_stats"
+      ],
+      "lines_of_code": 703,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "feature_engineering"
+      ]
+    },
+    "mlflow_tracker": {
+      "path": "scripts/ml/mlflow_tracker.py",
+      "name": "mlflow_tracker",
+      "purpose": "No description",
+      "dependencies": [
+        "logging",
+        "pathlib",
+        "mlflow",
+        "typing"
+      ],
+      "key_functions": [
+        "setup",
+        "start_run",
+        "log_params",
+        "log_metrics",
+        "log_artifact",
+        "log_model",
+        "register_model",
+        "load_model"
+      ],
+      "lines_of_code": 94,
+      "integration_points": [
+        "machine_learning"
+      ]
+    },
+    "model_explainability": {
+      "path": "scripts/ml/model_explainability.py",
+      "name": "model_explainability",
+      "purpose": "No description",
+      "dependencies": [
+        "dataclasses",
+        "json",
+        "logging",
+        "warnings",
+        "sklearn",
+        "typing",
+        "pathlib",
+        "datetime",
+        "numpy",
+        "time",
+        "pandas"
+      ],
+      "key_functions": [
+        "to_dict",
+        "to_dict",
+        "to_dict",
+        "permutation_importance",
+        "scoring_func",
+        "explain_instance",
+        "detect_interactions",
+        "partial_dependence",
+        "export_explanations",
+        "demo_model_explainability"
+      ],
+      "lines_of_code": 542,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "predict_upcoming_games": {
+      "path": "scripts/ml/predict_upcoming_games.py",
+      "name": "predict_upcoming_games",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "sklearn",
+        "warnings",
+        "typing",
+        "mlflow",
+        "os",
+        "datetime",
+        "numpy",
+        "pickle",
+        "pandas"
+      ],
+      "key_functions": [
+        "predict_game",
+        "predict_all_games",
+        "format_predictions_table",
+        "main"
+      ],
+      "lines_of_code": 368,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "generate_features": {
+      "path": "scripts/ml/generate_features.py",
+      "name": "generate_features",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "tempfile",
+        "pandas",
+        "os",
+        "datetime",
+        "numpy",
+        "psycopg2",
+        "boto3",
+        "sqlalchemy"
+      ],
+      "key_functions": [
+        "main",
+        "calculate_rolling_stats",
+        "calculate_rest_days"
+      ],
+      "lines_of_code": 385,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "database",
+        "feature_engineering"
+      ]
+    },
+    "train_models_with_panel_features": {
+      "path": "scripts/ml/train_models_with_panel_features.py",
+      "name": "train_models_with_panel_features",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "implement_rec_11",
+        "implement_consolidated_ml_systems_2",
+        "sklearn",
+        "xgboost",
+        "implement_rec_22",
+        "mlflow",
+        "io",
+        "os",
+        "datetime",
+        "numpy",
+        "lightgbm",
+        "pickle",
+        "implement_consolidated_ml_systems_1",
+        "boto3",
+        "pandas"
+      ],
+      "key_functions": [
+        "setup_mlops",
+        "create_panel_features",
+        "prepare_ml_data",
+        "check_test_drift",
+        "scale_features",
+        "train_model",
+        "train_all_models",
+        "compare_results",
+        "save_to_s3",
+        "print_summary"
+      ],
+      "lines_of_code": 678,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "prediction_api": {
+      "path": "scripts/ml/prediction_api.py",
+      "name": "prediction_api",
+      "purpose": "No description",
+      "dependencies": [
+        "flask",
+        "json",
+        "mlflow",
+        "datetime",
+        "numpy",
+        "pickle",
+        "pandas"
+      ],
+      "key_functions": [
+        "load_model_artifacts",
+        "health",
+        "model_info",
+        "predict",
+        "predict_batch",
+        "predict_single_game"
+      ],
+      "lines_of_code": 281,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "api",
+        "feature_engineering"
+      ]
+    },
+    "export_model_coefficients": {
+      "path": "scripts/ml/export_model_coefficients.py",
+      "name": "export_model_coefficients",
+      "purpose": "No description",
+      "dependencies": [
+        "json",
+        "io",
+        "numpy",
+        "pickle",
+        "boto3"
+      ],
+      "key_functions": [
+        "load_model_from_s3",
+        "export_coefficients"
+      ],
+      "lines_of_code": 97,
+      "integration_points": [
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "cross_validation_strategies": {
+      "path": "scripts/ml/cross_validation_strategies.py",
+      "name": "cross_validation_strategies",
+      "purpose": "No description",
+      "dependencies": [
+        "dataclasses",
+        "json",
+        "logging",
+        "warnings",
+        "sklearn",
+        "typing",
+        "pathlib",
+        "datetime",
+        "numpy",
+        "time",
+        "pandas"
+      ],
+      "key_functions": [
+        "to_dict",
+        "time_series_cv",
+        "blocked_time_series_cv",
+        "group_kfold_cv",
+        "stratified_kfold_cv",
+        "leave_one_group_out_cv",
+        "compare_strategies",
+        "export_results",
+        "demo_cv_strategies"
+      ],
+      "lines_of_code": 556,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "feature_engineering"
+      ]
+    },
+    "validate_predictions": {
+      "path": "scripts/ml/validate_predictions.py",
+      "name": "validate_predictions",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "typing",
+        "os",
+        "datetime",
+        "requests",
+        "pandas"
+      ],
+      "key_functions": [
+        "fetch_actual_results",
+        "validate_predictions",
+        "generate_report",
+        "main"
+      ],
+      "lines_of_code": 359,
+      "integration_points": [
+        "data_processing",
+        "prediction"
+      ]
+    },
+    "model_interpretability": {
+      "path": "scripts/ml/model_interpretability.py",
+      "name": "model_interpretability",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "shap",
+        "json",
+        "matplotlib",
+        "logging",
+        "sklearn",
+        "typing",
+        "mlflow",
+        "pathlib",
+        "os",
+        "datetime",
+        "numpy",
+        "joblib",
+        "pandas"
+      ],
+      "key_functions": [
+        "compute_feature_importance",
+        "compute_shap_values",
+        "compute_partial_dependence",
+        "explain_prediction",
+        "generate_report",
+        "main"
+      ],
+      "lines_of_code": 745,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "mlflow_setup": {
+      "path": "scripts/ml/mlflow_setup.py",
+      "name": "mlflow_setup",
+      "purpose": "No description",
+      "dependencies": [
+        "sklearn",
+        "warnings",
+        "mlflow",
+        "numpy",
+        "pickle",
+        "pandas"
+      ],
+      "key_functions": [],
+      "lines_of_code": 210,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "prepare_upcoming_game_features": {
+      "path": "scripts/ml/prepare_upcoming_game_features.py",
+      "name": "prepare_upcoming_game_features",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "warnings",
+        "typing",
+        "numpy",
+        "pandas"
+      ],
+      "key_functions": [
+        "create_panel_features",
+        "get_team_roster_mapping",
+        "prepare_game_features",
+        "main"
+      ],
+      "lines_of_code": 417,
+      "integration_points": [
+        "data_processing",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "add_contextual_features": {
+      "path": "scripts/ml/add_contextual_features.py",
+      "name": "add_contextual_features",
+      "purpose": "No description",
+      "dependencies": [
+        "pandas",
+        "datetime",
+        "numpy"
+      ],
+      "key_functions": [],
+      "lines_of_code": 263,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "feature_engineering"
+      ]
+    },
+    "improved_feature_aggregation": {
+      "path": "scripts/ml/improved_feature_aggregation.py",
+      "name": "improved_feature_aggregation",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "os",
+        "datetime",
+        "numpy",
+        "importlib",
+        "pandas"
+      ],
+      "key_functions": [],
+      "lines_of_code": 244,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "train_models": {
+      "path": "scripts/ml/train_models.py",
+      "name": "train_models",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "sklearn",
+        "xgboost",
+        "io",
+        "os",
+        "datetime",
+        "numpy",
+        "lightgbm",
+        "pickle",
+        "boto3",
+        "pandas"
+      ],
+      "key_functions": [
+        "main"
+      ],
+      "lines_of_code": 286,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "model_calibration": {
+      "path": "scripts/ml/model_calibration.py",
+      "name": "model_calibration",
+      "purpose": "No description",
+      "dependencies": [
+        "dataclasses",
+        "json",
+        "logging",
+        "warnings",
+        "sklearn",
+        "typing",
+        "pathlib",
+        "scipy",
+        "datetime",
+        "numpy",
+        "time",
+        "pandas"
+      ],
+      "key_functions": [
+        "to_dict",
+        "compute_calibration_metrics",
+        "platt_scaling",
+        "isotonic_calibration",
+        "temperature_scaling",
+        "sigmoid",
+        "nll_loss",
+        "analyze_calibration",
+        "export_results",
+        "demo_model_calibration"
+      ],
+      "lines_of_code": 540,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "learning_curves": {
+      "path": "scripts/ml/learning_curves.py",
+      "name": "learning_curves",
+      "purpose": "No description",
+      "dependencies": [
+        "dataclasses",
+        "json",
+        "logging",
+        "warnings",
+        "sklearn",
+        "typing",
+        "pathlib",
+        "datetime",
+        "numpy",
+        "time",
+        "pandas"
+      ],
+      "key_functions": [
+        "to_dict",
+        "to_dict",
+        "compute_learning_curve",
+        "compute_validation_curve",
+        "analyze_model_complexity",
+        "estimate_sample_size_requirement",
+        "export_results",
+        "demo_learning_curves"
+      ],
+      "lines_of_code": 542,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "feature_engineering"
+      ]
+    },
+    "fetch_recent_player_data": {
+      "path": "scripts/ml/fetch_recent_player_data.py",
+      "name": "fetch_recent_player_data",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "typing",
+        "botocore",
+        "pyarrow",
+        "datetime",
+        "boto3",
+        "pandas"
+      ],
+      "key_functions": [
+        "fetch_from_hoopr",
+        "get_active_rosters",
+        "aggregate_player_stats",
+        "prepare_panel_ready_data",
+        "main"
+      ],
+      "lines_of_code": 342,
+      "integration_points": [
+        "data_processing",
+        "feature_engineering"
+      ]
+    },
+    "test_temporal_queries": {
+      "path": "scripts/ml/test_temporal_queries.py",
+      "name": "test_temporal_queries",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "os",
+        "datetime",
+        "numpy",
+        "importlib",
+        "pandas"
+      ],
+      "key_functions": [],
+      "lines_of_code": 141,
+      "integration_points": [
+        "data_processing"
+      ]
+    },
+    "model_interpretation": {
+      "path": "scripts/ml/model_interpretation.py",
+      "name": "model_interpretation",
+      "purpose": "No description",
+      "dependencies": [
+        "dataclasses",
+        "json",
+        "logging",
+        "warnings",
+        "sklearn",
+        "typing",
+        "pathlib",
+        "datetime",
+        "numpy",
+        "time",
+        "pandas"
+      ],
+      "key_functions": [
+        "to_dict",
+        "to_dict",
+        "permutation_importance",
+        "partial_dependence",
+        "feature_interaction",
+        "explain_prediction",
+        "global_feature_importance",
+        "export_results",
+        "demo_model_interpretation"
+      ],
+      "lines_of_code": 499,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "automated_retraining_pipeline": {
+      "path": "scripts/ml/automated_retraining_pipeline.py",
+      "name": "automated_retraining_pipeline",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "logging",
+        "typing",
+        "mlflow",
+        "pathlib",
+        "os",
+        "datetime",
+        "numpy",
+        "importlib",
+        "time",
+        "pandas"
+      ],
+      "key_functions": [
+        "should_retrain",
+        "retrain_model",
+        "run_daemon",
+        "main"
+      ],
+      "lines_of_code": 608,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "database",
+        "feature_engineering"
+      ]
+    },
+    "error_analysis": {
+      "path": "scripts/ml/error_analysis.py",
+      "name": "error_analysis",
+      "purpose": "No description",
+      "dependencies": [
+        "dataclasses",
+        "json",
+        "logging",
+        "warnings",
+        "typing",
+        "pathlib",
+        "datetime",
+        "numpy",
+        "collections",
+        "time",
+        "pandas"
+      ],
+      "key_functions": [
+        "to_dict",
+        "to_dict",
+        "to_dict",
+        "analyze_confusion_matrix",
+        "detect_error_patterns",
+        "segment_errors",
+        "analyze_confidence",
+        "generate_recommendations",
+        "analyze_errors",
+        "export_results"
+      ],
+      "lines_of_code": 701,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "phase_2_train_models": {
+      "path": "scripts/ml/phase_2_train_models.py",
+      "name": "phase_2_train_models",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "sklearn",
+        "warnings",
+        "mlflow",
+        "implement_rec_22",
+        "datetime",
+        "numpy",
+        "pickle",
+        "time",
+        "pandas"
+      ],
+      "key_functions": [],
+      "lines_of_code": 203,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "train_models_with_panel_features_simplified": {
+      "path": "scripts/ml/train_models_with_panel_features_simplified.py",
+      "name": "train_models_with_panel_features_simplified",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "implement_rec_11",
+        "sklearn",
+        "xgboost",
+        "mlflow",
+        "implement_rec_22",
+        "io",
+        "scipy",
+        "os",
+        "datetime",
+        "numpy",
+        "lightgbm",
+        "pickle",
+        "boto3",
+        "pandas"
+      ],
+      "key_functions": [
+        "setup_mlops",
+        "create_panel_features",
+        "prepare_ml_data",
+        "check_test_drift",
+        "scale_features",
+        "train_model",
+        "train_all_models",
+        "compare_results",
+        "save_to_s3",
+        "print_summary"
+      ],
+      "lines_of_code": 679,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "demo_predictions": {
+      "path": "scripts/ml/demo_predictions.py",
+      "name": "demo_predictions",
+      "purpose": "No description",
+      "dependencies": [
+        "pandas",
+        "datetime",
+        "numpy"
+      ],
+      "key_functions": [
+        "generate_demo_predictions"
+      ],
+      "lines_of_code": 182,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "performance_profiling": {
+      "path": "scripts/ml/performance_profiling.py",
+      "name": "performance_profiling",
+      "purpose": "No description",
+      "dependencies": [
+        "gc",
+        "dataclasses",
+        "json",
+        "logging",
+        "warnings",
+        "sklearn",
+        "typing",
+        "psutil",
+        "pathlib",
+        "datetime",
+        "numpy",
+        "functools",
+        "time",
+        "pandas"
+      ],
+      "key_functions": [
+        "to_dict",
+        "to_dict",
+        "to_dict",
+        "get_memory_usage",
+        "profile_memory",
+        "profile_time",
+        "profile_comprehensive",
+        "get_system_stats",
+        "identify_bottlenecks",
+        "generate_recommendations"
+      ],
+      "lines_of_code": 590,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "panel_data_integration": {
+      "path": "scripts/ml/panel_data_integration.py",
+      "name": "panel_data_integration",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "dataclasses",
+        "logging",
+        "typing",
+        "os",
+        "datetime",
+        "numpy",
+        "scripts",
+        "importlib",
+        "pandas"
+      ],
+      "key_functions": [
+        "to_dict",
+        "load_player_data_for_game",
+        "extract_panel_features",
+        "extract_all_features_with_panel",
+        "batch_extract_features",
+        "get_feature_summary",
+        "main"
+      ],
+      "lines_of_code": 549,
+      "integration_points": [
+        "data_processing",
+        "feature_engineering"
+      ]
+    },
+    "train_with_real_nba_features": {
+      "path": "scripts/ml/train_with_real_nba_features.py",
+      "name": "train_with_real_nba_features",
+      "purpose": "No description",
+      "dependencies": [
+        "sklearn",
+        "xgboost",
+        "lightgbm",
+        "numpy",
+        "pandas"
+      ],
+      "key_functions": [],
+      "lines_of_code": 133,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "fix_data_leakage_aggregation": {
+      "path": "scripts/ml/fix_data_leakage_aggregation.py",
+      "name": "fix_data_leakage_aggregation",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "os",
+        "datetime",
+        "numpy",
+        "importlib",
+        "pandas"
+      ],
+      "key_functions": [],
+      "lines_of_code": 300,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "model_validation": {
+      "path": "scripts/ml/model_validation.py",
+      "name": "model_validation",
+      "purpose": "No description",
+      "dependencies": [
+        "dataclasses",
+        "json",
+        "logging",
+        "warnings",
+        "sklearn",
+        "typing",
+        "pathlib",
+        "scipy",
+        "datetime",
+        "numpy",
+        "time",
+        "pandas"
+      ],
+      "key_functions": [
+        "to_dict",
+        "validate_model",
+        "out_of_time_validation",
+        "stability_test",
+        "compare_models",
+        "statistical_significance_test",
+        "export_results",
+        "demo_model_validation"
+      ],
+      "lines_of_code": 550,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "panel_data_team_aggregator": {
+      "path": "scripts/ml/panel_data_team_aggregator.py",
+      "name": "panel_data_team_aggregator",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "dataclasses",
+        "logging",
+        "typing",
+        "os",
+        "numpy",
+        "pandas"
+      ],
+      "key_functions": [
+        "identify_panel_features",
+        "aggregate_team_features",
+        "create_matchup_features",
+        "aggregate_game",
+        "batch_aggregate_games",
+        "compare_aggregation_approaches",
+        "main"
+      ],
+      "lines_of_code": 451,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "feature_engineering"
+      ]
+    },
+    "setup_mlflow": {
+      "path": "scripts/ml/setup_mlflow.py",
+      "name": "setup_mlflow",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "logging",
+        "typing",
+        "mlflow",
+        "pathlib",
+        "os",
+        "dotenv"
+      ],
+      "key_functions": [
+        "setup_mlflow_directories",
+        "create_mlflow_config",
+        "create_mlflow_wrapper",
+        "setup",
+        "start_run",
+        "log_params",
+        "log_metrics",
+        "log_artifact",
+        "log_model",
+        "register_model"
+      ],
+      "lines_of_code": 305,
+      "integration_points": [
+        "machine_learning"
+      ]
+    },
+    "model_comparison": {
+      "path": "scripts/ml/model_comparison.py",
+      "name": "model_comparison",
+      "purpose": "No description",
+      "dependencies": [
+        "dataclasses",
+        "json",
+        "logging",
+        "warnings",
+        "typing",
+        "pathlib",
+        "scipy",
+        "datetime",
+        "numpy",
+        "time",
+        "pandas"
+      ],
+      "key_functions": [
+        "to_dict",
+        "to_dict",
+        "to_dict",
+        "paired_ttest",
+        "wilcoxon_test",
+        "mcnemar_test",
+        "rank_models",
+        "compare_to_baseline",
+        "benchmark_models",
+        "export_results"
+      ],
+      "lines_of_code": 647,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction"
+      ]
+    },
+    "live_prediction_demo": {
+      "path": "scripts/ml/live_prediction_demo.py",
+      "name": "live_prediction_demo",
+      "purpose": "No description",
+      "dependencies": [
+        "json",
+        "pandas",
+        "requests"
+      ],
+      "key_functions": [],
+      "lines_of_code": 103,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "train_quick_model": {
+      "path": "scripts/ml/train_quick_model.py",
+      "name": "train_quick_model",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "sklearn",
+        "warnings",
+        "datetime",
+        "numpy",
+        "pickle",
+        "pandas"
+      ],
+      "key_functions": [
+        "create_synthetic_training_data",
+        "train_model_from_player_data",
+        "main"
+      ],
+      "lines_of_code": 212,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "fetch_upcoming_games": {
+      "path": "scripts/ml/fetch_upcoming_games.py",
+      "name": "fetch_upcoming_games",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "typing",
+        "datetime",
+        "requests",
+        "pandas"
+      ],
+      "key_functions": [
+        "fetch_games_for_date",
+        "fetch_upcoming_games",
+        "main"
+      ],
+      "lines_of_code": 304,
+      "integration_points": [
+        "data_processing",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "automated_feature_selection": {
+      "path": "scripts/ml/automated_feature_selection.py",
+      "name": "automated_feature_selection",
+      "purpose": "No description",
+      "dependencies": [
+        "dataclasses",
+        "json",
+        "logging",
+        "warnings",
+        "sklearn",
+        "typing",
+        "pathlib",
+        "datetime",
+        "numpy",
+        "time",
+        "pandas"
+      ],
+      "key_functions": [
+        "to_dict",
+        "to_dict",
+        "variance_threshold_selection",
+        "correlation_selection",
+        "mutual_information_selection",
+        "lasso_selection",
+        "tree_based_selection",
+        "recursive_feature_elimination",
+        "stability_selection",
+        "consensus_selection"
+      ],
+      "lines_of_code": 781,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "feature_engineering"
+      ]
+    },
+    "hyperparameter_tuning": {
+      "path": "scripts/ml/hyperparameter_tuning.py",
+      "name": "hyperparameter_tuning",
+      "purpose": "No description",
+      "dependencies": [
+        "dataclasses",
+        "json",
+        "logging",
+        "sklearn",
+        "itertools",
+        "typing",
+        "mlflow",
+        "pathlib",
+        "datetime",
+        "numpy",
+        "concurrent",
+        "time",
+        "pandas"
+      ],
+      "key_functions": [
+        "sample_random",
+        "to_dict",
+        "convert_value",
+        "split",
+        "grid_search",
+        "random_search",
+        "export_results",
+        "convert_value",
+        "demo_hyperparameter_tuning"
+      ],
+      "lines_of_code": 760,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "test_prediction_api": {
+      "path": "scripts/ml/test_prediction_api.py",
+      "name": "test_prediction_api",
+      "purpose": "No description",
+      "dependencies": [
+        "json",
+        "pandas",
+        "requests"
+      ],
+      "key_functions": [],
+      "lines_of_code": 120,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "api",
+        "feature_engineering"
+      ]
+    },
+    "final_model_validation": {
+      "path": "scripts/ml/final_model_validation.py",
+      "name": "final_model_validation",
+      "purpose": "No description",
+      "dependencies": [
+        "sklearn",
+        "warnings",
+        "pandas",
+        "numpy"
+      ],
+      "key_functions": [],
+      "lines_of_code": 261,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "train_with_clean_features": {
+      "path": "scripts/ml/train_with_clean_features.py",
+      "name": "train_with_clean_features",
+      "purpose": "No description",
+      "dependencies": [
+        "sklearn",
+        "xgboost",
+        "lightgbm",
+        "numpy",
+        "pandas"
+      ],
+      "key_functions": [],
+      "lines_of_code": 230,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "ensemble_learning": {
+      "path": "scripts/ml/ensemble_learning.py",
+      "name": "ensemble_learning",
+      "purpose": "No description",
+      "dependencies": [
+        "dataclasses",
+        "json",
+        "logging",
+        "warnings",
+        "sklearn",
+        "typing",
+        "pathlib",
+        "datetime",
+        "numpy",
+        "time",
+        "pandas"
+      ],
+      "key_functions": [
+        "to_dict",
+        "voting_ensemble",
+        "weighted_average_ensemble",
+        "stacking_ensemble",
+        "bagging_ensemble",
+        "boosting_ensemble",
+        "export_results",
+        "demo_ensemble_learning"
+      ],
+      "lines_of_code": 557,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "train_full_dataset": {
+      "path": "scripts/ml/train_full_dataset.py",
+      "name": "train_full_dataset",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "sklearn",
+        "warnings",
+        "mlflow",
+        "implement_rec_22",
+        "datetime",
+        "numpy",
+        "pickle",
+        "time",
+        "pandas"
+      ],
+      "key_functions": [],
+      "lines_of_code": 437,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "train_with_improved_features": {
+      "path": "scripts/ml/train_with_improved_features.py",
+      "name": "train_with_improved_features",
+      "purpose": "No description",
+      "dependencies": [
+        "sklearn",
+        "xgboost",
+        "lightgbm",
+        "numpy",
+        "pandas"
+      ],
+      "key_functions": [],
+      "lines_of_code": 167,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "train_with_real_nba_data": {
+      "path": "scripts/ml/train_with_real_nba_data.py",
+      "name": "train_with_real_nba_data",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "os",
+        "datetime",
+        "numpy",
+        "importlib",
+        "pandas"
+      ],
+      "key_functions": [],
+      "lines_of_code": 214,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "create_local_hoopr_database": {
+      "path": "scripts/db/create_local_hoopr_database.py",
+      "name": "create_local_hoopr_database",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "traceback",
+        "sys",
+        "sqlite3",
+        "pathlib",
+        "datetime",
+        "pandas"
+      ],
+      "key_functions": [
+        "create_database",
+        "main"
+      ],
+      "lines_of_code": 345,
+      "integration_points": [
+        "data_processing",
+        "database"
+      ]
+    },
+    "create_local_espn_database": {
+      "path": "scripts/db/create_local_espn_database.py",
+      "name": "create_local_espn_database",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "sqlite3",
+        "pathlib",
+        "datetime",
+        "collections"
+      ],
+      "key_functions": [
+        "create_schema",
+        "extract_game_info",
+        "insert_game",
+        "calculate_coverage",
+        "print_summary",
+        "main"
+      ],
+      "lines_of_code": 510,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "create_unified_espn_hoopr_view": {
+      "path": "scripts/db/create_unified_espn_hoopr_view.py",
+      "name": "create_unified_espn_hoopr_view",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "traceback",
+        "sys",
+        "os",
+        "datetime",
+        "dotenv",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "create_unified_play_by_play_view",
+        "create_unified_schedule_view",
+        "create_documentation_view",
+        "print_summary",
+        "main"
+      ],
+      "lines_of_code": 425,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "populate_data_availability": {
+      "path": "scripts/db/populate_data_availability.py",
+      "name": "populate_data_availability",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "logging",
+        "os",
+        "datetime",
+        "dotenv",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "get_era",
+        "get_fidelity",
+        "populate_from_assessment",
+        "main"
+      ],
+      "lines_of_code": 264,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "create_unified_database": {
+      "path": "scripts/db/create_unified_database.py",
+      "name": "create_unified_database",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "sqlite3",
+        "pathlib",
+        "os",
+        "datetime",
+        "dotenv",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "create_local_unified_database",
+        "create_rds_unified_database",
+        "main"
+      ],
+      "lines_of_code": 661,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "create_temporal_tables": {
+      "path": "scripts/db/create_temporal_tables.py",
+      "name": "create_temporal_tables",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "pathlib",
+        "os",
+        "dotenv",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "check_prerequisites",
+        "create_table",
+        "validate_tables",
+        "print_summary",
+        "main"
+      ],
+      "lines_of_code": 251,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "load_hoopr_player_box_only": {
+      "path": "scripts/db/load_hoopr_player_box_only.py",
+      "name": "load_hoopr_player_box_only",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "glob",
+        "os",
+        "datetime",
+        "psycopg2",
+        "pandas"
+      ],
+      "key_functions": [
+        "log",
+        "create_player_box_table",
+        "load_player_box_csv",
+        "main"
+      ],
+      "lines_of_code": 276,
+      "integration_points": [
+        "data_processing",
+        "database"
+      ]
+    },
+    "load_espn_to_local_postgres": {
+      "path": "scripts/db/load_espn_to_local_postgres.py",
+      "name": "load_espn_to_local_postgres",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "json",
+        "pathlib",
+        "os",
+        "datetime",
+        "csv",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "log",
+        "parse_game_clock",
+        "reconstruct_wall_clock",
+        "create_tables",
+        "load_players",
+        "load_events",
+        "main"
+      ],
+      "lines_of_code": 407,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "create_team_id_mapping": {
+      "path": "scripts/db/create_team_id_mapping.py",
+      "name": "create_team_id_mapping",
+      "purpose": "No description",
+      "dependencies": [
+        "logging",
+        "collections",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "get_db_connection",
+        "create_mapping_table",
+        "build_mapping",
+        "insert_mappings",
+        "verify_mapping",
+        "main"
+      ],
+      "lines_of_code": 240,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "load_kaggle_to_rds": {
+      "path": "scripts/db/load_kaggle_to_rds.py",
+      "name": "load_kaggle_to_rds",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "re",
+        "json",
+        "io",
+        "pathlib",
+        "os",
+        "datetime",
+        "dotenv",
+        "csv",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "check_prerequisites",
+        "load_player_biographical",
+        "to_int",
+        "load_temporal_events",
+        "create_initial_indexes",
+        "print_summary",
+        "main"
+      ],
+      "lines_of_code": 463,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "debug_hoopr_insert": {
+      "path": "scripts/db/debug_hoopr_insert.py",
+      "name": "debug_hoopr_insert",
+      "purpose": "No description",
+      "dependencies": [
+        "traceback",
+        "psycopg2",
+        "pandas"
+      ],
+      "key_functions": [
+        "debug_single_row"
+      ],
+      "lines_of_code": 190,
+      "integration_points": [
+        "data_processing",
+        "database"
+      ]
+    },
+    "load_kaggle_to_local_postgres": {
+      "path": "scripts/db/load_kaggle_to_local_postgres.py",
+      "name": "load_kaggle_to_local_postgres",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "io",
+        "datetime",
+        "psycopg2",
+        "pandas"
+      ],
+      "key_functions": [
+        "main"
+      ],
+      "lines_of_code": 209,
+      "integration_points": [
+        "data_processing",
+        "database"
+      ]
+    },
+    "create_temporal_indexes": {
+      "path": "scripts/db/create_temporal_indexes.py",
+      "name": "create_temporal_indexes",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "pathlib",
+        "os",
+        "datetime",
+        "dotenv",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "check_table_size",
+        "create_brin_indexes",
+        "print_index_summary",
+        "print_storage_comparison",
+        "main"
+      ],
+      "lines_of_code": 312,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "load_hoopr_to_rds": {
+      "path": "scripts/db/load_hoopr_to_rds.py",
+      "name": "load_hoopr_to_rds",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "traceback",
+        "sys",
+        "sqlite3",
+        "io",
+        "pathlib",
+        "os",
+        "datetime",
+        "dotenv",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "check_prerequisites",
+        "create_hoopr_tables",
+        "load_table",
+        "create_indexes",
+        "print_summary",
+        "main"
+      ],
+      "lines_of_code": 514,
+      "integration_points": [
+        "machine_learning",
+        "database",
+        "feature_engineering"
+      ]
+    },
+    "create_team_id_mapping_static": {
+      "path": "scripts/db/create_team_id_mapping_static.py",
+      "name": "create_team_id_mapping_static",
+      "purpose": "No description",
+      "dependencies": [
+        "logging",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "get_db_connection",
+        "create_mapping_table",
+        "insert_mappings",
+        "verify_mapping",
+        "test_known_matchup",
+        "main"
+      ],
+      "lines_of_code": 227,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "load_hoopr_to_local_postgres": {
+      "path": "scripts/db/load_hoopr_to_local_postgres.py",
+      "name": "load_hoopr_to_local_postgres",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "glob",
+        "os",
+        "datetime",
+        "psycopg2",
+        "pandas"
+      ],
+      "key_functions": [
+        "log",
+        "create_tables",
+        "load_csv_to_table",
+        "main"
+      ],
+      "lines_of_code": 716,
+      "integration_points": [
+        "data_processing",
+        "database"
+      ]
+    },
+    "create_stored_procedures": {
+      "path": "scripts/db/create_stored_procedures.py",
+      "name": "create_stored_procedures",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "pathlib",
+        "os",
+        "datetime",
+        "dotenv",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "check_prerequisites",
+        "create_procedures",
+        "validate_procedures",
+        "print_usage_examples",
+        "main"
+      ],
+      "lines_of_code": 276,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "load_espn_events": {
+      "path": "scripts/db/load_espn_events.py",
+      "name": "load_espn_events",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "traceback",
+        "sys",
+        "json",
+        "pathlib",
+        "os",
+        "datetime",
+        "dotenv",
+        "psycopg2",
+        "pandas"
+      ],
+      "key_functions": [
+        "parse_game_clock",
+        "reconstruct_wall_clock",
+        "get_team_ids_for_games",
+        "process_batch",
+        "load_events",
+        "main"
+      ],
+      "lines_of_code": 411,
+      "integration_points": [
+        "data_processing",
+        "database",
+        "feature_engineering"
+      ]
+    },
+    "generate_inventory": {
+      "path": "scripts/maintenance/generate_inventory.py",
+      "name": "generate_inventory",
+      "purpose": "No description",
+      "dependencies": [
+        "re",
+        "typing",
+        "pathlib",
+        "os",
+        "datetime",
+        "subprocess"
+      ],
+      "key_functions": [
+        "get_file_info",
+        "get_file_type",
+        "extract_purpose",
+        "extract_functions",
+        "extract_dependencies",
+        "extract_usage",
+        "scan_project",
+        "generate_markdown",
+        "run"
+      ],
+      "lines_of_code": 374,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "sync_progress": {
+      "path": "scripts/maintenance/sync_progress.py",
+      "name": "sync_progress",
+      "purpose": "No description",
+      "dependencies": [
+        "re",
+        "sys",
+        "pathlib",
+        "datetime",
+        "subprocess"
+      ],
+      "key_functions": [
+        "run_command",
+        "check_s3_bucket",
+        "check_rds_status",
+        "check_glue_crawler",
+        "check_glue_etl_job",
+        "check_file_exists",
+        "detect_phase_status",
+        "update_progress_status",
+        "generate_summary",
+        "run"
+      ],
+      "lines_of_code": 218,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "unified_monitoring_dashboard": {
+      "path": "scripts/monitoring/unified_monitoring_dashboard.py",
+      "name": "unified_monitoring_dashboard",
+      "purpose": "No description",
+      "dependencies": [
+        "time",
+        "argparse",
+        "sys",
+        "rich",
+        "json",
+        "typing",
+        "mlflow",
+        "pathlib",
+        "os",
+        "datetime",
+        "subprocess",
+        "psycopg2"
+      ],
+      "key_functions": [
+        "get_database_metrics",
+        "get_kaggle_loading_progress",
+        "get_player_dashboards_progress",
+        "get_mlflow_metrics",
+        "create_layout",
+        "render_header",
+        "render_data_loading",
+        "render_database",
+        "render_ml_experiments",
+        "render_system_status"
+      ],
+      "lines_of_code": 579,
+      "integration_points": [
+        "machine_learning",
+        "prediction",
+        "database",
+        "feature_engineering"
+      ]
+    },
+    "scraper_health_monitor": {
+      "path": "scripts/monitoring/scraper_health_monitor.py",
+      "name": "scraper_health_monitor",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "dataclasses",
+        "json",
+        "asyncio",
+        "logging",
+        "boto3",
+        "typing",
+        "aiohttp",
+        "psutil",
+        "botocore",
+        "subprocess",
+        "yaml",
+        "pathlib",
+        "scraper_health_monitor",
+        "datetime",
+        "time",
+        "enum"
+      ],
+      "key_functions": [
+        "to_dict",
+        "get_health_summary",
+        "get_scraper_health"
+      ],
+      "lines_of_code": 689,
+      "integration_points": [
+        "database",
+        "api"
+      ]
+    },
+    "alert_manager": {
+      "path": "scripts/monitoring/alert_manager.py",
+      "name": "alert_manager",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "dataclasses",
+        "json",
+        "asyncio",
+        "hashlib",
+        "alert_manager",
+        "logging",
+        "typing",
+        "boto3",
+        "aiohttp",
+        "botocore",
+        "pathlib",
+        "os",
+        "datetime",
+        "time",
+        "enum"
+      ],
+      "key_functions": [
+        "to_dict",
+        "generate_hash",
+        "register_channel",
+        "get_alert_history",
+        "get_alert_stats"
+      ],
+      "lines_of_code": 572,
+      "integration_points": []
+    },
+    "data_quality_monitor": {
+      "path": "scripts/monitoring/data_quality_monitor.py",
+      "name": "data_quality_monitor",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "json",
+        "logging",
+        "typing",
+        "sqlite3",
+        "pathlib",
+        "os",
+        "datetime",
+        "collections",
+        "time",
+        "random",
+        "boto3",
+        "pandas"
+      ],
+      "key_functions": [
+        "setup_database",
+        "log_quality_check",
+        "log_alert",
+        "log_file_counts",
+        "check_file_counts",
+        "check_file_count_anomaly",
+        "check_json_quality",
+        "check_recent_data_freshness",
+        "generate_daily_report",
+        "run_daily_check"
+      ],
+      "lines_of_code": 489,
+      "integration_points": [
+        "data_processing",
+        "database"
+      ]
+    },
+    "cross_validate_3_sources": {
+      "path": "scripts/validation/cross_validate_3_sources.py",
+      "name": "cross_validate_3_sources",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "logging",
+        "pathlib",
+        "datetime",
+        "collections",
+        "boto3"
+      ],
+      "key_functions": [
+        "get_date_range",
+        "list_s3_games",
+        "get_s3_json",
+        "extract_game_stats",
+        "validate_game",
+        "validate_date",
+        "calculate_quality_scores",
+        "generate_summary",
+        "save_report",
+        "run"
+      ],
+      "lines_of_code": 438,
+      "integration_points": [
+        "api"
+      ]
+    },
+    "cross_validate_basketball_reference": {
+      "path": "scripts/validation/cross_validate_basketball_reference.py",
+      "name": "cross_validate_basketball_reference",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "typing",
+        "sqlite3",
+        "datetime",
+        "collections",
+        "csv"
+      ],
+      "key_functions": [
+        "aggregate_hoopr_player_seasons",
+        "get_bbref_player_seasons",
+        "normalize_player_name",
+        "normalize_team_name",
+        "match_player_seasons",
+        "compare_player_seasons",
+        "analyze_discrepancies",
+        "generate_data_quality_score",
+        "export_discrepancies_to_csv",
+        "main"
+      ],
+      "lines_of_code": 607,
+      "integration_points": [
+        "database",
+        "feature_engineering"
+      ]
+    },
+    "export_ml_quality_dataset": {
+      "path": "scripts/validation/export_ml_quality_dataset.py",
+      "name": "export_ml_quality_dataset",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "json",
+        "typing",
+        "sqlite3",
+        "pathlib",
+        "datetime",
+        "collections",
+        "csv",
+        "pandas"
+      ],
+      "key_functions": [
+        "get_quality_metadata",
+        "get_all_games_quality",
+        "export_json",
+        "export_csv",
+        "export_summary",
+        "main"
+      ],
+      "lines_of_code": 613,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "database",
+        "feature_engineering"
+      ]
+    },
+    "detect_data_discrepancies": {
+      "path": "scripts/validation/detect_data_discrepancies.py",
+      "name": "detect_data_discrepancies",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "json",
+        "typing",
+        "sqlite3",
+        "pathlib",
+        "datetime",
+        "collections"
+      ],
+      "key_functions": [
+        "load_game_mapping",
+        "get_dual_source_games",
+        "get_espn_game_data",
+        "get_hoopr_game_data",
+        "calculate_severity",
+        "detect_discrepancies",
+        "log_discrepancy",
+        "update_quality_scores",
+        "process_games",
+        "main"
+      ],
+      "lines_of_code": 685,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "validate_rec_22_with_real_data": {
+      "path": "scripts/validation/validate_rec_22_with_real_data.py",
+      "name": "validate_rec_22_with_real_data",
+      "purpose": "No description",
+      "dependencies": [
+        "sys",
+        "warnings",
+        "implement_rec_22",
+        "datetime",
+        "numpy",
+        "time",
+        "pandas"
+      ],
+      "key_functions": [
+        "load_real_nba_data",
+        "prepare_for_panel",
+        "test_panel_index_creation",
+        "test_lag_generation",
+        "test_rolling_windows",
+        "test_cumulative_stats",
+        "test_temporal_query",
+        "test_data_quality",
+        "count_features_generated",
+        "generate_report"
+      ],
+      "lines_of_code": 526,
+      "integration_points": [
+        "data_processing",
+        "feature_engineering"
+      ]
+    },
+    "save_predictions_to_s3": {
+      "path": "scripts/analytics/save_predictions_to_s3.py",
+      "name": "save_predictions_to_s3",
+      "purpose": "No description",
+      "dependencies": [
+        "io",
+        "datetime",
+        "numpy",
+        "pickle",
+        "boto3",
+        "pandas"
+      ],
+      "key_functions": [
+        "load_model_from_s3",
+        "generate_sample_predictions",
+        "save_predictions_to_s3",
+        "main"
+      ],
+      "lines_of_code": 189,
+      "integration_points": [
+        "data_processing",
+        "machine_learning",
+        "prediction",
+        "feature_engineering"
+      ]
+    },
+    "download_kaggle_database": {
+      "path": "scripts/archive/deprecated/download_kaggle_database.py",
+      "name": "download_kaggle_database",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "sqlite3",
+        "pathlib",
+        "os",
+        "kaggle",
+        "boto3"
+      ],
+      "key_functions": [
+        "download_dataset",
+        "list_database_files",
+        "inspect_database",
+        "extract_table_to_json",
+        "extract_all_tables",
+        "main"
+      ],
+      "lines_of_code": 322,
+      "integration_points": [
+        "database"
+      ]
+    },
+    "extract_espn_local_to_temporal_UPDATED": {
+      "path": "scripts/archive/deprecated/extract_espn_local_to_temporal_UPDATED.py",
+      "name": "extract_espn_local_to_temporal_UPDATED",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "json",
+        "typing",
+        "pathlib",
+        "datetime",
+        "pandas"
+      ],
+      "key_functions": [
+        "parse_espn_pbp_file",
+        "extract_players_from_box_score",
+        "process_all_espn_data",
+        "main"
+      ],
+      "lines_of_code": 342,
+      "integration_points": [
+        "data_processing",
+        "database"
+      ]
+    },
+    "scrape_sportsdataverse": {
+      "path": "scripts/archive/deprecated/scrape_sportsdataverse.py",
+      "name": "scrape_sportsdataverse",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "sys",
+        "json",
+        "pathlib",
+        "datetime",
+        "sportsdataverse",
+        "time",
+        "boto3"
+      ],
+      "key_functions": [
+        "save_json",
+        "convert_for_json",
+        "upload_to_s3",
+        "scrape_season_schedule",
+        "scrape_game_pbp",
+        "scrape_game_box_score",
+        "scrape_season",
+        "main"
+      ],
+      "lines_of_code": 337,
+      "integration_points": [
+        "data_processing"
+      ]
+    },
+    "extract_espn_local_to_temporal": {
+      "path": "scripts/archive/deprecated/extract_espn_local_to_temporal.py",
+      "name": "extract_espn_local_to_temporal",
+      "purpose": "No description",
+      "dependencies": [
+        "argparse",
+        "json",
+        "typing",
+        "pytz",
+        "pathlib",
+        "datetime",
+        "numpy",
+        "pandas"
+      ],
+      "key_functions": [
+        "build_game_date_index",
+        "load_game_date_index",
+        "extract_game_date_from_schedule",
+        "parse_espn_pbp_file",
+        "extract_players_from_box_score",
+        "process_all_espn_data",
+        "main"
+      ],
+      "lines_of_code": 556,
+      "integration_points": [
+        "data_processing"
+      ]
+    }
+  },
+  "integration_map": {
+    "data_ingestion": [],
+    "feature_engineering": [
+      "causal_inference_pipeline",
+      "bayesian_analysis_pipeline",
+      "panel_data_quality_monitor",
+      "statistical_model_validation",
+      "enhanced_ml_integration",
+      "enhanced_storage_system",
+      "enhanced_betting_integration",
+      "phase_9_master_agent",
+      "enhanced_nba_api_processor",
+      "enhanced_advanced_metrics",
+      "enhanced_kaggle_processor",
+      "multi_source_integrator",
+      "working_multi_source_integrator",
+      "load_local_json_to_rds",
+      "create_possession_panel_from_kaggle",
+      "structured_output_framework",
+      "scrape_basketball_reference_mock",
+      "phase_1_1_integration_agent",
+      "process_kaggle_historical",
+      "scrape_bref_tier1_incremental",
+      "expand_nba_stats_scraper",
+      "scrape_nba_api_team_dashboards",
+      "scrape_basketball_reference_full",
+      "scrape_nba_api_player_tracking",
+      "scrape_nba_api_comprehensive",
+      "create_possession_panel_from_pbpstats",
+      "scrape_hoopr_nba_stats",
+      "create_possession_panel_from_espn",
+      "scrape_nba_api_player_dashboards",
+      "basketball_reference_box_score_scraper",
+      "master_data_collection_agent",
+      "scrape_nba_api_game_advanced",
+      "scrape_kaggle_database_expansion",
+      "create_possession_panel_with_lineups",
+      "validate_nba_api_files",
+      "train_models_with_mlops",
+      "unified_feature_extractor",
+      "monitoring_dashboard",
+      "train_model_for_predictions",
+      "feature_selection",
+      "temporal_cross_validation",
+      "feature_store",
+      "model_explainability",
+      "predict_upcoming_games",
+      "generate_features",
+      "train_models_with_panel_features",
+      "prediction_api",
+      "export_model_coefficients",
+      "cross_validation_strategies",
+      "model_interpretability",
+      "mlflow_setup",
+      "prepare_upcoming_game_features",
+      "add_contextual_features",
+      "improved_feature_aggregation",
+      "train_models",
+      "model_calibration",
+      "learning_curves",
+      "fetch_recent_player_data",
+      "model_interpretation",
+      "automated_retraining_pipeline",
+      "error_analysis",
+      "phase_2_train_models",
+      "train_models_with_panel_features_simplified",
+      "demo_predictions",
+      "performance_profiling",
+      "panel_data_integration",
+      "train_with_real_nba_features",
+      "fix_data_leakage_aggregation",
+      "model_validation",
+      "panel_data_team_aggregator",
+      "live_prediction_demo",
+      "train_quick_model",
+      "fetch_upcoming_games",
+      "automated_feature_selection",
+      "hyperparameter_tuning",
+      "test_prediction_api",
+      "final_model_validation",
+      "train_with_clean_features",
+      "ensemble_learning",
+      "train_full_dataset",
+      "train_with_improved_features",
+      "train_with_real_nba_data",
+      "load_hoopr_to_rds",
+      "load_espn_events",
+      "unified_monitoring_dashboard",
+      "cross_validate_basketball_reference",
+      "export_ml_quality_dataset",
+      "validate_rec_22_with_real_data",
+      "save_predictions_to_s3"
+    ],
+    "modeling": [],
+    "prediction": [
+      "causal_inference_pipeline",
+      "bayesian_analysis_pipeline",
+      "enhanced_ml_integration",
+      "enhanced_betting_integration",
+      "phase_9_master_agent",
+      "train_models_with_mlops",
+      "monitoring_dashboard",
+      "train_model_for_predictions",
+      "feature_selection",
+      "temporal_cross_validation",
+      "model_explainability",
+      "predict_upcoming_games",
+      "generate_features",
+      "train_models_with_panel_features",
+      "prediction_api",
+      "export_model_coefficients",
+      "validate_predictions",
+      "model_interpretability",
+      "mlflow_setup",
+      "prepare_upcoming_game_features",
+      "improved_feature_aggregation",
+      "train_models",
+      "model_calibration",
+      "model_interpretation",
+      "automated_retraining_pipeline",
+      "error_analysis",
+      "phase_2_train_models",
+      "train_models_with_panel_features_simplified",
+      "demo_predictions",
+      "performance_profiling",
+      "train_with_real_nba_features",
+      "fix_data_leakage_aggregation",
+      "model_validation",
+      "model_comparison",
+      "live_prediction_demo",
+      "train_quick_model",
+      "fetch_upcoming_games",
+      "hyperparameter_tuning",
+      "test_prediction_api",
+      "final_model_validation",
+      "train_with_clean_features",
+      "ensemble_learning",
+      "train_full_dataset",
+      "train_with_improved_features",
+      "train_with_real_nba_data",
+      "unified_monitoring_dashboard",
+      "export_ml_quality_dataset",
+      "save_predictions_to_s3"
+    ],
+    "evaluation": [],
+    "api": [
+      "enhanced_nba_api_processor",
+      "load_local_json_to_rds",
+      "espn_async_scraper",
+      "scraper_config",
+      "fixed_nba_api_scraper",
+      "scrape_nba_stats_api",
+      "verify_with_nba_stats",
+      "expand_nba_stats_scraper",
+      "create_possession_panel_from_nba_api",
+      "scrape_nba_api_team_dashboards",
+      "nba_api_incremental_simple",
+      "scrape_nba_api_player_tracking",
+      "scrape_nba_api_matchups_defense",
+      "test_basketball_reference_api",
+      "scrape_nba_api_comprehensive",
+      "nba_api_async_scraper",
+      "scrape_hoopr_nba_stats",
+      "identify_missing_games",
+      "phase_1c_historical_agent",
+      "scrape_basketball_reference_fixed",
+      "scrape_nba_api_player_dashboards",
+      "phase_1_7_nba_stats_agent",
+      "scrape_hoopr_complete_all_endpoints",
+      "create_glue_etl_job",
+      "scrape_nba_api_playbyplay_only",
+      "master_data_collection_agent",
+      "scrape_nba_api_game_advanced",
+      "scrape_espn_additional",
+      "nba_api_reverse_scraper",
+      "scraper_telemetry",
+      "fixed_espn_scraper",
+      "scrape_basketball_reference_additional",
+      "scrape_nba_lineups",
+      "validate_nba_api_files",
+      "prediction_api",
+      "test_prediction_api",
+      "scraper_health_monitor",
+      "cross_validate_3_sources"
+    ],
+    "database": [
+      "assess_data",
+      "extract_espn_hoopr_game_mapping",
+      "panel_data_quality_monitor",
+      "compare_espn_local_vs_rds",
+      "enhanced_storage_system",
+      "phase_9_master_agent",
+      "box_score_snapshot",
+      "enhanced_kaggle_processor",
+      "final_storage_test",
+      "hoopr_processor",
+      "multi_source_integrator",
+      "working_multi_source_integrator",
+      "fill_historical_gaps",
+      "extract_teams_by_year",
+      "load_local_json_to_rds",
+      "create_possession_panel_from_kaggle",
+      "extract_kaggle_to_temporal",
+      "extract_espn_pbp_data",
+      "analyze_espn_coverage",
+      "scrape_missing_hoopr_games",
+      "phase_1_1_integration_agent",
+      "provenance_tracker",
+      "hoopr_incremental_scraper",
+      "load_espn_pbp_to_rds",
+      "load_validated_espn_pbp",
+      "deduplication_manager",
+      "basketball_reference_pbp_backfill",
+      "create_possession_panel_from_nba_api",
+      "build_master_game_list",
+      "integrate_basketball_reference_aggregate",
+      "nba_api_incremental_simple",
+      "extract_pbp_local",
+      "create_possession_panel_from_pbpstats",
+      "scrape_basketball_reference_transactions",
+      "download_kaggle_basketball",
+      "game_id_decoder",
+      "hoopr_incremental_simple",
+      "basketball_reference_daily_box_scores",
+      "espn_incremental_simple",
+      "create_possession_panel_with_hoopr_lineups",
+      "create_possession_panel_from_espn",
+      "phase_1_7_nba_stats_agent",
+      "basketball_reference_box_score_scraper",
+      "create_glue_etl_job",
+      "scrape_basketball_reference_html",
+      "merge_all_sources",
+      "validate_espn_pbp_files",
+      "create_player_id_mapping",
+      "build_unified_database",
+      "integrate_basketball_reference",
+      "scrape_kaggle_database_expansion",
+      "validate_lineup_tracking",
+      "espn_incremental_scraper",
+      "extract_boxscores_local",
+      "extract_schedule_local",
+      "build_master_game_list_robust",
+      "phase_9_2_hoopr_agent",
+      "glue_etl_extract_schedule",
+      "create_possession_panel_with_lineups",
+      "complete_schema_update",
+      "phase_1_11_deduplication_agent",
+      "basketball_reference_incremental_scraper",
+      "verify_local_cloud_sync",
+      "compare_espn_hoopr_local",
+      "compare_espn_databases",
+      "update_data_catalog",
+      "cross_validate_espn_hoopr_with_mapping",
+      "generate_features",
+      "automated_retraining_pipeline",
+      "create_local_hoopr_database",
+      "create_local_espn_database",
+      "create_unified_espn_hoopr_view",
+      "populate_data_availability",
+      "create_unified_database",
+      "create_temporal_tables",
+      "load_hoopr_player_box_only",
+      "load_espn_to_local_postgres",
+      "create_team_id_mapping",
+      "load_kaggle_to_rds",
+      "debug_hoopr_insert",
+      "load_kaggle_to_local_postgres",
+      "create_temporal_indexes",
+      "load_hoopr_to_rds",
+      "create_team_id_mapping_static",
+      "load_hoopr_to_local_postgres",
+      "create_stored_procedures",
+      "load_espn_events",
+      "generate_inventory",
+      "sync_progress",
+      "unified_monitoring_dashboard",
+      "scraper_health_monitor",
+      "data_quality_monitor",
+      "cross_validate_basketball_reference",
+      "export_ml_quality_dataset",
+      "detect_data_discrepancies",
+      "download_kaggle_database",
+      "extract_espn_local_to_temporal_UPDATED"
+    ],
+    "utilities": []
+  },
+  "gaps": [
+    {
+      "category": "data_ingestion",
+      "severity": "high",
+      "description": "No modules found for data_ingestion"
+    },
+    {
+      "category": "modeling",
+      "severity": "high",
+      "description": "No modules found for modeling"
+    },
+    {
+      "category": "evaluation",
+      "severity": "high",
+      "description": "No modules found for evaluation"
+    },
+    {
+      "category": "utilities",
+      "severity": "high",
+      "description": "No modules found for utilities"
+    }
+  ],
+  "recommendations": [
+    {
+      "gap": "data_ingestion",
+      "recommendation": "Consider adding data_ingestion module",
+      "priority": "high"
+    },
+    {
+      "gap": "modeling",
+      "recommendation": "Consider adding modeling module",
+      "priority": "high"
+    },
+    {
+      "gap": "evaluation",
+      "recommendation": "Consider adding evaluation module",
+      "priority": "high"
+    },
+    {
+      "gap": "utilities",
+      "recommendation": "Consider adding utilities module",
+      "priority": "high"
+    }
+  ]
+}
