@@ -1,0 +1,320 @@
+{
+  "timestamp": "2025-10-19T04:26:16.570391",
+  "total_books": 51,
+  "books_converged": 0,
+  "total_recommendations": 0,
+  "by_priority": {
+    "critical": 0,
+    "important": 0,
+    "nice-to-have": 0
+  },
+  "total_cost": 0.0,
+  "books": [
+    {
+      "title": "Hastie, Tibshirani, Friedman - \"Elements of Statistical Learning\"",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Book of Proof Richard Hammack",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "The Midrange Theory",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Practical MLOps  Operationalizing Machine Learning Models",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "AI Engineering",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Anaconda-Sponsored Manning Generative-AI-in-Action",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Wooldridge   Cross section and Panel Data",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Hands On Machine Learning with Scikit Learn Keras and Tensorflow   Aurelien Geron",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "James H. Stock Mark W. Watson Introduction to Econometrics Global Edition Pearson Education Limited 2020",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Hands-On Machine Learning with Scikit-Learn Keras and Tensorflow - Aurelien Geron",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "applied predictive modeling max kuhn kjell johnson 1518",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Probabilistic Machine Learning Advanced Topics... (Z-Library)",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Mathematics for Computer Science Eric Lehman",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "microeconometrics-methods-and-applications-1b0z9bykeq",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Practical MLOps Operationalizing Machine Learning Models",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Designing Machine Learning Systems An Iterative Process for Production Ready Applications   Chip Huyen",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "James-H.-Stock-Mark-W.-Watson-Introduction-to-Econometrics-Global-Edition-Pearson-Education-Limited-2020",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Basketball on Paper",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "STATISTICS 601 Advanced Statistical Methods ( PDFDrive )",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "ML Machine Learning A Probabilistic Perspective",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "NLP with Transformer models",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "LLM Engineers Handbook",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "ML Math",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "2008 Angrist Pischke MostlyHarmlessEconometrics",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "ECONOMETRICS A Modern Approach",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Deep Learning by Ian Goodfellow, Yoshua Bengio, Aaron Courville",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Applied Machine Learning and AI for Engineers",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Bishop Pattern Recognition and Machine Learning 2006",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Hastie, Tibshirani, Friedman   \"Elements of Statistical Learning\"",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Designing Machine Learning Systems An Iterative Process for Production-Ready Applications - Chip Huyen",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "ML Machine Learning-A Probabilistic Perspective",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Anaconda Sponsored Manning Generative AI in Action",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Designing Machine Learning Systems",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Generative Deep Learning",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Applied-Machine-Learning-and-AI-for-Engineers",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Gans in action deep learning with generative adversarial networks",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Sports Analytics",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "building machine learning powered applications going from idea to product",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Artificial Intelligence   A Modern Approach (3rd Edition)",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Hands On Machine Learning with Scikit Learn and TensorFlow",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "0812 Machine Learning for Absolute Beginners",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "machine learning",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Hands-On Generative AI with Transformers and Diffusion",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Econometrics versus the Bookmakers An econometric approach to sports betting",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "econometric Analysis Greene",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "microeconometrics methods and applications 1b0z9bykeq",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Hands On Large Language Models",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Probabilistic Machine Learning Advanced Topics... (Z Library)",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Introductory Econometrics 7E 2020",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Hands On Generative AI with Transformers and Diffusion",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    },
+    {
+      "title": "Basketball Beyond Paper",
+      "converged": false,
+      "iterations": 0,
+      "recommendations": 0
+    }
+  ]
+}

@@ -25,23 +25,23 @@ workflow:
 # COST LIMITS (USD)
 # ============================================================================
 cost_limits:
-  # Phase 2: Book analysis
-  phase_2_analysis: 30.00
+  # Phase 2: Book analysis (increased for convergence enhancement)
+  phase_2_analysis: 300.00
 
   # Phase 3: Consolidation and synthesis
-  phase_3_synthesis: 20.00
+  phase_3_synthesis: 50.00
 
   # Phase 3.5: AI-driven plan modifications (Tier 2+)
-  phase_3_5_modifications: 15.00
+  phase_3_5_modifications: 25.00
 
   # Phase 5: Prediction enhancements (Tier 2+)
-  phase_5_predictions: 10.00
+  phase_5_predictions: 25.00
 
-  # Total workflow hard limit
-  total_workflow: 75.00
+  # Total workflow hard limit (increased for convergence enhancement)
+  total_workflow: 400.00
 
   # Require approval above this threshold (Tier 1+)
-  approval_threshold: 10.00
+  approval_threshold: 50.00
 
 # ============================================================================
 # AI MODEL CONFIGURATION
@@ -97,11 +97,19 @@ phases:
 
     # Analysis settings
     min_recommendations: 10
-    max_recommendations: 60
+    max_recommendations: 100 # Increased for convergence
 
-    # Convergence criteria
+    # Convergence criteria (enhanced for Tier 3)
+    convergence:
+      enabled: true
+      max_iterations: 200 # Increased from 12 for deep analysis
+      convergence_threshold: 3 # Consecutive iterations with <3 new recs
+      min_recommendations_per_iteration: 2 # Stop if < 2 recs per iteration
+      force_convergence: true # Don't stop until truly converged
+
+    # Legacy settings (for backward compatibility)
     convergence_threshold: 0.85
-    max_iterations: 3
+    max_iterations: 200
 
   # Phase 3: Consolidation and Synthesis
   phase_3:
@@ -198,9 +206,9 @@ checkpoints:
   ttl_hours: 24
   max_checkpoints: 10
 
-# Resource monitoring (Tier 1)
-monitoring:
-  enabled: false
+# Resource monitoring (Tier 3) - ENABLED
+resource_monitoring:
+  enabled: true
   check_disk_space: true
   check_memory: true
   check_api_quotas: true
@@ -209,13 +217,27 @@ monitoring:
   min_disk_gb: 10
   max_memory_percent: 80
 
-# A/B testing for models (Tier 3)
+  # API Quotas (tokens per minute)
+  gemini_quota: 1000000 # 1M tokens/min
+  claude_quota: 20000 # 20K tokens/min
+
+  # Disk limits (GB)
+  disk_limit_gb: 50
+  cache_limit_gb: 30
+  results_limit_gb: 15
+
+  # Memory limits (GB)
+  memory_limit_gb: 16
+
+# A/B testing for models (Tier 3) - ENABLED
 ab_testing:
-  enabled: false
+  enabled: true
   test_combinations:
     - ["gemini", "claude"]
-    - ["gemini", "gpt4"]
-    - ["claude", "gpt4"]
+    - ["gemini_only"]
+    - ["claude_only"]
+  min_test_books: 5
+  statistical_significance: 0.05 # p-value threshold
 
 # ============================================================================
 # LOGGING

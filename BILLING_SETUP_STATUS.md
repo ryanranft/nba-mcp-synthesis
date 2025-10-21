@@ -48,7 +48,7 @@ Status:       Ready for billing export
 ### 4. Verify Export Tables Created ⏳ (In 10 minutes)
 - **Timeline**: 5-10 minutes after export configuration
 - **Command**: `bq ls ${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}:billing_export`
-- **Expected**: Table `gcp_billing_export_v1_01C3B6_61505E_CB6F45` appears
+- **Expected**: Table `${BIGQUERY_BILLING_EXPORT_TABLE}` appears
 
 ### 5. Wait for Data Population ⏳ (24 hours)
 - **Timeline**: 24 hours after export configuration (October 19, 2025)
@@ -63,7 +63,7 @@ Status:       Ready for billing export
 bq ls ${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}:billing_export
 
 # Expected tables:
-#   - gcp_billing_export_v1_01C3B6_61505E_CB6F45
+#   - ${BIGQUERY_BILLING_EXPORT_TABLE}
 #   - gcp_billing_export_resource_v1_01C3B6_61505E_CB6F45 (if detailed enabled)
 ```
 

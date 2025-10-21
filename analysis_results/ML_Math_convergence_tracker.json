@@ -1,11 +1,11 @@
 {
   "book_title": "ML Math",
   "s3_path": "books/ML Math.pdf",
-  "start_time": "2025-10-19T00:25:46.377565",
+  "start_time": "2025-10-19T05:10:15.327242",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-19T00:25:48.360530",
+      "timestamp": "2025-10-19T05:10:17.245301",
       "recommendations": {
         "critical": [
           {
@@ -344,7 +344,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-19T00:25:56.322078",
+      "timestamp": "2025-10-19T05:10:24.355033",
       "recommendations": {
         "critical": [
           {
@@ -683,7 +683,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-19T00:26:04.376313",
+      "timestamp": "2025-10-19T05:10:31.384300",
       "recommendations": {
         "critical": [
           {
@@ -1022,7 +1022,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-19T00:26:12.575424",
+      "timestamp": "2025-10-19T05:10:38.404694",
       "recommendations": {
         "critical": [
           {
@@ -1361,7 +1361,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-19T00:26:20.683028",
+      "timestamp": "2025-10-19T05:10:45.449183",
       "recommendations": {
         "critical": [
           {
@@ -1700,7 +1700,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-19T00:26:28.570807",
+      "timestamp": "2025-10-19T05:10:52.473953",
       "recommendations": {
         "critical": [
           {
@@ -2039,7 +2039,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-19T00:26:37.047413",
+      "timestamp": "2025-10-19T05:10:59.508835",
       "recommendations": {
         "critical": [
           {
@@ -2378,7 +2378,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-19T00:26:45.652908",
+      "timestamp": "2025-10-19T05:11:06.500703",
       "recommendations": {
         "critical": [
           {
@@ -2717,7 +2717,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-19T00:26:53.591661",
+      "timestamp": "2025-10-19T05:11:13.853614",
       "recommendations": {
         "critical": [
           {
@@ -3056,7 +3056,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-19T00:27:01.542415",
+      "timestamp": "2025-10-19T05:11:25.135179",
       "recommendations": {
         "critical": [
           {
@@ -3395,7 +3395,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-19T00:27:11.243564",
+      "timestamp": "2025-10-19T05:11:32.127372",
       "recommendations": {
         "critical": [
           {
@@ -3734,7 +3734,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-19T00:27:21.574496",
+      "timestamp": "2025-10-19T05:11:39.081808",
       "recommendations": {
         "critical": [
           {
@@ -4073,7 +4073,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-19T00:27:31.875864",
+      "timestamp": "2025-10-19T05:11:46.140335",
       "recommendations": {
         "critical": [
           {
@@ -4412,7 +4412,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-19T00:27:39.941793",
+      "timestamp": "2025-10-19T05:11:53.144943",
       "recommendations": {
         "critical": [
           {
@@ -4751,7 +4751,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-19T00:27:47.905904",
+      "timestamp": "2025-10-19T05:12:00.286917",
       "recommendations": {
         "critical": [
           {
@@ -5099,6 +5099,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-19T00:27:54.200694",
+  "end_time": "2025-10-19T05:12:05.535854",
   "total_iterations": 15
 }

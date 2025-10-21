@@ -1,0 +1,2048 @@
+{
+  "total": 291,
+  "by_target": {
+    "nba-simulator-aws": 63,
+    "both": 228,
+    "nba-mcp-synthesis": 0,
+    "unclear": 0
+  },
+  "details": [
+    {
+      "name": "rec_001_employ_logistic_regression_for_predicting_game_out",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_001_implement_continuous_integration_for_data_validati",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_001_prioritize_business_objectives_over_ml_metrics",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_002_automate_feature_store_updates_with_cicd",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_002_implement_k_nearest_neighbors_k_nn_for_player_simi",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_002_implement_reliability_mechanisms_for_predictions",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_003_implement_containerized_workflows_for_model_traini",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_003_implement_data_scrubbing_pipeline_for_data_quality",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_003_prioritize_data_understanding_by_examining_data_so",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_004_address_data_leakage",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_004_implement_linear_regression_for_player_performance",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_004_monitor_model_performance_with_drift_detection",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_005_automate_model_retraining_with_ml_pipelines",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_005_design_for_scalability_using_resource_scaling",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_005_implement_linear_regression_for_score_prediction",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_006_employ_column_major_formats_for_feature_access",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_006_implement_data_scrubbing_pipeline",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_006_implement_version_control_for_ml_models_and_code",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_007_implement_canary_deployments_for_model_rollouts",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_007_implement_k_nearest_neighbors_for_player_classific",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_007_integrate_in_memory_storage_for_data_caching",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_008_implement_a_pubsub_system_for_streaming_data",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_008_implement_feature_selection_for_player_performance",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_008_utilize_onnx_for_model_interoperability",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_009_implement_input_data_scaling_validation",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_009_implement_linear_regression_for_player_performance",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_009_incorporate_weighted_sampling_to_account_for_data_",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_010_apply_importance_sampling_for_distribution_correct",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_010_implement_data_scrubbing_pipeline",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_010_secure_mlops_workflows_with_key_management_service",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_011_implement_and_validate_invertibility_and_data_inte",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_011_implement_feature_selection_and_engineering",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_011_implement_test_suites_for_trained_models",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_012_implement_health_checks_for_microservices",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_012_implement_linear_regression_for_player_performance",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_012_perform_directional_expectation_tests_on_features",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_013_capture_ml_metadata",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_013_evaluate_sensitivity_of_hyperparameters",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_013_implement_data_scrubbing_pipeline",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_014_employ_generalized_linear_models_glms_for_predicti",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_014_implement_linear_regression_for_player_performance",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_014_use_f1_score_precision_and_recall",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_015_assess_model_fit_with_analysis_of_residuals",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_015_evaluate_using_the_auc_curve",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_015_implement_data_scrubbing_and_feature_engineering_p",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_016_apply_logistic_regression_for_predicting_game_outc",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_016_employ_cross_validation_for_model_selection_and_va",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_016_make_use_of_a_backup_system_for_high_latency_queri",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_017_design_and_implement_mcmc_algorithms_to_compute_po",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_017_implement_data_scrubbing_pipeline",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_017_implement_invariant_tests_to_validate_model_stabil",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_018_apply_k_nearest_neighbors_for_player_similarity",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_018_compare_models_of_player_valuation_with_cross_vali",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_018_incorporate_a_push_deployment",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_019_combine_the_use_of_static_features",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_019_evaluate_the_goodness_of_fit_of_the_mcmc_chain_usi",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 2
+    },
+    {
+      "name": "rec_019_implement_linear_regression_for_player_performance",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_020_combine_stream_and_batch_processing",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_020_implement_k_nearest_neighbors_k_nn_for_player_simi",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_020_implement_simple_random_sampling_for_initial_data_",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_021_combine_manual_intervention_and_automation",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_021_employ_stratified_sampling_to_account_for_team_and",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_021_implement_data_scrubbing_pipeline_for_data_quality",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_022_evaluate_treatment_effects_with_experimental_desig",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_022_implement_linear_regression_for_player_performance",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_022_track_long_term_and_local_factors",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_023_implement_data_scrubbing_pipeline",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_023_mitigate_biases_by_understanding_trade_offs",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_023_utilize_permutation_tests_to_validate_player_impac",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_024_construct_exponential_family_distributions_for_pla",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_024_implement_linear_regression_for_player_performance",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_024_set_performance_and_reporting_goals",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_025_implement_mixed_models_to_capture_team_specific_ef",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_025_leverage_data_lineage",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_026_employ_logistic_regression_for_predicting_game_out",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_026_use_assessment_through_simulation_to_generate_refe",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_027_conduct_sensitivity_analysis_to_test_the_robustnes",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_027_implement_k_nearest_neighbors_k_nn_for_player_simi",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_028_implement_data_scrubbing_pipeline_for_data_quality",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_028_implement_sequential_bayesian_inference_to_refine_",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_029_implement_conjugate_priors_for_faster_posterior_up",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_029_implement_linear_regression_for_player_performance",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_030_implement_linear_regression_for_score_prediction",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_030_test_the_sensitivity_to_starting_points_for_iterat",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_031_implement_an_fti_architecture_for_nba_data_pipelin",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_031_implement_data_scrubbing_pipeline",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_032_implement_k_nearest_neighbors_for_player_classific",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_032_use_poetry_for_dependency_management",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_033_implement_feature_selection_for_player_performance",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_033_store_raw_data_in_a_nosql_database",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_034_implement_a_rag_feature_pipeline",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_034_implement_linear_regression_for_player_performance",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_035_create_an_instruction_dataset_for_nba_analysis",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_035_implement_data_scrubbing_pipeline",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_036_implement_feature_selection_and_engineering",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_036_implement_full_fine_tuning_lora_and_qlora_techniqu",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_037_implement_filtered_vector_search",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_037_implement_linear_regression_for_player_performance",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_038_deploy_llm_microservice_using_aws_sagemaker",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_038_implement_data_scrubbing_pipeline",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_039_build_business_microservice_with_fastapi",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_039_implement_linear_regression_for_player_performance",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_040_implement_data_scrubbing_and_feature_engineering_p",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_040_set_up_mongodb_serverless_for_data_storage",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_041_apply_logistic_regression_for_predicting_game_outc",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_041_set_up_qdrant_cloud_as_a_vector_database",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_042_deploy_zenml_pipelines_to_aws_using_zenml_cloud",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_042_implement_data_scrubbing_pipeline",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_043_apply_k_nearest_neighbors_for_player_similarity",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_043_implement_continuous_integration_ci_pipeline_with_",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_044_implement_data_collection_pipeline_with_dispatcher",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_044_implement_linear_regression_for_player_performance",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_045_implement_k_nearest_neighbors_k_nn_for_player_simi",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_045_use_qdrant_as_a_logical_feature_store",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_046_implement_data_scrubbing_pipeline_for_data_quality",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_046_leverage_llm_as_a_judge_for_evaluating_nba_content",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_047_create_and_fine_tune_with_preference_datasets",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_047_implement_linear_regression_for_player_performance",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_048_implement_data_scrubbing_pipeline",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_048_implement_query_expansion_for_enhanced_retrieval",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_049_implement_linear_regression_for_player_performance",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_049_implement_re_ranking_with_cross_encoders",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_050_implement_autoscaling_for_sagemaker_endpoint",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_051_add_prompt_monitoring_and_logging_with_opik",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_052_implement_an_alerting_system_with_zenml",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_053_represent_player_and_team_data_as_vectors",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_054_apply_the_chain_rule_correctly_during_backpropagat",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_055_implement_linear_regression_for_player_performance",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_056_use_pca_for_dimensionality_reduction_of_player_sta",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_057_implement_a_gaussian_mixture_model_for_player_clus",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_058_employ_support_vector_machines_for_player_role_cla",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_059_check_linear_independence_of_features",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_060_implement_automatic_differentiation",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_061_implement_an_iterative_solver_for_least_squares",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_062_implement_cross_validation",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_063_incorporate_a_regularization_parameter",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_064_model_player_activity_using_state_space_models",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_065_model_selection_for_regression",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_066_develop_a_supervised_learning_model_for_game_outco",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_067_use_gradient_boosting_machines_gbms_for_injury_pre",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_068_implement_k_fold_cross_validation_for_robust_model",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_069_implement_monitoring_and_alerting_for_machine_lear",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_070_store_data_in_a_system_for_scalability_and_reprodu",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_071_implement_k_means_clustering_for_player_performanc",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_072_implement_linear_regression_for_player_salary_pred",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_073_develop_a_binary_classification_model_for_predicti",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_074_utilize_precision_and_recall_for_evaluating_player",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_075_implement_one_hot_encoding_for_categorical_feature",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_076_text_vectorization_with_padding_and_tokenization_f",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_077_implement_data_normalization_for_svm_based_player_",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_078_employ_grid_search_to_optimize_svm_hyperparameters",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_079_use_pca_for_feature_reduction_in_high_dimensional_",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_080_apply_pca_for_anomaly_detection_of_player_performa",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_081_implement_onnx_runtime_for_cross_platform_deployme",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_082_employ_flask_to_create_an_api_for_game_outcome_pre",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_083_leverage_containerization_for_scalable_model_deplo",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_084_implement_dropout_layers_in_deep_learning_models_t",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_085_use_transfer_learning_with_mobilenetv2_for_real_ti",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_086_use_the_early_stopping_callback_to_optimize_traini",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_087_integrate_ml_model_evaluation_into_the_cicd_pipeli",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_088_implement_a_data_validation_process_to_ensure_data",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_089_implement_normalization_for_input_data",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 2
+    },
+    {
+      "name": "rec_090_implement_batch_normalization",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_091_leverage_the_keras_functional_api",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_092_inspect_and_interrogate_attention_to_predict_futur",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_093_perform_extensive_error_analysis_on_outputs_to_red",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_094_utilize_relu_based_activation_functions",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_095_experiment_with_dropout_regularization",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_096_utilize_conv2d_layers_to_process_basketball_court_",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_097_build_a_variational_autoencoder_vae_for_player_emb",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_098_implement_wasserstein_gan_with_gradient_penalty_wg",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_099_evaluate_rnn_extensions_grus",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_100_model_joint_and_conditional_probability_for_better",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_101_implement_a_diffusion_model_for_more_complex_game_",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_102_utilize_attention_to_model_nba_game_play",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_103_compare_the_use_of_recurrent_and_attentional_model",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_104_determine_best_guess_strategies_for_modeling_a_car",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_105_create_data_with_a_model_to_save_time",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_106_use_a_text_vector_encoding_on_descriptions_and_com",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_107_train_the_network_with_specific_types_of_rewards",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_108_monitor_average_reward_scores_over_different_test_",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_109_design_a_model_with_a_wide_range_of_testability",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_110_evaluate_gan_performance_with_fr\u00e9chet_inception_di",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_111_data_constrained_training_datasets_with_synthetic_",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_112_implement_a_gan_for_simulating_player_movement_tra",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_113_implement_a_dcgan_to_synthesize_basketball_court_s",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_114_apply_batch_normalization_in_discriminator_network",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 2
+    },
+    {
+      "name": "rec_115_implement_gradient_penalty_for_wasserstein_gan_wga",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_116_progressive_growing_for_high_resolution_basketball",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_117_utilize_tensorflow_hub_for_rapid_prototyping_with_",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_118_implement_semi_supervised_gan_for_player_classific",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_119_build_a_conditional_gan_for_generating_targeted_pl",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_120_implement_data_augmentation_on_imbalanced_datasets",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_121_monitor_loss_of_originality_of_classification_data",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_122_utilize_a_relativistic_discriminator_for_enhanced_",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_123_implement_an_anomaly_detection_system_with_vaes_an",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_124_utilize_object_oriented_programming_for_managing_c",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_125_implement_initial_heuristics_based_prototype_for_n",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_126_automated_data_validation_with_pandas_and_great_ex",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_127_implement_time_based_data_splitting_for_nba_game_d",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_128_establish_a_baseline_model_and_regularly_evaluate_",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_129_implement_ab_testing_for_real_time_evaluation_of_r",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_130_filter_test_for_a_productionized_model",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_131_create_a_monitoring_system_to_log_data_points_thro",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_132_compare_data_distribution_to_training_data",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_133_validate_data_flow_by_visualizing_feature_statisti",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_134_implement_and_monitor_prediction_calibration",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_135_implement_feature_importance_analysis_to_identify_",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_136_apply_k_means_clustering_for_identifying_player_ar",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_137_implement_active_learning_for_data_augmentation",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_138_utilize_ensemble_models_for_robust_predictions",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_139_implement_counterfactual_evaluation_to_reduce_acti",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_140_implement_data_provenance_tracking_for_reproducibl",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_141_implement_a_two_model_system_for_scoring_and_class",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_142_build_system_level_checks_for_action_outputs",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_143_implement_canary_development_to_test_model_perform",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_144_implement_a_ranking_model_to_predict_top_prospects",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_145_train_a_model_to_predict_player_injury_risk",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_146_train_an_error_model_to_identify_poor_performing_d",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_147_implement_a_real_time_fraud_detection_model_for_nb",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_148_add_test_function_to_validate_predictions",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_149_implement_extended_bradley_terry_model_for_match_o",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_150_implement_a_betting_edge_calculation_module",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 4,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_151_backtest_and_validate_model_performance",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_152_automate_data_collection_and_etl_processes",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 4,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_153_implement_a_prediction_function",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_154_create_a_looping_mechanism_to_generate_estimates_f",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_155_maximize_expected_value_by_choosing_the_best_odds",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 4,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_156_test_the_model_empirically_in_real_time",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 4,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_157_incorporate_team_salaries_as_a_covariate_in_the_mo",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_158_define_and_implement_value_thresholds_for_bet_plac",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_159_implement_real_time_prediction_service",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_160_monitor_model_performance_and_data_quality",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_161_implement_data_validation_and_cleaning_procedures",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_162_implement_ab_testing_for_model_variants",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_163_implement_parameter_optimization_using_rs_optim_fu",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_164_develop_a_log_likelihood_function_for_maximum_like",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_165_automate_the_model_fitting_process",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_166_compare_model_performance_with_linear_and_logarith",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_167_evaluate_the_effect_of_home_advantage",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_168_integrate_recent_form_as_a_covariate",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_169_implement_rolling_window_backtesting",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_170_implement_a_system_to_handle_data_latency",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_171_document_the_codebase_thoroughly",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_172_implement_subword_tokenization_with_bpe_or_wordpie",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_173_use_token_embeddings_as_input_to_language_models",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_174_implement_parallel_token_processing_and_kv_cache",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_175_utilize_sentence_transformers_for_supervised_class",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_176_fine_tune_generative_models_with_human_preferences",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_177_improve_outputs_with_step_by_step_thinking",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_178_add_context_to_chatbot",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_179_implement_a_two_pass_process_to_improve_search_qua",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_180_increase_information_availability",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_181_combine_several_chains",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_182_experiment_with_temperature_and_top_p_sampling",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_183_implement_zero_shot_classification_with_cosine_sim",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_184_use_flan_t5_for_sentiment_analysis",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_185_employ_tf_idf_as_a_baseline_for_text_clustering",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_186_use_test_cases_to_help_validate_outputs",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_187_utilize_hybrid_searches",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_188_combine_retrieval_augmented_generation_rag_and_the",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_189_make_a_robust_architecture",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_190_develop_special_tokenizers",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_191_enhance_the_system_by_using_external_apis",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_192_implement_mlops_pipeline_to_serve_image_search_mod",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_193_establish_robust_monitoring_for_prompt_and_generat",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_194_filter_training_datasets",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_195_use_high_level_utilities",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_196_set_data_source_for_models",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_197_track_toxicity_to_maintain_integrity",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_198_implement_data_representation_with_autoencoders_fo",
+      "target": "nba-simulator-aws",
+      "confidence": "medium",
+      "simulator_score": 3,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_199_implement_contrastive_learning_with_clip_for_seman",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_200_experiment_with_different_noise_schedules_in_diffu",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_201_leverage_latent_diffusion_for_generating_high_reso",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_202_implement_classifier_free_guidance_in_stable_diffu",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_203_evaluate_generative_performance_using_fr\u00e9chet_ince",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_204_fine_tune_distilbert_for_player_position_classific",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_205_use_traininghistory_callback_for_better_model_insi",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_206_use_lora_adapters_for_specialized_video_generation",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_207_evaluate_with_a_zero_shot_set_up",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_208_assess_prompt_template_impact",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_209_use_data_augmentation_to_improve_training",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_210_implement_bert_model",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_211_ensure_homogenous_text_and_image_data",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_212_train_model_with_two_objectives",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_213_apply_sigmoid_activation_for_pixel_values",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_214_generate_test_cases_that_represent_the_entire_data",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_215_use_attention_mechanisms",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_216_model_with_gaussian_distributions",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_217_track_mean_opinion_score_mos_for_data_visualizatio",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    },
+    {
+      "name": "rec_218_use_chain_of_thought_with_llms",
+      "target": "both",
+      "confidence": "low",
+      "simulator_score": 2,
+      "mcp_score": 1
+    }
+  ]
+}

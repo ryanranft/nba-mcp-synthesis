@@ -160,7 +160,7 @@ class PriorityActionListGenerator:
         """
         priority = rec.get('priority', 'important')
         category = rec.get('category', '').lower()
-        
+
         impact_text = rec.get('expected_impact', '').lower()
 
         # Base score from priority
@@ -199,18 +199,18 @@ class PriorityActionListGenerator:
 
         # Group by priority
         by_priority = {'critical': [], 'important': [], 'nice-to-have': []}
-        
+
         for rec_id in self.dependency_order:
             idx = self.rec_index.get(rec_id)
             if idx is None:
                 continue
-            
+
             rec = self.recommendations[idx]
             priority = rec.get('priority', 'important')
             by_priority[priority].append((rec_id, rec))
 
         # Calculate statistics
-        total_time = sum(self.parse_time_estimate(rec.get('time_estimate', '')) 
+        total_time = sum(self.parse_time_estimate(rec.get('time_estimate', ''))
                         for rec in self.recommendations)
         total_critical = len(by_priority['critical'])
         total_important = len(by_priority['important'])
@@ -258,7 +258,7 @@ Implement nice-to-have recommendations for additional enhancements.
 
         # Generate detailed list
         global_counter = 1
-        
+
         for priority_name in ['critical', 'important', 'nice-to-have']:
             priority_recs = by_priority[priority_name]
             if not priority_recs:
@@ -474,10 +474,10 @@ def main():
 
     # Build generator
     generator = PriorityActionListGenerator(recommendations, dependency_order)
-    
+
     # Generate action list
     generator.generate_action_list(args.output)
-    
+
     # Print summary
     print(f"\n" + "=" * 80)
     print(f"✅ PRIORITY ACTION LIST GENERATED")
@@ -489,4 +489,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
 

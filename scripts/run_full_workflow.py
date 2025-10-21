@@ -363,8 +363,8 @@ class Tier0WorkflowOrchestrator:
         logger.info("PHASE 8.5: PRE-INTEGRATION VALIDATION")
         logger.info("="*60 + "\n")
 
-        # Start phase tracking
-        self.status_mgr.start_phase("phase_8_5", "Phase 8.5: Pre-Integration Validation")
+        # Start phase tracking (skip prereq check since Phase 8 is skipped in autonomous mode)
+        self.status_mgr.start_phase("phase_8_5", "Phase 8.5: Pre-Integration Validation", skip_prereq_check=True)
 
         # Run validation script
         cmd = ['python3', 'scripts/phase8_5_validation.py']
@@ -408,7 +408,8 @@ class Tier0WorkflowOrchestrator:
         skip_validation: bool = False,
         use_parallel: bool = False,
         max_workers: int = 4,
-        skip_ai_modifications: bool = False
+        skip_ai_modifications: bool = False,
+        force_fresh: bool = False
     ) -> bool:
         """
         Run complete Tier 0/1/2 workflow.
@@ -420,6 +421,7 @@ class Tier0WorkflowOrchestrator:
             use_parallel: Enable parallel execution (Tier 1)
             max_workers: Number of parallel workers (Tier 1)
             skip_ai_modifications: Skip Phase 3.5 AI modifications (Tier 2)
+            force_fresh: Force fresh analysis, bypass all caching
 
         Returns:
             True if successful
@@ -471,6 +473,16 @@ class Tier0WorkflowOrchestrator:
         if not await self.run_phase4(dry_run):
             logger.error("\n❌ Workflow failed at Phase 4")
             return False
+
+        # Skip manual phases 5-8 (not applicable for autonomous runs)
+        logger.info("\n" + "="*60)
+        logger.info("SKIPPING MANUAL PHASES 5-8")
+        logger.info("="*60)
+        self.status_mgr.skip_phase("phase_5", "Dry-run validation - manual phase, skipped in autonomous mode")
+        self.status_mgr.skip_phase("phase_6", "Conflict resolution - manual phase, skipped in autonomous mode")
+        self.status_mgr.skip_phase("phase_7", "Manual review - manual phase, skipped in autonomous mode")
+        self.status_mgr.skip_phase("phase_8", "Implementation - manual phase, skipped in autonomous mode")
+        logger.info("⏭️  Skipped manual phases 5-8 (not applicable for autonomous workflow)\n")
 
         # Phase 8.5: Validation
         if not skip_validation:
@@ -563,11 +575,21 @@ Examples:
         action="store_true",
         help="Skip Phase 3.5: AI Plan Modifications (Tier 2 feature)"
     )
+    parser.add_argument(
+        "--force-fresh",
+        action="store_true",
+        help="Force fresh analysis, bypass all caching (ensures true convergence enhancement)"
+    )
 
     args = parser.parse_args()
 
     # Initialize orchestrator
     orchestrator = Tier0WorkflowOrchestrator()
+
+    # Warn about force-fresh mode
+    if args.force_fresh:
+        logger.warning("⚠️  FORCE FRESH MODE ENABLED - All caching bypassed")
+        logger.warning("   This ensures true convergence enhancement but may be slower")
 
     # Run workflow
     success = await orchestrator.run_workflow(
@@ -576,7 +598,8 @@ Examples:
         skip_validation=args.skip_validation,
         use_parallel=args.parallel,
         max_workers=args.max_workers,
-        skip_ai_modifications=args.skip_ai_modifications
+        skip_ai_modifications=args.skip_ai_modifications,
+        force_fresh=args.force_fresh
     )
 
     if success:

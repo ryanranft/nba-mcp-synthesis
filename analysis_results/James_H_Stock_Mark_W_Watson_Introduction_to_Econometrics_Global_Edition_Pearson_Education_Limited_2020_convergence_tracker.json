@@ -1,11 +1,11 @@
 {
   "book_title": "James H. Stock Mark W. Watson Introduction to Econometrics Global Edition Pearson Education Limited 2020",
   "s3_path": "books/James-H.-Stock-Mark-W.-Watson-Introduction-to-Econometrics-Global-Edition-Pearson-Education-Limited-2020.pdf",
-  "start_time": "2025-10-19T00:19:41.967904",
+  "start_time": "2025-10-19T05:04:47.706788",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-19T00:19:53.211126",
+      "timestamp": "2025-10-19T05:04:51.858917",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -14,7 +14,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-19T00:19:57.454941",
+      "timestamp": "2025-10-19T05:04:55.876990",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -23,7 +23,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-19T00:20:01.627913",
+      "timestamp": "2025-10-19T05:05:00.495734",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -32,7 +32,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-19T00:20:05.920798",
+      "timestamp": "2025-10-19T05:05:04.488725",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -41,7 +41,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-19T00:20:10.053457",
+      "timestamp": "2025-10-19T05:05:08.609904",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -50,7 +50,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-19T00:20:14.320526",
+      "timestamp": "2025-10-19T05:05:12.679689",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -59,7 +59,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-19T00:20:18.673475",
+      "timestamp": "2025-10-19T05:05:24.223756",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -68,7 +68,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-19T00:20:23.155643",
+      "timestamp": "2025-10-19T05:05:28.132763",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -77,7 +77,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-19T00:20:27.289509",
+      "timestamp": "2025-10-19T05:05:32.095741",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -86,7 +86,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-19T00:20:31.837822",
+      "timestamp": "2025-10-19T05:05:36.568371",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -95,7 +95,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-19T00:20:35.905332",
+      "timestamp": "2025-10-19T05:05:41.371533",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -104,7 +104,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-19T00:20:40.238685",
+      "timestamp": "2025-10-19T05:05:45.813332",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -113,7 +113,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-19T00:20:44.485863",
+      "timestamp": "2025-10-19T05:05:49.846463",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -122,7 +122,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-19T00:20:48.595717",
+      "timestamp": "2025-10-19T05:05:54.043775",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -131,7 +131,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-19T00:20:52.898946",
+      "timestamp": "2025-10-19T05:05:58.004561",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -149,6 +149,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-19T00:20:52.898965",
+  "end_time": "2025-10-19T05:05:58.004579",
   "total_iterations": 15
 }

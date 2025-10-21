@@ -1,11 +1,11 @@
 {
   "book_title": "0812 Machine Learning for Absolute Beginners",
   "s3_path": "books/0812_Machine-Learning-for-Absolute-Beginners.pdf",
-  "start_time": "2025-10-19T01:45:00.090821",
+  "start_time": "2025-10-19T04:41:23.176435",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-19T01:45:01.935025",
+      "timestamp": "2025-10-19T04:41:24.955947",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -14,7 +14,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-19T01:45:02.713000",
+      "timestamp": "2025-10-19T04:41:25.892784",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -23,7 +23,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-19T01:45:03.471938",
+      "timestamp": "2025-10-19T04:41:26.742375",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -32,7 +32,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-19T01:45:04.235371",
+      "timestamp": "2025-10-19T04:41:27.475818",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -41,7 +41,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-19T01:45:04.955730",
+      "timestamp": "2025-10-19T04:41:28.216353",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -50,7 +50,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-19T01:45:05.700390",
+      "timestamp": "2025-10-19T04:41:29.039189",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -59,7 +59,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-19T01:45:06.476017",
+      "timestamp": "2025-10-19T04:41:29.793103",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -68,7 +68,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-19T01:45:07.285180",
+      "timestamp": "2025-10-19T04:41:30.525949",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -77,7 +77,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-19T01:45:08.069324",
+      "timestamp": "2025-10-19T04:41:31.300147",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -86,7 +86,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-19T01:45:08.835844",
+      "timestamp": "2025-10-19T04:41:36.338444",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -95,7 +95,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-19T01:45:09.611206",
+      "timestamp": "2025-10-19T04:41:37.065236",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -104,7 +104,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-19T01:45:10.425013",
+      "timestamp": "2025-10-19T04:41:37.801731",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -113,7 +113,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-19T01:45:11.190168",
+      "timestamp": "2025-10-19T04:41:38.539836",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -122,7 +122,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-19T01:45:11.946255",
+      "timestamp": "2025-10-19T04:41:39.280006",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -131,7 +131,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-19T01:45:12.714548",
+      "timestamp": "2025-10-19T04:41:40.069362",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -149,6 +149,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-19T01:45:12.714570",
+  "end_time": "2025-10-19T04:41:40.069386",
   "total_iterations": 15
 }

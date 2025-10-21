@@ -15,8 +15,8 @@ Git history scrubbing was successfully completed locally using BFG Repo-Cleaner.
 ## What Was Successfully Scrubbed
 
 ### Google Cloud IDs - ✅ CLEANED
-- `gen-lang-client-0453895548` → `${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}`
-- `gen-lang-client-0677055559` → `${GOOGLE_CLOUD_PROJECT_ID_SECONDARY}`
+- `${PROJECT_ID_PRIMARY}` → `${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}`
+- `${PROJECT_ID_SECONDARY}` → `${GOOGLE_CLOUD_PROJECT_ID_SECONDARY}`
 - `01C3B6-61505E-CB6F45` → `${GOOGLE_CLOUD_BILLING_ACCOUNT_ID}`
 
 ### Files Cleaned (9 files, 20 object IDs changed)
@@ -239,4 +239,7 @@ Once decided, I can:
 
 **Last Updated**: 2025-10-18 20:52 UTC  
 **Status**: ⚠️ Awaiting decision on how to proceed
+
+
+
 

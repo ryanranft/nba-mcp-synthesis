@@ -1,0 +1,70 @@
+{
+  "total": 48,
+  "by_category": {
+    "uncategorized": 43,
+    "data": 1,
+    "books": 2,
+    "nba": 1,
+    "s3": 1
+  },
+  "details": {
+    "uncategorized": [
+      "action_tools",
+      "advanced_formula_intelligence",
+      "advanced_visualization_engine",
+      "algebra_helper",
+      "automated_book_analysis",
+      "automated_formula_discovery",
+      "automated_report_generation",
+      "correlation_helper",
+      "cross_reference_system",
+      "documentation_training",
+      "file_tools",
+      "formula_builder",
+      "formula_comparison",
+      "formula_dependency_graph",
+      "formula_extractor",
+      "formula_intelligence",
+      "formula_playground",
+      "formula_usage_analytics",
+      "formula_validation",
+      "glue_tools",
+      "intelligent_error_correction",
+      "intelligent_recommendations",
+      "logger_config",
+      "math_helper",
+      "ml_anomaly_helper",
+      "ml_classification_helper",
+      "ml_clustering_helper",
+      "ml_evaluation_helper",
+      "ml_feature_helper",
+      "ml_validation_helper",
+      "multimodal_formula_processing",
+      "natural_language_formula",
+      "params",
+      "performance_monitoring",
+      "predictive_analytics",
+      "production_deployment_pipeline",
+      "realtime_calculation_service",
+      "smart_context_analysis",
+      "sports_validation",
+      "stats_helper",
+      "symbolic_regression",
+      "timeseries_helper",
+      "visualization_engine"
+    ],
+    "data": [
+      "database_tools"
+    ],
+    "books": [
+      "epub_helper",
+      "pdf_helper"
+    ],
+    "nba": [
+      "nba_metrics_helper"
+    ],
+    "s3": [
+      "s3_tools"
+    ]
+  }
+}

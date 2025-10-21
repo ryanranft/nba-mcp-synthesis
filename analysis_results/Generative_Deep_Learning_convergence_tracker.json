@@ -1,11 +1,11 @@
 {
   "book_title": "Generative Deep Learning",
   "s3_path": "books/Generative-Deep-Learning.pdf",
-  "start_time": "2025-10-19T00:07:52.338674",
+  "start_time": "2025-10-19T04:54:05.338495",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-19T00:07:55.134890",
+      "timestamp": "2025-10-19T04:54:07.530289",
       "recommendations": {
         "critical": [
           {
@@ -543,7 +543,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-19T00:08:05.196022",
+      "timestamp": "2025-10-19T04:54:17.065041",
       "recommendations": {
         "critical": [
           {
@@ -1081,7 +1081,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-19T00:08:16.606764",
+      "timestamp": "2025-10-19T04:54:25.896971",
       "recommendations": {
         "critical": [
           {
@@ -1619,7 +1619,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-19T00:08:27.094947",
+      "timestamp": "2025-10-19T04:54:34.720681",
       "recommendations": {
         "critical": [
           {
@@ -2157,7 +2157,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-19T00:08:38.473303",
+      "timestamp": "2025-10-19T04:54:43.634709",
       "recommendations": {
         "critical": [
           {
@@ -2695,7 +2695,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-19T00:08:49.148349",
+      "timestamp": "2025-10-19T04:54:52.436621",
       "recommendations": {
         "critical": [
           {
@@ -3233,7 +3233,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-19T00:09:00.265408",
+      "timestamp": "2025-10-19T04:55:01.314009",
       "recommendations": {
         "critical": [
           {
@@ -3771,7 +3771,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-19T00:09:10.966135",
+      "timestamp": "2025-10-19T04:55:10.346593",
       "recommendations": {
         "critical": [
           {
@@ -4309,7 +4309,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-19T00:09:21.145429",
+      "timestamp": "2025-10-19T04:55:19.174823",
       "recommendations": {
         "critical": [
           {
@@ -4847,7 +4847,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-19T00:09:31.704771",
+      "timestamp": "2025-10-19T04:55:28.166082",
       "recommendations": {
         "critical": [
           {
@@ -5385,7 +5385,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-19T00:09:42.669806",
+      "timestamp": "2025-10-19T04:55:36.976003",
       "recommendations": {
         "critical": [
           {
@@ -5923,7 +5923,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-19T00:09:53.703560",
+      "timestamp": "2025-10-19T04:55:45.931747",
       "recommendations": {
         "critical": [
           {
@@ -6461,7 +6461,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-19T00:10:04.967238",
+      "timestamp": "2025-10-19T04:55:54.775514",
       "recommendations": {
         "critical": [
           {
@@ -6999,7 +6999,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-19T00:10:15.377700",
+      "timestamp": "2025-10-19T04:56:03.688804",
       "recommendations": {
         "critical": [
           {
@@ -7537,7 +7537,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-19T00:10:25.356576",
+      "timestamp": "2025-10-19T04:56:12.880107",
       "recommendations": {
         "critical": [
           {
@@ -8084,6 +8084,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-19T00:10:34.305036",
+  "end_time": "2025-10-19T04:56:20.077093",
   "total_iterations": 15
 }

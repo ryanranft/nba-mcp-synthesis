@@ -1,11 +1,11 @@
 {
   "book_title": "ML Machine Learning A Probabilistic Perspective",
   "s3_path": "books/ML Machine Learning-A Probabilistic Perspective.pdf",
-  "start_time": "2025-10-19T00:24:28.819419",
+  "start_time": "2025-10-19T05:09:00.427506",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-19T00:24:33.949044",
+      "timestamp": "2025-10-19T05:09:05.376695",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -14,7 +14,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-19T00:24:38.524806",
+      "timestamp": "2025-10-19T05:09:10.380131",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -23,7 +23,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-19T00:24:43.072299",
+      "timestamp": "2025-10-19T05:09:14.812010",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -32,7 +32,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-19T00:24:47.548905",
+      "timestamp": "2025-10-19T05:09:19.213726",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -41,7 +41,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-19T00:24:52.252585",
+      "timestamp": "2025-10-19T05:09:23.699689",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -50,7 +50,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-19T00:24:56.924320",
+      "timestamp": "2025-10-19T05:09:28.063372",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -59,7 +59,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-19T00:25:01.444811",
+      "timestamp": "2025-10-19T05:09:39.428727",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -68,7 +68,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-19T00:25:05.919433",
+      "timestamp": "2025-10-19T05:09:44.318775",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -77,7 +77,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-19T00:25:18.750280",
+      "timestamp": "2025-10-19T05:09:48.975337",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -86,7 +86,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-19T00:25:23.321387",
+      "timestamp": "2025-10-19T05:09:53.314650",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -95,7 +95,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-19T00:25:27.889558",
+      "timestamp": "2025-10-19T05:09:57.659943",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -104,7 +104,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-19T00:25:32.825292",
+      "timestamp": "2025-10-19T05:10:01.974174",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -113,7 +113,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-19T00:25:37.335854",
+      "timestamp": "2025-10-19T05:10:06.238737",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -122,7 +122,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-19T00:25:41.822473",
+      "timestamp": "2025-10-19T05:10:10.879493",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -131,7 +131,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-19T00:25:46.361015",
+      "timestamp": "2025-10-19T05:10:15.313175",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -149,6 +149,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-19T00:25:46.361033",
+  "end_time": "2025-10-19T05:10:15.313196",
   "total_iterations": 15
 }

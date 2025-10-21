@@ -174,13 +174,14 @@ class PhaseStatusManager:
         except Exception as e:
             logger.error(f"Error saving phase status: {e}")
 
-    def start_phase(self, phase_id: str, phase_name: Optional[str] = None):
+    def start_phase(self, phase_id: str, phase_name: Optional[str] = None, skip_prereq_check: bool = False):
         """
         Mark a phase as started.
 
         Args:
             phase_id: Unique identifier for the phase
             phase_name: Human-readable name (optional, creates new phase if not exists)
+            skip_prereq_check: Skip prerequisite validation (use for validation/testing phases)
 
         Raises:
             ValueError: If prerequisites not met
@@ -198,12 +199,13 @@ class PhaseStatusManager:
 
         phase = self.phases[phase_id]
 
-        # Check prerequisites
-        unmet_prereqs = self._check_prerequisites(phase_id)
-        if unmet_prereqs:
-            raise ValueError(
-                f"Cannot start {phase_id}: Unmet prerequisites: {', '.join(unmet_prereqs)}"
-            )
+        # Check prerequisites (unless explicitly skipped)
+        if not skip_prereq_check:
+            unmet_prereqs = self._check_prerequisites(phase_id)
+            if unmet_prereqs:
+                raise ValueError(
+                    f"Cannot start {phase_id}: Unmet prerequisites: {', '.join(unmet_prereqs)}"
+                )
 
         # Update status
         phase.state = PhaseState.IN_PROGRESS
@@ -334,13 +336,13 @@ class PhaseStatusManager:
 
         for prereq_id in phase.prerequisites:
             if prereq_id not in self.phases:
-                unmet.append(prereq_id)
+                unmet.append(f"{prereq_id}(not_found)")
                 continue
 
             prereq = self.phases[prereq_id]
             # Prerequisites are met if phase is COMPLETED or SKIPPED
             if prereq.state not in (PhaseState.COMPLETED, PhaseState.SKIPPED):
-                unmet.append(prereq_id)
+                unmet.append(f"{prereq_id}({prereq.state.value})")
 
         return unmet
 

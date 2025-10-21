@@ -102,12 +102,12 @@ class DependencyTracker:
         for idx, rec in enumerate(self.recommendations, 1):
             rec_id = f"rec_{idx:03d}"
             deps = self.extract_dependencies(rec, idx)
-            
+
             if deps:
                 self.graph[rec_id] = deps
                 for dep_id in deps:
                     self.reverse_graph[dep_id].add(rec_id)
-                
+
                 logger.info(f"  {rec_id}: {len(deps)} dependencies")
 
         logger.info(f"✅ Graph built: {len(self.graph)} nodes with dependencies")
@@ -173,7 +173,7 @@ class DependencyTracker:
         # Calculate in-degree for each node
         in_degree = defaultdict(int)
         all_recs = [f"rec_{i:03d}" for i in range(1, len(self.recommendations) + 1)]
-        
+
         for rec_id in all_recs:
             in_degree[rec_id] = len(self.graph.get(rec_id, []))
 
@@ -300,7 +300,7 @@ See [PRIORITY_ACTION_LIST.md](PRIORITY_ACTION_LIST.md) for the recommended imple
             rec_idx = int(rec_id.split('_')[1])
             title = self.recommendations[rec_idx - 1].get('title', 'Unknown')
             deps = sorted(self.graph[rec_id])
-            
+
             markdown_content += f"### {rec_id}: {title}\n\n"
             markdown_content += f"**Depends on:**\n"
             for dep_id in deps:
@@ -345,19 +345,19 @@ def main():
 
     # Build tracker
     tracker = DependencyTracker(recommendations)
-    
+
     # Build graph
     tracker.build_dependency_graph()
-    
+
     # Detect circular dependencies
     cycles = tracker.detect_circular_dependencies()
-    
+
     # Generate implementation order
     order = tracker.generate_implementation_order()
-    
+
     # Generate Mermaid diagram
     tracker.generate_mermaid_diagram(args.output)
-    
+
     # Print summary
     print(f"\n" + "=" * 80)
     print(f"✅ DEPENDENCY ANALYSIS COMPLETE")
@@ -372,4 +372,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
 

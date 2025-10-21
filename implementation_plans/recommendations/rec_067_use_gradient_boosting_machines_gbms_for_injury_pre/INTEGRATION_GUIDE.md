@@ -94,4 +94,4 @@ python scripts/rollback_manager.py --restore [backup_id]
 
 ---
 
-**Generated:** 2025-10-19T01:45:41.423280
+**Generated:** 2025-10-19T05:47:00.917723

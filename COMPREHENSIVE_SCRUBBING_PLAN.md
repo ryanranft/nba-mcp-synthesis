@@ -47,8 +47,8 @@
 
 ### Plus: Google Cloud IDs (Already Being Scrubbed)
 
-- `gen-lang-client-0453895548`
-- `gen-lang-client-0677055559`
+- `${PROJECT_ID_PRIMARY}`
+- `${PROJECT_ID_SECONDARY}`
 - `01C3B6-61505E-CB6F45`
 
 ---
@@ -63,7 +63,7 @@
 
 ```bash
 # Visit Google Cloud Console
-open "https://console.cloud.google.com/apis/credentials?project=gen-lang-client-0453895548"
+open "https://console.cloud.google.com/apis/credentials?project=${PROJECT_ID_PRIMARY}"
 
 # Steps:
 # 1. Find API key: ${GOOGLE_API_KEY_REVOKED}
@@ -74,7 +74,7 @@ open "https://console.cloud.google.com/apis/credentials?project=gen-lang-client-
 Or via CLI:
 ```bash
 gcloud alpha services api-keys delete ${GOOGLE_API_KEY_REVOKED} \
-  --project=gen-lang-client-0453895548
+  --project=${PROJECT_ID_PRIMARY}
 ```
 
 #### 1.2 Revoke Anthropic API Key (2 minutes)
@@ -136,10 +136,10 @@ After keys are revoked, create a comprehensive replacement file:
 ```bash
 cat > /tmp/comprehensive-replacements.txt << 'EOF'
 # Google Cloud IDs
-gen-lang-client-0453895548==>${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}
-gen-lang-client-0677055559==>${GOOGLE_CLOUD_PROJECT_ID_SECONDARY}
+${PROJECT_ID_PRIMARY}==>${GOOGLE_CLOUD_PROJECT_ID_PRIMARY}
+${PROJECT_ID_SECONDARY}==>${GOOGLE_CLOUD_PROJECT_ID_SECONDARY}
 01C3B6-61505E-CB6F45==>${GOOGLE_CLOUD_BILLING_ACCOUNT_ID}
-gcp_billing_export_v1_01C3B6_61505E_CB6F45==>${BIGQUERY_BILLING_EXPORT_TABLE}
+${BIGQUERY_BILLING_EXPORT_TABLE}==>${BIGQUERY_BILLING_EXPORT_TABLE}
 
 # API Keys (REVOKED)
 ${GOOGLE_API_KEY_REVOKED}==>${GOOGLE_API_KEY_REVOKED}
@@ -350,4 +350,7 @@ Scrubbing is complete when:
 **Time to Complete**: ~1 hour
 **Safety**: Backup created, can restore if needed
 **Result**: Completely clean history, all secrets removed
+
+
+
 

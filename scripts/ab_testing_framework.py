@@ -148,44 +148,97 @@ class ABTestingFramework:
         """
         logger.info(f"🧪 Running test: {config.name} on {book_title}")
 
-        # TODO: Integrate with actual high_context_book_analyzer
-        # For now, return mock results for framework testing
+        # Integrate with actual high_context_book_analyzer
+        try:
+            # Dynamically import to avoid circular dependencies
+            from high_context_book_analyzer import HighContextBookAnalyzer
 
-        # This would normally call:
-        # from scripts.high_context_book_analyzer import HighContextBookAnalyzer
-        # analyzer = HighContextBookAnalyzer(
-        #     primary_model=config.primary_model,
-        #     secondary_model=config.secondary_model,
-        #     use_consensus=config.use_consensus,
-        #     similarity_threshold=config.similarity_threshold
-        # )
-        # result = await analyzer.analyze_book(book_path, book_title)
+            # Create analyzer with config settings
+            analyzer = HighContextBookAnalyzer(
+                model_combination=self._config_to_model_combination(config),
+                consensus_threshold=config.similarity_threshold
+            )
 
-        # Mock result for now
-        result = TestResult(
-            config_name=config.name,
-            book_title=book_title,
-            recommendations_found=42,
-            critical_count=5,
-            important_count=15,
-            nice_to_have_count=22,
-            convergence_achieved=True,
-            iterations_required=3,
-            total_cost_usd=0.75,
-            gemini_cost_usd=0.60,
-            claude_cost_usd=0.15,
-            processing_time_seconds=45.2,
-            tokens_used=125000,
-            cache_hits=0,
-            characters_analyzed=500000,
-            pages_analyzed=250
-        )
+            # Run analysis
+            start_time = datetime.now()
+            analysis_result = await analyzer.analyze_book_async(book_path)
+            processing_time = (datetime.now() - start_time).total_seconds()
 
-        logger.info(f"  ✅ Test complete: {result.recommendations_found} recommendations")
-        logger.info(f"  💰 Cost: ${result.total_cost_usd:.4f}")
-        logger.info(f"  ⏱️  Time: {result.processing_time_seconds:.1f}s")
+            # Extract metrics from analysis result
+            recommendations = analysis_result.get('recommendations', [])
+            convergence_tracker = analysis_result.get('convergence_tracker', {})
+            cost_data = analysis_result.get('cost', {})
 
-        return result
+            # Count by priority
+            critical_count = sum(1 for r in recommendations if r.get('priority') == 'critical')
+            important_count = sum(1 for r in recommendations if r.get('priority') == 'important')
+            nice_to_have_count = sum(1 for r in recommendations if r.get('priority') == 'nice-to-have')
+
+            result = TestResult(
+                config_name=config.name,
+                book_title=book_title,
+                recommendations_found=len(recommendations),
+                critical_count=critical_count,
+                important_count=important_count,
+                nice_to_have_count=nice_to_have_count,
+                convergence_achieved=convergence_tracker.get('convergence_achieved', False),
+                iterations_required=convergence_tracker.get('iterations_completed', 0),
+                total_cost_usd=cost_data.get('total', 0.0),
+                gemini_cost_usd=cost_data.get('gemini', 0.0),
+                claude_cost_usd=cost_data.get('claude', 0.0),
+                processing_time_seconds=processing_time,
+                tokens_used=cost_data.get('tokens_used', 0),
+                cache_hits=analysis_result.get('cache_hits', 0),
+                characters_analyzed=analysis_result.get('characters_analyzed', 0),
+                pages_analyzed=analysis_result.get('pages_analyzed', 0)
+            )
+
+            logger.info(f"  ✅ Test complete: {result.recommendations_found} recommendations")
+            logger.info(f"  💰 Cost: ${result.total_cost_usd:.4f}")
+            logger.info(f"  ⏱️  Time: {result.processing_time_seconds:.1f}s")
+
+            return result
+
+        except Exception as e:
+            logger.error(f"  ❌ Test failed: {e}")
+            # Return minimal result on failure
+            return TestResult(
+                config_name=config.name,
+                book_title=book_title,
+                recommendations_found=0,
+                critical_count=0,
+                important_count=0,
+                nice_to_have_count=0,
+                convergence_achieved=False,
+                iterations_required=0,
+                total_cost_usd=0.0,
+                gemini_cost_usd=0.0,
+                claude_cost_usd=0.0,
+                processing_time_seconds=0.0,
+                tokens_used=0,
+                cache_hits=0,
+                characters_analyzed=0,
+                pages_analyzed=0
+            )
+
+    def _config_to_model_combination(self, config: ModelConfig) -> str:
+        """
+        Convert ModelConfig to model_combination string.
+
+        Args:
+            config: ModelConfig instance
+
+        Returns:
+            Model combination string
+        """
+        if config.use_consensus and config.secondary_model:
+            return 'gemini+claude'
+        elif config.primary_model == 'gemini':
+            return 'gemini_only'
+        elif config.primary_model == 'claude':
+            return 'claude_only'
+        else:
+            return 'gemini+claude'
 
     async def run_comparison_test(
         self,

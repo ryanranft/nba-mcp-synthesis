@@ -1,0 +1,88 @@
+{
+  "phase_0": {
+    "name": "Phase 0: Discovery",
+    "description": "Initial project discovery",
+    "dependencies": []
+  },
+  "phase_1": {
+    "name": "Phase 1: Book Discovery",
+    "description": "Discover technical books",
+    "dependencies": [
+      "phase_0"
+    ]
+  },
+  "phase_2": {
+    "name": "Phase 2: Book Analysis",
+    "description": "Analyze books with AI",
+    "dependencies": [
+      "phase_1"
+    ],
+    "critical": true
+  },
+  "phase_3": {
+    "name": "Phase 3: Synthesis",
+    "description": "Synthesize recommendations",
+    "dependencies": [
+      "phase_2"
+    ],
+    "critical": true
+  },
+  "phase_3.5": {
+    "name": "Phase 3.5: AI Modifications",
+    "description": "AI-powered plan modifications",
+    "dependencies": [
+      "phase_3"
+    ],
+    "critical": true
+  },
+  "phase_4": {
+    "name": "Phase 4: File Generation",
+    "description": "Generate implementation files",
+    "dependencies": [
+      "phase_3.5"
+    ]
+  },
+  "phase_5": {
+    "name": "Phase 5: Index Updates",
+    "description": "Update documentation indexes",
+    "dependencies": [
+      "phase_4"
+    ]
+  },
+  "phase_6": {
+    "name": "Phase 6: Status Reports",
+    "description": "Generate status reports",
+    "dependencies": [
+      "phase_5"
+    ]
+  },
+  "phase_7": {
+    "name": "Phase 7: Sequence Optimization",
+    "description": "Optimize implementation sequence",
+    "dependencies": [
+      "phase_6"
+    ]
+  },
+  "phase_8": {
+    "name": "Phase 8: Progress Tracking",
+    "description": "Setup progress tracking",
+    "dependencies": [
+      "phase_7"
+    ]
+  },
+  "phase_8.5": {
+    "name": "Phase 8.5: Pre-Integration Validation",
+    "description": "Validate before integration",
+    "dependencies": [
+      "phase_4"
+    ]
+  },
+  "phase_9": {
+    "name": "Phase 9: Integration",
+    "description": "Integrate with nba-simulator-aws",
+    "dependencies": [
+      "phase_8",
+      "phase_8.5"
+    ]
+  }
+}

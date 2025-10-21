@@ -1,11 +1,11 @@
 {
   "book_title": "building machine learning powered applications going from idea to product",
   "s3_path": "books/building-machine-learning-powered-applications-going-from-idea-to-product.pdf",
-  "start_time": "2025-10-19T00:37:49.931453",
+  "start_time": "2025-10-19T05:21:17.678458",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-19T00:37:51.229569",
+      "timestamp": "2025-10-19T05:21:18.777325",
       "recommendations": {
         "critical": [
           {
@@ -617,7 +617,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-19T00:38:06.872265",
+      "timestamp": "2025-10-19T05:21:32.085046",
       "recommendations": {
         "critical": [
           {
@@ -1229,7 +1229,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-19T00:38:21.824583",
+      "timestamp": "2025-10-19T05:21:45.368225",
       "recommendations": {
         "critical": [
           {
@@ -1841,7 +1841,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-19T00:38:37.681621",
+      "timestamp": "2025-10-19T05:21:58.806283",
       "recommendations": {
         "critical": [
           {
@@ -2453,7 +2453,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-19T00:38:52.937790",
+      "timestamp": "2025-10-19T05:22:12.363987",
       "recommendations": {
         "critical": [
           {
@@ -3065,7 +3065,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-19T00:39:08.145918",
+      "timestamp": "2025-10-19T05:22:26.015587",
       "recommendations": {
         "critical": [
           {
@@ -3677,7 +3677,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-19T00:39:23.891905",
+      "timestamp": "2025-10-19T05:22:39.320401",
       "recommendations": {
         "critical": [
           {
@@ -4289,7 +4289,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-19T00:39:39.204459",
+      "timestamp": "2025-10-19T05:22:52.757343",
       "recommendations": {
         "critical": [
           {
@@ -4901,7 +4901,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-19T00:39:54.017924",
+      "timestamp": "2025-10-19T05:23:06.056393",
       "recommendations": {
         "critical": [
           {
@@ -5513,7 +5513,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-19T00:40:09.259843",
+      "timestamp": "2025-10-19T05:23:19.850144",
       "recommendations": {
         "critical": [
           {
@@ -6125,7 +6125,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-19T00:40:24.453508",
+      "timestamp": "2025-10-19T05:23:33.286201",
       "recommendations": {
         "critical": [
           {
@@ -6737,7 +6737,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-19T00:40:40.734478",
+      "timestamp": "2025-10-19T05:23:46.979248",
       "recommendations": {
         "critical": [
           {
@@ -7349,7 +7349,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-19T00:40:56.683428",
+      "timestamp": "2025-10-19T05:24:00.254975",
       "recommendations": {
         "critical": [
           {
@@ -7961,7 +7961,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-19T00:41:12.280480",
+      "timestamp": "2025-10-19T05:24:14.065064",
       "recommendations": {
         "critical": [
           {
@@ -8573,7 +8573,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-19T00:41:27.848264",
+      "timestamp": "2025-10-19T05:24:27.473373",
       "recommendations": {
         "critical": [
           {
@@ -9194,6 +9194,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-19T00:41:42.911874",
+  "end_time": "2025-10-19T05:24:39.982482",
   "total_iterations": 15
 }
