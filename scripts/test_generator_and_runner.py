@@ -212,6 +212,21 @@ class TestGeneratorAndRunner:
         classes = re.findall(r'class (\w+)', implementation_code)
         functions = re.findall(r'def (\w+)', implementation_code)
 
+        # Determine correct import path based on module location
+        module_path_obj = Path(module_path)
+        if self.project_root in module_path_obj.parents:
+            # Get relative path from project root
+            rel_path = module_path_obj.relative_to(self.project_root)
+            # Convert to import path (remove .py, replace / with .)
+            import_path = str(rel_path.with_suffix('')).replace('/', '.')
+        else:
+            # Fallback to simple module name
+            import_path = module_name
+
+        # Get the directory containing the module for path manipulation
+        module_dir = module_path_obj.parent.relative_to(self.project_root) if self.project_root in module_path_obj.parents else Path('scripts')
+        module_dir_str = str(module_dir)
+
         prompt = f"""Generate a comprehensive pytest test suite for the following Python module.
 
 # Module: {module_name}
@@ -259,6 +274,9 @@ Generate a complete pytest test file with:
 
 ## Test Structure
 
+IMPORTANT: The module is located at {module_dir_str}/{module_name}.py
+You MUST use this exact import statement:
+
 ```python
 #!/usr/bin/env python3
 \"\"\"
@@ -266,9 +284,14 @@ Tests for {module_name}
 \"\"\"
 
 import pytest
-import pandas as pd
-import numpy as np
+import sys
+from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
+
+# Add module directory to Python path
+sys.path.insert(0, str(Path(__file__).parent.parent / '{module_dir_str}'))
+
+# Import from the module
 from {module_name} import [classes/functions to test]
 
 
@@ -287,6 +310,14 @@ def test_[feature]_[scenario]():
     # Assert
     assert expected == actual
 ```
+
+## Critical Import Requirements
+
+- ALWAYS include the sys.path.insert line EXACTLY as shown above
+- The path manipulation is: sys.path.insert(0, str(Path(__file__).parent.parent / '{module_dir_str}'))
+- Then import using: from {module_name} import ...
+- Do NOT use: from {import_path} import ... (this will fail)
+- Do NOT skip the path manipulation code
 
 ## Important
 
@@ -317,6 +348,14 @@ Generate the complete test suite now:"""
         classes = re.findall(r'class (\w+)', implementation_code)
         functions = re.findall(r'def (\w+)', implementation_code)
 
+        # Get module directory for path manipulation
+        module_path_obj = Path(module_path)
+        if self.project_root in module_path_obj.parents:
+            module_dir = module_path_obj.parent.relative_to(self.project_root)
+            module_dir_str = str(module_dir)
+        else:
+            module_dir_str = 'scripts'
+
         test_code = f'''#!/usr/bin/env python3
 """
 Tests for {module_name}
@@ -325,6 +364,12 @@ Feature: {title}
 """
 
 import pytest
+import sys
+from pathlib import Path
+
+# Add module directory to Python path
+sys.path.insert(0, str(Path(__file__).parent.parent / '{module_dir_str}'))
+
 from {module_name} import *
 
 
