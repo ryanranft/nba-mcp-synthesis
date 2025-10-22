@@ -126,14 +126,22 @@ class MockDataInventoryScanner:
                 # Extract columns
                 columns = {}
                 for line in lines[1:]:
-                    if '(' in line or ')' in line or 'INDEX' in line:
+                    line_stripped = line.strip()
+                    # Skip empty lines, closing braces, and constraint definitions
+                    if not line_stripped or line_stripped.startswith(')') or 'INDEX' in line:
                         continue
-                    if line.strip():
-                        parts = line.strip().rstrip(',').split()
-                        if len(parts) >= 2:
-                            col_name = parts[0]
-                            col_type = parts[1]
-                            columns[col_name] = {'type': col_type}
+                    # Skip constraint keywords
+                    if line_stripped.startswith(('PRIMARY', 'FOREIGN', 'UNIQUE', 'CHECK', 'CONSTRAINT')):
+                        continue
+
+                    # Parse column definition
+                    parts = line_stripped.rstrip(',').split(maxsplit=1)
+                    if len(parts) >= 2:
+                        col_name = parts[0]
+                        # Extract just the data type (first word after column name)
+                        col_type_full = parts[1]
+                        col_type = col_type_full.split()[0] if col_type_full else ''
+                        columns[col_name] = {'type': col_type}
 
                 schema[table_name] = {'columns': columns}
 
@@ -473,8 +481,8 @@ CREATE TABLE master_games (
         with open(metrics_file, 'w') as f:
             yaml.dump({
                 'database': {'total_tables': 15, 'total_rows': 5000000},
-                's3': {'total_objects': 172000},
-                'coverage': {'seasons': '2014-2025'}
+                's3': {'total_objects': 172000, 'total_size_gb': 450},
+                'coverage': {'seasons': '2014-2025', 'games': 15000, 'players': 5000}
             }, f)
 
         # Create schema

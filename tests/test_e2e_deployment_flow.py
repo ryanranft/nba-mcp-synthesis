@@ -292,7 +292,10 @@ async def mock_e2e_deployment_flow(
             result['status'] = 'git_failed'
             return result
 
-        result['branch_name'] = f"feature/book-analytics-{int(time.time())}"
+        # Use high-precision timestamp with microseconds for uniqueness
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]  # Short unique identifier
+        result['branch_name'] = f"feature/book-analytics-{int(time.time())}-{unique_id}"
         result['branch_created'] = True
         result['local_commit'] = True
         result['push_success'] = True

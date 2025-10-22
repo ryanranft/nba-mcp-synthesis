@@ -163,20 +163,34 @@ PASSWORD = "password123"
             pytest.skip("detect-secrets not installed")
 
         # Create new baseline in temp directory
+        # detect-secrets requires redirecting output to create initial baseline
         baseline_path = tmp_path / ".secrets.baseline"
 
+        # Create initial baseline by scanning and redirecting output
         result = subprocess.run(
-            ['detect-secrets', 'scan', '--baseline', str(baseline_path)],
+            ['detect-secrets', 'scan', str(tmp_path)],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+
+        # Write the baseline file
+        if result.returncode in [0, 1, 3]:  # Various success codes
+            baseline_path.write_text(result.stdout)
+
+        assert baseline_path.exists(), "Baseline file should be created"
+
+        # Now test updating the baseline
+        result = subprocess.run(
+            ['detect-secrets', 'scan', '--baseline', str(baseline_path), str(tmp_path)],
             capture_output=True,
             text=True,
             cwd=tmp_path,
             timeout=10
         )
 
-        # Different versions of detect-secrets may return different codes
-        # Some return 0, some return 3 when no secrets found
-        assert result.returncode in [0, 1, 3], f"Baseline creation should succeed (got code {result.returncode})"
-        assert baseline_path.exists(), "Baseline file should be created"
+        # Update should succeed
+        assert result.returncode in [0, 1, 3], f"Baseline update should succeed (got code {result.returncode})"
 
         # Verify baseline format
         with open(baseline_path) as f:
