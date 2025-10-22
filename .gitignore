@@ -466,4 +466,5 @@ overnight.log
 logs/
 *.log
 
-.cursorignore
+.cursorignorefixed_deployment.json
+success_deployment.json
