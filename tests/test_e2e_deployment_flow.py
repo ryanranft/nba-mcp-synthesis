@@ -804,25 +804,53 @@ async def run_all_e2e_tests():
         'models_used': ['deepseek', 'claude']
     }
 
+    # Define test functions without lambdas to avoid scope issues
+    async def run_test_01():
+        await test_suite.test_01_complete_e2e_deployment_flow(
+            sample_book, deployment_config, sample_extraction, mock_synthesis)
+
+    async def run_test_02():
+        await test_suite.test_02_extraction_failure_handling(
+            sample_book, deployment_config)
+
+    async def run_test_03():
+        await test_suite.test_03_synthesis_failure_rollback(
+            sample_book, deployment_config, sample_extraction)
+
+    async def run_test_04():
+        await test_suite.test_04_test_generation_failure(
+            sample_book, deployment_config, sample_extraction, mock_synthesis)
+
+    async def run_test_05():
+        await test_suite.test_05_test_execution_failure(
+            sample_book, deployment_config, sample_extraction, mock_synthesis)
+
+    async def run_test_06():
+        await test_suite.test_06_git_workflow_failure(
+            sample_book, deployment_config, sample_extraction, mock_synthesis)
+
+    async def run_test_07():
+        await test_suite.test_07_pr_creation_failure(
+            sample_book, deployment_config, sample_extraction, mock_synthesis)
+
+    async def run_test_08():
+        await test_suite.test_08_concurrent_deployments(
+            temp_dir, deployment_config, sample_extraction, mock_synthesis)
+
+    async def run_test_09():
+        await test_suite.test_09_cost_limit_protection(
+            sample_book, deployment_config, sample_extraction, mock_synthesis)
+
     tests = [
-        ("Complete E2E Flow", lambda: test_suite.test_01_complete_e2e_deployment_flow(
-            sample_book, deployment_config, sample_extraction, mock_synthesis)),
-        ("Extraction Failure", lambda: test_suite.test_02_extraction_failure_handling(
-            sample_book, deployment_config)),
-        ("Synthesis Rollback", lambda: test_suite.test_03_synthesis_failure_rollback(
-            sample_book, deployment_config, sample_extraction)),
-        ("Test Generation Failure", lambda: test_suite.test_04_test_generation_failure(
-            sample_book, deployment_config, sample_extraction, mock_synthesis)),
-        ("Test Execution Failure", lambda: test_suite.test_05_test_execution_failure(
-            sample_book, deployment_config, sample_extraction, mock_synthesis)),
-        ("Git Workflow Failure", lambda: test_suite.test_06_git_workflow_failure(
-            sample_book, deployment_config, sample_extraction, mock_synthesis)),
-        ("PR Creation Failure", lambda: test_suite.test_07_pr_creation_failure(
-            sample_book, deployment_config, sample_extraction, mock_synthesis)),
-        ("Concurrent Deployments", lambda: test_suite.test_08_concurrent_deployments(
-            temp_dir, deployment_config, sample_extraction, mock_synthesis)),
-        ("Cost Limit Protection", lambda: test_suite.test_09_cost_limit_protection(
-            sample_book, deployment_config, sample_extraction, mock_synthesis)),
+        ("Complete E2E Flow", run_test_01),
+        ("Extraction Failure", run_test_02),
+        ("Synthesis Rollback", run_test_03),
+        ("Test Generation Failure", run_test_04),
+        ("Test Execution Failure", run_test_05),
+        ("Git Workflow Failure", run_test_06),
+        ("PR Creation Failure", run_test_07),
+        ("Concurrent Deployments", run_test_08),
+        ("Cost Limit Protection", run_test_09),
     ]
 
     passed = 0

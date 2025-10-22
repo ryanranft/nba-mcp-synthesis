@@ -510,16 +510,52 @@ async def run_all_dims_tests():
     print()
 
     test_suite = TestDIMSIntegration()
-    tmp_path = Path(tempfile.mkdtemp())
+    base_tmp_path = Path(tempfile.mkdtemp())
+
+    # Create test functions with unique temp dirs to avoid conflicts
+    def run_test_01():
+        tmp_path = base_tmp_path / "test_01"
+        tmp_path.mkdir()
+        return test_suite.test_01_dims_scanner_initialization(tmp_path)
+
+    def run_test_02():
+        tmp_path = base_tmp_path / "test_02"
+        tmp_path.mkdir()
+        return test_suite.test_02_load_metrics_from_yaml(tmp_path)
+
+    def run_test_03():
+        tmp_path = base_tmp_path / "test_03"
+        tmp_path.mkdir()
+        return test_suite.test_03_parse_sql_schema(tmp_path)
+
+    def run_test_04():
+        tmp_path = base_tmp_path / "test_04"
+        tmp_path.mkdir()
+        return test_suite.test_04_assess_data_coverage(tmp_path)
+
+    def run_test_05():
+        tmp_path = base_tmp_path / "test_05"
+        tmp_path.mkdir()
+        return test_suite.test_05_extract_available_features(tmp_path)
+
+    def run_test_06():
+        tmp_path = base_tmp_path / "test_06"
+        tmp_path.mkdir()
+        return test_suite.test_06_generate_ai_summary(tmp_path)
+
+    def run_test_08():
+        tmp_path = base_tmp_path / "test_08"
+        tmp_path.mkdir()
+        return test_suite.test_08_full_inventory_scan(tmp_path)
 
     tests = [
-        ("Scanner Initialization", lambda: test_suite.test_01_dims_scanner_initialization(tmp_path)),
-        ("Load Metrics from YAML", lambda: test_suite.test_02_load_metrics_from_yaml(tmp_path)),
-        ("Parse SQL Schema", lambda: test_suite.test_03_parse_sql_schema(tmp_path)),
-        ("Assess Data Coverage", lambda: test_suite.test_04_assess_data_coverage(tmp_path)),
-        ("Extract Available Features", lambda: test_suite.test_05_extract_available_features(tmp_path)),
-        ("Generate AI Summary", lambda: test_suite.test_06_generate_ai_summary(tmp_path)),
-        ("Full Inventory Scan", lambda: test_suite.test_08_full_inventory_scan(tmp_path)),
+        ("Scanner Initialization", run_test_01),
+        ("Load Metrics from YAML", run_test_02),
+        ("Parse SQL Schema", run_test_03),
+        ("Assess Data Coverage", run_test_04),
+        ("Extract Available Features", run_test_05),
+        ("Generate AI Summary", run_test_06),
+        ("Full Inventory Scan", run_test_08),
     ]
 
     passed = 0
@@ -540,7 +576,7 @@ async def run_all_dims_tests():
 
     # Cleanup
     import shutil
-    shutil.rmtree(tmp_path, ignore_errors=True)
+    shutil.rmtree(base_tmp_path, ignore_errors=True)
 
     print("=" * 80)
     print(f"Results: {passed} passed, {failed} failed")
