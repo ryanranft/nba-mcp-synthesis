@@ -1,0 +1,290 @@
+# Automated Deployment Configuration
+# Configuration for the Automated Deployment Orchestrator
+#
+# This file controls how recommendations are automatically implemented
+# and deployed to the nba-simulator-aws project.
+
+# ============================================================================
+# DEPLOYMENT SETTINGS
+# ============================================================================
+
+deployment:
+  # Enable/disable automated deployment
+  enabled: true
+
+  # Deployment mode:
+  #   - "pr": Create pull requests (recommended)
+  #   - "commit": Commit to branch but don't create PR
+  #   - "local": Generate code locally without git operations
+  mode: "pr"
+
+  # Number of recommendations to process in a batch
+  batch_size: 5
+
+  # Dry run mode (preview without making changes)
+  # Set to true for testing, false for production
+  dry_run: false
+
+# ============================================================================
+# AI SETTINGS
+# ============================================================================
+
+ai:
+  # AI provider (currently only "anthropic" supported)
+  provider: "anthropic"
+
+  # Claude model to use for code generation
+  # Options: claude-sonnet-4-5-20250929, claude-opus-4-20250514
+  model: "claude-sonnet-4-5-20250929"
+
+  # Maximum tokens per generation
+  # Higher = more complete code, but more expensive
+  max_tokens: 8000
+
+  # Sampling temperature (0.0 = deterministic, 1.0 = creative)
+  # Lower values recommended for code generation
+  temperature: 0.1
+
+  # API key source
+  # Must be set in environment: ANTHROPIC_API_KEY
+  api_key_env_var: "ANTHROPIC_API_KEY"
+
+# ============================================================================
+# TESTING SETTINGS
+# ============================================================================
+
+testing:
+  # Enable test generation and execution
+  enabled: true
+
+  # Block deployment if tests fail
+  # true = tests must pass to proceed (recommended)
+  # false = proceed even if tests fail (risky)
+  block_on_failure: true
+
+  # Test execution timeout (seconds)
+  timeout: 300
+
+  # pytest arguments
+  pytest_args:
+    - "-v"              # Verbose output
+    - "--tb=short"      # Short traceback format
+    - "--strict-markers"  # Strict marker checking
+
+  # Coverage requirements (future enhancement)
+  coverage:
+    enabled: false
+    min_coverage: 80
+
+# ============================================================================
+# GIT WORKFLOW SETTINGS
+# ============================================================================
+
+git:
+  # Create feature branches
+  create_branches: true
+
+  # Push to remote repository
+  push_to_remote: true
+
+  # Create GitHub pull requests
+  create_prs: true
+
+  # Base branch for PRs (usually main or master)
+  base_branch: "main"
+
+  # Branch naming prefix
+  branch_prefix: "feature/auto-impl"
+
+  # PR template file
+  pr_template: "templates/auto_pr_template.md"
+
+  # Labels to add to PRs
+  labels:
+    - "auto-generated"
+    - "needs-review"
+
+  # Auto-assign reviewers (GitHub usernames)
+  # Leave empty to not auto-assign
+  reviewers: []
+
+  # PR draft mode
+  # true = create as draft PR
+  # false = create as regular PR
+  create_as_draft: false
+
+# ============================================================================
+# SAFETY SETTINGS
+# ============================================================================
+
+safety:
+  # Maximum consecutive failures before stopping
+  # Circuit breaker opens after this many failures
+  max_failures: 3
+
+  # Require all validation checks to pass
+  require_validation: true
+
+  # Create backups before modifying existing files
+  create_backups: true
+
+  # Backup directory (relative to project root)
+  backup_dir: ".deployment_backups"
+
+  # Validation checks to run
+  checks:
+    - "syntax"          # Python syntax validation
+    - "imports"         # Import resolution check
+    - "circuit_breaker" # Circuit breaker status
+
+  # Rollback on failure
+  rollback_on_failure: true
+
+# ============================================================================
+# PROJECT SETTINGS
+# ============================================================================
+
+project:
+  # Target repository path (relative or absolute)
+  target_repo: "../nba-simulator-aws"
+
+  # Source for recommendations
+  recommendations_file: "analysis_results/prioritized_recommendations.json"
+
+  # Implementation order file
+  implementation_order: "analysis_results/TEST_IMPLEMENTATION_ORDER.md"
+
+  # Progress tracker file
+  progress_tracker: "analysis_results/progress_tracker.json"
+
+# ============================================================================
+# LOGGING SETTINGS
+# ============================================================================
+
+logging:
+  # Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+  level: "INFO"
+
+  # Log file path
+  log_file: "logs/automated_deployment.log"
+
+  # Log format
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+  # Enable audit logging
+  audit_enabled: true
+
+  # Audit log file
+  audit_file: ".deployment_backups/deployment_audit.jsonl"
+
+# ============================================================================
+# PERFORMANCE SETTINGS
+# ============================================================================
+
+performance:
+  # Parallel processing (future enhancement)
+  parallel: false
+  max_workers: 4
+
+  # Caching
+  cache_enabled: true
+  cache_dir: ".deployment_cache"
+
+  # Rate limiting for API calls
+  rate_limit:
+    enabled: true
+    calls_per_minute: 50
+
+# ============================================================================
+# NOTIFICATION SETTINGS (future enhancement)
+# ============================================================================
+
+notifications:
+  enabled: false
+
+  # Notification channels
+  channels:
+    - "email"
+    - "slack"
+
+  # Email settings
+  email:
+    recipients: []
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+
+  # Slack settings
+  slack:
+    webhook_url: ""
+    channel: "#deployments"
+
+# ============================================================================
+# FILTERS
+# ============================================================================
+
+filters:
+  # Only deploy recommendations matching these criteria
+
+  # Priority levels to deploy (CRITICAL, HIGH, MEDIUM, LOW)
+  priorities:
+    - "CRITICAL"
+    - "HIGH"
+    # - "MEDIUM"
+    # - "LOW"
+
+  # Categories to deploy
+  categories:
+    - "Quick Win"
+    - "Strategic Project"
+    # - "Medium Priority"
+
+  # Maximum time estimate (hours)
+  # Only deploy if time_estimate <= this value
+  max_time_estimate: null  # null = no limit
+
+  # Exclude specific recommendation IDs
+  exclude_ids: []
+
+# ============================================================================
+# EXAMPLES AND PRESETS
+# ============================================================================
+
+# Uncomment and modify a preset to use it
+
+# SAFE PRESET (recommended for first run)
+# presets:
+#   safe:
+#     deployment:
+#       dry_run: true
+#       mode: "local"
+#     testing:
+#       block_on_failure: true
+#     safety:
+#       max_failures: 1
+#     filters:
+#       priorities: ["CRITICAL"]
+#       categories: ["Quick Win"]
+
+# AGGRESSIVE PRESET (use with caution)
+# presets:
+#   aggressive:
+#     deployment:
+#       dry_run: false
+#       mode: "pr"
+#       batch_size: 10
+#     testing:
+#       block_on_failure: false
+#     safety:
+#       max_failures: 5
+#     filters:
+#       priorities: ["CRITICAL", "HIGH", "MEDIUM"]
+
+# DEVELOPMENT PRESET
+# presets:
+#   development:
+#     deployment:
+#       dry_run: false
+#       mode: "commit"
+#     git:
+#       create_prs: false
+#       create_as_draft: true
