@@ -34,9 +34,20 @@ import sys
 # Add scripts directory to path
 sys.path.insert(0, str(Path(__file__).parent))
 
+# Add parent directory to path for MCP server imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# Initialize secrets from hierarchical structure
+from mcp_server.secrets_loader import init_secrets
+logger_temp = logging.getLogger(__name__)
+if not init_secrets(project='nba-mcp-synthesis', context='WORKFLOW', quiet=True):
+    logger_temp.warning("⚠️  Secrets not fully loaded - some features may not work")
+    logger_temp.warning("⚠️  Ensure secrets are in: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/")
+
 # Import our modules
 from project_structure_mapper import ProjectStructureMapper, FileMapping
-from code_integration_analyzer import CodeIntegrationAnalyzer, IntegrationPlan, ImplementationContext
+from code_integration_analyzer import CodeIntegrationAnalyzer, IntegrationPlan
+from ai_code_implementer import ImplementationContext
 from ai_code_implementer import AICodeImplementer, GeneratedImplementation
 from test_generator_and_runner import TestGeneratorAndRunner, TestResult
 from git_workflow_manager import GitWorkflowManager, PullRequestInfo
@@ -276,32 +287,40 @@ class AutomatedDeploymentOrchestrator:
             result.implementation_generated = True
             logger.info(f"   ✅ Implementation generated ({len(implementation.code)} chars)")
 
-            # Step 5: Safety checks
-            logger.info(f"🛡️  Step 5: Running safety checks...")
+            # Step 5: Save implementation (to temp in dry run, real location otherwise)
+            temp_file = None
+            if self.config.dry_run:
+                logger.info(f"💾 Step 5: Saving to temp for validation...")
+                temp_file = f"/tmp/{Path(file_mapping.full_path).name}"
+                self._save_implementation(implementation, temp_file)
+                validation_path = temp_file
+            else:
+                logger.info(f"💾 Step 5: Saving implementation...")
+                self._save_implementation(implementation, file_mapping.full_path)
+                validation_path = file_mapping.full_path
+
+            # Step 6: Safety checks
+            logger.info(f"🛡️  Step 6: Running safety checks...")
             safety_result = self.safety_manager.run_pre_deployment_checks(
-                files_to_deploy=[file_mapping.full_path],
+                files_to_deploy=[validation_path],
                 recommendation=recommendation
             )
+
+            # Clean up temp file if dry run
+            if temp_file and Path(temp_file).exists():
+                Path(temp_file).unlink()
 
             if not safety_result.passed:
                 result.error_message = f"Safety checks failed: {len(safety_result.critical_failures)} critical failures"
                 return result
 
-            # Step 6: Create backup (if modifying existing)
+            # Step 7: Create backup (if modifying existing)
             backup = None
-            if Path(file_mapping.full_path).exists():
-                logger.info(f"💾 Step 6: Creating backup...")
+            if not self.config.dry_run and Path(file_mapping.full_path).exists():
+                logger.info(f"💾 Step 7: Creating backup...")
                 backup = self.safety_manager.create_backup(
                     files=[file_mapping.full_path],
                     recommendation_id=rec_id
-                )
-
-            # Step 7: Save implementation (if not dry run)
-            if not self.config.dry_run:
-                logger.info(f"💾 Step 7: Saving implementation...")
-                self._save_implementation(
-                    implementation,
-                    file_mapping.full_path
                 )
 
             # Step 8: Generate tests

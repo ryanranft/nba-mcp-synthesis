@@ -18,6 +18,7 @@ Date: 2025-10-22
 """
 
 import os
+import sys
 import subprocess
 import json
 import logging
@@ -26,6 +27,12 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# Import hierarchical secrets helper
+from mcp_server.env_helper import get_api_key
 
 logging.basicConfig(
     level=logging.INFO,
@@ -90,14 +97,19 @@ class TestGeneratorAndRunner:
         self.project_root = Path(project_root).resolve()
         self.model = model
 
-        # Initialize Claude client
-        api_key = os.getenv('ANTHROPIC_API_KEY')
+        # Initialize Claude client with hierarchical secrets
+        api_key = get_api_key('ANTHROPIC')
         if api_key and ANTHROPIC_AVAILABLE:
             self.client = Anthropic(api_key=api_key)
             logger.info(f"🧪 Test Generator & Runner initialized")
+            logger.info(f"   Model: {self.model}")
         else:
             self.client = None
             logger.warning("⚠️  Claude client not available for test generation")
+            if not api_key:
+                logger.warning("   Reason: ANTHROPIC_API_KEY not found in secrets")
+            if not ANTHROPIC_AVAILABLE:
+                logger.warning("   Reason: anthropic package not installed")
 
     def generate_tests(
         self,
