@@ -150,7 +150,7 @@ class TestGeneratorAndRunner:
             # Call Claude
             response = self.client.messages.create(
                 model=self.model,
-                max_tokens=6000,
+                max_tokens=16000,  # Increased to handle larger test files with many test cases
                 temperature=0.1,
                 messages=[{"role": "user", "content": prompt}]
             )
