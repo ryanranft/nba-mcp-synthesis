@@ -45,6 +45,43 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       continue-on-error: true
     
+    - name: Install test tools
+      run: |
+        pip install detect-secrets bandit pyyaml
+      continue-on-error: true
+
+    - name: Run Phase 11 tests (Automated Deployment)
+      run: |
+        python scripts/test_phase_11_automated_deployment.py
+      continue-on-error: true
+
+    - name: Run Phase 4 tests (File Generation)
+      run: |
+        python scripts/test_phase_4_file_generation.py
+      continue-on-error: true
+
+    - name: Run Phase 1 tests (Foundation)
+      env:
+        RDS_HOST: localhost
+        RDS_PORT: 5432
+        RDS_DATABASE: test_db
+        RDS_USERNAME: test_user
+        RDS_PASSWORD: test_pass
+        S3_BUCKET: test-bucket
+        AWS_ACCESS_KEY_ID: test_key
+        AWS_SECRET_ACCESS_KEY: test_secret
+      run: |
+        python scripts/test_phase_1_foundation.py
+      continue-on-error: true
+
+    - name: Run new test suite (E2E, DIMS, Security)
+      run: |
+        pytest tests/test_e2e_deployment_flow.py \
+               tests/test_dims_integration.py \
+               tests/test_security_hooks.py \
+               -v --tb=short
+      continue-on-error: true
+
     - name: Run unit tests
       env:
         # Mock environment variables for testing
