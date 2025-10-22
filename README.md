@@ -13,6 +13,14 @@ This system combines:
 - **Claude Desktop Integration**: Use via Claude Desktop app
 - **Smart Context**: Automatically gathers relevant data for better AI responses
 
+> Using PyCharm? See PyCharm AI Playground setup: docs/guides/PYCHARM_AI_PLAYGROUND_SETUP.md
+
+## AI Playground Adapter (New)
+
+A lightweight adapter exposes MCP capabilities and data-inventory-aware context to any UI.
+
+Quick start:
+
 ### 🎯 What's New
 
 **Version 1.0 - Production Ready** (October 10, 2025):

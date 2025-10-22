@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration name="Playground Adapter" type="PythonConfigurationType" factoryName="Python">
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/run_playground_adapter.py" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <option name="ADD_CONTENT_ROOTS" value="true" />
+    <option name="ADD_SOURCE_ROOTS" value="true" />
+    <envs>
+      <env name="PLAYGROUND_ADAPTER_HOST" value="0.0.0.0" />
+      <env name="PLAYGROUND_ADAPTER_PORT" value="5055" />
+      <env name="MCP_SERVER_URL" value="http://localhost:3000" />
+      <env name="PLAYGROUND_PROJECT_CONFIG" value="project_configs/nba_mcp_synthesis.json" />
+      <env name="PLAYGROUND_INVENTORY_REPORT" value="data_inventory_report.json" />
+      <env name="PLAYGROUND_INVENTORY_ENABLED" value="true" />
+    </envs>
+    <method v="2" />
+  </configuration>
+</component>

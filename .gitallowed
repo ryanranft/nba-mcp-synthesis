@@ -1,0 +1,16 @@
+# False positives for git-secrets
+# Test documentation and example API keys
+
+# Example API key in README (not a real key)
+RDS_PASSWORD=your-password
+
+# Example API keys in test documentation (clearly marked as fake/test)
+"sk-ant-api03-1234567890abcdef"
+"sk-ant-api03-RealSecretKey123"
+sk-ant-test-key
+sk-deepseek-test-key
+
+# Example credentials in test files
+test_secret_key
+test-key
+test_password
