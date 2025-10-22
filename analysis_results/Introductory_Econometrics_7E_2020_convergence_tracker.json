@@ -1,11 +1,11 @@
 {
   "book_title": "Introductory Econometrics 7E 2020",
   "s3_path": "books/Introductory_Econometrics_7E_2020.pdf",
-  "start_time": "2025-10-19T05:03:57.209719",
+  "start_time": "2025-10-21T20:14:22.068274",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-19T05:04:00.507776",
+      "timestamp": "2025-10-21T20:14:25.239858",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -14,7 +14,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-19T05:04:03.584890",
+      "timestamp": "2025-10-21T20:14:28.231063",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -23,7 +23,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-19T05:04:06.643458",
+      "timestamp": "2025-10-21T20:14:31.207128",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -32,7 +32,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-19T05:04:10.244258",
+      "timestamp": "2025-10-21T20:14:34.449375",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -41,7 +41,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-19T05:04:13.267328",
+      "timestamp": "2025-10-21T20:14:37.652469",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -50,7 +50,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-19T05:04:16.411142",
+      "timestamp": "2025-10-21T20:14:40.840972",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -59,7 +59,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-19T05:04:19.482456",
+      "timestamp": "2025-10-21T20:14:43.895876",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -68,7 +68,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-19T05:04:23.148708",
+      "timestamp": "2025-10-21T20:14:46.968040",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -77,7 +77,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-19T05:04:26.576498",
+      "timestamp": "2025-10-21T20:14:52.967129",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -86,7 +86,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-19T05:04:32.306922",
+      "timestamp": "2025-10-21T20:14:56.504886",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -95,7 +95,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-19T05:04:35.384818",
+      "timestamp": "2025-10-21T20:15:02.396880",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -104,7 +104,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-19T05:04:38.435118",
+      "timestamp": "2025-10-21T20:15:05.769016",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -113,7 +113,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-19T05:04:41.556882",
+      "timestamp": "2025-10-21T20:15:08.729382",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -122,7 +122,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-19T05:04:44.602199",
+      "timestamp": "2025-10-21T20:15:11.776984",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -131,7 +131,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-19T05:04:47.688291",
+      "timestamp": "2025-10-21T20:15:14.870612",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -149,6 +149,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-19T05:04:47.688334",
+  "end_time": "2025-10-21T20:15:14.870649",
   "total_iterations": 15
 }

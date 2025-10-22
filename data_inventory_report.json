@@ -1,0 +1,1878 @@
+{
+  "metadata": {
+    "system": "DIMS",
+    "version": "1.0.0",
+    "last_updated": "Unknown",
+    "backend": "PostgreSQL"
+  },
+  "metrics": {
+    "metadata": {
+      "version": "1.0.0",
+      "last_updated": "2025-10-21T22:34:42.668597Z",
+      "last_verified": "2025-10-21T19:00:00Z",
+      "verified_by": "manual_verification",
+      "system": "DIMS v1.0.0",
+      "notes": "Initial metrics from comprehensive verification on 2025-10-21"
+    },
+    "s3_storage": {
+      "total_objects": {
+        "value": 172726,
+        "last_verified": "2025-10-21T14:00:00Z",
+        "verification_method": "aws_cli",
+        "cached": false,
+        "cache_expires": null
+      },
+      "total_size_gb": {
+        "value": 118.26,
+        "last_verified": "2025-10-21T14:00:00Z",
+        "verification_method": "aws_cli",
+        "cached": false,
+        "cache_expires": null
+      },
+      "hoopr_files": {
+        "value": 96,
+        "last_verified": "2025-10-21T14:00:00Z",
+        "verification_method": "aws_cli",
+        "cached": false,
+        "cache_expires": null
+      }
+    },
+    "prediction_system": {
+      "total_lines": {
+        "value": 2103,
+        "last_verified": "2025-10-21T14:00:00Z",
+        "verification_method": "wc_command",
+        "cached": false,
+        "cache_expires": null
+      },
+      "scripts": {
+        "fetch_upcoming_games": {
+          "lines": 303,
+          "path": "scripts/ml/fetch_upcoming_games.py"
+        },
+        "fetch_recent_player_data": {
+          "lines": 341,
+          "path": "scripts/ml/fetch_recent_player_data.py"
+        },
+        "prepare_upcoming_game_features": {
+          "lines": 416,
+          "path": "scripts/ml/prepare_upcoming_game_features.py"
+        },
+        "predict_upcoming_games": {
+          "lines": 367,
+          "path": "scripts/ml/predict_upcoming_games.py"
+        },
+        "train_model_for_predictions": {
+          "lines": 359,
+          "path": "scripts/ml/train_model_for_predictions.py"
+        },
+        "demo_predictions": {
+          "lines": 181,
+          "path": "scripts/ml/demo_predictions.py"
+        },
+        "daily_predictions_sh": {
+          "lines": 136,
+          "path": "scripts/ml/daily_predictions.sh"
+        }
+      }
+    },
+    "plus_minus_system": {
+      "total_lines": {
+        "value": 4619,
+        "last_verified": "2025-10-21T22:15:15.424825Z",
+        "verification_method": "automated",
+        "components": {
+          "python": 1616,
+          "sql": 2318,
+          "docs": 2054
+        },
+        "cached": false,
+        "cache_expires": null
+      },
+      "python_files": {
+        "total_lines": 1616,
+        "scripts": {
+          "plus_minus_calculator": {
+            "lines": 497,
+            "path": "scripts/pbp_to_boxscore/plus_minus_calculator.py"
+          },
+          "populate_plus_minus_tables": {
+            "lines": 767,
+            "path": "scripts/pbp_to_boxscore/populate_plus_minus_tables.py"
+          },
+          "demo_plus_minus_population": {
+            "lines": 352,
+            "path": "scripts/pbp_to_boxscore/demo_plus_minus_population.py"
+          }
+        }
+      },
+      "sql_files": {
+        "total_lines": 2318,
+        "directory": "sql/plus_minus/",
+        "description": "All SQL schemas, views, and migrations for Plus/Minus system"
+      },
+      "documentation": {
+        "total_lines": 2054,
+        "files": [
+          {
+            "name": "PLUS_MINUS_ML_INTEGRATION.md",
+            "lines": 262
+          },
+          {
+            "name": "PLUS_MINUS_IMPLEMENTATION_SUMMARY.md",
+            "lines": 508
+          },
+          {
+            "name": "PLUS_MINUS_OPTIMIZATION_SUMMARY.md",
+            "lines": 325
+          },
+          {
+            "name": "REC_11_PLUS_MINUS_COMPLETION_SUMMARY.md",
+            "lines": 245
+          },
+          {
+            "name": "PLUS_MINUS_RDS_DEPLOYMENT_SUCCESS.md",
+            "lines": 234
+          },
+          {
+            "name": "REC_11_PLUS_MINUS_INTEGRATION.md",
+            "lines": 480
+          }
+        ]
+      }
+    },
+    "code_base": {
+      "python_files": {
+        "value": 1261,
+        "last_verified": "2025-10-21T21:09:13.131676Z",
+        "verification_method": "automated",
+        "cached": false,
+        "cache_expires": null
+      },
+      "ml_scripts": {
+        "value": 56,
+        "directory": "scripts/ml/",
+        "last_verified": "2025-10-21T14:00:00Z"
+      },
+      "phase_9_scripts": {
+        "value": 40,
+        "directory": "scripts/pbp_to_boxscore/",
+        "last_verified": "2025-10-21T14:00:00Z"
+      },
+      "test_files": {
+        "value": 498,
+        "last_verified": "2025-10-21T21:09:13.252895Z",
+        "verification_method": "automated",
+        "cached": false,
+        "cache_expires": null
+      }
+    },
+    "documentation": {
+      "markdown_files": {
+        "value": 1696,
+        "last_verified": "2025-10-21T22:31:15.431777Z",
+        "verification_method": "automated",
+        "cached": false,
+        "cache_expires": null
+      },
+      "total_size_mb": {
+        "value": 32,
+        "last_verified": "2025-10-21T20:05:41.881918Z",
+        "verification_method": "automated",
+        "cached": false,
+        "cache_expires": null
+      }
+    },
+    "git": {
+      "book_recommendation_commits": {
+        "value": 214,
+        "last_verified": "2025-10-21T14:00:00Z",
+        "verification_method": "git_log",
+        "description": "Commits for book recommendation implementations (Oct 2025)",
+        "cached": false,
+        "cache_expires": null
+      }
+    },
+    "workflows": {
+      "total": {
+        "value": 60,
+        "directory": "docs/claude_workflows/workflow_descriptions/",
+        "last_verified": "2025-10-21T14:00:00Z"
+      }
+    },
+    "sql_schemas": {
+      "total_lines": {
+        "value": 754,
+        "files": [
+          {
+            "name": "sql/master_schema.sql",
+            "lines": 468
+          },
+          {
+            "name": "sql/phase9_box_score_snapshots.sql",
+            "lines": 286
+          }
+        ],
+        "last_verified": "2025-10-21T14:00:00Z"
+      }
+    },
+    "local_data": {
+      "espn_size_gb": {
+        "value": 843,
+        "path": "/Users/ryanranft/0espn",
+        "last_verified": "2025-10-21T14:00:00Z",
+        "note": "Multi-sport data (not NBA-only)"
+      }
+    }
+  },
+  "schema": {
+    "source_file": "/Users/ryanranft/nba-simulator-aws/sql/master_schema.sql",
+    "tables": {
+      "master_players": {
+        "columns": [
+          {
+            "name": "player_id",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "player_name",
+            "type": "VARCHAR(100)"
+          },
+          {
+            "name": "first_name",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "last_name",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "position",
+            "type": "VARCHAR(10)"
+          },
+          {
+            "name": "height_inches",
+            "type": "INTEGER"
+          },
+          {
+            "name": "weight_lbs",
+            "type": "INTEGER"
+          },
+          {
+            "name": "birth_date",
+            "type": "DATE"
+          },
+          {
+            "name": "birth_country",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "college",
+            "type": "VARCHAR(100)"
+          },
+          {
+            "name": "draft_year",
+            "type": "INTEGER"
+          },
+          {
+            "name": "draft_round",
+            "type": "INTEGER"
+          },
+          {
+            "name": "draft_pick",
+            "type": "INTEGER"
+          },
+          {
+            "name": "jersey_number",
+            "type": "INTEGER"
+          },
+          {
+            "name": "team_id",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "is_active",
+            "type": "BOOLEAN"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "true"
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "CURRENT_TIMESTAMP"
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "CURRENT_TIMESTAMP"
+          },
+          {
+            "name": "Source",
+            "type": "tracking"
+          },
+          {
+            "name": "source_player_ids",
+            "type": "JSONB"
+          },
+          {
+            "name": "data_sources",
+            "type": "TEXT"
+          },
+          {
+            "name": "Constraints",
+            "type": "CONSTRAINT"
+          },
+          {
+            "name": "valid_height",
+            "type": "CHECK"
+          },
+          {
+            "name": "height_inches",
+            "type": "BETWEEN"
+          },
+          {
+            "name": "60",
+            "type": "AND"
+          },
+          {
+            "name": "CHECK",
+            "type": "(weight_lbs"
+          },
+          {
+            "name": "BETWEEN",
+            "type": "150"
+          },
+          {
+            "name": "AND",
+            "type": "350)"
+          },
+          {
+            "name": "CHECK",
+            "type": "(draft_year"
+          },
+          {
+            "name": "BETWEEN",
+            "type": "1946"
+          },
+          {
+            "name": "AND",
+            "type": "2030)"
+          }
+        ],
+        "column_count": 34,
+        "column_names": [
+          "player_id",
+          "player_name",
+          "first_name",
+          "last_name",
+          "position",
+          "height_inches",
+          "weight_lbs",
+          "birth_date",
+          "birth_country",
+          "college",
+          "draft_year",
+          "draft_round",
+          "draft_pick",
+          "jersey_number",
+          "team_id",
+          "is_active",
+          "DEFAULT",
+          "created_at",
+          "DEFAULT",
+          "updated_at",
+          "DEFAULT",
+          "Source",
+          "source_player_ids",
+          "data_sources",
+          "Constraints",
+          "valid_height",
+          "height_inches",
+          "60",
+          "CHECK",
+          "BETWEEN",
+          "AND",
+          "CHECK",
+          "BETWEEN",
+          "AND"
+        ],
+        "type": "dimension",
+        "description": "Unified player dimension with biographical data",
+        "primary_key": "player_id"
+      },
+      "master_teams": {
+        "columns": [
+          {
+            "name": "team_id",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "team_name",
+            "type": "VARCHAR(100)"
+          },
+          {
+            "name": "team_abbreviation",
+            "type": "VARCHAR(10)"
+          },
+          {
+            "name": "team_city",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "team_state",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "team_country",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "conference",
+            "type": "VARCHAR(10)"
+          },
+          {
+            "name": "CHECK",
+            "type": "(conference"
+          },
+          {
+            "name": "IN",
+            "type": "("
+          },
+          {
+            "name": "division",
+            "type": "VARCHAR(20)"
+          },
+          {
+            "name": "founded_year",
+            "type": "INTEGER"
+          },
+          {
+            "name": "is_active",
+            "type": "BOOLEAN"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "true"
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "CURRENT_TIMESTAMP"
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "CURRENT_TIMESTAMP"
+          },
+          {
+            "name": "Source",
+            "type": "tracking"
+          },
+          {
+            "name": "source_team_ids",
+            "type": "JSONB"
+          },
+          {
+            "name": "data_sources",
+            "type": "TEXT"
+          },
+          {
+            "name": "Constraints",
+            "type": "CONSTRAINT"
+          },
+          {
+            "name": "valid_founded_year",
+            "type": "CHECK"
+          },
+          {
+            "name": "founded_year",
+            "type": "BETWEEN"
+          },
+          {
+            "name": "1946",
+            "type": "AND"
+          }
+        ],
+        "column_count": 24,
+        "column_names": [
+          "team_id",
+          "team_name",
+          "team_abbreviation",
+          "team_city",
+          "team_state",
+          "team_country",
+          "conference",
+          "CHECK",
+          "IN",
+          "division",
+          "founded_year",
+          "is_active",
+          "DEFAULT",
+          "created_at",
+          "DEFAULT",
+          "updated_at",
+          "DEFAULT",
+          "Source",
+          "source_team_ids",
+          "data_sources",
+          "Constraints",
+          "valid_founded_year",
+          "founded_year",
+          "1946"
+        ],
+        "type": "dimension",
+        "description": "Unified team dimension",
+        "primary_key": "team_id"
+      },
+      "master_games": {
+        "columns": [
+          {
+            "name": "game_id",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "game_date",
+            "type": "DATE"
+          },
+          {
+            "name": "season",
+            "type": "VARCHAR(20)"
+          },
+          {
+            "name": "season_type",
+            "type": "VARCHAR(20)"
+          },
+          {
+            "name": "Regular",
+            "type": "Season"
+          },
+          {
+            "name": "Regular",
+            "type": "Season"
+          },
+          {
+            "name": "Preseason",
+            "type": "home_team_id"
+          },
+          {
+            "name": "NOT",
+            "type": "NULL"
+          },
+          {
+            "name": "away_team_id",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "home_score",
+            "type": "INTEGER"
+          },
+          {
+            "name": "away_score",
+            "type": "INTEGER"
+          },
+          {
+            "name": "venue",
+            "type": "VARCHAR(200)"
+          },
+          {
+            "name": "venue_city",
+            "type": "VARCHAR(100)"
+          },
+          {
+            "name": "venue_state",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "attendance",
+            "type": "INTEGER"
+          },
+          {
+            "name": "game_status",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "periods",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "4"
+          },
+          {
+            "name": "is_overtime",
+            "type": "BOOLEAN"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "false"
+          },
+          {
+            "name": "is_completed",
+            "type": "BOOLEAN"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "false"
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "CURRENT_TIMESTAMP"
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "CURRENT_TIMESTAMP"
+          },
+          {
+            "name": "Source",
+            "type": "tracking"
+          },
+          {
+            "name": "source_game_ids",
+            "type": "JSONB"
+          },
+          {
+            "name": "data_sources",
+            "type": "TEXT"
+          },
+          {
+            "name": "REFERENCES",
+            "type": "master_teams(team_id)"
+          },
+          {
+            "name": "REFERENCES",
+            "type": "master_teams(team_id)"
+          },
+          {
+            "name": "Constraints",
+            "type": "CONSTRAINT"
+          },
+          {
+            "name": "valid_scores",
+            "type": "CHECK"
+          },
+          {
+            "name": "0",
+            "type": "AND"
+          },
+          {
+            "name": "CHECK",
+            "type": "(periods"
+          },
+          {
+            "name": "BETWEEN",
+            "type": "1"
+          },
+          {
+            "name": "AND",
+            "type": "10)"
+          },
+          {
+            "name": "CHECK",
+            "type": "(attendance"
+          }
+        ],
+        "column_count": 38,
+        "column_names": [
+          "game_id",
+          "game_date",
+          "season",
+          "season_type",
+          "Regular",
+          "Regular",
+          "Preseason",
+          "NOT",
+          "away_team_id",
+          "home_score",
+          "away_score",
+          "venue",
+          "venue_city",
+          "venue_state",
+          "attendance",
+          "game_status",
+          "periods",
+          "DEFAULT",
+          "is_overtime",
+          "DEFAULT",
+          "is_completed",
+          "DEFAULT",
+          "created_at",
+          "DEFAULT",
+          "updated_at",
+          "DEFAULT",
+          "Source",
+          "source_game_ids",
+          "data_sources",
+          "REFERENCES",
+          "REFERENCES",
+          "Constraints",
+          "valid_scores",
+          "0",
+          "CHECK",
+          "BETWEEN",
+          "AND",
+          "CHECK"
+        ],
+        "type": "fact",
+        "description": "Game-level fact table",
+        "primary_key": "game_id"
+      },
+      "master_player_game_stats": {
+        "columns": [
+          {
+            "name": "id",
+            "type": "SERIAL"
+          },
+          {
+            "name": "game_id",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "player_id",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "team_id",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "Basic",
+            "type": "stats"
+          },
+          {
+            "name": "minutes_played",
+            "type": "DECIMAL(4"
+          },
+          {
+            "name": "field_goals_made",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "field_goals_attempted",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "field_goal_percentage",
+            "type": "DECIMAL(5"
+          },
+          {
+            "name": "three_pointers_made",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "three_pointers_attempted",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "three_point_percentage",
+            "type": "DECIMAL(5"
+          },
+          {
+            "name": "free_throws_made",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "free_throws_attempted",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "free_throw_percentage",
+            "type": "DECIMAL(5"
+          },
+          {
+            "name": "Advanced",
+            "type": "stats"
+          },
+          {
+            "name": "points",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "rebounds",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "assists",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "steals",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "blocks",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "turnovers",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "personal_fouls",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "Advanced",
+            "type": "metrics"
+          },
+          {
+            "name": "true_shooting_percentage",
+            "type": "DECIMAL(5"
+          },
+          {
+            "name": "effective_field_goal_percentage",
+            "type": "DECIMAL(5"
+          },
+          {
+            "name": "player_efficiency_rating",
+            "type": "DECIMAL(5"
+          },
+          {
+            "name": "plus_minus",
+            "type": "INTEGER"
+          },
+          {
+            "name": "Tracking",
+            "type": "stats"
+          },
+          {
+            "name": "com",
+            "type": "Stats)"
+          },
+          {
+            "name": "touches",
+            "type": "INTEGER"
+          },
+          {
+            "name": "passes",
+            "type": "INTEGER"
+          },
+          {
+            "name": "speed_mph",
+            "type": "DECIMAL(4"
+          },
+          {
+            "name": "distance_miles",
+            "type": "DECIMAL(5"
+          },
+          {
+            "name": "Hustle",
+            "type": "stats"
+          },
+          {
+            "name": "com",
+            "type": "Stats)"
+          },
+          {
+            "name": "deflections",
+            "type": "INTEGER"
+          },
+          {
+            "name": "loose_balls_recovered",
+            "type": "INTEGER"
+          },
+          {
+            "name": "charges_drawn",
+            "type": "INTEGER"
+          },
+          {
+            "name": "screen_assists",
+            "type": "INTEGER"
+          },
+          {
+            "name": "Source",
+            "type": "tracking"
+          },
+          {
+            "name": "source_stats",
+            "type": "JSONB"
+          },
+          {
+            "name": "Raw",
+            "type": "stats"
+          },
+          {
+            "name": "from",
+            "type": "each"
+          },
+          {
+            "name": "source",
+            "type": "data_sources"
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "CURRENT_TIMESTAMP"
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "CURRENT_TIMESTAMP"
+          },
+          {
+            "name": "REFERENCES",
+            "type": "master_games(game_id)"
+          },
+          {
+            "name": "REFERENCES",
+            "type": "master_players(player_id)"
+          },
+          {
+            "name": "REFERENCES",
+            "type": "master_teams(team_id)"
+          },
+          {
+            "name": "Constraints",
+            "type": "CONSTRAINT"
+          },
+          {
+            "name": "valid_field_goals",
+            "type": "CHECK"
+          },
+          {
+            "name": "CHECK",
+            "type": "(three_pointers_made"
+          },
+          {
+            "name": "CHECK",
+            "type": "(free_throws_made"
+          },
+          {
+            "name": "CHECK",
+            "type": "("
+          },
+          {
+            "name": "field_goal_percentage",
+            "type": "BETWEEN"
+          },
+          {
+            "name": "0",
+            "type": "AND"
+          },
+          {
+            "name": "1",
+            "type": "AND"
+          },
+          {
+            "name": "three_point_percentage",
+            "type": "BETWEEN"
+          },
+          {
+            "name": "0",
+            "type": "AND"
+          },
+          {
+            "name": "1",
+            "type": "AND"
+          },
+          {
+            "name": "free_throw_percentage",
+            "type": "BETWEEN"
+          },
+          {
+            "name": "0",
+            "type": "AND"
+          },
+          {
+            "name": "1",
+            "type": ")"
+          }
+        ],
+        "column_count": 79,
+        "column_names": [
+          "id",
+          "game_id",
+          "player_id",
+          "team_id",
+          "Basic",
+          "minutes_played",
+          "field_goals_made",
+          "DEFAULT",
+          "field_goals_attempted",
+          "DEFAULT",
+          "field_goal_percentage",
+          "three_pointers_made",
+          "DEFAULT",
+          "three_pointers_attempted",
+          "DEFAULT",
+          "three_point_percentage",
+          "free_throws_made",
+          "DEFAULT",
+          "free_throws_attempted",
+          "DEFAULT",
+          "free_throw_percentage",
+          "Advanced",
+          "points",
+          "DEFAULT",
+          "rebounds",
+          "DEFAULT",
+          "assists",
+          "DEFAULT",
+          "steals",
+          "DEFAULT",
+          "blocks",
+          "DEFAULT",
+          "turnovers",
+          "DEFAULT",
+          "personal_fouls",
+          "DEFAULT",
+          "Advanced",
+          "true_shooting_percentage",
+          "effective_field_goal_percentage",
+          "player_efficiency_rating",
+          "plus_minus",
+          "Tracking",
+          "com",
+          "touches",
+          "passes",
+          "speed_mph",
+          "distance_miles",
+          "Hustle",
+          "com",
+          "deflections",
+          "loose_balls_recovered",
+          "charges_drawn",
+          "screen_assists",
+          "Source",
+          "source_stats",
+          "Raw",
+          "from",
+          "source",
+          "created_at",
+          "DEFAULT",
+          "updated_at",
+          "DEFAULT",
+          "REFERENCES",
+          "REFERENCES",
+          "REFERENCES",
+          "Constraints",
+          "valid_field_goals",
+          "CHECK",
+          "CHECK",
+          "CHECK",
+          "field_goal_percentage",
+          "0",
+          "1",
+          "three_point_percentage",
+          "0",
+          "1",
+          "free_throw_percentage",
+          "0",
+          "1"
+        ],
+        "type": "fact",
+        "description": "Player performance panel data (game-level)",
+        "primary_key": [
+          "game_id",
+          "player_id"
+        ],
+        "key_metrics": [
+          "points",
+          "rebounds",
+          "assists",
+          "plus_minus",
+          "minutes_played"
+        ]
+      },
+      "master_team_game_stats": {
+        "columns": [
+          {
+            "name": "id",
+            "type": "SERIAL"
+          },
+          {
+            "name": "game_id",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "team_id",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "is_home",
+            "type": "BOOLEAN"
+          },
+          {
+            "name": "Basic",
+            "type": "team"
+          },
+          {
+            "name": "stats",
+            "type": "points"
+          },
+          {
+            "name": "INTEGER",
+            "type": "DEFAULT"
+          },
+          {
+            "name": "field_goals_made",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "field_goals_attempted",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "field_goal_percentage",
+            "type": "DECIMAL(5"
+          },
+          {
+            "name": "three_pointers_made",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "three_pointers_attempted",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "three_point_percentage",
+            "type": "DECIMAL(5"
+          },
+          {
+            "name": "free_throws_made",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "free_throws_attempted",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "free_throw_percentage",
+            "type": "DECIMAL(5"
+          },
+          {
+            "name": "Advanced",
+            "type": "team"
+          },
+          {
+            "name": "stats",
+            "type": "rebounds"
+          },
+          {
+            "name": "INTEGER",
+            "type": "DEFAULT"
+          },
+          {
+            "name": "assists",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "steals",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "blocks",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "turnovers",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "personal_fouls",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "Team",
+            "type": "advanced"
+          },
+          {
+            "name": "metrics",
+            "type": "offensive_rating"
+          },
+          {
+            "name": "defensive_rating",
+            "type": "DECIMAL(5"
+          },
+          {
+            "name": "pace",
+            "type": "DECIMAL(5"
+          },
+          {
+            "name": "Four",
+            "type": "Factors"
+          },
+          {
+            "name": "effective_field_goal_percentage",
+            "type": "DECIMAL(5"
+          },
+          {
+            "name": "turnover_percentage",
+            "type": "DECIMAL(5"
+          },
+          {
+            "name": "offensive_rebound_percentage",
+            "type": "DECIMAL(5"
+          },
+          {
+            "name": "free_throw_rate",
+            "type": "DECIMAL(5"
+          },
+          {
+            "name": "Source",
+            "type": "tracking"
+          },
+          {
+            "name": "source_stats",
+            "type": "JSONB"
+          },
+          {
+            "name": "Raw",
+            "type": "stats"
+          },
+          {
+            "name": "from",
+            "type": "each"
+          },
+          {
+            "name": "source",
+            "type": "data_sources"
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "CURRENT_TIMESTAMP"
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "CURRENT_TIMESTAMP"
+          },
+          {
+            "name": "REFERENCES",
+            "type": "master_games(game_id)"
+          },
+          {
+            "name": "REFERENCES",
+            "type": "master_teams(team_id)"
+          },
+          {
+            "name": "Constraints",
+            "type": "CONSTRAINT"
+          },
+          {
+            "name": "valid_team_field_goals",
+            "type": "CHECK"
+          },
+          {
+            "name": "CHECK",
+            "type": "(three_pointers_made"
+          },
+          {
+            "name": "CHECK",
+            "type": "(free_throws_made"
+          }
+        ],
+        "column_count": 59,
+        "column_names": [
+          "id",
+          "game_id",
+          "team_id",
+          "is_home",
+          "Basic",
+          "stats",
+          "INTEGER",
+          "field_goals_made",
+          "DEFAULT",
+          "field_goals_attempted",
+          "DEFAULT",
+          "field_goal_percentage",
+          "three_pointers_made",
+          "DEFAULT",
+          "three_pointers_attempted",
+          "DEFAULT",
+          "three_point_percentage",
+          "free_throws_made",
+          "DEFAULT",
+          "free_throws_attempted",
+          "DEFAULT",
+          "free_throw_percentage",
+          "Advanced",
+          "stats",
+          "INTEGER",
+          "assists",
+          "DEFAULT",
+          "steals",
+          "DEFAULT",
+          "blocks",
+          "DEFAULT",
+          "turnovers",
+          "DEFAULT",
+          "personal_fouls",
+          "DEFAULT",
+          "Team",
+          "metrics",
+          "defensive_rating",
+          "pace",
+          "Four",
+          "effective_field_goal_percentage",
+          "turnover_percentage",
+          "offensive_rebound_percentage",
+          "free_throw_rate",
+          "Source",
+          "source_stats",
+          "Raw",
+          "from",
+          "source",
+          "created_at",
+          "DEFAULT",
+          "updated_at",
+          "DEFAULT",
+          "REFERENCES",
+          "REFERENCES",
+          "Constraints",
+          "valid_team_field_goals",
+          "CHECK",
+          "CHECK"
+        ]
+      },
+      "master_play_by_play": {
+        "columns": [
+          {
+            "name": "id",
+            "type": "SERIAL"
+          },
+          {
+            "name": "game_id",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "event_number",
+            "type": "INTEGER"
+          },
+          {
+            "name": "quarter",
+            "type": "INTEGER"
+          },
+          {
+            "name": "time_remaining",
+            "type": "VARCHAR(10)"
+          },
+          {
+            "name": "format",
+            "type": "game_clock_seconds"
+          },
+          {
+            "name": "Total",
+            "type": "seconds"
+          },
+          {
+            "name": "from",
+            "type": "start"
+          },
+          {
+            "name": "of",
+            "type": "game"
+          },
+          {
+            "name": "home_score",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "away_score",
+            "type": "INTEGER"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "0"
+          },
+          {
+            "name": "Event",
+            "type": "details"
+          },
+          {
+            "name": "event_type",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "event_description",
+            "type": "TEXT"
+          },
+          {
+            "name": "player_id",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "team_id",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "Shot",
+            "type": "details"
+          },
+          {
+            "name": "if",
+            "type": "applicable)"
+          },
+          {
+            "name": "shot_type",
+            "type": "VARCHAR(20)"
+          },
+          {
+            "name": "shot_made",
+            "type": "BOOLEAN"
+          },
+          {
+            "name": "shot_distance",
+            "type": "INTEGER"
+          },
+          {
+            "name": "feet",
+            "type": "shot_location_x"
+          },
+          {
+            "name": "shot_location_y",
+            "type": "DECIMAL(6"
+          },
+          {
+            "name": "Source",
+            "type": "tracking"
+          },
+          {
+            "name": "source_event_ids",
+            "type": "JSONB"
+          },
+          {
+            "name": "data_sources",
+            "type": "TEXT"
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "CURRENT_TIMESTAMP"
+          },
+          {
+            "name": "REFERENCES",
+            "type": "master_games(game_id)"
+          },
+          {
+            "name": "REFERENCES",
+            "type": "master_players(player_id)"
+          },
+          {
+            "name": "REFERENCES",
+            "type": "master_teams(team_id)"
+          },
+          {
+            "name": "Constraints",
+            "type": "CONSTRAINT"
+          },
+          {
+            "name": "valid_quarter",
+            "type": "CHECK"
+          },
+          {
+            "name": "quarter",
+            "type": "BETWEEN"
+          },
+          {
+            "name": "1",
+            "type": "AND"
+          },
+          {
+            "name": "CHECK",
+            "type": "(game_clock_seconds"
+          },
+          {
+            "name": "CHECK",
+            "type": "(home_score"
+          },
+          {
+            "name": "0",
+            "type": "AND"
+          }
+        ],
+        "column_count": 40,
+        "column_names": [
+          "id",
+          "game_id",
+          "event_number",
+          "quarter",
+          "time_remaining",
+          "format",
+          "Total",
+          "from",
+          "of",
+          "home_score",
+          "DEFAULT",
+          "away_score",
+          "DEFAULT",
+          "Event",
+          "event_type",
+          "event_description",
+          "player_id",
+          "team_id",
+          "Shot",
+          "if",
+          "shot_type",
+          "shot_made",
+          "shot_distance",
+          "feet",
+          "shot_location_y",
+          "Source",
+          "source_event_ids",
+          "data_sources",
+          "created_at",
+          "DEFAULT",
+          "REFERENCES",
+          "REFERENCES",
+          "REFERENCES",
+          "Constraints",
+          "valid_quarter",
+          "quarter",
+          "1",
+          "CHECK",
+          "CHECK",
+          "0"
+        ]
+      },
+      "data_source_mapping": {
+        "columns": [
+          {
+            "name": "id",
+            "type": "SERIAL"
+          },
+          {
+            "name": "table_name",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "record_id",
+            "type": "VARCHAR(100)"
+          },
+          {
+            "name": "source_name",
+            "type": "VARCHAR(50)"
+          },
+          {
+            "name": "source_record_id",
+            "type": "VARCHAR(100)"
+          },
+          {
+            "name": "source_url",
+            "type": "TEXT"
+          },
+          {
+            "name": "data_quality_score",
+            "type": "DECIMAL(3"
+          },
+          {
+            "name": "DEFAULT",
+            "type": "1"
+          },
+          {
+            "name": "0",
+            "type": "to"
+          },
+          {
+            "name": "0",
+            "type": "created_at"
+          },
+          {
+            "name": "TIMESTAMP",
+            "type": "DEFAULT"
+          },
+          {
+            "name": "Constraints",
+            "type": "CONSTRAINT"
+          },
+          {
+            "name": "valid_quality_score",
+            "type": "CHECK"
+          },
+          {
+            "name": "data_quality_score",
+            "type": "BETWEEN"
+          },
+          {
+            "name": "0",
+            "type": "AND"
+          }
+        ],
+        "column_count": 15,
+        "column_names": [
+          "id",
+          "table_name",
+          "record_id",
+          "source_name",
+          "source_record_id",
+          "source_url",
+          "data_quality_score",
+          "DEFAULT",
+          "0",
+          "0",
+          "TIMESTAMP",
+          "Constraints",
+          "valid_quality_score",
+          "data_quality_score",
+          "0"
+        ]
+      }
+    },
+    "total_tables": 7
+  },
+  "data_coverage": {
+    "s3_objects": 172726,
+    "s3_size_gb": 118.26,
+    "hoopr_files": 96,
+    "seasons_estimated": "2014-2025 (estimated from commit history)",
+    "games_estimated": "15000+ games (estimated)",
+    "players_estimated": "5000+ players (estimated)",
+    "local_espn_size_gb": 843
+  },
+  "available_features": [
+    "Player game-level stat: id",
+    "Player game-level stat: team_id",
+    "Player game-level stat: Basic",
+    "Player game-level stat: minutes_played",
+    "Player game-level stat: field_goals_made",
+    "Player game-level stat: DEFAULT",
+    "Player game-level stat: field_goals_attempted",
+    "Player game-level stat: DEFAULT",
+    "Player game-level stat: field_goal_percentage",
+    "Player game-level stat: three_pointers_made",
+    "Player game-level stat: DEFAULT",
+    "Player game-level stat: three_pointers_attempted",
+    "Player game-level stat: DEFAULT",
+    "Player game-level stat: three_point_percentage",
+    "Player game-level stat: free_throws_made",
+    "Player game-level stat: DEFAULT",
+    "Player game-level stat: free_throws_attempted",
+    "Player game-level stat: DEFAULT",
+    "Player game-level stat: free_throw_percentage",
+    "Player game-level stat: Advanced",
+    "Player game-level stat: points",
+    "Player game-level stat: DEFAULT",
+    "Player game-level stat: rebounds",
+    "Player game-level stat: DEFAULT",
+    "Player game-level stat: assists",
+    "Player game-level stat: DEFAULT",
+    "Player game-level stat: steals",
+    "Player game-level stat: DEFAULT",
+    "Player game-level stat: blocks",
+    "Player game-level stat: DEFAULT",
+    "Player game-level stat: turnovers",
+    "Player game-level stat: DEFAULT",
+    "Player game-level stat: personal_fouls",
+    "Player game-level stat: DEFAULT",
+    "Player game-level stat: Advanced",
+    "Player game-level stat: true_shooting_percentage",
+    "Player game-level stat: effective_field_goal_percentage",
+    "Player game-level stat: player_efficiency_rating",
+    "Player game-level stat: plus_minus",
+    "Player game-level stat: Tracking",
+    "Player game-level stat: com",
+    "Player game-level stat: touches",
+    "Player game-level stat: passes",
+    "Player game-level stat: speed_mph",
+    "Player game-level stat: distance_miles",
+    "Player game-level stat: Hustle",
+    "Player game-level stat: com",
+    "Player game-level stat: deflections",
+    "Player game-level stat: loose_balls_recovered",
+    "Player game-level stat: charges_drawn",
+    "Player game-level stat: screen_assists",
+    "Player game-level stat: Source",
+    "Player game-level stat: source_stats",
+    "Player game-level stat: Raw",
+    "Player game-level stat: from",
+    "Player game-level stat: source",
+    "Player game-level stat: created_at",
+    "Player game-level stat: DEFAULT",
+    "Player game-level stat: updated_at",
+    "Player game-level stat: DEFAULT",
+    "Player game-level stat: REFERENCES",
+    "Player game-level stat: REFERENCES",
+    "Player game-level stat: REFERENCES",
+    "Player game-level stat: Constraints",
+    "Player game-level stat: valid_field_goals",
+    "Player game-level stat: CHECK",
+    "Player game-level stat: CHECK",
+    "Player game-level stat: CHECK",
+    "Player game-level stat: field_goal_percentage",
+    "Player game-level stat: 0",
+    "Player game-level stat: 1",
+    "Player game-level stat: three_point_percentage",
+    "Player game-level stat: 0",
+    "Player game-level stat: 1",
+    "Player game-level stat: free_throw_percentage",
+    "Player game-level stat: 0",
+    "Player game-level stat: 1",
+    "Player biographical data (height, weight, position, birth_date)",
+    "Team organizational data (conference, division, arena)",
+    "Plus/Minus calculation system (4,619 lines of code)",
+    "Game outcome prediction models",
+    "Player performance prediction models",
+    "Play-by-play event sequences (172k S3 objects)"
+  ],
+  "system_capabilities": {
+    "prediction_system": {
+      "available": true,
+      "total_lines": 2103,
+      "scripts": [
+        "fetch_upcoming_games",
+        "fetch_recent_player_data",
+        "prepare_upcoming_game_features",
+        "predict_upcoming_games",
+        "train_model_for_predictions"
+      ]
+    },
+    "plus_minus_system": {
+      "available": true,
+      "total_lines": 4619,
+      "components": {
+        "python": 1616,
+        "sql": 2318,
+        "docs": 2054
+      },
+      "capabilities": [
+        "Calculate player plus/minus from play-by-play",
+        "Populate plus_minus tables in PostgreSQL",
+        "Track on-court impact for all players"
+      ]
+    },
+    "data_pipeline": {
+      "available": true,
+      "s3_storage": true,
+      "postgresql_backend": true,
+      "local_cache": true
+    }
+  },
+  "summary_for_ai": "## \ud83d\udcca DATA INVENTORY SUMMARY\n\n**Database Schema**:\n- 7 core tables\n- Panel Data: master_player_game_stats (game-level player performance)\n- Dimensions: master_players, master_teams, master_games\n\n**Data Coverage**:\n- 172,726 objects in S3 (118.26 GB)\n- Seasons: 2014-2025 (estimated from commit history)\n- Estimated 15000+ games (estimated) games, 5000+ players (estimated) players\n\n**Available Systems**:\n- \u2705 Game Prediction System (2,103 lines of code)\n- \u2705 Plus/Minus Calculation System (4,619 lines of code)\n- \u2705 PostgreSQL panel data backend\n- \u2705 S3 data lake with play-by-play events\n\n**Key Data Features Available**:\n- Player biographical data (height, weight, position)\n- Game-level player statistics (points, rebounds, assists, plus_minus)\n- Team organizational data\n- Historical game results (2014-2025)\n- Play-by-play event sequences\n\n**IMPORTANT FOR RECOMMENDATIONS**:\nWhen recommending features from the book, leverage these existing data assets:\n1. Use master_player_game_stats for player performance analysis\n2. Reference the 172k S3 objects of play-by-play data for sequence modeling\n3. Build on the existing prediction system (2,103 lines)\n4. Integrate with the plus/minus calculation system\n5. Query PostgreSQL for historical panel data analysis"
+}

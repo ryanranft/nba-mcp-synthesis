@@ -1,0 +1,46 @@
+digraph RecommendationDependencies {
+    rankdir=LR;
+    node [shape=box, style=rounded];
+
+    "ml_systems_5" [label="Feature Store", fillcolor="#ff6b6b", style="rounded,filled"];
+    "ml_systems_7" [label="Shadow Deployment", fillcolor="#ff6b6b", style="rounded,filled"];
+    "consolidated_rec_17" [label="Advanced Statistical Testing Framework", fillcolor="#ff6b6b", style="rounded,filled"];
+    "rec_22" [label="Panel Data Processing System", fillcolor="#ff6b6b", style="rounded,filled"];
+    "rec_26" [label="Causal Inference Pipeline", fillcolor="#ff6b6b", style="rounded,filled"];
+    "rec_18" [label="Bayesian Analysis Pipeline", fillcolor="#ff6b6b", style="rounded,filled"];
+    "rec_19" [label="Statistical Model Validation System", fillcolor="#ff6b6b", style="rounded,filled"];
+    "ml_systems_4" [label="Automated Retraining Pipeline", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_9_07180494" [label="Pipeline Analysis Bayesian - Variation 9", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_11_4d00df1f" [label="Panel Data System Processing - Variation...", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_12_146b760e" [label="Retraining Automated Pipeline - Variatio...", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_22_e48be029" [label="Framework Testing A/B - Variation 22", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_23_319a6df8" [label="Causal Pipeline Inference - Variation 23", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_26_1cc8fc97" [label="Statistical Validation Model System - Va...", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_45_9291f1f5" [label="Data Panel Processing System - Variation...", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_47_80dd4180" [label="Feature Store - Variation 47", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_50_23743798" [label="System Data Processing Panel - Variation...", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_61_6f15e61e" [label="Testing A/B Framework - Variation 61", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_75_66603a58" [label="Advanced Testing Statistical Framework -...", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_89_1f0e2a38" [label="ML Dashboard Tracking Experiment - Varia...", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_90_e99475f8" [label="Drift Data Detection - Variation 90", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_92_91d384c8" [label="Validation Model Statistical System - Va...", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_93_f13f0522" [label="Feature Store - Variation 93", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_96_6e89b5ed" [label="ML Tracking Experiment Dashboard - Varia...", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_98_8fe1a07f" [label="Framework Testing A/B - Variation 98", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_105_40c98422" [label="Panel Processing Data System - Variation...", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_110_aa88ac63" [label="Panel Data System Processing - Variation...", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_158_3085f2f1" [label="Analysis Bayesian Pipeline - Variation 1...", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_171_c9039f13" [label="Automated Pipeline Retraining - Variatio...", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_173_9c58893d" [label="Pipeline Retraining Automated - Variatio...", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_175_3fc6589c" [label="Statistical Model System Validation - Va...", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_182_3cffa414" [label="Inference Causal Pipeline - Variation 18...", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_194_c05ee6e2" [label="Data Panel Processing System - Variation...", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_108_8391d96e" [label="Monitoring Dashboards - Variation 108", fillcolor="#ff6b6b", style="rounded,filled"];
+    "consolidated_consolidated_consolidated_rec_13" [label="Model Interpretability Tools", fillcolor="#ff6b6b", style="rounded,filled"];
+    "rec_25" [label="Research Paper Generation", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_49_0c8b9c59" [label="Statistical Testing Significance - Varia...", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_71_9103ceef" [label="Generation Paper Research - Variation 71", fillcolor="#ff6b6b", style="rounded,filled"];
+    "variation_106_0abcec53" [label="Significance Statistical Testing - Varia...", fillcolor="#ff6b6b", style="rounded,filled"];
+    "consolidated_rec_39_6262" [label="Implement Cross-Validation for Model Eva...", fillcolor="#ff6b6b", style="rounded,filled"];
+
+}

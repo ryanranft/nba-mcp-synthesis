@@ -1,11 +1,11 @@
 {
   "book_title": "Econometrics versus the Bookmakers An econometric approach to sports betting",
   "s3_path": "books/thesis.pdf",
-  "start_time": "2025-10-19T05:26:46.935817",
+  "start_time": "2025-10-21T20:39:02.683891",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-19T05:26:47.435383",
+      "timestamp": "2025-10-21T20:39:03.196515",
       "recommendations": {
         "critical": [
           {
@@ -654,7 +654,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-19T05:27:02.376241",
+      "timestamp": "2025-10-21T20:39:18.521575",
       "recommendations": {
         "critical": [
           {
@@ -1303,7 +1303,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-19T05:27:17.951488",
+      "timestamp": "2025-10-21T20:39:33.732960",
       "recommendations": {
         "critical": [
           {
@@ -1952,7 +1952,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-19T05:27:33.018439",
+      "timestamp": "2025-10-21T20:39:49.039333",
       "recommendations": {
         "critical": [
           {
@@ -2601,7 +2601,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-19T05:27:48.099408",
+      "timestamp": "2025-10-21T20:40:04.562361",
       "recommendations": {
         "critical": [
           {
@@ -3250,7 +3250,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-19T05:28:03.357389",
+      "timestamp": "2025-10-21T20:40:20.331081",
       "recommendations": {
         "critical": [
           {
@@ -3899,7 +3899,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-19T05:28:18.628435",
+      "timestamp": "2025-10-21T20:40:36.311045",
       "recommendations": {
         "critical": [
           {
@@ -4548,7 +4548,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-19T05:28:33.605535",
+      "timestamp": "2025-10-21T20:40:52.102066",
       "recommendations": {
         "critical": [
           {
@@ -5197,7 +5197,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-19T05:28:48.069311",
+      "timestamp": "2025-10-21T20:41:06.786853",
       "recommendations": {
         "critical": [
           {
@@ -5846,7 +5846,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-19T05:29:02.694641",
+      "timestamp": "2025-10-21T20:41:21.420188",
       "recommendations": {
         "critical": [
           {
@@ -6495,7 +6495,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-19T05:29:17.648699",
+      "timestamp": "2025-10-21T20:41:37.386511",
       "recommendations": {
         "critical": [
           {
@@ -7144,7 +7144,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-19T05:29:32.284328",
+      "timestamp": "2025-10-21T20:41:52.314234",
       "recommendations": {
         "critical": [
           {
@@ -7793,7 +7793,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-19T05:29:46.868359",
+      "timestamp": "2025-10-21T20:42:06.941360",
       "recommendations": {
         "critical": [
           {
@@ -8442,7 +8442,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-19T05:30:01.645343",
+      "timestamp": "2025-10-21T20:42:21.879267",
       "recommendations": {
         "critical": [
           {
@@ -9091,7 +9091,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-19T05:30:16.270527",
+      "timestamp": "2025-10-21T20:42:36.456966",
       "recommendations": {
         "critical": [
           {
@@ -9749,6 +9749,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-19T05:30:30.309751",
+  "end_time": "2025-10-21T20:42:50.645785",
   "total_iterations": 15
 }

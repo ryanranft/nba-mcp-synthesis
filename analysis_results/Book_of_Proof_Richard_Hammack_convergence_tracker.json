@@ -1,11 +1,11 @@
 {
   "book_title": "Book of Proof Richard Hammack",
   "s3_path": "books/Book_of_Proof_Richard_Hammack.pdf",
-  "start_time": "2025-10-19T04:49:19.549468",
+  "start_time": "2025-10-21T19:58:35.522436",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-19T04:49:20.757618",
+      "timestamp": "2025-10-21T19:58:36.632677",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -14,7 +14,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-19T04:49:22.004587",
+      "timestamp": "2025-10-21T19:58:37.690886",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -23,7 +23,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-19T04:49:23.124174",
+      "timestamp": "2025-10-21T19:58:38.737136",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -32,7 +32,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-19T04:49:24.553866",
+      "timestamp": "2025-10-21T19:58:39.755385",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -41,7 +41,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-19T04:49:25.643333",
+      "timestamp": "2025-10-21T19:58:40.800426",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -50,7 +50,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-19T04:49:26.717559",
+      "timestamp": "2025-10-21T19:58:41.827198",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -59,7 +59,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-19T04:49:27.805429",
+      "timestamp": "2025-10-21T19:58:42.891603",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -68,7 +68,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-19T04:49:30.252656",
+      "timestamp": "2025-10-21T19:58:43.914031",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -77,7 +77,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-19T04:49:31.352700",
+      "timestamp": "2025-10-21T19:58:44.989485",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -86,7 +86,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-19T04:49:32.451096",
+      "timestamp": "2025-10-21T19:58:46.733852",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -95,7 +95,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-19T04:49:33.548680",
+      "timestamp": "2025-10-21T19:58:47.931443",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -104,7 +104,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-19T04:49:34.633140",
+      "timestamp": "2025-10-21T19:58:48.952752",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -113,7 +113,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-19T04:49:35.749944",
+      "timestamp": "2025-10-21T19:58:49.963256",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -122,7 +122,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-19T04:49:36.827710",
+      "timestamp": "2025-10-21T19:58:50.970622",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -131,7 +131,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-19T04:49:37.919901",
+      "timestamp": "2025-10-21T19:58:51.984174",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -149,6 +149,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-19T04:49:37.919943",
+  "end_time": "2025-10-21T19:58:51.984191",
   "total_iterations": 15
 }

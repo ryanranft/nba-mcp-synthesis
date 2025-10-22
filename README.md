@@ -70,13 +70,42 @@ This runs 5 comprehensive tests showing:
 
 **Cost:** ~$0.04 total for all tests
 
-## Security
+## Security & Secrets Management
 
-This project implements comprehensive security scanning to prevent secrets in commits and ensure data privacy:
+This project implements comprehensive security scanning and hierarchical secrets management:
+
+### 🔐 Hierarchical Secrets (UPDATED 2025-10-22)
+
+Secrets are stored in a hierarchical structure outside the repository for maximum security:
+
+```bash
+# 1. Test secrets loading (quickest way to verify setup)
+python test_secrets_hierarchical.py
+
+# 2. Secrets are automatically loaded from:
+/Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/
+  ├── nba-mcp-synthesis/.env.nba_mcp_synthesis.production/
+  │   ├── ANTHROPIC_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW.env
+  │   ├── GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW.env
+  │   └── ... (other secrets)
+  └── nba-simulator-aws/.env.nba_simulator_aws.production/
+      └── ... (AWS project secrets)
+
+# 3. For detailed setup instructions:
+# See: SECRETS_MIGRATION_COMPLETE.md
+# See: /Users/ryanranft/Desktop/++/big_cat_bets_assets/SECRETS_STRUCTURE.md
+```
+
+**Key Benefits:**
+- ✅ **Auto-loading**: Scripts automatically load secrets on startup
+- ✅ **Context-aware**: Separate secrets for WORKFLOW/DEVELOPMENT/TEST
+- ✅ **Fallback support**: Hierarchical loading with context fallback
+- ✅ **No manual exports**: No need to `export ANTHROPIC_API_KEY=...`
+
+### Security Scanning
 
 - ✅ **Pre-commit Hooks**: detect-secrets + git-secrets + bandit (local protection)
 - ✅ **CI/CD Scanning**: Bandit + Trivy + trufflehog (automated pipeline)
-- ✅ **Secrets Management**: Hierarchical + unified_secrets_manager.py
 - ✅ **S3 Public Access Validation**: Automated bucket/object privacy checks
 - ✅ **Permission Auditing**: Automated file permission checks
 

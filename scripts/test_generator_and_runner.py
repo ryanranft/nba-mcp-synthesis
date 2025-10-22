@@ -157,10 +157,21 @@ class TestGeneratorAndRunner:
 
             test_code = response.content[0].text.strip()
 
-            # Extract code from markdown if present
+            # Extract code from markdown if present (handle both complete and incomplete fences)
+            # Try complete fence first (```python ... ```)
             code_match = re.search(r'```python\n(.*?)```', test_code, re.DOTALL)
             if code_match:
                 test_code = code_match.group(1).strip()
+            else:
+                # Try incomplete fence (```python ... with no closing)
+                code_match = re.search(r'```python\n(.*)', test_code, re.DOTALL)
+                if code_match:
+                    test_code = code_match.group(1).strip()
+                # Also check for just ```\n without python keyword
+                elif test_code.startswith('```'):
+                    # Strip opening fence and any closing fence
+                    test_code = re.sub(r'^```[a-z]*\n', '', test_code)
+                    test_code = re.sub(r'\n```$', '', test_code).strip()
 
             # Count test cases
             num_tests = test_code.count('def test_')

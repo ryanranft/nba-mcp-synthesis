@@ -1,0 +1,31 @@
+{
+  "summary": {
+    "total_recommendations": 2,
+    "successful_deployments": 0,
+    "failed_deployments": 2,
+    "prs_created": 0,
+    "tests_passed": 0,
+    "tests_failed": 1,
+    "start_time": "2025-10-22T12:18:28.063252",
+    "end_time": "2025-10-22T12:21:47.406995",
+    "total_time": 199.343743
+  },
+  "results": [
+    {
+      "recommendation_id": "ml_systems_5",
+      "success": false,
+      "pr_url": null,
+      "tests_passed": false,
+      "error_message": "Safety checks failed: 1 critical failures",
+      "execution_time": 85.061902
+    },
+    {
+      "recommendation_id": "ml_systems_7",
+      "success": false,
+      "pr_url": null,
+      "tests_passed": false,
+      "error_message": "Tests failed (0 failures)",
+      "execution_time": 114.281583
+    }
+  ]
+}

@@ -69,6 +69,56 @@
                 </div>
             </div>
 
+            <!-- Live Progress (Real-Time) -->
+            <div class="card">
+                <h2>🔴 Live Progress (Real-Time)</h2>
+                <div class="stat-group">
+                    <div class="stat">
+                        <label>Current Book:</label>
+                        <span id="current-book" class="value highlight">Waiting...</span>
+                    </div>
+                    <div class="stat">
+                        <label>Books Completed:</label>
+                        <span id="books-processed-live" class="value">0 / 51</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="progress-bar-live" class="progress-bar live" style="width: 0%"></div>
+                        <span id="progress-percent-live" class="progress-text">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Process Status -->
+            <div class="card">
+                <h2>⚙️ Process Status</h2>
+                <div class="stat-group">
+                    <div class="stat">
+                        <label>Status:</label>
+                        <span id="process-status" class="status-badge">Checking...</span>
+                    </div>
+                    <div class="stat">
+                        <label>PID:</label>
+                        <span id="process-pid" class="value">-</span>
+                    </div>
+                    <div class="stat">
+                        <label>CPU Usage:</label>
+                        <span id="process-cpu" class="value">-</span>
+                    </div>
+                    <div class="stat">
+                        <label>Memory:</label>
+                        <span id="process-memory" class="value">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Log Viewer -->
+            <div class="card wide">
+                <h2>📜 Live Log Viewer (Last 20 Lines)</h2>
+                <div id="log-container" class="log-viewer">
+                    <div class="log-line">Loading logs...</div>
+                </div>
+            </div>
+
             <!-- Phase Status -->
             <div class="card wide">
                 <h2>📋 Phase Status</h2>

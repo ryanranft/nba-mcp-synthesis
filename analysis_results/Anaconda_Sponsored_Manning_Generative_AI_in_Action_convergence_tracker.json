@@ -1,11 +1,11 @@
 {
   "book_title": "Anaconda Sponsored Manning Generative AI in Action",
   "s3_path": "books/Anaconda-Sponsored_Manning_Generative-AI-in-Action.pdf",
-  "start_time": "2025-10-19T04:42:33.131466",
+  "start_time": "2025-10-21T19:51:58.343064",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-19T04:42:35.643897",
+      "timestamp": "2025-10-21T19:52:00.951388",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -14,7 +14,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-19T04:42:37.844798",
+      "timestamp": "2025-10-21T19:52:03.045752",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -23,7 +23,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-19T04:42:40.059085",
+      "timestamp": "2025-10-21T19:52:05.166019",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -32,7 +32,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-19T04:42:42.298879",
+      "timestamp": "2025-10-21T19:52:07.308717",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -41,7 +41,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-19T04:42:44.499222",
+      "timestamp": "2025-10-21T19:52:09.550958",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -50,7 +50,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-19T04:42:47.300489",
+      "timestamp": "2025-10-21T19:52:11.821482",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -59,7 +59,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-19T04:42:57.191376",
+      "timestamp": "2025-10-21T19:52:13.894033",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -68,7 +68,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-19T04:42:59.383144",
+      "timestamp": "2025-10-21T19:52:16.049986",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -77,7 +77,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-19T04:43:01.615930",
+      "timestamp": "2025-10-21T19:52:26.153361",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -86,7 +86,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-19T04:43:03.794029",
+      "timestamp": "2025-10-21T19:52:28.581519",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -95,7 +95,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-19T04:43:05.982787",
+      "timestamp": "2025-10-21T19:52:30.732980",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -104,7 +104,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-19T04:43:08.429427",
+      "timestamp": "2025-10-21T19:52:39.750115",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -113,7 +113,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-19T04:43:10.575424",
+      "timestamp": "2025-10-21T19:52:42.308041",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -122,7 +122,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-19T04:43:12.764440",
+      "timestamp": "2025-10-21T19:52:44.468444",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -131,7 +131,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-19T04:43:14.889605",
+      "timestamp": "2025-10-21T19:52:46.608093",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -149,6 +149,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-19T04:43:14.889626",
+  "end_time": "2025-10-21T19:52:46.608111",
   "total_iterations": 15
 }

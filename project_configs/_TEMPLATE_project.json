@@ -1,0 +1,78 @@
+{
+  "project_id": "YOUR_PROJECT_ID",
+  "sport": "SPORT_NAME",
+  "league": "LEAGUE_ABBREVIATION",
+  "project_path": "/path/to/your/project",
+  "project_name": "Full Project Name",
+  "project_goals": [
+    "Goal 1: Description of primary objective",
+    "Goal 2: Description of secondary objective",
+    "Goal 3: Additional goals..."
+  ],
+  "current_phase": "Current development phase or milestone",
+  "key_technologies": [
+    "Technology 1",
+    "Technology 2",
+    "Technology 3"
+  ],
+  "directory_structure": {
+    "dir_name": "Description of what this directory contains"
+  },
+  "exclude_dirs": [
+    "data",
+    "__pycache__",
+    ".git",
+    "node_modules",
+    ".pytest_cache",
+    "venv",
+    ".venv",
+    "dist",
+    "build",
+    "logs"
+  ],
+  "sampling_config": {
+    "large_dir_threshold": 20,
+    "sample_size": 20,
+    "priority_dirs": [
+      "scripts",
+      "src",
+      "tests"
+    ],
+    "file_types": [
+      "*.py",
+      "*.json",
+      "*.yaml"
+    ]
+  },
+  "data_inventory": {
+    "enabled": false,
+    "inventory_path": "/path/to/project-simulator-aws/inventory",
+    "description": "Data Inventory Management System (DIMS) for [SPORT] panel data",
+    "database": {
+      "type": "PostgreSQL",
+      "schema": "public",
+      "key_tables": [
+        "master_teams",
+        "master_games",
+        "master_player_stats"
+      ]
+    },
+    "data_coverage": {
+      "s3_objects": 0,
+      "s3_size_gb": 0.0,
+      "seasons": "YYYY-YYYY",
+      "games_estimated": "0+",
+      "players_estimated": "0+"
+    },
+    "systems": [
+      "prediction_system",
+      "simulation_system",
+      "mcp_server"
+    ]
+  },
+  "metadata": {
+    "created": "YYYY-MM-DD",
+    "last_updated": "YYYY-MM-DD",
+    "version": "1.0"
+  }
+}

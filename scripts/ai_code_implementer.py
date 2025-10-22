@@ -19,12 +19,19 @@ Date: 2025-10-22
 """
 
 import os
+import sys
 import json
 import logging
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass
 import re
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# Import secrets management
+from mcp_server.env_helper import get_api_key
 
 logging.basicConfig(
     level=logging.INFO,
@@ -95,7 +102,8 @@ class AICodeImplementer:
         self.temperature = temperature
 
         # Initialize Anthropic client
-        api_key = os.getenv('ANTHROPIC_API_KEY')
+        # Use hierarchical secrets loading
+        api_key = get_api_key('ANTHROPIC')
         if api_key and ANTHROPIC_AVAILABLE:
             self.client = Anthropic(api_key=api_key)
             logger.info(f"🤖 AI Code Implementer initialized")
@@ -107,6 +115,7 @@ class AICodeImplementer:
                 logger.warning("⚠️  Anthropic library not installed")
             else:
                 logger.warning("⚠️  ANTHROPIC_API_KEY not found in environment")
+                logger.warning("⚠️  Make sure secrets are initialized with: from mcp_server.secrets_loader import init_secrets; init_secrets()")
 
     def implement_recommendation(
         self,

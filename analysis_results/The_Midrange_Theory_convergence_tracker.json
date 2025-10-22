@@ -1,11 +1,11 @@
 {
   "book_title": "The Midrange Theory",
   "s3_path": "books/The_Midrange_Theory.pdf",
-  "start_time": "2025-10-19T05:19:49.717738",
+  "start_time": "2025-10-21T20:32:03.426310",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-19T05:19:50.226610",
+      "timestamp": "2025-10-21T20:32:03.981311",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -14,7 +14,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-19T05:19:51.074885",
+      "timestamp": "2025-10-21T20:32:04.400366",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -23,7 +23,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-19T05:19:51.477015",
+      "timestamp": "2025-10-21T20:32:04.778903",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -32,7 +32,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-19T05:19:51.877235",
+      "timestamp": "2025-10-21T20:32:05.142292",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -41,7 +41,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-19T05:19:52.295643",
+      "timestamp": "2025-10-21T20:32:05.519878",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -50,7 +50,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-19T05:19:52.708615",
+      "timestamp": "2025-10-21T20:32:05.885549",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -59,7 +59,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-19T05:19:53.569498",
+      "timestamp": "2025-10-21T20:32:06.255276",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -68,7 +68,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-19T05:19:53.994903",
+      "timestamp": "2025-10-21T20:32:06.612957",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -77,7 +77,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-19T05:19:54.390215",
+      "timestamp": "2025-10-21T20:32:06.976970",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -86,7 +86,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-19T05:19:54.821388",
+      "timestamp": "2025-10-21T20:32:07.382795",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -95,7 +95,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-19T05:19:55.227973",
+      "timestamp": "2025-10-21T20:32:07.750974",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -104,7 +104,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-19T05:19:55.638163",
+      "timestamp": "2025-10-21T20:32:08.111749",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -113,7 +113,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-19T05:19:56.512967",
+      "timestamp": "2025-10-21T20:32:08.481464",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -122,7 +122,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-19T05:19:56.914770",
+      "timestamp": "2025-10-21T20:32:08.879950",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -131,7 +131,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-19T05:19:57.320394",
+      "timestamp": "2025-10-21T20:32:09.244058",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -149,6 +149,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-19T05:19:57.320448",
+  "end_time": "2025-10-21T20:32:09.244085",
   "total_iterations": 15
 }

@@ -34,7 +34,10 @@ async function fetchAllData() {
             fetchStatus(),
             fetchPhases(),
             fetchCost(),
-            fetchSystem()
+            fetchSystem(),
+            fetchLiveProgress(),
+            fetchLogTail(),
+            fetchProcessStatus()
         ]);
         updateLastUpdateTime();
     } catch (error) {
@@ -85,6 +88,141 @@ function updateStatus(data) {
     // Time
     document.getElementById('elapsed-time').textContent = data.elapsed || '0s';
     document.getElementById('time-remaining').textContent = data.time_remaining || 'Unknown';
+}
+
+// Fetch live progress
+async function fetchLiveProgress() {
+    try {
+        const response = await fetch(`${API_BASE}/api/live-progress`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        updateLiveProgress(data);
+    } catch (error) {
+        console.error('Failed to fetch live progress:', error);
+    }
+}
+
+// Update live progress display
+function updateLiveProgress(data) {
+    // Override the standard progress with live filesystem data
+    const elem = document.getElementById('books-processed-live');
+    if (elem) {
+        elem.textContent = `${data.books_completed || 0} / ${data.total_books || 0}`;
+    }
+
+    const progressElem = document.getElementById('progress-bar-live');
+    if (progressElem) {
+        const progress = data.progress_percent || 0;
+        progressElem.style.width = `${progress}%`;
+    }
+
+    const percentElem = document.getElementById('progress-percent-live');
+    if (percentElem) {
+        percentElem.textContent = `${data.progress_percent || 0}%`;
+    }
+
+    const currentBookElem = document.getElementById('current-book');
+    if (currentBookElem) {
+        currentBookElem.textContent = data.current_book || 'Waiting...';
+    }
+}
+
+// Fetch log tail
+async function fetchLogTail() {
+    try {
+        const response = await fetch(`${API_BASE}/api/logs/tail?lines=20`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        updateLogTail(data);
+    } catch (error) {
+        console.error('Failed to fetch log tail:', error);
+    }
+}
+
+// Update log tail display
+function updateLogTail(data) {
+    const container = document.getElementById('log-container');
+    if (!container) return;
+
+    if (!data.lines || data.lines.length === 0) {
+        container.innerHTML = '<div class="log-line">No log data available</div>';
+        return;
+    }
+
+    const logLines = data.lines.map(line => {
+        // Escape HTML and add coloring for different log levels
+        const escapedLine = escapeHtml(line);
+        let className = 'log-line';
+
+        if (line.includes('ERROR') || line.includes('❌')) {
+            className += ' log-error';
+        } else if (line.includes('WARNING') || line.includes('⚠️')) {
+            className += ' log-warning';
+        } else if (line.includes('SUCCESS') || line.includes('✅')) {
+            className += ' log-success';
+        }
+
+        return `<div class="${className}">${escapedLine}</div>`;
+    }).join('');
+
+    container.innerHTML = logLines;
+
+    // Auto-scroll to bottom
+    container.scrollTop = container.scrollHeight;
+}
+
+// Fetch process status
+async function fetchProcessStatus() {
+    try {
+        const response = await fetch(`${API_BASE}/api/process-status`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        updateProcessStatus(data);
+    } catch (error) {
+        console.error('Failed to fetch process status:', error);
+    }
+}
+
+// Update process status display
+function updateProcessStatus(data) {
+    const statusElem = document.getElementById('process-status');
+    const pidElem = document.getElementById('process-pid');
+    const cpuElem = document.getElementById('process-cpu');
+    const memElem = document.getElementById('process-memory');
+
+    if (data.found && data.process) {
+        if (statusElem) {
+            statusElem.textContent = 'Running';
+            statusElem.className = 'status-badge ok';
+        }
+        if (pidElem) {
+            pidElem.textContent = data.process.pid || '-';
+        }
+        if (cpuElem) {
+            cpuElem.textContent = `${data.process.cpu_percent || 0}%`;
+        }
+        if (memElem) {
+            memElem.textContent = `${data.process.memory_percent || 0}%`;
+        }
+    } else {
+        if (statusElem) {
+            statusElem.textContent = 'Not Running';
+            statusElem.className = 'status-badge warning';
+        }
+        if (pidElem) pidElem.textContent = '-';
+        if (cpuElem) cpuElem.textContent = '-';
+        if (memElem) memElem.textContent = '-';
+    }
+}
+
+// Escape HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Fetch phases
@@ -296,6 +434,7 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('error', (event) => {
     console.error('Global error:', event.error);
 });
+
 
 
 

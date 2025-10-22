@@ -1,0 +1,97 @@
+{
+  "project_id": "nba_mcp_synthesis",
+  "sport": "basketball",
+  "league": "NBA",
+  "project_path": "/Users/ryanranft/nba-mcp-synthesis",
+  "project_name": "NBA MCP Synthesis & Analytics Platform",
+  "project_goals": [
+    "Build comprehensive NBA data analytics and simulation platform",
+    "Integrate real-time game data with historical analysis",
+    "Provide ML-powered predictions and betting insights",
+    "Create MCP server for seamless data access",
+    "Develop game simulator with realistic physics and player models",
+    "Enable automated recommendation generation from technical books"
+  ],
+  "current_phase": "Phase 4: Integration & Enhancement",
+  "key_technologies": [
+    "Python 3.11+",
+    "AWS (S3, Lambda, SageMaker)",
+    "FastAPI",
+    "PostgreSQL / BigQuery",
+    "Gemini 1.5 Pro",
+    "Claude Sonnet 4",
+    "PyMuPDF",
+    "scikit-learn",
+    "TensorFlow/Keras"
+  ],
+  "directory_structure": {
+    "scripts": "Automation and workflow scripts",
+    "synthesis": "AI model integrations (Google, Claude, etc.)",
+    "mcp_server": "Model Context Protocol server implementation",
+    "implementation_plans": "Generated recommendation plans",
+    "analysis_results": "Book analysis outputs",
+    "config": "Configuration files"
+  },
+  "exclude_dirs": [
+    "data",
+    "__pycache__",
+    ".git",
+    "node_modules",
+    ".pytest_cache",
+    "venv",
+    ".venv",
+    "dist",
+    "build",
+    "logs",
+    ".DS_Store"
+  ],
+  "sampling_config": {
+    "large_dir_threshold": 20,
+    "sample_size": 20,
+    "priority_dirs": [
+      "scripts",
+      "synthesis",
+      "mcp_server",
+      "tests"
+    ],
+    "file_types": [
+      "*.py",
+      "*.json",
+      "*.yaml",
+      "*.md"
+    ]
+  },
+  "data_inventory": {
+    "enabled": true,
+    "inventory_path": "/Users/ryanranft/nba-simulator-aws/inventory",
+    "description": "Data Inventory Management System (DIMS) for NBA panel data",
+    "database": {
+      "type": "PostgreSQL",
+      "schema": "public",
+      "key_tables": [
+        "master_players",
+        "master_teams",
+        "master_games",
+        "master_player_game_stats"
+      ]
+    },
+    "data_coverage": {
+      "s3_objects": 172726,
+      "s3_size_gb": 118.26,
+      "seasons": "2014-2025",
+      "games_estimated": "15000+",
+      "players_estimated": "5000+"
+    },
+    "systems": [
+      "prediction_system",
+      "plus_minus_system",
+      "game_simulation",
+      "mcp_server"
+    ]
+  },
+  "metadata": {
+    "created": "2025-10-21",
+    "last_updated": "2025-10-21",
+    "version": "1.0"
+  }
+}

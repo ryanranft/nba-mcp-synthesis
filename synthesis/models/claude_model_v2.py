@@ -67,7 +67,8 @@ class ClaudeModelV2:
         self,
         book_content: str,
         book_title: str,
-        book_metadata: Dict[str, Any]
+        book_metadata: Dict[str, Any],
+        project_context: Optional[Dict] = None
     ) -> Dict[str, Any]:
         """
         Analyze book content and extract recommendations using full context.
@@ -76,6 +77,7 @@ class ClaudeModelV2:
             book_content: Full book text content (up to 1M tokens)
             book_title: Title of the book
             book_metadata: Book metadata dictionary
+            project_context: Optional project context from project_code_analyzer
 
         Returns:
             Dict with success, recommendations, cost, input_tokens
@@ -83,7 +85,7 @@ class ClaudeModelV2:
         start_time = datetime.now()
 
         # Create comprehensive prompt for full-book analysis
-        prompt = self._create_full_book_prompt(book_content, book_title, book_metadata)
+        prompt = self._create_full_book_prompt(book_content, book_title, book_metadata, project_context)
 
         logger.info(f"📖 Analyzing book with Claude: {book_title}")
         logger.info(f"📊 Content length: {len(book_content):,} characters")
@@ -152,17 +154,79 @@ class ClaudeModelV2:
         self,
         book_content: str,
         book_title: str,
-        book_metadata: Dict[str, Any]
+        book_metadata: Dict[str, Any],
+        project_context: Optional[Dict] = None
     ) -> str:
-        """Create comprehensive prompt for full-book analysis"""
+        """Create comprehensive prompt for full-book analysis with project awareness"""
 
         author = book_metadata.get("author", "Unknown")
 
-        prompt = f"""You are an expert technical analyst extracting actionable recommendations from technical books for NBA analytics and simulation systems.
+        # Build project context section if available
+        project_section = ""
+        if project_context:
+            project_info = project_context.get('project_info', {})
+            project_name = project_info.get('name', 'NBA Analytics System')
+            project_goals = project_info.get('goals', [])
+            project_phase = project_info.get('phase', 'Unknown')
+            project_tech = project_info.get('technologies', [])
+            file_tree = project_context.get('file_tree', '')
+            recent_commits = project_context.get('recent_commits', [])[:5]
+            completion = project_context.get('completion_status', {})
+            sampled_files = project_context.get('sampled_files', {})
+
+            project_section = f"""
+## 🎯 PROJECT CONTEXT: {project_name}
+
+**Current Development Phase**: {project_phase}
+
+**Project Goals**:
+{chr(10).join(f'- {goal}' for goal in project_goals)}
+
+**Technologies in Use**:
+{', '.join(project_tech)}
+
+**Project Maturity**: {completion.get('maturity', 'Unknown')}
+- TODOs remaining: {completion.get('todos_found', 0)}
+- FIXMEs remaining: {completion.get('fixmes_found', 0)}
+
+**File Structure**:
+```
+{file_tree[:1500]}
+{'... (truncated)' if len(file_tree) > 1500 else ''}
+```
+
+**Recent Development Activity** (last 5 commits):
+{chr(10).join(f"- [{commit.get('hash', '')}] {commit.get('message', '')}" for commit in recent_commits)}
+
+**Key Implementation Files** (sampled):
+{chr(10).join(f"- {file_path}" for file_path in list(sampled_files.keys())[:10])}
+
+**IMPORTANT**: Use this project context to:
+1. Recommend only features that are NOT already implemented
+2. Build on existing implementations and architecture
+3. Align with the project's current phase and goals
+4. Use the technologies already in the stack
+5. Address gaps you identify in the current implementation
+"""
+
+        prompt = f"""You are an expert technical analyst extracting actionable recommendations from technical books for software development projects.
 
 BOOK: "{book_title}" by {author}
+{project_section}
 
-TASK: Analyze this COMPLETE technical book and extract specific, implementable recommendations for an NBA basketball analytics platform built on AWS.
+TASK: Analyze this COMPLETE technical book and extract specific, implementable recommendations for this {'specific ' + project_info.get('sport', 'basketball') + ' analytics project' if project_context else 'NBA basketball analytics platform built on AWS'}."""
+
+        if project_context:
+            prompt += """
+
+CRITICAL: Before recommending any feature, check if it's already implemented in the project context above. Focus on:
+- Features mentioned in the book but MISSING from the current project
+- Improvements to existing implementations
+- Technologies from the book that complement the current stack
+- Addressing TODOs and FIXMEs you see in the project state
+"""
+
+        prompt += """
 
 COMPLETE BOOK CONTENT:
 {book_content}
@@ -233,6 +297,7 @@ Begin your comprehensive analysis:"""
         book_content: str,
         book_metadata: Dict[str, Any],
         existing_recommendations: Optional[List[Dict[str, Any]]] = None,
+        project_context: Optional[Dict] = None
     ) -> Dict[str, Any]:
         """
         Alternate interface for compatibility with existing code.
@@ -241,10 +306,11 @@ Begin your comprehensive analysis:"""
             book_content: Full book text
             book_metadata: Book metadata
             existing_recommendations: Optional context from other analyses
+            project_context: Optional project context from project_code_analyzer
 
         Returns:
             Analysis result dictionary
         """
         title = book_metadata.get("title", "Unknown")
-        return await self.analyze_book(book_content, title, book_metadata)
+        return await self.analyze_book(book_content, title, book_metadata, project_context)
 

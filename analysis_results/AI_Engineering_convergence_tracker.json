@@ -1,11 +1,11 @@
 {
   "book_title": "AI Engineering",
   "s3_path": "books/AI Engineering.pdf",
-  "start_time": "2025-10-19T04:41:56.405892",
+  "start_time": "2025-10-21T19:51:07.791857",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-19T04:41:58.903765",
+      "timestamp": "2025-10-21T19:51:18.434110",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -14,7 +14,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-19T04:42:01.118717",
+      "timestamp": "2025-10-21T19:51:21.219483",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -23,7 +23,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-19T04:42:03.369706",
+      "timestamp": "2025-10-21T19:51:23.492671",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -32,7 +32,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-19T04:42:06.051941",
+      "timestamp": "2025-10-21T19:51:25.624594",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -41,7 +41,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-19T04:42:08.542843",
+      "timestamp": "2025-10-21T19:51:27.776703",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -50,7 +50,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-19T04:42:10.757223",
+      "timestamp": "2025-10-21T19:51:37.650763",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -59,7 +59,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-19T04:42:13.071733",
+      "timestamp": "2025-10-21T19:51:39.888648",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -68,7 +68,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-19T04:42:15.223957",
+      "timestamp": "2025-10-21T19:51:42.203105",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -77,7 +77,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-19T04:42:17.943899",
+      "timestamp": "2025-10-21T19:51:44.418992",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -86,7 +86,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-19T04:42:20.078611",
+      "timestamp": "2025-10-21T19:51:46.976347",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -95,7 +95,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-19T04:42:22.213146",
+      "timestamp": "2025-10-21T19:51:49.046650",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -104,7 +104,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-19T04:42:26.534239",
+      "timestamp": "2025-10-21T19:51:51.538078",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -113,7 +113,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-19T04:42:28.725838",
+      "timestamp": "2025-10-21T19:51:53.710871",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -122,7 +122,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-19T04:42:31.008400",
+      "timestamp": "2025-10-21T19:51:55.982739",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -131,7 +131,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-19T04:42:33.114683",
+      "timestamp": "2025-10-21T19:51:58.322637",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -149,6 +149,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-19T04:42:33.114704",
+  "end_time": "2025-10-21T19:51:58.322668",
   "total_iterations": 15
 }

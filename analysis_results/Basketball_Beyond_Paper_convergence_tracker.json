@@ -1,11 +1,11 @@
 {
   "book_title": "Basketball Beyond Paper",
   "s3_path": "books/Basketball_Beyond_Paper.pdf",
-  "start_time": "2025-10-19T04:47:03.095815",
+  "start_time": "2025-10-21T19:56:44.843262",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-19T04:47:03.672989",
+      "timestamp": "2025-10-21T19:56:45.563674",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -14,7 +14,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-19T04:47:04.147650",
+      "timestamp": "2025-10-21T19:56:45.963634",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -23,7 +23,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-19T04:47:04.588866",
+      "timestamp": "2025-10-21T19:56:46.363337",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -32,7 +32,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-19T04:47:05.050106",
+      "timestamp": "2025-10-21T19:56:46.761624",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -41,7 +41,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-19T04:47:05.488516",
+      "timestamp": "2025-10-21T19:56:47.173814",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -50,7 +50,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-19T04:47:05.954007",
+      "timestamp": "2025-10-21T19:56:47.574474",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -59,7 +59,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-19T04:47:06.396419",
+      "timestamp": "2025-10-21T19:56:47.954436",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -68,7 +68,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-19T04:47:06.837427",
+      "timestamp": "2025-10-21T19:56:48.355599",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -77,7 +77,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-19T04:47:07.294206",
+      "timestamp": "2025-10-21T19:56:48.763397",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -86,7 +86,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-19T04:47:08.793740",
+      "timestamp": "2025-10-21T19:56:51.636530",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -95,7 +95,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-19T04:47:09.248191",
+      "timestamp": "2025-10-21T19:56:52.022345",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -104,7 +104,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-19T04:47:09.681086",
+      "timestamp": "2025-10-21T19:56:52.426597",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -113,7 +113,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-19T04:47:10.153525",
+      "timestamp": "2025-10-21T19:56:52.805820",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -122,7 +122,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-19T04:47:10.589205",
+      "timestamp": "2025-10-21T19:56:53.207785",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -131,7 +131,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-19T04:47:11.036874",
+      "timestamp": "2025-10-21T19:56:53.601174",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -149,6 +149,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-19T04:47:11.036924",
+  "end_time": "2025-10-21T19:56:53.601250",
   "total_iterations": 15
 }

@@ -27,6 +27,7 @@ from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from datetime import datetime
 from difflib import SequenceMatcher
+from pathlib import Path
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -82,11 +83,46 @@ class HighContextBookAnalyzer:
     MAX_CHARS = 1_000_000  # 1M characters (~250k tokens, full book capability)
     MAX_TOKENS = 250_000   # Explicit token limit for tracking
 
-    def __init__(self, project: str = "nba-mcp-synthesis", context: str = "production", enable_cache: bool = True):
-        """Initialize with Gemini 1.5 Pro and Claude Sonnet 4."""
+    def __init__(self, project: str = "nba-mcp-synthesis", context: str = "production", enable_cache: bool = True, use_local_books: bool = False, books_dir: Optional[str] = None, project_config_path: Optional[str] = None):
+        """
+        Initialize with Gemini 1.5 Pro and Claude Sonnet 4.
+
+        Args:
+            project: Project name for configuration
+            context: Context for secrets (production, development, test)
+            enable_cache: Whether to enable result caching
+            use_local_books: If True, read books from local filesystem instead of S3
+            books_dir: Directory to search for books (defaults to ~/Downloads)
+            project_config_path: Path to project configuration JSON (for project-aware analysis)
+        """
         logger.info(f"🚀 Initializing High-Context Book Analyzer")
         logger.info(f"📊 Max content: {self.MAX_CHARS:,} chars (~{self.MAX_TOKENS:,} tokens)")
         logger.info(f"🤖 Models: Gemini 1.5 Pro (2M context) + Claude Sonnet 4 (1M context)")
+
+        self.use_local_books = use_local_books
+        self.books_dir = books_dir
+        self.project_config_path = project_config_path
+        self.project_context = None
+
+        # Load project context if config path provided
+        if project_config_path:
+            logger.info(f"🔍 Loading project context from: {project_config_path}")
+            try:
+                from scripts.project_code_analyzer import EnhancedProjectScanner
+                scanner = EnhancedProjectScanner(project_config_path)
+                self.project_context = scanner.scan_project_deeply()
+                logger.info("✅ Project context loaded successfully")
+                logger.info(f"📂 Project: {self.project_context.get('project_info', {}).get('name', 'Unknown')}")
+            except Exception as e:
+                logger.warning(f"⚠️  Failed to load project context: {e}")
+                logger.warning("⚠️  Continuing without project context")
+                self.project_context = None
+
+        if use_local_books:
+            books_path = books_dir or str(Path.home() / "Downloads")
+            logger.info(f"📚 Reading books from local filesystem: {books_path}")
+        else:
+            logger.info(f"📚 Reading books from S3")
 
         # Initialize cache
         self.enable_cache = enable_cache
@@ -170,7 +206,21 @@ class HighContextBookAnalyzer:
         # Get book content
         book_content = book.get("content", "")
         if not book_content:
-            book_content = await self._read_book_from_s3(book)
+            # Choose reader based on configuration with S3 fallback
+            if self.use_local_books:
+                logger.info("📚 Attempting to read book from local filesystem...")
+                book_content = await self._read_book_from_local(book, self.books_dir)
+
+                # Fallback to S3 if local read fails
+                if not book_content:
+                    logger.warning("⚠️  Book not found locally, falling back to S3...")
+                    book_content = await self._read_book_from_s3(book)
+                    if book_content:
+                        logger.info("✅ Successfully retrieved book from S3 fallback")
+            else:
+                logger.info("📚 Reading book from S3...")
+                book_content = await self._read_book_from_s3(book)
+
             if not book_content:
                 return HighContextAnalysisResult(
                     success=False,
@@ -214,6 +264,8 @@ class HighContextBookAnalyzer:
         # Gemini 1.5 Pro
         if self.gemini_model:
             logger.info("🔄 Analyzing with Gemini 1.5 Pro...")
+            if self.project_context:
+                logger.info("📂 Using project context for analysis")
             model_results["gemini"] = await self._run_gemini_analysis(
                 book_content, book, timeout=180  # 3 minutes for large context
             )
@@ -221,12 +273,24 @@ class HighContextBookAnalyzer:
         # Claude Sonnet 4
         if self.claude_model:
             logger.info("🔄 Analyzing with Claude Sonnet 4...")
+            if self.project_context:
+                logger.info("📂 Using project context for analysis")
             model_results["claude"] = await self._run_claude_analysis(
                 book_content, book, timeout=180  # 3 minutes for large context
             )
 
         # Synthesize consensus
         synthesized_recs, consensus_level = self._synthesize_dual_consensus(model_results)
+
+        # Validate recommendations (if project context available)
+        if self.project_context:
+            logger.info("🔍 Validating recommendations...")
+            synthesized_recs = await self._validate_recommendations(synthesized_recs)
+
+        # Prioritize recommendations (if project context available)
+        if self.project_context:
+            logger.info("📊 Prioritizing recommendations...")
+            synthesized_recs = await self._prioritize_recommendations(synthesized_recs)
 
         # Calculate totals
         gemini_cost = model_results.get("gemini", {}).get("cost", 0.0)
@@ -293,7 +357,8 @@ class HighContextBookAnalyzer:
             result = await asyncio.wait_for(
                 self.gemini_model.analyze_book_content(
                     book_content=content,
-                    book_metadata=metadata
+                    book_metadata=metadata,
+                    project_context=self.project_context
                 ),
                 timeout=timeout,
             )
@@ -323,7 +388,8 @@ class HighContextBookAnalyzer:
                 self.claude_model.analyze_book(
                     book_content=content,
                     book_title=metadata.get("title", "Unknown"),
-                    book_metadata=metadata
+                    book_metadata=metadata,
+                    project_context=self.project_context
                 ),
                 timeout=timeout,
             )
@@ -445,6 +511,110 @@ class HighContextBookAnalyzer:
 
         return final_recs
 
+    async def _read_book_from_local(self, book: Dict, books_dir: Optional[str] = None) -> Optional[str]:
+        """
+        Read book content from local filesystem (default: ~/Downloads).
+
+        Args:
+            book: Book metadata dict with title and optional filename
+            books_dir: Directory to search for books (defaults to ~/Downloads)
+
+        Returns:
+            Full text content of the book, or None if not found
+        """
+        try:
+            import pymupdf  # PyMuPDF for PDF extraction
+            from pathlib import Path
+            import re
+
+            # Default to Downloads folder
+            if books_dir is None:
+                books_dir = str(Path.home() / "Downloads")
+
+            books_path = Path(books_dir)
+            if not books_path.exists():
+                logger.error(f"Books directory does not exist: {books_dir}")
+                return None
+
+            # Get book title and create search pattern
+            book_title = book.get("title", "")
+            if not book_title:
+                logger.error("No book title provided for local search")
+                return None
+
+            # Check if filename is explicitly provided
+            if "local_filename" in book:
+                target_file = books_path / book["local_filename"]
+                if target_file.exists() and target_file.suffix.lower() == '.pdf':
+                    logger.info(f"📥 Reading from local file: {target_file.name}")
+                    pdf_files = [target_file]
+                else:
+                    logger.error(f"Specified file not found: {book['local_filename']}")
+                    return None
+            else:
+                # Search for matching PDF files
+                # Clean title for filename matching (remove special chars, normalize spaces)
+                clean_title = re.sub(r'[^\w\s-]', '', book_title.lower())
+                clean_title_parts = clean_title.split()
+
+                logger.info(f"🔍 Searching for PDFs matching: {book_title}")
+
+                # Find all PDFs in directory
+                pdf_files = list(books_path.glob("*.pdf"))
+
+                if not pdf_files:
+                    logger.warning(f"No PDF files found in {books_dir}")
+                    return None
+
+                logger.info(f"📂 Found {len(pdf_files)} PDFs in {books_dir}")
+
+                # Score each PDF by title match
+                best_match = None
+                best_score = 0
+
+                for pdf_file in pdf_files:
+                    # Clean filename for comparison
+                    filename_clean = re.sub(r'[^\w\s-]', '', pdf_file.stem.lower())
+
+                    # Count matching words
+                    filename_parts = filename_clean.split()
+                    matches = sum(1 for part in clean_title_parts if part in filename_parts)
+                    score = matches / len(clean_title_parts) if clean_title_parts else 0
+
+                    if score > best_score:
+                        best_score = score
+                        best_match = pdf_file
+
+                # Require at least 30% word match
+                if best_score < 0.3:
+                    logger.error(f"No good filename match found for '{book_title}' (best score: {best_score:.2%})")
+                    logger.info(f"💡 Tip: Add 'local_filename' to book metadata for exact match")
+                    return None
+
+                pdf_files = [best_match]
+                logger.info(f"📖 Best match: {best_match.name} (score: {best_score:.2%})")
+
+            # Extract text from PDF
+            pdf_path = pdf_files[0]
+            logger.info(f"📚 Extracting text from {pdf_path.name}...")
+
+            doc = pymupdf.open(pdf_path)
+
+            text_parts = []
+            for page_num in range(len(doc)):
+                page = doc[page_num]
+                text_parts.append(page.get_text())
+
+            full_text = "\n\n".join(text_parts)
+            logger.info(f"✅ Extracted {len(full_text):,} characters from {len(doc)} pages")
+
+            doc.close()
+            return full_text
+
+        except Exception as e:
+            logger.error(f"❌ Failed to read book from local filesystem: {e}")
+            return None
+
     async def _read_book_from_s3(self, book: Dict) -> Optional[str]:
         """Read book content from S3."""
         try:
@@ -486,4 +656,118 @@ class HighContextBookAnalyzer:
         except Exception as e:
             logger.error(f"❌ Failed to read book from S3: {e}")
             return None
+
+    async def _validate_recommendations(self, recommendations: List[Dict]) -> List[Dict]:
+        """
+        Validate recommendations for quality and feasibility.
+
+        Args:
+            recommendations: List of recommendation dictionaries
+
+        Returns:
+            Validated and potentially filtered recommendations with validation metadata
+        """
+        from scripts.recommendation_validator import RecommendationValidator
+
+        # Initialize validator with project inventory
+        validator = RecommendationValidator(
+            project_inventory=self.project_context if hasattr(self, 'project_context') else None
+        )
+
+        validated_recs = []
+        validation_stats = {
+            'total': len(recommendations),
+            'passed': 0,
+            'failed': 0,
+            'warnings': 0
+        }
+
+        logger.info(f"🔍 Validating {len(recommendations)} recommendations...")
+
+        for idx, rec in enumerate(recommendations):
+            # Validate recommendation
+            result = validator.validate_recommendation(rec)
+
+            # Add validation metadata to recommendation
+            rec['validation'] = {
+                'passed': result.passed,
+                'warnings_count': len(result.warnings),
+                'errors_count': len(result.errors),
+                'warnings': result.warnings,
+                'errors': result.errors,
+                'suggestions': result.suggestions
+            }
+
+            if result.passed:
+                validation_stats['passed'] += 1
+                validated_recs.append(rec)
+            else:
+                validation_stats['failed'] += 1
+                # Still include failed recommendations but mark them
+                rec['validation']['status'] = 'NEEDS_REVIEW'
+                validated_recs.append(rec)
+
+            if result.warnings:
+                validation_stats['warnings'] += 1
+
+            # Log validation results for important issues
+            if result.errors:
+                logger.warning(f"⚠️  Validation errors in '{rec.get('title', 'Unknown')}': {len(result.errors)} errors")
+                for error in result.errors[:3]:  # Show first 3 errors
+                    logger.warning(f"   - {error}")
+
+        # Summary
+        logger.info(f"✅ Validation complete:")
+        logger.info(f"   - Passed: {validation_stats['passed']}/{validation_stats['total']}")
+        logger.info(f"   - Failed: {validation_stats['failed']}/{validation_stats['total']}")
+        logger.info(f"   - With warnings: {validation_stats['warnings']}/{validation_stats['total']}")
+
+        return validated_recs
+
+    async def _prioritize_recommendations(self, recommendations: List[Dict]) -> List[Dict]:
+        """
+        Prioritize recommendations by impact, effort, and feasibility.
+
+        Args:
+            recommendations: List of recommendation dictionaries
+
+        Returns:
+            Prioritized and sorted recommendations with priority scores
+        """
+        from scripts.recommendation_prioritizer import RecommendationPrioritizer
+
+        # Initialize prioritizer with project inventory
+        prioritizer = RecommendationPrioritizer(
+            project_inventory=self.project_context if hasattr(self, 'project_context') else None
+        )
+
+        # Prioritize all recommendations
+        prioritized_recs = prioritizer.prioritize_recommendations(recommendations)
+
+        # Log category breakdown
+        categories = {}
+        tiers = {}
+
+        for rec in prioritized_recs:
+            score = rec.get('priority_score', {})
+            category = score.get('category', 'Unknown')
+            tier = score.get('tier', 'MEDIUM')
+
+            categories[category] = categories.get(category, 0) + 1
+            tiers[tier] = tiers.get(tier, 0) + 1
+
+        logger.info(f"✅ Prioritization complete:")
+        logger.info(f"   Categories:")
+        for cat in ['Quick Win', 'Strategic Project', 'Medium Priority', 'Low Priority']:
+            count = categories.get(cat, 0)
+            if count > 0:
+                logger.info(f"     - {cat}: {count}")
+
+        logger.info(f"   Priority Tiers:")
+        for tier in ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']:
+            count = tiers.get(tier, 0)
+            if count > 0:
+                logger.info(f"     - {tier}: {count}")
+
+        return prioritized_recs
 

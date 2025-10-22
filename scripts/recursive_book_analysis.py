@@ -661,7 +661,10 @@ class RecursiveAnalyzer:
         enable_cache: bool = True,
         enable_parallel: bool = False,
         max_workers: int = 4,
-        converge_until_done: bool = False
+        converge_until_done: bool = False,
+        project_config_path: Optional[str] = None,
+        use_local_books: bool = False,
+        books_dir: Optional[str] = None
     ):
         self.config = config
         self.s3_bucket = config["s3_bucket"]
@@ -674,6 +677,9 @@ class RecursiveAnalyzer:
         self.enable_cache = enable_cache
         self.enable_parallel = enable_parallel
         self.max_workers = max_workers
+        self.project_config_path = project_config_path
+        self.use_local_books = use_local_books
+        self.books_dir = books_dir
 
         # Initialize project scanner
         self.project_paths = config.get(
@@ -1068,7 +1074,12 @@ Only include recommendations that are genuinely new or significantly different f
             if 's3_bucket' not in book:
                 book['s3_bucket'] = self.s3_bucket
 
-            analyzer = HighContextBookAnalyzer(enable_cache=self.enable_cache)
+            analyzer = HighContextBookAnalyzer(
+                enable_cache=self.enable_cache,
+                use_local_books=self.use_local_books,
+                books_dir=self.books_dir,
+                project_config_path=self.project_config_path
+            )
             analysis_result = await analyzer.analyze_book(book)
         else:
             logger.info("🤖 Running standard analysis (4 models)...")
@@ -1682,6 +1693,21 @@ Examples:
         action="store_true",
         help="Run unlimited iterations until convergence (safety cap: 100 iterations). Useful for comprehensive textbooks.",
     )
+    parser.add_argument(
+        "--project",
+        type=str,
+        help="Project configuration file (e.g., 'project_configs/nba_mcp_synthesis.json'). Enables project-aware analysis with current codebase context.",
+    )
+    parser.add_argument(
+        "--local-books",
+        action="store_true",
+        help="Read books from local filesystem (~/Downloads) instead of S3. Faster and no network overhead.",
+    )
+    parser.add_argument(
+        "--books-dir",
+        type=str,
+        help="Custom directory for local books (default: ~/Downloads). Only used with --local-books flag.",
+    )
 
     args = parser.parse_args()
 
@@ -1783,7 +1809,10 @@ Examples:
         enable_cache=not args.no_cache,  # Invert --no-cache flag
         enable_parallel=args.parallel,
         max_workers=args.max_workers,
-        converge_until_done=args.converge_until_done
+        converge_until_done=args.converge_until_done,
+        project_config_path=args.project,
+        use_local_books=args.local_books,
+        books_dir=args.books_dir
     )
     report_gen = RecommendationGenerator()
     plan_gen = PlanGenerator()
