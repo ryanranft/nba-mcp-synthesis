@@ -14,3 +14,11 @@ sk-deepseek-test-key
 test_secret_key
 test-key
 test_password
+
+# Documentation files with example environment variables
+your_password
+your-password
+your_token
+your_key
+your_secret
+ghp_your_token_here
