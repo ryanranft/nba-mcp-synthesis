@@ -794,9 +794,12 @@ async def run_all_e2e_tests():
 
     sample_extraction = {
         'book_title': 'Test Book',
-        'formulas': [{'name': 'TS%', 'formula': 'PTS / (2 * (FGA + 0.44 * FTA))'}],
+        'formulas': [
+            {'name': 'TS%', 'formula': 'PTS / (2 * (FGA + 0.44 * FTA))'},
+            {'name': 'eFG%', 'formula': '(FGM + 0.5 * FG3M) / FGA'}
+        ],
         'concepts': ['Analytics'],
-        'extraction_metadata': {'confidence_score': 0.9, 'formulas_found': 1}
+        'extraction_metadata': {'confidence_score': 0.92, 'formulas_found': 2}
     }
 
     mock_synthesis = {
