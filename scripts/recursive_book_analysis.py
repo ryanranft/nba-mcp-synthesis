@@ -228,7 +228,8 @@ class BookManager:
         ignore_file = Path(__file__).parent.parent / "config" / "books_ignore_list.json"
         if ignore_file.exists():
             import json
-            with open(ignore_file, 'r') as f:
+
+            with open(ignore_file, "r") as f:
                 return json.load(f)
         return {"ignore_patterns": [], "ignore_titles": []}
 
@@ -260,7 +261,9 @@ class BookManager:
             filename_lower = book_filename.lower().strip()
             for ignore_pattern in self.ignore_list.get("ignore_patterns", []):
                 if ignore_pattern.lower() in filename_lower:
-                    logger.info(f"⏭️  Ignoring book: {book_filename} (matches ignore pattern)")
+                    logger.info(
+                        f"⏭️  Ignoring book: {book_filename} (matches ignore pattern)"
+                    )
                     return True
 
         return False
@@ -311,7 +314,9 @@ class BookManager:
             logger.info(f"{'='*70}")
 
             # Check if book should be ignored
-            book_filename = book.get("s3_path", "").split("/")[-1] if book.get("s3_path") else None
+            book_filename = (
+                book.get("s3_path", "").split("/")[-1] if book.get("s3_path") else None
+            )
             if self.should_ignore_book(book.get("title", ""), book_filename):
                 results["skipped"].append(book)
                 continue
@@ -393,7 +398,9 @@ Total processed:        {sum(len(v) for v in results.values())} books
                 print(f"  - {book['title']}")
             print()
 
-    def filter_books_by_titles(self, books: List[Dict], title_filter: Optional[str]) -> List[Dict]:
+    def filter_books_by_titles(
+        self, books: List[Dict], title_filter: Optional[str]
+    ) -> List[Dict]:
         """
         Filter books by title(s) with smart matching.
 
@@ -414,14 +421,14 @@ Total processed:        {sum(len(v) for v in results.values())} books
         if not title_filter:
             return books
 
-        search_titles = [t.strip() for t in title_filter.split(',')]
+        search_titles = [t.strip() for t in title_filter.split(",")]
         matched_books = []
 
         for search_title in search_titles:
             search_words = set(search_title.lower().split())
 
             for book in books:
-                book_title = book.get('title', '').lower()
+                book_title = book.get("title", "").lower()
                 book_words = set(book_title.split())
 
                 # Calculate word overlap
@@ -430,10 +437,14 @@ Total processed:        {sum(len(v) for v in results.values())} books
 
                 # Match if >= 50% of search words appear in book title
                 # AND search has 2+ words OR exact single-word match
-                if overlap_ratio >= 0.5 and (len(search_words) > 1 or search_title.lower() == book_title):
+                if overlap_ratio >= 0.5 and (
+                    len(search_words) > 1 or search_title.lower() == book_title
+                ):
                     if book not in matched_books:
                         matched_books.append(book)
-                        logger.info(f"✅ Matched: \"{book.get('title')}\" for search \"{search_title}\"")
+                        logger.info(
+                            f"✅ Matched: \"{book.get('title')}\" for search \"{search_title}\""
+                        )
 
         return matched_books
 
@@ -664,7 +675,7 @@ class RecursiveAnalyzer:
         converge_until_done: bool = False,
         project_config_path: Optional[str] = None,
         use_local_books: bool = False,
-        books_dir: Optional[str] = None
+        books_dir: Optional[str] = None,
     ):
         self.config = config
         self.s3_bucket = config["s3_bucket"]
@@ -700,6 +711,7 @@ class RecursiveAnalyzer:
         # Initialize parallel executor if enabled
         if enable_parallel:
             from parallel_executor import ParallelExecutor
+
             self.parallel_executor = ParallelExecutor(max_workers=max_workers)
             logger.info(f"🔀 Parallel execution enabled: {max_workers} workers")
         else:
@@ -707,13 +719,19 @@ class RecursiveAnalyzer:
 
         # Log analyzer type
         if use_high_context:
-            logger.info("🚀 Using High-Context Analyzer (Gemini 1.5 Pro + Claude Sonnet 4)")
+            logger.info(
+                "🚀 Using High-Context Analyzer (Gemini 1.5 Pro + Claude Sonnet 4)"
+            )
             logger.info("📊 Context: up to 250k tokens (~1M characters) per book")
             logger.info(f"💾 Cache: {'enabled' if enable_cache else 'disabled'}")
             if converge_until_done:
-                logger.info(f"♾️  Convergence: Unlimited iterations (safety cap: {self.safety_max_iterations})")
+                logger.info(
+                    f"♾️  Convergence: Unlimited iterations (safety cap: {self.safety_max_iterations})"
+                )
             else:
-                logger.info(f"🔄 Convergence: Standard ({self.max_iterations} iterations max)")
+                logger.info(
+                    f"🔄 Convergence: Standard ({self.max_iterations} iterations max)"
+                )
             if enable_parallel:
                 logger.info(f"🔀 Parallel: {max_workers} workers")
         else:
@@ -758,13 +776,21 @@ class RecursiveAnalyzer:
         iteration = 0
 
         # Determine effective max iterations
-        effective_max = self.safety_max_iterations if self.converge_until_done else self.max_iterations
-        iteration_display = "∞" if self.converge_until_done else str(self.max_iterations)
+        effective_max = (
+            self.safety_max_iterations
+            if self.converge_until_done
+            else self.max_iterations
+        )
+        iteration_display = (
+            "∞" if self.converge_until_done else str(self.max_iterations)
+        )
 
         while iteration < effective_max:
             iteration += 1
             if self.converge_until_done:
-                logger.info(f"\n🔄 Iteration {iteration} (converge-until-done mode, safety cap: {self.safety_max_iterations})")
+                logger.info(
+                    f"\n🔄 Iteration {iteration} (converge-until-done mode, safety cap: {self.safety_max_iterations})"
+                )
             else:
                 logger.info(f"\n🔄 Iteration {iteration}/{self.max_iterations}")
 
@@ -824,10 +850,20 @@ class RecursiveAnalyzer:
         tracker["total_iterations"] = iteration
 
         # Warn if safety cap was reached in unlimited mode
-        if self.converge_until_done and iteration >= self.safety_max_iterations and not tracker["convergence_achieved"]:
-            logger.warning(f"\n⚠️ Safety cap of {self.safety_max_iterations} iterations reached without convergence!")
-            logger.warning(f"   Found {tracker['total_recommendations']['critical']} critical + {tracker['total_recommendations']['important']} important recommendations")
-            logger.warning(f"   Consider reviewing convergence criteria or book complexity")
+        if (
+            self.converge_until_done
+            and iteration >= self.safety_max_iterations
+            and not tracker["convergence_achieved"]
+        ):
+            logger.warning(
+                f"\n⚠️ Safety cap of {self.safety_max_iterations} iterations reached without convergence!"
+            )
+            logger.warning(
+                f"   Found {tracker['total_recommendations']['critical']} critical + {tracker['total_recommendations']['important']} important recommendations"
+            )
+            logger.warning(
+                f"   Consider reviewing convergence criteria or book complexity"
+            )
 
         # Save master recommendations
         self.master_recs.save_master()
@@ -1067,18 +1103,20 @@ Only include recommendations that are genuinely new or significantly different f
         """
         # Use appropriate analyzer based on configuration
         if self.use_high_context:
-            logger.info("🤖 Running high-context analysis (Gemini 1.5 Pro + Claude Sonnet 4)...")
+            logger.info(
+                "🤖 Running high-context analysis (Gemini 1.5 Pro + Claude Sonnet 4)..."
+            )
             from high_context_book_analyzer import HighContextBookAnalyzer
 
             # Inject S3 bucket into book metadata if not already present
-            if 's3_bucket' not in book:
-                book['s3_bucket'] = self.s3_bucket
+            if "s3_bucket" not in book:
+                book["s3_bucket"] = self.s3_bucket
 
             analyzer = HighContextBookAnalyzer(
                 enable_cache=self.enable_cache,
                 use_local_books=self.use_local_books,
                 books_dir=self.books_dir,
-                project_config_path=self.project_config_path
+                project_config_path=self.project_config_path,
             )
             analysis_result = await analyzer.analyze_book(book)
         else:
@@ -1086,8 +1124,8 @@ Only include recommendations that are genuinely new or significantly different f
             from resilient_book_analyzer import ResilientBookAnalyzer
 
             # Inject S3 bucket into book metadata if not already present
-            if 's3_bucket' not in book:
-                book['s3_bucket'] = self.s3_bucket
+            if "s3_bucket" not in book:
+                book["s3_bucket"] = self.s3_bucket
 
             analyzer = ResilientBookAnalyzer()
             analysis_result = await analyzer.analyze_book(book)
@@ -1113,7 +1151,9 @@ Only include recommendations that are genuinely new or significantly different f
             # High-context analyzer (Gemini + Claude)
             logger.info(f"   Gemini 1.5 Pro: ${analysis_result.gemini_cost:.4f}")
             logger.info(f"   Claude Sonnet 4: ${analysis_result.claude_cost:.4f}")
-            logger.info(f"📊 Content analyzed: {analysis_result.content_chars:,} characters")
+            logger.info(
+                f"📊 Content analyzed: {analysis_result.content_chars:,} characters"
+            )
             logger.info(f"💰 Pricing tier: {analysis_result.pricing_tier}")
         else:
             # Standard analyzer (4 models)
@@ -1374,12 +1414,13 @@ Consider extending max_iterations or reviewing analysis criteria.
     def _sanitize_filename(self, filename: str) -> str:
         """Convert title to safe filename."""
         import re
+
         # Replace special characters and spaces with underscores
-        safe = re.sub(r'[^\w\s-]', '_', filename)
+        safe = re.sub(r"[^\w\s-]", "_", filename)
         # Replace multiple spaces/underscores with single underscore
-        safe = re.sub(r'[-\s_]+', '_', safe)
+        safe = re.sub(r"[-\s_]+", "_", safe)
         # Remove leading/trailing underscores
-        return safe.strip('_')
+        return safe.strip("_")
 
 
 class PlanGenerator:
@@ -1606,12 +1647,13 @@ Questions? Refer back to the analysis report or the source book.
     def _sanitize_filename(self, filename: str) -> str:
         """Convert title to safe filename."""
         import re
+
         # Replace special characters and spaces with underscores
-        safe = re.sub(r'[^\w\s-]', '_', filename)
+        safe = re.sub(r"[^\w\s-]", "_", filename)
         # Replace multiple spaces/underscores with single underscore
-        safe = re.sub(r'[-\s_]+', '_', safe)
+        safe = re.sub(r"[-\s_]+", "_", safe)
         # Remove leading/trailing underscores
-        return safe.strip('_')
+        return safe.strip("_")
 
 
 def load_config(config_path: str) -> Dict:
@@ -1641,7 +1683,11 @@ Examples:
     parser.add_argument(
         "--all", action="store_true", help="Analyze all books in configuration"
     )
-    parser.add_argument("--book", type=str, help="Analyze specific book(s) by title. Use comma-separated for multiple (e.g., 'Designing,Sports')")
+    parser.add_argument(
+        "--book",
+        type=str,
+        help="Analyze specific book(s) by title. Use comma-separated for multiple (e.g., 'Designing,Sports')",
+    )
     parser.add_argument(
         "--check-s3", action="store_true", help="Check which books are in S3"
     )
@@ -1775,11 +1821,13 @@ Examples:
     # Filter books if specific book requested
     books_to_analyze = books
     if args.book:
-        logger.info(f"🔍 Filtering books with search: \"{args.book}\"\n")
+        logger.info(f'🔍 Filtering books with search: "{args.book}"\n')
         books_to_analyze = book_manager.filter_books_by_titles(books, args.book)
         if not books_to_analyze:
-            logger.error(f"❌ No books matched search: \"{args.book}\"")
-            logger.error("Hint: Use partial titles, comma-separated for multiple (e.g., 'Designing,Sports')")
+            logger.error(f'❌ No books matched search: "{args.book}"')
+            logger.error(
+                "Hint: Use partial titles, comma-separated for multiple (e.g., 'Designing,Sports')"
+            )
             sys.exit(1)
         logger.info(f"✅ Found {len(books_to_analyze)} matching book(s)\n")
     elif not args.all:
@@ -1791,7 +1839,9 @@ Examples:
     if args.dry_run:
         logger.info("\n🔍 DRY RUN MODE - Preview of books to be analyzed:\n")
         logger.info(f"Total books: {len(books_to_analyze)}")
-        logger.info(f"Analyzer: {'High-Context (Gemini + Claude)' if args.high_context else 'Standard (4 models)'}")
+        logger.info(
+            f"Analyzer: {'High-Context (Gemini + Claude)' if args.high_context else 'Standard (4 models)'}"
+        )
         if args.converge_until_done:
             logger.info(f"Convergence mode: ♾️  Unlimited (safety cap: 100 iterations)")
         else:
@@ -1822,7 +1872,7 @@ Examples:
         converge_until_done=args.converge_until_done,
         project_config_path=args.project,
         use_local_books=args.local_books,
-        books_dir=args.books_dir
+        books_dir=args.books_dir,
     )
     report_gen = RecommendationGenerator()
     plan_gen = PlanGenerator()
@@ -1831,7 +1881,9 @@ Examples:
 
     for book in books_to_analyze:
         # Check if book should be ignored
-        book_filename = book.get("s3_path", "").split("/")[-1] if book.get("s3_path") else None
+        book_filename = (
+            book.get("s3_path", "").split("/")[-1] if book.get("s3_path") else None
+        )
         if book_manager.should_ignore_book(book.get("title", ""), book_filename):
             logger.info(f"⏭️  Skipping ignored book: {book['title']}")
             continue

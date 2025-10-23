@@ -31,12 +31,7 @@ def query_bigquery(sql: str) -> Optional[List[Dict]]:
     Returns:
         List of result rows as dictionaries, or None if error
     """
-    cmd = [
-        "bq", "query",
-        "--use_legacy_sql=false",
-        "--format=json",
-        sql
-    ]
+    cmd = ["bq", "query", "--use_legacy_sql=false", "--format=json", sql]
 
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, check=False)
@@ -170,22 +165,24 @@ def print_cost_report(results: Optional[List[Dict]], title: str):
 
     total_cost = 0
     for row in results:
-        cost = float(row.get('cost_usd', 0))
+        cost = float(row.get("cost_usd", 0))
         total_cost += cost
 
-        if 'sku' in row:
+        if "sku" in row:
             # Detailed report with SKU breakdown
             print(f"\n{row['sku']}:")
             print(f"  Cost: ${cost:.4f}")
-            print(f"  Usage: {row.get('usage_amount', 0):,.0f} {row.get('unit', 'units')}")
+            print(
+                f"  Usage: {row.get('usage_amount', 0):,.0f} {row.get('unit', 'units')}"
+            )
 
-            if 'cost_per_million_units' in row:
-                cpm = float(row.get('cost_per_million_units', 0))
+            if "cost_per_million_units" in row:
+                cpm = float(row.get("cost_per_million_units", 0))
                 print(f"  Rate: ${cpm:.4f} per million {row.get('unit', 'units')}")
 
-        elif 'date' in row:
+        elif "date" in row:
             # Date range report
-            tokens = row.get('total_tokens', 0)
+            tokens = row.get("total_tokens", 0)
             print(f"{row['date']}: ${cost:.2f} ({tokens:,.0f} tokens)")
 
     print(f"\n{'='*80}")
@@ -201,11 +198,7 @@ def check_bigquery_setup() -> bool:
         True if setup is verified, False otherwise
     """
     # Check if bq command is available
-    result = subprocess.run(
-        ["which", "bq"],
-        capture_output=True,
-        text=True
-    )
+    result = subprocess.run(["which", "bq"], capture_output=True, text=True)
 
     if result.returncode != 0:
         print("❌ 'bq' command not found. Install with: brew install google-cloud-sdk")
@@ -213,9 +206,7 @@ def check_bigquery_setup() -> bool:
 
     # Check if dataset exists
     result = subprocess.run(
-        ["bq", "ls", f"{PROJECT_ID}:{DATASET}"],
-        capture_output=True,
-        text=True
+        ["bq", "ls", f"{PROJECT_ID}:{DATASET}"], capture_output=True, text=True
     )
 
     if result.returncode != 0:
@@ -243,15 +234,23 @@ Examples:
   %(prog)s --date 2025-10-18 --detailed  # Detailed breakdown
 
 For setup instructions, see: docs/BIGQUERY_BILLING_SETUP.md
-        """
+        """,
     )
 
-    parser.add_argument('--today', action='store_true', help="Show today's costs")
-    parser.add_argument('--yesterday', action='store_true', help="Show yesterday's costs")
-    parser.add_argument('--last-7-days', action='store_true', help="Show last 7 days")
-    parser.add_argument('--date', type=str, help="Show costs for specific date (YYYY-MM-DD)")
-    parser.add_argument('--detailed', action='store_true', help="Show detailed SKU breakdown")
-    parser.add_argument('--check-setup', action='store_true', help="Verify BigQuery setup")
+    parser.add_argument("--today", action="store_true", help="Show today's costs")
+    parser.add_argument(
+        "--yesterday", action="store_true", help="Show yesterday's costs"
+    )
+    parser.add_argument("--last-7-days", action="store_true", help="Show last 7 days")
+    parser.add_argument(
+        "--date", type=str, help="Show costs for specific date (YYYY-MM-DD)"
+    )
+    parser.add_argument(
+        "--detailed", action="store_true", help="Show detailed SKU breakdown"
+    )
+    parser.add_argument(
+        "--check-setup", action="store_true", help="Verify BigQuery setup"
+    )
 
     args = parser.parse_args()
 
@@ -272,7 +271,7 @@ For setup instructions, see: docs/BIGQUERY_BILLING_SETUP.md
     # Execute queries based on arguments
     if args.today:
         if args.detailed:
-            today = datetime.now().strftime('%Y-%m-%d')
+            today = datetime.now().strftime("%Y-%m-%d")
             results = get_gemini_costs_detailed(today)
             print_cost_report(results, f"Gemini API Costs - TODAY ({today}) - DETAILED")
         else:
@@ -280,7 +279,7 @@ For setup instructions, see: docs/BIGQUERY_BILLING_SETUP.md
             print_cost_report(results, "Gemini API Costs - TODAY")
 
     if args.yesterday:
-        yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+        yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
         if args.detailed:
             results = get_gemini_costs_detailed(yesterday)
             print_cost_report(results, f"Gemini API Costs - {yesterday} - DETAILED")
@@ -289,10 +288,12 @@ For setup instructions, see: docs/BIGQUERY_BILLING_SETUP.md
             print_cost_report(results, f"Gemini API Costs - {yesterday}")
 
     if args.last_7_days:
-        end_date = datetime.now().strftime('%Y-%m-%d')
-        start_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
+        end_date = datetime.now().strftime("%Y-%m-%d")
+        start_date = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
         results = get_gemini_costs_date_range(start_date, end_date)
-        print_cost_report(results, f"Gemini API Costs - Last 7 Days ({start_date} to {end_date})")
+        print_cost_report(
+            results, f"Gemini API Costs - Last 7 Days ({start_date} to {end_date})"
+        )
 
     if args.date:
         if args.detailed:
@@ -305,4 +306,3 @@ For setup instructions, see: docs/BIGQUERY_BILLING_SETUP.md
 
 if __name__ == "__main__":
     main()
-

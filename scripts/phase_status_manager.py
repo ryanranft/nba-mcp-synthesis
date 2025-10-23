@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 class PhaseState(str, Enum):
     """Possible states for a phase."""
+
     NOT_STARTED = "not_started"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
@@ -35,6 +36,7 @@ class PhaseState(str, Enum):
 @dataclass
 class PhaseStatus:
     """Status information for a single phase."""
+
     phase_id: str
     phase_name: str
     state: PhaseState
@@ -58,14 +60,14 @@ class PhaseStatus:
     def to_dict(self) -> Dict:
         """Convert to dictionary for JSON serialization."""
         d = asdict(self)
-        d['state'] = self.state.value
+        d["state"] = self.state.value
         return d
 
     @classmethod
-    def from_dict(cls, data: Dict) -> 'PhaseStatus':
+    def from_dict(cls, data: Dict) -> "PhaseStatus":
         """Create from dictionary."""
         data = data.copy()
-        data['state'] = PhaseState(data['state'])
+        data["state"] = PhaseState(data["state"])
         return cls(**data)
 
 
@@ -103,13 +105,15 @@ class PhaseStatusManager:
         self.phases: Dict[str, PhaseStatus] = {}
         self._load_status()
 
-        logger.info(f"PhaseStatusManager initialized with {len(self.phases)} tracked phases")
+        logger.info(
+            f"PhaseStatusManager initialized with {len(self.phases)} tracked phases"
+        )
 
     def _load_status(self):
         """Load status from JSON file."""
         if self.status_file.exists():
             try:
-                with open(self.status_file, 'r') as f:
+                with open(self.status_file, "r") as f:
                     data = json.load(f)
 
                 self.phases = {
@@ -153,7 +157,7 @@ class PhaseStatusManager:
                 phase_id=phase_id,
                 phase_name=phase_name,
                 state=PhaseState.NOT_STARTED,
-                prerequisites=prerequisites
+                prerequisites=prerequisites,
             )
 
         self._save_status()
@@ -163,18 +167,22 @@ class PhaseStatusManager:
         """Save status to JSON file."""
         try:
             data = {
-                phase_id: phase.to_dict()
-                for phase_id, phase in self.phases.items()
+                phase_id: phase.to_dict() for phase_id, phase in self.phases.items()
             }
 
-            with open(self.status_file, 'w') as f:
+            with open(self.status_file, "w") as f:
                 json.dump(data, f, indent=2)
 
             logger.debug(f"Saved status for {len(self.phases)} phases")
         except Exception as e:
             logger.error(f"Error saving phase status: {e}")
 
-    def start_phase(self, phase_id: str, phase_name: Optional[str] = None, skip_prereq_check: bool = False):
+    def start_phase(
+        self,
+        phase_id: str,
+        phase_name: Optional[str] = None,
+        skip_prereq_check: bool = False,
+    ):
         """
         Mark a phase as started.
 
@@ -189,12 +197,10 @@ class PhaseStatusManager:
         # Create phase if doesn't exist
         if phase_id not in self.phases:
             if phase_name is None:
-                phase_name = phase_id.replace('_', ' ').title()
+                phase_name = phase_id.replace("_", " ").title()
 
             self.phases[phase_id] = PhaseStatus(
-                phase_id=phase_id,
-                phase_name=phase_name,
-                state=PhaseState.NOT_STARTED
+                phase_id=phase_id, phase_name=phase_name, state=PhaseState.NOT_STARTED
             )
 
         phase = self.phases[phase_id]
@@ -227,8 +233,8 @@ class PhaseStatusManager:
         if phase_id not in self.phases:
             self.phases[phase_id] = PhaseStatus(
                 phase_id=phase_id,
-                phase_name=phase_id.replace('_', ' ').title(),
-                state=PhaseState.SKIPPED
+                phase_name=phase_id.replace("_", " ").title(),
+                state=PhaseState.SKIPPED,
             )
         else:
             self.phases[phase_id].state = PhaseState.SKIPPED
@@ -263,7 +269,9 @@ class PhaseStatusManager:
             phase.last_run_duration_seconds = (completed - started).total_seconds()
 
         self._save_status()
-        logger.info(f"✅ Completed {phase_id}: {phase.phase_name} (duration: {phase.last_run_duration_seconds:.1f}s)")
+        logger.info(
+            f"✅ Completed {phase_id}: {phase.phase_name} (duration: {phase.last_run_duration_seconds:.1f}s)"
+        )
 
     def fail_phase(self, phase_id: str, error_message: str):
         """
@@ -316,7 +324,9 @@ class PhaseStatusManager:
         self._save_status()
         logger.warning(f"⚠️  Marked {phase_id} for rerun: {reason}")
         if dependent_phases:
-            logger.warning(f"   Also marked dependent phases: {', '.join(dependent_phases)}")
+            logger.warning(
+                f"   Also marked dependent phases: {', '.join(dependent_phases)}"
+            )
 
     def _check_prerequisites(self, phase_id: str) -> List[str]:
         """
@@ -423,7 +433,9 @@ class PhaseStatusManager:
         for state in PhaseState:
             count = state_counts.get(state, 0)
             emoji = self._get_state_emoji(state)
-            lines.append(f"| {emoji} {state.value.replace('_', ' ').title()} | {count} |")
+            lines.append(
+                f"| {emoji} {state.value.replace('_', ' ').title()} | {count} |"
+            )
         lines.append("")
 
         # Phases needing attention
@@ -460,10 +472,16 @@ class PhaseStatusManager:
             lines.append(f"### {emoji} {phase.phase_name} ({phase_id})")
             lines.append("")
             lines.append(f"- **State**: {phase.state.value.replace('_', ' ').title()}")
-            lines.append(f"- **Run Count**: {phase.run_count} (✅ {phase.success_count}, ❌ {phase.failure_count})")
+            lines.append(
+                f"- **Run Count**: {phase.run_count} (✅ {phase.success_count}, ❌ {phase.failure_count})"
+            )
 
             if phase.prerequisites:
-                prereq_names = [self.phases[p].phase_name for p in phase.prerequisites if p in self.phases]
+                prereq_names = [
+                    self.phases[p].phase_name
+                    for p in phase.prerequisites
+                    if p in self.phases
+                ]
                 lines.append(f"- **Prerequisites**: {', '.join(prereq_names)}")
 
             if phase.started_at:
@@ -472,7 +490,9 @@ class PhaseStatusManager:
             if phase.completed_at:
                 lines.append(f"- **Completed**: {phase.completed_at}")
                 if phase.last_run_duration_seconds:
-                    lines.append(f"- **Duration**: {phase.last_run_duration_seconds:.1f}s")
+                    lines.append(
+                        f"- **Duration**: {phase.last_run_duration_seconds:.1f}s"
+                    )
 
             if phase.failed_at:
                 lines.append(f"- **Failed**: {phase.failed_at}")
@@ -484,15 +504,17 @@ class PhaseStatusManager:
                 lines.append(f"- **Rerun Reason**: {phase.needs_rerun_reason}")
 
             if phase.ai_modified:
-                lines.append(f"- **AI Modified**: ✓ ({phase.ai_modification_timestamp})")
+                lines.append(
+                    f"- **AI Modified**: ✓ ({phase.ai_modification_timestamp})"
+                )
 
             lines.append("")
 
-        report_content = '\n'.join(lines)
+        report_content = "\n".join(lines)
 
         # Save to file
         report_file.parent.mkdir(parents=True, exist_ok=True)
-        with open(report_file, 'w') as f:
+        with open(report_file, "w") as f:
             f.write(report_content)
 
         logger.info(f"Generated phase status report: {report_file}")
@@ -560,7 +582,9 @@ if __name__ == "__main__":
 
     # AI modifies Phase 3 output
     print("Simulating AI modification...")
-    manager.mark_needs_rerun("phase_3", "AI improved synthesis with new recommendations")
+    manager.mark_needs_rerun(
+        "phase_3", "AI improved synthesis with new recommendations"
+    )
     print()
 
     # Generate report
@@ -572,4 +596,3 @@ if __name__ == "__main__":
     print("=" * 70)
     print("Demo complete! Check implementation_plans/PHASE_STATUS_REPORT.md")
     print("=" * 70)
-

@@ -109,10 +109,9 @@ class TestProjectScanner(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()
         # ProjectScanner needs project_paths argument
-        self.scanner = ProjectScanner({
-            "synthesis": self.temp_dir,
-            "simulator": self.temp_dir
-        })
+        self.scanner = ProjectScanner(
+            {"synthesis": self.temp_dir, "simulator": self.temp_dir}
+        )
 
     def tearDown(self):
         shutil.rmtree(self.temp_dir)
@@ -165,10 +164,10 @@ class TestMasterRecommendations(unittest.TestCase):
         self.master_recs.add_recommendation(rec2, "Test Book 2")
 
         # Should only have one recommendation (recommendations is a dict, access the list)
-        self.assertEqual(len(self.master_recs.recommendations['recommendations']), 1)
+        self.assertEqual(len(self.master_recs.recommendations["recommendations"]), 1)
 
         # Should have both books as sources
-        rec = self.master_recs.recommendations['recommendations'][0]
+        rec = self.master_recs.recommendations["recommendations"][0]
         self.assertIn("Test Book 1", rec["source_books"])
         self.assertIn("Test Book 2", rec["source_books"])
 
@@ -185,9 +184,10 @@ class TestMasterRecommendations(unittest.TestCase):
         new_master_recs = MasterRecommendations(self.master_file)
 
         # Should have the same recommendation
-        self.assertEqual(len(new_master_recs.recommendations['recommendations']), 1)
+        self.assertEqual(len(new_master_recs.recommendations["recommendations"]), 1)
         self.assertEqual(
-            new_master_recs.recommendations['recommendations'][0]["title"], "Test recommendation"
+            new_master_recs.recommendations["recommendations"][0]["title"],
+            "Test recommendation",
         )
 
 
@@ -204,8 +204,8 @@ class TestRecursiveAnalyzer(unittest.TestCase):
                 "s3_bucket": "test-bucket",
                 "project_context": {
                     "synthesis": {"path": "/test/synthesis"},
-                    "simulator": {"path": "/test/simulator"}
-                }
+                    "simulator": {"path": "/test/simulator"},
+                },
             }
         )
 
@@ -325,7 +325,9 @@ class TestRecommendationGenerator(unittest.TestCase):
         with open(report_file, "r") as f:
             content = f.read()
             self.assertIn("Test Book", content)
-            self.assertIn("Convergence Achieved", content)  # Changed to match actual output
+            self.assertIn(
+                "Convergence Achieved", content
+            )  # Changed to match actual output
             self.assertIn("Test 1", content)
             self.assertIn("Test 2", content)
 

@@ -36,6 +36,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class CostRecord:
     """Record of a cost transaction."""
+
     timestamp: str
     phase: str
     operation: str
@@ -63,23 +64,25 @@ class CostSafetyManager:
     """
 
     COST_LIMITS = {
-        'phase_0_discovery': 1.00,
-        'phase_1_book_discovery': 0.50,
-        'phase_2_analysis': 100.00,  # Increased for Tier 2 testing
-        'phase_3_synthesis': 50.00,  # Increased for Tier 2 testing
-        'phase_3.5_modifications': 30.00,  # Increased for Tier 2 testing
-        'phase_4_generation': 10.00,
-        'phase_5_predictions': 10.00,
-        'phase_6_status': 0.50,
-        'phase_7_optimization': 1.00,
-        'phase_8_tracking': 0.50,
-        'phase_9_integration': 2.00,
-        'total_workflow': 200.00  # Increased for Tier 2 testing
+        "phase_0_discovery": 1.00,
+        "phase_1_book_discovery": 0.50,
+        "phase_2_analysis": 100.00,  # Increased for Tier 2 testing
+        "phase_3_synthesis": 50.00,  # Increased for Tier 2 testing
+        "phase_3.5_modifications": 30.00,  # Increased for Tier 2 testing
+        "phase_4_generation": 10.00,
+        "phase_5_predictions": 10.00,
+        "phase_6_status": 0.50,
+        "phase_7_optimization": 1.00,
+        "phase_8_tracking": 0.50,
+        "phase_9_integration": 2.00,
+        "total_workflow": 200.00,  # Increased for Tier 2 testing
     }
 
     def __init__(self, cost_log_path: Optional[Path] = None):
         """Initialize cost safety manager."""
-        self.cost_log_path = cost_log_path or Path("implementation_plans/cost_tracking.json")
+        self.cost_log_path = cost_log_path or Path(
+            "implementation_plans/cost_tracking.json"
+        )
         self.cost_log_path.parent.mkdir(parents=True, exist_ok=True)
 
         self.costs = self._load_costs()
@@ -93,16 +96,16 @@ class CostSafetyManager:
             return json.loads(self.cost_log_path.read_text())
         else:
             return {
-                'records': [],
-                'phase_totals': {},
-                'total_cost': 0.0,
-                'created_at': datetime.now().isoformat(),
-                'last_updated': datetime.now().isoformat()
+                "records": [],
+                "phase_totals": {},
+                "total_cost": 0.0,
+                "created_at": datetime.now().isoformat(),
+                "last_updated": datetime.now().isoformat(),
             }
 
     def _save_costs(self):
         """Save cost history to disk."""
-        self.costs['last_updated'] = datetime.now().isoformat()
+        self.costs["last_updated"] = datetime.now().isoformat()
         self.cost_log_path.write_text(json.dumps(self.costs, indent=2))
 
     def check_cost_limit(self, phase: str, estimated_cost: float) -> bool:
@@ -117,9 +120,9 @@ class CostSafetyManager:
             True if within limits, False if would exceed
         """
         phase_limit = self.COST_LIMITS.get(phase, 10.00)
-        phase_current = self.costs['phase_totals'].get(phase, 0.0)
-        total_limit = self.COST_LIMITS['total_workflow']
-        total_current = self.costs['total_cost']
+        phase_current = self.costs["phase_totals"].get(phase, 0.0)
+        total_limit = self.COST_LIMITS["total_workflow"]
+        total_current = self.costs["total_cost"]
 
         # Check phase limit
         if phase_current + estimated_cost > phase_limit:
@@ -127,7 +130,9 @@ class CostSafetyManager:
             logger.error(f"   Current: ${phase_current:.2f}")
             logger.error(f"   Estimated: ${estimated_cost:.2f}")
             logger.error(f"   Limit: ${phase_limit:.2f}")
-            logger.error(f"   Would exceed by: ${(phase_current + estimated_cost - phase_limit):.2f}")
+            logger.error(
+                f"   Would exceed by: ${(phase_current + estimated_cost - phase_limit):.2f}"
+            )
             return False
 
         # Check total limit
@@ -136,7 +141,9 @@ class CostSafetyManager:
             logger.error(f"   Current: ${total_current:.2f}")
             logger.error(f"   Estimated: ${estimated_cost:.2f}")
             logger.error(f"   Limit: ${total_limit:.2f}")
-            logger.error(f"   Would exceed by: ${(total_current + estimated_cost - total_limit):.2f}")
+            logger.error(
+                f"   Would exceed by: ${(total_current + estimated_cost - total_limit):.2f}"
+            )
             return False
 
         # Warning at 80%
@@ -155,7 +162,7 @@ class CostSafetyManager:
         operation: str,
         cost: float,
         plans_affected: int = 0,
-        auto_approve: bool = False
+        auto_approve: bool = False,
     ) -> bool:
         """
         Require human approval for expensive or impactful operations.
@@ -174,13 +181,11 @@ class CostSafetyManager:
         Returns:
             True if approved, False otherwise
         """
-        total_pct = ((self.costs['total_cost'] + cost) / self.COST_LIMITS['total_workflow']) * 100
+        total_pct = (
+            (self.costs["total_cost"] + cost) / self.COST_LIMITS["total_workflow"]
+        ) * 100
 
-        needs_approval = (
-            cost > 10.00 or
-            plans_affected > 5 or
-            total_pct > 90
-        )
+        needs_approval = cost > 10.00 or plans_affected > 5 or total_pct > 90
 
         if not needs_approval:
             return True
@@ -206,7 +211,7 @@ class CostSafetyManager:
         actual_cost: float,
         operation: str = "",
         estimated_cost: Optional[float] = None,
-        notes: str = ""
+        notes: str = "",
     ):
         """
         Track actual cost after operation completes.
@@ -224,17 +229,17 @@ class CostSafetyManager:
             operation=operation or phase,
             estimated_cost=estimated_cost or actual_cost,
             actual_cost=actual_cost,
-            notes=notes
+            notes=notes,
         )
 
         # Update records
-        self.costs['records'].append(asdict(record))
+        self.costs["records"].append(asdict(record))
 
         # Update totals
-        if phase not in self.costs['phase_totals']:
-            self.costs['phase_totals'][phase] = 0.0
-        self.costs['phase_totals'][phase] += actual_cost
-        self.costs['total_cost'] += actual_cost
+        if phase not in self.costs["phase_totals"]:
+            self.costs["phase_totals"][phase] = 0.0
+        self.costs["phase_totals"][phase] += actual_cost
+        self.costs["total_cost"] += actual_cost
 
         # Save
         self._save_costs()
@@ -247,11 +252,11 @@ class CostSafetyManager:
 
     def get_total_cost(self) -> float:
         """Get total cost spent across all phases."""
-        return self.costs['total_cost']
+        return self.costs["total_cost"]
 
     def get_phase_cost(self, phase: str) -> float:
         """Get total cost for specific phase."""
-        return self.costs['phase_totals'].get(phase, 0.0)
+        return self.costs["phase_totals"].get(phase, 0.0)
 
     def get_remaining_budget(self, phase: Optional[str] = None) -> float:
         """Get remaining budget for phase or total workflow."""
@@ -260,7 +265,7 @@ class CostSafetyManager:
             spent = self.get_phase_cost(phase)
             return max(0.0, limit - spent)
         else:
-            limit = self.COST_LIMITS['total_workflow']
+            limit = self.COST_LIMITS["total_workflow"]
             spent = self.get_total_cost()
             return max(0.0, limit - spent)
 
@@ -281,7 +286,7 @@ class CostSafetyManager:
 """
 
         for phase, limit in sorted(self.COST_LIMITS.items()):
-            if phase == 'total_workflow':
+            if phase == "total_workflow":
                 continue
             spent = self.get_phase_cost(phase)
             remaining = max(0.0, limit - spent)
@@ -293,7 +298,7 @@ class CostSafetyManager:
         report += f"\n## Recent Transactions\n\n"
 
         # Show last 10 transactions
-        recent = self.costs['records'][-10:]
+        recent = self.costs["records"][-10:]
         for record in reversed(recent):
             report += f"- **{record['timestamp']}**: {record['phase']} - ${record['actual_cost']:.2f} ({record['operation']})\n"
 
@@ -310,15 +315,14 @@ class CostSafetyManager:
 # Example usage
 if __name__ == "__main__":
     logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s'
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
     )
 
     # Initialize manager
     cost_mgr = CostSafetyManager()
 
     # Example: Check before expensive operation
-    phase = 'phase_2_analysis'
+    phase = "phase_2_analysis"
     estimated = 5.00
 
     if cost_mgr.check_cost_limit(phase, estimated):
@@ -326,9 +330,10 @@ if __name__ == "__main__":
 
         # Simulate operation
         actual = 4.87
-        cost_mgr.track_cost(phase, actual, operation="Analyze 5 books", estimated_cost=estimated)
+        cost_mgr.track_cost(
+            phase, actual, operation="Analyze 5 books", estimated_cost=estimated
+        )
 
     # Generate report
     cost_mgr.save_cost_report()
     print("\n" + cost_mgr.generate_cost_report())
-

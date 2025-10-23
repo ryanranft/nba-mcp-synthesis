@@ -21,7 +21,11 @@ import re
 
 # Import database connector for live queries
 try:
-    from scripts.database_connector import DatabaseConnector, create_db_connector_from_env
+    from scripts.database_connector import (
+        DatabaseConnector,
+        create_db_connector_from_env,
+    )
+
     DB_CONNECTOR_AVAILABLE = True
 except ImportError:
     DB_CONNECTOR_AVAILABLE = False
@@ -40,8 +44,12 @@ class DataInventoryScanner:
     - "Build features from master_games table covering 2014-2025 seasons"
     """
 
-    def __init__(self, inventory_path: str, db_connection: Optional[Any] = None,
-                 enable_live_queries: bool = True):
+    def __init__(
+        self,
+        inventory_path: str,
+        db_connection: Optional[Any] = None,
+        enable_live_queries: bool = True,
+    ):
         """
         Initialize Data Inventory Scanner
 
@@ -66,7 +74,9 @@ class DataInventoryScanner:
                     self.live_queries_enabled = True
                     logger.info("✅ Live database queries enabled")
                 else:
-                    logger.info("ℹ️  Database credentials not found - using static metrics")
+                    logger.info(
+                        "ℹ️  Database credentials not found - using static metrics"
+                    )
             except Exception as e:
                 logger.warning(f"⚠️  Failed to connect to database: {e}")
                 logger.info("ℹ️  Falling back to static metrics")
@@ -87,13 +97,13 @@ class DataInventoryScanner:
         logger.info("🔍 Scanning data inventory...")
 
         inventory = {
-            'metadata': self._get_metadata(),
-            'metrics': self._load_metrics(),
-            'schema': self._parse_schema(),
-            'data_coverage': self._assess_data_coverage(),
-            'available_features': self._extract_available_features(),
-            'system_capabilities': self._analyze_system_capabilities(),
-            'summary_for_ai': self._generate_ai_summary(),
+            "metadata": self._get_metadata(),
+            "metrics": self._load_metrics(),
+            "schema": self._parse_schema(),
+            "data_coverage": self._assess_data_coverage(),
+            "available_features": self._extract_available_features(),
+            "system_capabilities": self._analyze_system_capabilities(),
+            "summary_for_ai": self._generate_ai_summary(),
         }
 
         logger.info("✅ Data inventory scan complete")
@@ -104,20 +114,20 @@ class DataInventoryScanner:
         config_file = self.inventory_path / "config.yaml"
 
         if config_file.exists():
-            with open(config_file, 'r') as f:
+            with open(config_file, "r") as f:
                 config = yaml.safe_load(f)
             return {
-                'system': config.get('system', 'DIMS'),
-                'version': config.get('version', '1.0.0'),
-                'last_updated': config.get('last_updated', 'Unknown'),
-                'backend': config.get('backend', {}).get('type', 'PostgreSQL'),
+                "system": config.get("system", "DIMS"),
+                "version": config.get("version", "1.0.0"),
+                "last_updated": config.get("last_updated", "Unknown"),
+                "backend": config.get("backend", {}).get("type", "PostgreSQL"),
             }
 
         return {
-            'system': 'DIMS',
-            'version': '1.0.0',
-            'last_updated': datetime.now().isoformat(),
-            'backend': 'PostgreSQL',
+            "system": "DIMS",
+            "version": "1.0.0",
+            "last_updated": datetime.now().isoformat(),
+            "backend": "PostgreSQL",
         }
 
     def _load_metrics(self) -> Dict[str, Any]:
@@ -128,7 +138,7 @@ class DataInventoryScanner:
             logger.warning(f"⚠️  Metrics file not found: {metrics_file}")
             return {}
 
-        with open(metrics_file, 'r') as f:
+        with open(metrics_file, "r") as f:
             metrics = yaml.safe_load(f)
 
         logger.info(f"📊 Loaded metrics: {len(metrics)} categories")
@@ -143,7 +153,7 @@ class DataInventoryScanner:
             logger.warning(f"⚠️  Schema file not found: {schema_file}")
             return {}
 
-        with open(schema_file, 'r') as f:
+        with open(schema_file, "r") as f:
             schema_sql = f.read()
 
         # Extract table definitions
@@ -151,9 +161,9 @@ class DataInventoryScanner:
 
         logger.info(f"📋 Parsed schema: {len(tables)} tables")
         return {
-            'source_file': str(schema_file),
-            'tables': tables,
-            'total_tables': len(tables),
+            "source_file": str(schema_file),
+            "tables": tables,
+            "total_tables": len(tables),
         }
 
     def _extract_tables_from_sql(self, sql: str) -> Dict[str, Dict]:
@@ -162,8 +172,8 @@ class DataInventoryScanner:
 
         # Find all CREATE TABLE statements
         table_pattern = re.compile(
-            r'CREATE TABLE (?:IF NOT EXISTS )?(\w+)\s*\((.*?)\);',
-            re.DOTALL | re.IGNORECASE
+            r"CREATE TABLE (?:IF NOT EXISTS )?(\w+)\s*\((.*?)\);",
+            re.DOTALL | re.IGNORECASE,
         )
 
         for match in table_pattern.finditer(sql):
@@ -172,49 +182,59 @@ class DataInventoryScanner:
 
             # Extract column definitions
             columns = []
-            column_pattern = re.compile(r'(\w+)\s+([\w\(\)]+)(?:\s+(PRIMARY KEY|NOT NULL|UNIQUE))*')
+            column_pattern = re.compile(
+                r"(\w+)\s+([\w\(\)]+)(?:\s+(PRIMARY KEY|NOT NULL|UNIQUE))*"
+            )
 
             for col_match in column_pattern.finditer(columns_sql):
                 col_name = col_match.group(1)
                 col_type = col_match.group(2)
 
                 # Skip constraint keywords
-                if col_name.upper() in ['PRIMARY', 'FOREIGN', 'CONSTRAINT', 'INDEX']:
+                if col_name.upper() in ["PRIMARY", "FOREIGN", "CONSTRAINT", "INDEX"]:
                     continue
 
-                columns.append({
-                    'name': col_name,
-                    'type': col_type,
-                })
+                columns.append(
+                    {
+                        "name": col_name,
+                        "type": col_type,
+                    }
+                )
 
             tables[table_name] = {
-                'columns': columns,
-                'column_count': len(columns),
-                'column_names': [c['name'] for c in columns],
+                "columns": columns,
+                "column_count": len(columns),
+                "column_names": [c["name"] for c in columns],
             }
 
         # Add known table metadata from documentation
         table_metadata = {
-            'master_players': {
-                'type': 'dimension',
-                'description': 'Unified player dimension with biographical data',
-                'primary_key': 'player_id',
+            "master_players": {
+                "type": "dimension",
+                "description": "Unified player dimension with biographical data",
+                "primary_key": "player_id",
             },
-            'master_teams': {
-                'type': 'dimension',
-                'description': 'Unified team dimension',
-                'primary_key': 'team_id',
+            "master_teams": {
+                "type": "dimension",
+                "description": "Unified team dimension",
+                "primary_key": "team_id",
             },
-            'master_games': {
-                'type': 'fact',
-                'description': 'Game-level fact table',
-                'primary_key': 'game_id',
+            "master_games": {
+                "type": "fact",
+                "description": "Game-level fact table",
+                "primary_key": "game_id",
             },
-            'master_player_game_stats': {
-                'type': 'fact',
-                'description': 'Player performance panel data (game-level)',
-                'primary_key': ['game_id', 'player_id'],
-                'key_metrics': ['points', 'rebounds', 'assists', 'plus_minus', 'minutes_played'],
+            "master_player_game_stats": {
+                "type": "fact",
+                "description": "Player performance panel data (game-level)",
+                "primary_key": ["game_id", "player_id"],
+                "key_metrics": [
+                    "points",
+                    "rebounds",
+                    "assists",
+                    "plus_minus",
+                    "minutes_played",
+                ],
             },
         }
 
@@ -233,17 +253,17 @@ class DataInventoryScanner:
         logger.info("🔍 Querying database for live statistics...")
 
         live_stats = {
-            'data_source': 'live_database',
-            'query_timestamp': datetime.now().isoformat(),
-            'tables': {}
+            "data_source": "live_database",
+            "query_timestamp": datetime.now().isoformat(),
+            "tables": {},
         }
 
         # Define tables to query
         tables_to_query = {
-            'master_players': 'player_id',
-            'master_teams': 'team_id',
-            'master_games': 'game_id',
-            'master_player_game_stats': None,  # Composite key
+            "master_players": "player_id",
+            "master_teams": "team_id",
+            "master_games": "game_id",
+            "master_player_game_stats": None,  # Composite key
         }
 
         for table_name, id_column in tables_to_query.items():
@@ -256,25 +276,27 @@ class DataInventoryScanner:
 
                 # Get date range if this is a game-related table
                 date_range = None
-                if 'game' in table_name.lower():
+                if "game" in table_name.lower():
                     try:
-                        date_range = self.db_connection.get_date_range(table_name, 'game_date')
+                        date_range = self.db_connection.get_date_range(
+                            table_name, "game_date"
+                        )
                     except:
                         pass  # Not all tables have game_date
 
-                live_stats['tables'][table_name] = {
-                    'row_count': row_count,
-                    'size_bytes': table_stats.get('size_bytes'),
-                    'size_mb': table_stats.get('size_mb'),
-                    'size_pretty': table_stats.get('size_pretty'),
-                    'date_range': date_range,
+                live_stats["tables"][table_name] = {
+                    "row_count": row_count,
+                    "size_bytes": table_stats.get("size_bytes"),
+                    "size_mb": table_stats.get("size_mb"),
+                    "size_pretty": table_stats.get("size_pretty"),
+                    "date_range": date_range,
                 }
 
                 logger.info(f"   ✅ {table_name}: {row_count:,} rows")
 
             except Exception as e:
                 logger.warning(f"   ⚠️  Failed to query {table_name}: {e}")
-                live_stats['tables'][table_name] = {'error': str(e)}
+                live_stats["tables"][table_name] = {"error": str(e)}
 
         return live_stats
 
@@ -286,89 +308,105 @@ class DataInventoryScanner:
 
         if live_stats:
             # Use live database statistics
-            tables = live_stats.get('tables', {})
+            tables = live_stats.get("tables", {})
 
             coverage = {
-                'data_source': 'live_database',
-                'query_timestamp': live_stats.get('query_timestamp'),
-                'games': tables.get('master_games', {}).get('row_count', 0),
-                'players': tables.get('master_players', {}).get('row_count', 0),
-                'teams': tables.get('master_teams', {}).get('row_count', 0),
-                'player_game_stats': tables.get('master_player_game_stats', {}).get('row_count', 0),
+                "data_source": "live_database",
+                "query_timestamp": live_stats.get("query_timestamp"),
+                "games": tables.get("master_games", {}).get("row_count", 0),
+                "players": tables.get("master_players", {}).get("row_count", 0),
+                "teams": tables.get("master_teams", {}).get("row_count", 0),
+                "player_game_stats": tables.get("master_player_game_stats", {}).get(
+                    "row_count", 0
+                ),
             }
 
             # Add date range if available
-            games_table = tables.get('master_games', {})
-            date_range = games_table.get('date_range')
+            games_table = tables.get("master_games", {})
+            date_range = games_table.get("date_range")
             if date_range:
-                coverage['date_range'] = {
-                    'min_date': date_range.get('min_date'),
-                    'max_date': date_range.get('max_date'),
-                    'unique_dates': date_range.get('unique_dates'),
+                coverage["date_range"] = {
+                    "min_date": date_range.get("min_date"),
+                    "max_date": date_range.get("max_date"),
+                    "unique_dates": date_range.get("unique_dates"),
                 }
-                coverage['seasons'] = f"{date_range.get('min_date', '?')[:4]}-{date_range.get('max_date', '?')[:4]}"
+                coverage["seasons"] = (
+                    f"{date_range.get('min_date', '?')[:4]}-{date_range.get('max_date', '?')[:4]}"
+                )
 
             # Add table sizes
             total_size_mb = sum(
-                t.get('size_mb', 0) for t in tables.values()
-                if isinstance(t.get('size_mb'), (int, float))
+                t.get("size_mb", 0)
+                for t in tables.values()
+                if isinstance(t.get("size_mb"), (int, float))
             )
-            coverage['database_size_mb'] = round(total_size_mb, 2)
-            coverage['database_size_gb'] = round(total_size_mb / 1024, 2)
+            coverage["database_size_mb"] = round(total_size_mb, 2)
+            coverage["database_size_gb"] = round(total_size_mb / 1024, 2)
 
-            logger.info(f"✅ Live data coverage: {coverage['games']:,} games, {coverage['players']:,} players")
+            logger.info(
+                f"✅ Live data coverage: {coverage['games']:,} games, {coverage['players']:,} players"
+            )
 
         else:
             # Fall back to static metrics
             metrics = self._load_metrics()
-            s3_storage = metrics.get('s3_storage', {})
+            s3_storage = metrics.get("s3_storage", {})
 
             coverage = {
-                'data_source': 'static_metrics',
-                's3_objects': s3_storage.get('total_objects', {}).get('value', 0),
-                's3_size_gb': s3_storage.get('total_size_gb', {}).get('value', 0.0),
-                'hoopr_files': s3_storage.get('hoopr_files', {}).get('value', 0),
-                'seasons_estimated': '2014-2025 (estimated from commit history)',
-                'games_estimated': '15000+ games (estimated)',
-                'players_estimated': '5000+ players (estimated)',
+                "data_source": "static_metrics",
+                "s3_objects": s3_storage.get("total_objects", {}).get("value", 0),
+                "s3_size_gb": s3_storage.get("total_size_gb", {}).get("value", 0.0),
+                "hoopr_files": s3_storage.get("hoopr_files", {}).get("value", 0),
+                "seasons_estimated": "2014-2025 (estimated from commit history)",
+                "games_estimated": "15000+ games (estimated)",
+                "players_estimated": "5000+ players (estimated)",
             }
 
             # Add local data info
-            local_data = metrics.get('local_data', {})
+            local_data = metrics.get("local_data", {})
             if local_data:
-                coverage['local_espn_size_gb'] = local_data.get('espn_size_gb', {}).get('value', 0)
+                coverage["local_espn_size_gb"] = local_data.get("espn_size_gb", {}).get(
+                    "value", 0
+                )
 
         return coverage
 
     def _extract_available_features(self) -> List[str]:
         """Extract list of available data features for AI recommendations"""
         schema = self._parse_schema()
-        tables = schema.get('tables', {})
+        tables = schema.get("tables", {})
 
         features = []
 
         # Panel data features
-        if 'master_player_game_stats' in tables:
-            stats_cols = tables['master_player_game_stats'].get('column_names', [])
-            features.extend([
-                f"Player game-level stat: {col}" for col in stats_cols
-                if col not in ['game_id', 'player_id']
-            ])
+        if "master_player_game_stats" in tables:
+            stats_cols = tables["master_player_game_stats"].get("column_names", [])
+            features.extend(
+                [
+                    f"Player game-level stat: {col}"
+                    for col in stats_cols
+                    if col not in ["game_id", "player_id"]
+                ]
+            )
 
         # Dimension features
-        if 'master_players' in tables:
-            features.append("Player biographical data (height, weight, position, birth_date)")
+        if "master_players" in tables:
+            features.append(
+                "Player biographical data (height, weight, position, birth_date)"
+            )
 
-        if 'master_teams' in tables:
+        if "master_teams" in tables:
             features.append("Team organizational data (conference, division, arena)")
 
         # System features
-        features.extend([
-            "Plus/Minus calculation system (4,619 lines of code)",
-            "Game outcome prediction models",
-            "Player performance prediction models",
-            "Play-by-play event sequences (172k S3 objects)",
-        ])
+        features.extend(
+            [
+                "Plus/Minus calculation system (4,619 lines of code)",
+                "Game outcome prediction models",
+                "Player performance prediction models",
+                "Play-by-play event sequences (172k S3 objects)",
+            ]
+        )
 
         return features
 
@@ -376,36 +414,38 @@ class DataInventoryScanner:
         """Analyze what the system can currently do"""
         metrics = self._load_metrics()
 
-        prediction_system = metrics.get('prediction_system', {})
-        plus_minus_system = metrics.get('plus_minus_system', {})
+        prediction_system = metrics.get("prediction_system", {})
+        plus_minus_system = metrics.get("plus_minus_system", {})
 
         return {
-            'prediction_system': {
-                'available': bool(prediction_system),
-                'total_lines': prediction_system.get('total_lines', {}).get('value', 0),
-                'scripts': [
-                    'fetch_upcoming_games',
-                    'fetch_recent_player_data',
-                    'prepare_upcoming_game_features',
-                    'predict_upcoming_games',
-                    'train_model_for_predictions',
+            "prediction_system": {
+                "available": bool(prediction_system),
+                "total_lines": prediction_system.get("total_lines", {}).get("value", 0),
+                "scripts": [
+                    "fetch_upcoming_games",
+                    "fetch_recent_player_data",
+                    "prepare_upcoming_game_features",
+                    "predict_upcoming_games",
+                    "train_model_for_predictions",
                 ],
             },
-            'plus_minus_system': {
-                'available': bool(plus_minus_system),
-                'total_lines': plus_minus_system.get('total_lines', {}).get('value', 0),
-                'components': plus_minus_system.get('total_lines', {}).get('components', {}),
-                'capabilities': [
-                    'Calculate player plus/minus from play-by-play',
-                    'Populate plus_minus tables in PostgreSQL',
-                    'Track on-court impact for all players',
+            "plus_minus_system": {
+                "available": bool(plus_minus_system),
+                "total_lines": plus_minus_system.get("total_lines", {}).get("value", 0),
+                "components": plus_minus_system.get("total_lines", {}).get(
+                    "components", {}
+                ),
+                "capabilities": [
+                    "Calculate player plus/minus from play-by-play",
+                    "Populate plus_minus tables in PostgreSQL",
+                    "Track on-court impact for all players",
                 ],
             },
-            'data_pipeline': {
-                'available': True,
-                's3_storage': True,
-                'postgresql_backend': True,
-                'local_cache': True,
+            "data_pipeline": {
+                "available": True,
+                "s3_storage": True,
+                "postgresql_backend": True,
+                "local_cache": True,
             },
         }
 
@@ -416,8 +456,8 @@ class DataInventoryScanner:
         coverage = self._assess_data_coverage()
 
         # Determine data source
-        data_source = coverage.get('data_source', 'static_metrics')
-        is_live = data_source == 'live_database'
+        data_source = coverage.get("data_source", "static_metrics")
+        is_live = data_source == "live_database"
 
         # Build coverage section based on data source
         if is_live:
@@ -428,8 +468,8 @@ class DataInventoryScanner:
 - {coverage.get('player_game_stats', 0):,} player-game records in master_player_game_stats
 - Database size: {coverage.get('database_size_mb', 0):.2f} MB ({coverage.get('database_size_gb', 0):.3f} GB)"""
 
-            if coverage.get('date_range'):
-                date_range = coverage['date_range']
+            if coverage.get("date_range"):
+                date_range = coverage["date_range"]
                 coverage_section += f"""
 - Date range: {date_range.get('min_date', 'N/A')} to {date_range.get('max_date', 'N/A')}
 - Unique game dates: {date_range.get('unique_dates', 0):,}
@@ -482,7 +522,7 @@ When recommending features from the book, leverage these existing data assets:
         output_file = Path(output_path)
         output_file.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(inventory, f, indent=2, default=str)
 
         logger.info(f"💾 Inventory report saved: {output_file}")
@@ -495,10 +535,12 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 2:
         print("Usage: python data_inventory_scanner.py <inventory_path>")
-        print("Example: python data_inventory_scanner.py /Users/ryanranft/nba-simulator-aws/inventory")
+        print(
+            "Example: python data_inventory_scanner.py /Users/ryanranft/nba-simulator-aws/inventory"
+        )
         sys.exit(1)
 
-    logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
     inventory_path = sys.argv[1]
     scanner = DataInventoryScanner(inventory_path)
@@ -507,9 +549,9 @@ if __name__ == "__main__":
     inventory = scanner.scan_full_inventory()
 
     # Print AI summary
-    print("\n" + "="*80)
-    print(inventory['summary_for_ai'])
-    print("="*80 + "\n")
+    print("\n" + "=" * 80)
+    print(inventory["summary_for_ai"])
+    print("=" * 80 + "\n")
 
     # Save report
     output_path = "data_inventory_report.json"

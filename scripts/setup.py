@@ -129,11 +129,14 @@ def configure_environment():
 
     # Optional Slack
     if Confirm.ask("\nConfigure Slack notifications?", default=False):
-        console.print("\n[yellow]Note: It's recommended to use hierarchical secrets instead of .env files.[/yellow]")
-        console.print("[yellow]Place webhook in: .env.nba_mcp_synthesis.production/SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW.env[/yellow]")
+        console.print(
+            "\n[yellow]Note: It's recommended to use hierarchical secrets instead of .env files.[/yellow]"
+        )
+        console.print(
+            "[yellow]Place webhook in: .env.nba_mcp_synthesis.production/SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW.env[/yellow]"
+        )
         env_config["SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW"] = Prompt.ask(
-            "Slack Webhook URL (Production)",
-            default="Use hierarchical secrets"
+            "Slack Webhook URL (Production)", default="Use hierarchical secrets"
         )
 
     # Write .env file
@@ -187,10 +190,17 @@ def configure_environment():
         if env_config.get("SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW"):
             f.write("# Slack Notifications\n")
             f.write("# Note: Hierarchical secrets are recommended over .env files\n")
-            if env_config['SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW'] != "Use hierarchical secrets":
-                f.write(f"SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW={env_config['SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW']}\n\n")
+            if (
+                env_config["SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW"]
+                != "Use hierarchical secrets"
+            ):
+                f.write(
+                    f"SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW={env_config['SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW']}\n\n"
+                )
             else:
-                f.write("# SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW=<place in hierarchical secrets>\n\n")
+                f.write(
+                    "# SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW=<place in hierarchical secrets>\n\n"
+                )
 
         # Limits
         f.write("# Safety & Performance\n")

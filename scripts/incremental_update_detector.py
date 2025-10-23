@@ -33,8 +33,7 @@ from collections import defaultdict
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -42,6 +41,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class FileState:
     """Represents the state of a file for change detection"""
+
     file_path: str
     checksum: str
     last_modified: str
@@ -54,38 +54,49 @@ class FileState:
 @dataclass
 class AnalysisState:
     """Represents the state of the entire analysis"""
+
     timestamp: str
     books_analyzed: Dict[str, FileState]  # book_name -> file state
     inventory_state: Optional[FileState] = None
     config_state: Optional[FileState] = None
     recommendations_count: int = 0
-    analysis_results: Dict[str, str] = field(default_factory=dict)  # book_name -> result file path
+    analysis_results: Dict[str, str] = field(
+        default_factory=dict
+    )  # book_name -> result file path
 
     def to_dict(self) -> Dict:
         return {
-            'timestamp': self.timestamp,
-            'books_analyzed': {k: v.to_dict() for k, v in self.books_analyzed.items()},
-            'inventory_state': self.inventory_state.to_dict() if self.inventory_state else None,
-            'config_state': self.config_state.to_dict() if self.config_state else None,
-            'recommendations_count': self.recommendations_count,
-            'analysis_results': self.analysis_results,
+            "timestamp": self.timestamp,
+            "books_analyzed": {k: v.to_dict() for k, v in self.books_analyzed.items()},
+            "inventory_state": (
+                self.inventory_state.to_dict() if self.inventory_state else None
+            ),
+            "config_state": self.config_state.to_dict() if self.config_state else None,
+            "recommendations_count": self.recommendations_count,
+            "analysis_results": self.analysis_results,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict) -> 'AnalysisState':
+    def from_dict(cls, data: Dict) -> "AnalysisState":
         books_analyzed = {
-            k: FileState(**v) for k, v in data.get('books_analyzed', {}).items()
+            k: FileState(**v) for k, v in data.get("books_analyzed", {}).items()
         }
-        inventory_state = FileState(**data['inventory_state']) if data.get('inventory_state') else None
-        config_state = FileState(**data['config_state']) if data.get('config_state') else None
+        inventory_state = (
+            FileState(**data["inventory_state"])
+            if data.get("inventory_state")
+            else None
+        )
+        config_state = (
+            FileState(**data["config_state"]) if data.get("config_state") else None
+        )
 
         return cls(
-            timestamp=data['timestamp'],
+            timestamp=data["timestamp"],
             books_analyzed=books_analyzed,
             inventory_state=inventory_state,
             config_state=config_state,
-            recommendations_count=data.get('recommendations_count', 0),
-            analysis_results=data.get('analysis_results', {})
+            recommendations_count=data.get("recommendations_count", 0),
+            analysis_results=data.get("analysis_results", {}),
         )
 
 
@@ -95,9 +106,7 @@ class IncrementalUpdateDetector:
     STATE_FILE = ".analysis_state.json"
 
     def __init__(
-        self,
-        state_file: Optional[str] = None,
-        cache_dir: Optional[str] = None
+        self, state_file: Optional[str] = None, cache_dir: Optional[str] = None
     ):
         """
         Initialize incremental update detector
@@ -107,7 +116,7 @@ class IncrementalUpdateDetector:
             cache_dir: Directory to cache analysis results (default: .analysis_cache/)
         """
         self.state_file = Path(state_file) if state_file else Path(self.STATE_FILE)
-        self.cache_dir = Path(cache_dir) if cache_dir else Path('.analysis_cache')
+        self.cache_dir = Path(cache_dir) if cache_dir else Path(".analysis_cache")
         self.cache_dir.mkdir(exist_ok=True)
 
         self.current_state: Optional[AnalysisState] = None
@@ -124,7 +133,7 @@ class IncrementalUpdateDetector:
             return None
 
         try:
-            with open(self.state_file, 'r') as f:
+            with open(self.state_file, "r") as f:
                 data = json.load(f)
 
             state = AnalysisState.from_dict(data)
@@ -145,7 +154,7 @@ class IncrementalUpdateDetector:
         sha256 = hashlib.sha256()
 
         try:
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 while chunk := f.read(8192):
                     sha256.update(chunk)
             return sha256.hexdigest()
@@ -162,14 +171,14 @@ class IncrementalUpdateDetector:
             file_path=str(file_path),
             checksum=checksum,
             last_modified=datetime.fromtimestamp(stat.st_mtime).isoformat(),
-            file_size=stat.st_size
+            file_size=stat.st_size,
         )
 
     def detect_changes(
         self,
         books_dir: str,
         inventory_file: Optional[str] = None,
-        config_file: Optional[str] = None
+        config_file: Optional[str] = None,
     ) -> Tuple[Set[str], Set[str], Set[str]]:
         """
         Detect changes since last analysis
@@ -225,7 +234,9 @@ class IncrementalUpdateDetector:
         logger.info(f"      New books: {len(new_books)}")
         logger.info(f"      Modified books: {len(modified_books)}")
         logger.info(f"      Deleted books: {len(deleted_books)}")
-        logger.info(f"      Unchanged books: {len(potentially_modified) - len(modified_books)}")
+        logger.info(
+            f"      Unchanged books: {len(potentially_modified) - len(modified_books)}"
+        )
 
         # Check inventory changes
         if inventory_file and Path(inventory_file).exists():
@@ -233,7 +244,9 @@ class IncrementalUpdateDetector:
             prev_inventory = previous_state.inventory_state
 
             if prev_inventory and curr_inventory.checksum != prev_inventory.checksum:
-                logger.info("   ⚠️  Inventory file changed - may need to re-validate all")
+                logger.info(
+                    "   ⚠️  Inventory file changed - may need to re-validate all"
+                )
 
         # Check config changes
         if config_file and Path(config_file).exists():
@@ -247,8 +260,16 @@ class IncrementalUpdateDetector:
         self.current_state = AnalysisState(
             timestamp=datetime.now().isoformat(),
             books_analyzed=current_books,
-            inventory_state=self.get_file_state(Path(inventory_file)) if inventory_file and Path(inventory_file).exists() else None,
-            config_state=self.get_file_state(Path(config_file)) if config_file and Path(config_file).exists() else None
+            inventory_state=(
+                self.get_file_state(Path(inventory_file))
+                if inventory_file and Path(inventory_file).exists()
+                else None
+            ),
+            config_state=(
+                self.get_file_state(Path(config_file))
+                if config_file and Path(config_file).exists()
+                else None
+            ),
         )
 
         return new_books, modified_books, deleted_books
@@ -258,7 +279,7 @@ class IncrementalUpdateDetector:
         books_dir: str,
         inventory_file: Optional[str] = None,
         config_file: Optional[str] = None,
-        force_full: bool = False
+        force_full: bool = False,
     ) -> List[str]:
         """
         Get list of books that need to be analyzed
@@ -302,10 +323,7 @@ class IncrementalUpdateDetector:
         return to_analyze
 
     def cache_analysis_result(
-        self,
-        book_name: str,
-        result_data: Dict,
-        result_file: Optional[str] = None
+        self, book_name: str, result_data: Dict, result_file: Optional[str] = None
     ):
         """
         Cache analysis result for a book
@@ -318,7 +336,7 @@ class IncrementalUpdateDetector:
         cache_file = self.cache_dir / f"{book_name}_analysis.json"
 
         try:
-            with open(cache_file, 'w') as f:
+            with open(cache_file, "w") as f:
                 json.dump(result_data, f, indent=2)
 
             logger.info(f"💾 Cached analysis result for {book_name}")
@@ -347,7 +365,7 @@ class IncrementalUpdateDetector:
             return None
 
         try:
-            with open(cache_file, 'r') as f:
+            with open(cache_file, "r") as f:
                 data = json.load(f)
 
             logger.info(f"📂 Loaded cached result for {book_name}")
@@ -358,8 +376,7 @@ class IncrementalUpdateDetector:
             return None
 
     def get_cached_recommendations(
-        self,
-        books_to_skip: Optional[Set[str]] = None
+        self, books_to_skip: Optional[Set[str]] = None
     ) -> List[Dict]:
         """
         Get cached recommendations for books that don't need re-analysis
@@ -383,7 +400,7 @@ class IncrementalUpdateDetector:
             cached_result = self.load_cached_result(book_name)
             if cached_result:
                 # Extract recommendations
-                recs = cached_result.get('recommendations', [])
+                recs = cached_result.get("recommendations", [])
                 if isinstance(recs, list):
                     cached_recs.extend(recs)
 
@@ -391,9 +408,7 @@ class IncrementalUpdateDetector:
         return cached_recs
 
     def merge_results(
-        self,
-        cached_recommendations: List[Dict],
-        new_recommendations: List[Dict]
+        self, cached_recommendations: List[Dict], new_recommendations: List[Dict]
     ) -> List[Dict]:
         """
         Merge cached and new recommendations
@@ -419,7 +434,7 @@ class IncrementalUpdateDetector:
     def save_state(
         self,
         recommendations_count: int,
-        analysis_results: Optional[Dict[str, str]] = None
+        analysis_results: Optional[Dict[str, str]] = None,
     ):
         """
         Save current analysis state to disk
@@ -437,7 +452,7 @@ class IncrementalUpdateDetector:
             self.current_state.analysis_results = analysis_results
 
         try:
-            with open(self.state_file, 'w') as f:
+            with open(self.state_file, "w") as f:
                 json.dump(self.current_state.to_dict(), f, indent=2)
 
             logger.info(f"💾 Saved analysis state to {self.state_file}")
@@ -448,23 +463,27 @@ class IncrementalUpdateDetector:
     def get_statistics(self) -> Dict[str, Any]:
         """Get statistics about incremental analysis"""
         stats = {
-            'has_previous_state': self.previous_state is not None,
-            'cache_size_mb': 0.0,
-            'cached_books': 0,
+            "has_previous_state": self.previous_state is not None,
+            "cache_size_mb": 0.0,
+            "cached_books": 0,
         }
 
         if self.cache_dir.exists():
             # Calculate cache size
-            total_size = sum(f.stat().st_size for f in self.cache_dir.glob('**/*') if f.is_file())
-            stats['cache_size_mb'] = total_size / (1024 * 1024)
+            total_size = sum(
+                f.stat().st_size for f in self.cache_dir.glob("**/*") if f.is_file()
+            )
+            stats["cache_size_mb"] = total_size / (1024 * 1024)
 
             # Count cached books
-            stats['cached_books'] = len(list(self.cache_dir.glob('*_analysis.json')))
+            stats["cached_books"] = len(list(self.cache_dir.glob("*_analysis.json")))
 
         if self.previous_state:
-            stats['previous_analysis_date'] = self.previous_state.timestamp
-            stats['previous_books_count'] = len(self.previous_state.books_analyzed)
-            stats['previous_recommendations_count'] = self.previous_state.recommendations_count
+            stats["previous_analysis_date"] = self.previous_state.timestamp
+            stats["previous_books_count"] = len(self.previous_state.books_analyzed)
+            stats["previous_recommendations_count"] = (
+                self.previous_state.recommendations_count
+            )
 
         return stats
 
@@ -491,51 +510,32 @@ class IncrementalUpdateDetector:
 def main():
     """Main CLI entry point"""
     parser = argparse.ArgumentParser(
-        description='Detect incremental updates and manage analysis cache'
+        description="Detect incremental updates and manage analysis cache"
     )
     parser.add_argument(
-        '--books-dir',
-        default='books/',
-        help='Directory containing books'
+        "--books-dir", default="books/", help="Directory containing books"
+    )
+    parser.add_argument("--inventory", help="Path to inventory JSON file")
+    parser.add_argument("--config", help="Path to project config file")
+    parser.add_argument(
+        "--state-file", help="Path to state file (default: .analysis_state.json)"
     )
     parser.add_argument(
-        '--inventory',
-        help='Path to inventory JSON file'
+        "--cache-dir", help="Path to cache directory (default: .analysis_cache/)"
     )
     parser.add_argument(
-        '--config',
-        help='Path to project config file'
+        "--force-full", action="store_true", help="Force full analysis (ignore cache)"
     )
     parser.add_argument(
-        '--state-file',
-        help='Path to state file (default: .analysis_state.json)'
+        "--clear-cache", action="store_true", help="Clear all cached results"
     )
-    parser.add_argument(
-        '--cache-dir',
-        help='Path to cache directory (default: .analysis_cache/)'
-    )
-    parser.add_argument(
-        '--force-full',
-        action='store_true',
-        help='Force full analysis (ignore cache)'
-    )
-    parser.add_argument(
-        '--clear-cache',
-        action='store_true',
-        help='Clear all cached results'
-    )
-    parser.add_argument(
-        '--stats',
-        action='store_true',
-        help='Show cache statistics'
-    )
+    parser.add_argument("--stats", action="store_true", help="Show cache statistics")
 
     args = parser.parse_args()
 
     # Initialize detector
     detector = IncrementalUpdateDetector(
-        state_file=args.state_file,
-        cache_dir=args.cache_dir
+        state_file=args.state_file, cache_dir=args.cache_dir
     )
 
     # Handle commands
@@ -550,10 +550,14 @@ def main():
         logger.info(f"   Has previous state: {stats['has_previous_state']}")
         logger.info(f"   Cache size: {stats['cache_size_mb']:.2f} MB")
         logger.info(f"   Cached books: {stats['cached_books']}")
-        if stats['has_previous_state']:
-            logger.info(f"   Previous analysis: {stats.get('previous_analysis_date', 'Unknown')}")
+        if stats["has_previous_state"]:
+            logger.info(
+                f"   Previous analysis: {stats.get('previous_analysis_date', 'Unknown')}"
+            )
             logger.info(f"   Previous books: {stats.get('previous_books_count', 0)}")
-            logger.info(f"   Previous recommendations: {stats.get('previous_recommendations_count', 0)}")
+            logger.info(
+                f"   Previous recommendations: {stats.get('previous_recommendations_count', 0)}"
+            )
         return 0
 
     # Detect changes and show what needs analysis
@@ -561,7 +565,7 @@ def main():
         books_dir=args.books_dir,
         inventory_file=args.inventory,
         config_file=args.config,
-        force_full=args.force_full
+        force_full=args.force_full,
     )
 
     if not to_analyze:
@@ -572,5 +576,5 @@ def main():
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     exit(main())

@@ -591,7 +591,9 @@ class InteractiveFormulaBuilder:
         # Validate variable values (sports stats should not be negative)
         for var, value in variable_values.items():
             if value < 0:
-                return {"error": f"Invalid value for {var}: {value}. Sports statistics cannot be negative."}
+                return {
+                    "error": f"Invalid value for {var}: {value}. Sports statistics cannot be negative."
+                }
 
         # Substitute values into template
         formula_str = template.template
@@ -630,7 +632,9 @@ class InteractiveFormulaBuilder:
         # Validate format type first
         valid_formats = ["latex", "python", "sympy", "json"]
         if format_type not in valid_formats:
-            raise ValueError(f"Unsupported format: {format_type}. Valid formats: {', '.join(valid_formats)}")
+            raise ValueError(
+                f"Unsupported format: {format_type}. Valid formats: {', '.join(valid_formats)}"
+            )
 
         try:
             # Preprocess formula to handle variables like 3PM
@@ -754,17 +758,23 @@ class InteractiveFormulaBuilder:
             Preprocessed formula string safe for sympy parsing
         """
         # Find all variable-like tokens (alphanumeric plus underscores)
-        tokens = re.findall(r'[A-Za-z_][A-Za-z0-9_]*|\d+[A-Za-z_][A-Za-z0-9_]*', formula_str)
+        tokens = re.findall(
+            r"[A-Za-z_][A-Za-z0-9_]*|\d+[A-Za-z_][A-Za-z0-9_]*", formula_str
+        )
 
         # Identify variables that start with a digit
-        numeric_prefix_vars = [token for token in tokens if token and token[0].isdigit()]
+        numeric_prefix_vars = [
+            token for token in tokens if token and token[0].isdigit()
+        ]
 
         # Replace numeric-prefix variables with safe versions
         preprocessed = formula_str
         for var in numeric_prefix_vars:
             safe_var = f"VAR_{var}"
             # Use word boundaries to avoid partial replacements
-            preprocessed = re.sub(r'\b' + re.escape(var) + r'\b', safe_var, preprocessed)
+            preprocessed = re.sub(
+                r"\b" + re.escape(var) + r"\b", safe_var, preprocessed
+            )
 
         return preprocessed
 

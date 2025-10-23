@@ -44,6 +44,7 @@ logger = logging.getLogger(__name__)
 # Test Suite
 # ==============================================================================
 
+
 class TestSecurityHooks:
     """Security hooks and pre-commit tests"""
 
@@ -61,16 +62,18 @@ class TestSecurityHooks:
 
         # Find detect-secrets hook
         detect_secrets_hook = None
-        for repo in config.get('repos', []):
-            if 'detect-secrets' in repo.get('repo', ''):
+        for repo in config.get("repos", []):
+            if "detect-secrets" in repo.get("repo", ""):
                 detect_secrets_hook = repo
                 break
 
-        assert detect_secrets_hook is not None, "detect-secrets hook should be configured"
+        assert (
+            detect_secrets_hook is not None
+        ), "detect-secrets hook should be configured"
 
         # Verify hook configuration
-        hooks = detect_secrets_hook.get('hooks', [])
-        detect_hook = next((h for h in hooks if h.get('id') == 'detect-secrets'), None)
+        hooks = detect_secrets_hook.get("hooks", [])
+        detect_hook = next((h for h in hooks if h.get("id") == "detect-secrets"), None)
         assert detect_hook is not None, "detect-secrets hook should be present"
 
         # Verify baseline file exists
@@ -87,10 +90,10 @@ class TestSecurityHooks:
         # Check if detect-secrets is installed
         try:
             result = subprocess.run(
-                ['detect-secrets', '--version'],
+                ["detect-secrets", "--version"],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             if result.returncode != 0:
                 pytest.skip("detect-secrets not installed")
@@ -99,18 +102,20 @@ class TestSecurityHooks:
 
         # Create test file with potential secret
         test_file = tmp_path / "test_secrets.py"
-        test_file.write_text('''
+        test_file.write_text(
+            """
 # This is a test file with fake secrets
 API_KEY = "sk-test-1234567890abcdef"  # Fake API key
 PASSWORD = "password123"
-''')
+"""
+        )
 
         # Run detect-secrets on file
         result = subprocess.run(
-            ['detect-secrets', 'scan', str(test_file)],
+            ["detect-secrets", "scan", str(test_file)],
             capture_output=True,
             text=True,
-            timeout=10
+            timeout=10,
         )
 
         # Check if secrets were detected
@@ -135,17 +140,20 @@ PASSWORD = "password123"
             config = yaml.safe_load(f)
 
         # Find detect-secrets hook
-        for repo in config.get('repos', []):
-            if 'detect-secrets' in repo.get('repo', ''):
-                hooks = repo.get('hooks', [])
+        for repo in config.get("repos", []):
+            if "detect-secrets" in repo.get("repo", ""):
+                hooks = repo.get("hooks", [])
                 for hook in hooks:
-                    if hook.get('id') == 'detect-secrets':
-                        exclude_pattern = hook.get('exclude', '')
+                    if hook.get("id") == "detect-secrets":
+                        exclude_pattern = hook.get("exclude", "")
                         logger.info(f"Exclusion pattern: {exclude_pattern}")
 
                         # Verify common exclusions are present
-                        assert '.env.example' in exclude_pattern or 'env.example' in exclude_pattern or exclude_pattern != '', \
-                            "Should exclude .env.example files"
+                        assert (
+                            ".env.example" in exclude_pattern
+                            or "env.example" in exclude_pattern
+                            or exclude_pattern != ""
+                        ), "Should exclude .env.example files"
 
                         logger.info("✅ Exclusion patterns test passed")
                         return
@@ -158,8 +166,17 @@ PASSWORD = "password123"
 
         # Check if detect-secrets is installed
         try:
-            subprocess.run(['detect-secrets', '--version'], capture_output=True, check=True, timeout=5)
-        except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            subprocess.run(
+                ["detect-secrets", "--version"],
+                capture_output=True,
+                check=True,
+                timeout=5,
+            )
+        except (
+            FileNotFoundError,
+            subprocess.CalledProcessError,
+            subprocess.TimeoutExpired,
+        ):
             pytest.skip("detect-secrets not installed")
 
         # Create new baseline in temp directory
@@ -168,10 +185,10 @@ PASSWORD = "password123"
 
         # Create initial baseline by scanning and redirecting output
         result = subprocess.run(
-            ['detect-secrets', 'scan', str(tmp_path)],
+            ["detect-secrets", "scan", str(tmp_path)],
             capture_output=True,
             text=True,
-            timeout=10
+            timeout=10,
         )
 
         # Write the baseline file
@@ -182,22 +199,26 @@ PASSWORD = "password123"
 
         # Now test updating the baseline
         result = subprocess.run(
-            ['detect-secrets', 'scan', '--baseline', str(baseline_path), str(tmp_path)],
+            ["detect-secrets", "scan", "--baseline", str(baseline_path), str(tmp_path)],
             capture_output=True,
             text=True,
             cwd=tmp_path,
-            timeout=10
+            timeout=10,
         )
 
         # Update should succeed
-        assert result.returncode in [0, 1, 3], f"Baseline update should succeed (got code {result.returncode})"
+        assert result.returncode in [
+            0,
+            1,
+            3,
+        ], f"Baseline update should succeed (got code {result.returncode})"
 
         # Verify baseline format
         with open(baseline_path) as f:
             baseline = json.load(f)
 
-        assert 'version' in baseline, "Baseline should have version"
-        assert 'results' in baseline, "Baseline should have results"
+        assert "version" in baseline, "Baseline should have version"
+        assert "results" in baseline, "Baseline should have results"
 
         logger.info("✅ Baseline file management test passed")
 
@@ -208,13 +229,10 @@ PASSWORD = "password123"
         # Check if pre-commit is installed
         try:
             result = subprocess.run(
-                ['pre-commit', '--version'],
-                capture_output=True,
-                text=True,
-                timeout=5
+                ["pre-commit", "--version"], capture_output=True, text=True, timeout=5
             )
             assert result.returncode == 0, "pre-commit should be installed"
-            assert 'pre-commit' in result.stdout, "Should show pre-commit version"
+            assert "pre-commit" in result.stdout, "Should show pre-commit version"
 
             logger.info(f"Pre-commit version: {result.stdout.strip()}")
 
@@ -242,10 +260,12 @@ PASSWORD = "password123"
 
         # Create a test file with a fake secret
         test_file = tmp_path / "test_code.py"
-        test_file.write_text('API_KEY = "sk-1234567890abcdef"  # This looks like a secret')
+        test_file.write_text(
+            'API_KEY = "sk-1234567890abcdef"  # This looks like a secret'
+        )
 
         # Mock the detect-secrets scan
-        with patch('subprocess.run') as mock_run:
+        with patch("subprocess.run") as mock_run:
             # Simulate detect-secrets finding a secret
             mock_result = Mock()
             mock_result.returncode = 1  # Non-zero indicates secrets found
@@ -253,7 +273,7 @@ PASSWORD = "password123"
             mock_run.return_value = mock_result
 
             # Run the mocked scan
-            result = mock_run(['detect-secrets', 'scan', str(test_file)])
+            result = mock_run(["detect-secrets", "scan", str(test_file)])
 
             # Verify that secrets were detected (commit would be blocked)
             assert result.returncode == 1, "Should detect secrets and block commit"
@@ -266,10 +286,7 @@ PASSWORD = "password123"
         # Check if bandit is installed
         try:
             result = subprocess.run(
-                ['bandit', '--version'],
-                capture_output=True,
-                text=True,
-                timeout=5
+                ["bandit", "--version"], capture_output=True, text=True, timeout=5
             )
             if result.returncode != 0:
                 pytest.skip("Bandit not installed")
@@ -278,7 +295,8 @@ PASSWORD = "password123"
 
         # Create test file with security issues
         test_file = tmp_path / "insecure.py"
-        test_file.write_text('''
+        test_file.write_text(
+            """
 import random
 
 # B105: Hardcoded password
@@ -286,14 +304,12 @@ password = "hardcoded_password"
 
 # B311: Insecure random
 random_number = random.random()
-''')
+"""
+        )
 
         # Run bandit
         result = subprocess.run(
-            ['bandit', '-r', str(tmp_path)],
-            capture_output=True,
-            text=True,
-            timeout=10
+            ["bandit", "-r", str(tmp_path)], capture_output=True, text=True, timeout=10
         )
 
         # Bandit should detect issues or run successfully
@@ -311,10 +327,7 @@ random_number = random.random()
         # Check if black is installed
         try:
             result = subprocess.run(
-                ['black', '--version'],
-                capture_output=True,
-                text=True,
-                timeout=5
+                ["black", "--version"], capture_output=True, text=True, timeout=5
             )
             if result.returncode != 0:
                 pytest.skip("Black not installed")
@@ -323,44 +336,43 @@ random_number = random.random()
 
         # Properly formatted code
         good_file = tmp_path / "good.py"
-        good_file.write_text('''def calculate_sum(a, b):
+        good_file.write_text(
+            """def calculate_sum(a, b):
     return a + b
 
 
 def main():
     result = calculate_sum(1, 2)
     print(result)
-''')
+"""
+        )
 
         result = subprocess.run(
-            ['black', '--check', str(good_file)],
-            capture_output=True,
-            timeout=10
+            ["black", "--check", str(good_file)], capture_output=True, timeout=10
         )
         # Black may reformat even "good" code for newlines/spacing
         # Accept 0 (no changes) or 1 (would reformat) as valid
-        assert result.returncode in [0, 1], f"Code check should succeed (got code {result.returncode})"
+        assert result.returncode in [
+            0,
+            1,
+        ], f"Code check should succeed (got code {result.returncode})"
 
         # Improperly formatted code
         bad_file = tmp_path / "bad.py"
-        bad_file.write_text('def add(a,b):return a+b')
+        bad_file.write_text("def add(a,b):return a+b")
 
         result = subprocess.run(
-            ['black', '--check', str(bad_file)],
-            capture_output=True,
-            timeout=10
+            ["black", "--check", str(bad_file)], capture_output=True, timeout=10
         )
         # Should need reformatting (returncode 1) or be reformatted successfully
         logger.info(f"Black check result: {result.returncode}")
 
         # Apply formatting
-        subprocess.run(['black', str(bad_file)], capture_output=True, timeout=10)
+        subprocess.run(["black", str(bad_file)], capture_output=True, timeout=10)
 
         # Now should pass
         result = subprocess.run(
-            ['black', '--check', str(bad_file)],
-            capture_output=True,
-            timeout=10
+            ["black", "--check", str(bad_file)], capture_output=True, timeout=10
         )
         assert result.returncode == 0, "Formatted code should pass"
 
@@ -388,9 +400,15 @@ def main():
 
         # Check if pre-commit is available
         try:
-            result = subprocess.run(['pre-commit', '--version'], capture_output=True, check=True, timeout=5)
+            result = subprocess.run(
+                ["pre-commit", "--version"], capture_output=True, check=True, timeout=5
+            )
             logger.info(f"Pre-commit version: {result.stdout.decode().strip()}")
-        except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        except (
+            FileNotFoundError,
+            subprocess.CalledProcessError,
+            subprocess.TimeoutExpired,
+        ):
             pytest.skip("pre-commit not available")
 
         # Mock full pre-commit run instead of requiring git setup
@@ -401,7 +419,7 @@ def main():
         test_py.write_text('print("hello world")')
 
         # Mock successful pre-commit run
-        with patch('subprocess.run') as mock_run:
+        with patch("subprocess.run") as mock_run:
             # Simulate successful hook execution
             mock_result = Mock()
             mock_result.returncode = 0
@@ -409,7 +427,7 @@ def main():
             mock_run.return_value = mock_result
 
             # Run the mocked command
-            result = mock_run(['pre-commit', 'run', '--all-files'])
+            result = mock_run(["pre-commit", "run", "--all-files"])
 
             # Verify success
             assert result.returncode == 0, "Pre-commit should run successfully"
@@ -419,6 +437,7 @@ def main():
 # ==============================================================================
 # Standalone Test Runner
 # ==============================================================================
+
 
 def run_all_security_tests():
     """Run all security hooks tests"""
@@ -431,13 +450,28 @@ def run_all_security_tests():
     tmp_path = Path(tempfile.mkdtemp())
 
     tests = [
-        ("Detect-Secrets Configuration", test_suite.test_01_detect_secrets_configuration),
-        ("Secret Detection", lambda: test_suite.test_02_secret_detection_python_files(tmp_path)),
+        (
+            "Detect-Secrets Configuration",
+            test_suite.test_01_detect_secrets_configuration,
+        ),
+        (
+            "Secret Detection",
+            lambda: test_suite.test_02_secret_detection_python_files(tmp_path),
+        ),
         ("Exclusion Patterns", test_suite.test_03_exclusion_patterns),
-        ("Baseline Management", lambda: test_suite.test_04_baseline_file_management(tmp_path)),
+        (
+            "Baseline Management",
+            lambda: test_suite.test_04_baseline_file_management(tmp_path),
+        ),
         ("Pre-Commit Installation", test_suite.test_05_pre_commit_hook_installation),
-        ("Bandit Scanning", lambda: test_suite.test_07_bandit_security_scanning(tmp_path)),
-        ("Black Formatting", lambda: test_suite.test_08_black_formatting_enforcement(tmp_path)),
+        (
+            "Bandit Scanning",
+            lambda: test_suite.test_07_bandit_security_scanning(tmp_path),
+        ),
+        (
+            "Black Formatting",
+            lambda: test_suite.test_08_black_formatting_enforcement(tmp_path),
+        ),
         ("Custom File Size Check", test_suite.test_09_custom_file_size_check),
     ]
 
@@ -463,6 +497,7 @@ def run_all_security_tests():
 
     # Cleanup
     import shutil
+
     shutil.rmtree(tmp_path, ignore_errors=True)
 
     print("=" * 80)

@@ -40,13 +40,13 @@ def check_health() -> Dict[str, Any]:
         "checks": {
             "secrets": check_secrets_loaded(),
             "filesystem": check_filesystem_access(),
-            "python": check_python_imports()
+            "python": check_python_imports(),
         },
-        "details": {}
+        "details": {},
     }
 
     # Add database check if configured
-    if os.getenv('CHECK_DATABASE', 'false').lower() == 'true':
+    if os.getenv("CHECK_DATABASE", "false").lower() == "true":
         health["checks"]["database"] = check_database_connection()
 
     # Determine overall status
@@ -72,7 +72,9 @@ def check_secrets_loaded() -> bool:
         has_secrets = sm.verify_secrets_loaded()
 
         if has_secrets:
-            logger.debug(f"Secrets check passed: {len(sm.get_all_secrets())} secrets loaded")
+            logger.debug(
+                f"Secrets check passed: {len(sm.get_all_secrets())} secrets loaded"
+            )
         else:
             logger.warning("Secrets check failed: No secrets loaded")
 
@@ -100,7 +102,7 @@ def check_database_connection() -> bool:
             "port": int(get_secret("DB_PORT") or "5432"),
             "database": get_secret("DB_NAME") or "nba",
             "user": get_secret("DB_USER") or "postgres",
-            "password": get_secret("DB_PASSWORD") or ""
+            "password": get_secret("DB_PASSWORD") or "",
         }
 
         # Attempt connection
@@ -185,16 +187,16 @@ def get_health_status_detailed() -> Dict[str, Any]:
         basic_health["system"] = {
             "cpu_percent": psutil.cpu_percent(interval=1),
             "memory_percent": psutil.virtual_memory().percent,
-            "disk_percent": psutil.disk_usage('/').percent
+            "disk_percent": psutil.disk_usage("/").percent,
         }
     except ImportError:
         logger.debug("psutil not available for system metrics")
 
     # Add environment info
     basic_health["environment"] = {
-        "docker": os.getenv('DOCKER_CONTAINER', 'false'),
-        "project": os.getenv('PROJECT', 'unknown'),
-        "context": os.getenv('CONTEXT', 'unknown')
+        "docker": os.getenv("DOCKER_CONTAINER", "false"),
+        "project": os.getenv("PROJECT", "unknown"),
+        "context": os.getenv("CONTEXT", "unknown"),
     }
 
     return basic_health
@@ -218,4 +220,3 @@ if __name__ == "__main__":
     else:
         print("\n✅ Health check PASSED")
         sys.exit(0)
-

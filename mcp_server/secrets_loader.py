@@ -45,7 +45,7 @@ def init_secrets(
     context: Optional[str] = None,
     force: bool = False,
     base_path: Optional[str] = None,
-    quiet: bool = False
+    quiet: bool = False,
 ) -> bool:
     """
     Initialize secrets from hierarchical structure.
@@ -89,29 +89,29 @@ def init_secrets(
     # Auto-detect project from current directory
     if project is None:
         cwd = Path.cwd()
-        if 'nba-simulator-aws' in str(cwd):
-            project = 'nba-simulator-aws'
+        if "nba-simulator-aws" in str(cwd):
+            project = "nba-simulator-aws"
         else:
-            project = os.getenv('PROJECT_NAME', 'nba-mcp-synthesis')
+            project = os.getenv("PROJECT_NAME", "nba-mcp-synthesis")
 
     # Default sport
     if sport is None:
-        sport = os.getenv('SPORT_NAME', 'NBA')
+        sport = os.getenv("SPORT_NAME", "NBA")
 
     # Auto-detect context
     if context is None:
-        context = os.getenv('NBA_MCP_CONTEXT', 'WORKFLOW')
+        context = os.getenv("NBA_MCP_CONTEXT", "WORKFLOW")
 
     # Convert context to match directory naming
     context_map = {
-        'WORKFLOW': 'production',
-        'PRODUCTION': 'production',
-        'DEVELOPMENT': 'development',
-        'DEV': 'development',
-        'TEST': 'test',
-        'TESTING': 'test'
+        "WORKFLOW": "production",
+        "PRODUCTION": "production",
+        "DEVELOPMENT": "development",
+        "DEV": "development",
+        "TEST": "test",
+        "TESTING": "test",
     }
-    dir_context = context_map.get(context.upper(), 'production')
+    dir_context = context_map.get(context.upper(), "production")
 
     if not quiet:
         logger.info(f"🔐 Initializing secrets for {project} ({sport}) - {context}")
@@ -124,9 +124,7 @@ def init_secrets(
 
         # Load secrets hierarchically
         result = secrets_manager.load_secrets_hierarchical(
-            project=project,
-            sport=sport,
-            context=dir_context
+            project=project, sport=sport, context=dir_context
         )
 
         if result.success:
@@ -223,11 +221,11 @@ def init_for_automated_deployment() -> bool:
         ...     print("Failed to initialize secrets for deployment")
         ...     sys.exit(1)
     """
-    if not init_secrets(project='nba-mcp-synthesis', context='WORKFLOW'):
+    if not init_secrets(project="nba-mcp-synthesis", context="WORKFLOW"):
         return False
 
     # Validate required secrets for deployment
-    success, missing = validate_required_secrets(['ANTHROPIC_API_KEY'])
+    success, missing = validate_required_secrets(["ANTHROPIC_API_KEY"])
     if not success:
         logger.error(f"❌ Missing required secrets for deployment: {missing}")
         return False
@@ -235,7 +233,7 @@ def init_for_automated_deployment() -> bool:
     return True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """
     Test secrets initialization.
 
@@ -248,26 +246,25 @@ if __name__ == '__main__':
 
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
-    parser = argparse.ArgumentParser(description='Test secrets initialization')
-    parser.add_argument('--project', help='Project name', default=None)
-    parser.add_argument('--sport', help='Sport name', default=None)
-    parser.add_argument('--context', help='Context (WORKFLOW/DEVELOPMENT/TEST)', default=None)
-    parser.add_argument('--force', action='store_true', help='Force reinitialization')
+    parser = argparse.ArgumentParser(description="Test secrets initialization")
+    parser.add_argument("--project", help="Project name", default=None)
+    parser.add_argument("--sport", help="Sport name", default=None)
+    parser.add_argument(
+        "--context", help="Context (WORKFLOW/DEVELOPMENT/TEST)", default=None
+    )
+    parser.add_argument("--force", action="store_true", help="Force reinitialization")
     args = parser.parse_args()
 
-    print("="*70)
+    print("=" * 70)
     print("Secrets Loader Test")
-    print("="*70)
+    print("=" * 70)
 
     # Initialize secrets
     success = init_secrets(
-        project=args.project,
-        sport=args.sport,
-        context=args.context,
-        force=args.force
+        project=args.project, sport=args.sport, context=args.context, force=args.force
     )
 
     if success:
@@ -279,23 +276,22 @@ if __name__ == '__main__':
         print("\n📋 Testing secret access:")
 
         test_secrets = {
-            'ANTHROPIC': get_api_key('ANTHROPIC'),
-            'GOOGLE': get_api_key('GOOGLE'),
-            'OPENAI': get_api_key('OPENAI'),
-            'DEEPSEEK': get_api_key('DEEPSEEK')
+            "ANTHROPIC": get_api_key("ANTHROPIC"),
+            "GOOGLE": get_api_key("GOOGLE"),
+            "OPENAI": get_api_key("OPENAI"),
+            "DEEPSEEK": get_api_key("DEEPSEEK"),
         }
 
         for name, value in test_secrets.items():
-            status = '✓' if value else '✗'
-            masked = f"{value[:10]}..." if value else 'Not set'
+            status = "✓" if value else "✗"
+            masked = f"{value[:10]}..." if value else "Not set"
             print(f"  {status} {name}_API_KEY: {masked}")
 
         # Test validation
         print("\n🔍 Validating required secrets:")
-        success, missing = validate_required_secrets([
-            'ANTHROPIC_API_KEY',
-            'GOOGLE_API_KEY'
-        ])
+        success, missing = validate_required_secrets(
+            ["ANTHROPIC_API_KEY", "GOOGLE_API_KEY"]
+        )
 
         if success:
             print("  ✅ All required secrets present")
@@ -306,6 +302,6 @@ if __name__ == '__main__':
         print("\n❌ Failed to initialize secrets")
         sys.exit(1)
 
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("Test complete")
-    print("="*70)
+    print("=" * 70)

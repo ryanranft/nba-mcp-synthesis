@@ -33,14 +33,14 @@ from datetime import datetime
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 # Try to import OpenAI for embeddings
 try:
     from openai import OpenAI
+
     OPENAI_AVAILABLE = True
 except ImportError:
     OPENAI_AVAILABLE = False
@@ -50,6 +50,7 @@ except ImportError:
 @dataclass
 class SimilarityMatch:
     """Represents a similarity match between two recommendations"""
+
     rec1_id: str
     rec2_id: str
     rec1_book: str
@@ -66,6 +67,7 @@ class SimilarityMatch:
 @dataclass
 class ConsolidatedRecommendation:
     """Represents a consolidated recommendation from multiple sources"""
+
     consolidated_id: str
     title: str
     description: str
@@ -96,13 +98,15 @@ class CrossBookSimilarityDetector:
         Args:
             openai_api_key: OpenAI API key for embeddings (defaults to env var)
         """
-        self.api_key = openai_api_key or os.getenv('OPENAI_API_KEY')
+        self.api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
 
         if not OPENAI_AVAILABLE:
             logger.error("❌ OpenAI library not available. Cannot compute embeddings.")
             self.client = None
         elif not self.api_key:
-            logger.warning("⚠️  No OpenAI API key provided. Set OPENAI_API_KEY environment variable.")
+            logger.warning(
+                "⚠️  No OpenAI API key provided. Set OPENAI_API_KEY environment variable."
+            )
             self.client = None
         else:
             self.client = OpenAI(api_key=self.api_key)
@@ -114,8 +118,7 @@ class CrossBookSimilarityDetector:
         self.consolidated_recommendations: List[ConsolidatedRecommendation] = []
 
     def load_recommendations_from_multiple_books(
-        self,
-        book_analysis_dir: str
+        self, book_analysis_dir: str
     ) -> List[Dict]:
         """
         Load recommendations from all books in analysis directory
@@ -142,7 +145,7 @@ class CrossBookSimilarityDetector:
 
         # For each book, look for corresponding JSON files
         for md_file in recommendation_files:
-            book_name = md_file.stem.replace('_RECOMMENDATIONS_COMPLETE', '')
+            book_name = md_file.stem.replace("_RECOMMENDATIONS_COMPLETE", "")
 
             # Try to find JSON file with recommendations
             json_candidates = [
@@ -163,15 +166,15 @@ class CrossBookSimilarityDetector:
 
             # Load recommendations from JSON
             try:
-                with open(json_file, 'r') as f:
+                with open(json_file, "r") as f:
                     data = json.load(f)
 
                 # Handle different JSON formats
                 if isinstance(data, list):
                     book_recs = data
                 elif isinstance(data, dict):
-                    if 'recommendations' in data:
-                        book_recs = data['recommendations']
+                    if "recommendations" in data:
+                        book_recs = data["recommendations"]
                     else:
                         book_recs = [data]
                 else:
@@ -180,11 +183,13 @@ class CrossBookSimilarityDetector:
 
                 # Add book source metadata
                 for rec in book_recs:
-                    rec['source_book'] = book_name
-                    rec['source_file'] = str(json_file)
+                    rec["source_book"] = book_name
+                    rec["source_file"] = str(json_file)
 
                 all_recommendations.extend(book_recs)
-                logger.info(f"   ✅ Loaded {len(book_recs)} recommendations from {book_name}")
+                logger.info(
+                    f"   ✅ Loaded {len(book_recs)} recommendations from {book_name}"
+                )
 
             except Exception as e:
                 logger.error(f"   ❌ Error loading {json_file}: {e}")
@@ -206,15 +211,15 @@ class CrossBookSimilarityDetector:
         """
         logger.info(f"📖 Loading recommendations from: {file_path}")
 
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             data = json.load(f)
 
         # Handle different JSON formats
         if isinstance(data, list):
             recommendations = data
         elif isinstance(data, dict):
-            if 'recommendations' in data:
-                recommendations = data['recommendations']
+            if "recommendations" in data:
+                recommendations = data["recommendations"]
             else:
                 recommendations = [data]
         else:
@@ -223,8 +228,8 @@ class CrossBookSimilarityDetector:
 
         # Add source book from metadata if available
         for i, rec in enumerate(recommendations):
-            if 'source_book' not in rec:
-                rec['source_book'] = rec.get('book', f'unknown_book_{i}')
+            if "source_book" not in rec:
+                rec["source_book"] = rec.get("book", f"unknown_book_{i}")
 
         logger.info(f"📊 Loaded {len(recommendations)} recommendations")
         self.recommendations = recommendations
@@ -250,8 +255,7 @@ class CrossBookSimilarityDetector:
 
         try:
             response = self.client.embeddings.create(
-                input=text,
-                model="text-embedding-3-small"  # Fast and cost-effective
+                input=text, model="text-embedding-3-small"  # Fast and cost-effective
             )
 
             embedding = response.data[0].embedding
@@ -262,7 +266,9 @@ class CrossBookSimilarityDetector:
             logger.error(f"❌ Error getting embedding: {e}")
             return None
 
-    def compute_similarity(self, embedding1: List[float], embedding2: List[float]) -> float:
+    def compute_similarity(
+        self, embedding1: List[float], embedding2: List[float]
+    ) -> float:
         """
         Compute cosine similarity between two embeddings
 
@@ -294,26 +300,23 @@ class CrossBookSimilarityDetector:
         text_parts = []
 
         # Title (weighted more)
-        if 'title' in rec:
-            text_parts.append(rec['title'])
-            text_parts.append(rec['title'])  # Add twice for emphasis
+        if "title" in rec:
+            text_parts.append(rec["title"])
+            text_parts.append(rec["title"])  # Add twice for emphasis
 
         # Description
-        if 'description' in rec:
-            text_parts.append(rec['description'])
+        if "description" in rec:
+            text_parts.append(rec["description"])
 
         # Implementation steps (first 3)
-        if 'implementation_steps' in rec:
-            steps = rec['implementation_steps']
+        if "implementation_steps" in rec:
+            steps = rec["implementation_steps"]
             if isinstance(steps, list):
                 text_parts.extend(steps[:3])
 
-        return ' '.join(text_parts)
+        return " ".join(text_parts)
 
-    def detect_similarities(
-        self,
-        min_threshold: float = None
-    ) -> List[SimilarityMatch]:
+    def detect_similarities(self, min_threshold: float = None) -> List[SimilarityMatch]:
         """
         Detect similarities between all recommendations
 
@@ -351,12 +354,16 @@ class CrossBookSimilarityDetector:
             else:
                 embeddings.append(embedding)
 
-        logger.info(f"✅ Computed {sum(1 for e in embeddings if e is not None)} embeddings")
+        logger.info(
+            f"✅ Computed {sum(1 for e in embeddings if e is not None)} embeddings"
+        )
 
         # Step 2: Compare all pairs
         logger.info("🔍 Comparing all pairs...")
         matches = []
-        total_comparisons = len(self.recommendations) * (len(self.recommendations) - 1) // 2
+        total_comparisons = (
+            len(self.recommendations) * (len(self.recommendations) - 1) // 2
+        )
 
         comparison_count = 0
         for i in range(len(self.recommendations)):
@@ -374,7 +381,7 @@ class CrossBookSimilarityDetector:
                 rec1 = self.recommendations[i]
                 rec2 = self.recommendations[j]
 
-                if rec1.get('source_book') == rec2.get('source_book'):
+                if rec1.get("source_book") == rec2.get("source_book"):
                     continue
 
                 # Compute similarity
@@ -384,23 +391,23 @@ class CrossBookSimilarityDetector:
                 if similarity >= min_threshold:
                     # Determine match type
                     if similarity >= self.THRESHOLD_DUPLICATE:
-                        match_type = 'duplicate'
+                        match_type = "duplicate"
                     elif similarity >= self.THRESHOLD_VERY_SIMILAR:
-                        match_type = 'very_similar'
+                        match_type = "very_similar"
                     elif similarity >= self.THRESHOLD_SIMILAR:
-                        match_type = 'similar'
+                        match_type = "similar"
                     else:
-                        match_type = 'related'
+                        match_type = "related"
 
                     match = SimilarityMatch(
-                        rec1_id=rec1.get('recommendation_id', f'rec_{i}'),
-                        rec2_id=rec2.get('recommendation_id', f'rec_{j}'),
-                        rec1_book=rec1.get('source_book', 'unknown'),
-                        rec2_book=rec2.get('source_book', 'unknown'),
+                        rec1_id=rec1.get("recommendation_id", f"rec_{i}"),
+                        rec2_id=rec2.get("recommendation_id", f"rec_{j}"),
+                        rec1_book=rec1.get("source_book", "unknown"),
+                        rec2_book=rec2.get("source_book", "unknown"),
                         similarity_score=similarity,
                         match_type=match_type,
-                        rec1_title=rec1.get('title', 'Unknown'),
-                        rec2_title=rec2.get('title', 'Unknown')
+                        rec1_title=rec1.get("title", "Unknown"),
+                        rec2_title=rec2.get("title", "Unknown"),
                     )
 
                     matches.append(match)
@@ -413,7 +420,7 @@ class CrossBookSimilarityDetector:
             by_type[match.match_type] += 1
 
         logger.info("   Matches by type:")
-        for match_type in ['duplicate', 'very_similar', 'similar', 'related']:
+        for match_type in ["duplicate", "very_similar", "similar", "related"]:
             count = by_type[match_type]
             if count > 0:
                 logger.info(f"     - {match_type}: {count}")
@@ -422,8 +429,7 @@ class CrossBookSimilarityDetector:
         return matches
 
     def consolidate_recommendations(
-        self,
-        min_similarity: float = None
+        self, min_similarity: float = None
     ) -> List[ConsolidatedRecommendation]:
         """
         Consolidate similar recommendations into merged recommendations
@@ -442,8 +448,7 @@ class CrossBookSimilarityDetector:
 
         # Filter matches by minimum similarity
         consolidation_matches = [
-            m for m in self.similarity_matches
-            if m.similarity_score >= min_similarity
+            m for m in self.similarity_matches if m.similarity_score >= min_similarity
         ]
 
         logger.info(f"   {len(consolidation_matches)} matches above threshold")
@@ -460,7 +465,9 @@ class CrossBookSimilarityDetector:
                 continue  # Skip singleton clusters
 
             # Get all recommendations in cluster
-            cluster_recs = [self._find_recommendation_by_id(rec_id) for rec_id in cluster]
+            cluster_recs = [
+                self._find_recommendation_by_id(rec_id) for rec_id in cluster
+            ]
             cluster_recs = [r for r in cluster_recs if r is not None]
 
             if not cluster_recs:
@@ -521,14 +528,12 @@ class CrossBookSimilarityDetector:
     def _find_recommendation_by_id(self, rec_id: str) -> Optional[Dict]:
         """Find recommendation by ID"""
         for rec in self.recommendations:
-            if rec.get('recommendation_id') == rec_id or rec.get('id') == rec_id:
+            if rec.get("recommendation_id") == rec_id or rec.get("id") == rec_id:
                 return rec
         return None
 
     def _merge_recommendations(
-        self,
-        recommendations: List[Dict],
-        cluster_id: int
+        self, recommendations: List[Dict], cluster_id: int
     ) -> ConsolidatedRecommendation:
         """
         Merge multiple similar recommendations into one consolidated recommendation
@@ -541,23 +546,34 @@ class CrossBookSimilarityDetector:
             Consolidated recommendation
         """
         # Use most common title (or first if all different)
-        titles = [r.get('title', '') for r in recommendations]
-        title = max(set(titles), key=titles.count) if titles else f"Consolidated Recommendation {cluster_id}"
+        titles = [r.get("title", "") for r in recommendations]
+        title = (
+            max(set(titles), key=titles.count)
+            if titles
+            else f"Consolidated Recommendation {cluster_id}"
+        )
 
         # Combine descriptions
-        descriptions = [r.get('description', '') for r in recommendations if r.get('description')]
+        descriptions = [
+            r.get("description", "") for r in recommendations if r.get("description")
+        ]
         if descriptions:
-            description = f"Consolidated from {len(recommendations)} sources:\n\n" + "\n\n".join(
-                f"- {desc[:200]}..." if len(desc) > 200 else f"- {desc}"
-                for desc in descriptions[:3]
+            description = (
+                f"Consolidated from {len(recommendations)} sources:\n\n"
+                + "\n\n".join(
+                    f"- {desc[:200]}..." if len(desc) > 200 else f"- {desc}"
+                    for desc in descriptions[:3]
+                )
             )
         else:
-            description = f"Consolidated recommendation from {len(recommendations)} sources"
+            description = (
+                f"Consolidated recommendation from {len(recommendations)} sources"
+            )
 
         # Merge implementation steps (deduplicate)
         all_steps = []
         for rec in recommendations:
-            steps = rec.get('implementation_steps', [])
+            steps = rec.get("implementation_steps", [])
             if isinstance(steps, list):
                 all_steps.extend(steps)
 
@@ -571,14 +587,17 @@ class CrossBookSimilarityDetector:
                 unique_steps.append(step)
 
         # Take highest priority
-        priorities = [r.get('priority', 'MEDIUM') for r in recommendations]
-        priority_order = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'NICE_TO_HAVE']
-        priority = min(priorities, key=lambda p: priority_order.index(p) if p in priority_order else 999)
+        priorities = [r.get("priority", "MEDIUM") for r in recommendations]
+        priority_order = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "NICE_TO_HAVE"]
+        priority = min(
+            priorities,
+            key=lambda p: priority_order.index(p) if p in priority_order else 999,
+        )
 
         # Average time estimates (convert to hours, average, convert back)
         time_estimates = []
         for rec in recommendations:
-            estimate_str = rec.get('time_estimate', '0 hours')
+            estimate_str = rec.get("time_estimate", "0 hours")
             try:
                 hours = float(estimate_str.split()[0])
                 time_estimates.append(hours)
@@ -592,8 +611,12 @@ class CrossBookSimilarityDetector:
             time_estimate = "Unknown"
 
         # Source attribution
-        source_rec_ids = [r.get('recommendation_id', r.get('id', '')) for r in recommendations]
-        source_books = list(set(r.get('source_book', 'unknown') for r in recommendations))
+        source_rec_ids = [
+            r.get("recommendation_id", r.get("id", "")) for r in recommendations
+        ]
+        source_books = list(
+            set(r.get("source_book", "unknown") for r in recommendations)
+        )
 
         # Confidence boost (more sources = higher confidence)
         confidence_boost = min(1.0 + (len(recommendations) - 1) * 0.1, 2.0)
@@ -607,7 +630,7 @@ class CrossBookSimilarityDetector:
             implementation_steps=unique_steps[:10],  # Limit to top 10
             priority=priority,
             time_estimate=time_estimate,
-            confidence_boost=confidence_boost
+            confidence_boost=confidence_boost,
         )
 
     def export_similarity_report(self, output_file: str):
@@ -615,78 +638,86 @@ class CrossBookSimilarityDetector:
         logger.info(f"📤 Exporting similarity report: {output_file}")
 
         lines = [
-            '# Cross-Book Similarity Analysis Report',
-            '',
-            f'**Generated**: {datetime.now().isoformat()}',
-            f'**Total Recommendations Analyzed**: {len(self.recommendations)}',
-            f'**Similarity Matches Found**: {len(self.similarity_matches)}',
-            f'**Consolidated Recommendations**: {len(self.consolidated_recommendations)}',
-            '',
-            '---',
-            '',
-            '## Summary',
-            '',
+            "# Cross-Book Similarity Analysis Report",
+            "",
+            f"**Generated**: {datetime.now().isoformat()}",
+            f"**Total Recommendations Analyzed**: {len(self.recommendations)}",
+            f"**Similarity Matches Found**: {len(self.similarity_matches)}",
+            f"**Consolidated Recommendations**: {len(self.consolidated_recommendations)}",
+            "",
+            "---",
+            "",
+            "## Summary",
+            "",
         ]
 
         # Books analyzed
-        books = set(r.get('source_book', 'unknown') for r in self.recommendations)
-        lines.append(f'**Books Analyzed**: {len(books)}')
-        lines.append('')
+        books = set(r.get("source_book", "unknown") for r in self.recommendations)
+        lines.append(f"**Books Analyzed**: {len(books)}")
+        lines.append("")
 
         # Matches by type
         by_type = defaultdict(int)
         for match in self.similarity_matches:
             by_type[match.match_type] += 1
 
-        lines.append('**Matches by Type**:')
-        for match_type in ['duplicate', 'very_similar', 'similar', 'related']:
+        lines.append("**Matches by Type**:")
+        for match_type in ["duplicate", "very_similar", "similar", "related"]:
             count = by_type[match_type]
-            lines.append(f'- {match_type}: {count}')
-        lines.append('')
+            lines.append(f"- {match_type}: {count}")
+        lines.append("")
 
         # Top similarity matches
-        lines.extend([
-            '## Top Similarity Matches',
-            '',
-            '| Score | Type | Book 1 | Recommendation 1 | Book 2 | Recommendation 2 |',
-            '|-------|------|--------|------------------|--------|------------------|',
-        ])
+        lines.extend(
+            [
+                "## Top Similarity Matches",
+                "",
+                "| Score | Type | Book 1 | Recommendation 1 | Book 2 | Recommendation 2 |",
+                "|-------|------|--------|------------------|--------|------------------|",
+            ]
+        )
 
         # Sort by similarity score
-        top_matches = sorted(self.similarity_matches, key=lambda m: m.similarity_score, reverse=True)[:50]
+        top_matches = sorted(
+            self.similarity_matches, key=lambda m: m.similarity_score, reverse=True
+        )[:50]
 
         for match in top_matches:
             lines.append(
-                f'| {match.similarity_score:.3f} | {match.match_type} | '
-                f'{match.rec1_book[:20]} | {match.rec1_title[:30]} | '
-                f'{match.rec2_book[:20]} | {match.rec2_title[:30]} |'
+                f"| {match.similarity_score:.3f} | {match.match_type} | "
+                f"{match.rec1_book[:20]} | {match.rec1_title[:30]} | "
+                f"{match.rec2_book[:20]} | {match.rec2_title[:30]} |"
             )
 
         # Consolidated recommendations
         if self.consolidated_recommendations:
-            lines.extend([
-                '',
-                '## Consolidated Recommendations',
-                '',
-            ])
+            lines.extend(
+                [
+                    "",
+                    "## Consolidated Recommendations",
+                    "",
+                ]
+            )
 
             for cons_rec in self.consolidated_recommendations:
-                lines.extend([
-                    f'### {cons_rec.title}',
-                    '',
-                    f'**Consolidated ID**: `{cons_rec.consolidated_id}`',
-                    f'**Priority**: {cons_rec.priority}',
-                    f'**Time Estimate**: {cons_rec.time_estimate}',
-                    f'**Confidence Boost**: {cons_rec.confidence_boost:.2f}x',
-                    f'**Source Books**: {", ".join(cons_rec.source_books)}',
-                    f'**Source Recommendations**: {len(cons_rec.source_recommendations)}',
-                    '',
-                    f'{cons_rec.description}',
-                    '',
-                ])
+                lines.extend(
+                    [
+                        f"### {cons_rec.title}",
+                        "",
+                        f"**Consolidated ID**: `{cons_rec.consolidated_id}`",
+                        f"**Priority**: {cons_rec.priority}",
+                        f"**Time Estimate**: {cons_rec.time_estimate}",
+                        f"**Confidence Boost**: {cons_rec.confidence_boost:.2f}x",
+                        f'**Source Books**: {", ".join(cons_rec.source_books)}',
+                        f"**Source Recommendations**: {len(cons_rec.source_recommendations)}",
+                        "",
+                        f"{cons_rec.description}",
+                        "",
+                    ]
+                )
 
         # Write to file
-        Path(output_file).write_text('\n'.join(lines))
+        Path(output_file).write_text("\n".join(lines))
         logger.info(f"✅ Similarity report exported")
 
     def export_consolidated_recommendations(self, output_file: str):
@@ -694,16 +725,20 @@ class CrossBookSimilarityDetector:
         logger.info(f"📤 Exporting consolidated recommendations: {output_file}")
 
         output_data = {
-            'metadata': {
-                'generated': datetime.now().isoformat(),
-                'total_source_recommendations': len(self.recommendations),
-                'total_consolidated': len(self.consolidated_recommendations),
-                'books_analyzed': list(set(r.get('source_book', 'unknown') for r in self.recommendations)),
+            "metadata": {
+                "generated": datetime.now().isoformat(),
+                "total_source_recommendations": len(self.recommendations),
+                "total_consolidated": len(self.consolidated_recommendations),
+                "books_analyzed": list(
+                    set(r.get("source_book", "unknown") for r in self.recommendations)
+                ),
             },
-            'consolidated_recommendations': [rec.to_dict() for rec in self.consolidated_recommendations],
+            "consolidated_recommendations": [
+                rec.to_dict() for rec in self.consolidated_recommendations
+            ],
         }
 
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(output_data, f, indent=2)
 
         logger.info(f"✅ Consolidated recommendations exported")
@@ -712,35 +747,30 @@ class CrossBookSimilarityDetector:
 def main():
     """Main CLI entry point"""
     parser = argparse.ArgumentParser(
-        description='Detect and consolidate similar recommendations across books'
+        description="Detect and consolidate similar recommendations across books"
     )
     parser.add_argument(
-        '--recommendations',
-        help='Path to single recommendations JSON file'
+        "--recommendations", help="Path to single recommendations JSON file"
     )
     parser.add_argument(
-        '--analysis-dir',
-        help='Directory containing multiple book analysis results'
+        "--analysis-dir", help="Directory containing multiple book analysis results"
     )
     parser.add_argument(
-        '--min-threshold',
+        "--min-threshold",
         type=float,
         default=0.65,
-        help='Minimum similarity threshold (0.0-1.0)'
+        help="Minimum similarity threshold (0.0-1.0)",
     )
     parser.add_argument(
-        '--consolidate-threshold',
+        "--consolidate-threshold",
         type=float,
         default=0.75,
-        help='Minimum similarity for consolidation (0.0-1.0)'
+        help="Minimum similarity for consolidation (0.0-1.0)",
     )
+    parser.add_argument("--report", help="Output path for similarity report (markdown)")
     parser.add_argument(
-        '--report',
-        help='Output path for similarity report (markdown)'
-    )
-    parser.add_argument(
-        '--consolidated-output',
-        help='Output path for consolidated recommendations (JSON)'
+        "--consolidated-output",
+        help="Output path for consolidated recommendations (JSON)",
     )
 
     args = parser.parse_args()
@@ -767,7 +797,9 @@ def main():
 
     # Consolidate recommendations
     if matches:
-        consolidated = detector.consolidate_recommendations(min_similarity=args.consolidate_threshold)
+        consolidated = detector.consolidate_recommendations(
+            min_similarity=args.consolidate_threshold
+        )
 
     # Export results
     if args.report:
@@ -781,5 +813,5 @@ def main():
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     exit(main())

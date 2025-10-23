@@ -16,8 +16,7 @@ from datetime import datetime
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -38,18 +37,18 @@ async def main():
         {
             "title": "Designing Machine Learning Systems",
             "s3_key": "books/Designing_Machine_Learning_Systems.pdf",
-            "category": "ml_systems"
+            "category": "ml_systems",
         },
         {
             "title": "Applied Predictive Modeling",
             "s3_key": "books/applied_predictive_modeling_max_kuhn_kjell_johnson_1518.pdf",
-            "category": "statistics"
+            "category": "statistics",
         },
         {
             "title": "Basketball on Paper",
             "s3_key": "books/Basketball_on_Paper.pdf",
-            "category": "sports_analytics"
-        }
+            "category": "sports_analytics",
+        },
     ]
 
     # Use predefined model configurations from framework
@@ -57,7 +56,7 @@ async def main():
         "gemini_only",
         "claude_only",
         "gemini_claude_consensus",
-        "gemini_claude_high_consensus"
+        "gemini_claude_high_consensus",
     ]
 
     logger.info(f"📚 Testing {len(test_books)} books")
@@ -78,9 +77,7 @@ async def main():
     # Run comparison test
     try:
         comparison = await framework.run_comparison_test(
-            config_names=config_names,
-            book_paths=book_paths,
-            book_titles=book_titles
+            config_names=config_names, book_paths=book_paths, book_titles=book_titles
         )
 
         logger.info("\n" + "=" * 80)
@@ -90,8 +87,7 @@ async def main():
         # Calculate summary metrics
         total_tests = sum(len(results) for results in comparison.values())
         total_cost = sum(
-            sum(r.total_cost_usd for r in results)
-            for results in comparison.values()
+            sum(r.total_cost_usd for r in results) for results in comparison.values()
         )
 
         # Display results summary
@@ -116,19 +112,25 @@ async def main():
             avg_recs = sum(r.recommendations_found for r in results) / len(results)
 
             # Calculate overall score (quality + cost-efficiency + speed)
-            score = avg_quality * 0.5 + (1/avg_cost if avg_cost > 0 else 0) * 0.3 + (100/avg_speed if avg_speed > 0 else 0) * 0.2
+            score = (
+                avg_quality * 0.5
+                + (1 / avg_cost if avg_cost > 0 else 0) * 0.3
+                + (100 / avg_speed if avg_speed > 0 else 0) * 0.2
+            )
 
-            rankings.append({
-                'config_name': config_name,
-                'score': score,
-                'avg_quality': avg_quality,
-                'avg_cost': avg_cost,
-                'avg_speed': avg_speed,
-                'avg_recs': avg_recs
-            })
+            rankings.append(
+                {
+                    "config_name": config_name,
+                    "score": score,
+                    "avg_quality": avg_quality,
+                    "avg_cost": avg_cost,
+                    "avg_speed": avg_speed,
+                    "avg_recs": avg_recs,
+                }
+            )
 
         # Sort by score
-        rankings.sort(key=lambda x: x['score'], reverse=True)
+        rankings.sort(key=lambda x: x["score"], reverse=True)
 
         # Show winner
         winner = rankings[0]
@@ -143,16 +145,21 @@ async def main():
         logger.info(f"\n📊 ALL RANKINGS:")
         for i, result in enumerate(rankings, 1):
             logger.info(f"   {i}. {result['config_name']}: {result['score']:.3f}")
-            logger.info(f"      Quality: {result['avg_quality']:.2f}, "
-                       f"Cost: ${result['avg_cost']:.4f}, "
-                       f"Speed: {result['avg_speed']:.2f}s")
+            logger.info(
+                f"      Quality: {result['avg_quality']:.2f}, "
+                f"Cost: ${result['avg_cost']:.4f}, "
+                f"Speed: {result['avg_speed']:.2f}s"
+            )
 
         # Generate reports
         logger.info(f"\n📄 Generating reports...")
         framework.generate_comparison_report(comparison)
 
         # Save JSON results
-        results_file = framework.results_dir / f"ab_test_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        results_file = (
+            framework.results_dir
+            / f"ab_test_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        )
         framework.save_results_json(comparison, results_file)
 
         logger.info(f"\n✅ Reports saved to: {framework.results_dir}")
@@ -161,7 +168,7 @@ async def main():
 
         # Recommendations
         logger.info(f"\n💡 RECOMMENDATIONS:")
-        config_name = winner['config_name']
+        config_name = winner["config_name"]
         if config_name == "gemini_only":
             logger.info(f"   ✓ Use Gemini 1.5 Pro only (no consensus)")
             logger.info(f"   ✓ Best for cost optimization and reasonable quality")
@@ -175,7 +182,9 @@ async def main():
             logger.info(f"   ✓ Use Gemini + Claude with 85% consensus threshold")
             logger.info(f"   ✓ Best for highest quality with stricter agreement")
 
-        logger.info(f"   ✓ Update config/workflow_config.yaml with winning configuration")
+        logger.info(
+            f"   ✓ Update config/workflow_config.yaml with winning configuration"
+        )
 
         return comparison
 
@@ -195,4 +204,3 @@ if __name__ == "__main__":
         print(f"❌ A/B TEST FAILED: {e}")
         print("=" * 80)
         exit(1)
-

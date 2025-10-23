@@ -39,10 +39,13 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Initialize secrets from hierarchical structure
 from mcp_server.secrets_loader import init_secrets
+
 logger_temp = logging.getLogger(__name__)
-if not init_secrets(project='nba-mcp-synthesis', context='WORKFLOW', quiet=True):
+if not init_secrets(project="nba-mcp-synthesis", context="WORKFLOW", quiet=True):
     logger_temp.warning("⚠️  Secrets not fully loaded - some features may not work")
-    logger_temp.warning("⚠️  Ensure secrets are in: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/")
+    logger_temp.warning(
+        "⚠️  Ensure secrets are in: /Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/"
+    )
 
 # Import our modules
 from project_structure_mapper import ProjectStructureMapper, FileMapping
@@ -51,11 +54,14 @@ from ai_code_implementer import ImplementationContext
 from ai_code_implementer import AICodeImplementer, GeneratedImplementation
 from test_generator_and_runner import TestGeneratorAndRunner, TestResult
 from git_workflow_manager import GitWorkflowManager, PullRequestInfo
-from deployment_safety_manager import DeploymentSafetyManager, SafetyCheckResult, DeploymentBackup
+from deployment_safety_manager import (
+    DeploymentSafetyManager,
+    SafetyCheckResult,
+    DeploymentBackup,
+)
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -63,6 +69,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class DeploymentConfig:
     """Configuration for automated deployment"""
+
     enabled: bool = True
     mode: str = "pr"  # pr, commit, local
     batch_size: int = 5
@@ -77,6 +84,7 @@ class DeploymentConfig:
 @dataclass
 class DeploymentResult:
     """Result of deploying a single recommendation"""
+
     recommendation_id: str
     success: bool
     implementation_generated: bool
@@ -92,6 +100,7 @@ class DeploymentResult:
 @dataclass
 class DeploymentReport:
     """Complete deployment report"""
+
     total_recommendations: int
     successful_deployments: int
     failed_deployments: int
@@ -138,12 +147,9 @@ class AutomatedDeploymentOrchestrator:
             project_root=self.config.target_repo
         )
         self.code_implementer = AICodeImplementer()
-        self.test_runner = TestGeneratorAndRunner(
-            project_root=self.config.target_repo
-        )
+        self.test_runner = TestGeneratorAndRunner(project_root=self.config.target_repo)
         self.git_manager = GitWorkflowManager(
-            repo_path=self.config.target_repo,
-            base_branch=self.config.base_branch
+            repo_path=self.config.target_repo, base_branch=self.config.base_branch
         )
         self.safety_manager = DeploymentSafetyManager(
             project_root=self.config.target_repo
@@ -156,7 +162,7 @@ class AutomatedDeploymentOrchestrator:
     def deploy_recommendations(
         self,
         recommendations: List[Dict[str, Any]],
-        max_deployments: Optional[int] = None
+        max_deployments: Optional[int] = None,
     ) -> DeploymentReport:
         """
         Deploy multiple recommendations.
@@ -176,12 +182,16 @@ class AutomatedDeploymentOrchestrator:
             logger.info(f"   Max deployments: {max_deployments}")
 
         # Limit if specified
-        recs_to_deploy = recommendations[:max_deployments] if max_deployments else recommendations
+        recs_to_deploy = (
+            recommendations[:max_deployments] if max_deployments else recommendations
+        )
 
         # Deploy each recommendation
         for i, rec in enumerate(recs_to_deploy, 1):
             logger.info(f"\n{'='*70}")
-            logger.info(f"Deploying {i}/{len(recs_to_deploy)}: {rec.get('title', 'Untitled')}")
+            logger.info(
+                f"Deploying {i}/{len(recs_to_deploy)}: {rec.get('title', 'Untitled')}"
+            )
             logger.info(f"{'='*70}\n")
 
             # Check circuit breaker
@@ -200,8 +210,7 @@ class AutomatedDeploymentOrchestrator:
                 self.safety_manager.circuit_breaker.record_success()
             else:
                 self.safety_manager.circuit_breaker.record_failure(
-                    rec.get('id', 'unknown'),
-                    result.error_message or "Unknown error"
+                    rec.get("id", "unknown"), result.error_message or "Unknown error"
                 )
 
             # Log result
@@ -219,15 +228,16 @@ class AutomatedDeploymentOrchestrator:
         logger.info(f"\n{'='*70}")
         logger.info(f"Deployment Batch Complete")
         logger.info(f"{'='*70}\n")
-        logger.info(f"Successful: {report.successful_deployments}/{report.total_recommendations}")
+        logger.info(
+            f"Successful: {report.successful_deployments}/{report.total_recommendations}"
+        )
         logger.info(f"PRs created: {report.prs_created}")
         logger.info(f"Total time: {report.total_time:.1f}s")
 
         return report
 
     def deploy_single_recommendation(
-        self,
-        recommendation: Dict[str, Any]
+        self, recommendation: Dict[str, Any]
     ) -> DeploymentResult:
         """
         Deploy a single recommendation through complete workflow.
@@ -238,8 +248,8 @@ class AutomatedDeploymentOrchestrator:
         Returns:
             DeploymentResult
         """
-        rec_id = recommendation.get('id', 'unknown')
-        title = recommendation.get('title', 'Untitled')
+        rec_id = recommendation.get("id", "unknown")
+        title = recommendation.get("title", "Untitled")
 
         result = DeploymentResult(
             recommendation_id=rec_id,
@@ -248,7 +258,7 @@ class AutomatedDeploymentOrchestrator:
             tests_generated=False,
             tests_passed=False,
             branch_created=False,
-            pr_created=False
+            pr_created=False,
         )
 
         start_time = datetime.now()
@@ -261,23 +271,19 @@ class AutomatedDeploymentOrchestrator:
             # Step 2: Analyze integration
             logger.info(f"🔬 Step 2: Analyzing integration strategy...")
             integration_plan = self.integration_analyzer.analyze_integration(
-                recommendation,
-                file_mapping.full_path
+                recommendation, file_mapping.full_path
             )
 
             # Step 3: Gather context
             logger.info(f"📚 Step 3: Gathering implementation context...")
-            context = self._gather_context(
-                file_mapping,
-                integration_plan
-            )
+            context = self._gather_context(file_mapping, integration_plan)
 
             # Step 4: Generate implementation
             logger.info(f"🤖 Step 4: Generating implementation with AI...")
             implementation = self.code_implementer.implement_recommendation(
                 recommendation=recommendation,
                 context=context,
-                integration_strategy=integration_plan.primary_strategy.value
+                integration_strategy=integration_plan.primary_strategy.value,
             )
 
             if not implementation:
@@ -285,7 +291,9 @@ class AutomatedDeploymentOrchestrator:
                 return result
 
             result.implementation_generated = True
-            logger.info(f"   ✅ Implementation generated ({len(implementation.code)} chars)")
+            logger.info(
+                f"   ✅ Implementation generated ({len(implementation.code)} chars)"
+            )
 
             # Step 5: Save implementation (to temp in dry run, real location otherwise)
             temp_file = None
@@ -302,8 +310,7 @@ class AutomatedDeploymentOrchestrator:
             # Step 6: Safety checks
             logger.info(f"🛡️  Step 6: Running safety checks...")
             safety_result = self.safety_manager.run_pre_deployment_checks(
-                files_to_deploy=[validation_path],
-                recommendation=recommendation
+                files_to_deploy=[validation_path], recommendation=recommendation
             )
 
             # Clean up temp file if dry run
@@ -319,8 +326,7 @@ class AutomatedDeploymentOrchestrator:
             if not self.config.dry_run and Path(file_mapping.full_path).exists():
                 logger.info(f"💾 Step 7: Creating backup...")
                 backup = self.safety_manager.create_backup(
-                    files=[file_mapping.full_path],
-                    recommendation_id=rec_id
+                    files=[file_mapping.full_path], recommendation_id=rec_id
                 )
 
             # Step 8: Generate tests
@@ -329,45 +335,52 @@ class AutomatedDeploymentOrchestrator:
                 implementation_code=implementation.code,
                 recommendation=recommendation,
                 module_path=file_mapping.full_path,
-                block_on_failure=self.config.block_on_test_failure
+                block_on_failure=self.config.block_on_test_failure,
             )
 
             result.tests_generated = True
 
             if test_result:
                 result.tests_passed = test_result.passed
-                logger.info(f"   Tests: {test_result.passed_tests}/{test_result.total_tests} passed")
+                logger.info(
+                    f"   Tests: {test_result.passed_tests}/{test_result.total_tests} passed"
+                )
 
             if not should_proceed:
-                result.error_message = f"Tests failed ({test_result.failed_tests} failures)"
+                result.error_message = (
+                    f"Tests failed ({test_result.failed_tests} failures)"
+                )
                 # Restore backup
                 if backup:
                     self.safety_manager.restore_backup(backup)
                 return result
 
             # Step 9: Git workflow (if not dry run and mode is pr or commit)
-            if not self.config.dry_run and self.config.mode in ['pr', 'commit']:
+            if not self.config.dry_run and self.config.mode in ["pr", "commit"]:
                 logger.info(f"🌿 Step 9: Git workflow...")
 
                 # Create branch
                 branch_result = self.git_manager.create_feature_branch(recommendation)
                 if not branch_result.success:
-                    result.error_message = f"Failed to create branch: {branch_result.error}"
+                    result.error_message = (
+                        f"Failed to create branch: {branch_result.error}"
+                    )
                     return result
 
                 result.branch_created = True
-                branch_name = branch_result.details['branch_name']
+                branch_name = branch_result.details["branch_name"]
 
                 # Commit changes
-                files_to_commit = [
-                    file_mapping.full_path,
-                    file_mapping.test_full_path
-                ] if file_mapping.test_full_path else [file_mapping.full_path]
+                files_to_commit = (
+                    [file_mapping.full_path, file_mapping.test_full_path]
+                    if file_mapping.test_full_path
+                    else [file_mapping.full_path]
+                )
 
                 commit_result = self.git_manager.commit_changes(
                     recommendation=recommendation,
                     files=files_to_commit,
-                    implementation_summary=implementation.description
+                    implementation_summary=implementation.description,
                 )
 
                 if not commit_result.success:
@@ -386,16 +399,17 @@ class AutomatedDeploymentOrchestrator:
                 if self.config.create_prs:
                     logger.info(f"🔀 Step 10: Creating pull request...")
                     pr_body = self._generate_pr_body(
-                        recommendation,
-                        implementation,
-                        test_result
+                        recommendation, implementation, test_result
                     )
 
                     pr_success, pr_info = self.git_manager.create_pull_request(
                         recommendation=recommendation,
                         branch_name=branch_name,
                         pr_body=pr_body,
-                        labels=['auto-generated', f"priority-{recommendation.get('priority', 'medium').lower()}"]
+                        labels=[
+                            "auto-generated",
+                            f"priority-{recommendation.get('priority', 'medium').lower()}",
+                        ],
                     )
 
                     if pr_success and pr_info:
@@ -411,10 +425,7 @@ class AutomatedDeploymentOrchestrator:
                 recommendation_id=rec_id,
                 action="deploy",
                 status="success",
-                details={
-                    'pr_url': result.pr_url,
-                    'tests_passed': result.tests_passed
-                }
+                details={"pr_url": result.pr_url, "tests_passed": result.tests_passed},
             )
 
         except Exception as e:
@@ -426,7 +437,7 @@ class AutomatedDeploymentOrchestrator:
                 recommendation_id=rec_id,
                 action="deploy",
                 status="failed",
-                details={'error': str(e)}
+                details={"error": str(e)},
             )
 
         finally:
@@ -435,9 +446,7 @@ class AutomatedDeploymentOrchestrator:
         return result
 
     def _gather_context(
-        self,
-        file_mapping: FileMapping,
-        integration_plan: IntegrationPlan
+        self, file_mapping: FileMapping, integration_plan: IntegrationPlan
     ) -> ImplementationContext:
         """Gather context for implementation"""
         context = ImplementationContext()
@@ -446,7 +455,7 @@ class AutomatedDeploymentOrchestrator:
         file_path = Path(file_mapping.full_path)
         if file_path.exists():
             try:
-                with open(file_path, 'r') as f:
+                with open(file_path, "r") as f:
                     context.existing_code = f.read()
 
                 # Analyze with integration analyzer (already done, but get info)
@@ -461,12 +470,14 @@ class AutomatedDeploymentOrchestrator:
 
         return context
 
-    def _save_implementation(self, implementation: GeneratedImplementation, file_path: str):
+    def _save_implementation(
+        self, implementation: GeneratedImplementation, file_path: str
+    ):
         """Save implementation to file"""
         path = Path(file_path)
         path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             f.write(implementation.code)
 
         logger.info(f"   💾 Saved: {path}")
@@ -475,13 +486,13 @@ class AutomatedDeploymentOrchestrator:
         self,
         recommendation: Dict[str, Any],
         implementation: GeneratedImplementation,
-        test_result: Optional[TestResult]
+        test_result: Optional[TestResult],
     ) -> str:
         """Generate PR description"""
-        title = recommendation.get('title', 'Untitled')
-        description = recommendation.get('description', '')
-        priority = recommendation.get('priority', 'MEDIUM')
-        category = recommendation.get('priority_score', {}).get('category', 'Unknown')
+        title = recommendation.get("title", "Untitled")
+        description = recommendation.get("description", "")
+        priority = recommendation.get("priority", "MEDIUM")
+        category = recommendation.get("priority_score", {}).get("category", "Unknown")
 
         pr_body = f"""# {title}
 
@@ -530,7 +541,11 @@ class AutomatedDeploymentOrchestrator:
         failed = len(self.deployment_results) - successful
         prs_created = sum(1 for r in self.deployment_results if r.pr_created)
         tests_passed = sum(1 for r in self.deployment_results if r.tests_passed)
-        tests_failed = sum(1 for r in self.deployment_results if r.tests_generated and not r.tests_passed)
+        tests_failed = sum(
+            1
+            for r in self.deployment_results
+            if r.tests_generated and not r.tests_passed
+        )
 
         total_time = (end_time - self.start_time).total_seconds()
 
@@ -544,56 +559,60 @@ class AutomatedDeploymentOrchestrator:
             results=self.deployment_results,
             start_time=self.start_time.isoformat(),
             end_time=end_time.isoformat(),
-            total_time=total_time
+            total_time=total_time,
         )
 
     def _load_config(self, config_path: str) -> DeploymentConfig:
         """Load configuration from YAML"""
-        with open(config_path, 'r') as f:
+        with open(config_path, "r") as f:
             config_data = yaml.safe_load(f)
 
-        deployment_config = config_data.get('deployment', {})
+        deployment_config = config_data.get("deployment", {})
 
         return DeploymentConfig(
-            enabled=deployment_config.get('enabled', True),
-            mode=deployment_config.get('mode', 'pr'),
-            batch_size=deployment_config.get('batch_size', 5),
-            dry_run=deployment_config.get('dry_run', False),
-            block_on_test_failure=config_data.get('testing', {}).get('block_on_failure', True),
-            max_failures=config_data.get('safety', {}).get('max_failures', 3),
-            target_repo=config_data.get('project', {}).get('target_repo', '../nba-simulator-aws'),
-            base_branch=config_data.get('git', {}).get('base_branch', 'main'),
-            create_prs=config_data.get('git', {}).get('create_prs', True)
+            enabled=deployment_config.get("enabled", True),
+            mode=deployment_config.get("mode", "pr"),
+            batch_size=deployment_config.get("batch_size", 5),
+            dry_run=deployment_config.get("dry_run", False),
+            block_on_test_failure=config_data.get("testing", {}).get(
+                "block_on_failure", True
+            ),
+            max_failures=config_data.get("safety", {}).get("max_failures", 3),
+            target_repo=config_data.get("project", {}).get(
+                "target_repo", "../nba-simulator-aws"
+            ),
+            base_branch=config_data.get("git", {}).get("base_branch", "main"),
+            create_prs=config_data.get("git", {}).get("create_prs", True),
         )
 
     def save_report(self, report: DeploymentReport, output_path: str):
         """Save deployment report to file"""
         report_data = {
-            'summary': {
-                'total_recommendations': report.total_recommendations,
-                'successful_deployments': report.successful_deployments,
-                'failed_deployments': report.failed_deployments,
-                'prs_created': report.prs_created,
-                'tests_passed': report.tests_passed,
-                'tests_failed': report.tests_failed,
-                'start_time': report.start_time,
-                'end_time': report.end_time,
-                'total_time': report.total_time
+            "summary": {
+                "total_recommendations": report.total_recommendations,
+                "successful_deployments": report.successful_deployments,
+                "failed_deployments": report.failed_deployments,
+                "prs_created": report.prs_created,
+                "tests_passed": report.tests_passed,
+                "tests_failed": report.tests_failed,
+                "start_time": report.start_time,
+                "end_time": report.end_time,
+                "total_time": report.total_time,
             },
-            'results': [
+            "results": [
                 {
-                    'recommendation_id': r.recommendation_id,
-                    'success': r.success,
-                    'pr_url': r.pr_url,
-                    'tests_passed': r.tests_passed,
-                    'error_message': r.error_message,
-                    'execution_time': r.execution_time
+                    "recommendation_id": r.recommendation_id,
+                    "success": r.success,
+                    "pr_url": r.pr_url,
+                    "tests_passed": r.tests_passed,
+                    "error_message": r.error_message,
+                    "execution_time": r.execution_time,
                 }
                 for r in report.results
-            ]
+            ],
         }
 
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             json.dump(report_data, f, indent=2)
 
         logger.info(f"📊 Report saved: {output_path}")
@@ -603,16 +622,24 @@ def main():
     """CLI for orchestrator"""
     import argparse
 
-    parser = argparse.ArgumentParser(description='Automated Deployment Orchestrator')
-    parser.add_argument('--recommendations', required=True, help='Recommendations JSON file')
-    parser.add_argument('--config', help='Configuration YAML file')
-    parser.add_argument('--max-deployments', type=int, help='Max number to deploy (for testing)')
-    parser.add_argument('--dry-run', action='store_true', help='Dry run (no actual deployment)')
-    parser.add_argument('--report-output', default='deployment_report.json', help='Report output file')
+    parser = argparse.ArgumentParser(description="Automated Deployment Orchestrator")
+    parser.add_argument(
+        "--recommendations", required=True, help="Recommendations JSON file"
+    )
+    parser.add_argument("--config", help="Configuration YAML file")
+    parser.add_argument(
+        "--max-deployments", type=int, help="Max number to deploy (for testing)"
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Dry run (no actual deployment)"
+    )
+    parser.add_argument(
+        "--report-output", default="deployment_report.json", help="Report output file"
+    )
     args = parser.parse_args()
 
     # Load recommendations
-    with open(args.recommendations, 'r') as f:
+    with open(args.recommendations, "r") as f:
         recs = json.load(f)
 
     # Initialize orchestrator
@@ -624,8 +651,7 @@ def main():
 
     # Deploy
     report = orchestrator.deploy_recommendations(
-        recommendations=recs,
-        max_deployments=args.max_deployments
+        recommendations=recs, max_deployments=args.max_deployments
     )
 
     # Save report
@@ -643,5 +669,5 @@ def main():
     print(f"\nReport: {args.report_output}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

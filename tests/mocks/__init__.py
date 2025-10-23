@@ -1,2 +1,1 @@
 """Mock objects for testing"""
-

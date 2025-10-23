@@ -1,27 +1,15 @@
 #!/usr/bin/env python3
 """
-Test script for High-Context Book Analyzer
+Test script for High-Context Book Analyzer with local file
 
-Quick test with a single book to verify:
-- Full-context processing (up to 1M chars)
-- Both models (Gemini 1.5 Pro + Claude Sonnet 4)
-- Consensus synthesis
-- Cost tracking accuracy
-
-Usage:
-    python test_high_context_analyzer.py
-
-Expected output:
-- Cost: ~$0.60-0.70
-- Time: 60-120 seconds
-- Recommendations: 30-60
-- Both models succeed
+Tests the analyzer with a local PDF file instead of S3.
 """
 
 import asyncio
 import logging
 import sys
 import os
+import pymupdf  # PyMuPDF
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -29,31 +17,53 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from scripts.high_context_book_analyzer import HighContextBookAnalyzer
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 
-async def test_single_book():
-    """Test high-context analyzer with a single book."""
+async def test_with_local_file():
+    """Test high-context analyzer with a local PDF file."""
 
     logger.info("=" * 80)
-    logger.info("HIGH-CONTEXT BOOK ANALYZER TEST")
+    logger.info("HIGH-CONTEXT BOOK ANALYZER TEST (LOCAL FILE)")
     logger.info("=" * 80)
 
-    # Test book metadata
+    # Local book file
+    local_book_path = "/Users/ryanranft/nba-mcp-synthesis/books/Designing Machine Learning Systems.pdf"
+
+    logger.info(f"\n📖 Reading local file: {local_book_path}")
+
+    # Extract text from PDF
+    try:
+        logger.info("📚 Extracting text from PDF...")
+        doc = pymupdf.open(local_book_path)
+
+        text_parts = []
+        for page_num in range(len(doc)):
+            page = doc[page_num]
+            text_parts.append(page.get_text())
+
+        full_text = "\n\n".join(text_parts)
+        logger.info(f"✅ Extracted {len(full_text):,} characters from {len(doc)} pages")
+        doc.close()
+
+    except Exception as e:
+        logger.error(f"❌ Failed to read PDF: {e}")
+        return False
+
+    # Create test book metadata with content
     test_book = {
-        "title": "Machine Learning for Absolute Beginners",
-        "author": "Oliver Theobald",
-        "s3_key": "books/0812_Machine-Learning-for-Absolute-Beginners.pdf",
+        "title": "Designing Machine Learning Systems",
+        "author": "Chip Huyen",
         "genre": "Machine Learning",
-        "priority": "HIGH"
+        "priority": "HIGH",
+        "content": full_text,  # Provide content directly
     }
 
     logger.info(f"\n📖 Test Book: {test_book['title']}")
     logger.info(f"👤 Author: {test_book['author']}")
-    logger.info(f"📂 S3 Key: {test_book['s3_key']}")
+    logger.info(f"📄 Content: {len(full_text):,} characters")
 
     try:
         # Initialize analyzer
@@ -97,19 +107,32 @@ async def test_single_book():
             logger.info(f"   Total: {len(result.recommendations)}")
 
             # Count by priority
-            critical = sum(1 for r in result.recommendations if r.get("priority") == "CRITICAL")
-            important = sum(1 for r in result.recommendations if r.get("priority") == "IMPORTANT")
-            nice_to_have = sum(1 for r in result.recommendations if r.get("priority") == "NICE-TO-HAVE")
+            critical = sum(
+                1 for r in result.recommendations if r.get("priority") == "CRITICAL"
+            )
+            important = sum(
+                1 for r in result.recommendations if r.get("priority") == "IMPORTANT"
+            )
+            nice_to_have = sum(
+                1 for r in result.recommendations if r.get("priority") == "NICE-TO-HAVE"
+            )
 
             logger.info(f"   Critical:     {critical}")
             logger.info(f"   Important:    {important}")
             logger.info(f"   Nice-to-Have: {nice_to_have}")
 
             # Count by source
-            gemini_count = sum(1 for r in result.recommendations if r.get("_source") == "gemini")
-            claude_count = sum(1 for r in result.recommendations if r.get("_source") == "claude")
-            both_count = sum(1 for r in result.recommendations
-                           if r.get("_consensus", {}).get("both_agree", False))
+            gemini_count = sum(
+                1 for r in result.recommendations if r.get("_source") == "gemini"
+            )
+            claude_count = sum(
+                1 for r in result.recommendations if r.get("_source") == "claude"
+            )
+            both_count = sum(
+                1
+                for r in result.recommendations
+                if r.get("_consensus", {}).get("both_agree", False)
+            )
 
             logger.info(f"\n🎯 CONSENSUS:")
             logger.info(f"   From Gemini:  {gemini_count}")
@@ -123,7 +146,7 @@ async def test_single_book():
                 logger.info(f"      Priority: {rec.get('priority', 'N/A')}")
                 logger.info(f"      Source: {rec.get('_source', 'N/A')}")
                 logger.info(f"      Category: {rec.get('category', 'N/A')}")
-                desc = rec.get('description', 'N/A')
+                desc = rec.get("description", "N/A")
                 if len(desc) > 100:
                     desc = desc[:100] + "..."
                 logger.info(f"      Description: {desc}")
@@ -132,8 +155,12 @@ async def test_single_book():
             logger.info("TEST COMPLETED SUCCESSFULLY!")
             logger.info("=" * 80)
 
-            logger.info(f"\n💡 Cost projection for 45 books: ${result.total_cost * 45:.2f}")
-            logger.info(f"⏱️  Time projection for 45 books: {(result.total_time * 45) / 3600:.1f} hours")
+            logger.info(
+                f"\n💡 Cost projection for 45 books: ${result.total_cost * 45:.2f}"
+            )
+            logger.info(
+                f"⏱️  Time projection for 45 books: {(result.total_time * 45) / 3600:.1f} hours"
+            )
 
             return True
 
@@ -144,16 +171,17 @@ async def test_single_book():
     except Exception as e:
         logger.error(f"\n❌ Test failed with error: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
 
 async def main():
     """Main entry point."""
-    logger.info("\nStarting High-Context Book Analyzer test...")
-    logger.info("This will test the analyzer with a single book.\n")
+    logger.info("\nStarting High-Context Book Analyzer test with local file...")
+    logger.info("This will test the analyzer with a local PDF book.\n")
 
-    success = await test_single_book()
+    success = await test_with_local_file()
 
     if success:
         logger.info("\n✅ All tests passed!")
@@ -167,7 +195,7 @@ async def main():
         logger.error("\n❌ Tests failed!")
         logger.info("\n🔍 Troubleshooting:")
         logger.info("   1. Check API keys are set correctly")
-        logger.info("   2. Verify book exists in S3")
+        logger.info("   2. Verify local PDF file exists")
         logger.info("   3. Check network connectivity")
         logger.info("   4. Review error messages above")
         sys.exit(1)
@@ -175,4 +203,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-

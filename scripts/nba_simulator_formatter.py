@@ -21,7 +21,9 @@ from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 import logging
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -30,16 +32,69 @@ class NBASimulatorFormatter:
 
     # Phase mapping keywords
     PHASE_KEYWORDS = {
-        0: ['data collection', 'extraction', 'ingestion', 'scraping', 'api', 'raw data', 'source'],
-        1: ['data quality', 'validation', 'cleaning', 'preprocessing', 'data integrity', 'quality check'],
-        2: ['feature engineering', 'etl', 'transformation', 'feature', 'preprocessing pipeline'],
-        3: ['database', 'storage', 'infrastructure', 'postgres', 'sql', 'data warehouse', 'schema'],
-        4: ['simulation', 'game engine', 'game logic', 'monte carlo', 'simulator'],
-        5: ['ml', 'machine learning', 'model', 'training', 'prediction', 'classifier', 'regression', 'neural network', 'deep learning'],
-        6: ['api', 'serving', 'deployment', 'endpoint', 'rest api', 'prediction service'],
-        7: ['betting', 'odds', 'bookmaker', 'wagering', 'line', 'spread'],
-        8: ['analytics', 'real-time', 'streaming', 'advanced analytics', 'dashboard'],
-        9: ['monitoring', 'observability', 'logging', 'metrics', 'alerting', 'drift detection']
+        0: [
+            "data collection",
+            "extraction",
+            "ingestion",
+            "scraping",
+            "api",
+            "raw data",
+            "source",
+        ],
+        1: [
+            "data quality",
+            "validation",
+            "cleaning",
+            "preprocessing",
+            "data integrity",
+            "quality check",
+        ],
+        2: [
+            "feature engineering",
+            "etl",
+            "transformation",
+            "feature",
+            "preprocessing pipeline",
+        ],
+        3: [
+            "database",
+            "storage",
+            "infrastructure",
+            "postgres",
+            "sql",
+            "data warehouse",
+            "schema",
+        ],
+        4: ["simulation", "game engine", "game logic", "monte carlo", "simulator"],
+        5: [
+            "ml",
+            "machine learning",
+            "model",
+            "training",
+            "prediction",
+            "classifier",
+            "regression",
+            "neural network",
+            "deep learning",
+        ],
+        6: [
+            "api",
+            "serving",
+            "deployment",
+            "endpoint",
+            "rest api",
+            "prediction service",
+        ],
+        7: ["betting", "odds", "bookmaker", "wagering", "line", "spread"],
+        8: ["analytics", "real-time", "streaming", "advanced analytics", "dashboard"],
+        9: [
+            "monitoring",
+            "observability",
+            "logging",
+            "metrics",
+            "alerting",
+            "drift detection",
+        ],
     }
 
     def __init__(self, synthesis_file: str, output_base: str):
@@ -54,7 +109,9 @@ class NBASimulatorFormatter:
         self.output_base = Path(output_base)
         self.recommendations = []
         self.phase_mapping = {}  # rec_id -> phase
-        self.phase_counters = {i: 1 for i in range(10)}  # Track subdirectory numbers per phase
+        self.phase_counters = {
+            i: 1 for i in range(10)
+        }  # Track subdirectory numbers per phase
 
         logger.info(f"📂 Synthesis file: {self.synthesis_file}")
         logger.info(f"📂 Output base: {self.output_base}")
@@ -63,10 +120,10 @@ class NBASimulatorFormatter:
         """Load recommendations from synthesis file."""
         logger.info(f"📖 Loading recommendations from {self.synthesis_file}")
 
-        with open(self.synthesis_file, 'r') as f:
+        with open(self.synthesis_file, "r") as f:
             data = json.load(f)
 
-        self.recommendations = data.get('recommendations', [])
+        self.recommendations = data.get("recommendations", [])
         logger.info(f"✅ Loaded {len(self.recommendations)} recommendations")
 
     def map_recommendation_to_phase(self, rec: Dict) -> int:
@@ -79,9 +136,9 @@ class NBASimulatorFormatter:
         Returns:
             Phase number (0-9)
         """
-        title = rec.get('title', '').lower()
-        description = rec.get('description', '').lower()
-        category = rec.get('category', '').lower()
+        title = rec.get("title", "").lower()
+        description = rec.get("description", "").lower()
+        category = rec.get("category", "").lower()
         text = f"{title} {description} {category}"
 
         # Score each phase
@@ -93,7 +150,9 @@ class NBASimulatorFormatter:
 
         # Return phase with highest score, default to 5 (ML) if no match
         if not scores:
-            logger.warning(f"⚠️  No phase match for: {title[:50]}... -> Defaulting to Phase 5")
+            logger.warning(
+                f"⚠️  No phase match for: {title[:50]}... -> Defaulting to Phase 5"
+            )
             return 5
 
         best_phase = max(scores, key=scores.get)
@@ -111,8 +170,8 @@ class NBASimulatorFormatter:
         """
         # Convert to lowercase, replace spaces with underscores
         text = text.lower().strip()
-        text = re.sub(r'[^\w\s-]', '', text)
-        text = re.sub(r'[\s_]+', '_', text)
+        text = re.sub(r"[^\w\s-]", "", text)
+        text = re.sub(r"[\s_]+", "_", text)
         text = text[:60]  # Limit length
         return text
 
@@ -132,7 +191,7 @@ class NBASimulatorFormatter:
         counter = self.phase_counters[phase]
         self.phase_counters[phase] += 1
 
-        topic = self.sanitize_dirname(rec['title'])
+        topic = self.sanitize_dirname(rec["title"])
         dirname = f"{phase}.{counter}_{topic}"
 
         # Create full path
@@ -146,17 +205,17 @@ class NBASimulatorFormatter:
     def generate_readme(self, rec: Dict, phase: int, subdir: Path, rec_idx: int):
         """Generate README.md for recommendation."""
         priority_emoji = {
-            'critical': '⭐ CRITICAL',
-            'important': '🟡 IMPORTANT',
-            'nice-to-have': '🟢 NICE-TO-HAVE'
+            "critical": "⭐ CRITICAL",
+            "important": "🟡 IMPORTANT",
+            "nice-to-have": "🟢 NICE-TO-HAVE",
         }
 
-        priority = rec.get('priority', 'important')
-        priority_display = priority_emoji.get(priority, '🟡 IMPORTANT')
+        priority = rec.get("priority", "important")
+        priority_display = priority_emoji.get(priority, "🟡 IMPORTANT")
 
         # Extract subdirectory name
         subdir_name = subdir.name
-        subdir_num = subdir_name.split('_')[0]
+        subdir_num = subdir_name.split("_")[0]
 
         readme_content = f"""# {subdir_num}: {rec['title']}
 
@@ -311,12 +370,12 @@ python test_rec_{rec_idx:03d}.py -v
 """
 
         readme_path = subdir / "README.md"
-        with open(readme_path, 'w') as f:
+        with open(readme_path, "w") as f:
             f.write(readme_content)
 
     def generate_status(self, rec: Dict, subdir: Path, rec_idx: int):
         """Generate STATUS.md for recommendation."""
-        priority_display = rec.get('priority', 'important').upper()
+        priority_display = rec.get("priority", "important").upper()
 
         status_content = f"""# Recommendation Status: {rec['title']}
 
@@ -420,12 +479,14 @@ python test_rec_{rec_idx:03d}.py -v
 """
 
         status_path = subdir / "STATUS.md"
-        with open(status_path, 'w') as f:
+        with open(status_path, "w") as f:
             f.write(status_content)
 
-    def generate_recommendations_from_books(self, rec: Dict, subdir: Path, rec_idx: int):
+    def generate_recommendations_from_books(
+        self, rec: Dict, subdir: Path, rec_idx: int
+    ):
         """Generate RECOMMENDATIONS_FROM_BOOKS.md."""
-        priority_display = rec.get('priority', 'important').upper()
+        priority_display = rec.get("priority", "important").upper()
 
         content = f"""# Book Recommendations - rec_{rec_idx:03d}
 
@@ -487,7 +548,7 @@ python test_rec_{rec_idx:03d}.py -v
 """
 
         path = subdir / "RECOMMENDATIONS_FROM_BOOKS.md"
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             f.write(content)
 
     def generate_implementation_guide(self, rec: Dict, subdir: Path, rec_idx: int):
@@ -665,12 +726,12 @@ class TestRec{rec_idx:03d}(unittest.TestCase):
 """
 
         path = subdir / "IMPLEMENTATION_GUIDE.md"
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             f.write(content)
 
     def generate_implementation_skeleton(self, rec: Dict, subdir: Path, rec_idx: int):
         """Generate implement_rec_XXX.py skeleton."""
-        class_name = self._to_class_name(rec['title'])
+        class_name = self._to_class_name(rec["title"])
 
         content = f'''#!/usr/bin/env python3
 """
@@ -812,12 +873,12 @@ if __name__ == "__main__":
 '''
 
         path = subdir / f"implement_rec_{rec_idx:03d}.py"
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             f.write(content)
 
     def generate_test_skeleton(self, rec: Dict, subdir: Path, rec_idx: int):
         """Generate test_rec_XXX.py skeleton."""
-        class_name = self._to_class_name(rec['title'])
+        class_name = self._to_class_name(rec["title"])
 
         content = f'''#!/usr/bin/env python3
 """
@@ -904,12 +965,14 @@ if __name__ == "__main__":
 '''
 
         path = subdir / f"test_rec_{rec_idx:03d}.py"
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             f.write(content)
 
     def format_all_recommendations(self):
         """Format all recommendations."""
-        logger.info(f"\n🚀 Starting formatting of {len(self.recommendations)} recommendations\n")
+        logger.info(
+            f"\n🚀 Starting formatting of {len(self.recommendations)} recommendations\n"
+        )
 
         for idx, rec in enumerate(self.recommendations, 1):
             try:
@@ -918,7 +981,9 @@ if __name__ == "__main__":
                 rec_id = f"rec_{idx:03d}"
                 self.phase_mapping[rec_id] = phase
 
-                logger.info(f"[{idx}/{len(self.recommendations)}] {rec['title'][:50]}... -> Phase {phase}")
+                logger.info(
+                    f"[{idx}/{len(self.recommendations)}] {rec['title'][:50]}... -> Phase {phase}"
+                )
 
                 # Create subdirectory
                 subdir = self.create_subdirectory(phase, rec, idx)
@@ -972,7 +1037,13 @@ Phase {phase} focuses on: {self._get_phase_description(phase)}
 """
 
             # List all subdirectories in this phase
-            subdirs = sorted([d for d in phase_dir.iterdir() if d.is_dir() and d.name.startswith(f"{phase}.")])
+            subdirs = sorted(
+                [
+                    d
+                    for d in phase_dir.iterdir()
+                    if d.is_dir() and d.name.startswith(f"{phase}.")
+                ]
+            )
             for subdir in subdirs:
                 index_content += f"- [{subdir.name}]({subdir.name}/README.md)\n"
 
@@ -990,10 +1061,12 @@ Phase {phase} focuses on: {self._get_phase_description(phase)}
 **Generated:** {datetime.now().strftime('%B %d, %Y')}
 """
 
-            with open(index_path, 'w') as f:
+            with open(index_path, "w") as f:
                 f.write(index_content)
 
-            logger.info(f"  ✅ Updated PHASE_{phase}_INDEX.md ({rec_count} recommendations)")
+            logger.info(
+                f"  ✅ Updated PHASE_{phase}_INDEX.md ({rec_count} recommendations)"
+            )
 
     # Helper methods
     def _get_phase_name(self, phase: int) -> str:
@@ -1008,7 +1081,7 @@ Phase {phase} focuses on: {self._get_phase_description(phase)}
             6: "Prediction API",
             7: "Betting Integration",
             8: "Advanced Analytics",
-            9: "Monitoring & Observability"
+            9: "Monitoring & Observability",
         }
         return names.get(phase, f"Phase {phase}")
 
@@ -1024,27 +1097,27 @@ Phase {phase} focuses on: {self._get_phase_description(phase)}
             6: "prediction serving, REST API, and deployment",
             7: "betting odds integration and wagering systems",
             8: "advanced analytics, real-time processing, and dashboards",
-            9: "monitoring, observability, logging, and drift detection"
+            9: "monitoring, observability, logging, and drift detection",
         }
         return descriptions.get(phase, f"phase {phase} implementation")
 
     def _to_class_name(self, text: str) -> str:
         """Convert text to PascalCase class name."""
-        words = re.sub(r'[^\w\s]', '', text).split()
-        return ''.join(word.capitalize() for word in words)
+        words = re.sub(r"[^\w\s]", "", text).split()
+        return "".join(word.capitalize() for word in words)
 
     def _format_list_from_text(self, text: str) -> str:
         """Format text as bullet list."""
         if not text:
             return "- No details provided"
-        sentences = text.split('. ')
-        return '\n'.join(f"- {s.strip()}" for s in sentences if s.strip())
+        sentences = text.split(". ")
+        return "\n".join(f"- {s.strip()}" for s in sentences if s.strip())
 
     def _format_implementation_steps(self, steps: List[str]) -> str:
         """Format implementation steps."""
         if not steps:
             return "1. Review requirements\n2. Implement solution\n3. Test thoroughly\n4. Deploy to production"
-        return '\n'.join(f"{i}. {step}" for i, step in enumerate(steps, 1))
+        return "\n".join(f"{i}. {step}" for i, step in enumerate(steps, 1))
 
     def _format_implementation_steps_detailed(self, steps: List[str]) -> str:
         """Format implementation steps with detailed sections."""
@@ -1062,7 +1135,7 @@ Phase {phase} focuses on: {self._get_phase_description(phase)}
         """Format dependencies as bullet list."""
         if not deps:
             return "- No dependencies"
-        return '\n'.join(f"- {dep}" for dep in deps)
+        return "\n".join(f"- {dep}" for dep in deps)
 
     def _format_dependencies_detailed(self, deps: List[str]) -> str:
         """Format dependencies with details."""
@@ -1078,17 +1151,23 @@ Phase {phase} focuses on: {self._get_phase_description(phase)}
         """Format steps as code comments."""
         if not steps:
             return "        # Step 1: Implement core functionality"
-        return '\n'.join(f"        # {step}" for step in steps)
+        return "\n".join(f"        # {step}" for step in steps)
 
 
 def main():
     """Main execution function."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Format recommendations for nba-simulator-aws")
-    parser.add_argument('--synthesis', required=True, help='Path to consolidated_recommendations.json')
-    parser.add_argument('--output', required=True, help='Output base directory')
-    parser.add_argument('--update-indices', action='store_true', help='Update phase indices')
+    parser = argparse.ArgumentParser(
+        description="Format recommendations for nba-simulator-aws"
+    )
+    parser.add_argument(
+        "--synthesis", required=True, help="Path to consolidated_recommendations.json"
+    )
+    parser.add_argument("--output", required=True, help="Output base directory")
+    parser.add_argument(
+        "--update-indices", action="store_true", help="Update phase indices"
+    )
 
     args = parser.parse_args()
 
@@ -1113,17 +1192,12 @@ def main():
     for phase in range(10):
         count = sum(1 for p in formatter.phase_mapping.values() if p == phase)
         if count > 0:
-            print(f"  Phase {phase} ({formatter._get_phase_name(phase)}): {count} recommendations")
+            print(
+                f"  Phase {phase} ({formatter._get_phase_name(phase)}): {count} recommendations"
+            )
     print(f"\nOutput directory: {formatter.output_base}")
     print(f"=" * 80)
 
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-

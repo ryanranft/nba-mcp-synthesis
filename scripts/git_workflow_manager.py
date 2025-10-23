@@ -31,8 +31,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -40,6 +39,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class GitOperationResult:
     """Result of a git operation"""
+
     success: bool
     operation: str
     message: str
@@ -50,6 +50,7 @@ class GitOperationResult:
 @dataclass
 class PullRequestInfo:
     """Information about a created PR"""
+
     pr_number: int
     pr_url: str
     branch: str
@@ -73,7 +74,7 @@ class GitWorkflowManager:
         self,
         repo_path: str = "../nba-simulator-aws",
         base_branch: str = "main",
-        branch_prefix: str = "feature/auto-impl"
+        branch_prefix: str = "feature/auto-impl",
     ):
         """
         Initialize Git Workflow Manager.
@@ -97,8 +98,7 @@ class GitWorkflowManager:
             logger.warning(f"⚠️  Not a git repository: {self.repo_path}")
 
     def create_feature_branch(
-        self,
-        recommendation: Dict[str, Any]
+        self, recommendation: Dict[str, Any]
     ) -> GitOperationResult:
         """
         Create a feature branch for recommendation.
@@ -109,8 +109,8 @@ class GitWorkflowManager:
         Returns:
             GitOperationResult with branch creation status
         """
-        rec_id = recommendation.get('id', 'unknown')
-        title = recommendation.get('title', 'untitled')
+        rec_id = recommendation.get("id", "unknown")
+        title = recommendation.get("title", "untitled")
 
         # Generate branch name
         branch_name = self._generate_branch_name(rec_id, title)
@@ -119,11 +119,11 @@ class GitWorkflowManager:
 
         try:
             # Ensure we're on base branch and up to date
-            self._run_git_command(['checkout', self.base_branch])
-            self._run_git_command(['pull', 'origin', self.base_branch])
+            self._run_git_command(["checkout", self.base_branch])
+            self._run_git_command(["pull", "origin", self.base_branch])
 
             # Create and checkout feature branch
-            result = self._run_git_command(['checkout', '-b', branch_name])
+            result = self._run_git_command(["checkout", "-b", branch_name])
 
             if result.returncode == 0:
                 logger.info(f"   ✅ Branch created successfully")
@@ -131,21 +131,23 @@ class GitWorkflowManager:
                     success=True,
                     operation="create_branch",
                     message=f"Created branch: {branch_name}",
-                    details={'branch_name': branch_name}
+                    details={"branch_name": branch_name},
                 )
             else:
                 # Branch might already exist, try checkout
-                checkout_result = self._run_git_command(['checkout', branch_name])
+                checkout_result = self._run_git_command(["checkout", branch_name])
                 if checkout_result.returncode == 0:
                     logger.info(f"   ℹ️  Branch already exists, checked out")
                     return GitOperationResult(
                         success=True,
                         operation="checkout_branch",
                         message=f"Checked out existing branch: {branch_name}",
-                        details={'branch_name': branch_name}
+                        details={"branch_name": branch_name},
                     )
                 else:
-                    raise Exception(f"Failed to create or checkout branch: {result.stderr}")
+                    raise Exception(
+                        f"Failed to create or checkout branch: {result.stderr}"
+                    )
 
         except Exception as e:
             logger.error(f"   ❌ Failed to create branch: {e}")
@@ -153,14 +155,14 @@ class GitWorkflowManager:
                 success=False,
                 operation="create_branch",
                 message="Failed to create branch",
-                error=str(e)
+                error=str(e),
             )
 
     def commit_changes(
         self,
         recommendation: Dict[str, Any],
         files: List[str],
-        implementation_summary: str
+        implementation_summary: str,
     ) -> GitOperationResult:
         """
         Commit changes with detailed message.
@@ -173,28 +175,25 @@ class GitWorkflowManager:
         Returns:
             GitOperationResult with commit status
         """
-        rec_id = recommendation.get('id', 'unknown')
-        title = recommendation.get('title', 'Untitled')
-        priority = recommendation.get('priority', 'MEDIUM')
-        category = recommendation.get('priority_score', {}).get('category', 'Unknown')
+        rec_id = recommendation.get("id", "unknown")
+        title = recommendation.get("title", "Untitled")
+        priority = recommendation.get("priority", "MEDIUM")
+        category = recommendation.get("priority_score", {}).get("category", "Unknown")
 
         logger.info(f"💾 Committing changes for: {title}")
 
         try:
             # Add files
             for file in files:
-                self._run_git_command(['add', file])
+                self._run_git_command(["add", file])
 
             # Generate commit message
             commit_message = self._generate_commit_message(
-                recommendation,
-                implementation_summary
+                recommendation, implementation_summary
             )
 
             # Commit
-            result = self._run_git_command(
-                ['commit', '-m', commit_message]
-            )
+            result = self._run_git_command(["commit", "-m", commit_message])
 
             if result.returncode == 0:
                 logger.info(f"   ✅ Changes committed")
@@ -203,9 +202,9 @@ class GitWorkflowManager:
                     operation="commit",
                     message="Changes committed successfully",
                     details={
-                        'files_committed': len(files),
-                        'commit_message': commit_message
-                    }
+                        "files_committed": len(files),
+                        "commit_message": commit_message,
+                    },
                 )
             else:
                 raise Exception(f"Commit failed: {result.stderr}")
@@ -216,13 +215,11 @@ class GitWorkflowManager:
                 success=False,
                 operation="commit",
                 message="Failed to commit changes",
-                error=str(e)
+                error=str(e),
             )
 
     def push_to_remote(
-        self,
-        branch_name: str,
-        force: bool = False
+        self, branch_name: str, force: bool = False
     ) -> GitOperationResult:
         """
         Push branch to remote.
@@ -237,9 +234,9 @@ class GitWorkflowManager:
         logger.info(f"⬆️  Pushing to remote: {branch_name}")
 
         try:
-            cmd = ['push', '-u', 'origin', branch_name]
+            cmd = ["push", "-u", "origin", branch_name]
             if force:
-                cmd.insert(1, '--force')
+                cmd.insert(1, "--force")
 
             result = self._run_git_command(cmd)
 
@@ -248,7 +245,7 @@ class GitWorkflowManager:
                 return GitOperationResult(
                     success=True,
                     operation="push",
-                    message=f"Pushed branch to remote: {branch_name}"
+                    message=f"Pushed branch to remote: {branch_name}",
                 )
             else:
                 raise Exception(f"Push failed: {result.stderr}")
@@ -259,7 +256,7 @@ class GitWorkflowManager:
                 success=False,
                 operation="push",
                 message="Failed to push to remote",
-                error=str(e)
+                error=str(e),
             )
 
     def create_pull_request(
@@ -267,7 +264,7 @@ class GitWorkflowManager:
         recommendation: Dict[str, Any],
         branch_name: str,
         pr_body: str,
-        labels: Optional[List[str]] = None
+        labels: Optional[List[str]] = None,
     ) -> Tuple[bool, Optional[PullRequestInfo]]:
         """
         Create GitHub pull request using gh CLI.
@@ -281,8 +278,8 @@ class GitWorkflowManager:
         Returns:
             Tuple of (success, PullRequestInfo or None)
         """
-        title = recommendation.get('title', 'Untitled')
-        priority = recommendation.get('priority', 'MEDIUM')
+        title = recommendation.get("title", "Untitled")
+        priority = recommendation.get("priority", "MEDIUM")
 
         # Generate PR title
         pr_title = f"[{priority}] {title}"
@@ -292,9 +289,7 @@ class GitWorkflowManager:
         try:
             # Check if gh CLI is available
             gh_check = subprocess.run(
-                ['gh', '--version'],
-                capture_output=True,
-                text=True
+                ["gh", "--version"], capture_output=True, text=True
             )
 
             if gh_check.returncode != 0:
@@ -303,23 +298,26 @@ class GitWorkflowManager:
 
             # Create PR
             cmd = [
-                'gh', 'pr', 'create',
-                '--base', self.base_branch,
-                '--head', branch_name,
-                '--title', pr_title,
-                '--body', pr_body
+                "gh",
+                "pr",
+                "create",
+                "--base",
+                self.base_branch,
+                "--head",
+                branch_name,
+                "--title",
+                pr_title,
+                "--body",
+                pr_body,
             ]
 
             # Add labels
             if labels:
                 for label in labels:
-                    cmd.extend(['--label', label])
+                    cmd.extend(["--label", label])
 
             result = subprocess.run(
-                cmd,
-                cwd=self.repo_path,
-                capture_output=True,
-                text=True
+                cmd, cwd=self.repo_path, capture_output=True, text=True
             )
 
             if result.returncode == 0:
@@ -327,7 +325,7 @@ class GitWorkflowManager:
                 pr_url = result.stdout.strip()
 
                 # Extract PR number from URL
-                pr_number_match = re.search(r'/pull/(\d+)', pr_url)
+                pr_number_match = re.search(r"/pull/(\d+)", pr_url)
                 pr_number = int(pr_number_match.group(1)) if pr_number_match else 0
 
                 logger.info(f"   ✅ PR created successfully")
@@ -339,7 +337,7 @@ class GitWorkflowManager:
                     pr_url=pr_url,
                     branch=branch_name,
                     title=pr_title,
-                    created_at=datetime.now().isoformat()
+                    created_at=datetime.now().isoformat(),
                 )
 
                 return True, pr_info
@@ -365,17 +363,17 @@ class GitWorkflowManager:
 
         try:
             # Checkout base branch first
-            self._run_git_command(['checkout', self.base_branch])
+            self._run_git_command(["checkout", self.base_branch])
 
             # Delete local branch
-            result = self._run_git_command(['branch', '-D', branch_name])
+            result = self._run_git_command(["branch", "-D", branch_name])
 
             if result.returncode == 0:
                 logger.info(f"   ✅ Branch deleted locally")
 
                 # Try to delete remote branch
                 try:
-                    self._run_git_command(['push', 'origin', '--delete', branch_name])
+                    self._run_git_command(["push", "origin", "--delete", branch_name])
                     logger.info(f"   ✅ Branch deleted from remote")
                 except:
                     logger.info(f"   ℹ️  Remote branch not found or already deleted")
@@ -383,7 +381,7 @@ class GitWorkflowManager:
                 return GitOperationResult(
                     success=True,
                     operation="rollback",
-                    message=f"Branch {branch_name} deleted"
+                    message=f"Branch {branch_name} deleted",
                 )
             else:
                 raise Exception(f"Failed to delete branch: {result.stderr}")
@@ -394,28 +392,26 @@ class GitWorkflowManager:
                 success=False,
                 operation="rollback",
                 message="Failed to rollback branch",
-                error=str(e)
+                error=str(e),
             )
 
     def _generate_branch_name(self, rec_id: str, title: str) -> str:
         """Generate standardized branch name"""
         # Sanitize title
-        sanitized = re.sub(r'[^\w\s-]', '', title.lower())
-        sanitized = re.sub(r'[-\s]+', '-', sanitized)
-        sanitized = sanitized.strip('-')[:40]  # Limit length
+        sanitized = re.sub(r"[^\w\s-]", "", title.lower())
+        sanitized = re.sub(r"[-\s]+", "-", sanitized)
+        sanitized = sanitized.strip("-")[:40]  # Limit length
 
         return f"{self.branch_prefix}/{rec_id}/{sanitized}"
 
     def _generate_commit_message(
-        self,
-        recommendation: Dict[str, Any],
-        implementation_summary: str
+        self, recommendation: Dict[str, Any], implementation_summary: str
     ) -> str:
         """Generate detailed commit message"""
-        title = recommendation.get('title', 'Untitled')
-        rec_id = recommendation.get('id', 'unknown')
-        priority = recommendation.get('priority', 'MEDIUM')
-        category = recommendation.get('priority_score', {}).get('category', 'Unknown')
+        title = recommendation.get("title", "Untitled")
+        rec_id = recommendation.get("id", "unknown")
+        priority = recommendation.get("priority", "MEDIUM")
+        category = recommendation.get("priority_score", {}).get("category", "Unknown")
 
         # Build commit message
         message_lines = [
@@ -431,28 +427,25 @@ class GitWorkflowManager:
             "🤖 Auto-generated by NBA MCP Synthesis",
             "Generated with Claude Code (https://claude.com/claude-code)",
             "",
-            "Co-Authored-By: Claude <noreply@anthropic.com>"
+            "Co-Authored-By: Claude <noreply@anthropic.com>",
         ]
 
-        return '\n'.join(message_lines)
+        return "\n".join(message_lines)
 
     def _run_git_command(self, args: List[str]) -> subprocess.CompletedProcess:
         """Run a git command in the repository"""
         return subprocess.run(
-            ['git'] + args,
-            cwd=self.repo_path,
-            capture_output=True,
-            text=True
+            ["git"] + args, cwd=self.repo_path, capture_output=True, text=True
         )
 
     def get_current_branch(self) -> str:
         """Get current branch name"""
-        result = self._run_git_command(['branch', '--show-current'])
+        result = self._run_git_command(["branch", "--show-current"])
         return result.stdout.strip()
 
     def has_uncommitted_changes(self) -> bool:
         """Check if there are uncommitted changes"""
-        result = self._run_git_command(['status', '--porcelain'])
+        result = self._run_git_command(["status", "--porcelain"])
         return len(result.stdout.strip()) > 0
 
     def get_branch_status(self, branch_name: str) -> Dict[str, Any]:
@@ -467,12 +460,12 @@ class GitWorkflowManager:
         """
         try:
             # Check if branch exists locally
-            local_result = self._run_git_command(['branch', '--list', branch_name])
+            local_result = self._run_git_command(["branch", "--list", branch_name])
             exists_locally = len(local_result.stdout.strip()) > 0
 
             # Check if branch exists remotely
             remote_result = self._run_git_command(
-                ['ls-remote', '--heads', 'origin', branch_name]
+                ["ls-remote", "--heads", "origin", branch_name]
             )
             exists_remotely = len(remote_result.stdout.strip()) > 0
 
@@ -480,24 +473,24 @@ class GitWorkflowManager:
             last_commit = None
             if exists_locally:
                 commit_result = self._run_git_command(
-                    ['log', '-1', '--format=%H %s', branch_name]
+                    ["log", "-1", "--format=%H %s", branch_name]
                 )
                 if commit_result.returncode == 0:
                     last_commit = commit_result.stdout.strip()
 
             return {
-                'exists_locally': exists_locally,
-                'exists_remotely': exists_remotely,
-                'last_commit': last_commit
+                "exists_locally": exists_locally,
+                "exists_remotely": exists_remotely,
+                "last_commit": last_commit,
             }
 
         except Exception as e:
             logger.error(f"Failed to get branch status: {e}")
             return {
-                'exists_locally': False,
-                'exists_remotely': False,
-                'last_commit': None,
-                'error': str(e)
+                "exists_locally": False,
+                "exists_remotely": False,
+                "last_commit": None,
+                "error": str(e),
             }
 
 
@@ -505,16 +498,18 @@ def main():
     """CLI for testing git workflow"""
     import argparse
 
-    parser = argparse.ArgumentParser(description='Test Git Workflow Manager')
-    parser.add_argument('--repo', default='../nba-simulator-aws', help='Repository path')
-    parser.add_argument('--test-recommendation', help='Test recommendation JSON')
+    parser = argparse.ArgumentParser(description="Test Git Workflow Manager")
+    parser.add_argument(
+        "--repo", default="../nba-simulator-aws", help="Repository path"
+    )
+    parser.add_argument("--test-recommendation", help="Test recommendation JSON")
     args = parser.parse_args()
 
     manager = GitWorkflowManager(repo_path=args.repo)
 
     # Test with sample recommendation
     if args.test_recommendation:
-        with open(args.test_recommendation, 'r') as f:
+        with open(args.test_recommendation, "r") as f:
             data = json.load(f)
             rec = data[0] if isinstance(data, list) else data
 
@@ -540,5 +535,5 @@ def main():
         print(f"Uncommitted changes: {manager.has_uncommitted_changes()}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -58,7 +58,7 @@ class CheckpointManager:
         checkpoint_dir: Path = Path("checkpoints/"),
         ttl_hours: int = 24,
         max_checkpoints: int = 10,
-        save_interval_seconds: int = 300  # 5 minutes
+        save_interval_seconds: int = 300,  # 5 minutes
     ):
         """
         Initialize checkpoint manager.
@@ -89,7 +89,7 @@ class CheckpointManager:
         iteration: int,
         state: Dict[str, Any],
         metadata: Optional[Dict[str, Any]] = None,
-        force: bool = False
+        force: bool = False,
     ) -> Optional[Path]:
         """
         Save checkpoint if enough time has passed.
@@ -115,14 +115,16 @@ class CheckpointManager:
             return None
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        checkpoint_file = self.checkpoint_dir / f"checkpoint_{timestamp}_iter{iteration}.json"
+        checkpoint_file = (
+            self.checkpoint_dir / f"checkpoint_{timestamp}_iter{iteration}.json"
+        )
 
         checkpoint_data = {
-            'phase': self.phase,
-            'iteration': iteration,
-            'timestamp': datetime.now().isoformat(),
-            'state': state,
-            'metadata': metadata or {}
+            "phase": self.phase,
+            "iteration": iteration,
+            "timestamp": datetime.now().isoformat(),
+            "state": state,
+            "metadata": metadata or {},
         }
 
         try:
@@ -131,7 +133,9 @@ class CheckpointManager:
             self.last_save_time = current_time
 
             file_size_kb = checkpoint_file.stat().st_size / 1024
-            logger.info(f"💾 Checkpoint saved: {checkpoint_file.name} ({file_size_kb:.1f} KB)")
+            logger.info(
+                f"💾 Checkpoint saved: {checkpoint_file.name} ({file_size_kb:.1f} KB)"
+            )
             logger.info(f"   Iteration: {iteration}")
             logger.info(f"   State keys: {list(state.keys())}")
 
@@ -154,7 +158,7 @@ class CheckpointManager:
         checkpoints = sorted(
             self.checkpoint_dir.glob("checkpoint_*.json"),
             key=lambda p: p.stat().st_mtime,
-            reverse=True
+            reverse=True,
         )
 
         if not checkpoints:
@@ -198,24 +202,29 @@ class CheckpointManager:
         for checkpoint_file in sorted(
             self.checkpoint_dir.glob("checkpoint_*.json"),
             key=lambda p: p.stat().st_mtime,
-            reverse=True
+            reverse=True,
         ):
             try:
                 modified_time = datetime.fromtimestamp(checkpoint_file.stat().st_mtime)
                 checkpoint_data = json.loads(checkpoint_file.read_text())
 
-                checkpoints.append({
-                    'file': checkpoint_file.name,
-                    'path': str(checkpoint_file),
-                    'iteration': checkpoint_data['iteration'],
-                    'timestamp': checkpoint_data['timestamp'],
-                    'age_hours': (datetime.now() - modified_time).total_seconds() / 3600,
-                    'size_kb': checkpoint_file.stat().st_size / 1024,
-                    'expired': (datetime.now() - modified_time) > self.ttl
-                })
+                checkpoints.append(
+                    {
+                        "file": checkpoint_file.name,
+                        "path": str(checkpoint_file),
+                        "iteration": checkpoint_data["iteration"],
+                        "timestamp": checkpoint_data["timestamp"],
+                        "age_hours": (datetime.now() - modified_time).total_seconds()
+                        / 3600,
+                        "size_kb": checkpoint_file.stat().st_size / 1024,
+                        "expired": (datetime.now() - modified_time) > self.ttl,
+                    }
+                )
 
             except Exception as e:
-                logger.warning(f"❌ Could not read checkpoint {checkpoint_file.name}: {e}")
+                logger.warning(
+                    f"❌ Could not read checkpoint {checkpoint_file.name}: {e}"
+                )
                 continue
 
         return checkpoints
@@ -239,7 +248,7 @@ class CheckpointManager:
         checkpoints = sorted(
             self.checkpoint_dir.glob("checkpoint_*.json"),
             key=lambda p: p.stat().st_mtime,
-            reverse=True
+            reverse=True,
         )
 
         deleted_count = 0
@@ -264,7 +273,9 @@ class CheckpointManager:
             if should_delete:
                 try:
                     checkpoint_file.unlink()
-                    logger.info(f"🗑️  Cleaned up checkpoint: {checkpoint_file.name} ({reason})")
+                    logger.info(
+                        f"🗑️  Cleaned up checkpoint: {checkpoint_file.name} ({reason})"
+                    )
                     deleted_count += 1
                 except Exception as e:
                     logger.error(f"❌ Failed to delete {checkpoint_file.name}: {e}")
@@ -295,29 +306,29 @@ class CheckpointManager:
 
         if not checkpoints:
             return {
-                'total_checkpoints': 0,
-                'valid_checkpoints': 0,
-                'expired_checkpoints': 0,
-                'total_size_mb': 0.0,
-                'oldest_age_hours': 0.0,
-                'newest_age_hours': 0.0
+                "total_checkpoints": 0,
+                "valid_checkpoints": 0,
+                "expired_checkpoints": 0,
+                "total_size_mb": 0.0,
+                "oldest_age_hours": 0.0,
+                "newest_age_hours": 0.0,
             }
 
-        valid = [cp for cp in checkpoints if not cp['expired']]
-        expired = [cp for cp in checkpoints if cp['expired']]
+        valid = [cp for cp in checkpoints if not cp["expired"]]
+        expired = [cp for cp in checkpoints if cp["expired"]]
 
-        total_size_mb = sum(cp['size_kb'] for cp in checkpoints) / 1024
+        total_size_mb = sum(cp["size_kb"] for cp in checkpoints) / 1024
 
-        ages = [cp['age_hours'] for cp in checkpoints]
+        ages = [cp["age_hours"] for cp in checkpoints]
 
         return {
-            'total_checkpoints': len(checkpoints),
-            'valid_checkpoints': len(valid),
-            'expired_checkpoints': len(expired),
-            'total_size_mb': total_size_mb,
-            'oldest_age_hours': max(ages) if ages else 0.0,
-            'newest_age_hours': min(ages) if ages else 0.0,
-            'checkpoints': checkpoints
+            "total_checkpoints": len(checkpoints),
+            "valid_checkpoints": len(valid),
+            "expired_checkpoints": len(expired),
+            "total_size_mb": total_size_mb,
+            "oldest_age_hours": max(ages) if ages else 0.0,
+            "newest_age_hours": min(ages) if ages else 0.0,
+            "checkpoints": checkpoints,
         }
 
 
@@ -327,7 +338,7 @@ def main():
 
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
     print("=" * 70)
@@ -335,14 +346,14 @@ def main():
     print("=" * 70)
 
     # Initialize checkpoint manager
-    cp = CheckpointManager(phase='test_phase', save_interval_seconds=0)
+    cp = CheckpointManager(phase="test_phase", save_interval_seconds=0)
 
     # Test 1: Save checkpoint
     print("\n1. Saving checkpoint...")
     state = {
-        'processed_items': 100,
-        'recommendations': ['rec_1', 'rec_2', 'rec_3'],
-        'current_book': 'Designing ML Systems'
+        "processed_items": 100,
+        "recommendations": ["rec_1", "rec_2", "rec_3"],
+        "current_book": "Designing ML Systems",
     }
     checkpoint_file = cp.save_checkpoint(iteration=1, state=state, force=True)
     assert checkpoint_file is not None, "Checkpoint should be saved"
@@ -350,7 +361,7 @@ def main():
 
     # Test 2: Save another checkpoint
     print("\n2. Saving second checkpoint...")
-    state['processed_items'] = 200
+    state["processed_items"] = 200
     checkpoint_file = cp.save_checkpoint(iteration=2, state=state, force=True)
     assert checkpoint_file is not None, "Second checkpoint should be saved"
     print(f"   ✅ Second checkpoint saved: {checkpoint_file.name}")
@@ -359,8 +370,8 @@ def main():
     print("\n3. Loading latest checkpoint...")
     latest = cp.get_latest_checkpoint()
     assert latest is not None, "Should load latest checkpoint"
-    assert latest['iteration'] == 2, "Should load iteration 2"
-    assert latest['state']['processed_items'] == 200, "State should match"
+    assert latest["iteration"] == 2, "Should load iteration 2"
+    assert latest["state"]["processed_items"] == 200, "State should match"
     print(f"   ✅ Loaded iteration {latest['iteration']}")
     print(f"   ✅ Processed items: {latest['state']['processed_items']}")
 
@@ -369,8 +380,10 @@ def main():
     checkpoints = cp.list_checkpoints()
     print(f"   ✅ Found {len(checkpoints)} checkpoint(s)")
     for cp_info in checkpoints:
-        print(f"      - {cp_info['file']}: iteration {cp_info['iteration']}, "
-              f"{cp_info['size_kb']:.1f} KB")
+        print(
+            f"      - {cp_info['file']}: iteration {cp_info['iteration']}, "
+            f"{cp_info['size_kb']:.1f} KB"
+        )
 
     # Test 5: Get statistics
     print("\n5. Checkpoint statistics...")
@@ -392,4 +405,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

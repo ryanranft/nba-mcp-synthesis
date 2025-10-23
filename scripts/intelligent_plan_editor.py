@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class PlanOperation:
     """Record of a plan operation."""
+
     operation_type: str  # 'add', 'modify', 'delete', 'merge'
     timestamp: str
     plan_id: str
@@ -62,7 +63,7 @@ class IntelligentPlanEditor:
         plans_dir: Optional[Path] = None,
         backup_dir: Optional[Path] = None,
         auto_backup: bool = True,
-        require_approval_threshold: float = 0.8
+        require_approval_threshold: float = 0.8,
     ):
         """
         Initialize intelligent plan editor.
@@ -113,7 +114,7 @@ class IntelligentPlanEditor:
         """Save operation history to log file."""
         try:
             data = [asdict(op) for op in self.operations]
-            with open(self.log_file, 'w') as f:
+            with open(self.log_file, "w") as f:
                 json.dump(data, f, indent=2)
         except Exception as e:
             logger.error(f"Error saving operation log: {e}")
@@ -170,7 +171,7 @@ class IntelligentPlanEditor:
         """Save plan to file."""
         plan_file = self.plans_dir / f"{plan_id}.json"
         try:
-            with open(plan_file, 'w') as f:
+            with open(plan_file, "w") as f:
                 json.dump(plan_data, f, indent=2)
             logger.info(f"Plan saved: {plan_file}")
         except Exception as e:
@@ -182,7 +183,7 @@ class IntelligentPlanEditor:
         plan_data: Dict[str, any],
         reason: str,
         confidence: float = 0.9,
-        require_approval: bool = False
+        require_approval: bool = False,
     ) -> Dict[str, any]:
         """
         Add a new implementation plan.
@@ -196,7 +197,9 @@ class IntelligentPlanEditor:
         Returns:
             Dict with operation result
         """
-        plan_id = plan_data.get('id', f"plan_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
+        plan_id = plan_data.get(
+            "id", f"plan_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        )
 
         logger.info(f"ADD PLAN: {plan_id}")
         logger.info(f"  Reason: {reason}")
@@ -204,34 +207,35 @@ class IntelligentPlanEditor:
 
         # Check if approval needed
         needs_approval = (
-            require_approval or
-            confidence < self.require_approval_threshold
+            require_approval or confidence < self.require_approval_threshold
         )
 
         if needs_approval:
-            logger.warning(f"⚠️  Manual approval required (confidence {confidence:.1%} < {self.require_approval_threshold:.1%})")
+            logger.warning(
+                f"⚠️  Manual approval required (confidence {confidence:.1%} < {self.require_approval_threshold:.1%})"
+            )
             return {
-                'success': False,
-                'plan_id': plan_id,
-                'reason': 'Manual approval required',
-                'confidence': confidence,
-                'approval_prompt': f"Add new plan '{plan_data.get('title', plan_id)}'? (confidence: {confidence:.1%})"
+                "success": False,
+                "plan_id": plan_id,
+                "reason": "Manual approval required",
+                "confidence": confidence,
+                "approval_prompt": f"Add new plan '{plan_data.get('title', plan_id)}'? (confidence: {confidence:.1%})",
             }
 
         # Check if plan already exists
         if (self.plans_dir / f"{plan_id}.json").exists():
             logger.error(f"Plan {plan_id} already exists")
             return {
-                'success': False,
-                'plan_id': plan_id,
-                'reason': 'Plan already exists'
+                "success": False,
+                "plan_id": plan_id,
+                "reason": "Plan already exists",
             }
 
         # Add metadata
-        plan_data['created_at'] = datetime.now().isoformat()
-        plan_data['created_by'] = 'ai'
-        plan_data['confidence'] = confidence
-        plan_data['reason'] = reason
+        plan_data["created_at"] = datetime.now().isoformat()
+        plan_data["created_by"] = "ai"
+        plan_data["confidence"] = confidence
+        plan_data["reason"] = reason
 
         # Save plan
         try:
@@ -239,33 +243,29 @@ class IntelligentPlanEditor:
 
             # Log operation
             operation = PlanOperation(
-                operation_type='add',
+                operation_type="add",
                 timestamp=datetime.now().isoformat(),
                 plan_id=plan_id,
                 description=f"Added new plan: {plan_data.get('title', plan_id)}",
                 backup_path=None,
-                changes={'new_plan': True},
+                changes={"new_plan": True},
                 reason=reason,
-                ai_confidence=confidence
+                ai_confidence=confidence,
             )
             self._log_operation(operation)
 
             logger.info(f"✅ Plan {plan_id} added successfully")
 
             return {
-                'success': True,
-                'plan_id': plan_id,
-                'operation': 'add',
-                'confidence': confidence
+                "success": True,
+                "plan_id": plan_id,
+                "operation": "add",
+                "confidence": confidence,
             }
 
         except Exception as e:
             logger.error(f"Failed to add plan: {e}")
-            return {
-                'success': False,
-                'plan_id': plan_id,
-                'reason': f"Error: {str(e)}"
-            }
+            return {"success": False, "plan_id": plan_id, "reason": f"Error: {str(e)}"}
 
     def modify_plan(
         self,
@@ -273,7 +273,7 @@ class IntelligentPlanEditor:
         modifications: Dict[str, any],
         reason: str,
         confidence: float = 0.9,
-        require_approval: bool = False
+        require_approval: bool = False,
     ) -> Dict[str, any]:
         """
         Modify an existing implementation plan.
@@ -297,30 +297,27 @@ class IntelligentPlanEditor:
         plan_data = self._load_plan(plan_id)
         if plan_data is None:
             logger.error(f"Plan {plan_id} not found")
-            return {
-                'success': False,
-                'plan_id': plan_id,
-                'reason': 'Plan not found'
-            }
+            return {"success": False, "plan_id": plan_id, "reason": "Plan not found"}
 
         # Check if approval needed
         needs_approval = (
-            require_approval or
-            confidence < self.require_approval_threshold
+            require_approval or confidence < self.require_approval_threshold
         )
 
         if needs_approval:
-            logger.warning(f"⚠️  Manual approval required (confidence {confidence:.1%} < {self.require_approval_threshold:.1%})")
+            logger.warning(
+                f"⚠️  Manual approval required (confidence {confidence:.1%} < {self.require_approval_threshold:.1%})"
+            )
             return {
-                'success': False,
-                'plan_id': plan_id,
-                'reason': 'Manual approval required',
-                'confidence': confidence,
-                'approval_prompt': f"Modify plan '{plan_data.get('title', plan_id)}'? Changes: {list(modifications.keys())}"
+                "success": False,
+                "plan_id": plan_id,
+                "reason": "Manual approval required",
+                "confidence": confidence,
+                "approval_prompt": f"Modify plan '{plan_data.get('title', plan_id)}'? Changes: {list(modifications.keys())}",
             }
 
         # Create backup
-        backup_path = self._create_backup(plan_id, 'modify')
+        backup_path = self._create_backup(plan_id, "modify")
 
         # Apply modifications
         old_data = plan_data.copy()
@@ -328,18 +325,20 @@ class IntelligentPlanEditor:
             plan_data[key] = value
 
         # Add modification metadata
-        if 'modifications' not in plan_data:
-            plan_data['modifications'] = []
+        if "modifications" not in plan_data:
+            plan_data["modifications"] = []
 
-        plan_data['modifications'].append({
-            'timestamp': datetime.now().isoformat(),
-            'modified_by': 'ai',
-            'fields': list(modifications.keys()),
-            'reason': reason,
-            'confidence': confidence
-        })
+        plan_data["modifications"].append(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "modified_by": "ai",
+                "fields": list(modifications.keys()),
+                "reason": reason,
+                "confidence": confidence,
+            }
+        )
 
-        plan_data['last_modified_at'] = datetime.now().isoformat()
+        plan_data["last_modified_at"] = datetime.now().isoformat()
 
         # Save modified plan
         try:
@@ -347,42 +346,38 @@ class IntelligentPlanEditor:
 
             # Log operation
             operation = PlanOperation(
-                operation_type='modify',
+                operation_type="modify",
                 timestamp=datetime.now().isoformat(),
                 plan_id=plan_id,
                 description=f"Modified plan: {plan_data.get('title', plan_id)}",
                 backup_path=backup_path,
                 changes=modifications,
                 reason=reason,
-                ai_confidence=confidence
+                ai_confidence=confidence,
             )
             self._log_operation(operation)
 
             logger.info(f"✅ Plan {plan_id} modified successfully")
 
             return {
-                'success': True,
-                'plan_id': plan_id,
-                'operation': 'modify',
-                'changes': modifications,
-                'backup': backup_path,
-                'confidence': confidence
+                "success": True,
+                "plan_id": plan_id,
+                "operation": "modify",
+                "changes": modifications,
+                "backup": backup_path,
+                "confidence": confidence,
             }
 
         except Exception as e:
             logger.error(f"Failed to modify plan: {e}")
-            return {
-                'success': False,
-                'plan_id': plan_id,
-                'reason': f"Error: {str(e)}"
-            }
+            return {"success": False, "plan_id": plan_id, "reason": f"Error: {str(e)}"}
 
     def delete_plan(
         self,
         plan_id: str,
         reason: str,
         confidence: float = 0.9,
-        require_approval: bool = False
+        require_approval: bool = False,
     ) -> Dict[str, any]:
         """
         Delete an obsolete implementation plan.
@@ -404,30 +399,27 @@ class IntelligentPlanEditor:
         plan_data = self._load_plan(plan_id)
         if plan_data is None:
             logger.error(f"Plan {plan_id} not found")
-            return {
-                'success': False,
-                'plan_id': plan_id,
-                'reason': 'Plan not found'
-            }
+            return {"success": False, "plan_id": plan_id, "reason": "Plan not found"}
 
         # Check if approval needed (deletion always needs high confidence)
         needs_approval = (
-            require_approval or
-            confidence < 0.85  # Higher threshold for deletion
+            require_approval or confidence < 0.85  # Higher threshold for deletion
         )
 
         if needs_approval:
-            logger.warning(f"⚠️  Manual approval required for deletion (confidence {confidence:.1%})")
+            logger.warning(
+                f"⚠️  Manual approval required for deletion (confidence {confidence:.1%})"
+            )
             return {
-                'success': False,
-                'plan_id': plan_id,
-                'reason': 'Manual approval required for deletion',
-                'confidence': confidence,
-                'approval_prompt': f"Delete plan '{plan_data.get('title', plan_id)}'? Reason: {reason}"
+                "success": False,
+                "plan_id": plan_id,
+                "reason": "Manual approval required for deletion",
+                "confidence": confidence,
+                "approval_prompt": f"Delete plan '{plan_data.get('title', plan_id)}'? Reason: {reason}",
             }
 
         # Create backup
-        backup_path = self._create_backup(plan_id, 'delete')
+        backup_path = self._create_backup(plan_id, "delete")
 
         # Delete plan file
         plan_file = self.plans_dir / f"{plan_id}.json"
@@ -436,34 +428,30 @@ class IntelligentPlanEditor:
 
             # Log operation
             operation = PlanOperation(
-                operation_type='delete',
+                operation_type="delete",
                 timestamp=datetime.now().isoformat(),
                 plan_id=plan_id,
                 description=f"Deleted plan: {plan_data.get('title', plan_id)}",
                 backup_path=backup_path,
-                changes={'deleted': True},
+                changes={"deleted": True},
                 reason=reason,
-                ai_confidence=confidence
+                ai_confidence=confidence,
             )
             self._log_operation(operation)
 
             logger.info(f"✅ Plan {plan_id} deleted successfully")
 
             return {
-                'success': True,
-                'plan_id': plan_id,
-                'operation': 'delete',
-                'backup': backup_path,
-                'confidence': confidence
+                "success": True,
+                "plan_id": plan_id,
+                "operation": "delete",
+                "backup": backup_path,
+                "confidence": confidence,
             }
 
         except Exception as e:
             logger.error(f"Failed to delete plan: {e}")
-            return {
-                'success': False,
-                'plan_id': plan_id,
-                'reason': f"Error: {str(e)}"
-            }
+            return {"success": False, "plan_id": plan_id, "reason": f"Error: {str(e)}"}
 
     def merge_plans(
         self,
@@ -471,7 +459,7 @@ class IntelligentPlanEditor:
         merged_plan_data: Dict[str, any],
         reason: str,
         confidence: float = 0.9,
-        require_approval: bool = False
+        require_approval: bool = False,
     ) -> Dict[str, any]:
         """
         Merge multiple plans into one.
@@ -496,50 +484,45 @@ class IntelligentPlanEditor:
             plan_data = self._load_plan(plan_id)
             if plan_data is None:
                 logger.error(f"Plan {plan_id} not found")
-                return {
-                    'success': False,
-                    'reason': f"Plan {plan_id} not found"
-                }
+                return {"success": False, "reason": f"Plan {plan_id} not found"}
             plans_to_merge.append((plan_id, plan_data))
 
         if len(plans_to_merge) < 2:
-            return {
-                'success': False,
-                'reason': 'Need at least 2 plans to merge'
-            }
+            return {"success": False, "reason": "Need at least 2 plans to merge"}
 
         # Check if approval needed
         needs_approval = (
-            require_approval or
-            confidence < self.require_approval_threshold
+            require_approval or confidence < self.require_approval_threshold
         )
 
         if needs_approval:
             logger.warning(f"⚠️  Manual approval required (confidence {confidence:.1%})")
-            titles = [p[1].get('title', p[0]) for p in plans_to_merge]
+            titles = [p[1].get("title", p[0]) for p in plans_to_merge]
             return {
-                'success': False,
-                'reason': 'Manual approval required',
-                'confidence': confidence,
-                'approval_prompt': f"Merge plans: {', '.join(titles)}?"
+                "success": False,
+                "reason": "Manual approval required",
+                "confidence": confidence,
+                "approval_prompt": f"Merge plans: {', '.join(titles)}?",
             }
 
         # Create backups of all plans
         backups = []
         for plan_id, _ in plans_to_merge:
-            backup_path = self._create_backup(plan_id, 'merge')
+            backup_path = self._create_backup(plan_id, "merge")
             if backup_path:
                 backups.append(backup_path)
 
         # Generate merged plan ID
-        merged_id = merged_plan_data.get('id', f"merged_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
+        merged_id = merged_plan_data.get(
+            "id", f"merged_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        )
 
         # Add merge metadata
-        merged_plan_data['created_at'] = datetime.now().isoformat()
-        merged_plan_data['created_by'] = 'ai'
-        merged_plan_data['merged_from'] = plan_ids
-        merged_plan_data['merge_reason'] = reason
-        merged_plan_data['confidence'] = confidence
+        merged_plan_data["created_at"] = datetime.now().isoformat()
+        merged_plan_data["created_by"] = "ai"
+        merged_plan_data["merged_from"] = plan_ids
+        merged_plan_data["merge_reason"] = reason
+        merged_plan_data["confidence"] = confidence
 
         try:
             # Save merged plan
@@ -552,34 +535,31 @@ class IntelligentPlanEditor:
 
             # Log operation
             operation = PlanOperation(
-                operation_type='merge',
+                operation_type="merge",
                 timestamp=datetime.now().isoformat(),
                 plan_id=merged_id,
                 description=f"Merged {len(plan_ids)} plans into {merged_id}",
-                backup_path='; '.join(backups) if backups else None,
-                changes={'merged_from': plan_ids},
+                backup_path="; ".join(backups) if backups else None,
+                changes={"merged_from": plan_ids},
                 reason=reason,
-                ai_confidence=confidence
+                ai_confidence=confidence,
             )
             self._log_operation(operation)
 
             logger.info(f"✅ Plans merged successfully into {merged_id}")
 
             return {
-                'success': True,
-                'plan_id': merged_id,
-                'operation': 'merge',
-                'merged_from': plan_ids,
-                'backups': backups,
-                'confidence': confidence
+                "success": True,
+                "plan_id": merged_id,
+                "operation": "merge",
+                "merged_from": plan_ids,
+                "backups": backups,
+                "confidence": confidence,
             }
 
         except Exception as e:
             logger.error(f"Failed to merge plans: {e}")
-            return {
-                'success': False,
-                'reason': f"Error: {str(e)}"
-            }
+            return {"success": False, "reason": f"Error: {str(e)}"}
 
     def get_operation_history(self, limit: Optional[int] = None) -> List[PlanOperation]:
         """Get operation history, optionally limited to most recent N."""
@@ -622,10 +602,10 @@ class IntelligentPlanEditor:
                 lines.append(f"- **Backup**: `{op.backup_path}`")
             lines.append("")
 
-        changelog = '\n'.join(lines)
+        changelog = "\n".join(lines)
 
         if output_file:
-            with open(output_file, 'w') as f:
+            with open(output_file, "w") as f:
                 f.write(changelog)
             logger.info(f"Changelog saved to {output_file}")
 
@@ -648,17 +628,15 @@ if __name__ == "__main__":
     print("1. ADD NEW PLAN")
     print("-" * 70)
     new_plan = {
-        'id': 'demo_plan_1',
-        'title': 'Implement Panel Data Analysis',
-        'description': 'Add fixed effects models for player analysis',
-        'priority': 'high',
-        'estimated_effort': 'medium'
+        "id": "demo_plan_1",
+        "title": "Implement Panel Data Analysis",
+        "description": "Add fixed effects models for player analysis",
+        "priority": "high",
+        "estimated_effort": "medium",
     }
 
     result = editor.add_plan(
-        new_plan,
-        reason="AI identified gap in current analytics",
-        confidence=0.95
+        new_plan, reason="AI identified gap in current analytics", confidence=0.95
     )
     print(f"Result: {result}")
     print()
@@ -667,14 +645,14 @@ if __name__ == "__main__":
     print("2. MODIFY EXISTING PLAN")
     print("-" * 70)
     result = editor.modify_plan(
-        'demo_plan_1',
+        "demo_plan_1",
         modifications={
-            'priority': 'critical',
-            'estimated_effort': 'high',
-            'notes': 'AI-enhanced: Increased priority due to dependency analysis'
+            "priority": "critical",
+            "estimated_effort": "high",
+            "notes": "AI-enhanced: Increased priority due to dependency analysis",
         },
         reason="Dependencies analysis shows this is critical path",
-        confidence=0.88
+        confidence=0.88,
     )
     print(f"Result: {result}")
     print()
@@ -688,10 +666,3 @@ if __name__ == "__main__":
     print("=" * 70)
     print("Demo complete!")
     print("=" * 70)
-
-
-
-
-
-
-

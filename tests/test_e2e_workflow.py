@@ -191,8 +191,9 @@ class TestE2EWorkflow:
     async def test_03_mcp_client_connection(self, mcp_server):
         """Test: MCP client can connect to server"""
         # Mock MCPClient methods
-        with patch.object(MCPClient, 'connect', new_callable=AsyncMock, return_value=True), \
-             patch.object(MCPClient, 'disconnect', new_callable=AsyncMock):
+        with patch.object(
+            MCPClient, "connect", new_callable=AsyncMock, return_value=True
+        ), patch.object(MCPClient, "disconnect", new_callable=AsyncMock):
 
             client = MCPClient(server_url=mcp_server.server_url)
 
@@ -210,9 +211,13 @@ class TestE2EWorkflow:
         # Mock database query response
         mock_result = {"success": True, "rows": [{"test": 1}]}
 
-        with patch.object(MCPClient, 'connect', new_callable=AsyncMock, return_value=True), \
-             patch.object(MCPClient, 'call_tool', new_callable=AsyncMock, return_value=mock_result), \
-             patch.object(MCPClient, 'disconnect', new_callable=AsyncMock):
+        with patch.object(
+            MCPClient, "connect", new_callable=AsyncMock, return_value=True
+        ), patch.object(
+            MCPClient, "call_tool", new_callable=AsyncMock, return_value=mock_result
+        ), patch.object(
+            MCPClient, "disconnect", new_callable=AsyncMock
+        ):
 
             client = MCPClient(server_url=mcp_server.server_url)
             await client.connect()
@@ -238,9 +243,13 @@ class TestE2EWorkflow:
         # Mock S3 access response
         mock_result = {"success": True, "files": ["file1.txt", "file2.txt"]}
 
-        with patch.object(MCPClient, 'connect', new_callable=AsyncMock, return_value=True), \
-             patch.object(MCPClient, 'call_tool', new_callable=AsyncMock, return_value=mock_result), \
-             patch.object(MCPClient, 'disconnect', new_callable=AsyncMock):
+        with patch.object(
+            MCPClient, "connect", new_callable=AsyncMock, return_value=True
+        ), patch.object(
+            MCPClient, "call_tool", new_callable=AsyncMock, return_value=mock_result
+        ), patch.object(
+            MCPClient, "disconnect", new_callable=AsyncMock
+        ):
 
             client = MCPClient(server_url=mcp_server.server_url)
             await client.connect()
@@ -251,7 +260,9 @@ class TestE2EWorkflow:
                 )
 
                 assert result.get("success"), "S3 listing should succeed"
-                assert "files" in result or "file_list" in result, "Should return file list"
+                assert (
+                    "files" in result or "file_list" in result
+                ), "Should return file list"
 
                 print("✅ S3 access via MCP successful")
 
@@ -262,11 +273,21 @@ class TestE2EWorkflow:
         """Test: Can get table schemas through MCP"""
         # Mock table schema responses
         mock_tables = {"success": True, "tables": ["players", "games"]}
-        mock_schema = {"success": True, "columns": [{"name": "player_id", "type": "int"}]}
+        mock_schema = {
+            "success": True,
+            "columns": [{"name": "player_id", "type": "int"}],
+        }
 
-        with patch.object(MCPClient, 'connect', new_callable=AsyncMock, return_value=True), \
-             patch.object(MCPClient, 'call_tool', new_callable=AsyncMock, side_effect=[mock_tables, mock_schema]), \
-             patch.object(MCPClient, 'disconnect', new_callable=AsyncMock):
+        with patch.object(
+            MCPClient, "connect", new_callable=AsyncMock, return_value=True
+        ), patch.object(
+            MCPClient,
+            "call_tool",
+            new_callable=AsyncMock,
+            side_effect=[mock_tables, mock_schema],
+        ), patch.object(
+            MCPClient, "disconnect", new_callable=AsyncMock
+        ):
 
             client = MCPClient(server_url=mcp_server.server_url)
             await client.connect()
@@ -281,12 +302,16 @@ class TestE2EWorkflow:
                         "get_table_schema", {"table_name": first_table}
                     )
 
-                    assert schema_result.get("success"), "Table schema query should succeed"
+                    assert schema_result.get(
+                        "success"
+                    ), "Table schema query should succeed"
                     assert (
                         "columns" in schema_result or "schema" in schema_result
                     ), "Should return schema information"
 
-                    print(f"✅ Table schema retrieval successful (table: {first_table})")
+                    print(
+                        f"✅ Table schema retrieval successful (table: {first_table})"
+                    )
 
             finally:
                 await client.disconnect()
@@ -296,14 +321,22 @@ class TestE2EWorkflow:
         # Mock synthesis result
         mock_result = {
             "status": "success",
-            "deepseek_result": {"code": "def factorial(n): return 1 if n <= 1 else n * factorial(n-1)"},
+            "deepseek_result": {
+                "code": "def factorial(n): return 1 if n <= 1 else n * factorial(n-1)"
+            },
             "claude_synthesis": {"explanation": "Recursive factorial implementation"},
             "total_cost": 0.0025,
-            "execution_time_seconds": 1.5
+            "execution_time_seconds": 1.5,
         }
 
-        with patch('tests.test_e2e_workflow.synthesize_with_mcp_context', new_callable=AsyncMock, return_value=mock_result):
-            request = "Write a Python function that calculates the factorial of a number"
+        with patch(
+            "tests.test_e2e_workflow.synthesize_with_mcp_context",
+            new_callable=AsyncMock,
+            return_value=mock_result,
+        ):
+            request = (
+                "Write a Python function that calculates the factorial of a number"
+            )
 
             result = await synthesize_with_mcp_context(
                 user_input=request,
@@ -330,16 +363,25 @@ class TestE2EWorkflow:
         # Mock synthesis result with MCP context
         mock_result = {
             "status": "success",
-            "deepseek_result": {"code": "SELECT p.name, SUM(s.points) FROM players p JOIN stats s ON p.id = s.player_id GROUP BY p.name ORDER BY SUM(s.points) DESC LIMIT 5"},
+            "deepseek_result": {
+                "code": "SELECT p.name, SUM(s.points) FROM players p JOIN stats s ON p.id = s.player_id GROUP BY p.name ORDER BY SUM(s.points) DESC LIMIT 5"
+            },
             "claude_synthesis": {"explanation": "SQL query for top 5 scorers"},
-            "mcp_context": {"tables": ["players", "stats"], "schemas": {"players": ["id", "name"]}},
+            "mcp_context": {
+                "tables": ["players", "stats"],
+                "schemas": {"players": ["id", "name"]},
+            },
             "mcp_status": "connected",
             "final_code": "SELECT p.name, SUM(s.points) FROM players p JOIN stats s",
             "total_cost": 0.005,
-            "execution_time_seconds": 2.5
+            "execution_time_seconds": 2.5,
         }
 
-        with patch('tests.test_e2e_workflow.synthesize_with_mcp_context', new_callable=AsyncMock, return_value=mock_result):
+        with patch(
+            "tests.test_e2e_workflow.synthesize_with_mcp_context",
+            new_callable=AsyncMock,
+            return_value=mock_result,
+        ):
             request = """
             Generate a SQL query to find the top 5 NBA players by total points scored.
             Use proper table joins and include player names.
@@ -390,10 +432,14 @@ class TestE2EWorkflow:
             "status": "success",
             "output_file": str(mock_output_file),
             "deepseek_result": {"code": "sum(range(1, 101))"},
-            "claude_synthesis": {"explanation": "Sum of 1 to 100 equals 5050"}
+            "claude_synthesis": {"explanation": "Sum of 1 to 100 equals 5050"},
         }
 
-        with patch('tests.test_e2e_workflow.synthesize_with_mcp_context', new_callable=AsyncMock, return_value=mock_result):
+        with patch(
+            "tests.test_e2e_workflow.synthesize_with_mcp_context",
+            new_callable=AsyncMock,
+            return_value=mock_result,
+        ):
             request = "Calculate the sum of 1 to 100"
 
             result = await synthesize_with_mcp_context(
@@ -430,10 +476,14 @@ class TestE2EWorkflow:
             "status": "partial_failure",
             "deepseek_result": {"warning": "Dangerous operation detected"},
             "claude_synthesis": {"recommendation": "Avoid DROP operations"},
-            "error_details": "Query blocked for safety"
+            "error_details": "Query blocked for safety",
         }
 
-        with patch('tests.test_e2e_workflow.synthesize_with_mcp_context', new_callable=AsyncMock, return_value=mock_result):
+        with patch(
+            "tests.test_e2e_workflow.synthesize_with_mcp_context",
+            new_callable=AsyncMock,
+            return_value=mock_result,
+        ):
             # Test with invalid SQL
             result = await synthesize_with_mcp_context(
                 user_input="Execute: DROP TABLE users;",  # Should be blocked
@@ -457,10 +507,14 @@ class TestE2EWorkflow:
         mock_results = [
             {"status": "success", "result": "4"},
             {"status": "success", "result": "Paris"},
-            {"status": "success", "result": "2, 3, 5"}
+            {"status": "success", "result": "2, 3, 5"},
         ]
 
-        with patch('tests.test_e2e_workflow.synthesize_with_mcp_context', new_callable=AsyncMock, side_effect=mock_results):
+        with patch(
+            "tests.test_e2e_workflow.synthesize_with_mcp_context",
+            new_callable=AsyncMock,
+            side_effect=mock_results,
+        ):
             requests = [
                 "What is 2 + 2?",
                 "What is the capital of France?",
@@ -487,7 +541,9 @@ class TestE2EWorkflow:
                 if not isinstance(r, Exception) and r.get("status") == "success"
             )
 
-            assert successful >= 2, f"At least 2 of 3 concurrent requests should succeed"
+            assert (
+                successful >= 2
+            ), f"At least 2 of 3 concurrent requests should succeed"
 
             print(f"✅ Concurrent requests test passed ({successful}/3 succeeded)")
 
@@ -498,10 +554,14 @@ class TestE2EWorkflow:
             "status": "success",
             "result": "The average is 5.5",
             "total_cost": 0.002,
-            "execution_time_seconds": 1.2
+            "execution_time_seconds": 1.2,
         }
 
-        with patch('tests.test_e2e_workflow.synthesize_with_mcp_context', new_callable=AsyncMock, return_value=mock_result):
+        with patch(
+            "tests.test_e2e_workflow.synthesize_with_mcp_context",
+            new_callable=AsyncMock,
+            return_value=mock_result,
+        ):
             request = "Calculate the average of the numbers 1 through 10"
 
             start_time = time.time()
@@ -519,7 +579,9 @@ class TestE2EWorkflow:
             assert result.get("status") == "success", "Synthesis should succeed"
 
             # Performance assertions (using mocked time)
-            assert total_time < 30, f"Should complete in <30s (actual: {total_time:.2f}s)"
+            assert (
+                total_time < 30
+            ), f"Should complete in <30s (actual: {total_time:.2f}s)"
             assert (
                 result.get("total_cost", 0) < 0.05
             ), f"Cost should be <$0.05 (actual: ${result.get('total_cost', 0):.6f})"

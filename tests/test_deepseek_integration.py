@@ -17,21 +17,22 @@ from mcp_server.unified_secrets_manager import load_secrets_hierarchical
 
 # Load secrets once at module level (this exports to os.environ)
 _secrets_loaded = False
+
+
 def ensure_secrets_loaded():
     """Load secrets hierarchically if not already loaded"""
     global _secrets_loaded
     if not _secrets_loaded:
         try:
             success = load_secrets_hierarchical(
-                project="nba-mcp-synthesis",
-                sport="NBA",
-                context="WORKFLOW"
+                project="nba-mcp-synthesis", sport="NBA", context="WORKFLOW"
             )
             _secrets_loaded = True
             if success:
                 print(f"✓ Loaded secrets for DeepSeek integration tests")
         except Exception as e:
             print(f"Warning: Could not load secrets: {e}")
+
 
 # Ensure secrets are loaded before tests run
 ensure_secrets_loaded()

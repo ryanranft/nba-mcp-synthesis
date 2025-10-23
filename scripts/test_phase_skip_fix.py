@@ -14,18 +14,26 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from phase_status_manager import PhaseStatusManager, PhaseState
 
+
 def test_phase_skip_fix():
     """Test that skipped phases satisfy prerequisites."""
 
     print("🧪 Testing Phase Skip Fix\n")
-    print("="*60)
+    print("=" * 60)
 
     # Create a temporary status manager
     status_mgr = PhaseStatusManager()
 
     # Simulate completed phases up to phase 4
     print("1. Setting up phases 0-4 as completed...")
-    for phase_id in ["phase_0", "phase_1", "phase_2", "phase_3", "phase_3_5", "phase_4"]:
+    for phase_id in [
+        "phase_0",
+        "phase_1",
+        "phase_2",
+        "phase_3",
+        "phase_3_5",
+        "phase_4",
+    ]:
         if phase_id in status_mgr.phases:
             status_mgr.phases[phase_id].state = PhaseState.COMPLETED
             print(f"   ✅ {phase_id} = COMPLETED")
@@ -56,7 +64,9 @@ def test_phase_skip_fix():
         # Check prerequisites
         unmet_prereqs = status_mgr._check_prerequisites("phase_8_5")
         if not unmet_prereqs:
-            print("   ✅ All prerequisites satisfied (skipped phases count as satisfied)")
+            print(
+                "   ✅ All prerequisites satisfied (skipped phases count as satisfied)"
+            )
         else:
             print(f"   ❌ Unmet prerequisites: {unmet_prereqs}")
             return False
@@ -65,7 +75,7 @@ def test_phase_skip_fix():
         print(f"   ❌ Failed to start phase 8.5: {e}")
         return False
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     if all_skipped:
         print("✅ TEST PASSED: Phase skip fix is working correctly!")
         print("\nKey findings:")
@@ -77,13 +87,7 @@ def test_phase_skip_fix():
         print("❌ TEST FAILED: Some phases were not properly skipped")
         return False
 
+
 if __name__ == "__main__":
     success = test_phase_skip_fix()
     sys.exit(0 if success else 1)
-
-
-
-
-
-
-

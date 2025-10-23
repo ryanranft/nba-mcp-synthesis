@@ -64,11 +64,15 @@ def get_config() -> AdapterConfig:
             "PLAYGROUND_INVENTORY_REPORT", "data_inventory_report.json"
         )
         or "data_inventory_report.json",
-        inventory_enabled_default=(_getenv("PLAYGROUND_INVENTORY_ENABLED", "true") or "true")
+        inventory_enabled_default=(
+            _getenv("PLAYGROUND_INVENTORY_ENABLED", "true") or "true"
+        )
         .lower()
         .strip()
         == "true",
         tools_cache_ttl=int(_getenv("PLAYGROUND_TOOLS_CACHE_TTL", "300") or "300"),
-        inventory_cache_ttl=int(_getenv("PLAYGROUND_INVENTORY_CACHE_TTL", "900") or "900"),
+        inventory_cache_ttl=int(
+            _getenv("PLAYGROUND_INVENTORY_CACHE_TTL", "900") or "900"
+        ),
         environment=_getenv("PLAYGROUND_ENV", "development") or "development",
     )

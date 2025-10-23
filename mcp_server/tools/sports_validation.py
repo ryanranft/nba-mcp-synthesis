@@ -65,7 +65,7 @@ def validate_sports_stat(
     elif stat_type == StatType.MINUTES:
         # Use get_stat_range() to get dynamic min/max based on stat name
         stat_range = get_stat_range(stat_name)
-        if not (stat_range['min'] <= float_value <= stat_range['max']):
+        if not (stat_range["min"] <= float_value <= stat_range["max"]):
             raise ValidationError(
                 f"{stat_name} must be between {stat_range['min']} and {stat_range['max']} minutes, got {float_value}"
             )
@@ -465,33 +465,36 @@ def get_stat_range(stat_name: str) -> Dict[str, float]:
         {'min': 0, 'max': 150}
     """
     stat_ranges = {
-        'PTS': {'min': 0, 'max': 150},
-        'AST': {'min': 0, 'max': 50},
-        'REB': {'min': 0, 'max': 50},
-        'STL': {'min': 0, 'max': 20},
-        'BLK': {'min': 0, 'max': 20},
-        'FG%': {'min': 0, 'max': 1},
-        'FT%': {'min': 0, 'max': 1},
-        '3P%': {'min': 0, 'max': 1},
-            'MP': {'min': 0, 'max': 4000},  # Player minutes (48 per game × 82 games = 3936 max season)
-            'MIN': {'min': 0, 'max': 4000},  # Alias for MP
-        'TM_MP': {'min': 0, 'max': 240},  # Team minutes (48 × 5 players)
-        'TEAM_MP': {'min': 0, 'max': 240},  # Alias for TM_MP
-        'FGA': {'min': 0, 'max': 100},
-        'FGM': {'min': 0, 'max': 100},
-        'FTA': {'min': 0, 'max': 50},
-        'FTM': {'min': 0, 'max': 50},
-        '3PA': {'min': 0, 'max': 50},
-        '3PM': {'min': 0, 'max': 50},
-        'TOV': {'min': 0, 'max': 20},
-        'PF': {'min': 0, 'max': 10},
-        'TM_FGA': {'min': 0, 'max': 200},  # Team field goal attempts
-        'TM_FTA': {'min': 0, 'max': 100},  # Team free throw attempts
-        'TM_TOV': {'min': 0, 'max': 50},  # Team turnovers
+        "PTS": {"min": 0, "max": 150},
+        "AST": {"min": 0, "max": 50},
+        "REB": {"min": 0, "max": 50},
+        "STL": {"min": 0, "max": 20},
+        "BLK": {"min": 0, "max": 20},
+        "FG%": {"min": 0, "max": 1},
+        "FT%": {"min": 0, "max": 1},
+        "3P%": {"min": 0, "max": 1},
+        "MP": {
+            "min": 0,
+            "max": 4000,
+        },  # Player minutes (48 per game × 82 games = 3936 max season)
+        "MIN": {"min": 0, "max": 4000},  # Alias for MP
+        "TM_MP": {"min": 0, "max": 240},  # Team minutes (48 × 5 players)
+        "TEAM_MP": {"min": 0, "max": 240},  # Alias for TM_MP
+        "FGA": {"min": 0, "max": 100},
+        "FGM": {"min": 0, "max": 100},
+        "FTA": {"min": 0, "max": 50},
+        "FTM": {"min": 0, "max": 50},
+        "3PA": {"min": 0, "max": 50},
+        "3PM": {"min": 0, "max": 50},
+        "TOV": {"min": 0, "max": 20},
+        "PF": {"min": 0, "max": 10},
+        "TM_FGA": {"min": 0, "max": 200},  # Team field goal attempts
+        "TM_FTA": {"min": 0, "max": 100},  # Team free throw attempts
+        "TM_TOV": {"min": 0, "max": 50},  # Team turnovers
     }
 
     stat_upper = stat_name.upper()
-    return stat_ranges.get(stat_upper, {'min': 0, 'max': float('inf')})
+    return stat_ranges.get(stat_upper, {"min": 0, "max": float("inf")})
 
 
 def validate_stat_range(stat_name: str, value: float) -> bool:
@@ -512,7 +515,7 @@ def validate_stat_range(stat_name: str, value: float) -> bool:
         False
     """
     range_dict = get_stat_range(stat_name)
-    return range_dict['min'] <= value <= range_dict['max']
+    return range_dict["min"] <= value <= range_dict["max"]
 
 
 def validate_stat_type(stat_name: str, value: Any) -> bool:

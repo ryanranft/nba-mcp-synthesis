@@ -43,6 +43,7 @@ logger = logging.getLogger(__name__)
 # Mock Data Inventory Scanner
 # ==============================================================================
 
+
 class MockDataInventoryScanner:
     """
     Mock Data Inventory Scanner for testing
@@ -51,7 +52,9 @@ class MockDataInventoryScanner:
     scripts/data_inventory_scanner.py
     """
 
-    def __init__(self, inventory_path: str, db_connection=None, enable_live_queries: bool = True):
+    def __init__(
+        self, inventory_path: str, db_connection=None, enable_live_queries: bool = True
+    ):
         self.inventory_path = Path(inventory_path)
         self.db_connection = db_connection
         self.live_queries_enabled = False
@@ -71,9 +74,9 @@ class MockDataInventoryScanner:
     def _get_metadata(self) -> Dict:
         """Get scan metadata"""
         return {
-            'scan_date': '2025-10-22T12:00:00',
-            'mode': 'live' if self.live_queries_enabled else 'static',
-            'inventory_path': str(self.inventory_path)
+            "scan_date": "2025-10-22T12:00:00",
+            "mode": "live" if self.live_queries_enabled else "static",
+            "inventory_path": str(self.inventory_path),
         }
 
     def _load_metrics(self) -> Dict:
@@ -86,21 +89,13 @@ class MockDataInventoryScanner:
 
         # Return default metrics if file doesn't exist
         return {
-            'database': {
-                'total_tables': 15,
-                'total_rows': 5000000,
-                'size_mb': 2500
+            "database": {"total_tables": 15, "total_rows": 5000000, "size_mb": 2500},
+            "s3": {
+                "total_objects": 172000,
+                "total_size_gb": 450,
+                "file_types": ["parquet", "csv", "json"],
             },
-            's3': {
-                'total_objects': 172000,
-                'total_size_gb': 450,
-                'file_types': ['parquet', 'csv', 'json']
-            },
-            'coverage': {
-                'seasons': '2014-2025',
-                'games': 15000,
-                'players': 5000
-            }
+            "coverage": {"seasons": "2014-2025", "games": 15000, "players": 5000},
         }
 
     def _parse_schema(self) -> Dict:
@@ -113,37 +108,43 @@ class MockDataInventoryScanner:
             content = schema_file.read_text()
 
             # Simple parsing (in production would be more sophisticated)
-            tables = content.split('CREATE TABLE')
+            tables = content.split("CREATE TABLE")
 
             for table_def in tables[1:]:  # Skip first empty split
-                lines = table_def.strip().split('\n')
+                lines = table_def.strip().split("\n")
                 if not lines:
                     continue
 
                 # Extract table name
-                table_name = lines[0].split('(')[0].strip()
+                table_name = lines[0].split("(")[0].strip()
 
                 # Extract columns
                 columns = {}
                 for line in lines[1:]:
                     line_stripped = line.strip()
                     # Skip empty lines, closing braces, and constraint definitions
-                    if not line_stripped or line_stripped.startswith(')') or 'INDEX' in line:
+                    if (
+                        not line_stripped
+                        or line_stripped.startswith(")")
+                        or "INDEX" in line
+                    ):
                         continue
                     # Skip constraint keywords
-                    if line_stripped.startswith(('PRIMARY', 'FOREIGN', 'UNIQUE', 'CHECK', 'CONSTRAINT')):
+                    if line_stripped.startswith(
+                        ("PRIMARY", "FOREIGN", "UNIQUE", "CHECK", "CONSTRAINT")
+                    ):
                         continue
 
                     # Parse column definition
-                    parts = line_stripped.rstrip(',').split(maxsplit=1)
+                    parts = line_stripped.rstrip(",").split(maxsplit=1)
                     if len(parts) >= 2:
                         col_name = parts[0]
                         # Extract just the data type (first word after column name)
                         col_type_full = parts[1]
-                        col_type = col_type_full.split()[0] if col_type_full else ''
-                        columns[col_name] = {'type': col_type}
+                        col_type = col_type_full.split()[0] if col_type_full else ""
+                        columns[col_name] = {"type": col_type}
 
-                schema[table_name] = {'columns': columns}
+                schema[table_name] = {"columns": columns}
 
         return schema
 
@@ -152,11 +153,11 @@ class MockDataInventoryScanner:
         metrics = self._load_metrics()
 
         coverage = {
-            'seasons': metrics.get('coverage', {}).get('seasons', 'Unknown'),
-            'teams': 30,  # NBA teams
-            'players': metrics.get('coverage', {}).get('players', 0),
-            'games': metrics.get('coverage', {}).get('games', 0),
-            'completeness_score': 85.5
+            "seasons": metrics.get("coverage", {}).get("seasons", "Unknown"),
+            "teams": 30,  # NBA teams
+            "players": metrics.get("coverage", {}).get("players", 0),
+            "games": metrics.get("coverage", {}).get("games", 0),
+            "completeness_score": 85.5,
         }
 
         return coverage
@@ -166,20 +167,20 @@ class MockDataInventoryScanner:
         schema = self._parse_schema()
 
         features = {
-            'player_stats': [],
-            'team_stats': [],
-            'game_data': [],
-            'advanced_metrics': []
+            "player_stats": [],
+            "team_stats": [],
+            "game_data": [],
+            "advanced_metrics": [],
         }
 
         # Extract features from schema
         for table_name, table_info in schema.items():
-            if 'player' in table_name.lower():
-                features['player_stats'].extend(table_info['columns'].keys())
-            elif 'team' in table_name.lower():
-                features['team_stats'].extend(table_info['columns'].keys())
-            elif 'game' in table_name.lower():
-                features['game_data'].extend(table_info['columns'].keys())
+            if "player" in table_name.lower():
+                features["player_stats"].extend(table_info["columns"].keys())
+            elif "team" in table_name.lower():
+                features["team_stats"].extend(table_info["columns"].keys())
+            elif "game" in table_name.lower():
+                features["game_data"].extend(table_info["columns"].keys())
 
         return features
 
@@ -203,20 +204,20 @@ class MockDataInventoryScanner:
         """
 
         return {
-            'summary': summary.strip(),
-            'key_statistics': {
-                'total_tables': metrics['database']['total_tables'],
-                'total_rows': metrics['database']['total_rows'],
-                'seasons': coverage['seasons'],
-                'games': coverage['games']
+            "summary": summary.strip(),
+            "key_statistics": {
+                "total_tables": metrics["database"]["total_tables"],
+                "total_rows": metrics["database"]["total_rows"],
+                "seasons": coverage["seasons"],
+                "games": coverage["games"],
             },
-            'available_tables': list(schema.keys()),
-            'recommended_use_cases': [
-                'Player performance analytics',
-                'Team efficiency metrics',
-                'Game outcome prediction',
-                'Advanced statistics calculation'
-            ]
+            "available_tables": list(schema.keys()),
+            "recommended_use_cases": [
+                "Player performance analytics",
+                "Team efficiency metrics",
+                "Game outcome prediction",
+                "Advanced statistics calculation",
+            ],
         }
 
     async def _query_live_stats(self) -> Dict:
@@ -226,15 +227,12 @@ class MockDataInventoryScanner:
 
         # In production, would query actual database
         return {
-            'table_counts': {
-                'master_games': 15234,
-                'master_player_game_stats': 485000,
-                'master_team_game_stats': 30468
+            "table_counts": {
+                "master_games": 15234,
+                "master_player_game_stats": 485000,
+                "master_team_game_stats": 30468,
             },
-            'date_ranges': {
-                'min_date': '2014-10-28',
-                'max_date': '2025-06-15'
-            }
+            "date_ranges": {"min_date": "2014-10-28", "max_date": "2025-06-15"},
         }
 
     def scan_full_inventory(self) -> Dict[str, Any]:
@@ -242,12 +240,12 @@ class MockDataInventoryScanner:
         logger.info("🔍 Scanning data inventory...")
 
         inventory = {
-            'metadata': self._get_metadata(),
-            'metrics': self._load_metrics(),
-            'schema': self._parse_schema(),
-            'data_coverage': self._assess_data_coverage(),
-            'available_features': self._extract_available_features(),
-            'summary_for_ai': self._generate_ai_summary(),
+            "metadata": self._get_metadata(),
+            "metrics": self._load_metrics(),
+            "schema": self._parse_schema(),
+            "data_coverage": self._assess_data_coverage(),
+            "available_features": self._extract_available_features(),
+            "summary_for_ai": self._generate_ai_summary(),
         }
 
         logger.info("✅ Data inventory scan complete")
@@ -257,6 +255,7 @@ class MockDataInventoryScanner:
 # ==============================================================================
 # Test Suite
 # ==============================================================================
+
 
 @pytest.mark.asyncio
 class TestDIMSIntegration:
@@ -271,8 +270,7 @@ class TestDIMSIntegration:
         inventory_path.mkdir()
 
         scanner = MockDataInventoryScanner(
-            inventory_path=str(inventory_path),
-            enable_live_queries=False
+            inventory_path=str(inventory_path), enable_live_queries=False
         )
 
         assert scanner.inventory_path.exists()
@@ -291,32 +289,24 @@ class TestDIMSIntegration:
         # Create mock metrics.yaml
         metrics_file = inventory_path / "metrics.yaml"
         metrics_data = {
-            'database': {
-                'total_tables': 15,
-                'total_rows': 5000000,
-                'size_mb': 2500
+            "database": {"total_tables": 15, "total_rows": 5000000, "size_mb": 2500},
+            "s3": {
+                "total_objects": 172000,
+                "total_size_gb": 450,
+                "file_types": ["parquet", "csv", "json"],
             },
-            's3': {
-                'total_objects': 172000,
-                'total_size_gb': 450,
-                'file_types': ['parquet', 'csv', 'json']
-            },
-            'coverage': {
-                'seasons': '2014-2025',
-                'games': 15000,
-                'players': 5000
-            }
+            "coverage": {"seasons": "2014-2025", "games": 15000, "players": 5000},
         }
 
-        with open(metrics_file, 'w') as f:
+        with open(metrics_file, "w") as f:
             yaml.dump(metrics_data, f)
 
         scanner = MockDataInventoryScanner(inventory_path=str(inventory_path))
         metrics = scanner._load_metrics()
 
-        assert metrics['database']['total_tables'] == 15
-        assert metrics['s3']['total_objects'] == 172000
-        assert '2014-2025' in metrics['coverage']['seasons']
+        assert metrics["database"]["total_tables"] == 15
+        assert metrics["s3"]["total_objects"] == 172000
+        assert "2014-2025" in metrics["coverage"]["seasons"]
 
         logger.info("✅ Metrics loading test passed")
 
@@ -356,10 +346,13 @@ CREATE TABLE master_games (
         scanner = MockDataInventoryScanner(inventory_path=str(inventory_path))
         schema = scanner._parse_schema()
 
-        assert 'master_player_game_stats' in schema
-        assert 'master_games' in schema
-        assert 'points' in schema['master_player_game_stats']['columns']
-        assert schema['master_player_game_stats']['columns']['plus_minus']['type'] == 'DECIMAL(5,2)'
+        assert "master_player_game_stats" in schema
+        assert "master_games" in schema
+        assert "points" in schema["master_player_game_stats"]["columns"]
+        assert (
+            schema["master_player_game_stats"]["columns"]["plus_minus"]["type"]
+            == "DECIMAL(5,2)"
+        )
 
         logger.info("✅ SQL schema parsing test passed")
 
@@ -372,17 +365,16 @@ CREATE TABLE master_games (
         inventory_path.mkdir()
 
         scanner = MockDataInventoryScanner(
-            inventory_path=str(inventory_path),
-            enable_live_queries=False
+            inventory_path=str(inventory_path), enable_live_queries=False
         )
 
         coverage = scanner._assess_data_coverage()
 
-        assert 'seasons' in coverage
-        assert 'teams' in coverage
-        assert 'players' in coverage
-        assert 'completeness_score' in coverage
-        assert 0 <= coverage['completeness_score'] <= 100
+        assert "seasons" in coverage
+        assert "teams" in coverage
+        assert "players" in coverage
+        assert "completeness_score" in coverage
+        assert 0 <= coverage["completeness_score"] <= 100
 
         logger.info("✅ Data coverage assessment test passed")
 
@@ -395,7 +387,8 @@ CREATE TABLE master_games (
         inventory_path.mkdir()
 
         schema_file = inventory_path / "schema.sql"
-        schema_file.write_text("""
+        schema_file.write_text(
+            """
 CREATE TABLE master_player_game_stats (
     player_id VARCHAR(50),
     points INTEGER,
@@ -409,14 +402,15 @@ CREATE TABLE master_games (
     game_id VARCHAR(50),
     home_score INTEGER
 );
-""")
+"""
+        )
 
         scanner = MockDataInventoryScanner(inventory_path=str(inventory_path))
         features = scanner._extract_available_features()
 
-        assert 'player_stats' in features
-        assert 'team_stats' in features
-        assert 'game_data' in features
+        assert "player_stats" in features
+        assert "team_stats" in features
+        assert "game_data" in features
         assert len(features) > 0
 
         logger.info("✅ Feature extraction test passed")
@@ -432,11 +426,11 @@ CREATE TABLE master_games (
         scanner = MockDataInventoryScanner(inventory_path=str(inventory_path))
         summary = scanner._generate_ai_summary()
 
-        assert 'summary' in summary
-        assert 'key_statistics' in summary
-        assert 'available_tables' in summary
-        assert 'recommended_use_cases' in summary
-        assert len(summary['summary']) > 100
+        assert "summary" in summary
+        assert "key_statistics" in summary
+        assert "available_tables" in summary
+        assert "recommended_use_cases" in summary
+        assert len(summary["summary"]) > 100
 
         logger.info("✅ AI summary generation test passed")
 
@@ -452,32 +446,36 @@ CREATE TABLE master_games (
         # Create a mock database that returns realistic stats
         mock_db = MagicMock()
         mock_db.execute.return_value.fetchall.return_value = [
-            ('master_games', 10000),
-            ('player_game_stats', 250000),
-            ('team_game_stats', 20000)
+            ("master_games", 10000),
+            ("player_game_stats", 250000),
+            ("team_game_stats", 20000),
         ]
 
         scanner = MockDataInventoryScanner(
             inventory_path=str(inventory_path),
             db_connection=mock_db,
-            enable_live_queries=True
+            enable_live_queries=True,
         )
 
         if scanner.live_queries_enabled:
             # Mock the _query_live_stats method to return expected structure
-            with patch.object(scanner, '_query_live_stats', return_value={
-                'table_counts': {
-                    'master_games': 10000,
-                    'player_game_stats': 250000,
-                    'team_game_stats': 20000
+            with patch.object(
+                scanner,
+                "_query_live_stats",
+                return_value={
+                    "table_counts": {
+                        "master_games": 10000,
+                        "player_game_stats": 250000,
+                        "team_game_stats": 20000,
+                    },
+                    "last_updated": "2025-10-23T00:00:00Z",
                 },
-                'last_updated': '2025-10-23T00:00:00Z'
-            }):
+            ):
                 stats = await scanner._query_live_stats()
 
-                assert 'table_counts' in stats
-                assert stats['table_counts']['master_games'] == 10000
-                assert stats['table_counts']['player_game_stats'] == 250000
+                assert "table_counts" in stats
+                assert stats["table_counts"]["master_games"] == 10000
+                assert stats["table_counts"]["player_game_stats"] == 250000
 
         logger.info("✅ Live database query test passed (mocked)")
 
@@ -491,12 +489,19 @@ CREATE TABLE master_games (
 
         # Create metrics
         metrics_file = inventory_path / "metrics.yaml"
-        with open(metrics_file, 'w') as f:
-            yaml.dump({
-                'database': {'total_tables': 15, 'total_rows': 5000000},
-                's3': {'total_objects': 172000, 'total_size_gb': 450},
-                'coverage': {'seasons': '2014-2025', 'games': 15000, 'players': 5000}
-            }, f)
+        with open(metrics_file, "w") as f:
+            yaml.dump(
+                {
+                    "database": {"total_tables": 15, "total_rows": 5000000},
+                    "s3": {"total_objects": 172000, "total_size_gb": 450},
+                    "coverage": {
+                        "seasons": "2014-2025",
+                        "games": 15000,
+                        "players": 5000,
+                    },
+                },
+                f,
+            )
 
         # Create schema
         schema_file = inventory_path / "schema.sql"
@@ -505,16 +510,16 @@ CREATE TABLE master_games (
         scanner = MockDataInventoryScanner(inventory_path=str(inventory_path))
         inventory = scanner.scan_full_inventory()
 
-        assert 'metadata' in inventory
-        assert 'metrics' in inventory
-        assert 'schema' in inventory
-        assert 'data_coverage' in inventory
-        assert 'available_features' in inventory
-        assert 'summary_for_ai' in inventory
+        assert "metadata" in inventory
+        assert "metrics" in inventory
+        assert "schema" in inventory
+        assert "data_coverage" in inventory
+        assert "available_features" in inventory
+        assert "summary_for_ai" in inventory
 
         # Verify metadata
-        assert inventory['metadata']['scan_date'] is not None
-        assert inventory['metadata']['mode'] in ['static', 'live']
+        assert inventory["metadata"]["scan_date"] is not None
+        assert inventory["metadata"]["mode"] in ["static", "live"]
 
         logger.info("✅ Full inventory scan test passed")
 
@@ -522,6 +527,7 @@ CREATE TABLE master_games (
 # ==============================================================================
 # Standalone Test Runner
 # ==============================================================================
+
 
 async def run_all_dims_tests():
     """Run all DIMS integration tests"""
@@ -597,6 +603,7 @@ async def run_all_dims_tests():
 
     # Cleanup
     import shutil
+
     shutil.rmtree(base_tmp_path, ignore_errors=True)
 
     print("=" * 80)
@@ -608,5 +615,6 @@ async def run_all_dims_tests():
 
 if __name__ == "__main__":
     import asyncio
+
     success = asyncio.run(run_all_dims_tests())
     sys.exit(0 if success else 1)

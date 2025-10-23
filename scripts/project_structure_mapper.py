@@ -26,14 +26,14 @@ from dataclasses import dataclass
 from enum import Enum
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 
 class FileType(Enum):
     """File types for generated code"""
+
     PYTHON = "python"
     SQL = "sql"
     YAML = "yaml"
@@ -44,6 +44,7 @@ class FileType(Enum):
 
 class RecommendationType(Enum):
     """Types of recommendations"""
+
     ML_MODEL = "ml_model"
     DATA_PROCESSING = "data_processing"
     ETL_PIPELINE = "etl_pipeline"
@@ -62,6 +63,7 @@ class RecommendationType(Enum):
 @dataclass
 class FileMapping:
     """Represents a file mapping for a recommendation"""
+
     file_type: FileType
     target_directory: str
     filename: str
@@ -87,53 +89,138 @@ class ProjectStructureMapper:
     # Keyword patterns for recommendation type detection
     TYPE_PATTERNS = {
         RecommendationType.ML_MODEL: [
-            'model', 'training', 'prediction', 'classifier', 'regression',
-            'neural', 'machine learning', 'ml', 'scikit', 'tensorflow',
-            'keras', 'pytorch', 'xgboost', 'random forest', 'gradient boost'
+            "model",
+            "training",
+            "prediction",
+            "classifier",
+            "regression",
+            "neural",
+            "machine learning",
+            "ml",
+            "scikit",
+            "tensorflow",
+            "keras",
+            "pytorch",
+            "xgboost",
+            "random forest",
+            "gradient boost",
         ],
         RecommendationType.DATA_PROCESSING: [
-            'etl', 'transform', 'clean', 'preprocess', 'feature engineering',
-            'data quality', 'normalization', 'aggregation', 'feature store'
+            "etl",
+            "transform",
+            "clean",
+            "preprocess",
+            "feature engineering",
+            "data quality",
+            "normalization",
+            "aggregation",
+            "feature store",
         ],
         RecommendationType.ETL_PIPELINE: [
-            'pipeline', 'scraper', 'crawler', 'extract', 'incremental',
-            'scrape', 'fetch', 'download', 'sync', 'collect'
+            "pipeline",
+            "scraper",
+            "crawler",
+            "extract",
+            "incremental",
+            "scrape",
+            "fetch",
+            "download",
+            "sync",
+            "collect",
         ],
         RecommendationType.DATABASE: [
-            'database', 'schema', 'migration', 'table', 'index', 'query',
-            'sql', 'postgres', 'rds', 'stored procedure', 'view'
+            "database",
+            "schema",
+            "migration",
+            "table",
+            "index",
+            "query",
+            "sql",
+            "postgres",
+            "rds",
+            "stored procedure",
+            "view",
         ],
         RecommendationType.API: [
-            'api', 'endpoint', 'route', 'rest', 'fastapi', 'flask',
-            'service', 'mcp', 'server'
+            "api",
+            "endpoint",
+            "route",
+            "rest",
+            "fastapi",
+            "flask",
+            "service",
+            "mcp",
+            "server",
         ],
         RecommendationType.MONITORING: [
-            'monitor', 'logging', 'metrics', 'alert', 'dashboard',
-            'observability', 'tracking', 'telemetry', 'health'
+            "monitor",
+            "logging",
+            "metrics",
+            "alert",
+            "dashboard",
+            "observability",
+            "tracking",
+            "telemetry",
+            "health",
         ],
         RecommendationType.TESTING: [
-            'test', 'validation', 'verify', 'check', 'quality assurance',
-            'pytest', 'unit test', 'integration test'
+            "test",
+            "validation",
+            "verify",
+            "check",
+            "quality assurance",
+            "pytest",
+            "unit test",
+            "integration test",
         ],
         RecommendationType.DEPLOYMENT: [
-            'deploy', 'docker', 'kubernetes', 'cicd', 'automation',
-            'lambda', 'aws', 'cloud', 'container'
+            "deploy",
+            "docker",
+            "kubernetes",
+            "cicd",
+            "automation",
+            "lambda",
+            "aws",
+            "cloud",
+            "container",
         ],
         RecommendationType.ANALYSIS: [
-            'analysis', 'statistical', 'bayesian', 'econometric',
-            'causal', 'panel data', 'regression analysis', 'hypothesis test'
+            "analysis",
+            "statistical",
+            "bayesian",
+            "econometric",
+            "causal",
+            "panel data",
+            "regression analysis",
+            "hypothesis test",
         ],
         RecommendationType.AUTOMATION: [
-            'automate', 'schedule', 'cron', 'workflow', 'orchestrat',
-            'batch', 'task', 'job'
+            "automate",
+            "schedule",
+            "cron",
+            "workflow",
+            "orchestrat",
+            "batch",
+            "task",
+            "job",
         ],
         RecommendationType.INTEGRATION: [
-            'integrat', 'multi-source', 'combine', 'merge', 'consolidat',
-            'unified', 'cross-validate'
+            "integrat",
+            "multi-source",
+            "combine",
+            "merge",
+            "consolidat",
+            "unified",
+            "cross-validate",
         ],
         RecommendationType.VALIDATION: [
-            'validat', 'check', 'verify', 'audit', 'quality control',
-            'cross-check', 'reconcil'
+            "validat",
+            "check",
+            "verify",
+            "audit",
+            "quality control",
+            "cross-check",
+            "reconcil",
         ],
     }
 
@@ -180,7 +267,7 @@ class ProjectStructureMapper:
         Returns:
             FileMapping with target locations
         """
-        title = recommendation.get('title', 'Untitled')
+        title = recommendation.get("title", "Untitled")
         logger.info(f"🔍 Mapping: {title}")
 
         # Detect recommendation type
@@ -218,7 +305,7 @@ class ProjectStructureMapper:
             test_directory=test_dir,
             test_filename=test_filename,
             test_full_path=test_full_path,
-            related_files=related_files
+            related_files=related_files,
         )
 
         logger.info(f"✅ Mapped to: {full_path}")
@@ -230,10 +317,13 @@ class ProjectStructureMapper:
     def _detect_recommendation_type(self, rec: Dict[str, Any]) -> RecommendationType:
         """Detect recommendation type from content"""
         text = (
-            rec.get('title', '') + ' ' +
-            rec.get('description', '') + ' ' +
-            rec.get('technical_details', '') + ' ' +
-            ' '.join(rec.get('implementation_steps', []))
+            rec.get("title", "")
+            + " "
+            + rec.get("description", "")
+            + " "
+            + rec.get("technical_details", "")
+            + " "
+            + " ".join(rec.get("implementation_steps", []))
         ).lower()
 
         # Score each type
@@ -251,71 +341,61 @@ class ProjectStructureMapper:
         return RecommendationType.GENERAL
 
     def _detect_file_type(
-        self,
-        rec: Dict[str, Any],
-        rec_type: RecommendationType
+        self, rec: Dict[str, Any], rec_type: RecommendationType
     ) -> FileType:
         """Detect primary file type needed"""
-        text = (
-            rec.get('title', '') + ' ' +
-            rec.get('technical_details', '')
-        ).lower()
+        text = (rec.get("title", "") + " " + rec.get("technical_details", "")).lower()
 
         # SQL if database-related
-        if rec_type == RecommendationType.DATABASE or 'sql' in text or 'query' in text:
+        if rec_type == RecommendationType.DATABASE or "sql" in text or "query" in text:
             return FileType.SQL
 
         # YAML if config-related
-        if 'config' in text or 'yaml' in text or 'settings' in text:
+        if "config" in text or "yaml" in text or "settings" in text:
             return FileType.YAML
 
         # Bash if automation script
-        if 'bash' in text or 'shell' in text or '.sh' in text:
+        if "bash" in text or "shell" in text or ".sh" in text:
             return FileType.BASH
 
         # Default to Python
         return FileType.PYTHON
 
     def _get_target_directory(
-        self,
-        rec_type: RecommendationType,
-        rec: Dict[str, Any]
+        self, rec_type: RecommendationType, rec: Dict[str, Any]
     ) -> str:
         """Get target directory for recommendation"""
         base_dir = self.DIRECTORY_MAPPINGS.get(rec_type, "scripts")
 
         # For ETL, check if it's a specific subdirectory
         if rec_type == RecommendationType.ETL_PIPELINE:
-            text = rec.get('title', '').lower()
-            if 'basketball reference' in text or 'bref' in text or 'bbref' in text:
+            text = rec.get("title", "").lower()
+            if "basketball reference" in text or "bref" in text or "bbref" in text:
                 return "scripts/etl"
-            elif 'espn' in text:
+            elif "espn" in text:
                 return "scripts/etl"
-            elif 'hoopr' in text:
+            elif "hoopr" in text:
                 return "scripts/etl"
 
         # For ML, check if it's feature engineering or model
         if rec_type == RecommendationType.ML_MODEL:
-            text = rec.get('title', '').lower()
-            if 'feature' in text and ('store' in text or 'engineering' in text):
+            text = rec.get("title", "").lower()
+            if "feature" in text and ("store" in text or "engineering" in text):
                 return "scripts/ml"
 
         return base_dir
 
     def _generate_filename(
-        self,
-        rec: Dict[str, Any],
-        file_type: FileType,
-        rec_type: RecommendationType
+        self, rec: Dict[str, Any], file_type: FileType, rec_type: RecommendationType
     ) -> str:
         """Generate filename from recommendation"""
-        title = rec.get('title', 'untitled')
+        title = rec.get("title", "untitled")
 
         # Convert title to filename
         # Remove special characters, convert to snake_case
-        filename = re.sub(r'[^\w\s-]', '', title.lower())
-        filename = re.sub(r'[-\s]+', '_', filename)
-        filename = filename.strip('_')[:60]  # Limit length
+        filename = re.sub(r"[^\w\s-]", "", title.lower())
+        filename = re.sub(r"[-\s]+", "_", filename)
+        filename = filename.strip("_")[:60]  # Limit length
 
         # Add appropriate extension
         if file_type == FileType.PYTHON:
@@ -334,10 +414,7 @@ class ProjectStructureMapper:
             return f"{filename}.txt"
 
     def _get_test_location(
-        self,
-        filename: str,
-        target_dir: str,
-        file_type: FileType
+        self, filename: str, target_dir: str, file_type: FileType
     ) -> Tuple[Optional[str], Optional[str], Optional[str]]:
         """Determine test file location"""
         # Only generate tests for Python files
@@ -348,10 +425,10 @@ class ProjectStructureMapper:
         test_dir = "tests"
 
         # Test filename (prepend with test_)
-        if filename.startswith('test_'):
+        if filename.startswith("test_"):
             test_filename = filename
         else:
-            base_name = filename.replace('.py', '')
+            base_name = filename.replace(".py", "")
             test_filename = f"test_{base_name}.py"
 
         # Full path
@@ -360,38 +437,27 @@ class ProjectStructureMapper:
         return test_dir, test_filename, test_full_path
 
     def _detect_related_files(
-        self,
-        rec: Dict[str, Any],
-        rec_type: RecommendationType
+        self, rec: Dict[str, Any], rec_type: RecommendationType
     ) -> List[str]:
         """Detect if recommendation needs related files (SQL, config, etc.)"""
         related = []
 
         text = (
-            rec.get('description', '') + ' ' +
-            rec.get('technical_details', '')
+            rec.get("description", "") + " " + rec.get("technical_details", "")
         ).lower()
 
         # SQL file needed?
-        if 'database' in text or 'table' in text or 'query' in text:
+        if "database" in text or "table" in text or "query" in text:
             if rec_type != RecommendationType.DATABASE:  # Only if not already SQL
-                title = rec.get('title', 'untitled')
-                sql_filename = self._generate_filename(
-                    rec,
-                    FileType.SQL,
-                    rec_type
-                )
+                title = rec.get("title", "untitled")
+                sql_filename = self._generate_filename(rec, FileType.SQL, rec_type)
                 sql_path = str(self.target_project / "sql" / sql_filename)
                 related.append(sql_path)
 
         # Config file needed?
-        if 'config' in text or 'settings' in text:
-            title = rec.get('title', 'untitled')
-            config_filename = self._generate_filename(
-                rec,
-                FileType.YAML,
-                rec_type
-            )
+        if "config" in text or "settings" in text:
+            title = rec.get("title", "untitled")
+            config_filename = self._generate_filename(rec, FileType.YAML, rec_type)
             config_path = str(self.target_project / "config" / config_filename)
             related.append(config_path)
 
@@ -429,7 +495,9 @@ class ProjectStructureMapper:
             for related_file in mapping.related_files:
                 related_path = Path(related_file).parent
                 if not related_path.exists():
-                    issues.append(f"Related file directory does not exist: {related_path}")
+                    issues.append(
+                        f"Related file directory does not exist: {related_path}"
+                    )
 
         is_valid = len(issues) == 0
         return is_valid, issues
@@ -456,7 +524,7 @@ class ProjectStructureMapper:
         python_files = [
             str(f.relative_to(self.target_project))
             for f in python_files
-            if f.name != '__init__.py' and '__pycache__' not in str(f)
+            if f.name != "__init__.py" and "__pycache__" not in str(f)
         ]
 
         return sorted(python_files)
@@ -466,18 +534,24 @@ def main():
     """CLI for testing structure mapper"""
     import argparse
 
-    parser = argparse.ArgumentParser(description='Map recommendations to project structure')
-    parser.add_argument('--recommendation', required=True, help='Path to recommendation JSON')
-    parser.add_argument('--target-project', default='../nba-simulator-aws', help='Target project path')
+    parser = argparse.ArgumentParser(
+        description="Map recommendations to project structure"
+    )
+    parser.add_argument(
+        "--recommendation", required=True, help="Path to recommendation JSON"
+    )
+    parser.add_argument(
+        "--target-project", default="../nba-simulator-aws", help="Target project path"
+    )
     args = parser.parse_args()
 
     # Load recommendation
-    with open(args.recommendation, 'r') as f:
+    with open(args.recommendation, "r") as f:
         data = json.load(f)
 
     # Handle different formats
-    if isinstance(data, dict) and 'recommendations' in data:
-        recommendations = data['recommendations']
+    if isinstance(data, dict) and "recommendations" in data:
+        recommendations = data["recommendations"]
     elif isinstance(data, list):
         recommendations = data
     else:
@@ -513,5 +587,5 @@ def main():
                 print(f"  - {issue}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

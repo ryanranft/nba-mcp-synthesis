@@ -375,7 +375,9 @@ class UnifiedSecretsManager:
 
         return has_service and has_resource_type and has_context
 
-    def _create_aliases(self, project: Optional[str] = None, context: Optional[str] = None):
+    def _create_aliases(
+        self, project: Optional[str] = None, context: Optional[str] = None
+    ):
         """Create backward-compatible aliases for short names"""
 
         # Use provided values or fall back to stored values
@@ -494,7 +496,7 @@ class UnifiedSecretsManager:
             Dict of secrets loaded from Docker
         """
         secrets = {}
-        docker_secrets_dir = os.getenv('DOCKER_SECRETS_DIR', '/run/secrets')
+        docker_secrets_dir = os.getenv("DOCKER_SECRETS_DIR", "/run/secrets")
 
         if not os.path.exists(docker_secrets_dir):
             logger.debug(f"Docker secrets directory not found: {docker_secrets_dir}")
@@ -502,7 +504,9 @@ class UnifiedSecretsManager:
 
         # Look for project-specific secrets in directory structure
         # Expected structure: /run/secrets/project/.env.project.context/
-        project_dir = Path(docker_secrets_dir) / project / f".env.{project}.{context.lower()}"
+        project_dir = (
+            Path(docker_secrets_dir) / project / f".env.{project}.{context.lower()}"
+        )
 
         if not project_dir.exists():
             logger.debug(f"Docker project secrets directory not found: {project_dir}")
@@ -514,7 +518,9 @@ class UnifiedSecretsManager:
                 key = secret_file.stem
                 # Remove project and context suffixes if present
                 key = key.replace(f"_{project.upper()}_{context.upper()}", "")
-                key = key.replace(f"_{project.replace('-', '_').upper()}_{context.upper()}", "")
+                key = key.replace(
+                    f"_{project.replace('-', '_').upper()}_{context.upper()}", ""
+                )
 
                 value = secret_file.read_text().strip()
                 secrets[key] = value
@@ -526,7 +532,7 @@ class UnifiedSecretsManager:
                     level="docker",
                     context=context,
                     loaded_at=datetime.now(),
-                    source="docker"
+                    source="docker",
                 )
 
                 logger.debug(f"Loaded Docker secret: {key}")
@@ -535,7 +541,13 @@ class UnifiedSecretsManager:
 
         return secrets
 
-    def load_secrets(self, project: str, context: str, env: str = "test", base_path: Optional[str] = None) -> bool:
+    def load_secrets(
+        self,
+        project: str,
+        context: str,
+        env: str = "test",
+        base_path: Optional[str] = None,
+    ) -> bool:
         """
         Manually load secrets for a specific project and context.
 
@@ -565,7 +577,7 @@ class UnifiedSecretsManager:
         secrets_loaded = 0
 
         # Check if we're in Docker environment
-        if os.getenv('DOCKER_CONTAINER'):
+        if os.getenv("DOCKER_CONTAINER"):
             docker_secrets = self._load_from_docker_secrets(project, context)
             self.secrets.update(docker_secrets)
             secrets_loaded += len(docker_secrets)
@@ -574,13 +586,15 @@ class UnifiedSecretsManager:
         # Try file-based loading
         project_path = search_path / project / f".env.{project}.{env}"
         if project_path.exists():
-            file_secrets = self._load_secrets_from_level(project_path, "project", context)
+            file_secrets = self._load_secrets_from_level(
+                project_path, "project", context
+            )
             self.secrets.update(file_secrets)
             secrets_loaded += len(file_secrets)
             logger.info(f"Loaded {len(file_secrets)} secrets from files")
 
         # Try AWS Secrets Manager if configured
-        if os.getenv('USE_AWS_SECRETS_MANAGER') == 'true':
+        if os.getenv("USE_AWS_SECRETS_MANAGER") == "true":
             try:
                 aws_secrets = self._load_from_aws_secrets_manager(context)
                 self.secrets.update(aws_secrets)
@@ -594,7 +608,9 @@ class UnifiedSecretsManager:
 
         return secrets_loaded > 0
 
-    def export_secrets(self, output_file: str, include_provenance: bool = False) -> None:
+    def export_secrets(
+        self, output_file: str, include_provenance: bool = False
+    ) -> None:
         """
         Export secrets to file (for debugging/migration).
 
@@ -610,8 +626,8 @@ class UnifiedSecretsManager:
             "metadata": {
                 "exported_at": datetime.now().isoformat(),
                 "total_secrets": len(self.secrets),
-                "total_aliases": len(self.aliases)
-            }
+                "total_aliases": len(self.aliases),
+            },
         }
 
         if include_provenance:
@@ -620,12 +636,12 @@ class UnifiedSecretsManager:
                     "level": v.level,
                     "context": v.context,
                     "source": v.source,
-                    "loaded_at": v.loaded_at.isoformat()
+                    "loaded_at": v.loaded_at.isoformat(),
                 }
                 for k, v in self.provenance.items()
             }
 
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(export_data, f, indent=2)
 
         logger.info(f"Exported secrets metadata to {output_file}")
@@ -659,7 +675,9 @@ class UnifiedSecretsManager:
             result = self.load_secrets_hierarchical()
             logger.info(f"Reloaded {result.secrets_loaded} secrets")
 
-    def validate_secrets(self, required_keys: Optional[List[str]] = None) -> bool | Dict[str, bool]:
+    def validate_secrets(
+        self, required_keys: Optional[List[str]] = None
+    ) -> bool | Dict[str, bool]:
         """
         Validate that required secrets are present.
 
@@ -680,9 +698,9 @@ class UnifiedSecretsManager:
         for key in required_keys:
             # Check both direct secrets and aliases
             validation_result[key] = (
-                key in self.secrets or
-                key in self.aliases or
-                any(key in alias for alias in self.aliases.keys())
+                key in self.secrets
+                or key in self.aliases
+                or any(key in alias for alias in self.aliases.keys())
             )
         return validation_result
 
@@ -694,21 +712,21 @@ class UnifiedSecretsManager:
             Detected context string (test, production, development, etc.)
         """
         # Docker typically indicates production
-        if os.getenv('DOCKER_CONTAINER'):
-            return 'production'
+        if os.getenv("DOCKER_CONTAINER"):
+            return "production"
         # AWS/K8s typically indicates production
-        elif os.getenv('AWS_EXECUTION_ENV') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'):
-            return 'production'
-        elif os.getenv('KUBERNETES_SERVICE_HOST'):
-            return 'production'
+        elif os.getenv("AWS_EXECUTION_ENV") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
+            return "production"
+        elif os.getenv("KUBERNETES_SERVICE_HOST"):
+            return "production"
         # CI/CD indicates test
-        elif os.getenv('CI') or os.getenv('GITHUB_ACTIONS'):
-            return 'test'
+        elif os.getenv("CI") or os.getenv("GITHUB_ACTIONS"):
+            return "test"
         # Local development
-        elif os.getenv('USER'):
-            return 'development'
+        elif os.getenv("USER"):
+            return "development"
         else:
-            return 'development'
+            return "development"
 
     def _detect_context(self) -> str:
         """Backward-compatible alias for context_detection()"""

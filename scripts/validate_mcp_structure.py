@@ -113,7 +113,7 @@ def check_config_files() -> Tuple[bool, str]:
         required_files = [
             "config/workflow_config.yaml",
             "PRIORITY_ACTION_LIST.md",
-            "BACKGROUND_AGENT_INSTRUCTIONS.md"
+            "BACKGROUND_AGENT_INSTRUCTIONS.md",
         ]
 
         missing = []
@@ -179,4 +179,3 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-

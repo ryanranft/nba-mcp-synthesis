@@ -5573,7 +5573,10 @@ class EnsembleModelParams(BaseModel):
     """Parameters for ensemble model creation"""
 
     base_models: List[str] = Field(
-        ..., min_length=2, max_length=10, description="List of base model IDs to combine"
+        ...,
+        min_length=2,
+        max_length=10,
+        description="List of base model IDs to combine",
     )
     ensemble_method: Literal["voting", "bagging", "boosting", "stacking"] = Field(
         default="voting", description="Method for combining base models"

@@ -774,7 +774,9 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
         try:
             expr = parse_expr(preprocessed_formula)
         except Exception as parse_error:
-            logger.error(f"Could not parse formula '{preprocessed_formula}': {parse_error}")
+            logger.error(
+                f"Could not parse formula '{preprocessed_formula}': {parse_error}"
+            )
             raise ValueError(f"Malformed formula: {parse_error}")
 
         # Build substitution dictionary for provided variables
@@ -787,12 +789,16 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
             # Check for missing required variables
             missing_vars = set(formula_info["variables"]) - set(kwargs.keys())
             if missing_vars:
-                raise ValueError(f"Missing required variables: {', '.join(sorted(missing_vars))}")
+                raise ValueError(
+                    f"Missing required variables: {', '.join(sorted(missing_vars))}"
+                )
 
             # Check for negative values (counts/stats should be non-negative)
             for var, val in kwargs.items():
                 if isinstance(val, (int, float)) and val < 0:
-                    raise ValueError(f"Invalid input for {formula_name}: {var} cannot be negative, got {val}")
+                    raise ValueError(
+                        f"Invalid input for {formula_name}: {var} cannot be negative, got {val}"
+                    )
 
             # Check for division by zero scenarios and invalid denominators
             if formula_name == "true_shooting":
@@ -800,13 +806,19 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
                 fta = kwargs.get("FTA", 0)
                 # FGA of 0 with any FTA is invalid for shooting percentage
                 if fga == 0:
-                    raise ValueError("Invalid input for true_shooting: FGA cannot be zero")
+                    raise ValueError(
+                        "Invalid input for true_shooting: FGA cannot be zero"
+                    )
                 denominator = fga + 0.44 * fta
                 if denominator == 0:
-                    raise ZeroDivisionError("Division by zero: FGA + 0.44*FTA cannot be zero")
+                    raise ZeroDivisionError(
+                        "Division by zero: FGA + 0.44*FTA cannot be zero"
+                    )
             elif formula_name in ["effective_field_goal_percentage", "effective_fg"]:
                 if kwargs.get("FGA", 0) == 0:
-                    raise ValueError("Invalid input: FGA cannot be zero for field goal percentage")
+                    raise ValueError(
+                        "Invalid input: FGA cannot be zero for field goal percentage"
+                    )
 
         # Perform symbolic substitution (respects variable boundaries)
         # Map original variable names to preprocessed names if needed
@@ -829,7 +841,9 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
         try:
             result = float(result_expr.evalf())
         except Exception as calc_error:
-            logger.warning(f"Could not calculate result for '{substituted_formula}': {calc_error}")
+            logger.warning(
+                f"Could not calculate result for '{substituted_formula}': {calc_error}"
+            )
 
         return {
             "formula_name": formula_name,
@@ -853,7 +867,9 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
         logger.error(f"Failed to process formula '{formula_name}': {e}")
         return {
             "formula_name": formula_name,
-            "name": formula_info.get("name", formula_name),  # Add name for test compatibility
+            "name": formula_info.get(
+                "name", formula_name
+            ),  # Add name for test compatibility
             "formula": formula_info["formula"],
             "latex": formula_info["formula"],
             "variables": formula_info["variables"],
@@ -1135,7 +1151,9 @@ def solve_equation_system(equations: List[str], variables: List[str]) -> Dict[st
 # =============================================================================
 
 
-def calculate_sports_formula(formula_name: str, variables: Optional[Dict] = None, **kwargs) -> Dict[str, Any]:
+def calculate_sports_formula(
+    formula_name: str, variables: Optional[Dict] = None, **kwargs
+) -> Dict[str, Any]:
     """
     Wrapper for get_sports_formula for backward compatibility.
 
@@ -1260,7 +1278,9 @@ def factor_formula(formula_str: str) -> Dict[str, Any]:
         }
 
 
-def differentiate_formula(formula_str: str, variable: str, order: int = 1) -> Dict[str, Any]:
+def differentiate_formula(
+    formula_str: str, variable: str, order: int = 1
+) -> Dict[str, Any]:
     """
     Wrapper for differentiate_expression for backward compatibility.
 
@@ -1279,7 +1299,7 @@ def integrate_formula(
     formula_str: str,
     variable: str,
     lower_limit: Optional[float] = None,
-    upper_limit: Optional[float] = None
+    upper_limit: Optional[float] = None,
 ) -> Dict[str, Any]:
     """
     Wrapper for integrate_expression for backward compatibility.
@@ -1296,7 +1316,9 @@ def integrate_formula(
     return integrate_expression(formula_str, variable, lower_limit, upper_limit)
 
 
-def substitute_variables(formula_str: str, substitutions: Dict[str, float]) -> Dict[str, Any]:
+def substitute_variables(
+    formula_str: str, substitutions: Dict[str, float]
+) -> Dict[str, Any]:
     """
     Substitute values into a formula.
 
@@ -1326,7 +1348,9 @@ def substitute_variables(formula_str: str, substitutions: Dict[str, float]) -> D
         free_symbols = result_expr.free_symbols
         if free_symbols:
             unknown_vars = [str(sym) for sym in free_symbols]
-            raise ValueError(f"Unknown variables remain after substitution: {', '.join(unknown_vars)}")
+            raise ValueError(
+                f"Unknown variables remain after substitution: {', '.join(unknown_vars)}"
+            )
 
         # Try to evaluate to a number
         try:
@@ -1390,23 +1414,23 @@ def validate_sports_stat(stat_name: str, value: float) -> Dict[str, Any]:
     """
     # Define valid ranges for common stats
     stat_ranges = {
-        'PTS': (0, 150),  # Points: 0-150 (max realistic per game)
-        'AST': (0, 50),   # Assists: 0-50
-        'REB': (0, 50),   # Rebounds: 0-50
-        'STL': (0, 20),   # Steals: 0-20
-        'BLK': (0, 20),   # Blocks: 0-20
-        'FG%': (0, 1),    # Field goal percentage: 0-1
-        'FT%': (0, 1),    # Free throw percentage: 0-1
-        '3P%': (0, 1),    # 3-point percentage: 0-1
-        'MIN': (0, 60),   # Minutes: 0-60
-        'FGA': (0, 100),  # Field goal attempts: 0-100
-        'FGM': (0, 100),  # Field goals made: 0-100
-        'FTA': (0, 50),   # Free throw attempts: 0-50
-        'FTM': (0, 50),   # Free throws made: 0-50
-        '3PA': (0, 50),   # 3-point attempts: 0-50
-        '3PM': (0, 50),   # 3-pointers made: 0-50
-        'TOV': (0, 20),   # Turnovers: 0-20
-        'PF': (0, 10),    # Personal fouls: 0-10
+        "PTS": (0, 150),  # Points: 0-150 (max realistic per game)
+        "AST": (0, 50),  # Assists: 0-50
+        "REB": (0, 50),  # Rebounds: 0-50
+        "STL": (0, 20),  # Steals: 0-20
+        "BLK": (0, 20),  # Blocks: 0-20
+        "FG%": (0, 1),  # Field goal percentage: 0-1
+        "FT%": (0, 1),  # Free throw percentage: 0-1
+        "3P%": (0, 1),  # 3-point percentage: 0-1
+        "MIN": (0, 60),  # Minutes: 0-60
+        "FGA": (0, 100),  # Field goal attempts: 0-100
+        "FGM": (0, 100),  # Field goals made: 0-100
+        "FTA": (0, 50),  # Free throw attempts: 0-50
+        "FTM": (0, 50),  # Free throws made: 0-50
+        "3PA": (0, 50),  # 3-point attempts: 0-50
+        "3PM": (0, 50),  # 3-pointers made: 0-50
+        "TOV": (0, 20),  # Turnovers: 0-20
+        "PF": (0, 10),  # Personal fouls: 0-10
     }
 
     # Normalize stat name
@@ -1417,40 +1441,40 @@ def validate_sports_stat(stat_name: str, value: float) -> Dict[str, Any]:
 
         if value < min_val:
             return {
-                'valid': False,
-                'stat': stat_name,
-                'value': value,
-                'error': f'{stat_name} cannot be less than {min_val}',
-                'range': {'min': min_val, 'max': max_val}
+                "valid": False,
+                "stat": stat_name,
+                "value": value,
+                "error": f"{stat_name} cannot be less than {min_val}",
+                "range": {"min": min_val, "max": max_val},
             }
         elif value > max_val:
             return {
-                'valid': False,
-                'stat': stat_name,
-                'value': value,
-                'error': f'{stat_name} exceeds maximum realistic value of {max_val}',
-                'range': {'min': min_val, 'max': max_val}
+                "valid": False,
+                "stat": stat_name,
+                "value": value,
+                "error": f"{stat_name} exceeds maximum realistic value of {max_val}",
+                "range": {"min": min_val, "max": max_val},
             }
         else:
             return {
-                'valid': True,
-                'stat': stat_name,
-                'value': value,
-                'range': {'min': min_val, 'max': max_val}
+                "valid": True,
+                "stat": stat_name,
+                "value": value,
+                "range": {"min": min_val, "max": max_val},
             }
     else:
         # Unknown stat - accept any non-negative value
         if value < 0:
             return {
-                'valid': False,
-                'stat': stat_name,
-                'value': value,
-                'error': f'{stat_name} cannot be negative'
+                "valid": False,
+                "stat": stat_name,
+                "value": value,
+                "error": f"{stat_name} cannot be negative",
             }
         else:
             return {
-                'valid': True,
-                'stat': stat_name,
-                'value': value,
-                'warning': 'Unknown stat - validation range not defined'
+                "valid": True,
+                "stat": stat_name,
+                "value": value,
+                "warning": "Unknown stat - validation range not defined",
             }

@@ -5,8 +5,9 @@ Convert Pydantic V1 `class Config` to V2 `model_config = ConfigDict(...)`
 
 import re
 
+
 def fix_config_classes(file_path):
-    with open(file_path, 'r') as f:
+    with open(file_path, "r") as f:
         lines = f.readlines()
 
     new_lines = []
@@ -16,9 +17,9 @@ def fix_config_classes(file_path):
         line = lines[i]
 
         # Check if this line starts a Config class
-        if line.strip() == 'class Config:':
+        if line.strip() == "class Config:":
             indent = len(line) - len(line.lstrip())
-            base_indent = ' ' * indent
+            base_indent = " " * indent
 
             # Collect all config options
             config_opts = []
@@ -30,7 +31,11 @@ def fix_config_classes(file_path):
                 config_stripped = config_line.strip()
 
                 # Check if we've left the config block
-                if config_stripped and not config_line.startswith(base_indent + '    ') and config_stripped != '':
+                if (
+                    config_stripped
+                    and not config_line.startswith(base_indent + "    ")
+                    and config_stripped != ""
+                ):
                     # We've left the config class
                     break
 
@@ -40,7 +45,7 @@ def fix_config_classes(file_path):
                     continue
 
                 # Extract config option
-                if '=' in config_stripped:
+                if "=" in config_stripped:
                     config_opts.append(config_stripped)
 
                 i += 1
@@ -48,26 +53,28 @@ def fix_config_classes(file_path):
             # Generate model_config line
             if config_opts:
                 # Format as ConfigDict
-                config_dict_content = ', '.join(config_opts)
-                new_lines.append(f"{base_indent}model_config = ConfigDict({config_dict_content})\n")
+                config_dict_content = ", ".join(config_opts)
+                new_lines.append(
+                    f"{base_indent}model_config = ConfigDict({config_dict_content})\n"
+                )
             else:
                 # Empty config
                 new_lines.append(f"{base_indent}model_config = ConfigDict()\n")
 
             # Add blank line after model_config
             if i < len(lines) and lines[i].strip():
-                new_lines.append('\n')
+                new_lines.append("\n")
 
             continue
 
         new_lines.append(line)
         i += 1
 
-    with open(file_path, 'w') as f:
+    with open(file_path, "w") as f:
         f.writelines(new_lines)
 
     print(f"✅ Converted class Config → model_config in {file_path}")
 
-if __name__ == '__main__':
-    fix_config_classes('mcp_server/tools/params.py')
 
+if __name__ == "__main__":
+    fix_config_classes("mcp_server/tools/params.py")

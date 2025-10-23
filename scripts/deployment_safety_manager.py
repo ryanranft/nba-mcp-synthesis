@@ -30,14 +30,14 @@ from datetime import datetime
 from enum import Enum
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 
 class ValidationLevel(Enum):
     """Validation severity levels"""
+
     CRITICAL = "critical"
     WARNING = "warning"
     INFO = "info"
@@ -46,6 +46,7 @@ class ValidationLevel(Enum):
 @dataclass
 class ValidationResult:
     """Result of a validation check"""
+
     check_name: str
     passed: bool
     level: ValidationLevel
@@ -56,6 +57,7 @@ class ValidationResult:
 @dataclass
 class SafetyCheckResult:
     """Complete safety check result"""
+
     passed: bool
     checks_run: int
     checks_passed: int
@@ -68,6 +70,7 @@ class SafetyCheckResult:
 @dataclass
 class DeploymentBackup:
     """Backup information for rollback"""
+
     backup_id: str
     timestamp: str
     files_backed_up: List[str]
@@ -93,15 +96,19 @@ class CircuitBreaker:
     def record_failure(self, recommendation_id: str, error: str):
         """Record a deployment failure"""
         self.failure_count += 1
-        self.failures.append({
-            'recommendation_id': recommendation_id,
-            'error': error,
-            'timestamp': datetime.now().isoformat()
-        })
+        self.failures.append(
+            {
+                "recommendation_id": recommendation_id,
+                "error": error,
+                "timestamp": datetime.now().isoformat(),
+            }
+        )
 
         if self.failure_count >= self.failure_threshold:
             self.is_open = True
-            logger.error(f"🚨 CIRCUIT BREAKER OPENED after {self.failure_count} failures")
+            logger.error(
+                f"🚨 CIRCUIT BREAKER OPENED after {self.failure_count} failures"
+            )
 
     def record_success(self):
         """Record a successful deployment"""
@@ -116,7 +123,10 @@ class CircuitBreaker:
     def can_proceed(self) -> Tuple[bool, str]:
         """Check if deployment can proceed"""
         if self.is_open:
-            return False, f"Circuit breaker is OPEN after {self.failure_count} consecutive failures"
+            return (
+                False,
+                f"Circuit breaker is OPEN after {self.failure_count} consecutive failures",
+            )
         return True, "OK"
 
 
@@ -135,7 +145,7 @@ class DeploymentSafetyManager:
     def __init__(
         self,
         project_root: str = "../nba-simulator-aws",
-        backup_dir: str = ".deployment_backups"
+        backup_dir: str = ".deployment_backups",
     ):
         """
         Initialize Safety Manager.
@@ -155,9 +165,7 @@ class DeploymentSafetyManager:
         logger.info(f"   Backup directory: {self.backup_dir}")
 
     def run_pre_deployment_checks(
-        self,
-        files_to_deploy: List[str],
-        recommendation: Dict[str, Any]
+        self, files_to_deploy: List[str], recommendation: Dict[str, Any]
     ) -> SafetyCheckResult:
         """
         Run comprehensive pre-deployment safety checks.
@@ -181,7 +189,7 @@ class DeploymentSafetyManager:
                 check_name="Circuit Breaker",
                 passed=can_proceed,
                 level=ValidationLevel.CRITICAL,
-                message=cb_message
+                message=cb_message,
             )
         )
 
@@ -194,19 +202,19 @@ class DeploymentSafetyManager:
                         check_name=f"File Exists: {Path(file_path).name}",
                         passed=True,  # OK to modify existing
                         level=ValidationLevel.WARNING,
-                        message=f"Will modify existing file: {file_path}"
+                        message=f"Will modify existing file: {file_path}",
                     )
                 )
 
         # Check 3: Python syntax validation
         for file_path in files_to_deploy:
-            if file_path.endswith('.py'):
+            if file_path.endswith(".py"):
                 result = self._validate_python_syntax(file_path)
                 all_results.append(result)
 
         # Check 4: Import validation
         for file_path in files_to_deploy:
-            if file_path.endswith('.py'):
+            if file_path.endswith(".py"):
                 result = self._validate_imports(file_path)
                 all_results.append(result)
 
@@ -225,14 +233,12 @@ class DeploymentSafetyManager:
         checks_failed = checks_run - checks_passed
 
         critical_failures = [
-            r for r in all_results
+            r
+            for r in all_results
             if not r.passed and r.level == ValidationLevel.CRITICAL
         ]
 
-        warnings = [
-            r for r in all_results
-            if r.level == ValidationLevel.WARNING
-        ]
+        warnings = [r for r in all_results if r.level == ValidationLevel.WARNING]
 
         passed = len(critical_failures) == 0
 
@@ -243,7 +249,7 @@ class DeploymentSafetyManager:
             checks_failed=checks_failed,
             critical_failures=critical_failures,
             warnings=warnings,
-            all_results=all_results
+            all_results=all_results,
         )
 
         logger.info(f"✅ Safety checks complete")
@@ -256,9 +262,7 @@ class DeploymentSafetyManager:
         return result
 
     def create_backup(
-        self,
-        files: List[str],
-        recommendation_id: str
+        self, files: List[str], recommendation_id: str
     ) -> Optional[DeploymentBackup]:
         """
         Create backup of files before modification.
@@ -302,22 +306,22 @@ class DeploymentSafetyManager:
 
             # Save backup metadata
             metadata = {
-                'backup_id': backup_id,
-                'timestamp': datetime.now().isoformat(),
-                'recommendation_id': recommendation_id,
-                'files': files_backed_up
+                "backup_id": backup_id,
+                "timestamp": datetime.now().isoformat(),
+                "recommendation_id": recommendation_id,
+                "files": files_backed_up,
             }
 
-            metadata_file = backup_path / 'backup_metadata.json'
-            with open(metadata_file, 'w') as f:
+            metadata_file = backup_path / "backup_metadata.json"
+            with open(metadata_file, "w") as f:
                 json.dump(metadata, f, indent=2)
 
             backup = DeploymentBackup(
                 backup_id=backup_id,
-                timestamp=metadata['timestamp'],
+                timestamp=metadata["timestamp"],
                 files_backed_up=files_backed_up,
                 backup_directory=str(backup_path),
-                recommendation_id=recommendation_id
+                recommendation_id=recommendation_id,
             )
 
             logger.info(f"✅ Backup created successfully")
@@ -371,7 +375,7 @@ class DeploymentSafetyManager:
     def _validate_python_syntax(self, file_path: str) -> ValidationResult:
         """Validate Python file syntax"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 code = f.read()
 
             # Try to parse AST
@@ -381,7 +385,7 @@ class DeploymentSafetyManager:
                 check_name=f"Syntax: {Path(file_path).name}",
                 passed=True,
                 level=ValidationLevel.CRITICAL,
-                message="Python syntax is valid"
+                message="Python syntax is valid",
             )
 
         except SyntaxError as e:
@@ -390,7 +394,7 @@ class DeploymentSafetyManager:
                 passed=False,
                 level=ValidationLevel.CRITICAL,
                 message=f"Syntax error: {e}",
-                details={'error': str(e), 'line': e.lineno}
+                details={"error": str(e), "line": e.lineno},
             )
 
         except Exception as e:
@@ -398,7 +402,7 @@ class DeploymentSafetyManager:
                 check_name=f"Syntax: {Path(file_path).name}",
                 passed=False,
                 level=ValidationLevel.CRITICAL,
-                message=f"Failed to validate syntax: {e}"
+                message=f"Failed to validate syntax: {e}",
             )
 
     def _validate_imports(self, file_path: str) -> ValidationResult:
@@ -406,9 +410,9 @@ class DeploymentSafetyManager:
         try:
             # Use python -m py_compile to check if file can be compiled
             result = subprocess.run(
-                ['python', '-m', 'py_compile', file_path],
+                ["python", "-m", "py_compile", file_path],
                 capture_output=True,
-                text=True
+                text=True,
             )
 
             if result.returncode == 0:
@@ -416,7 +420,7 @@ class DeploymentSafetyManager:
                     check_name=f"Imports: {Path(file_path).name}",
                     passed=True,
                     level=ValidationLevel.WARNING,
-                    message="File compiles successfully"
+                    message="File compiles successfully",
                 )
             else:
                 return ValidationResult(
@@ -424,7 +428,7 @@ class DeploymentSafetyManager:
                     passed=False,
                     level=ValidationLevel.WARNING,
                     message=f"Compilation warning: {result.stderr}",
-                    details={'stderr': result.stderr}
+                    details={"stderr": result.stderr},
                 )
 
         except Exception as e:
@@ -432,18 +436,20 @@ class DeploymentSafetyManager:
                 check_name=f"Imports: {Path(file_path).name}",
                 passed=True,  # Don't block on import validation failure
                 level=ValidationLevel.INFO,
-                message=f"Could not validate imports: {e}"
+                message=f"Could not validate imports: {e}",
             )
 
     def _needs_database(self, recommendation: Dict[str, Any]) -> bool:
         """Check if recommendation needs database"""
         text = (
-            recommendation.get('title', '') + ' ' +
-            recommendation.get('description', '') + ' ' +
-            recommendation.get('technical_details', '')
+            recommendation.get("title", "")
+            + " "
+            + recommendation.get("description", "")
+            + " "
+            + recommendation.get("technical_details", "")
         ).lower()
 
-        db_keywords = ['database', 'sql', 'postgres', 'table', 'query']
+        db_keywords = ["database", "sql", "postgres", "table", "query"]
         return any(keyword in text for keyword in db_keywords)
 
     def _check_database_connection(self) -> ValidationResult:
@@ -453,17 +459,19 @@ class DeploymentSafetyManager:
             check_name="Database Connection",
             passed=True,
             level=ValidationLevel.INFO,
-            message="Database connection check skipped (not critical)"
+            message="Database connection check skipped (not critical)",
         )
 
-    def _check_environment_variables(self, recommendation: Dict[str, Any]) -> ValidationResult:
+    def _check_environment_variables(
+        self, recommendation: Dict[str, Any]
+    ) -> ValidationResult:
         """Check if required environment variables exist"""
         # Placeholder - could check for API keys, credentials, etc.
         return ValidationResult(
             check_name="Environment Variables",
             passed=True,
             level=ValidationLevel.INFO,
-            message="Environment variables check passed"
+            message="Environment variables check passed",
         )
 
     def log_deployment(
@@ -471,21 +479,21 @@ class DeploymentSafetyManager:
         recommendation_id: str,
         action: str,
         status: str,
-        details: Optional[Dict[str, Any]] = None
+        details: Optional[Dict[str, Any]] = None,
     ):
         """Log deployment action for audit trail"""
         log_entry = {
-            'timestamp': datetime.now().isoformat(),
-            'recommendation_id': recommendation_id,
-            'action': action,
-            'status': status,
-            'details': details or {}
+            "timestamp": datetime.now().isoformat(),
+            "recommendation_id": recommendation_id,
+            "action": action,
+            "status": status,
+            "details": details or {},
         }
 
         # Write to audit log
-        audit_log = self.backup_dir / 'deployment_audit.jsonl'
-        with open(audit_log, 'a') as f:
-            f.write(json.dumps(log_entry) + '\n')
+        audit_log = self.backup_dir / "deployment_audit.jsonl"
+        with open(audit_log, "a") as f:
+            f.write(json.dumps(log_entry) + "\n")
 
         logger.info(f"📋 Logged: {action} - {status}")
 
@@ -494,9 +502,11 @@ def main():
     """CLI for testing safety manager"""
     import argparse
 
-    parser = argparse.ArgumentParser(description='Test Deployment Safety Manager')
-    parser.add_argument('--project-root', default='../nba-simulator-aws', help='Project root')
-    parser.add_argument('--test-file', help='Test file path')
+    parser = argparse.ArgumentParser(description="Test Deployment Safety Manager")
+    parser.add_argument(
+        "--project-root", default="../nba-simulator-aws", help="Project root"
+    )
+    parser.add_argument("--test-file", help="Test file path")
     args = parser.parse_args()
 
     manager = DeploymentSafetyManager(project_root=args.project_root)
@@ -516,5 +526,5 @@ def main():
         print(f"  Message: {result.message}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

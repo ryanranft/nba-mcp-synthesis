@@ -61,14 +61,16 @@ class ClaudeModelV2:
 
         logger.info(f"✅ Claude Sonnet initialized: {self.model}")
         logger.info(f"📊 Context window: 1M tokens (200k advertised)")
-        logger.info(f"💰 Pricing: ${self.input_cost_per_1m}/M input, ${self.output_cost_per_1m}/M output")
+        logger.info(
+            f"💰 Pricing: ${self.input_cost_per_1m}/M input, ${self.output_cost_per_1m}/M output"
+        )
 
     async def analyze_book(
         self,
         book_content: str,
         book_title: str,
         book_metadata: Dict[str, Any],
-        project_context: Optional[Dict] = None
+        project_context: Optional[Dict] = None,
     ) -> Dict[str, Any]:
         """
         Analyze book content and extract recommendations using full context.
@@ -85,7 +87,9 @@ class ClaudeModelV2:
         start_time = datetime.now()
 
         # Create comprehensive prompt for full-book analysis
-        prompt = self._create_full_book_prompt(book_content, book_title, book_metadata, project_context)
+        prompt = self._create_full_book_prompt(
+            book_content, book_title, book_metadata, project_context
+        )
 
         logger.info(f"📖 Analyzing book with Claude: {book_title}")
         logger.info(f"📊 Content length: {len(book_content):,} characters")
@@ -96,7 +100,7 @@ class ClaudeModelV2:
                 model=self.model,
                 max_tokens=8192,  # Increased for comprehensive output
                 temperature=0.7,
-                messages=[{"role": "user", "content": prompt}]
+                messages=[{"role": "user", "content": prompt}],
             )
 
             content = response.content[0].text
@@ -104,7 +108,8 @@ class ClaudeModelV2:
             # Extract JSON recommendations
             try:
                 import re
-                json_match = re.search(r'\[.*\]', content, re.DOTALL)
+
+                json_match = re.search(r"\[.*\]", content, re.DOTALL)
                 if json_match:
                     recommendations = json.loads(json_match.group(0))
                 else:
@@ -115,12 +120,15 @@ class ClaudeModelV2:
             # Calculate cost
             input_tokens = response.usage.input_tokens
             output_tokens = response.usage.output_tokens
-            cost = (input_tokens / 1_000_000 * self.input_cost_per_1m) + \
-                   (output_tokens / 1_000_000 * self.output_cost_per_1m)
+            cost = (input_tokens / 1_000_000 * self.input_cost_per_1m) + (
+                output_tokens / 1_000_000 * self.output_cost_per_1m
+            )
 
             processing_time = (datetime.now() - start_time).total_seconds()
 
-            logger.info(f"✅ Claude analyzed {book_title}: {len(recommendations)} recommendations")
+            logger.info(
+                f"✅ Claude analyzed {book_title}: {len(recommendations)} recommendations"
+            )
             logger.info(f"💰 Cost: ${cost:.4f}")
             logger.info(f"🔢 Tokens: {input_tokens:,} in, {output_tokens:,} out")
             logger.info(f"⏱️ Time: {processing_time:.1f}s")
@@ -155,7 +163,7 @@ class ClaudeModelV2:
         book_content: str,
         book_title: str,
         book_metadata: Dict[str, Any],
-        project_context: Optional[Dict] = None
+        project_context: Optional[Dict] = None,
     ) -> str:
         """Create comprehensive prompt for full-book analysis with project awareness"""
 
@@ -164,15 +172,15 @@ class ClaudeModelV2:
         # Build project context section if available
         project_section = ""
         if project_context:
-            project_info = project_context.get('project_info', {})
-            project_name = project_info.get('name', 'NBA Analytics System')
-            project_goals = project_info.get('goals', [])
-            project_phase = project_info.get('phase', 'Unknown')
-            project_tech = project_info.get('technologies', [])
-            file_tree = project_context.get('file_tree', '')
-            recent_commits = project_context.get('recent_commits', [])[:5]
-            completion = project_context.get('completion_status', {})
-            sampled_files = project_context.get('sampled_files', {})
+            project_info = project_context.get("project_info", {})
+            project_name = project_info.get("name", "NBA Analytics System")
+            project_goals = project_info.get("goals", [])
+            project_phase = project_info.get("phase", "Unknown")
+            project_tech = project_info.get("technologies", [])
+            file_tree = project_context.get("file_tree", "")
+            recent_commits = project_context.get("recent_commits", [])[:5]
+            completion = project_context.get("completion_status", {})
+            sampled_files = project_context.get("sampled_files", {})
 
             project_section = f"""
 ## 🎯 PROJECT CONTEXT: {project_name}
@@ -297,7 +305,7 @@ Begin your comprehensive analysis:"""
         book_content: str,
         book_metadata: Dict[str, Any],
         existing_recommendations: Optional[List[Dict[str, Any]]] = None,
-        project_context: Optional[Dict] = None
+        project_context: Optional[Dict] = None,
     ) -> Dict[str, Any]:
         """
         Alternate interface for compatibility with existing code.
@@ -312,5 +320,6 @@ Begin your comprehensive analysis:"""
             Analysis result dictionary
         """
         title = book_metadata.get("title", "Unknown")
-        return await self.analyze_book(book_content, title, book_metadata, project_context)
-
+        return await self.analyze_book(
+            book_content, title, book_metadata, project_context
+        )

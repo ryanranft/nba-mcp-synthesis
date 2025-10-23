@@ -57,6 +57,7 @@ class ResilientBookAnalyzer:
         logger.info(f"Loading secrets for project={project}, context={context}")
         try:
             from mcp_server.unified_secrets_manager import load_secrets_hierarchical
+
             # Map context to the secrets context
             secrets_context = context.upper()
             if context.lower() == "production":
@@ -210,7 +211,9 @@ class ResilientBookAnalyzer:
                 models_used.append("GPT-4")
 
         # Synthesize recommendations with consensus voting
-        synthesized_recs, consensus_level = self._synthesize_consensus(model_results, models_used)
+        synthesized_recs, consensus_level = self._synthesize_consensus(
+            model_results, models_used
+        )
 
         # Calculate totals
         total_cost = sum(result.get("cost", 0.0) for result in model_results.values())
@@ -265,23 +268,40 @@ class ResilientBookAnalyzer:
                 logger.warning(
                     f"⚠️ {model_name} analysis failed: {result.get('error', 'Unknown error')}"
                 )
-                return {"success": False, "recommendations": [], "cost": 0.0, "tokens_input_estimate": 0}
+                return {
+                    "success": False,
+                    "recommendations": [],
+                    "cost": 0.0,
+                    "tokens_input_estimate": 0,
+                }
 
         except asyncio.TimeoutError:
             logger.error(f"❌ {model_name} analysis timed out")
-            return {"success": False, "recommendations": [], "cost": 0.0, "tokens_input_estimate": 0}
+            return {
+                "success": False,
+                "recommendations": [],
+                "cost": 0.0,
+                "tokens_input_estimate": 0,
+            }
         except Exception as e:
             logger.error(f"❌ {model_name} analysis failed: {str(e)}")
-            return {"success": False, "recommendations": [], "cost": 0.0, "tokens_input_estimate": 0}
+            return {
+                "success": False,
+                "recommendations": [],
+                "cost": 0.0,
+                "tokens_input_estimate": 0,
+            }
 
-    async def _run_claude_analysis(self, content: str, metadata: Dict, timeout: int) -> Dict:
+    async def _run_claude_analysis(
+        self, content: str, metadata: Dict, timeout: int
+    ) -> Dict:
         """Run Claude analysis with proper interface."""
         try:
             result = await asyncio.wait_for(
                 self.claude_model.analyze_book(
                     book_content=content,
                     book_title=metadata.get("title", "Unknown"),
-                    book_metadata=metadata
+                    book_metadata=metadata,
                 ),
                 timeout=timeout,
             )
@@ -295,20 +315,39 @@ class ResilientBookAnalyzer:
                     "recommendations": result.get("recommendations", []),
                     "cost": result.get("cost", 0.0),
                     "tokens_input_estimate": result.get("input_tokens", 0),
-                    "model_name": "Claude"
+                    "model_name": "Claude",
                 }
             else:
-                logger.warning(f"⚠️ Claude analysis failed: {result.get('error', 'Unknown error')}")
-                return {"success": False, "recommendations": [], "cost": 0.0, "tokens_input_estimate": 0}
+                logger.warning(
+                    f"⚠️ Claude analysis failed: {result.get('error', 'Unknown error')}"
+                )
+                return {
+                    "success": False,
+                    "recommendations": [],
+                    "cost": 0.0,
+                    "tokens_input_estimate": 0,
+                }
 
         except asyncio.TimeoutError:
             logger.error("❌ Claude analysis timed out")
-            return {"success": False, "recommendations": [], "cost": 0.0, "tokens_input_estimate": 0}
+            return {
+                "success": False,
+                "recommendations": [],
+                "cost": 0.0,
+                "tokens_input_estimate": 0,
+            }
         except Exception as e:
             logger.error(f"❌ Claude analysis failed: {str(e)}")
-            return {"success": False, "recommendations": [], "cost": 0.0, "tokens_input_estimate": 0}
+            return {
+                "success": False,
+                "recommendations": [],
+                "cost": 0.0,
+                "tokens_input_estimate": 0,
+            }
 
-    async def _run_gpt4_analysis(self, content: str, metadata: Dict, timeout: int) -> Dict:
+    async def _run_gpt4_analysis(
+        self, content: str, metadata: Dict, timeout: int
+    ) -> Dict:
         """Run GPT-4 analysis with proper interface."""
         try:
             # Extract raw recommendations from other models for synthesis
@@ -318,7 +357,7 @@ class ResilientBookAnalyzer:
                 self.gpt4_model.synthesize_recommendations(
                     raw_recommendations=raw_recs,
                     book_metadata=metadata,
-                    book_content=content
+                    book_content=content,
                 ),
                 timeout=timeout,
             )
@@ -332,18 +371,35 @@ class ResilientBookAnalyzer:
                     "recommendations": result.get("recommendations", []),
                     "cost": result.get("cost", 0.0),
                     "tokens_input_estimate": result.get("input_tokens", 0),
-                    "model_name": "GPT-4"
+                    "model_name": "GPT-4",
                 }
             else:
-                logger.warning(f"⚠️ GPT-4 analysis failed: {result.get('error', 'Unknown error')}")
-                return {"success": False, "recommendations": [], "cost": 0.0, "tokens_input_estimate": 0}
+                logger.warning(
+                    f"⚠️ GPT-4 analysis failed: {result.get('error', 'Unknown error')}"
+                )
+                return {
+                    "success": False,
+                    "recommendations": [],
+                    "cost": 0.0,
+                    "tokens_input_estimate": 0,
+                }
 
         except asyncio.TimeoutError:
             logger.error("❌ GPT-4 analysis timed out")
-            return {"success": False, "recommendations": [], "cost": 0.0, "tokens_input_estimate": 0}
+            return {
+                "success": False,
+                "recommendations": [],
+                "cost": 0.0,
+                "tokens_input_estimate": 0,
+            }
         except Exception as e:
             logger.error(f"❌ GPT-4 analysis failed: {str(e)}")
-            return {"success": False, "recommendations": [], "cost": 0.0, "tokens_input_estimate": 0}
+            return {
+                "success": False,
+                "recommendations": [],
+                "cost": 0.0,
+                "tokens_input_estimate": 0,
+            }
 
     def _synthesize_consensus(
         self, model_results: Dict, models_used: List[str]
@@ -374,7 +430,9 @@ class ResilientBookAnalyzer:
             found_group = False
             for group in rec_groups:
                 group_title = group[0].get("title", "")
-                similarity = SequenceMatcher(None, title.lower(), group_title.lower()).ratio()
+                similarity = SequenceMatcher(
+                    None, title.lower(), group_title.lower()
+                ).ratio()
                 if similarity >= 0.7:
                     group.append(rec)
                     found_group = True
@@ -413,7 +471,9 @@ class ResilientBookAnalyzer:
             synthesized.append(synth_rec)
 
         # Sort by consensus (most agreed upon first)
-        synthesized.sort(key=lambda x: (x["source_count"], x["consensus_votes"]), reverse=True)
+        synthesized.sort(
+            key=lambda x: (x["source_count"], x["consensus_votes"]), reverse=True
+        )
 
         # Determine overall consensus level
         if not synthesized:

@@ -145,7 +145,9 @@ class TestSecretsManagerIntegration:
         def load_secrets():
             with patch("os.path.exists", return_value=True):
                 sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
-                result = sm.load_secrets("test_project", "TEST", "test", base_path=temp_secrets_dir)
+                result = sm.load_secrets(
+                    "test_project", "TEST", "test", base_path=temp_secrets_dir
+                )
                 results.append(result)
 
         # Create multiple threads
@@ -257,4 +259,3 @@ class TestSecretsManagerIntegration:
             # Verify logging worked
             assert len(sm.secrets) == 1
             assert len(sm.aliases) == 1
-

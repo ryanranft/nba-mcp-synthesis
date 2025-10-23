@@ -18,7 +18,9 @@ from typing import Dict, List, Set, Tuple
 from collections import defaultdict, deque
 import logging
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -41,7 +43,7 @@ class DependencyTracker:
         # Build title index
         for idx, rec in enumerate(recommendations, 1):
             rec_id = f"rec_{idx:03d}"
-            title = rec.get('title', '').lower()
+            title = rec.get("title", "").lower()
             self.rec_by_title[title] = rec_id
 
         logger.info(f"Initialized tracker with {len(recommendations)} recommendations")
@@ -65,7 +67,7 @@ class DependencyTracker:
         deps = set()
 
         # 1. Explicit dependencies field
-        explicit_deps = rec.get('dependencies', [])
+        explicit_deps = rec.get("dependencies", [])
         for dep_title in explicit_deps:
             dep_title_lower = dep_title.lower().strip()
             if dep_title_lower in self.rec_by_title:
@@ -76,19 +78,19 @@ class DependencyTracker:
         text_lower = text.lower()
 
         # Pattern 1: "requires rec_XXX"
-        for match in re.finditer(r'requires?\s+rec[_-]?(\d+)', text_lower):
+        for match in re.finditer(r"requires?\s+rec[_-]?(\d+)", text_lower):
             dep_id = f"rec_{int(match.group(1)):03d}"
             if dep_id != f"rec_{rec_idx:03d}":  # Avoid self-dependency
                 deps.add(dep_id)
 
         # Pattern 2: "depends on rec_XXX"
-        for match in re.finditer(r'depends?\s+on\s+rec[_-]?(\d+)', text_lower):
+        for match in re.finditer(r"depends?\s+on\s+rec[_-]?(\d+)", text_lower):
             dep_id = f"rec_{int(match.group(1)):03d}"
             if dep_id != f"rec_{rec_idx:03d}":
                 deps.add(dep_id)
 
         # Pattern 3: "after implementing rec_XXX"
-        for match in re.finditer(r'after\s+implementing\s+rec[_-]?(\d+)', text_lower):
+        for match in re.finditer(r"after\s+implementing\s+rec[_-]?(\d+)", text_lower):
             dep_id = f"rec_{int(match.group(1)):03d}"
             if dep_id != f"rec_{rec_idx:03d}":
                 deps.add(dep_id)
@@ -221,19 +223,22 @@ class DependencyTracker:
             logger.info(f"  Limiting diagram to 50 most connected nodes")
             # Sort by number of connections
             node_connections = {
-                node: len(self.graph.get(node, [])) + len(self.reverse_graph.get(node, []))
+                node: len(self.graph.get(node, []))
+                + len(self.reverse_graph.get(node, []))
                 for node in all_involved
             }
-            all_involved = set(sorted(node_connections, key=node_connections.get, reverse=True)[:50])
+            all_involved = set(
+                sorted(node_connections, key=node_connections.get, reverse=True)[:50]
+            )
 
         mermaid_content = "```mermaid\ngraph TD\n"
 
         # Add nodes
         for rec_id in sorted(all_involved):
-            rec_idx = int(rec_id.split('_')[1])
-            title = self.recommendations[rec_idx - 1].get('title', 'Unknown')
+            rec_idx = int(rec_id.split("_")[1])
+            title = self.recommendations[rec_idx - 1].get("title", "Unknown")
             title_short = title[:40] + "..." if len(title) > 40 else title
-            mermaid_content += f"    {rec_id}[\"{rec_id}: {title_short}\"]\n"
+            mermaid_content += f'    {rec_id}["{rec_id}: {title_short}"]\n'
 
         # Add edges
         for rec_id in sorted(all_involved):
@@ -275,7 +280,9 @@ This document visualizes the dependencies between recommendations for the NBA Si
 """
 
         if self.circular_deps:
-            markdown_content += f"⚠️ **Found {len(self.circular_deps)} circular dependencies:**\n\n"
+            markdown_content += (
+                f"⚠️ **Found {len(self.circular_deps)} circular dependencies:**\n\n"
+            )
             for i, cycle in enumerate(self.circular_deps, 1):
                 markdown_content += f"### Cycle {i}\n\n"
                 markdown_content += " → ".join(cycle) + f" → {cycle[0]}\n\n"
@@ -297,27 +304,30 @@ See [PRIORITY_ACTION_LIST.md](PRIORITY_ACTION_LIST.md) for the recommended imple
 
         # List all dependencies
         for rec_id in sorted(self.graph.keys()):
-            rec_idx = int(rec_id.split('_')[1])
-            title = self.recommendations[rec_idx - 1].get('title', 'Unknown')
+            rec_idx = int(rec_id.split("_")[1])
+            title = self.recommendations[rec_idx - 1].get("title", "Unknown")
             deps = sorted(self.graph[rec_id])
 
             markdown_content += f"### {rec_id}: {title}\n\n"
             markdown_content += f"**Depends on:**\n"
             for dep_id in deps:
-                dep_idx = int(dep_id.split('_')[1])
-                dep_title = self.recommendations[dep_idx - 1].get('title', 'Unknown')
+                dep_idx = int(dep_id.split("_")[1])
+                dep_title = self.recommendations[dep_idx - 1].get("title", "Unknown")
                 markdown_content += f"- {dep_id}: {dep_title}\n"
             markdown_content += "\n"
 
-        markdown_content += """
+        markdown_content += (
+            """
 ---
 
 **Generated by:** Dependency Tracker
-**Last Updated:** """ + self._get_timestamp()
+**Last Updated:** """
+            + self._get_timestamp()
+        )
 
         # Write to file
         output_path = Path(output_file)
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             f.write(markdown_content)
 
         logger.info(f"✅ Saved Mermaid diagram to {output_file}")
@@ -325,23 +335,30 @@ See [PRIORITY_ACTION_LIST.md](PRIORITY_ACTION_LIST.md) for the recommended imple
     def _get_timestamp(self) -> str:
         """Get formatted timestamp."""
         from datetime import datetime
-        return datetime.now().strftime('%B %d, %Y at %H:%M:%S')
+
+        return datetime.now().strftime("%B %d, %Y at %H:%M:%S")
 
 
 def main():
     """Main execution function."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Track dependencies between recommendations")
-    parser.add_argument('--synthesis', required=True, help='Path to consolidated_recommendations.json')
-    parser.add_argument('--output', default='DEPENDENCY_GRAPH.md', help='Output markdown file')
+    parser = argparse.ArgumentParser(
+        description="Track dependencies between recommendations"
+    )
+    parser.add_argument(
+        "--synthesis", required=True, help="Path to consolidated_recommendations.json"
+    )
+    parser.add_argument(
+        "--output", default="DEPENDENCY_GRAPH.md", help="Output markdown file"
+    )
 
     args = parser.parse_args()
 
     # Load recommendations
-    with open(args.synthesis, 'r') as f:
+    with open(args.synthesis, "r") as f:
         data = json.load(f)
-    recommendations = data.get('recommendations', [])
+    recommendations = data.get("recommendations", [])
 
     # Build tracker
     tracker = DependencyTracker(recommendations)
@@ -364,7 +381,9 @@ def main():
     print(f"=" * 80)
     print(f"Total recommendations: {len(recommendations)}")
     print(f"Recommendations with dependencies: {len(tracker.graph)}")
-    print(f"Total dependency edges: {sum(len(deps) for deps in tracker.graph.values())}")
+    print(
+        f"Total dependency edges: {sum(len(deps) for deps in tracker.graph.values())}"
+    )
     print(f"Circular dependencies: {len(cycles)}")
     print(f"\nOutput: {args.output}")
     print(f"=" * 80)
@@ -372,10 +391,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-

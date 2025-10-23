@@ -42,6 +42,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class BackupMetadata:
     """Metadata for a backup."""
+
     backup_id: str
     phase: str
     timestamp: str
@@ -87,19 +88,19 @@ class RollbackManager:
             return json.loads(self.metadata_file.read_text())
         else:
             return {
-                'backups': [],
-                'created_at': datetime.now().isoformat(),
-                'last_updated': datetime.now().isoformat()
+                "backups": [],
+                "created_at": datetime.now().isoformat(),
+                "last_updated": datetime.now().isoformat(),
             }
 
     def _save_metadata(self):
         """Save backup metadata to disk."""
-        self.metadata['last_updated'] = datetime.now().isoformat()
+        self.metadata["last_updated"] = datetime.now().isoformat()
         self.metadata_file.write_text(json.dumps(self.metadata, indent=2))
 
     def _generate_backup_id(self, phase: str) -> str:
         """Generate unique backup ID."""
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         unique_hash = hashlib.md5(f"{phase}_{timestamp}".encode()).hexdigest()[:8]
         return f"{phase}_{timestamp}_{unique_hash}"
 
@@ -107,7 +108,7 @@ class RollbackManager:
         self,
         phase: str,
         paths_to_backup: Optional[List[Path]] = None,
-        description: str = ""
+        description: str = "",
     ) -> str:
         """
         Create backup of specified paths.
@@ -160,7 +161,7 @@ class RollbackManager:
                 shutil.copytree(path, dest, symlinks=False, ignore=self._should_ignore)
 
                 # Count files
-                for file in dest.rglob('*'):
+                for file in dest.rglob("*"):
                     if file.is_file():
                         file_count += 1
                         total_size += file.stat().st_size
@@ -176,30 +177,32 @@ class RollbackManager:
             paths_backed_up=backed_up_paths,
             total_size_bytes=total_size,
             file_count=file_count,
-            backup_dir=str(backup_dir)
+            backup_dir=str(backup_dir),
         )
 
         # Save metadata
-        self.metadata['backups'].append(asdict(metadata))
+        self.metadata["backups"].append(asdict(metadata))
         self._save_metadata()
 
         # Cleanup old backups
         self._cleanup_old_backups(phase, keep_count=5)
 
-        logger.info(f"   ✅ Backup created: {file_count} files, {total_size / 1024:.1f} KB")
+        logger.info(
+            f"   ✅ Backup created: {file_count} files, {total_size / 1024:.1f} KB"
+        )
 
         return backup_id
 
     def _should_ignore(self, dir_path: str, names: List[str]) -> List[str]:
         """Determine which files/dirs to ignore during backup."""
         ignore_patterns = {
-            '__pycache__',
-            '.pyc',
-            '.git',
-            '.DS_Store',
-            'backups',  # Don't backup backups
-            '.pytest_cache',
-            'node_modules'
+            "__pycache__",
+            ".pyc",
+            ".git",
+            ".DS_Store",
+            "backups",  # Don't backup backups
+            ".pytest_cache",
+            "node_modules",
         }
 
         ignored = []
@@ -210,10 +213,7 @@ class RollbackManager:
         return ignored
 
     def restore_backup(
-        self,
-        backup_id: str,
-        safe_restore: bool = True,
-        dry_run: bool = False
+        self, backup_id: str, safe_restore: bool = True, dry_run: bool = False
     ) -> bool:
         """
         Restore from backup.
@@ -228,8 +228,8 @@ class RollbackManager:
         """
         # Find backup metadata
         backup_meta = None
-        for backup in self.metadata['backups']:
-            if backup['backup_id'] == backup_id:
+        for backup in self.metadata["backups"]:
+            if backup["backup_id"] == backup_id:
                 backup_meta = backup
                 break
 
@@ -237,7 +237,7 @@ class RollbackManager:
             logger.error(f"❌ Backup not found: {backup_id}")
             return False
 
-        backup_dir = Path(backup_meta['backup_dir'])
+        backup_dir = Path(backup_meta["backup_dir"])
 
         if not backup_dir.exists():
             logger.error(f"❌ Backup directory not found: {backup_dir}")
@@ -257,14 +257,14 @@ class RollbackManager:
         if safe_restore:
             logger.info("   📦 Creating safety backup of current state...")
             safety_backup_id = self.create_backup(
-                phase=backup_meta['phase'],
-                description=f"Safety backup before restoring {backup_id}"
+                phase=backup_meta["phase"],
+                description=f"Safety backup before restoring {backup_id}",
             )
             logger.info(f"   ✅ Safety backup created: {safety_backup_id}")
 
         # Restore files
         try:
-            for path_str in backup_meta['paths_backed_up']:
+            for path_str in backup_meta["paths_backed_up"]:
                 source_path = backup_dir / Path(path_str).name
                 dest_path = Path(path_str)
 
@@ -288,8 +288,10 @@ class RollbackManager:
         except Exception as e:
             logger.error(f"❌ Restore failed: {e}")
 
-            if safe_restore and 'safety_backup_id' in locals():
-                logger.error(f"   Attempting to restore safety backup: {safety_backup_id}")
+            if safe_restore and "safety_backup_id" in locals():
+                logger.error(
+                    f"   Attempting to restore safety backup: {safety_backup_id}"
+                )
                 return self.restore_backup(safety_backup_id, safe_restore=False)
 
             return False
@@ -297,7 +299,7 @@ class RollbackManager:
     def _preview_restore(self, backup_dir: Path):
         """Preview what would be restored."""
         logger.info("\n   Files to be restored:")
-        for file in backup_dir.rglob('*'):
+        for file in backup_dir.rglob("*"):
             if file.is_file():
                 relative = file.relative_to(backup_dir)
                 logger.info(f"     - {relative}")
@@ -312,13 +314,13 @@ class RollbackManager:
         Returns:
             List of backup metadata dictionaries
         """
-        backups = self.metadata['backups']
+        backups = self.metadata["backups"]
 
         if phase:
-            backups = [b for b in backups if b['phase'] == phase]
+            backups = [b for b in backups if b["phase"] == phase]
 
         # Sort by timestamp (newest first)
-        backups = sorted(backups, key=lambda x: x['timestamp'], reverse=True)
+        backups = sorted(backups, key=lambda x: x["timestamp"], reverse=True)
 
         return backups
 
@@ -330,28 +332,29 @@ class RollbackManager:
             phase: Phase to clean up
             keep_count: Number of backups to keep
         """
-        phase_backups = [b for b in self.metadata['backups'] if b['phase'] == phase]
+        phase_backups = [b for b in self.metadata["backups"] if b["phase"] == phase]
 
         if len(phase_backups) <= keep_count:
             return
 
         # Sort by timestamp (oldest first)
-        phase_backups = sorted(phase_backups, key=lambda x: x['timestamp'])
+        phase_backups = sorted(phase_backups, key=lambda x: x["timestamp"])
 
         # Remove oldest backups
-        to_remove = phase_backups[:len(phase_backups) - keep_count]
+        to_remove = phase_backups[: len(phase_backups) - keep_count]
 
         for backup in to_remove:
-            backup_dir = Path(backup['backup_dir'])
+            backup_dir = Path(backup["backup_dir"])
 
             if backup_dir.exists():
                 shutil.rmtree(backup_dir)
                 logger.info(f"   🗑️  Removed old backup: {backup['backup_id']}")
 
             # Remove from metadata
-            self.metadata['backups'] = [
-                b for b in self.metadata['backups']
-                if b['backup_id'] != backup['backup_id']
+            self.metadata["backups"] = [
+                b
+                for b in self.metadata["backups"]
+                if b["backup_id"] != backup["backup_id"]
             ]
 
         if to_remove:
@@ -369,8 +372,8 @@ class RollbackManager:
         """
         # Find backup
         backup_meta = None
-        for backup in self.metadata['backups']:
-            if backup['backup_id'] == backup_id:
+        for backup in self.metadata["backups"]:
+            if backup["backup_id"] == backup_id:
                 backup_meta = backup
                 break
 
@@ -378,7 +381,7 @@ class RollbackManager:
             logger.error(f"❌ Backup not found: {backup_id}")
             return False
 
-        backup_dir = Path(backup_meta['backup_dir'])
+        backup_dir = Path(backup_meta["backup_dir"])
 
         # Delete directory
         if backup_dir.exists():
@@ -386,9 +389,8 @@ class RollbackManager:
             logger.info(f"🗑️  Deleted backup: {backup_id}")
 
         # Remove from metadata
-        self.metadata['backups'] = [
-            b for b in self.metadata['backups']
-            if b['backup_id'] != backup_id
+        self.metadata["backups"] = [
+            b for b in self.metadata["backups"] if b["backup_id"] != backup_id
         ]
         self._save_metadata()
 
@@ -408,8 +410,10 @@ class RollbackManager:
 |-----------|-------|---------|-------|------|-------------|
 """
 
-        for backup in sorted(self.metadata['backups'], key=lambda x: x['timestamp'], reverse=True):
-            size_kb = backup['total_size_bytes'] / 1024
+        for backup in sorted(
+            self.metadata["backups"], key=lambda x: x["timestamp"], reverse=True
+        ):
+            size_kb = backup["total_size_bytes"] / 1024
             report += f"| {backup['backup_id']} | {backup['phase']} | {backup['timestamp']} | {backup['file_count']} | {size_kb:.1f} KB | {backup['description']} |\n"
 
         return report
@@ -418,18 +422,14 @@ class RollbackManager:
 # Example usage
 if __name__ == "__main__":
     logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s'
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
     )
 
     # Initialize manager
     rollback = RollbackManager()
 
     # Create backup
-    backup_id = rollback.create_backup(
-        phase='test_phase',
-        description="Test backup"
-    )
+    backup_id = rollback.create_backup(phase="test_phase", description="Test backup")
 
     # List backups
     backups = rollback.list_backups()
@@ -437,8 +437,7 @@ if __name__ == "__main__":
 
     # Preview restore
     if backups:
-        rollback.restore_backup(backups[0]['backup_id'], dry_run=True)
+        rollback.restore_backup(backups[0]["backup_id"], dry_run=True)
 
     # Generate report
     print("\n" + rollback.generate_backup_report())
-

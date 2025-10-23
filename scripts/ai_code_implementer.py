@@ -34,23 +34,26 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from mcp_server.env_helper import get_api_key
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 # Try to import Anthropic
 try:
     from anthropic import Anthropic
+
     ANTHROPIC_AVAILABLE = True
 except ImportError:
     ANTHROPIC_AVAILABLE = False
-    logger.warning("⚠️  Anthropic library not available. Install with: pip install anthropic")
+    logger.warning(
+        "⚠️  Anthropic library not available. Install with: pip install anthropic"
+    )
 
 
 @dataclass
 class ImplementationContext:
     """Context for code implementation"""
+
     existing_code: Optional[str] = None
     existing_classes: List[str] = None
     existing_functions: List[str] = None
@@ -63,6 +66,7 @@ class ImplementationContext:
 @dataclass
 class GeneratedImplementation:
     """Generated code implementation"""
+
     code: str
     language: str
     description: str
@@ -87,7 +91,7 @@ class AICodeImplementer:
         self,
         model: str = "claude-sonnet-4-5-20250929",
         max_tokens: int = 8000,
-        temperature: float = 0.1
+        temperature: float = 0.1,
     ):
         """
         Initialize AI Code Implementer.
@@ -103,7 +107,7 @@ class AICodeImplementer:
 
         # Initialize Anthropic client
         # Use hierarchical secrets loading
-        api_key = get_api_key('ANTHROPIC')
+        api_key = get_api_key("ANTHROPIC")
         if api_key and ANTHROPIC_AVAILABLE:
             self.client = Anthropic(api_key=api_key)
             logger.info(f"🤖 AI Code Implementer initialized")
@@ -115,13 +119,15 @@ class AICodeImplementer:
                 logger.warning("⚠️  Anthropic library not installed")
             else:
                 logger.warning("⚠️  ANTHROPIC_API_KEY not found in environment")
-                logger.warning("⚠️  Make sure secrets are initialized with: from mcp_server.secrets_loader import init_secrets; init_secrets()")
+                logger.warning(
+                    "⚠️  Make sure secrets are initialized with: from mcp_server.secrets_loader import init_secrets; init_secrets()"
+                )
 
     def implement_recommendation(
         self,
         recommendation: Dict[str, Any],
         context: ImplementationContext,
-        integration_strategy: str = "create_new"
+        integration_strategy: str = "create_new",
     ) -> Optional[GeneratedImplementation]:
         """
         Generate complete implementation for a recommendation.
@@ -138,16 +144,14 @@ class AICodeImplementer:
             logger.error("❌ Claude client not initialized")
             return None
 
-        title = recommendation.get('title', 'Untitled')
+        title = recommendation.get("title", "Untitled")
         logger.info(f"🤖 Generating implementation for: {title}")
         logger.info(f"   Strategy: {integration_strategy}")
 
         try:
             # Build prompt
             prompt = self._build_implementation_prompt(
-                recommendation,
-                context,
-                integration_strategy
+                recommendation, context, integration_strategy
             )
 
             logger.info(f"   Prompt length: {len(prompt)} chars")
@@ -158,12 +162,7 @@ class AICodeImplementer:
                 model=self.model,
                 max_tokens=self.max_tokens,
                 temperature=self.temperature,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ]
+                messages=[{"role": "user", "content": prompt}],
             )
 
             # Extract generated code
@@ -172,10 +171,7 @@ class AICodeImplementer:
             logger.info(f"   ✅ Generated {len(generated_text)} characters")
 
             # Parse generated code
-            implementation = self._parse_generated_code(
-                generated_text,
-                recommendation
-            )
+            implementation = self._parse_generated_code(generated_text, recommendation)
 
             return implementation
 
@@ -187,22 +183,21 @@ class AICodeImplementer:
         self,
         recommendation: Dict[str, Any],
         context: ImplementationContext,
-        integration_strategy: str
+        integration_strategy: str,
     ) -> str:
         """Build comprehensive prompt for Claude"""
-        title = recommendation.get('title', 'Untitled')
-        description = recommendation.get('description', 'No description')
-        technical_details = recommendation.get('technical_details', '')
-        steps = recommendation.get('implementation_steps', [])
-        time_estimate = recommendation.get('time_estimate', 'Unknown')
+        title = recommendation.get("title", "Untitled")
+        description = recommendation.get("description", "No description")
+        technical_details = recommendation.get("technical_details", "")
+        steps = recommendation.get("implementation_steps", [])
+        time_estimate = recommendation.get("time_estimate", "Unknown")
 
         # Build context section
         context_section = self._build_context_section(context)
 
         # Build integration instructions
         integration_instructions = self._build_integration_instructions(
-            integration_strategy,
-            context
+            integration_strategy, context
         )
 
         # Build the prompt
@@ -287,7 +282,8 @@ Generate complete, production-ready code now:"""
         sections = []
 
         if context.existing_code:
-            sections.append(f"""
+            sections.append(
+                f"""
 ## Existing Code Context
 
 The target file already exists with the following structure:
@@ -298,37 +294,46 @@ The target file already exists with the following structure:
 
 Classes: {', '.join(context.existing_classes) if context.existing_classes else 'None'}
 Functions: {', '.join(context.existing_functions) if context.existing_functions else 'None'}
-""")
+"""
+            )
 
         if context.database_schema:
-            sections.append(f"""
+            sections.append(
+                f"""
 ## Database Schema
 
 {context.database_schema}
-""")
+"""
+            )
 
         if context.similar_implementations:
-            sections.append(f"""
+            sections.append(
+                f"""
 ## Similar Implementations in Project
 
 Reference these existing implementations for style and patterns:
 
 {chr(10).join(f'- {impl}' for impl in context.similar_implementations[:3])}
-""")
+"""
+            )
 
         if context.project_structure:
-            sections.append(f"""
+            sections.append(
+                f"""
 ## Project Structure
 
 {context.project_structure}
-""")
+"""
+            )
 
-        return '\n'.join(sections) if sections else "## Context\n\nNo existing code context."
+        return (
+            "\n".join(sections)
+            if sections
+            else "## Context\n\nNo existing code context."
+        )
 
     def _build_integration_instructions(
-        self,
-        strategy: str,
-        context: ImplementationContext
+        self, strategy: str, context: ImplementationContext
     ) -> str:
         """Build integration-specific instructions"""
         if strategy == "create_new":
@@ -378,16 +383,14 @@ Carefully modify existing code:
         for i, step in enumerate(steps, 1):
             formatted.append(f"{i}. {step}")
 
-        return '\n'.join(formatted)
+        return "\n".join(formatted)
 
     def _parse_generated_code(
-        self,
-        generated_text: str,
-        recommendation: Dict[str, Any]
+        self, generated_text: str, recommendation: Dict[str, Any]
     ) -> GeneratedImplementation:
         """Parse and validate generated code"""
         # Extract code from markdown if present
-        code_match = re.search(r'```python\n(.*?)```', generated_text, re.DOTALL)
+        code_match = re.search(r"```python\n(.*?)```", generated_text, re.DOTALL)
 
         if code_match:
             code = code_match.group(1).strip()
@@ -403,24 +406,28 @@ Carefully modify existing code:
 
         # Extract description from docstring
         description_match = re.search(r'"""(.*?)"""', code, re.DOTALL)
-        description = description_match.group(1).strip() if description_match else recommendation.get('title', 'Implementation')
+        description = (
+            description_match.group(1).strip()
+            if description_match
+            else recommendation.get("title", "Implementation")
+        )
 
         return GeneratedImplementation(
             code=code,
-            language='python',
+            language="python",
             description=description,
             imports_needed=imports,
             dependencies=[],  # Could parse requirements from imports
             integration_notes="Generated code ready for integration",
-            estimated_completeness=completeness
+            estimated_completeness=completeness,
         )
 
     def _extract_imports(self, code: str) -> List[str]:
         """Extract import statements from code"""
         import_lines = []
-        for line in code.split('\n'):
+        for line in code.split("\n"):
             stripped = line.strip()
-            if stripped.startswith('import ') or stripped.startswith('from '):
+            if stripped.startswith("import ") or stripped.startswith("from "):
                 import_lines.append(stripped)
 
         return import_lines
@@ -430,19 +437,19 @@ Carefully modify existing code:
         score = 0.0
 
         # Check for key indicators
-        if 'def ' in code:
+        if "def " in code:
             score += 0.2
-        if 'class ' in code:
+        if "class " in code:
             score += 0.2
-        if 'logging' in code:
+        if "logging" in code:
             score += 0.1
-        if 'raise ' in code or 'except ' in code:
+        if "raise " in code or "except " in code:
             score += 0.1
         if '"""' in code:  # Has docstrings
             score += 0.1
-        if 'if __name__' in code:
+        if "if __name__" in code:
             score += 0.1
-        if 'typing' in code or ': ' in code:  # Type hints
+        if "typing" in code or ": " in code:  # Type hints
             score += 0.1
         if len(code) > 500:  # Substantial code
             score += 0.1
@@ -450,16 +457,14 @@ Carefully modify existing code:
         return min(score, 1.0)
 
     def generate_sql_implementation(
-        self,
-        recommendation: Dict[str, Any],
-        database_schema: Optional[str] = None
+        self, recommendation: Dict[str, Any], database_schema: Optional[str] = None
     ) -> Optional[GeneratedImplementation]:
         """Generate SQL implementation"""
         if not self.client:
             logger.error("❌ Claude client not initialized")
             return None
 
-        title = recommendation.get('title', 'Untitled')
+        title = recommendation.get("title", "Untitled")
         logger.info(f"🤖 Generating SQL implementation for: {title}")
 
         prompt = f"""Generate a complete SQL implementation for: {title}
@@ -484,24 +489,24 @@ Provide ONLY the SQL code, no explanations:"""
                 model=self.model,
                 max_tokens=self.max_tokens,
                 temperature=self.temperature,
-                messages=[{"role": "user", "content": prompt}]
+                messages=[{"role": "user", "content": prompt}],
             )
 
             sql_code = response.content[0].text.strip()
 
             # Extract from markdown if present
-            code_match = re.search(r'```sql\n(.*?)```', sql_code, re.DOTALL)
+            code_match = re.search(r"```sql\n(.*?)```", sql_code, re.DOTALL)
             if code_match:
                 sql_code = code_match.group(1).strip()
 
             return GeneratedImplementation(
                 code=sql_code,
-                language='sql',
+                language="sql",
                 description=title,
                 imports_needed=[],
                 dependencies=[],
                 integration_notes="SQL implementation",
-                estimated_completeness=0.9
+                estimated_completeness=0.9,
             )
 
         except Exception as e:
@@ -509,16 +514,14 @@ Provide ONLY the SQL code, no explanations:"""
             return None
 
     def generate_config_implementation(
-        self,
-        recommendation: Dict[str, Any],
-        config_format: str = 'yaml'
+        self, recommendation: Dict[str, Any], config_format: str = "yaml"
     ) -> Optional[GeneratedImplementation]:
         """Generate configuration file"""
         if not self.client:
             logger.error("❌ Claude client not initialized")
             return None
 
-        title = recommendation.get('title', 'Untitled')
+        title = recommendation.get("title", "Untitled")
         logger.info(f"🤖 Generating {config_format.upper()} config for: {title}")
 
         prompt = f"""Generate a {config_format.upper()} configuration file for: {title}
@@ -538,13 +541,15 @@ Provide ONLY the {config_format.upper()} content, no explanations:"""
                 model=self.model,
                 max_tokens=2000,
                 temperature=self.temperature,
-                messages=[{"role": "user", "content": prompt}]
+                messages=[{"role": "user", "content": prompt}],
             )
 
             config_code = response.content[0].text.strip()
 
             # Extract from markdown if present
-            code_match = re.search(rf'```{config_format}\n(.*?)```', config_code, re.DOTALL)
+            code_match = re.search(
+                rf"```{config_format}\n(.*?)```", config_code, re.DOTALL
+            )
             if code_match:
                 config_code = code_match.group(1).strip()
 
@@ -555,7 +560,7 @@ Provide ONLY the {config_format.upper()} content, no explanations:"""
                 imports_needed=[],
                 dependencies=[],
                 integration_notes=f"{config_format.upper()} configuration",
-                estimated_completeness=0.9
+                estimated_completeness=0.9,
             )
 
         except Exception as e:
@@ -567,19 +572,21 @@ def main():
     """CLI for testing AI code implementer"""
     import argparse
 
-    parser = argparse.ArgumentParser(description='Test AI Code Implementer')
-    parser.add_argument('--recommendation', required=True, help='Recommendation JSON file')
-    parser.add_argument('--output', help='Output file for generated code')
+    parser = argparse.ArgumentParser(description="Test AI Code Implementer")
+    parser.add_argument(
+        "--recommendation", required=True, help="Recommendation JSON file"
+    )
+    parser.add_argument("--output", help="Output file for generated code")
     args = parser.parse_args()
 
     # Load recommendation
-    with open(args.recommendation, 'r') as f:
+    with open(args.recommendation, "r") as f:
         data = json.load(f)
 
     if isinstance(data, list):
         rec = data[0]
-    elif isinstance(data, dict) and 'recommendations' in data:
-        rec = data['recommendations'][0]
+    elif isinstance(data, dict) and "recommendations" in data:
+        rec = data["recommendations"][0]
     else:
         rec = data
 
@@ -595,9 +602,7 @@ def main():
     print(f"{'='*60}\n")
 
     implementation = implementer.implement_recommendation(
-        recommendation=rec,
-        context=context,
-        integration_strategy="create_new"
+        recommendation=rec, context=context, integration_strategy="create_new"
     )
 
     if implementation:
@@ -608,7 +613,7 @@ def main():
         print(f"   Code length: {len(implementation.code)} characters")
 
         if args.output:
-            with open(args.output, 'w') as f:
+            with open(args.output, "w") as f:
                 f.write(implementation.code)
             print(f"\n💾 Saved to: {args.output}")
         else:
@@ -621,5 +626,5 @@ def main():
         print(f"❌ Failed to generate implementation")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

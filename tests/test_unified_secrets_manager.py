@@ -290,4 +290,3 @@ class TestUnifiedSecretsManager:
             assert len(sm.secrets) == 2
             assert len(sm.aliases) == 2
             assert sm.validate_secrets() is True
-

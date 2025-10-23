@@ -26,14 +26,14 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 
 class IntegrationStrategy(Enum):
     """Integration strategies for new code"""
+
     CREATE_NEW_MODULE = "create_new_module"
     EXTEND_EXISTING_CLASS = "extend_existing_class"
     ADD_FUNCTION_TO_MODULE = "add_function_to_module"
@@ -46,6 +46,7 @@ class IntegrationStrategy(Enum):
 @dataclass
 class ModuleInfo:
     """Information about an existing module"""
+
     path: str
     classes: List[str] = field(default_factory=list)
     functions: List[str] = field(default_factory=list)
@@ -60,6 +61,7 @@ class ModuleInfo:
 @dataclass
 class IntegrationPoint:
     """Represents a potential integration point"""
+
     strategy: IntegrationStrategy
     target_file: Optional[str]
     target_class: Optional[str] = None
@@ -73,6 +75,7 @@ class IntegrationPoint:
 @dataclass
 class IntegrationPlan:
     """Complete integration plan for a recommendation"""
+
     primary_strategy: IntegrationStrategy
     integration_points: List[IntegrationPoint]
     new_files_needed: List[str]
@@ -107,9 +110,7 @@ class CodeIntegrationAnalyzer:
         logger.info(f"   Project root: {self.project_root}")
 
     def analyze_integration(
-        self,
-        recommendation: Dict[str, Any],
-        target_file: str
+        self, recommendation: Dict[str, Any], target_file: str
     ) -> IntegrationPlan:
         """
         Analyze how to integrate recommendation into target file.
@@ -121,7 +122,7 @@ class CodeIntegrationAnalyzer:
         Returns:
             IntegrationPlan with strategy recommendations
         """
-        title = recommendation.get('title', 'Untitled')
+        title = recommendation.get("title", "Untitled")
         logger.info(f"🔍 Analyzing integration for: {title}")
         logger.info(f"   Target: {target_file}")
 
@@ -136,29 +137,22 @@ class CodeIntegrationAnalyzer:
 
             # Determine integration strategy
             integration_points = self._find_integration_points(
-                recommendation,
-                module_info
+                recommendation, module_info
             )
 
             # Select primary strategy
             primary_strategy = self._select_primary_strategy(
-                integration_points,
-                module_info,
-                recommendation
+                integration_points, module_info, recommendation
             )
 
             # Determine modifications needed
             modifications = self._determine_modifications(
-                primary_strategy,
-                integration_points,
-                module_info
+                primary_strategy, integration_points, module_info
             )
 
             # Check for conflicts
             conflicts = self._check_conflicts(
-                recommendation,
-                module_info,
-                integration_points
+                recommendation, module_info, integration_points
             )
 
             new_files = []
@@ -173,7 +167,7 @@ class CodeIntegrationAnalyzer:
                     strategy=IntegrationStrategy.CREATE_NEW_MODULE,
                     target_file=target_file,
                     confidence=1.0,
-                    reasoning="Target file does not exist - creating new module"
+                    reasoning="Target file does not exist - creating new module",
                 )
             ]
 
@@ -183,9 +177,7 @@ class CodeIntegrationAnalyzer:
 
         # Generate safety notes
         safety_notes = self._generate_safety_notes(
-            primary_strategy,
-            file_exists,
-            conflicts
+            primary_strategy, file_exists, conflicts
         )
 
         plan = IntegrationPlan(
@@ -194,7 +186,7 @@ class CodeIntegrationAnalyzer:
             new_files_needed=new_files,
             modifications_needed=modifications,
             potential_conflicts=conflicts,
-            safety_notes=safety_notes
+            safety_notes=safety_notes,
         )
 
         logger.info(f"✅ Integration plan created")
@@ -222,7 +214,7 @@ class CodeIntegrationAnalyzer:
         logger.info(f"   Parsing: {file_path}")
 
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 code = f.read()
 
             # Parse AST
@@ -243,7 +235,7 @@ class CodeIntegrationAnalyzer:
                     functions.append(node.name)
 
                     # Check for main function
-                    if node.name == 'main':
+                    if node.name == "main":
                         has_main = True
 
                 elif isinstance(node, (ast.Import, ast.ImportFrom)):
@@ -254,7 +246,7 @@ class CodeIntegrationAnalyzer:
                             imports.append(node.module)
 
             # Count lines
-            lines_of_code = len(code.split('\n'))
+            lines_of_code = len(code.split("\n"))
 
             # Estimate complexity
             complexity = "low"
@@ -275,7 +267,7 @@ class CodeIntegrationAnalyzer:
                 lines_of_code=lines_of_code,
                 complexity=complexity,
                 has_main=has_main,
-                last_modified=last_modified
+                last_modified=last_modified,
             )
 
             # Cache
@@ -291,15 +283,10 @@ class CodeIntegrationAnalyzer:
         except Exception as e:
             logger.error(f"   ❌ Failed to parse {file_path}: {e}")
             # Return minimal info
-            return ModuleInfo(
-                path=file_path,
-                complexity="unknown"
-            )
+            return ModuleInfo(path=file_path, complexity="unknown")
 
     def _find_integration_points(
-        self,
-        recommendation: Dict[str, Any],
-        module_info: ModuleInfo
+        self, recommendation: Dict[str, Any], module_info: ModuleInfo
     ) -> List[IntegrationPoint]:
         """
         Find potential integration points in existing module.
@@ -312,7 +299,7 @@ class CodeIntegrationAnalyzer:
             List of potential integration points
         """
         integration_points = []
-        title = recommendation.get('title', '').lower()
+        title = recommendation.get("title", "").lower()
 
         # Strategy 1: Extend existing class
         if module_info.classes:
@@ -327,7 +314,7 @@ class CodeIntegrationAnalyzer:
                             target_file=module_info.path,
                             target_class=class_name,
                             confidence=similarity,
-                            reasoning=f"Extends existing class '{class_name}' (similarity: {similarity:.2f})"
+                            reasoning=f"Extends existing class '{class_name}' (similarity: {similarity:.2f})",
                         )
                     )
 
@@ -339,7 +326,7 @@ class CodeIntegrationAnalyzer:
                     strategy=IntegrationStrategy.ADD_FUNCTION_TO_MODULE,
                     target_file=module_info.path,
                     confidence=0.7,
-                    reasoning="Module is function-based, add new function(s)"
+                    reasoning="Module is function-based, add new function(s)",
                 )
             )
 
@@ -350,7 +337,7 @@ class CodeIntegrationAnalyzer:
                     strategy=IntegrationStrategy.CREATE_NEW_MODULE,
                     target_file=None,
                     confidence=0.8,
-                    reasoning=f"Existing module is complex ({module_info.lines_of_code} LOC), recommend new module"
+                    reasoning=f"Existing module is complex ({module_info.lines_of_code} LOC), recommend new module",
                 )
             )
 
@@ -361,7 +348,7 @@ class CodeIntegrationAnalyzer:
                     strategy=IntegrationStrategy.ADD_TO_EXISTING_FILE,
                     target_file=module_info.path,
                     confidence=0.9,
-                    reasoning="Module is small and simple, safe to add code"
+                    reasoning="Module is small and simple, safe to add code",
                 )
             )
 
@@ -371,7 +358,7 @@ class CodeIntegrationAnalyzer:
         self,
         integration_points: List[IntegrationPoint],
         module_info: ModuleInfo,
-        recommendation: Dict[str, Any]
+        recommendation: Dict[str, Any],
     ) -> IntegrationStrategy:
         """
         Select the best integration strategy.
@@ -389,9 +376,7 @@ class CodeIntegrationAnalyzer:
 
         # Sort by confidence
         sorted_points = sorted(
-            integration_points,
-            key=lambda x: x.confidence,
-            reverse=True
+            integration_points, key=lambda x: x.confidence, reverse=True
         )
 
         # Return highest confidence strategy
@@ -401,15 +386,14 @@ class CodeIntegrationAnalyzer:
         self,
         primary_strategy: IntegrationStrategy,
         integration_points: List[IntegrationPoint],
-        module_info: ModuleInfo
+        module_info: ModuleInfo,
     ) -> List[str]:
         """Determine what modifications are needed"""
         modifications = []
 
         if primary_strategy == IntegrationStrategy.EXTEND_EXISTING_CLASS:
             point = next(
-                (p for p in integration_points if p.strategy == primary_strategy),
-                None
+                (p for p in integration_points if p.strategy == primary_strategy), None
             )
             if point and point.target_class:
                 modifications.append(
@@ -417,14 +401,10 @@ class CodeIntegrationAnalyzer:
                 )
 
         elif primary_strategy == IntegrationStrategy.ADD_FUNCTION_TO_MODULE:
-            modifications.append(
-                f"Add new function(s) to {module_info.path}"
-            )
+            modifications.append(f"Add new function(s) to {module_info.path}")
 
         elif primary_strategy == IntegrationStrategy.ADD_TO_EXISTING_FILE:
-            modifications.append(
-                f"Add new class/functions to {module_info.path}"
-            )
+            modifications.append(f"Add new class/functions to {module_info.path}")
 
         return modifications
 
@@ -432,12 +412,12 @@ class CodeIntegrationAnalyzer:
         self,
         recommendation: Dict[str, Any],
         module_info: ModuleInfo,
-        integration_points: List[IntegrationPoint]
+        integration_points: List[IntegrationPoint],
     ) -> List[str]:
         """Check for potential conflicts"""
         conflicts = []
 
-        title = recommendation.get('title', '')
+        title = recommendation.get("title", "")
 
         # Check for name conflicts
         proposed_name = self._title_to_name(title)
@@ -459,10 +439,7 @@ class CodeIntegrationAnalyzer:
         return conflicts
 
     def _generate_safety_notes(
-        self,
-        strategy: IntegrationStrategy,
-        file_exists: bool,
-        conflicts: List[str]
+        self, strategy: IntegrationStrategy, file_exists: bool, conflicts: List[str]
     ) -> List[str]:
         """Generate safety notes for integration"""
         notes = []
@@ -473,7 +450,7 @@ class CodeIntegrationAnalyzer:
         elif strategy in [
             IntegrationStrategy.EXTEND_EXISTING_CLASS,
             IntegrationStrategy.ADD_FUNCTION_TO_MODULE,
-            IntegrationStrategy.ADD_TO_EXISTING_FILE
+            IntegrationStrategy.ADD_TO_EXISTING_FILE,
         ]:
             notes.append("⚠️  Modifying existing file - review changes carefully")
             notes.append("💾 Backup existing file before modification")
@@ -504,8 +481,8 @@ class CodeIntegrationAnalyzer:
             Similarity score (0.0 to 1.0)
         """
         # Simple word-based similarity
-        words1 = set(text1.lower().split('_'))
-        words2 = set(text2.lower().split('_'))
+        words1 = set(text1.lower().split("_"))
+        words2 = set(text2.lower().split("_"))
 
         if not words1 or not words2:
             return 0.0
@@ -518,14 +495,13 @@ class CodeIntegrationAnalyzer:
     def _title_to_name(self, title: str) -> str:
         """Convert title to potential class/function name"""
         import re
+
         # Remove special characters, convert to PascalCase
-        words = re.sub(r'[^\w\s]', '', title).split()
-        return ''.join(word.capitalize() for word in words)
+        words = re.sub(r"[^\w\s]", "", title).split()
+        return "".join(word.capitalize() for word in words)
 
     def find_similar_modules(
-        self,
-        recommendation: Dict[str, Any],
-        search_directory: str
+        self, recommendation: Dict[str, Any], search_directory: str
     ) -> List[Tuple[str, float]]:
         """
         Find modules similar to recommendation in a directory.
@@ -542,15 +518,15 @@ class CodeIntegrationAnalyzer:
         if not search_path.exists():
             return []
 
-        title = recommendation.get('title', '').lower()
-        description = recommendation.get('description', '').lower()
+        title = recommendation.get("title", "").lower()
+        description = recommendation.get("description", "").lower()
         search_text = f"{title} {description}"
 
         similar_modules = []
 
         # Find all Python files
         for py_file in search_path.glob("*.py"):
-            if py_file.name.startswith('__'):
+            if py_file.name.startswith("__"):
                 continue
 
             # Analyze module
@@ -566,21 +542,16 @@ class CodeIntegrationAnalyzer:
             docstring_sim = 0.0
             if module_info.docstring:
                 docstring_sim = self._calculate_similarity(
-                    search_text,
-                    module_info.docstring.lower()
+                    search_text, module_info.docstring.lower()
                 )
 
             names_sim = 0.0
             if module_info.classes or module_info.functions:
-                all_names = ' '.join(module_info.classes + module_info.functions)
+                all_names = " ".join(module_info.classes + module_info.functions)
                 names_sim = self._calculate_similarity(search_text, all_names.lower())
 
             # Weighted average
-            overall_sim = (
-                filename_sim * 0.4 +
-                docstring_sim * 0.3 +
-                names_sim * 0.3
-            )
+            overall_sim = filename_sim * 0.4 + docstring_sim * 0.3 + names_sim * 0.3
 
             if overall_sim > 0.2:  # 20% threshold
                 similar_modules.append((str(py_file), overall_sim))
@@ -596,20 +567,24 @@ def main():
     import argparse
     import json
 
-    parser = argparse.ArgumentParser(description='Analyze code integration')
-    parser.add_argument('--recommendation', required=True, help='Path to recommendation JSON')
-    parser.add_argument('--target-file', required=True, help='Target file path')
-    parser.add_argument('--project-root', default='../nba-simulator-aws', help='Project root')
+    parser = argparse.ArgumentParser(description="Analyze code integration")
+    parser.add_argument(
+        "--recommendation", required=True, help="Path to recommendation JSON"
+    )
+    parser.add_argument("--target-file", required=True, help="Target file path")
+    parser.add_argument(
+        "--project-root", default="../nba-simulator-aws", help="Project root"
+    )
     args = parser.parse_args()
 
     # Load recommendation
-    with open(args.recommendation, 'r') as f:
+    with open(args.recommendation, "r") as f:
         data = json.load(f)
 
     if isinstance(data, list):
         rec = data[0]
-    elif isinstance(data, dict) and 'recommendations' in data:
-        rec = data['recommendations'][0]
+    elif isinstance(data, dict) and "recommendations" in data:
+        rec = data["recommendations"][0]
     else:
         rec = data
 
@@ -651,5 +626,5 @@ def main():
             print(f"  {note}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -103,7 +103,7 @@ class ResultCache:
         Returns:
             16-character hex hash (first 16 chars of SHA-256)
         """
-        return hashlib.sha256(content.encode('utf-8')).hexdigest()[:16]
+        return hashlib.sha256(content.encode("utf-8")).hexdigest()[:16]
 
     def is_cached(self, operation: str, content_hash: str) -> bool:
         """
@@ -123,7 +123,7 @@ class ResultCache:
 
         # Check if expired
         entry = self.index[cache_key]
-        cached_at = datetime.fromisoformat(entry['cached_at'])
+        cached_at = datetime.fromisoformat(entry["cached_at"])
         expires_at = cached_at + timedelta(hours=self.ttl_hours)
 
         if datetime.now() > expires_at:
@@ -161,8 +161,10 @@ class ResultCache:
 
             # Update hit count and last accessed
             cache_key = f"{operation}:{content_hash}"
-            self.index[cache_key]['hit_count'] = self.index[cache_key].get('hit_count', 0) + 1
-            self.index[cache_key]['last_accessed'] = datetime.now().isoformat()
+            self.index[cache_key]["hit_count"] = (
+                self.index[cache_key].get("hit_count", 0) + 1
+            )
+            self.index[cache_key]["last_accessed"] = datetime.now().isoformat()
             self._save_index()
 
             logger.info(f"💾 Cache HIT: {operation} ({content_hash})")
@@ -181,7 +183,7 @@ class ResultCache:
         operation: str,
         content_hash: str,
         result: Dict,
-        metadata: Optional[Dict] = None
+        metadata: Optional[Dict] = None,
     ):
         """
         Save result to cache.
@@ -201,12 +203,12 @@ class ResultCache:
 
             # Save metadata
             cache_metadata = {
-                'content_hash': content_hash,
-                'operation': operation,
-                'cached_at': datetime.now().isoformat(),
-                'size_bytes': len(json.dumps(result)),
-                'hit_count': 0,
-                **(metadata or {})
+                "content_hash": content_hash,
+                "operation": operation,
+                "cached_at": datetime.now().isoformat(),
+                "size_bytes": len(json.dumps(result)),
+                "hit_count": 0,
+                **(metadata or {}),
             }
             metadata_file.write_text(json.dumps(cache_metadata, indent=2))
 
@@ -244,13 +246,15 @@ class ResultCache:
         """
         if operation:
             logger.warning(f"🗑️  Clearing all {operation} cache entries...")
-            keys_to_remove = [k for k in self.index.keys() if k.startswith(f"{operation}:")]
+            keys_to_remove = [
+                k for k in self.index.keys() if k.startswith(f"{operation}:")
+            ]
         else:
             logger.warning("🗑️  Clearing entire cache...")
             keys_to_remove = list(self.index.keys())
 
         for cache_key in keys_to_remove:
-            op, content_hash = cache_key.split(':', 1)
+            op, content_hash = cache_key.split(":", 1)
             self._remove_cache_entry(op, content_hash)
 
         logger.info(f"✅ Cleared {len(keys_to_remove)} cache entries")
@@ -263,37 +267,39 @@ class ResultCache:
             Dict with cache stats (size, hit rates, entry counts, etc.)
         """
         stats = {
-            'total_entries': len(self.index),
-            'by_operation': {},
-            'total_size_mb': 0,
-            'oldest_entry': None,
-            'newest_entry': None,
-            'total_hits': 0
+            "total_entries": len(self.index),
+            "by_operation": {},
+            "total_size_mb": 0,
+            "oldest_entry": None,
+            "newest_entry": None,
+            "total_hits": 0,
         }
 
         for cache_key, entry in self.index.items():
-            operation = cache_key.split(':', 1)[0]
+            operation = cache_key.split(":", 1)[0]
 
-            if operation not in stats['by_operation']:
-                stats['by_operation'][operation] = {
-                    'count': 0,
-                    'size_mb': 0,
-                    'hits': 0
-                }
+            if operation not in stats["by_operation"]:
+                stats["by_operation"][operation] = {"count": 0, "size_mb": 0, "hits": 0}
 
-            stats['by_operation'][operation]['count'] += 1
-            stats['by_operation'][operation]['size_mb'] += entry.get('size_bytes', 0) / (1024 * 1024)
-            stats['by_operation'][operation]['hits'] += entry.get('hit_count', 0)
+            stats["by_operation"][operation]["count"] += 1
+            stats["by_operation"][operation]["size_mb"] += entry.get(
+                "size_bytes", 0
+            ) / (1024 * 1024)
+            stats["by_operation"][operation]["hits"] += entry.get("hit_count", 0)
 
-            stats['total_size_mb'] += entry.get('size_bytes', 0) / (1024 * 1024)
-            stats['total_hits'] += entry.get('hit_count', 0)
+            stats["total_size_mb"] += entry.get("size_bytes", 0) / (1024 * 1024)
+            stats["total_hits"] += entry.get("hit_count", 0)
 
             # Track oldest/newest
-            cached_at = datetime.fromisoformat(entry['cached_at'])
-            if not stats['oldest_entry'] or cached_at < datetime.fromisoformat(stats['oldest_entry']):
-                stats['oldest_entry'] = entry['cached_at']
-            if not stats['newest_entry'] or cached_at > datetime.fromisoformat(stats['newest_entry']):
-                stats['newest_entry'] = entry['cached_at']
+            cached_at = datetime.fromisoformat(entry["cached_at"])
+            if not stats["oldest_entry"] or cached_at < datetime.fromisoformat(
+                stats["oldest_entry"]
+            ):
+                stats["oldest_entry"] = entry["cached_at"]
+            if not stats["newest_entry"] or cached_at > datetime.fromisoformat(
+                stats["newest_entry"]
+            ):
+                stats["newest_entry"] = entry["cached_at"]
 
         return stats
 
@@ -301,27 +307,31 @@ class ResultCache:
         """Print cache statistics to console."""
         stats = self.get_stats()
 
-        logger.info("\n" + "="*60)
+        logger.info("\n" + "=" * 60)
         logger.info("📊 Cache Statistics")
-        logger.info("="*60)
+        logger.info("=" * 60)
         logger.info(f"Total entries: {stats['total_entries']}")
-        logger.info(f"Total size: {stats['total_size_mb']:.2f} MB / {self.max_cache_size_gb * 1024:.0f} MB")
+        logger.info(
+            f"Total size: {stats['total_size_mb']:.2f} MB / {self.max_cache_size_gb * 1024:.0f} MB"
+        )
         logger.info(f"Total hits: {stats['total_hits']}")
 
-        if stats['oldest_entry']:
+        if stats["oldest_entry"]:
             logger.info(f"Oldest entry: {stats['oldest_entry']}")
-        if stats['newest_entry']:
+        if stats["newest_entry"]:
             logger.info(f"Newest entry: {stats['newest_entry']}")
 
         logger.info("\nBy operation:")
-        for operation, op_stats in stats['by_operation'].items():
-            hit_rate = (op_stats['hits'] / op_stats['count']) if op_stats['count'] > 0 else 0
+        for operation, op_stats in stats["by_operation"].items():
+            hit_rate = (
+                (op_stats["hits"] / op_stats["count"]) if op_stats["count"] > 0 else 0
+            )
             logger.info(f"  {operation}:")
             logger.info(f"    Entries: {op_stats['count']}")
             logger.info(f"    Size: {op_stats['size_mb']:.2f} MB")
             logger.info(f"    Hits: {op_stats['hits']} (avg {hit_rate:.1f} per entry)")
 
-        logger.info("="*60 + "\n")
+        logger.info("=" * 60 + "\n")
 
     # =========================================================================
     # Private methods
@@ -367,7 +377,7 @@ class ResultCache:
         expired_keys = []
 
         for cache_key, entry in self.index.items():
-            cached_at = datetime.fromisoformat(entry['cached_at'])
+            cached_at = datetime.fromisoformat(entry["cached_at"])
             expires_at = cached_at + timedelta(hours=self.ttl_hours)
 
             if now > expires_at:
@@ -376,47 +386,50 @@ class ResultCache:
         if expired_keys:
             logger.info(f"🗑️  Cleaning up {len(expired_keys)} expired cache entries...")
             for cache_key in expired_keys:
-                operation, content_hash = cache_key.split(':', 1)
+                operation, content_hash = cache_key.split(":", 1)
                 self._remove_cache_entry(operation, content_hash)
 
     def _check_cache_size(self):
         """Check cache size and evict LRU entries if needed."""
         stats = self.get_stats()
 
-        if stats['total_size_mb'] > self.max_cache_size_gb * 1024:
-            logger.warning(f"⚠️  Cache size {stats['total_size_mb']:.2f} MB exceeds limit {self.max_cache_size_gb * 1024:.0f} MB")
+        if stats["total_size_mb"] > self.max_cache_size_gb * 1024:
+            logger.warning(
+                f"⚠️  Cache size {stats['total_size_mb']:.2f} MB exceeds limit {self.max_cache_size_gb * 1024:.0f} MB"
+            )
             logger.warning("   Evicting least-recently-used entries...")
 
             # Sort by last accessed (or cached_at if never accessed)
             entries = []
             for cache_key, entry in self.index.items():
-                last_accessed = entry.get('last_accessed', entry['cached_at'])
-                entries.append((cache_key, last_accessed, entry.get('size_bytes', 0)))
+                last_accessed = entry.get("last_accessed", entry["cached_at"])
+                entries.append((cache_key, last_accessed, entry.get("size_bytes", 0)))
 
             entries.sort(key=lambda x: x[1])  # Sort by timestamp
 
             # Evict oldest until under 80% of limit
             target_size = self.max_cache_size_gb * 1024 * 0.8
-            current_size = stats['total_size_mb']
+            current_size = stats["total_size_mb"]
             evicted = 0
 
             for cache_key, _, size_bytes in entries:
                 if current_size <= target_size:
                     break
 
-                operation, content_hash = cache_key.split(':', 1)
+                operation, content_hash = cache_key.split(":", 1)
                 self._remove_cache_entry(operation, content_hash)
                 current_size -= size_bytes / (1024 * 1024)
                 evicted += 1
 
-            logger.info(f"✅ Evicted {evicted} entries, cache now {current_size:.2f} MB")
+            logger.info(
+                f"✅ Evicted {evicted} entries, cache now {current_size:.2f} MB"
+            )
 
 
 if __name__ == "__main__":
     """Test cache functionality."""
     logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s'
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
     )
 
     cache = ResultCache()
@@ -427,27 +440,24 @@ if __name__ == "__main__":
     content_hash = cache.get_content_hash(test_content)
 
     test_result = {
-        'recommendations': [
-            {'title': 'Test Rec 1', 'priority': 'critical'},
-            {'title': 'Test Rec 2', 'priority': 'important'}
+        "recommendations": [
+            {"title": "Test Rec 1", "priority": "critical"},
+            {"title": "Test Rec 2", "priority": "important"},
         ],
-        'analysis_metadata': {
-            'model': 'gemini-2.0-flash-exp',
-            'tokens': 12345,
-            'cost': 0.25
-        }
+        "analysis_metadata": {
+            "model": "gemini-2.0-flash-exp",
+            "tokens": 12345,
+            "cost": 0.25,
+        },
     }
 
     # Save to cache
     cache.save_to_cache(
-        'book_analysis',
-        content_hash,
-        test_result,
-        metadata={'book_title': 'Test Book'}
+        "book_analysis", content_hash, test_result, metadata={"book_title": "Test Book"}
     )
 
     # Retrieve from cache
-    cached_result = cache.get_cached('book_analysis', content_hash)
+    cached_result = cache.get_cached("book_analysis", content_hash)
     assert cached_result == test_result, "Cache retrieval failed"
     print("✅ Save and retrieve successful")
 
@@ -458,9 +468,8 @@ if __name__ == "__main__":
     # Test 3: Cache miss
     print("\n=== Test 3: Cache Miss ===")
     fake_hash = "nonexistent_hash"
-    result = cache.get_cached('book_analysis', fake_hash)
+    result = cache.get_cached("book_analysis", fake_hash)
     assert result is None, "Should return None for cache miss"
     print("✅ Cache miss handled correctly")
 
     print("\n✅ All cache tests passed!")
-

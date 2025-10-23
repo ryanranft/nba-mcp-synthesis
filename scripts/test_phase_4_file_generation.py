@@ -44,6 +44,7 @@ logger = logging.getLogger(__name__)
 # Mock Phase 4 File Generator
 # ==============================================================================
 
+
 class MockPhase4FileGenerationBasic:
     """
     Mock Phase 4 File Generation (Basic version)
@@ -53,7 +54,9 @@ class MockPhase4FileGenerationBasic:
     """
 
     def __init__(self, input_file: Path = None, output_dir: Path = None):
-        self.input_file = input_file or Path("implementation_plans/consolidated_recommendations.json")
+        self.input_file = input_file or Path(
+            "implementation_plans/consolidated_recommendations.json"
+        )
         self.output_dir = output_dir or Path("implementation_plans")
 
         logger.info("📝 Phase 4: Implementation File Generation (Mock)")
@@ -63,17 +66,18 @@ class MockPhase4FileGenerationBasic:
     def _sanitize_filename(self, text: str) -> str:
         """Convert text to safe filename"""
         import re
+
         # Remove special characters, convert spaces to underscores
-        safe = re.sub(r'[^\w\s-]', '', text.lower())
-        safe = re.sub(r'[-\s]+', '_', safe)
+        safe = re.sub(r"[^\w\s-]", "", text.lower())
+        safe = re.sub(r"[-\s]+", "_", safe)
         return safe[:50]  # Limit length
 
     def _generate_readme(self, recommendation: dict, rec_dir: Path) -> str:
         """Generate basic README.md for recommendation"""
-        title = recommendation.get('title', 'Untitled Recommendation')
-        description = recommendation.get('description', 'No description provided')
-        formula = recommendation.get('formula', '')
-        priority = recommendation.get('priority', 'medium')
+        title = recommendation.get("title", "Untitled Recommendation")
+        description = recommendation.get("description", "No description provided")
+        formula = recommendation.get("formula", "")
+        priority = recommendation.get("priority", "medium")
 
         readme = f"""# {title}
 
@@ -104,10 +108,10 @@ Coming soon...
 
     def _generate_placeholder_implementation(self, recommendation: dict) -> str:
         """Generate placeholder implementation.py"""
-        title = recommendation.get('title', 'feature')
+        title = recommendation.get("title", "feature")
         func_name = self._sanitize_filename(title)
-        formula = recommendation.get('formula', '')
-        variables = recommendation.get('variables', [])
+        formula = recommendation.get("formula", "")
+        variables = recommendation.get("variables", [])
 
         impl = f'''#!/usr/bin/env python3
 """
@@ -142,7 +146,7 @@ if __name__ == "__main__":
 
     def _create_directory_structure(self, recommendation: dict) -> Path:
         """Create directory structure for recommendation"""
-        rec_name = self._sanitize_filename(recommendation.get('title', 'feature'))
+        rec_name = self._sanitize_filename(recommendation.get("title", "feature"))
         rec_dir = self.output_dir / rec_name
         rec_dir.mkdir(parents=True, exist_ok=True)
         (rec_dir / "tests").mkdir(exist_ok=True)
@@ -202,8 +206,8 @@ For issues or questions, please refer to the project documentation.
             # Check if input file exists
             if not self.input_file.exists():
                 return {
-                    'status': 'failed',
-                    'error': f"Input file not found: {self.input_file}"
+                    "status": "failed",
+                    "error": f"Input file not found: {self.input_file}",
                 }
 
             # Load recommendations
@@ -211,10 +215,7 @@ For issues or questions, please refer to the project documentation.
                 with open(self.input_file) as f:
                     recommendations = json.load(f)
             except json.JSONDecodeError:
-                return {
-                    'status': 'failed',
-                    'error': 'Invalid JSON in input file'
-                }
+                return {"status": "failed", "error": "Invalid JSON in input file"}
 
             if not isinstance(recommendations, list):
                 recommendations = [recommendations]
@@ -248,23 +249,21 @@ For issues or questions, please refer to the project documentation.
             files_created += 1
 
             return {
-                'status': 'success',
-                'files_created': files_created,
-                'recommendations_processed': len(recommendations),
-                'output_directory': str(self.output_dir)
+                "status": "success",
+                "files_created": files_created,
+                "recommendations_processed": len(recommendations),
+                "output_directory": str(self.output_dir),
             }
 
         except Exception as e:
             logger.error(f"Error during file generation: {e}")
-            return {
-                'status': 'failed',
-                'error': str(e)
-            }
+            return {"status": "failed", "error": str(e)}
 
 
 # ==============================================================================
 # Test Suite
 # ==============================================================================
+
 
 class Phase4FileGenerationTestSuite(unittest.TestCase):
     """Test suite for Phase 4: File Generation"""
@@ -276,6 +275,7 @@ class Phase4FileGenerationTestSuite(unittest.TestCase):
     def tearDown(self):
         """Clean up test environment"""
         import shutil
+
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_01_file_generator_initialization(self):
@@ -286,8 +286,7 @@ class Phase4FileGenerationTestSuite(unittest.TestCase):
         output_dir = Path(self.temp_dir) / "output"
 
         generator = MockPhase4FileGenerationBasic(
-            input_file=input_file,
-            output_dir=output_dir
+            input_file=input_file, output_dir=output_dir
         )
 
         self.assertEqual(generator.input_file, input_file)
@@ -305,7 +304,7 @@ class Phase4FileGenerationTestSuite(unittest.TestCase):
             "Add True Shooting % Calculator": "add_true_shooting_calculator",
             "Feature: Usage Rate (Advanced)": "feature_usage_rate_advanced",
             "SQL Query Optimizer!!!": "sql_query_optimizer",
-            "A" * 100: "a" * 50  # Length limit
+            "A" * 100: "a" * 50,  # Length limit
         }
 
         for input_text, expected_output in test_cases.items():
@@ -321,13 +320,13 @@ class Phase4FileGenerationTestSuite(unittest.TestCase):
         generator = MockPhase4FileGenerationBasic(output_dir=Path(self.temp_dir))
 
         recommendation = {
-            'id': 'rec-1',
-            'title': 'True Shooting Percentage Calculator',
-            'description': 'Calculate TS% for player efficiency',
-            'formula': 'PTS / (2 * (FGA + 0.44 * FTA))',
-            'priority': 'high',
-            'category': 'analytics',
-            'dependencies': []
+            "id": "rec-1",
+            "title": "True Shooting Percentage Calculator",
+            "description": "Calculate TS% for player efficiency",
+            "formula": "PTS / (2 * (FGA + 0.44 * FTA))",
+            "priority": "high",
+            "category": "analytics",
+            "dependencies": [],
         }
 
         rec_dir = Path(self.temp_dir) / "ts_percentage"
@@ -335,9 +334,9 @@ class Phase4FileGenerationTestSuite(unittest.TestCase):
 
         readme_content = generator._generate_readme(recommendation, rec_dir)
 
-        self.assertIn('True Shooting Percentage', readme_content)
-        self.assertIn('PTS / (2 * (FGA + 0.44 * FTA))', readme_content)
-        self.assertIn('high', readme_content.lower())
+        self.assertIn("True Shooting Percentage", readme_content)
+        self.assertIn("PTS / (2 * (FGA + 0.44 * FTA))", readme_content)
+        self.assertIn("high", readme_content.lower())
         self.assertGreater(len(readme_content), 100)
 
         logger.info("✓ README generation test passed")
@@ -349,17 +348,17 @@ class Phase4FileGenerationTestSuite(unittest.TestCase):
         generator = MockPhase4FileGenerationBasic(output_dir=Path(self.temp_dir))
 
         recommendation = {
-            'title': 'Calculate Usage Rate',
-            'formula': '100 * ((FGA + 0.44 * FTA + TOV) * (Tm MP / 5)) / (MP * (Tm FGA + 0.44 * Tm FTA + Tm TOV))',
-            'variables': ['FGA', 'FTA', 'TOV', 'MP', 'Tm_MP']
+            "title": "Calculate Usage Rate",
+            "formula": "100 * ((FGA + 0.44 * FTA + TOV) * (Tm MP / 5)) / (MP * (Tm FGA + 0.44 * Tm FTA + Tm TOV))",
+            "variables": ["FGA", "FTA", "TOV", "MP", "Tm_MP"],
         }
 
         impl_content = generator._generate_placeholder_implementation(recommendation)
 
-        self.assertIn('def calculate_usage_rate', impl_content)
-        self.assertIn('TODO', impl_content)
+        self.assertIn("def calculate_usage_rate", impl_content)
+        self.assertIn("TODO", impl_content)
         self.assertIn('"""', impl_content)  # Has docstring
-        self.assertIn('return', impl_content.lower() or 'raise' in impl_content.lower())
+        self.assertIn("return", impl_content.lower() or "raise" in impl_content.lower())
 
         logger.info("✓ Placeholder implementation file test passed")
 
@@ -370,9 +369,9 @@ class Phase4FileGenerationTestSuite(unittest.TestCase):
         generator = MockPhase4FileGenerationBasic(output_dir=Path(self.temp_dir))
 
         recommendation = {
-            'id': 'rec-1',
-            'title': 'Test Feature',
-            'category': 'analytics'
+            "id": "rec-1",
+            "title": "Test Feature",
+            "category": "analytics",
         }
 
         rec_dir = generator._create_directory_structure(recommendation)
@@ -391,16 +390,16 @@ class Phase4FileGenerationTestSuite(unittest.TestCase):
         generator = MockPhase4FileGenerationBasic(output_dir=Path(self.temp_dir))
 
         recommendations = [
-            {'id': 'rec-1', 'title': 'Feature A', 'description': 'First feature'},
-            {'id': 'rec-2', 'title': 'Feature B', 'description': 'Second feature'}
+            {"id": "rec-1", "title": "Feature A", "description": "First feature"},
+            {"id": "rec-2", "title": "Feature B", "description": "Second feature"},
         ]
 
         guide_content = generator._generate_integration_guide(recommendations)
 
-        self.assertIn('Integration Guide', guide_content)
-        self.assertIn('Feature A', guide_content)
-        self.assertIn('Feature B', guide_content)
-        self.assertTrue('Installation' in guide_content or 'Setup' in guide_content)
+        self.assertIn("Integration Guide", guide_content)
+        self.assertIn("Feature A", guide_content)
+        self.assertIn("Feature B", guide_content)
+        self.assertTrue("Installation" in guide_content or "Setup" in guide_content)
         self.assertGreater(len(guide_content), 200)
 
         logger.info("✓ Integration guide generation test passed")
@@ -413,33 +412,36 @@ class Phase4FileGenerationTestSuite(unittest.TestCase):
         recommendations_file = Path(self.temp_dir) / "recommendations.json"
         recommendations_data = [
             {
-                'id': 'rec-1',
-                'title': 'True Shooting %',
-                'description': 'Calculate TS%',
-                'formula': 'PTS / (2 * (FGA + 0.44 * FTA))',
-                'variables': ['PTS', 'FGA', 'FTA']
+                "id": "rec-1",
+                "title": "True Shooting %",
+                "description": "Calculate TS%",
+                "formula": "PTS / (2 * (FGA + 0.44 * FTA))",
+                "variables": ["PTS", "FGA", "FTA"],
             },
             {
-                'id': 'rec-2',
-                'title': 'Usage Rate',
-                'description': 'Calculate usage rate',
-                'formula': '100 * (...)',
-                'variables': ['FGA', 'FTA']
-            }
+                "id": "rec-2",
+                "title": "Usage Rate",
+                "description": "Calculate usage rate",
+                "formula": "100 * (...)",
+                "variables": ["FGA", "FTA"],
+            },
         ]
-        with open(recommendations_file, 'w') as f:
+        with open(recommendations_file, "w") as f:
             json.dump(recommendations_data, f)
 
         generator = MockPhase4FileGenerationBasic(
-            input_file=recommendations_file,
-            output_dir=Path(self.temp_dir) / "output"
+            input_file=recommendations_file, output_dir=Path(self.temp_dir) / "output"
         )
 
         result = generator.generate_all()
 
-        self.assertEqual(result['status'], 'success')
-        self.assertGreaterEqual(result['files_created'], 4)  # At least 2 READMEs, 2 implementations
-        self.assertTrue((Path(self.temp_dir) / "output" / "INTEGRATION_GUIDE.md").exists())
+        self.assertEqual(result["status"], "success")
+        self.assertGreaterEqual(
+            result["files_created"], 4
+        )  # At least 2 READMEs, 2 implementations
+        self.assertTrue(
+            (Path(self.temp_dir) / "output" / "INTEGRATION_GUIDE.md").exists()
+        )
 
         logger.info("✓ Full generation process test passed")
 
@@ -449,25 +451,23 @@ class Phase4FileGenerationTestSuite(unittest.TestCase):
 
         # Test missing input file
         generator = MockPhase4FileGenerationBasic(
-            input_file=Path("nonexistent.json"),
-            output_dir=Path(self.temp_dir)
+            input_file=Path("nonexistent.json"), output_dir=Path(self.temp_dir)
         )
 
         result = generator.generate_all()
-        self.assertEqual(result['status'], 'failed')
-        self.assertIn('error', result)
+        self.assertEqual(result["status"], "failed")
+        self.assertIn("error", result)
 
         # Test invalid JSON
         invalid_file = Path(self.temp_dir) / "invalid.json"
         invalid_file.write_text("not valid json {")
 
         generator = MockPhase4FileGenerationBasic(
-            input_file=invalid_file,
-            output_dir=Path(self.temp_dir)
+            input_file=invalid_file, output_dir=Path(self.temp_dir)
         )
 
         result = generator.generate_all()
-        self.assertEqual(result['status'], 'failed')
+        self.assertEqual(result["status"], "failed")
 
         logger.info("✓ Error handling test passed")
 
@@ -503,10 +503,14 @@ def main():
     logger.info(f"Success Rate: {success_rate:.1f}%")
 
     if result.wasSuccessful():
-        logger.info("\n🎉 ALL TESTS PASSED! Phase 4 file generation is working correctly.")
+        logger.info(
+            "\n🎉 ALL TESTS PASSED! Phase 4 file generation is working correctly."
+        )
         return True
     else:
-        logger.info(f"\n❌ {failed_tests + error_tests} tests failed. Please review the implementation.")
+        logger.info(
+            f"\n❌ {failed_tests + error_tests} tests failed. Please review the implementation."
+        )
         return False
 
 

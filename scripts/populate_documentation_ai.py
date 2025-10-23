@@ -212,18 +212,15 @@ class DocumentationPopulator:
                 self.client = AsyncAnthropic()
 
         self.stats = {
-            'processed': 0,
-            'success': 0,
-            'failed': 0,
-            'skipped': 0,
-            'total_cost': 0.0,
+            "processed": 0,
+            "success": 0,
+            "failed": 0,
+            "skipped": 0,
+            "total_cost": 0.0,
         }
 
     async def populate_readme(
-        self,
-        metadata: Dict,
-        rec_path: Path,
-        codebase_context: str = ""
+        self, metadata: Dict, rec_path: Path, codebase_context: str = ""
     ) -> bool:
         """Generate README.md using AI."""
 
@@ -280,7 +277,7 @@ Start with: # {metadata['title']}
                 model="claude-3-7-sonnet-20250219",
                 max_tokens=4096,
                 temperature=0.7,
-                messages=[{"role": "user", "content": prompt}]
+                messages=[{"role": "user", "content": prompt}],
             )
 
             content = response.content[0].text
@@ -289,11 +286,11 @@ Start with: # {metadata['title']}
             input_tokens = response.usage.input_tokens
             output_tokens = response.usage.output_tokens
             cost = (input_tokens / 1_000_000 * 3.0) + (output_tokens / 1_000_000 * 15.0)
-            self.stats['total_cost'] += cost
+            self.stats["total_cost"] += cost
 
             # Write README.md
-            readme_path = rec_path / 'README.md'
-            with open(readme_path, 'w') as f:
+            readme_path = rec_path / "README.md"
+            with open(readme_path, "w") as f:
                 f.write(content)
 
             return True
@@ -302,11 +299,7 @@ Start with: # {metadata['title']}
             print(f"   ❌ Error generating README: {e}")
             return False
 
-    async def populate_usage_guide(
-        self,
-        metadata: Dict,
-        rec_path: Path
-    ) -> bool:
+    async def populate_usage_guide(self, metadata: Dict, rec_path: Path) -> bool:
         """Generate USAGE_GUIDE.md using AI."""
 
         if self.dry_run:
@@ -334,7 +327,7 @@ Start with: # {metadata['title']} - Usage Guide
                 model="claude-3-7-sonnet-20250219",
                 max_tokens=3072,
                 temperature=0.7,
-                messages=[{"role": "user", "content": prompt}]
+                messages=[{"role": "user", "content": prompt}],
             )
 
             content = response.content[0].text
@@ -343,11 +336,11 @@ Start with: # {metadata['title']} - Usage Guide
             input_tokens = response.usage.input_tokens
             output_tokens = response.usage.output_tokens
             cost = (input_tokens / 1_000_000 * 3.0) + (output_tokens / 1_000_000 * 15.0)
-            self.stats['total_cost'] += cost
+            self.stats["total_cost"] += cost
 
             # Write USAGE_GUIDE.md
-            usage_path = rec_path / 'USAGE_GUIDE.md'
-            with open(usage_path, 'w') as f:
+            usage_path = rec_path / "USAGE_GUIDE.md"
+            with open(usage_path, "w") as f:
                 f.write(content)
 
             return True
@@ -357,31 +350,29 @@ Start with: # {metadata['title']} - Usage Guide
             return False
 
     async def populate_single_recommendation(
-        self,
-        metadata_file: Path,
-        skip_existing: bool = True
+        self, metadata_file: Path, skip_existing: bool = True
     ) -> bool:
         """Populate documentation for a single recommendation."""
 
         rec_path = metadata_file.parent
 
         # Load metadata
-        with open(metadata_file, 'r') as f:
+        with open(metadata_file, "r") as f:
             metadata = json.load(f)
 
-        title = metadata.get('title', 'Unknown')
-        priority = metadata.get('priority', 'UNKNOWN')
+        title = metadata.get("title", "Unknown")
+        priority = metadata.get("priority", "UNKNOWN")
 
         print(f"📝 {metadata.get('full_id', '?')}: {title} ({priority})")
 
         # Check if already populated (skip if README > 100 lines)
-        readme_path = rec_path / 'README.md'
+        readme_path = rec_path / "README.md"
         if skip_existing and readme_path.exists():
-            with open(readme_path, 'r') as f:
+            with open(readme_path, "r") as f:
                 lines = f.readlines()
                 if len(lines) > 100:
                     print(f"   ⏭️  Skipped (already populated)")
-                    self.stats['skipped'] += 1
+                    self.stats["skipped"] += 1
                     return True
 
         # Generate README.md
@@ -393,22 +384,19 @@ Start with: # {metadata['title']} - Usage Guide
         # Generate EXAMPLES.md for CRITICAL items
         # (TODO: implement if needed)
 
-        self.stats['processed'] += 1
+        self.stats["processed"] += 1
 
         if success_readme and success_usage:
             print(f"   ✅ Complete")
-            self.stats['success'] += 1
+            self.stats["success"] += 1
             return True
         else:
             print(f"   ⚠️  Partial (some files failed)")
-            self.stats['failed'] += 1
+            self.stats["failed"] += 1
             return False
 
     async def populate_by_priority(
-        self,
-        base_path: Path,
-        priority: str,
-        batch_size: int = 5
+        self, base_path: Path, priority: str, batch_size: int = 5
     ):
         """Populate all recommendations with specific priority."""
 
@@ -420,11 +408,11 @@ Start with: # {metadata['title']} - Usage Guide
 
         # Find all metadata.json files with this priority
         metadata_files = []
-        for metadata_file in base_path.rglob('metadata.json'):
-            with open(metadata_file, 'r') as f:
+        for metadata_file in base_path.rglob("metadata.json"):
+            with open(metadata_file, "r") as f:
                 metadata = json.load(f)
 
-            if metadata.get('priority') == priority:
+            if metadata.get("priority") == priority:
                 metadata_files.append(metadata_file)
 
         print(f"Found {len(metadata_files)} {priority} recommendations")
@@ -432,9 +420,11 @@ Start with: # {metadata['title']} - Usage Guide
 
         # Process in batches to avoid rate limits
         for i in range(0, len(metadata_files), batch_size):
-            batch = metadata_files[i:i+batch_size]
+            batch = metadata_files[i : i + batch_size]
 
-            print(f"Batch {i//batch_size + 1}/{(len(metadata_files)-1)//batch_size + 1}")
+            print(
+                f"Batch {i//batch_size + 1}/{(len(metadata_files)-1)//batch_size + 1}"
+            )
 
             tasks = []
             for metadata_file in batch:
@@ -457,56 +447,54 @@ async def main():
     """Main execution."""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description='Populate documentation using AI'
+    parser = argparse.ArgumentParser(description="Populate documentation using AI")
+    parser.add_argument(
+        "--nba-simulator",
+        default="/Users/ryanranft/nba-simulator-aws",
+        help="Path to nba-simulator-aws project",
     )
     parser.add_argument(
-        '--nba-simulator',
-        default='/Users/ryanranft/nba-simulator-aws',
-        help='Path to nba-simulator-aws project'
+        "--priority",
+        choices=["CRITICAL", "IMPORTANT", "NICE_TO_HAVE", "ALL"],
+        default="CRITICAL",
+        help="Which priority level to process",
     )
     parser.add_argument(
-        '--priority',
-        choices=['CRITICAL', 'IMPORTANT', 'NICE_TO_HAVE', 'ALL'],
-        default='CRITICAL',
-        help='Which priority level to process'
-    )
-    parser.add_argument(
-        '--batch-size',
+        "--batch-size",
         type=int,
         default=5,
-        help='Number of recommendations to process in parallel'
+        help="Number of recommendations to process in parallel",
     )
     parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Show what would be done without calling AI'
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without calling AI",
     )
     parser.add_argument(
-        '--skip-existing',
-        action='store_true',
+        "--skip-existing",
+        action="store_true",
         default=True,
-        help='Skip recommendations that already have documentation'
+        help="Skip recommendations that already have documentation",
     )
 
     args = parser.parse_args()
 
-    base_path = Path(args.nba_simulator) / 'docs' / 'phases'
+    base_path = Path(args.nba_simulator) / "docs" / "phases"
 
     # Initialize populator
     populator = DocumentationPopulator(dry_run=args.dry_run)
 
     # Process by priority
-    priorities = ['CRITICAL', 'IMPORTANT', 'NICE_TO_HAVE'] if args.priority == 'ALL' else [args.priority]
+    priorities = (
+        ["CRITICAL", "IMPORTANT", "NICE_TO_HAVE"]
+        if args.priority == "ALL"
+        else [args.priority]
+    )
 
     start_time = time.time()
 
     for priority in priorities:
-        await populator.populate_by_priority(
-            base_path,
-            priority,
-            args.batch_size
-        )
+        await populator.populate_by_priority(base_path, priority, args.batch_size)
 
     # Print summary
     print("=" * 80)
@@ -525,6 +513,5 @@ async def main():
     print()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())
-

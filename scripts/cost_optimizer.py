@@ -33,28 +33,27 @@ import PyPDF2
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 
 # Model pricing (per 1M tokens)
 MODEL_PRICING = {
-    'gpt-4o': {
-        'input': 2.50,   # $2.50 per 1M input tokens
-        'output': 10.00, # $10.00 per 1M output tokens
-        'description': 'Most capable, highest quality, expensive'
+    "gpt-4o": {
+        "input": 2.50,  # $2.50 per 1M input tokens
+        "output": 10.00,  # $10.00 per 1M output tokens
+        "description": "Most capable, highest quality, expensive",
     },
-    'gpt-4o-mini': {
-        'input': 0.150,  # $0.15 per 1M input tokens
-        'output': 0.600, # $0.60 per 1M output tokens
-        'description': 'Fast, capable, cost-effective'
+    "gpt-4o-mini": {
+        "input": 0.150,  # $0.15 per 1M input tokens
+        "output": 0.600,  # $0.60 per 1M output tokens
+        "description": "Fast, capable, cost-effective",
     },
-    'gpt-3.5-turbo': {
-        'input': 0.50,   # $0.50 per 1M input tokens
-        'output': 1.50,  # $1.50 per 1M output tokens
-        'description': 'Legacy, cheap, less capable'
+    "gpt-3.5-turbo": {
+        "input": 0.50,  # $0.50 per 1M input tokens
+        "output": 1.50,  # $1.50 per 1M output tokens
+        "description": "Legacy, cheap, less capable",
     },
 }
 
@@ -62,6 +61,7 @@ MODEL_PRICING = {
 @dataclass
 class BookComplexity:
     """Represents complexity assessment of a book"""
+
     book_name: str
     page_count: int
     estimated_tokens: int
@@ -78,6 +78,7 @@ class BookComplexity:
 @dataclass
 class CostEstimate:
     """Represents cost estimate for analyzing a book"""
+
     book_name: str
     model: str
     estimated_input_tokens: int
@@ -92,6 +93,7 @@ class CostEstimate:
 @dataclass
 class ActualCost:
     """Represents actual cost incurred"""
+
     book_name: str
     model: str
     input_tokens: int
@@ -108,9 +110,9 @@ class CostOptimizer:
 
     # Complexity thresholds for model selection
     COMPLEXITY_THRESHOLDS = {
-        'gpt-3.5-turbo': 0.3,    # Use for very simple books
-        'gpt-4o-mini': 0.6,      # Use for simple to medium complexity
-        'gpt-4o': 1.0,           # Use for high complexity
+        "gpt-3.5-turbo": 0.3,  # Use for very simple books
+        "gpt-4o-mini": 0.6,  # Use for simple to medium complexity
+        "gpt-4o": 1.0,  # Use for high complexity
     }
 
     # Token estimation (pages to tokens)
@@ -118,14 +120,12 @@ class CostOptimizer:
 
     # Output multiplier (output tokens vs input)
     OUTPUT_MULTIPLIER = {
-        'analysis': 0.5,         # Analysis produces ~50% of input size
-        'recommendations': 0.8,  # Recommendations ~80% of input
+        "analysis": 0.5,  # Analysis produces ~50% of input size
+        "recommendations": 0.8,  # Recommendations ~80% of input
     }
 
     def __init__(
-        self,
-        cost_log_file: str = 'costs.json',
-        budget_limit: Optional[float] = None
+        self, cost_log_file: str = "costs.json", budget_limit: Optional[float] = None
     ):
         """
         Initialize cost optimizer
@@ -151,11 +151,11 @@ class CostOptimizer:
             return
 
         try:
-            with open(self.cost_log_file, 'r') as f:
+            with open(self.cost_log_file, "r") as f:
                 data = json.load(f)
 
             self.cost_history = [
-                ActualCost(**entry) for entry in data.get('cost_history', [])
+                ActualCost(**entry) for entry in data.get("cost_history", [])
             ]
 
             logger.info(f"✅ Loaded {len(self.cost_history)} cost entries")
@@ -167,12 +167,12 @@ class CostOptimizer:
         """Save cost history to file"""
         try:
             data = {
-                'cost_history': [cost.to_dict() for cost in self.cost_history],
-                'total_cost': sum(c.total_cost for c in self.cost_history),
-                'last_updated': datetime.now().isoformat(),
+                "cost_history": [cost.to_dict() for cost in self.cost_history],
+                "total_cost": sum(c.total_cost for c in self.cost_history),
+                "last_updated": datetime.now().isoformat(),
             }
 
-            with open(self.cost_log_file, 'w') as f:
+            with open(self.cost_log_file, "w") as f:
                 json.dump(data, f, indent=2)
 
             logger.info(f"💾 Saved cost history")
@@ -196,7 +196,7 @@ class CostOptimizer:
         logger.info(f"📊 Assessing complexity: {book_name}")
 
         try:
-            with open(book_path, 'rb') as f:
+            with open(book_path, "rb") as f:
                 pdf = PyPDF2.PdfReader(f)
                 page_count = len(pdf.pages)
 
@@ -215,33 +215,65 @@ class CostOptimizer:
                 book_name=book_name,
                 page_count=200,  # Assume medium size
                 estimated_tokens=100000,
-                technical_density='high',
+                technical_density="high",
                 has_code=True,
                 has_math=True,
                 has_diagrams=True,
-                complexity_score=0.9
+                complexity_score=0.9,
             )
 
         # Analyze content
-        has_code = any(keyword in sample_text.lower() for keyword in [
-            'def ', 'class ', 'import ', 'function', 'algorithm', 'code'
-        ])
+        has_code = any(
+            keyword in sample_text.lower()
+            for keyword in [
+                "def ",
+                "class ",
+                "import ",
+                "function",
+                "algorithm",
+                "code",
+            ]
+        )
 
-        has_math = any(keyword in sample_text.lower() for keyword in [
-            'theorem', 'proof', 'equation', 'matrix', 'derivative', 'integral'
-        ])
+        has_math = any(
+            keyword in sample_text.lower()
+            for keyword in [
+                "theorem",
+                "proof",
+                "equation",
+                "matrix",
+                "derivative",
+                "integral",
+            ]
+        )
 
-        has_diagrams = 'figure' in sample_text.lower() or 'diagram' in sample_text.lower()
+        has_diagrams = (
+            "figure" in sample_text.lower() or "diagram" in sample_text.lower()
+        )
 
         # Technical density based on vocabulary
         technical_keywords = [
-            'neural', 'machine learning', 'algorithm', 'optimization',
-            'statistical', 'model', 'framework', 'architecture'
+            "neural",
+            "machine learning",
+            "algorithm",
+            "optimization",
+            "statistical",
+            "model",
+            "framework",
+            "architecture",
         ]
-        tech_keyword_count = sum(1 for kw in technical_keywords if kw in sample_text.lower())
-        technical_density = 'very_high' if tech_keyword_count >= 5 else \
-                           'high' if tech_keyword_count >= 3 else \
-                           'medium' if tech_keyword_count >= 1 else 'low'
+        tech_keyword_count = sum(
+            1 for kw in technical_keywords if kw in sample_text.lower()
+        )
+        technical_density = (
+            "very_high"
+            if tech_keyword_count >= 5
+            else (
+                "high"
+                if tech_keyword_count >= 3
+                else "medium" if tech_keyword_count >= 1 else "low"
+            )
+        )
 
         # Complexity score (0.0 to 1.0)
         complexity_score = 0.0
@@ -249,7 +281,9 @@ class CostOptimizer:
         complexity_score += 0.2 if has_code else 0
         complexity_score += 0.2 if has_math else 0
         complexity_score += 0.1 if has_diagrams else 0
-        complexity_score += {'low': 0.1, 'medium': 0.2, 'high': 0.3, 'very_high': 0.4}[technical_density]
+        complexity_score += {"low": 0.1, "medium": 0.2, "high": 0.3, "very_high": 0.4}[
+            technical_density
+        ]
 
         complexity_score = min(1.0, complexity_score)  # Cap at 1.0
 
@@ -264,7 +298,7 @@ class CostOptimizer:
             has_code=has_code,
             has_math=has_math,
             has_diagrams=has_diagrams,
-            complexity_score=complexity_score
+            complexity_score=complexity_score,
         )
 
         logger.info(f"   Pages: {page_count}")
@@ -287,23 +321,22 @@ class CostOptimizer:
         score = complexity.complexity_score
 
         # Select model based on thresholds
-        if score <= self.COMPLEXITY_THRESHOLDS['gpt-3.5-turbo']:
-            model = 'gpt-3.5-turbo'
-        elif score <= self.COMPLEXITY_THRESHOLDS['gpt-4o-mini']:
-            model = 'gpt-4o-mini'
+        if score <= self.COMPLEXITY_THRESHOLDS["gpt-3.5-turbo"]:
+            model = "gpt-3.5-turbo"
+        elif score <= self.COMPLEXITY_THRESHOLDS["gpt-4o-mini"]:
+            model = "gpt-4o-mini"
         else:
-            model = 'gpt-4o'
+            model = "gpt-4o"
 
         logger.info(f"✅ Selected model: {model}")
-        logger.info(f"   Reason: Complexity {score:.2f} → {MODEL_PRICING[model]['description']}")
+        logger.info(
+            f"   Reason: Complexity {score:.2f} → {MODEL_PRICING[model]['description']}"
+        )
 
         return model
 
     def estimate_cost(
-        self,
-        complexity: BookComplexity,
-        model: str,
-        task: str = 'recommendations'
+        self, complexity: BookComplexity, model: str, task: str = "recommendations"
     ) -> CostEstimate:
         """
         Estimate cost for analyzing a book
@@ -325,8 +358,8 @@ class CostOptimizer:
 
         # Cost calculation
         pricing = MODEL_PRICING[model]
-        input_cost = (input_tokens / 1_000_000) * pricing['input']
-        output_cost = (output_tokens / 1_000_000) * pricing['output']
+        input_cost = (input_tokens / 1_000_000) * pricing["input"]
+        output_cost = (output_tokens / 1_000_000) * pricing["output"]
         total_cost = input_cost + output_cost
 
         estimate = CostEstimate(
@@ -336,11 +369,11 @@ class CostOptimizer:
             estimated_output_tokens=output_tokens,
             estimated_cost=total_cost,
             breakdown={
-                'input_cost': input_cost,
-                'output_cost': output_cost,
-                'input_tokens': input_tokens,
-                'output_tokens': output_tokens,
-            }
+                "input_cost": input_cost,
+                "output_cost": output_cost,
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
+            },
         )
 
         logger.info(f"💰 Cost estimate for {complexity.book_name}:")
@@ -362,7 +395,7 @@ class CostOptimizer:
             Tuple of (within_budget, remaining_budget)
         """
         if self.budget_limit is None:
-            return True, float('inf')
+            return True, float("inf")
 
         total_spent = sum(c.total_cost for c in self.cost_history)
         remaining = self.budget_limit - total_spent
@@ -379,11 +412,7 @@ class CostOptimizer:
         return within_budget, remaining
 
     def log_actual_cost(
-        self,
-        book_name: str,
-        model: str,
-        input_tokens: int,
-        output_tokens: int
+        self, book_name: str, model: str, input_tokens: int, output_tokens: int
     ) -> ActualCost:
         """
         Log actual cost incurred
@@ -398,8 +427,8 @@ class CostOptimizer:
             ActualCost entry
         """
         pricing = MODEL_PRICING[model]
-        input_cost = (input_tokens / 1_000_000) * pricing['input']
-        output_cost = (output_tokens / 1_000_000) * pricing['output']
+        input_cost = (input_tokens / 1_000_000) * pricing["input"]
+        output_cost = (output_tokens / 1_000_000) * pricing["output"]
         total_cost = input_cost + output_cost
 
         cost_entry = ActualCost(
@@ -408,7 +437,7 @@ class CostOptimizer:
             input_tokens=input_tokens,
             output_tokens=output_tokens,
             total_cost=total_cost,
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
 
         self.cost_history.append(cost_entry)
@@ -422,26 +451,28 @@ class CostOptimizer:
         """Get cost statistics"""
         if not self.cost_history:
             return {
-                'total_cost': 0,
-                'total_books': 0,
-                'avg_cost_per_book': 0,
-                'by_model': {},
+                "total_cost": 0,
+                "total_books": 0,
+                "avg_cost_per_book": 0,
+                "by_model": {},
             }
 
         total_cost = sum(c.total_cost for c in self.cost_history)
         total_books = len(self.cost_history)
 
-        by_model = defaultdict(lambda: {'count': 0, 'cost': 0.0})
+        by_model = defaultdict(lambda: {"count": 0, "cost": 0.0})
         for cost in self.cost_history:
-            by_model[cost.model]['count'] += 1
-            by_model[cost.model]['cost'] += cost.total_cost
+            by_model[cost.model]["count"] += 1
+            by_model[cost.model]["cost"] += cost.total_cost
 
         return {
-            'total_cost': total_cost,
-            'total_books': total_books,
-            'avg_cost_per_book': total_cost / total_books if total_books > 0 else 0,
-            'by_model': dict(by_model),
-            'budget_remaining': self.budget_limit - total_cost if self.budget_limit else None,
+            "total_cost": total_cost,
+            "total_books": total_books,
+            "avg_cost_per_book": total_cost / total_books if total_books > 0 else 0,
+            "by_model": dict(by_model),
+            "budget_remaining": (
+                self.budget_limit - total_cost if self.budget_limit else None
+            ),
         }
 
     def generate_cost_report(self, output_file: str):
@@ -451,100 +482,91 @@ class CostOptimizer:
         stats = self.get_statistics()
 
         lines = [
-            '# Cost Analysis Report',
-            '',
-            f'**Generated**: {datetime.now().isoformat()}',
+            "# Cost Analysis Report",
+            "",
+            f"**Generated**: {datetime.now().isoformat()}",
             f'**Total Books Analyzed**: {stats["total_books"]}',
             f'**Total Cost**: ${stats["total_cost"]:.4f}',
             f'**Average Cost per Book**: ${stats["avg_cost_per_book"]:.4f}',
-            '',
+            "",
         ]
 
         if self.budget_limit:
-            lines.extend([
-                f'**Budget Limit**: ${self.budget_limit:.2f}',
-                f'**Budget Remaining**: ${stats["budget_remaining"]:.2f}',
-                f'**Budget Used**: {(stats["total_cost"] / self.budget_limit * 100):.1f}%',
-                '',
-            ])
-
-        lines.extend([
-            '---',
-            '',
-            '## Cost by Model',
-            '',
-            '| Model | Books | Total Cost | Avg Cost | % of Total |',
-            '|-------|-------|------------|----------|------------|',
-        ])
-
-        for model, data in stats['by_model'].items():
-            pct = (data['cost'] / stats['total_cost'] * 100) if stats['total_cost'] > 0 else 0
-            avg = data['cost'] / data['count'] if data['count'] > 0 else 0
-            lines.append(
-                f'| {model} | {data["count"]} | ${data["cost"]:.4f} | '
-                f'${avg:.4f} | {pct:.1f}% |'
+            lines.extend(
+                [
+                    f"**Budget Limit**: ${self.budget_limit:.2f}",
+                    f'**Budget Remaining**: ${stats["budget_remaining"]:.2f}',
+                    f'**Budget Used**: {(stats["total_cost"] / self.budget_limit * 100):.1f}%',
+                    "",
+                ]
             )
 
-        lines.extend([
-            '',
-            '## Recent Analyses',
-            '',
-            '| Book | Model | Cost | Date |',
-            '|------|-------|------|------|',
-        ])
+        lines.extend(
+            [
+                "---",
+                "",
+                "## Cost by Model",
+                "",
+                "| Model | Books | Total Cost | Avg Cost | % of Total |",
+                "|-------|-------|------------|----------|------------|",
+            ]
+        )
 
-        for cost in sorted(self.cost_history, key=lambda c: c.timestamp, reverse=True)[:20]:
+        for model, data in stats["by_model"].items():
+            pct = (
+                (data["cost"] / stats["total_cost"] * 100)
+                if stats["total_cost"] > 0
+                else 0
+            )
+            avg = data["cost"] / data["count"] if data["count"] > 0 else 0
+            lines.append(
+                f'| {model} | {data["count"]} | ${data["cost"]:.4f} | '
+                f"${avg:.4f} | {pct:.1f}% |"
+            )
+
+        lines.extend(
+            [
+                "",
+                "## Recent Analyses",
+                "",
+                "| Book | Model | Cost | Date |",
+                "|------|-------|------|------|",
+            ]
+        )
+
+        for cost in sorted(self.cost_history, key=lambda c: c.timestamp, reverse=True)[
+            :20
+        ]:
             date = cost.timestamp[:10]
-            lines.append(f'| {cost.book_name[:40]} | {cost.model} | ${cost.total_cost:.4f} | {date} |')
+            lines.append(
+                f"| {cost.book_name[:40]} | {cost.model} | ${cost.total_cost:.4f} | {date} |"
+            )
 
-        Path(output_file).write_text('\n'.join(lines))
+        Path(output_file).write_text("\n".join(lines))
         logger.info(f"✅ Cost report generated")
 
 
 def main():
     """Main CLI entry point"""
     parser = argparse.ArgumentParser(
-        description='Optimize model selection and track costs'
+        description="Optimize model selection and track costs"
     )
+    parser.add_argument("--assess", help="Assess complexity of a book")
+    parser.add_argument("--estimate", help="Estimate cost for a book")
     parser.add_argument(
-        '--assess',
-        help='Assess complexity of a book'
+        "--model", help="Model to use for estimation (default: auto-select)"
     )
+    parser.add_argument("--budget", type=float, help="Set budget limit in dollars")
+    parser.add_argument("--report", help="Generate cost report (markdown)")
+    parser.add_argument("--stats", action="store_true", help="Show cost statistics")
     parser.add_argument(
-        '--estimate',
-        help='Estimate cost for a book'
-    )
-    parser.add_argument(
-        '--model',
-        help='Model to use for estimation (default: auto-select)'
-    )
-    parser.add_argument(
-        '--budget',
-        type=float,
-        help='Set budget limit in dollars'
-    )
-    parser.add_argument(
-        '--report',
-        help='Generate cost report (markdown)'
-    )
-    parser.add_argument(
-        '--stats',
-        action='store_true',
-        help='Show cost statistics'
-    )
-    parser.add_argument(
-        '--cost-log',
-        default='costs.json',
-        help='Path to cost log file'
+        "--cost-log", default="costs.json", help="Path to cost log file"
     )
 
     args = parser.parse_args()
 
     # Initialize optimizer
-    optimizer = CostOptimizer(
-        cost_log_file=args.cost_log,
-        budget_limit=args.budget
-    )
+    optimizer = CostOptimizer(cost_log_file=args.cost_log, budget_limit=args.budget)
 
     # Handle commands
     if args.stats:
@@ -558,7 +580,7 @@ def main():
             logger.info(f"   Budget remaining: ${stats['budget_remaining']:.2f}")
         logger.info("")
         logger.info("   By model:")
-        for model, data in stats['by_model'].items():
+        for model, data in stats["by_model"].items():
             logger.info(f"     {model}: {data['count']} books, ${data['cost']:.4f}")
         return 0
 
@@ -585,5 +607,5 @@ def main():
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     exit(main())
