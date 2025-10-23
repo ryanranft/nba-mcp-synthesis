@@ -377,7 +377,7 @@ class UnifiedSecretsManager:
 
     def _create_aliases(self, project: Optional[str] = None, context: Optional[str] = None):
         """Create backward-compatible aliases for short names"""
-        
+
         # Use provided values or fall back to stored values
         project = project or self.project or "nba-mcp-synthesis"
         context = context or self.context or "WORKFLOW"
@@ -557,11 +557,11 @@ class UnifiedSecretsManager:
         self.project = project
         self.sport = context  # Use context as sport for backward compatibility
         self.context = env
-        
+
         # Use provided base_path or default
         search_path = Path(base_path) if base_path else self.base_path
         self._last_load_base_path = base_path  # Track for reload
-        
+
         secrets_loaded = 0
 
         # Check if we're in Docker environment
@@ -640,16 +640,16 @@ class UnifiedSecretsManager:
     def reload_secrets(self) -> None:
         """Reload secrets from sources using the last-used parameters"""
         logger.info("Reloading secrets...")
-        
+
         # Store current parameters
         project = self.project
         sport = self.sport
         context = self.context
         base_path = self._last_load_base_path
-        
+
         # Clear and reload
         self.clear_secrets()
-        
+
         # If we have project/context, use load_secrets
         if project and context:
             self.load_secrets(project, context, context, base_path=base_path)
@@ -689,7 +689,7 @@ class UnifiedSecretsManager:
     def context_detection(self) -> str:
         """
         Auto-detect context from environment.
-        
+
         Returns:
             Detected context string (test, production, development, etc.)
         """
