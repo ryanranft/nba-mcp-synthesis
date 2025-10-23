@@ -95,6 +95,7 @@ class OrganizationEnforcer:
             "*_INSTRUCTIONS.md": "docs/guides/",
             "*_QUICK_START.md": "docs/guides/",
             "*README.md": "docs/guides/",  # except main README.md
+            "guide_*_user_guide.md": "docs/archive/test-generated/",  # Test-generated files
             # Plans
             "*_PLAN.md": "docs/plans/",
             "*_ACTION_PLAN.md": "docs/plans/action/",
