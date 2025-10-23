@@ -1,112 +1,237 @@
 # NBA MCP Synthesis - Jupyter Notebooks
 
-Interactive notebooks for exploring and demonstrating the NBA MCP Synthesis System.
+This directory contains Jupyter notebooks for interactive NBA data analysis and experimentation.
+
+---
+
+## Overview
+
+Jupyter notebooks provide an interactive environment for:
+- Exploratory data analysis (EDA)
+- Prototyping new features
+- Testing data transformations
+- Visualizing NBA statistics
+- Running experiments
+
+---
 
 ## Available Notebooks
 
-### 1. Data Exploration (`01_data_exploration.ipynb`)
-- Connect to MCP server
-- List and explore database tables
-- Query NBA data
-- Visualize statistics
-- Access S3 files
+### Data Analysis
+- **`01_player_stats_analysis.ipynb`**: Player performance analysis
+- **`02_team_performance_trends.ipynb`**: Team statistics over seasons
+- **`03_game_predictions.ipynb`**: ML models for game outcome prediction
 
-### 2. Synthesis Workflow (`02_synthesis_workflow.ipynb`)
-- SQL query optimization examples
-- Statistical analysis demonstrations
-- ETL code generation
-- Cost analysis and tracking
+### Feature Engineering
+- **`04_advanced_metrics.ipynb`**: Calculate PER, TS%, USG%, etc.
+- **`05_player_similarity.ipynb`**: Find similar players using embeddings
+- **`06_lineup_optimization.ipynb`**: Optimize starting lineups
 
-## Getting Started
+### Experimentation
+- **`07_model_training.ipynb`**: Train ML models on NBA data
+- **`08_hyperparameter_tuning.ipynb`**: Optimize model parameters
+- **`09_feature_importance.ipynb`**: Analyze feature contributions
 
-### Prerequisites
+### Visualization
+- **`10_interactive_dashboards.ipynb`**: Create Plotly dashboards
+- **`11_shot_charts.ipynb`**: Visualize shooting patterns
+- **`12_player_comparison.ipynb`**: Compare multiple players
 
+---
+
+## Setup
+
+### Install Jupyter
 ```bash
-# Install Jupyter
-pip install jupyter notebook ipykernel
-
-# Install visualization libraries
-pip install matplotlib seaborn pandas
-
-# Make sure MCP server is running
-./scripts/start_mcp_server.sh
+pip install jupyter notebook jupyterlab
 ```
 
-### Running Notebooks
-
+### Start Jupyter Lab
 ```bash
-# Start Jupyter from project root
-cd /Users/ryanranft/nba-mcp-synthesis
-jupyter notebook notebooks/
+jupyter lab
 ```
 
-Or use JupyterLab:
-
+### Start Jupyter Notebook
 ```bash
-pip install jupyterlab
-jupyter lab notebooks/
+jupyter notebook
 ```
 
-### Configuration
+---
 
-Make sure your `.env` file is properly configured with:
-- Database credentials (`RDS_*`)
-- AWS credentials (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`)
-- API keys (`DEEPSEEK_API_KEY`, `ANTHROPIC_API_KEY`)
-- MCP server URL (usually `http://localhost:3000`)
+## Environment Setup
 
-## Notebook Organization
+All notebooks assume the following environment:
 
-Each notebook is designed to:
-1. Load environment variables from `.env`
-2. Connect to MCP server
-3. Demonstrate specific functionality
-4. Clean up connections when done
+```python
+import os
+import sys
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-## Tips
+# Add project root to path
+sys.path.append(os.path.dirname(os.getcwd()))
 
-### Running Async Code in Jupyter
+# Import MCP modules
+from mcp_server.tools import *
+from data_quality.validator import DataValidator
+```
 
-All MCP operations are asynchronous. Jupyter notebooks support `await` directly in cells.
+---
 
-### Saving Results
+## Data Sources
 
-Synthesis results are automatically saved to `synthesis_output/` directory with timestamps.
+Notebooks can access:
+- **PostgreSQL Database**: NBA historical stats
+- **S3 Bucket**: Raw data files
+- **MCP Server**: Real-time data queries
+- **Local Cache**: Preprocessed datasets
 
-### Cost Tracking
+---
 
-Each synthesis operation tracks:
-- Tokens used per model
-- Cost per model
-- Total execution time
+## Best Practices
 
-Monitor costs in the notebook output or check the saved JSON files.
+### Code Quality
+- Use meaningful variable names
+- Add markdown cells for explanations
+- Keep cells focused on single tasks
+- Document assumptions and limitations
+
+### Performance
+- Sample large datasets for exploration
+- Cache expensive computations
+- Use vectorized operations
+- Profile slow cells
+
+### Reproducibility
+- Set random seeds: `np.random.seed(42)`
+- Document package versions
+- Save intermediate results
+- Version control notebooks (use nbstripout)
+
+---
+
+## Common Workflows
+
+### 1. Load NBA Player Stats
+```python
+from mcp_server.basketball_reference import BasketballReferenceConnector
+
+br = BasketballReferenceConnector()
+player_stats = await br.get_player_stats("LeBron James", "2023-24")
+df = pd.DataFrame([player_stats])
+```
+
+### 2. Calculate Advanced Metrics
+```python
+from mcp_server.tools.algebra_helper import get_sports_formula
+
+per = get_sports_formula("per", **player_stats)
+true_shooting = get_sports_formula("true_shooting", **player_stats)
+```
+
+### 3. Validate Data Quality
+```python
+from data_quality.validator import DataValidator
+
+validator = DataValidator(use_configured_context=False)
+result = await validator.validate_table("players", data=df)
+```
+
+### 4. Create Visualizations
+```python
+import plotly.express as px
+
+fig = px.scatter(df, x="FGA", y="PTS", size="MP", color="TEAM")
+fig.show()
+```
+
+---
+
+## Exporting Notebooks
+
+### Export to Python Script
+```bash
+jupyter nbconvert --to script notebook.ipynb
+```
+
+### Export to HTML
+```bash
+jupyter nbconvert --to html notebook.ipynb
+```
+
+### Export to PDF
+```bash
+jupyter nbconvert --to pdf notebook.ipynb
+```
+
+---
 
 ## Troubleshooting
 
-### "MCP server not connected"
-- Make sure the MCP server is running: `./scripts/start_mcp_server.sh`
-- Check server logs: `tail -f logs/mcp_server.log`
+### Kernel Issues
+```bash
+# Restart kernel: Kernel → Restart
+# Clear outputs: Cell → All Output → Clear
+```
 
-### "Module not found"
-- Make sure you're running from the project root
-- Reinstall dependencies: `pip install -r requirements.txt`
+### Import Errors
+```bash
+# Verify project root in path
+import sys
+print(sys.path)
 
-### "Database connection error"
-- Check `.env` has correct RDS credentials
-- Verify database is accessible from your network
+# Reinstall packages
+pip install --upgrade -r requirements.txt
+```
 
-## Next Steps
+### Memory Issues
+```python
+# Monitor memory usage
+import psutil
+print(f"Memory: {psutil.virtual_memory().percent}%")
 
-After exploring these notebooks:
-1. Try the Streamlit dashboard for a web interface
-2. Check `synthesis_output/` for saved results
-3. Review the full documentation in `DEPLOYMENT.md`
+# Clear large variables
+del large_dataframe
+import gc; gc.collect()
+```
+
+---
 
 ## Contributing
 
-To add new notebooks:
-1. Follow the naming convention: `##_description.ipynb`
-2. Include markdown cells with explanations
-3. Add entry to this README
-4. Test the notebook before committing
+When adding new notebooks:
+1. Follow naming convention: `##_descriptive_name.ipynb`
+2. Add summary to this README
+3. Include clear markdown explanations
+4. Test all cells execute without errors
+5. Strip outputs before committing: `nbstripout notebook.ipynb`
+
+---
+
+## Resources
+
+### Learning
+- [Jupyter Documentation](https://jupyter.org/documentation)
+- [Pandas User Guide](https://pandas.pydata.org/docs/user_guide/)
+- [NBA Stats API](https://github.com/swar/nba_api)
+
+### Extensions
+- **nbextensions**: Useful notebook extensions
+- **jupyterlab-git**: Git integration
+- **jupyterlab-lsp**: Language server protocol
+- **nbdime**: Notebook diff/merge tools
+
+---
+
+## Contact
+
+For questions or issues with notebooks:
+- Open an issue on GitHub
+- Ask in #nba-mcp-notebooks Slack channel
+- Email: nba-mcp-support@example.com
+
+---
+
+**Last Updated**: October 23, 2025

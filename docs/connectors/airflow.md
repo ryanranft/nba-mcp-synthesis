@@ -22,11 +22,11 @@ from mcp_server.airflow_connector import NBADataPipeline
 
 with DAG('nba_daily_stats', schedule_interval='0 0 * * *') as dag:
     pipeline = NBADataPipeline()
-    
+
     fetch_stats = pipeline.create_fetch_task('fetch_stats')
     process_stats = pipeline.create_process_task('process_stats')
     load_stats = pipeline.create_load_task('load_stats')
-    
+
     fetch_stats >> process_stats >> load_stats
 ```
 
