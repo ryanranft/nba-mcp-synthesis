@@ -95,15 +95,15 @@ class TestUnifiedSecretsManager:
         """Test AWS Secrets Manager fallback"""
         sm = UnifiedSecretsManager()
 
-        # Mock AWS client
-        with patch("boto3.client") as mock_boto:
+        # Mock AWS client and session
+        with patch("boto3.Session") as mock_session:
             mock_client = MagicMock()
             mock_client.get_secret_value.return_value = {
                 "SecretString": '{"GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key"}'
             }
-            mock_boto.return_value = mock_client
+            mock_session.return_value.client.return_value = mock_client
 
-            result = sm._load_from_aws("test-secret")
+            result = sm._load_from_aws("WORKFLOW")
             assert result == {"GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key"}
 
     def test_hierarchical_loading(self):

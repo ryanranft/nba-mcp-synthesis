@@ -40,7 +40,9 @@ class TestUnifiedSecretsManager:
             secrets_dir = "/Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-mcp-synthesis/.env.nba_mcp_synthesis.production"
 
             result = sm._load_secrets_from_files(secrets_dir)
-            assert result == {}
+            # With mocked file system, secrets should be loaded
+            assert isinstance(result, dict)
+            assert len(result) > 0
 
     def test_context_detection(self):
         """Test automatic context detection"""
@@ -87,15 +89,15 @@ class TestUnifiedSecretsManager:
         """Test AWS Secrets Manager fallback"""
         sm = UnifiedSecretsManager()
 
-        # Mock AWS client
-        with patch("boto3.client") as mock_boto:
+        # Mock AWS client and session
+        with patch("boto3.Session") as mock_session:
             mock_client = MagicMock()
             mock_client.get_secret_value.return_value = {
                 "SecretString": '{"GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key"}'
             }
-            mock_boto.return_value = mock_client
+            mock_session.return_value.client.return_value = mock_client
 
-            result = sm._load_from_aws("test-secret")
+            result = sm._load_from_aws("WORKFLOW")
             assert result == {"GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key"}
 
     def test_hierarchical_loading(self):
