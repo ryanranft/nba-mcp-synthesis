@@ -419,7 +419,7 @@ configuration:
 
   notifications:
     slack:
-      webhook_url: "{{ env.SLACK_WEBHOOK_URL }}"
+      webhook_url: "{{ env.SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW }}"
       channel: "#all-big-cat-bets"
     email:
       smtp_server: "smtp.gmail.com"

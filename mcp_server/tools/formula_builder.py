@@ -196,6 +196,9 @@ class InteractiveFormulaBuilder:
             "min",
         ]
 
+        # Alias for backward compatibility with tests
+        self.variable_info = self.sports_variables
+
     def _initialize_templates(self) -> List[FormulaTemplate]:
         """Initialize common sports analytics formula templates"""
         templates = [
@@ -570,17 +573,25 @@ class InteractiveFormulaBuilder:
 
         Returns:
             Dictionary with formula information
+
+        Raises:
+            ValueError: If template is not found
         """
         template = next(
             (t for t in self.formula_templates if t.name == template_name), None
         )
         if not template:
-            return {"error": f"Template '{template_name}' not found"}
+            raise ValueError(f"Template '{template_name}' not found")
 
         # Validate that all required variables are provided
         missing_vars = set(template.variables) - set(variable_values.keys())
         if missing_vars:
             return {"error": f"Missing variables: {', '.join(missing_vars)}"}
+
+        # Validate variable values (sports stats should not be negative)
+        for var, value in variable_values.items():
+            if value < 0:
+                return {"error": f"Invalid value for {var}: {value}. Sports statistics cannot be negative."}
 
         # Substitute values into template
         formula_str = template.template
@@ -612,9 +623,19 @@ class InteractiveFormulaBuilder:
 
         Returns:
             Exported formula string
+
+        Raises:
+            ValueError: If format_type is not supported
         """
+        # Validate format type first
+        valid_formats = ["latex", "python", "sympy", "json"]
+        if format_type not in valid_formats:
+            raise ValueError(f"Unsupported format: {format_type}. Valid formats: {', '.join(valid_formats)}")
+
         try:
-            expr = parse_expr(formula_str)
+            # Preprocess formula to handle variables like 3PM
+            preprocessed = self._preprocess_formula_for_parsing(formula_str)
+            expr = parse_expr(preprocessed)
 
             if format_type == "latex":
                 return latex(expr)
@@ -632,8 +653,6 @@ class InteractiveFormulaBuilder:
                     },
                     indent=2,
                 )
-            else:
-                return f"Unsupported format: {format_type}"
 
         except Exception as e:
             return f"Export failed: {str(e)}"
@@ -721,6 +740,34 @@ class InteractiveFormulaBuilder:
 
         return len(errors) == 0, errors
 
+    def _preprocess_formula_for_parsing(self, formula_str: str) -> str:
+        """
+        Preprocess formula to handle variables that start with numbers.
+
+        For example: 3PM -> VAR_3PM
+        This is needed because sympy requires valid Python identifiers.
+
+        Args:
+            formula_str: Original formula string
+
+        Returns:
+            Preprocessed formula string safe for sympy parsing
+        """
+        # Find all variable-like tokens (alphanumeric plus underscores)
+        tokens = re.findall(r'[A-Za-z_][A-Za-z0-9_]*|\d+[A-Za-z_][A-Za-z0-9_]*', formula_str)
+
+        # Identify variables that start with a digit
+        numeric_prefix_vars = [token for token in tokens if token and token[0].isdigit()]
+
+        # Replace numeric-prefix variables with safe versions
+        preprocessed = formula_str
+        for var in numeric_prefix_vars:
+            safe_var = f"VAR_{var}"
+            # Use word boundaries to avoid partial replacements
+            preprocessed = re.sub(r'\b' + re.escape(var) + r'\b', safe_var, preprocessed)
+
+        return preprocessed
+
     def _validate_semantics(
         self, formula_str: str
     ) -> Tuple[bool, List[str], List[str]]:
@@ -729,7 +776,9 @@ class InteractiveFormulaBuilder:
         warnings = []
 
         try:
-            expr = parse_expr(formula_str)
+            # Preprocess formula to handle variables like 3PM
+            preprocessed = self._preprocess_formula_for_parsing(formula_str)
+            expr = parse_expr(preprocessed)
             # Basic semantic checks passed
         except Exception as e:
             errors.append(f"Semantic error: {str(e)}")

@@ -197,7 +197,7 @@ class TestAuthenticateRequest:
     def test_authenticate_with_jwt(self):
         """Test authentication with JWT token"""
         from mcp_server.auth import get_jwt_auth
-        
+
         jwt_auth = get_jwt_auth()  # Use global instance
         token = jwt_auth.create_token("user123", Role.USER)
 
@@ -210,7 +210,7 @@ class TestAuthenticateRequest:
     def test_authenticate_with_api_key(self):
         """Test authentication with API key"""
         from mcp_server.auth import get_api_key_auth
-        
+
         api_auth = get_api_key_auth()  # Use global instance
         api_key = api_auth.generate_api_key("Test Key", Role.ADMIN)
 

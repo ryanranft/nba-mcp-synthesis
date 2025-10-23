@@ -67,20 +67,23 @@ class TestDataValidatorIntegration:
     async def test_validator_with_postgres_config(self):
         """Test: Validator can be initialized with PostgreSQL config"""
         from data_quality.validator import DataValidator
+        from unittest.mock import patch
+        import os
 
-        # Skip if database credentials not configured
-        if not all(
-            [
-                get_hierarchical_env("RDS_HOST", "NBA_MCP_SYNTHESIS", "WORKFLOW"),
-                get_hierarchical_env("RDS_DATABASE", "NBA_MCP_SYNTHESIS", "WORKFLOW"),
-            ]
-        ):
-            pytest.skip("PostgreSQL credentials not configured")
-
-        validator = DataValidator(use_configured_context=True)
-        assert validator is not None
-        assert validator.use_configured_context == True
-        print("✅ Validator initialized with PostgreSQL config")
+        # Mock PostgreSQL environment variables for testing
+        with patch.dict(os.environ, {
+            'RDS_HOST_NBA_MCP_SYNTHESIS_WORKFLOW': 'localhost',
+            'RDS_DATABASE_NBA_MCP_SYNTHESIS_WORKFLOW': 'nba_stats',
+            'RDS_USERNAME_NBA_MCP_SYNTHESIS_WORKFLOW': 'test_user',
+            'RDS_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW': 'test_password',
+            'RDS_PORT_NBA_MCP_SYNTHESIS_WORKFLOW': '5432'
+        }):
+            # Test that validator can be initialized with config
+            # (doesn't actually connect to database in init)
+            validator = DataValidator(use_configured_context=True)
+            assert validator is not None
+            assert validator.use_configured_context == True
+            print("✅ Validator initialized with PostgreSQL config (mocked)")
 
     @pytest.mark.asyncio
     async def test_validator_in_memory_mode(self):
@@ -135,38 +138,31 @@ class TestDataValidatorIntegration:
             assert result["summary"]["passed"] == 2
             print("✅ In-memory validation works")
 
-    @pytest.mark.skipif(
-        not all(
-            [
-                get_hierarchical_env("RDS_HOST", "NBA_MCP_SYNTHESIS", "WORKFLOW"),
-                get_hierarchical_env("RDS_DATABASE", "NBA_MCP_SYNTHESIS", "WORKFLOW"),
-                get_hierarchical_env("RDS_USERNAME", "NBA_MCP_SYNTHESIS", "WORKFLOW"),
-                get_hierarchical_env("RDS_PASSWORD", "NBA_MCP_SYNTHESIS", "WORKFLOW"),
-            ]
-        ),
-        reason="PostgreSQL credentials not configured",
-    )
     @pytest.mark.asyncio
     async def test_postgres_connection_string_building(self):
         """Test: PostgreSQL connection string is built correctly"""
         from data_quality.validator import DataValidator
+        from unittest.mock import patch
+        import os
 
-        validator = DataValidator(use_configured_context=True)
+        # Mock PostgreSQL environment variables for testing
+        with patch.dict(os.environ, {
+            'RDS_HOST_NBA_MCP_SYNTHESIS_WORKFLOW': 'test-db.amazonaws.com',
+            'RDS_DATABASE_NBA_MCP_SYNTHESIS_WORKFLOW': 'nba_stats',
+            'RDS_USERNAME_NBA_MCP_SYNTHESIS_WORKFLOW': 'nba_user',
+            'RDS_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW': 'test_password_123',
+            'RDS_PORT_NBA_MCP_SYNTHESIS_WORKFLOW': '5432'
+        }):
+            validator = DataValidator(use_configured_context=True)
 
-        try:
-            connection_string = validator._build_postgres_connection_string()
-            assert "postgresql+psycopg2://" in connection_string
-            assert (
-                get_hierarchical_env("RDS_HOST", "NBA_MCP_SYNTHESIS", "WORKFLOW")
-                in connection_string
-            )
-            assert (
-                get_hierarchical_env("RDS_DATABASE", "NBA_MCP_SYNTHESIS", "WORKFLOW")
-                in connection_string
-            )
-            print("✅ PostgreSQL connection string built correctly")
-        except ValueError as e:
-            pytest.fail(f"Failed to build connection string: {e}")
+            try:
+                connection_string = validator._build_postgres_connection_string()
+                assert "postgresql+psycopg2://" in connection_string
+                assert "test-db.amazonaws.com" in connection_string
+                assert "nba_stats" in connection_string
+                print("✅ PostgreSQL connection string built correctly (mocked)")
+            except ValueError as e:
+                pytest.fail(f"Failed to build connection string: {e}")
 
 
 class TestProductionWorkflows:

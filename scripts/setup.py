@@ -129,7 +129,12 @@ def configure_environment():
 
     # Optional Slack
     if Confirm.ask("\nConfigure Slack notifications?", default=False):
-        env_config["SLACK_WEBHOOK_URL"] = Prompt.ask("Slack Webhook URL")
+        console.print("\n[yellow]Note: It's recommended to use hierarchical secrets instead of .env files.[/yellow]")
+        console.print("[yellow]Place webhook in: .env.nba_mcp_synthesis.production/SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW.env[/yellow]")
+        env_config["SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW"] = Prompt.ask(
+            "Slack Webhook URL (Production)",
+            default="Use hierarchical secrets"
+        )
 
     # Write .env file
     with open(".env", "w") as f:
@@ -179,9 +184,13 @@ def configure_environment():
         f.write("OLLAMA_HOST=http://localhost:11434\n\n")
 
         # Slack
-        if env_config.get("SLACK_WEBHOOK_URL"):
+        if env_config.get("SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW"):
             f.write("# Slack Notifications\n")
-            f.write(f"SLACK_WEBHOOK_URL={env_config['SLACK_WEBHOOK_URL']}\n\n")
+            f.write("# Note: Hierarchical secrets are recommended over .env files\n")
+            if env_config['SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW'] != "Use hierarchical secrets":
+                f.write(f"SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW={env_config['SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW']}\n\n")
+            else:
+                f.write("# SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW=<place in hierarchical secrets>\n\n")
 
         # Limits
         f.write("# Safety & Performance\n")

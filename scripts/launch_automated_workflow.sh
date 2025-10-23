@@ -9,7 +9,7 @@ if [ -f .env.workflow ]; then
     echo "📋 Loading workflow environment from .env.workflow..."
     source .env.workflow
     export GOOGLE_API_KEY DEEPSEEK_API_KEY ANTHROPIC_API_KEY OPENAI_API_KEY
-    export SLACK_WEBHOOK_URL LINEAR_API_KEY LINEAR_TEAM_ID LINEAR_PROJECT_ID
+    export SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW LINEAR_API_KEY LINEAR_TEAM_ID LINEAR_PROJECT_ID
     echo "✅ Workflow environment loaded"
 else
     echo "❌ Error: .env.workflow file not found"
@@ -22,8 +22,8 @@ echo "🔑 Validating required variables..."
 missing_vars=()
 
 
-if [ -z "$SLACK_WEBHOOK_URL" ]; then
-    missing_vars+=("SLACK_WEBHOOK_URL")
+if [ -z "$SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW" ]; then
+    missing_vars+=("SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW")
 fi
 
 if [ -z "$LINEAR_API_KEY" ]; then
@@ -56,7 +56,7 @@ echo "✅ All required variables validated"
 
 # Send start notification
 echo "📢 Sending start notification to Slack..."
-curl -X POST "$SLACK_WEBHOOK_URL" \
+curl -X POST "$SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW" \
     -H 'Content-Type: application/json' \
     -d '{"text": "🚀 Starting automated book analysis workflow..."}' \
     --silent --show-error
@@ -79,7 +79,7 @@ echo ""
 python3 scripts/automated_workflow.py \
     --config config/books_to_analyze_all_ai_ml.json \
     --budget 410.0 \
-    --slack-webhook "$SLACK_WEBHOOK_URL" \
+    --slack-webhook "$SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW" \
     --linear-api-key "$LINEAR_API_KEY" \
     --linear-team-id "$LINEAR_TEAM_ID" \
     --linear-project-id "$LINEAR_PROJECT_ID" \
@@ -94,13 +94,13 @@ echo ""
 echo "📢 Sending completion notification..."
 
 if [ $EXIT_CODE -eq 0 ]; then
-    curl -X POST "$SLACK_WEBHOOK_URL" \
+    curl -X POST "$SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW" \
         -H 'Content-Type: application/json' \
         -d '{"text": "✅ Workflow completed successfully! Check Linear for issues and NBA Simulator AWS for implementation files."}' \
         --silent --show-error
     echo "✅ Workflow completed successfully!"
 else
-    curl -X POST "$SLACK_WEBHOOK_URL" \
+    curl -X POST "$SLACK_WEBHOOK_URL_NBA_MCP_SYNTHESIS_WORKFLOW" \
         -H 'Content-Type: application/json' \
         -d '{"text": "❌ Workflow failed - check logs for details"}' \
         --silent --show-error

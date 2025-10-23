@@ -16,6 +16,14 @@ import sys
 from .mcp_client import MCPClient
 from .models import DeepSeekModel, ClaudeModel, OllamaModel
 
+# Try to import hierarchical env helper
+try:
+    from mcp_server.env_helper import get_hierarchical_env
+except ImportError:
+    # Fallback if env_helper not available
+    def get_hierarchical_env(key, project, context):
+        return os.getenv(f"{key}_{project}_{context}") or os.getenv(key)
+
 # Try to import structured logging
 try:
     sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -699,8 +707,8 @@ async def _send_slack_notification(
     if not SLACK_AVAILABLE:
         return
 
-    # Check if Slack webhook is configured
-    webhook_url = os.getenv("SLACK_WEBHOOK_URL")
+    # Check if Slack webhook is configured using hierarchical naming
+    webhook_url = get_hierarchical_env("SLACK_WEBHOOK_URL", "NBA_MCP_SYNTHESIS", "WORKFLOW")
     if not webhook_url:
         logger.debug("Slack webhook not configured, skipping notification")
         return

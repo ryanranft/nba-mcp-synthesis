@@ -5,3 +5,12 @@ skips = ["B101"]  # Skip assert_used warnings
 [tool.bandit.assert_used]
 skips = ["*/test_*.py", "*/tests/*"]
 
+[tool.pytest.ini_options]
+markers = [
+    "isolation: marks tests that need to run in isolation",
+    "integration: marks tests as integration tests",
+    "timeout: sets a timeout for test execution",
+]
+# Run tests with process isolation to prevent state contamination
+addopts = "-n auto"
+
