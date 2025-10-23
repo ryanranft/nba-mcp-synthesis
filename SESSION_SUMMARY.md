@@ -328,4 +328,48 @@
 - Issues fixed: 1
 - Security level: ✅ Production-grade
 
-**Commit**: `[pending]` - Security fix for exposed API key in documentation
+**Commit**: `6a40da6` - Security fix for exposed API key in documentation
+
+---
+
+## 🗂️ Organization Cleanup - October 23, 2025 (Continuation)
+
+### Test-Generated Files Cleanup
+
+**Discovered and archived 15 test-generated user guide files**:
+
+**Issue Found:**
+- Location: `docs/` directory
+- Pattern: `guide_{8-char-hash}_user_guide.md`
+- Files: 15 test-generated documentation files
+- Total size: ~2,565 lines
+- Created: October 14, 2025 (test run artifacts)
+
+**Action Taken:**
+1. Identified all files matching pattern `guide_*_user_guide.md`
+2. Verified files are test outputs (different titles, similar structure)
+3. Created archive directory: `docs/archive/test-generated/`
+4. Moved all 15 files to archive with documentation README
+5. Updated `enforce_organization.py` with new pattern rule
+
+**Files Archived:**
+- guide_11543c3f_user_guide.md (Test Examples)
+- guide_473564ed_user_guide.md (Performance Test Guide 3)
+- guide_92546cd4_user_guide.md (NBA Analytics Complete Guide)
+- guide_affdfd87_user_guide.md (Test Troubleshooting)
+- ... and 11 more test files
+
+**Organization Rule Added:**
+```python
+"guide_*_user_guide.md": "docs/archive/test-generated/"
+```
+
+**Impact:**
+- ✅ Improved documentation organization
+- ✅ Prevents future test file accumulation
+- ✅ Organization enforcement script validates successfully
+- ✅ Clear archival documentation for future reference
+
+**Commit**: `419739b` - Archive 15 test-generated user guide files
+
+**Status:** ✅ Organization rules enforced and validated
