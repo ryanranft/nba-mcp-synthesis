@@ -1787,7 +1787,7 @@ class AlgebraMatrixParams(BaseModel):
     """Parameters for matrix operations"""
 
     matrix_data: List[List[Union[int, float]]] = Field(
-        ..., min_items=1, description="2D list representing the matrix"
+        ..., min_length=1, description="2D list representing the matrix"
     )
     operation: str = Field(
         ..., min_length=1, max_length=20, description="Matrix operation to perform"
@@ -1828,10 +1828,10 @@ class AlgebraSystemSolveParams(BaseModel):
     """Parameters for solving equation systems"""
 
     equations: List[str] = Field(
-        ..., min_items=1, max_items=10, description="List of equation strings"
+        ..., min_length=1, max_length=10, description="List of equation strings"
     )
     variables: List[str] = Field(
-        ..., min_items=1, max_items=10, description="List of variable names"
+        ..., min_length=1, max_length=10, description="List of variable names"
     )
 
     class Config:
@@ -3933,7 +3933,7 @@ class SymbolicRegressionParams(BaseModel):
         ..., min_length=1, max_length=50, description="Variable to predict"
     )
     input_variables: List[str] = Field(
-        ..., min_items=1, max_items=10, description="Variables to use as inputs"
+        ..., min_length=1, max_length=10, description="Variables to use as inputs"
     )
     regression_type: Literal[
         "linear",
@@ -4041,7 +4041,7 @@ class CustomMetricParams(BaseModel):
         ..., min_length=1, max_length=500, description="Description of the metric"
     )
     variables: List[str] = Field(
-        ..., min_items=1, max_items=10, description="Variables used in the formula"
+        ..., min_length=1, max_length=10, description="Variables used in the formula"
     )
     parameters: Dict[str, float] = Field(
         ..., description="Optimized parameters for the formula"
@@ -4810,7 +4810,7 @@ class FormulaSuggestionParams(BaseModel):
     )
     available_variables: List[str] = Field(
         ...,
-        min_items=1,
+        min_length=1,
         description="List of available variables for formula construction",
     )
     target_metric: Optional[str] = Field(
@@ -4974,7 +4974,7 @@ class FormulaDiscoveryParams(BaseModel):
     )
     available_variables: List[str] = Field(
         ...,
-        min_items=2,
+        min_length=2,
         description="List of available variables for formula construction",
     )
     target_variable: Optional[str] = Field(
@@ -5035,7 +5035,7 @@ class PatternAnalysisParams(BaseModel):
     """Parameters for pattern analysis in formula discovery"""
 
     data_patterns: List[Dict[str, Any]] = Field(
-        ..., min_items=1, description="List of data patterns to analyze"
+        ..., min_length=1, description="List of data patterns to analyze"
     )
     pattern_types: List[
         Literal[
@@ -5077,7 +5077,7 @@ class FormulaValidationParams(BaseModel):
     """Parameters for validating discovered formulas"""
 
     formula_expressions: List[str] = Field(
-        ..., min_items=1, description="List of formula expressions to validate"
+        ..., min_length=1, description="List of formula expressions to validate"
     )
     test_data: Optional[Dict[str, List[float]]] = Field(
         default=None, description="Test data for formula validation"
@@ -5150,7 +5150,7 @@ class FormulaRankingParams(BaseModel):
     """Parameters for ranking discovered formulas"""
 
     discovered_formulas: List[Dict[str, Any]] = Field(
-        ..., min_items=1, description="List of discovered formulas with metadata"
+        ..., min_length=1, description="List of discovered formulas with metadata"
     )
     ranking_criteria: List[
         Literal["accuracy", "simplicity", "novelty", "interpretability", "robustness"]
@@ -5371,7 +5371,7 @@ class PredictiveModelParams(BaseModel):
         ..., min_length=1, max_length=100, description="Target variable to predict"
     )
     feature_variables: List[str] = Field(
-        ..., min_items=1, description="List of feature variables for prediction"
+        ..., min_length=1, description="List of feature variables for prediction"
     )
     training_data: Dict[str, List[float]] = Field(
         ..., description="Training data with variable names as keys and values as lists"
@@ -5573,7 +5573,7 @@ class EnsembleModelParams(BaseModel):
     """Parameters for ensemble model creation"""
 
     base_models: List[str] = Field(
-        ..., min_items=2, max_items=10, description="List of base model IDs to combine"
+        ..., min_length=2, max_length=10, description="List of base model IDs to combine"
     )
     ensemble_method: Literal["voting", "bagging", "boosting", "stacking"] = Field(
         default="voting", description="Method for combining base models"
@@ -5715,7 +5715,7 @@ class ErrorCorrectionParams(BaseModel):
     """Parameters for intelligent error correction"""
 
     detected_errors: List[Dict[str, Any]] = Field(
-        ..., min_items=1, description="List of detected errors to correct"
+        ..., min_length=1, description="List of detected errors to correct"
     )
     correction_strategy: Literal["automatic", "suggested", "interactive"] = Field(
         default="suggested", description="Strategy for error correction"
@@ -5843,7 +5843,7 @@ class ErrorLearningParams(BaseModel):
     """Parameters for error learning and improvement"""
 
     error_cases: List[Dict[str, Any]] = Field(
-        ..., min_items=1, description="List of error cases for learning"
+        ..., min_length=1, description="List of error cases for learning"
     )
     learning_type: Literal["supervised", "unsupervised", "reinforcement"] = Field(
         default="supervised", description="Type of learning to perform"
@@ -6279,7 +6279,7 @@ class FormulaComparisonParams(BaseModel):
     """Parameters for comparing different formula implementations"""
 
     formulas_to_compare: List[str] = Field(
-        ..., min_items=2, max_items=10, description="List of formulas to compare"
+        ..., min_length=2, max_length=10, description="List of formulas to compare"
     )
     comparison_metrics: List[
         Literal["accuracy", "speed", "complexity", "readability", "memory"]
@@ -6311,7 +6311,7 @@ class FormulaLearningParams(BaseModel):
     """Parameters for adaptive formula learning and improvement"""
 
     learning_data: List[Dict[str, Any]] = Field(
-        ..., min_items=1, description="Data for learning and improvement"
+        ..., min_length=1, description="Data for learning and improvement"
     )
     learning_objective: Literal[
         "accuracy", "performance", "user_satisfaction", "comprehensive"
@@ -6461,7 +6461,7 @@ class FormulaPatternDiscoveryParams(BaseModel):
     """Parameters for discovering patterns across formulas"""
 
     formula_ids: List[str] = Field(
-        ..., min_items=2, max_items=20, description="List of formula IDs to analyze"
+        ..., min_length=2, max_length=20, description="List of formula IDs to analyze"
     )
     pattern_types: List[
         Literal[
@@ -6635,7 +6635,7 @@ class UsageAlertParams(BaseModel):
     """Parameters for setting up usage alerts"""
 
     alert_conditions: List[Dict[str, Any]] = Field(
-        ..., min_items=1, description="Conditions that trigger alerts"
+        ..., min_length=1, description="Conditions that trigger alerts"
     )
     alert_types: List[Literal["email", "webhook", "dashboard", "sms"]] = Field(
         default=["email"], description="Types of alerts to send"
@@ -6751,7 +6751,7 @@ class DataFormulaProcessingParams(BaseModel):
 
     data: Dict[str, List[float]] = Field(
         ...,
-        min_items=2,
+        min_length=2,
         description="Dictionary with variable names as keys and data lists as values",
     )
     target_variable: str = Field(
@@ -6879,7 +6879,7 @@ class DataVisualizationParams(BaseModel):
 
     data: Dict[str, List[float]] = Field(
         ...,
-        min_items=1,
+        min_length=1,
         description="Data dictionary with variable names as keys and data lists as values",
     )
     visualization_type: Literal[
@@ -6959,8 +6959,8 @@ class FormulaRelationshipVisualizationParams(BaseModel):
 
     formulas: List[str] = Field(
         ...,
-        min_items=1,
-        max_items=20,
+        min_length=1,
+        max_length=20,
         description="List of formula strings to visualize relationships between",
     )
     relationships: List[Tuple[str, str, str]] = Field(
@@ -7386,8 +7386,8 @@ class TutorialGenerationParams(BaseModel):
     )
     objectives: List[str] = Field(
         ...,
-        min_items=1,
-        max_items=10,
+        min_length=1,
+        max_length=10,
         description="Learning objectives for the tutorial",
     )
     estimated_duration: Optional[int] = Field(
