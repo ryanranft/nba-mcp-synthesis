@@ -48,3 +48,10 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
         files: \.py$
+
+      - id: organization-enforcement
+        name: Enforce repository organization rules
+        entry: python3 scripts/enforce_organization.py --check-root
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
