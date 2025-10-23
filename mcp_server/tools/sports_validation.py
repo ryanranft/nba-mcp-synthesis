@@ -466,8 +466,8 @@ def get_stat_range(stat_name: str) -> Dict[str, float]:
         'FG%': {'min': 0, 'max': 1},
         'FT%': {'min': 0, 'max': 1},
         '3P%': {'min': 0, 'max': 1},
-        'MP': {'min': 0, 'max': 48},  # Player minutes (NBA regulation)
-        'MIN': {'min': 0, 'max': 48},  # Alias for MP
+            'MP': {'min': 0, 'max': 4000},  # Player minutes (48 per game × 82 games = 3936 max season)
+            'MIN': {'min': 0, 'max': 4000},  # Alias for MP
         'TM_MP': {'min': 0, 'max': 240},  # Team minutes (48 × 5 players)
         'TEAM_MP': {'min': 0, 'max': 240},  # Alias for TM_MP
         'FGA': {'min': 0, 'max': 100},
