@@ -1,0 +1,221 @@
+# Recommendation Audit & Consolidation Configuration
+#
+# This file controls how the audit_and_consolidate_recommendations.py script
+# finds, processes, and archives recommendation files.
+
+# ==============================================================================
+# FILE SCANNING
+# ==============================================================================
+
+# Glob patterns for finding recommendation files
+scan_patterns:
+  - "*RECOMMENDATION*.md"
+  - "*ACTION*.md"
+  - "*TODO*.md"
+  - "*ANALYSIS*.md"  # Only if contains action items
+
+# Directories to exclude from scanning
+exclude_dirs:
+  - ".git"
+  - "node_modules"
+  - "venv"
+  - ".venv"
+  - "__pycache__"
+  - ".pytest_cache"
+  - "docs/archive"  # Don't re-process archived files
+
+# Specific files to exclude
+exclude_files:
+  - "PRIORITY_ACTION_LIST.md"  # Master list, don't process
+  - "PROJECT_MASTER_TRACKER.md"  # Tracker, not recommendations
+  - "SESSION_SUMMARY.md"  # Session file, not recommendations
+
+# ==============================================================================
+# IMPLEMENTATION DETECTION
+# ==============================================================================
+
+# Directories to search for implementations
+implementation_dirs:
+  - "mcp_server/"
+  - "scripts/"
+  - "workflows/"
+  - "deployment/"
+  - "monitoring/"
+
+# Directories to search for tests
+test_dirs:
+  - "tests/"
+  - "tests/integration/"
+  - "tests/unit/"
+
+# Directories to search for documentation
+docs_dirs:
+  - "docs/"
+  - "docs/guides/"
+  - "docs/archive/completed/"
+
+# Keywords indicating completion (case-insensitive)
+completion_keywords:
+  - "COMPLETE"
+  - "DONE"
+  - "IMPLEMENTED"
+  - "FINISHED"
+  - "SUCCESS"
+
+# Keywords indicating partial completion
+partial_keywords:
+  - "IN_PROGRESS"
+  - "PARTIAL"
+  - "WIP"
+  - "STARTED"
+
+# ==============================================================================
+# RECOMMENDATION EXTRACTION
+# ==============================================================================
+
+# Patterns that indicate action items
+action_patterns:
+  # Checkbox patterns
+  - "- [ ]"
+  - "- [x]"
+  - "- [X]"
+
+  # Imperative verbs
+  - "Implement"
+  - "Add"
+  - "Create"
+  - "Build"
+  - "Setup"
+  - "Configure"
+  - "Install"
+  - "Deploy"
+  - "Update"
+  - "Integrate"
+  - "Automate"
+
+  # Success criteria
+  - "Success Criteria:"
+  - "Action Items:"
+  - "Implementation Steps:"
+  - "To Do:"
+  - "Next Steps:"
+
+# Priority indicators
+priority_keywords:
+  high:
+    - "CRITICAL"
+    - "HIGH"
+    - "URGENT"
+    - "PRIORITY 1"
+    - "P1"
+    - "🔴"
+    - "⭐"
+  medium:
+    - "MEDIUM"
+    - "IMPORTANT"
+    - "PRIORITY 2"
+    - "P2"
+    - "🟡"
+  low:
+    - "LOW"
+    - "NICE-TO-HAVE"
+    - "PRIORITY 3"
+    - "P3"
+    - "🟢"
+
+# ==============================================================================
+# OUTPUT & ARCHIVING
+# ==============================================================================
+
+# Where to move archived recommendation files
+archive_dir: "docs/archive/2025-10/recommendations/"
+
+# Master list file (to update with pending items)
+master_list: "PRIORITY_ACTION_LIST.md"
+
+# Backlog file (new pending items)
+backlog_list: "RECOMMENDATIONS_BACKLOG.md"
+
+# Completion report
+completion_report: "docs/archive/completed/RECOMMENDATIONS_COMPLETION_REPORT.md"
+
+# Create backup before archiving
+create_backup: true
+backup_dir: "backups/recommendations/"
+
+# ==============================================================================
+# PROCESSING OPTIONS
+# ==============================================================================
+
+# Minimum confidence threshold for completion detection (0.0-1.0)
+# 0.7 = 70% confidence required to mark as COMPLETED
+completion_confidence_threshold: 0.7
+
+# De-duplication similarity threshold (0.0-1.0)
+# 0.8 = 80% similar recommendations are considered duplicates
+deduplication_threshold: 0.8
+
+# Verbose output
+verbose: true
+
+# Dry run (show what would happen without making changes)
+dry_run: false
+
+# ==============================================================================
+# KEYWORD MAPPINGS
+# ==============================================================================
+# Maps recommendation keywords to implementation file patterns
+
+keyword_mappings:
+  mlflow:
+    - "model_tracking.py"
+    - "mlflow"
+    - "experiment"
+
+  drift:
+    - "drift_detector.py"
+    - "drift"
+    - "monitoring"
+
+  feature_store:
+    - "feature_store"
+    - "features.py"
+
+  ab_testing:
+    - "ab_testing"
+    - "ab_test"
+
+  monitoring:
+    - "monitoring"
+    - "dashboard"
+    - "grafana"
+
+  explainability:
+    - "explainability"
+    - "shap"
+    - "lime"
+
+  retraining:
+    - "retraining"
+    - "auto_retrain"
+
+  model_registry:
+    - "model_registry"
+    - "registry"
+
+  feedback:
+    - "feedback"
+    - "correction"
+
+# ==============================================================================
+# REPORTING
+# ==============================================================================
+
+# Report format (markdown, json, html)
+report_format: "markdown"
+
+# Include statistics in report
+include_statistics: true
+
+# Generate charts/graphs (requires matplotlib)
+generate_charts: false
