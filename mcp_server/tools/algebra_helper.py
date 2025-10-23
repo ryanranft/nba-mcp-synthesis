@@ -729,7 +729,7 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
         if kwargs:
             # Validate formula inputs
             validation_result = validate_formula_inputs(formula_name, kwargs)
-            
+
             # Check if validation failed
             if not validation_result.get("valid", True):
                 errors = validation_result.get("errors", [])
@@ -738,9 +738,9 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
                 if suggestions:
                     error_msg += f"\nSuggestions: {'; '.join(suggestions)}"
                 raise ValueError(error_msg)
-            
+
             validated_kwargs = validation_result.get("variables", kwargs)
-            
+
             # Check for consistency warnings
             warnings = validate_formula_consistency(formula_name, validated_kwargs)
             if warnings:
@@ -758,7 +758,7 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
 
         # Substitute values if provided using sympy symbolic substitution
         substituted_values = {}
-        
+
         # Preprocess formula to handle variables starting with numbers (e.g., 3PM, 3PA)
         # Replace them with valid Python identifiers (e.g., THREE_PM, THREE_PA)
         numeric_var_map = {}
@@ -769,7 +769,7 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
                 safe_var = f"VAR_{var}"
                 numeric_var_map[safe_var] = var
                 preprocessed_formula = preprocessed_formula.replace(var, safe_var)
-        
+
         # Parse formula as sympy expression
         try:
             expr = parse_expr(preprocessed_formula)
@@ -818,12 +818,12 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
                 subs_dict[Symbol(safe_var)] = val
             else:
                 subs_dict[Symbol(var)] = val
-        
+
         result_expr = expr.subs(subs_dict)
-        
+
         # Generate string representation for substituted formula
         substituted_formula = str(result_expr)
-        
+
         # Calculate result
         result = None
         try:

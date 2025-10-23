@@ -1,45 +1,71 @@
 version: '3.8'
 
 services:
+  mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nba-mcp-server
+    environment:
+      - DOCKER_CONTAINER=true
+      - PROJECT=${PROJECT:-nba-simulator-aws}
+      - CONTEXT=${CONTEXT:-TEST}
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./docs:/app/docs:ro
+      - ./mcp_server:/app/mcp_server:ro
+      - ./scripts:/app/scripts:ro
+    secrets:
+      - google_api_key
+      - aws_access_key_id
+      - aws_secret_access_key
+    healthcheck:
+      test: ["CMD", "python3", "-c", "from mcp_server.health import check_health; import sys; sys.exit(0 if check_health()['status'] == 'healthy' else 1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - mcp-network
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional: Redis for caching
   redis:
     image: redis:7-alpine
     container_name: nba-mcp-redis
-    ports:
-      - "6379:6379"
+    networks:
+      - mcp-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
     volumes:
       - redis-data:/data
-    command: redis-server --appendonly yes
     restart: unless-stopped
 
-  grafana:
-    image: grafana/grafana:latest
-    container_name: nba-mcp-grafana
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_USERS_ALLOW_SIGN_UP=false
-    volumes:
-      - grafana-data:/var/lib/grafana
-      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
-      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
-    restart: unless-stopped
+secrets:
+  google_api_key:
+    file: ${SECRETS_PATH:-.env.nba-simulator-aws.test}/GOOGLE_API_KEY_NBA_SIMULATOR_AWS_TEST.env
+  aws_access_key_id:
+    file: ${SECRETS_PATH:-.env.nba-simulator-aws.test}/AWS_ACCESS_KEY_ID_NBA_SIMULATOR_AWS_TEST.env
+  aws_secret_access_key:
+    file: ${SECRETS_PATH:-.env.nba-simulator-aws.test}/AWS_SECRET_ACCESS_KEY_NBA_SIMULATOR_AWS_TEST.env
 
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: nba-mcp-prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus-data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-    restart: unless-stopped
+networks:
+  mcp-network:
+    driver: bridge
+    name: nba-mcp-network
 
 volumes:
   redis-data:
-  grafana-data:
-  prometheus-data:
+    name: nba-mcp-redis-data

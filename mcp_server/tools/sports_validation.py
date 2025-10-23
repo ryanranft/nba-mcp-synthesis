@@ -266,7 +266,7 @@ def validate_formula_inputs(
     # If there are errors, return invalid result
     if errors:
         return {"valid": False, "variables": validated_vars, "errors": errors}
-    
+
     return {"valid": True, "variables": validated_vars, "errors": []}
 
 
