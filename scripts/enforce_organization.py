@@ -11,6 +11,7 @@ Usage:
     python scripts/enforce_organization.py --check-root # Check root only
     python scripts/enforce_organization.py --stats      # Show statistics
     python scripts/enforce_organization.py --verbose    # Detailed output
+    python scripts/enforce_organization.py --config custom.yaml  # Use custom config
 
 Exit codes:
     0 - All files properly organized
@@ -21,8 +22,9 @@ import os
 import sys
 import argparse
 import json
+import yaml
 from pathlib import Path
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 from datetime import datetime, timedelta
 from collections import defaultdict
 
@@ -33,7 +35,13 @@ PROJECT_ROOT = Path(__file__).parent.parent
 class OrganizationEnforcer:
     """Enforces project organization rules with enhanced features."""
 
-    def __init__(self, fix: bool = False, verbose: bool = False, quiet: bool = False):
+    def __init__(
+        self,
+        fix: bool = False,
+        verbose: bool = False,
+        quiet: bool = False,
+        config_path: Optional[Path] = None,
+    ):
         self.fix = fix
         self.verbose = verbose
         self.quiet = quiet
@@ -127,6 +135,87 @@ class OrganizationEnforcer:
         self.target_root_files = 20
         self.size_warning_mb = 0.5  # 500 KB
         self.size_critical_mb = 1.0  # 1 MB
+
+        # Load and merge configuration file if specified or found
+        config = self.load_config(config_path)
+        if config:
+            self.merge_rules(config)
+            if self.verbose:
+                print(
+                    f"✓ Loaded configuration from: {config_path or '.organization-rules.yaml'}"
+                )
+
+    def load_config(self, config_path: Optional[Path] = None) -> dict:
+        """
+        Load configuration from YAML file.
+
+        Args:
+            config_path: Optional path to config file. If None, looks for
+                        .organization-rules.yaml in project root.
+
+        Returns:
+            Dictionary with configuration, or empty dict if file not found.
+        """
+        if config_path is None:
+            config_path = PROJECT_ROOT / ".organization-rules.yaml"
+
+        if not config_path.exists():
+            return {}
+
+        try:
+            with open(config_path) as f:
+                config = yaml.safe_load(f)
+                return config if config else {}
+        except yaml.YAMLError as e:
+            print(f"⚠️  Error parsing config file: {e}")
+            return {}
+        except Exception as e:
+            print(f"⚠️  Error loading config file: {e}")
+            return {}
+
+    def merge_rules(self, config: dict):
+        """
+        Merge configuration rules with defaults.
+
+        Supports:
+        - custom_rules: Add new pattern → destination mappings
+        - override_rules: Override existing pattern destinations
+        - disabled_patterns: Remove patterns from enforcement
+        - additional_allowed_in_root: Add files allowed in root
+
+        Args:
+            config: Configuration dictionary from YAML
+        """
+        # Add custom rules
+        if "custom_rules" in config:
+            custom_count = len(config["custom_rules"])
+            self.rules.update(config["custom_rules"])
+            if self.verbose:
+                print(f"  ✓ Added {custom_count} custom rule(s)")
+
+        # Override existing rules
+        if "override_rules" in config:
+            override_count = len(config["override_rules"])
+            self.rules.update(config["override_rules"])
+            if self.verbose:
+                print(f"  ✓ Applied {override_count} rule override(s)")
+
+        # Disable patterns
+        if "disabled_patterns" in config:
+            disabled_count = 0
+            for pattern in config["disabled_patterns"]:
+                if pattern in self.rules:
+                    self.rules.pop(pattern)
+                    disabled_count += 1
+            if self.verbose:
+                print(f"  ✓ Disabled {disabled_count} pattern(s)")
+
+        # Add to allowed_in_root
+        if "additional_allowed_in_root" in config:
+            additional_count = len(config["additional_allowed_in_root"])
+            self.allowed_in_root.update(config["additional_allowed_in_root"])
+            if self.verbose:
+                print(f"  ✓ Added {additional_count} file(s) to allowed_in_root")
 
     def get_file_age_days(self, file_path: Path) -> int:
         """Get file age in days since last modification."""
@@ -401,10 +490,16 @@ def main():
     parser.add_argument(
         "--json", action="store_true", help="Output statistics as JSON (for CI/CD)"
     )
+    parser.add_argument(
+        "--config",
+        type=Path,
+        default=None,
+        help="Path to custom configuration file (default: .organization-rules.yaml)",
+    )
     args = parser.parse_args()
 
     enforcer = OrganizationEnforcer(
-        fix=args.fix, verbose=args.verbose, quiet=args.quiet
+        fix=args.fix, verbose=args.verbose, quiet=args.quiet, config_path=args.config
     )
 
     # Scan for violations
