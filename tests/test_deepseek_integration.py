@@ -136,6 +136,9 @@ async def test_cost_calculation():
 @pytest.mark.asyncio
 async def test_error_handling():
     """Test error handling with invalid input"""
+    if not get_hierarchical_env("DEEPSEEK_API_KEY", "NBA_MCP_SYNTHESIS", "WORKFLOW"):
+        pytest.skip("DEEPSEEK_API_KEY not set")
+    
     model = DeepSeekModel()
 
     # Test with empty prompt
@@ -168,6 +171,9 @@ async def test_context_formatting():
 
 def test_model_initialization():
     """Test model can be initialized"""
+    if not get_hierarchical_env("DEEPSEEK_API_KEY", "NBA_MCP_SYNTHESIS", "WORKFLOW"):
+        pytest.skip("DEEPSEEK_API_KEY not set")
+    
     model = DeepSeekModel()
     assert model.model == os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
 
