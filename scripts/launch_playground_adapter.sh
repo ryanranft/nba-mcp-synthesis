@@ -9,6 +9,9 @@ export PLAYGROUND_PROJECT_CONFIG="${PLAYGROUND_PROJECT_CONFIG:-project_configs/n
 export PLAYGROUND_INVENTORY_REPORT="${PLAYGROUND_INVENTORY_REPORT:-data_inventory_report.json}"
 export PLAYGROUND_INVENTORY_ENABLED="${PLAYGROUND_INVENTORY_ENABLED:-true}"
 
+# Ensure project root is on PYTHONPATH so 'playground_adapter' is importable
+export PYTHONPATH="${PYTHONPATH:-}:$(pwd)"
+
 echo "Starting Playground Adapter on ${PLAYGROUND_ADAPTER_HOST}:${PLAYGROUND_ADAPTER_PORT} ..."
 python scripts/run_playground_adapter.py &
 PID=$!
@@ -29,10 +32,8 @@ for i in $(seq 1 ${ATTEMPTS}); do
   if curl -s "${URL}" >/dev/null 2>&1; then
     echo "✅ Adapter is up: ${URL}"
     echo "Health:"
-    curl -s "${URL}" | python - <<'PY'
-import sys, json
-print(json.dumps(json.load(sys.stdin), indent=2))
-PY
+    # Pretty-print JSON; do not fail the script if formatting has issues
+    (curl -s "${URL}" | python -m json.tool) || true
     echo
     echo "Endpoints:"
     echo "  - Health         : ${URL}"

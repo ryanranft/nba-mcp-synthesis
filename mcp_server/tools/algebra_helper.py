@@ -1265,6 +1265,7 @@ def substitute_variables(formula_str: str, substitutions: Dict[str, float]) -> D
             "substitutions": substitutions,
             "result": result,
             "result_expr": str(result_expr),
+            "substituted": str(result_expr),  # For test compatibility
             "latex": latex(result_expr),
             "success": True,
         }

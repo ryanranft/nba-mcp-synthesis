@@ -11,6 +11,7 @@
       <env name="PLAYGROUND_PROJECT_CONFIG" value="project_configs/nba_mcp_synthesis.json" />
       <env name="PLAYGROUND_INVENTORY_REPORT" value="data_inventory_report.json" />
       <env name="PLAYGROUND_INVENTORY_ENABLED" value="true" />
+      <env name="PYTHONPATH" value="$PROJECT_DIR$" />
     </envs>
     <method v="2" />
   </configuration>

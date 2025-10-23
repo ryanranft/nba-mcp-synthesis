@@ -14,7 +14,7 @@
 All TIER 4 systems have been validated and are **production ready**:
 
 ✅ **DIMS (Data Inventory Management System)**: 7/7 tests passing (100%)
-✅ **Automated Deployment Pipeline**: 9/9 tests passing (100%)  
+✅ **Automated Deployment Pipeline**: 9/9 tests passing (100%)
 ✅ **Security Hooks & Scanning**: 7/7 tests passing (100%)
 ✅ **Edge Cases & Failure Scenarios**: 14/16 tests passing (87.5%)
 
@@ -349,7 +349,7 @@ All TIER 4 systems have been validated and are **production ready**:
    python scripts/orchestrate_recommendation_deployment.py \
      --recommendation analysis_results/sample_rec.json \
      --mode dry-run
-   
+
    # Deploy to production
    python scripts/orchestrate_recommendation_deployment.py \
      --recommendation analysis_results/sample_rec.json \
