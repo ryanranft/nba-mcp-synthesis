@@ -22,3 +22,4 @@ your_token
 your_key
 your_secret
 ghp_your_token_here
+.env.example
