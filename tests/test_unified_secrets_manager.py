@@ -19,7 +19,7 @@ class TestUnifiedSecretsManager:
 
     def test_initialization(self):
         """Test UnifiedSecretsManager initializes correctly"""
-        sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+        sm = UnifiedSecretsManager()
         assert sm.project is None
         assert sm.sport is None
         assert sm.context is None
@@ -28,7 +28,7 @@ class TestUnifiedSecretsManager:
 
     def test_load_secrets_from_files(self, temp_secrets_dir):
         """Test loading secrets from individual .env files"""
-        sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+        sm = UnifiedSecretsManager()
 
         # Create test secret files
         secret_dir = Path(temp_secrets_dir) / "test_project" / ".env.test_project.test"
@@ -52,7 +52,7 @@ class TestUnifiedSecretsManager:
 
     def test_context_detection(self):
         """Test automatic context detection"""
-        sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+        sm = UnifiedSecretsManager()
 
         # Test CI/CD detection
         with patch.dict(os.environ, {"CI": "true"}):
@@ -71,7 +71,7 @@ class TestUnifiedSecretsManager:
 
     def test_naming_convention_validation(self):
         """Test naming convention validation"""
-        sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+        sm = UnifiedSecretsManager()
 
         # Valid names
         assert sm._is_valid_naming_convention(
@@ -93,7 +93,7 @@ class TestUnifiedSecretsManager:
 
     def test_aws_fallback(self):
         """Test AWS Secrets Manager fallback"""
-        sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+        sm = UnifiedSecretsManager()
 
         # Mock AWS client
         with patch("boto3.client") as mock_boto:
@@ -118,7 +118,7 @@ class TestUnifiedSecretsManager:
 
     def test_get_secret(self):
         """Test getting a secret by name"""
-        sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+        sm = UnifiedSecretsManager()
         sm.secrets = {"GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key"}
 
         assert sm.get_secret("GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW") == "test_key"
@@ -126,7 +126,7 @@ class TestUnifiedSecretsManager:
 
     def test_create_aliases(self):
         """Test creating backward-compatible aliases"""
-        sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+        sm = UnifiedSecretsManager()
         sm.secrets = {
             "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key",
             "DB_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW": "test_password",
@@ -142,7 +142,7 @@ class TestUnifiedSecretsManager:
 
     def test_load_secrets(self, temp_secrets_dir):
         """Test loading secrets with project, sport, and context"""
-        sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+        sm = UnifiedSecretsManager()
 
         # Create test secret files
         secret_dir = Path(temp_secrets_dir) / "test_project" / ".env.test_project.test"
@@ -160,7 +160,7 @@ class TestUnifiedSecretsManager:
 
     def test_get_all_secrets(self):
         """Test getting all secrets"""
-        sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+        sm = UnifiedSecretsManager()
         sm.secrets = {
             "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key",
             "DB_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW": "test_password",
@@ -173,7 +173,7 @@ class TestUnifiedSecretsManager:
 
     def test_get_aliases(self):
         """Test getting all aliases"""
-        sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+        sm = UnifiedSecretsManager()
         sm.aliases = {
             "GOOGLE_API_KEY": "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW",
             "DB_PASSWORD": "DB_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW",
@@ -186,7 +186,7 @@ class TestUnifiedSecretsManager:
 
     def test_validate_secrets(self):
         """Test secret validation"""
-        sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+        sm = UnifiedSecretsManager()
         sm.secrets = {
             "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key",
             "ANTHROPIC_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key",
@@ -202,7 +202,7 @@ class TestUnifiedSecretsManager:
 
     def test_export_secrets(self, temp_secrets_dir):
         """Test exporting secrets to file"""
-        sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+        sm = UnifiedSecretsManager()
         sm.secrets = {
             "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key",
             "DB_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW": "test_password",
@@ -224,7 +224,7 @@ class TestUnifiedSecretsManager:
 
     def test_clear_secrets(self):
         """Test clearing secrets"""
-        sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+        sm = UnifiedSecretsManager()
         sm.secrets = {"GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW": "test_key"}
         sm.aliases = {"GOOGLE_API_KEY": "GOOGLE_API_KEY_NBA_MCP_SYNTHESIS_WORKFLOW"}
 
@@ -235,7 +235,7 @@ class TestUnifiedSecretsManager:
 
     def test_reload_secrets(self, temp_secrets_dir):
         """Test reloading secrets"""
-        sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+        sm = UnifiedSecretsManager()
         sm.project = "test_project"
         sm.sport = "TEST"
         sm.context = "test"
@@ -254,7 +254,7 @@ class TestUnifiedSecretsManager:
 
     def test_error_handling(self):
         """Test error handling"""
-        sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+        sm = UnifiedSecretsManager()
 
         # Test with invalid project
         with patch("os.path.exists", return_value=False):
@@ -268,7 +268,7 @@ class TestUnifiedSecretsManager:
 
     def test_integration(self, temp_secrets_dir):
         """Test integration with real file system"""
-        sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+        sm = UnifiedSecretsManager()
 
         # Create test secret files
         secret_dir = Path(temp_secrets_dir) / "test_project" / ".env.test_project.test"

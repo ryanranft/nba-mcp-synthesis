@@ -247,10 +247,10 @@ class UnifiedSecretsManager:
     def _load_secrets_from_files(self, directory: str) -> Dict[str, str]:
         """
         Backward-compatible wrapper for _load_secrets_from_level.
-        
+
         Args:
             directory: Directory path containing .env files
-            
+
         Returns:
             Dict of secrets loaded
         """
@@ -478,31 +478,31 @@ class UnifiedSecretsManager:
     def _load_from_docker_secrets(self, project: str, context: str) -> Dict[str, str]:
         """
         Load secrets from Docker secrets directory.
-        
+
         Docker secrets are mounted at /run/secrets/ or custom directory.
-        
+
         Args:
             project: Project name
             context: Context (TEST, PROD, etc.)
-            
+
         Returns:
             Dict of secrets loaded from Docker
         """
         secrets = {}
         docker_secrets_dir = os.getenv('DOCKER_SECRETS_DIR', '/run/secrets')
-        
+
         if not os.path.exists(docker_secrets_dir):
             logger.debug(f"Docker secrets directory not found: {docker_secrets_dir}")
             return secrets
-        
+
         # Look for project-specific secrets in directory structure
         # Expected structure: /run/secrets/project/.env.project.context/
         project_dir = Path(docker_secrets_dir) / project / f".env.{project}.{context.lower()}"
-        
+
         if not project_dir.exists():
             logger.debug(f"Docker project secrets directory not found: {project_dir}")
             return secrets
-        
+
         # Load all .env files from project directory
         for secret_file in project_dir.glob("*.env"):
             try:
@@ -510,10 +510,10 @@ class UnifiedSecretsManager:
                 # Remove project and context suffixes if present
                 key = key.replace(f"_{project.upper()}_{context.upper()}", "")
                 key = key.replace(f"_{project.replace('-', '_').upper()}_{context.upper()}", "")
-                
+
                 value = secret_file.read_text().strip()
                 secrets[key] = value
-                
+
                 # Track provenance
                 self.provenance[key] = SecretInfo(
                     name=key,
@@ -523,48 +523,48 @@ class UnifiedSecretsManager:
                     loaded_at=datetime.now(),
                     source="docker"
                 )
-                
+
                 logger.debug(f"Loaded Docker secret: {key}")
             except Exception as e:
                 logger.warning(f"Failed to load Docker secret from {secret_file}: {e}")
-        
+
         return secrets
 
     def load_secrets(self, project: str, context: str, env: str = "test", base_path: Optional[str] = None) -> bool:
         """
         Manually load secrets for a specific project and context.
-        
+
         This method is for backward compatibility and testing purposes.
         Production code should use load_secrets_hierarchical().
-        
+
         Args:
             project: Project name (e.g., 'nba-simulator-aws', 'test_project')
             context: Context (e.g., 'PROD', 'TEST')
             env: Environment suffix (default: 'test')
             base_path: Optional override for base_path (useful for testing)
-            
+
         Returns:
             bool: True if secrets were loaded successfully, False otherwise
         """
         logger.info(f"Loading secrets: project={project}, context={context}, env={env}")
-        
+
         # Track project/sport/context
         self.project = project
         self.sport = context  # Use context as sport for backward compatibility
         self.context = env
-        
+
         # Use provided base_path or default
         search_path = Path(base_path) if base_path else self.base_path
-        
+
         secrets_loaded = 0
-        
+
         # Check if we're in Docker environment
         if os.getenv('DOCKER_CONTAINER'):
             docker_secrets = self._load_from_docker_secrets(project, context)
             self.secrets.update(docker_secrets)
             secrets_loaded += len(docker_secrets)
             logger.info(f"Loaded {len(docker_secrets)} secrets from Docker")
-        
+
         # Try file-based loading
         project_path = search_path / project / f".env.{project}.{env}"
         if project_path.exists():
@@ -572,7 +572,7 @@ class UnifiedSecretsManager:
             self.secrets.update(file_secrets)
             secrets_loaded += len(file_secrets)
             logger.info(f"Loaded {len(file_secrets)} secrets from files")
-        
+
         # Try AWS Secrets Manager if configured
         if os.getenv('USE_AWS_SECRETS_MANAGER') == 'true':
             try:
@@ -582,18 +582,18 @@ class UnifiedSecretsManager:
                 logger.info(f"Loaded {len(aws_secrets)} secrets from AWS")
             except Exception as e:
                 logger.warning(f"Failed to load from AWS Secrets Manager: {e}")
-        
+
         # Create aliases
         self._create_aliases(project, context)
-        
+
         return secrets_loaded > 0
 
     def export_secrets(self, output_file: str, include_provenance: bool = False) -> None:
         """
         Export secrets to file (for debugging/migration).
-        
+
         Secrets are redacted in the export for security.
-        
+
         Args:
             output_file: Path to output JSON file
             include_provenance: Include provenance metadata
@@ -607,7 +607,7 @@ class UnifiedSecretsManager:
                 "total_aliases": len(self.aliases)
             }
         }
-        
+
         if include_provenance:
             export_data["provenance"] = {
                 k: {
@@ -618,10 +618,10 @@ class UnifiedSecretsManager:
                 }
                 for k, v in self.provenance.items()
             }
-        
+
         with open(output_file, 'w') as f:
             json.dump(export_data, f, indent=2)
-        
+
         logger.info(f"Exported secrets metadata to {output_file}")
 
     def clear_secrets(self) -> None:
@@ -634,15 +634,15 @@ class UnifiedSecretsManager:
     def reload_secrets(self) -> None:
         """Reload secrets from sources using the last-used parameters"""
         logger.info("Reloading secrets...")
-        
+
         # Store current parameters
         project = self.project
         sport = self.sport
         context = self.context
-        
+
         # Clear and reload
         self.clear_secrets()
-        
+
         # If we have project/context, use load_secrets
         if project and context:
             self.load_secrets(project, context, context)
@@ -655,11 +655,11 @@ class UnifiedSecretsManager:
     def validate_secrets(self, required_keys: Optional[List[str]] = None) -> bool | Dict[str, bool]:
         """
         Validate that required secrets are present.
-        
+
         Args:
             required_keys: Optional list of required secret names.
                           If None, validates that any secrets are loaded.
-            
+
         Returns:
             bool if required_keys is None (any secrets loaded?)
             Dict mapping secret names to presence status if required_keys provided
@@ -667,13 +667,13 @@ class UnifiedSecretsManager:
         # Backward compatibility: if no keys provided, just check if secrets exist
         if required_keys is None:
             return len(self.secrets) > 0
-        
+
         # Check specific keys
         validation_result = {}
         for key in required_keys:
             # Check both direct secrets and aliases
             validation_result[key] = (
-                key in self.secrets or 
+                key in self.secrets or
                 key in self.aliases or
                 any(key in alias for alias in self.aliases.keys())
             )
@@ -682,7 +682,7 @@ class UnifiedSecretsManager:
     def context_detection(self) -> str:
         """
         Auto-detect context from environment.
-        
+
         Returns:
             Detected context string
         """

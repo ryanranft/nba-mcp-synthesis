@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   mcp-server:
@@ -22,7 +22,13 @@ services:
       - aws_access_key_id
       - aws_secret_access_key
     healthcheck:
-      test: ["CMD", "python3", "-c", "from mcp_server.health import check_health; import sys; sys.exit(0 if check_health()['status'] == 'healthy' else 1)"]
+      test:
+        [
+          "CMD",
+          "python3",
+          "-c",
+          "from mcp_server.health import check_health; import sys; sys.exit(0 if check_health()['status'] == 'healthy' else 1)",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
