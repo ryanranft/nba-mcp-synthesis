@@ -594,8 +594,8 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
         },
         "assist_percentage": {
             "name": "Assist Percentage",
-            "formula": "AST% = (AST * (TM_MP / 5)) / (MP * (TM_FGM - Player_FGM)) * 100",
-            "variables": ["AST", "TM_MP", "MP", "TM_FGM", "Player_FGM"],
+            "formula": "AST% = (AST * (TM_MP / 5)) / (MP * (TM_FGM - FGM)) * 100",
+            "variables": ["AST", "TM_MP", "MP", "TM_FGM", "FGM"],
             "description": "Assist Percentage - assists per 100 teammate field goals",
         },
         "rebound_percentage": {
@@ -746,34 +746,59 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
         left_side = formula_parts[0].strip()
         right_side = formula_parts[1].strip()
 
-        # Substitute values if provided
-        substituted_formula = right_side
+        # Substitute values if provided using sympy symbolic substitution
         substituted_values = {}
+        
+        # Preprocess formula to handle variables starting with numbers (e.g., 3PM, 3PA)
+        # Replace them with valid Python identifiers (e.g., THREE_PM, THREE_PA)
+        numeric_var_map = {}
+        preprocessed_formula = right_side
+        for var in formula_info["variables"]:
+            if var and var[0].isdigit():
+                # Create valid Python identifier
+                safe_var = f"VAR_{var}"
+                numeric_var_map[safe_var] = var
+                preprocessed_formula = preprocessed_formula.replace(var, safe_var)
+        
+        # Parse formula as sympy expression
+        try:
+            expr = parse_expr(preprocessed_formula)
+        except Exception as parse_error:
+            logger.error(f"Could not parse formula '{preprocessed_formula}': {parse_error}")
+            raise ValueError(f"Malformed formula: {parse_error}")
 
+        # Build substitution dictionary for provided variables
         for var in formula_info["variables"]:
             if var in kwargs:
                 substituted_values[var] = kwargs[var]
-                # Replace variable names with their values
-                substituted_formula = substituted_formula.replace(var, str(kwargs[var]))
 
-        # Calculate result if all variables are provided
+        # Check for missing required variables
+        missing_vars = set(formula_info["variables"]) - set(kwargs.keys())
+        if missing_vars:
+            raise ValueError(f"Missing required variables: {', '.join(sorted(missing_vars))}")
+
+        # Perform symbolic substitution (respects variable boundaries)
+        # Map original variable names to preprocessed names if needed
+        subs_dict = {}
+        for var, val in substituted_values.items():
+            # Check if this variable was preprocessed
+            if var and var[0].isdigit():
+                safe_var = f"VAR_{var}"
+                subs_dict[Symbol(safe_var)] = val
+            else:
+                subs_dict[Symbol(var)] = val
+        
+        result_expr = expr.subs(subs_dict)
+        
+        # Generate string representation for substituted formula
+        substituted_formula = str(result_expr)
+        
+        # Calculate result
         result = None
-        if len(substituted_values) == len(formula_info["variables"]):
-            try:
-                # Clean up the formula for parsing
-                clean_formula = substituted_formula.replace(" ", "")
-                expr = parse_expr(clean_formula)
-                result = float(expr.evalf())
-            except Exception as parse_error:
-                logger.warning(
-                    f"Could not parse substituted formula '{substituted_formula}': {parse_error}"
-                )
-                # Try manual calculation for common patterns
-                try:
-                    # Simple manual calculation for basic arithmetic
-                    result = eval(substituted_formula)
-                except:
-                    pass
+        try:
+            result = float(result_expr.evalf())
+        except Exception as calc_error:
+            logger.warning(f"Could not calculate result for '{substituted_formula}': {calc_error}")
 
         return {
             "formula_name": formula_name,
@@ -1070,12 +1095,12 @@ def solve_equation_system(equations: List[str], variables: List[str]) -> Dict[st
 def calculate_sports_formula(formula_name: str, variables: Optional[Dict] = None, **kwargs) -> Dict[str, Any]:
     """
     Wrapper for get_sports_formula for backward compatibility.
-    
+
     Args:
         formula_name: Name of the sports formula
         variables: Optional dictionary of variable values
         **kwargs: Variable values for the formula (if variables not provided)
-        
+
     Returns:
         Dictionary with result and formula information
     """

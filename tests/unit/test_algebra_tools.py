@@ -56,6 +56,8 @@ class TestSportsFormulas(unittest.TestCase):
             "FTM": 2.0,
             "FTA": 3.0,
             "REB": 8.0,
+            "OREB": 3.0,  # Split REB into offensive and defensive
+            "DREB": 5.0,
             "AST": 6.0,
             "STL": 2.0,
             "BLK": 1.0,
