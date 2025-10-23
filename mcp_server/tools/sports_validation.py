@@ -62,9 +62,11 @@ def validate_sports_stat(
             )
 
     elif stat_type == StatType.MINUTES:
-        if not (0.0 <= float_value <= 48.0):
+        # Use get_stat_range() to get dynamic min/max based on stat name
+        stat_range = get_stat_range(stat_name)
+        if not (stat_range['min'] <= float_value <= stat_range['max']):
             raise ValidationError(
-                f"{stat_name} must be between 0.0 and 48.0 minutes, got {float_value}"
+                f"{stat_name} must be between {stat_range['min']} and {stat_range['max']} minutes, got {float_value}"
             )
 
     elif stat_type == StatType.COUNT:
@@ -444,13 +446,13 @@ def get_formula_requirements(formula_name: str) -> Dict[str, str]:
 def get_stat_range(stat_name: str) -> Dict[str, float]:
     """
     Get the valid range for a sports statistic.
-    
+
     Args:
         stat_name: Name of the statistic
-        
+
     Returns:
         Dictionary with 'min' and 'max' values
-        
+
     Example:
         >>> get_stat_range('PTS')
         {'min': 0, 'max': 150}
@@ -464,7 +466,10 @@ def get_stat_range(stat_name: str) -> Dict[str, float]:
         'FG%': {'min': 0, 'max': 1},
         'FT%': {'min': 0, 'max': 1},
         '3P%': {'min': 0, 'max': 1},
-        'MIN': {'min': 0, 'max': 60},
+        'MP': {'min': 0, 'max': 48},  # Player minutes (NBA regulation)
+        'MIN': {'min': 0, 'max': 48},  # Alias for MP
+        'TM_MP': {'min': 0, 'max': 240},  # Team minutes (48 × 5 players)
+        'TEAM_MP': {'min': 0, 'max': 240},  # Alias for TM_MP
         'FGA': {'min': 0, 'max': 100},
         'FGM': {'min': 0, 'max': 100},
         'FTA': {'min': 0, 'max': 50},
@@ -473,8 +478,11 @@ def get_stat_range(stat_name: str) -> Dict[str, float]:
         '3PM': {'min': 0, 'max': 50},
         'TOV': {'min': 0, 'max': 20},
         'PF': {'min': 0, 'max': 10},
+        'TM_FGA': {'min': 0, 'max': 200},  # Team field goal attempts
+        'TM_FTA': {'min': 0, 'max': 100},  # Team free throw attempts
+        'TM_TOV': {'min': 0, 'max': 50},  # Team turnovers
     }
-    
+
     stat_upper = stat_name.upper()
     return stat_ranges.get(stat_upper, {'min': 0, 'max': float('inf')})
 
@@ -482,14 +490,14 @@ def get_stat_range(stat_name: str) -> Dict[str, float]:
 def validate_stat_range(stat_name: str, value: float) -> bool:
     """
     Validate if a statistic value is within acceptable range.
-    
+
     Args:
         stat_name: Name of the statistic
         value: Value to validate
-        
+
     Returns:
         True if valid, False otherwise
-        
+
     Example:
         >>> validate_stat_range('PTS', 25)
         True
@@ -503,14 +511,14 @@ def validate_stat_range(stat_name: str, value: float) -> bool:
 def validate_stat_type(stat_name: str, value: Any) -> bool:
     """
     Validate if a statistic value is the correct type.
-    
+
     Args:
         stat_name: Name of the statistic
         value: Value to validate
-        
+
     Returns:
         True if correct type, False otherwise
-        
+
     Example:
         >>> validate_stat_type('PTS', 25)
         True

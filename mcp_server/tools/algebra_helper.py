@@ -380,6 +380,7 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
     # Define sports analytics formulas
     formulas = {
         "per": {
+            "name": "Player Efficiency Rating",
             "formula": "PER = (FGM * 85.910 + STL * 53.897 + 3PM * 51.757 + FTM * 46.845 + BLK * 39.190 + OREB * 39.190 + AST * 34.677 + DREB * 14.707 - PF * 17.174 - (FTA - FTM) * 20.091 - (FGA - FGM) * 39.190 - TOV * 53.897) * (1 / MP)",
             "variables": [
                 "FGM",
@@ -399,11 +400,13 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
             "description": "Player Efficiency Rating - comprehensive player value metric",
         },
         "true_shooting": {
+            "name": "True Shooting Percentage",
             "formula": "TS% = PTS / (2 * (FGA + 0.44 * FTA))",
             "variables": ["PTS", "FGA", "FTA"],
             "description": "True Shooting Percentage - accounts for 3-pointers and free throws",
         },
         "usage_rate": {
+            "name": "Usage Rate",
             "formula": "USG% = ((FGA + 0.44 * FTA + TOV) * (TM_MP / 5)) / (MP * (TM_FGA + 0.44 * TM_FTA + TM_TOV)) * 100",
             "variables": [
                 "FGA",
@@ -519,11 +522,13 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
             "description": "Defensive Win Shares - defensive contribution to team wins",
         },
         "steal_percentage": {
+            "name": "Steal Percentage",
             "formula": "STL% = (STL * (TM_MP / 5)) / (MP * OPP_POSS) * 100",
             "variables": ["STL", "TM_MP", "MP", "OPP_POSS"],
             "description": "Steal Percentage - steals per 100 opponent possessions",
         },
         "block_percentage": {
+            "name": "Block Percentage",
             "formula": "BLK% = (BLK * (TM_MP / 5)) / (MP * OPP_2PA) * 100",
             "variables": ["BLK", "TM_MP", "MP", "OPP_2PA"],
             "description": "Block Percentage - blocks per 100 opponent 2-point attempts",
@@ -535,6 +540,7 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
         },
         # Team Metrics
         "net_rating": {
+            "name": "Net Rating",
             "formula": "Net Rating = ORtg - DRtg",
             "variables": ["ORtg", "DRtg"],
             "description": "Net Rating - difference between offensive and defensive rating",
@@ -587,16 +593,19 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
             "description": "Offensive Win Shares - offensive contribution to team wins",
         },
         "assist_percentage": {
+            "name": "Assist Percentage",
             "formula": "AST% = (AST * (TM_MP / 5)) / (MP * (TM_FGM - Player_FGM)) * 100",
             "variables": ["AST", "TM_MP", "MP", "TM_FGM", "Player_FGM"],
             "description": "Assist Percentage - assists per 100 teammate field goals",
         },
         "rebound_percentage": {
+            "name": "Rebound Percentage",
             "formula": "REB% = (REB * (TM_MP / 5)) / (MP * (TM_REB + OPP_REB)) * 100",
             "variables": ["REB", "TM_MP", "MP", "TM_REB", "OPP_REB"],
             "description": "Rebound Percentage - rebounds per 100 available rebounds",
         },
         "turnover_percentage": {
+            "name": "Turnover Percentage",
             "formula": "TOV% = TOV / (FGA + 0.44 * FTA + TOV) * 100",
             "variables": ["TOV", "FGA", "FTA"],
             "description": "Turnover Percentage - turnovers per 100 plays",
@@ -607,6 +616,13 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
             "description": "Free Throw Rate - free throw attempts per field goal attempt",
         },
         "effective_field_goal_percentage": {
+            "name": "Effective Field Goal Percentage",
+            "formula": "eFG% = (FGM + 0.5 * 3PM) / FGA",
+            "variables": ["FGM", "3PM", "FGA"],
+            "description": "Effective Field Goal Percentage - adjusts for 3-pointers",
+        },
+        "effective_fg": {  # Alias for effective_field_goal_percentage
+            "name": "Effective Field Goal Percentage",
             "formula": "eFG% = (FGM + 0.5 * 3PM) / FGA",
             "variables": ["FGM", "3PM", "FGA"],
             "description": "Effective Field Goal Percentage - adjusts for 3-pointers",
@@ -1051,36 +1067,39 @@ def solve_equation_system(equations: List[str], variables: List[str]) -> Dict[st
 # =============================================================================
 
 
-def calculate_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
+def calculate_sports_formula(formula_name: str, variables: Optional[Dict] = None, **kwargs) -> Dict[str, Any]:
     """
     Wrapper for get_sports_formula for backward compatibility.
     
     Args:
         formula_name: Name of the sports formula
-        **kwargs: Variable values for the formula
+        variables: Optional dictionary of variable values
+        **kwargs: Variable values for the formula (if variables not provided)
         
     Returns:
         Dictionary with result and formula information
     """
+    if variables:
+        return get_sports_formula(formula_name, **variables)
     return get_sports_formula(formula_name, **kwargs)
 
 
 def get_formula_variables(formula_str: str) -> List[str]:
     """
     Extract variable names from a formula string.
-    
+
     Args:
         formula_str: Mathematical formula as string
-        
+
     Returns:
         List of variable names found in the formula
-        
+
     Example:
         >>> get_formula_variables("PTS / (2 * (FGA + 0.44 * FTA))")
         ['PTS', 'FGA', 'FTA']
     """
     check_sympy_dependency()
-    
+
     try:
         expr = parse_expr(formula_str)
         variables = [str(sym) for sym in expr.free_symbols]
@@ -1093,10 +1112,10 @@ def get_formula_variables(formula_str: str) -> List[str]:
 def simplify_formula(formula_str: str) -> Dict[str, Any]:
     """
     Wrapper for simplify_expression for backward compatibility.
-    
+
     Args:
         formula_str: Mathematical expression to simplify
-        
+
     Returns:
         Dictionary with simplified expression and LaTeX
     """
@@ -1106,23 +1125,23 @@ def simplify_formula(formula_str: str) -> Dict[str, Any]:
 def expand_formula(formula_str: str) -> Dict[str, Any]:
     """
     Expand a mathematical formula.
-    
+
     Args:
         formula_str: Formula to expand
-        
+
     Returns:
         Dictionary with expanded expression
-        
+
     Example:
         >>> expand_formula("(x + 1)**2")
         {'expanded': 'x**2 + 2*x + 1', 'latex': '...', ...}
     """
     check_sympy_dependency()
-    
+
     try:
         expr = parse_expr(formula_str)
         expanded = expand(expr)
-        
+
         return {
             "original": formula_str,
             "expanded": str(expanded),
@@ -1141,23 +1160,23 @@ def expand_formula(formula_str: str) -> Dict[str, Any]:
 def factor_formula(formula_str: str) -> Dict[str, Any]:
     """
     Factor a mathematical formula.
-    
+
     Args:
         formula_str: Formula to factor
-        
+
     Returns:
         Dictionary with factored expression
-        
+
     Example:
         >>> factor_formula("x**2 + 2*x + 1")
         {'factored': '(x + 1)**2', 'latex': '...', ...}
     """
     check_sympy_dependency()
-    
+
     try:
         expr = parse_expr(formula_str)
         factored = factor(expr)
-        
+
         return {
             "original": formula_str,
             "factored": str(factored),
@@ -1176,12 +1195,12 @@ def factor_formula(formula_str: str) -> Dict[str, Any]:
 def differentiate_formula(formula_str: str, variable: str, order: int = 1) -> Dict[str, Any]:
     """
     Wrapper for differentiate_expression for backward compatibility.
-    
+
     Args:
         formula_str: Formula to differentiate
         variable: Variable to differentiate with respect to
         order: Order of differentiation (default: 1)
-        
+
     Returns:
         Dictionary with derivative
     """
@@ -1189,20 +1208,20 @@ def differentiate_formula(formula_str: str, variable: str, order: int = 1) -> Di
 
 
 def integrate_formula(
-    formula_str: str, 
-    variable: str, 
+    formula_str: str,
+    variable: str,
     lower_limit: Optional[float] = None,
     upper_limit: Optional[float] = None
 ) -> Dict[str, Any]:
     """
     Wrapper for integrate_expression for backward compatibility.
-    
+
     Args:
         formula_str: Formula to integrate
         variable: Variable to integrate with respect to
         lower_limit: Lower limit for definite integral (optional)
         upper_limit: Upper limit for definite integral (optional)
-        
+
     Returns:
         Dictionary with integral
     """
@@ -1212,35 +1231,35 @@ def integrate_formula(
 def substitute_variables(formula_str: str, substitutions: Dict[str, float]) -> Dict[str, Any]:
     """
     Substitute values into a formula.
-    
+
     Args:
         formula_str: Mathematical formula
         substitutions: Dictionary mapping variable names to values
-        
+
     Returns:
         Dictionary with result
-        
+
     Example:
         >>> substitute_variables("x**2 + y", {"x": 3, "y": 5})
         {'result': 14, 'formula': 'x**2 + y', 'substitutions': {...}}
     """
     check_sympy_dependency()
-    
+
     try:
         expr = parse_expr(formula_str)
-        
+
         # Convert string keys to symbols
         subs_dict = {symbols(k): v for k, v in substitutions.items()}
-        
+
         # Substitute
         result_expr = expr.subs(subs_dict)
-        
+
         # Try to evaluate to a number
         try:
             result = float(result_expr)
         except (TypeError, ValueError):
             result = str(result_expr)
-        
+
         return {
             "formula": formula_str,
             "substitutions": substitutions,
@@ -1262,11 +1281,11 @@ def substitute_variables(formula_str: str, substitutions: Dict[str, float]) -> D
 def render_latex(expression_str: str, display_mode: bool = False) -> Dict[str, Any]:
     """
     Wrapper for render_equation_latex for backward compatibility.
-    
+
     Args:
         expression_str: Mathematical expression
         display_mode: Use display math mode (True) or inline mode (False)
-        
+
     Returns:
         Dictionary with LaTeX representation
     """
@@ -1276,18 +1295,18 @@ def render_latex(expression_str: str, display_mode: bool = False) -> Dict[str, A
 def validate_sports_stat(stat_name: str, value: float) -> Dict[str, Any]:
     """
     Validate a sports statistic value.
-    
+
     Args:
         stat_name: Name of the statistic (e.g., 'FG%', 'PTS', 'AST')
         value: The value to validate
-        
+
     Returns:
         Dictionary with validation result
-        
+
     Example:
         >>> validate_sports_stat('FG%', 0.45)
         {'valid': True, 'stat': 'FG%', 'value': 0.45}
-        
+
         >>> validate_sports_stat('PTS', -5)
         {'valid': False, 'stat': 'PTS', 'value': -5, 'error': 'Points cannot be negative'}
     """
@@ -1311,13 +1330,13 @@ def validate_sports_stat(stat_name: str, value: float) -> Dict[str, Any]:
         'TOV': (0, 20),   # Turnovers: 0-20
         'PF': (0, 10),    # Personal fouls: 0-10
     }
-    
+
     # Normalize stat name
     stat_upper = stat_name.upper()
-    
+
     if stat_upper in stat_ranges:
         min_val, max_val = stat_ranges[stat_upper]
-        
+
         if value < min_val:
             return {
                 'valid': False,
