@@ -40,3 +40,11 @@ repos:
         language: script
         pass_filenames: false
         always_run: true
+
+      - id: naming-convention-compliance
+        name: Check API key naming convention compliance
+        entry: pytest tests/test_code_naming_convention.py -q --tb=line
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+        files: \.py$

@@ -113,6 +113,32 @@ jobs:
       run: |
         python -c "import synthesis; import mcp_server; print('✅ All imports successful')"
 
+  naming-convention:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest
+
+    - name: Check naming convention compliance
+      run: |
+        pytest tests/test_code_naming_convention.py -v --tb=short
+      continue-on-error: false  # FAIL build if violations found
+
+    - name: Generate compliance report
+      if: failure()
+      run: |
+        pytest tests/test_code_naming_convention.py::TestCodeNamingConventionCompliance::test_06_generate_full_compliance_report -v -s
+
   lint:
     runs-on: ubuntu-latest
     
