@@ -207,7 +207,7 @@ class TestDIMSEdgeCases:
         from scripts.data_inventory_scanner import DataInventoryScanner
         scanner = DataInventoryScanner(str(temp_inventory), enable_live_queries=False)
 
-        result = scanner.scan()
+        result = scanner.scan_full_inventory()
         assert result is not None
         assert isinstance(result, dict)
 
@@ -274,7 +274,7 @@ class TestDIMSEdgeCases:
             try:
                 from scripts.data_inventory_scanner import DataInventoryScanner
                 scanner = DataInventoryScanner(str(temp_inventory), enable_live_queries=False)
-                result = scanner.scan()
+                result = scanner.scan_full_inventory()
                 results.append(result)
             except Exception as e:
                 errors.append(e)
