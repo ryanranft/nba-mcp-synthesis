@@ -31,8 +31,8 @@ class TestSecretsManagerIntegration:
 
         # Mock the directory structure
         with patch("os.path.exists", return_value=True):
-            sm = UnifiedSecretsManager()
-            sm.load_secrets("test_project", "TEST", "test")
+            sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+            sm.load_secrets("test_project", "TEST", "test", base_path=temp_secrets_dir)
 
             assert sm.project == "test_project"
             assert sm.sport == "TEST"
@@ -82,8 +82,8 @@ class TestSecretsManagerIntegration:
 
         # Mock the directory structure
         with patch("os.path.exists", return_value=True):
-            sm = UnifiedSecretsManager()
-            sm.load_secrets("test_project", "TEST", "test")
+            sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+            sm.load_secrets("test_project", "TEST", "test", base_path=temp_secrets_dir)
 
             # Test environment variable access
             assert sm.get_secret("GOOGLE_API_KEY_TEST_PROJECT_TEST") == "test_key"
@@ -91,7 +91,7 @@ class TestSecretsManagerIntegration:
 
     def test_error_recovery_integration(self, temp_secrets_dir):
         """Test error recovery in integration scenarios"""
-        sm = UnifiedSecretsManager()
+        sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
 
         # Test with missing secrets directory
         with patch("os.path.exists", return_value=False):
@@ -104,7 +104,7 @@ class TestSecretsManagerIntegration:
         (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
         with patch("os.path.exists", return_value=True):
-            sm.load_secrets("test_project", "TEST", "test")
+            sm.load_secrets("test_project", "TEST", "test", base_path=temp_secrets_dir)
 
             # Should have partial secrets
             assert len(sm.secrets) == 1
@@ -123,8 +123,8 @@ class TestSecretsManagerIntegration:
 
         # Mock the directory structure
         with patch("os.path.exists", return_value=True):
-            sm = UnifiedSecretsManager()
-            sm.load_secrets("test_project", "TEST", "test")
+            sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+            sm.load_secrets("test_project", "TEST", "test", base_path=temp_secrets_dir)
 
             assert len(sm.secrets) == 100
             assert len(sm.aliases) == 100
@@ -143,8 +143,8 @@ class TestSecretsManagerIntegration:
 
         def load_secrets():
             with patch("os.path.exists", return_value=True):
-                sm = UnifiedSecretsManager()
-                result = sm.load_secrets("test_project", "TEST", "test")
+                sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+                result = sm.load_secrets("test_project", "TEST", "test", base_path=temp_secrets_dir)
                 results.append(result)
 
         # Create multiple threads
@@ -182,8 +182,8 @@ class TestSecretsManagerIntegration:
 
         # Mock the directory structure
         with patch("os.path.exists", return_value=True):
-            sm = UnifiedSecretsManager()
-            sm.load_secrets("test_project", "TEST", "test")
+            sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+            sm.load_secrets("test_project", "TEST", "test", base_path=temp_secrets_dir)
 
             # Get final memory usage
             final_memory = process.memory_info().rss
@@ -205,14 +205,14 @@ class TestSecretsManagerIntegration:
 
         # Test reading from file system
         with patch("os.path.exists", return_value=True):
-            sm = UnifiedSecretsManager()
-            sm.load_secrets("test_project", "TEST", "test")
+            sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+            sm.load_secrets("test_project", "TEST", "test", base_path=temp_secrets_dir)
 
             assert sm.get_secret("GOOGLE_API_KEY_TEST_PROJECT_TEST") == "test_key"
 
     def test_network_integration(self):
         """Test network integration (AWS Secrets Manager)"""
-        sm = UnifiedSecretsManager()
+        sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
 
         # Mock AWS client
         with patch("boto3.client") as mock_boto:
@@ -244,8 +244,8 @@ class TestSecretsManagerIntegration:
 
         # Mock the directory structure
         with patch("os.path.exists", return_value=True):
-            sm = UnifiedSecretsManager()
-            sm.load_secrets("test_project", "TEST", "test")
+            sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+            sm.load_secrets("test_project", "TEST", "test", base_path=temp_secrets_dir)
 
             # Log some information
             logger.info(f"Loaded {len(sm.secrets)} secrets")

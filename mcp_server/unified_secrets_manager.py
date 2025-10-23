@@ -244,6 +244,18 @@ class UnifiedSecretsManager:
 
         return secrets
 
+    def _load_secrets_from_files(self, directory: str) -> Dict[str, str]:
+        """
+        Backward-compatible wrapper for _load_secrets_from_level.
+        
+        Args:
+            directory: Directory path containing .env files
+            
+        Returns:
+            Dict of secrets loaded
+        """
+        return self._load_secrets_from_level(Path(directory), "test", "test")
+
     def _is_valid_naming_convention(self, secret_name: str) -> bool:
         """
         Validate that secret name follows convention: SERVICE_RESOURCE_TYPE_PROJECT_CONTEXT
@@ -684,6 +696,14 @@ class UnifiedSecretsManager:
             return 'KUBERNETES'
         else:
             return 'LOCAL'
+
+    def _detect_context(self) -> str:
+        """Backward-compatible alias for context_detection()"""
+        return self.context_detection()
+
+    def _load_from_aws(self, context: str) -> Dict[str, str]:
+        """Backward-compatible alias for _load_from_aws_secrets_manager()"""
+        return self._load_from_aws_secrets_manager(context)
 
 
 # Global instance
