@@ -1373,8 +1373,13 @@ Consider extending max_iterations or reviewing analysis criteria.
 
     def _sanitize_filename(self, filename: str) -> str:
         """Convert title to safe filename."""
-        safe = "".join(c for c in filename if c.isalnum() or c in (" ", "-", "_"))
-        return safe.replace(" ", "_")
+        import re
+        # Replace special characters and spaces with underscores
+        safe = re.sub(r'[^\w\s-]', '_', filename)
+        # Replace multiple spaces/underscores with single underscore
+        safe = re.sub(r'[-\s_]+', '_', safe)
+        # Remove leading/trailing underscores
+        return safe.strip('_')
 
 
 class PlanGenerator:
@@ -1600,8 +1605,13 @@ Questions? Refer back to the analysis report or the source book.
 
     def _sanitize_filename(self, filename: str) -> str:
         """Convert title to safe filename."""
-        safe = "".join(c for c in filename if c.isalnum() or c in (" ", "-", "_"))
-        return safe.replace(" ", "_")
+        import re
+        # Replace special characters and spaces with underscores
+        safe = re.sub(r'[^\w\s-]', '_', filename)
+        # Replace multiple spaces/underscores with single underscore
+        safe = re.sub(r'[-\s_]+', '_', safe)
+        # Remove leading/trailing underscores
+        return safe.strip('_')
 
 
 def load_config(config_path: str) -> Dict:
