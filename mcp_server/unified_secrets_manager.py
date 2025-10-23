@@ -56,6 +56,7 @@ class UnifiedSecretsManager:
         self, base_path: str = "/Users/ryanranft/Desktop/++/big_cat_bets_assets"
     ):
         self.base_path = Path(base_path)
+        self._last_load_base_path = None  # Track last base_path used for reload
         self.secrets: Dict[str, str] = {}
         self.aliases: Dict[str, str] = {}
         self.provenance: Dict[str, SecretInfo] = {}
@@ -374,8 +375,12 @@ class UnifiedSecretsManager:
 
         return has_service and has_resource_type and has_context
 
-    def _create_aliases(self, project: str, context: str):
+    def _create_aliases(self, project: Optional[str] = None, context: Optional[str] = None):
         """Create backward-compatible aliases for short names"""
+        
+        # Use provided values or fall back to stored values
+        project = project or self.project or "nba-mcp-synthesis"
+        context = context or self.context or "WORKFLOW"
 
         # Map common short names to full names
         short_name_mappings = {
@@ -552,10 +557,11 @@ class UnifiedSecretsManager:
         self.project = project
         self.sport = context  # Use context as sport for backward compatibility
         self.context = env
-
+        
         # Use provided base_path or default
         search_path = Path(base_path) if base_path else self.base_path
-
+        self._last_load_base_path = base_path  # Track for reload
+        
         secrets_loaded = 0
 
         # Check if we're in Docker environment
@@ -634,18 +640,19 @@ class UnifiedSecretsManager:
     def reload_secrets(self) -> None:
         """Reload secrets from sources using the last-used parameters"""
         logger.info("Reloading secrets...")
-
+        
         # Store current parameters
         project = self.project
         sport = self.sport
         context = self.context
-
+        base_path = self._last_load_base_path
+        
         # Clear and reload
         self.clear_secrets()
-
+        
         # If we have project/context, use load_secrets
         if project and context:
-            self.load_secrets(project, context, context)
+            self.load_secrets(project, context, context, base_path=base_path)
             logger.info(f"Reloaded secrets for project={project}, context={context}")
         else:
             # Otherwise use hierarchical loading
@@ -682,20 +689,26 @@ class UnifiedSecretsManager:
     def context_detection(self) -> str:
         """
         Auto-detect context from environment.
-
+        
         Returns:
-            Detected context string
+            Detected context string (test, production, development, etc.)
         """
+        # Docker typically indicates production
         if os.getenv('DOCKER_CONTAINER'):
-            return 'DOCKER'
+            return 'production'
+        # AWS/K8s typically indicates production
         elif os.getenv('AWS_EXECUTION_ENV') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'):
-            return 'AWS'
-        elif os.getenv('CI') or os.getenv('GITHUB_ACTIONS'):
-            return 'CI'
+            return 'production'
         elif os.getenv('KUBERNETES_SERVICE_HOST'):
-            return 'KUBERNETES'
+            return 'production'
+        # CI/CD indicates test
+        elif os.getenv('CI') or os.getenv('GITHUB_ACTIONS'):
+            return 'test'
+        # Local development
+        elif os.getenv('USER'):
+            return 'development'
         else:
-            return 'LOCAL'
+            return 'development'
 
     def _detect_context(self) -> str:
         """Backward-compatible alias for context_detection()"""

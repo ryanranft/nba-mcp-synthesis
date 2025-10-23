@@ -235,22 +235,26 @@ class TestUnifiedSecretsManager:
 
     def test_reload_secrets(self, temp_secrets_dir):
         """Test reloading secrets"""
-        sm = UnifiedSecretsManager()
-        sm.project = "test_project"
-        sm.sport = "TEST"
-        sm.context = "test"
-
-        # Create test secret files
+        # Create test secret files first
         secret_dir = Path(temp_secrets_dir) / "test_project" / ".env.test_project.test"
         secret_dir.mkdir(parents=True)
         (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("test_key")
 
-        # Mock the directory structure
-        with patch("os.path.exists", return_value=True):
-            sm.reload_secrets()
+        # Initialize with proper base_path and load secrets
+        sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
+        sm.load_secrets("test_project", "TEST", "test", base_path=temp_secrets_dir)
 
-            assert "GOOGLE_API_KEY_TEST_PROJECT_TEST" in sm.secrets
-            assert sm.secrets["GOOGLE_API_KEY_TEST_PROJECT_TEST"] == "test_key"
+        # Verify initial load worked
+        assert "GOOGLE_API_KEY_TEST_PROJECT_TEST" in sm.secrets
+
+        # Clear and reload to test reload functionality
+        sm.clear_secrets()
+        assert len(sm.secrets) == 0
+
+        # Reload should restore secrets
+        sm.reload_secrets()
+        assert "GOOGLE_API_KEY_TEST_PROJECT_TEST" in sm.secrets
+        assert sm.secrets["GOOGLE_API_KEY_TEST_PROJECT_TEST"] == "test_key"
 
     def test_error_handling(self):
         """Test error handling"""
