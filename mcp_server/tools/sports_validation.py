@@ -434,3 +434,92 @@ def get_formula_requirements(formula_name: str) -> Dict[str, str]:
     }
 
     return requirements.get(formula_name, {})
+
+
+# =============================================================================
+# Additional Validation Functions for Test Compatibility
+# =============================================================================
+
+
+def get_stat_range(stat_name: str) -> Dict[str, float]:
+    """
+    Get the valid range for a sports statistic.
+    
+    Args:
+        stat_name: Name of the statistic
+        
+    Returns:
+        Dictionary with 'min' and 'max' values
+        
+    Example:
+        >>> get_stat_range('PTS')
+        {'min': 0, 'max': 150}
+    """
+    stat_ranges = {
+        'PTS': {'min': 0, 'max': 150},
+        'AST': {'min': 0, 'max': 50},
+        'REB': {'min': 0, 'max': 50},
+        'STL': {'min': 0, 'max': 20},
+        'BLK': {'min': 0, 'max': 20},
+        'FG%': {'min': 0, 'max': 1},
+        'FT%': {'min': 0, 'max': 1},
+        '3P%': {'min': 0, 'max': 1},
+        'MIN': {'min': 0, 'max': 60},
+        'FGA': {'min': 0, 'max': 100},
+        'FGM': {'min': 0, 'max': 100},
+        'FTA': {'min': 0, 'max': 50},
+        'FTM': {'min': 0, 'max': 50},
+        '3PA': {'min': 0, 'max': 50},
+        '3PM': {'min': 0, 'max': 50},
+        'TOV': {'min': 0, 'max': 20},
+        'PF': {'min': 0, 'max': 10},
+    }
+    
+    stat_upper = stat_name.upper()
+    return stat_ranges.get(stat_upper, {'min': 0, 'max': float('inf')})
+
+
+def validate_stat_range(stat_name: str, value: float) -> bool:
+    """
+    Validate if a statistic value is within acceptable range.
+    
+    Args:
+        stat_name: Name of the statistic
+        value: Value to validate
+        
+    Returns:
+        True if valid, False otherwise
+        
+    Example:
+        >>> validate_stat_range('PTS', 25)
+        True
+        >>> validate_stat_range('PTS', 200)
+        False
+    """
+    range_dict = get_stat_range(stat_name)
+    return range_dict['min'] <= value <= range_dict['max']
+
+
+def validate_stat_type(stat_name: str, value: Any) -> bool:
+    """
+    Validate if a statistic value is the correct type.
+    
+    Args:
+        stat_name: Name of the statistic
+        value: Value to validate
+        
+    Returns:
+        True if correct type, False otherwise
+        
+    Example:
+        >>> validate_stat_type('PTS', 25)
+        True
+        >>> validate_stat_type('PTS', "twenty-five")
+        False
+    """
+    try:
+        # All stats should be numeric
+        float(value)
+        return True
+    except (TypeError, ValueError):
+        return False

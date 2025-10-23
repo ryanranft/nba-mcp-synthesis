@@ -761,6 +761,7 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
 
         return {
             "formula_name": formula_name,
+            "name": formula_info["name"],  # Add name for test compatibility
             "formula": formula_info["formula"],
             "latex": formula_info["formula"],  # Use original formula for LaTeX
             "variables": formula_info["variables"],
@@ -775,6 +776,7 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
         logger.error(f"Failed to process formula '{formula_name}': {e}")
         return {
             "formula_name": formula_name,
+            "name": formula_info.get("name", formula_name),  # Add name for test compatibility
             "formula": formula_info["formula"],
             "latex": formula_info["formula"],
             "variables": formula_info["variables"],
@@ -1042,3 +1044,316 @@ def solve_equation_system(equations: List[str], variables: List[str]) -> Dict[st
             "success": False,
             "error": str(e),
         }
+
+
+# =============================================================================
+# Wrapper Functions for Test Compatibility
+# =============================================================================
+
+
+def calculate_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
+    """
+    Wrapper for get_sports_formula for backward compatibility.
+    
+    Args:
+        formula_name: Name of the sports formula
+        **kwargs: Variable values for the formula
+        
+    Returns:
+        Dictionary with result and formula information
+    """
+    return get_sports_formula(formula_name, **kwargs)
+
+
+def get_formula_variables(formula_str: str) -> List[str]:
+    """
+    Extract variable names from a formula string.
+    
+    Args:
+        formula_str: Mathematical formula as string
+        
+    Returns:
+        List of variable names found in the formula
+        
+    Example:
+        >>> get_formula_variables("PTS / (2 * (FGA + 0.44 * FTA))")
+        ['PTS', 'FGA', 'FTA']
+    """
+    check_sympy_dependency()
+    
+    try:
+        expr = parse_expr(formula_str)
+        variables = [str(sym) for sym in expr.free_symbols]
+        return sorted(variables)
+    except Exception as e:
+        logger.error(f"Failed to extract variables: {e}")
+        return []
+
+
+def simplify_formula(formula_str: str) -> Dict[str, Any]:
+    """
+    Wrapper for simplify_expression for backward compatibility.
+    
+    Args:
+        formula_str: Mathematical expression to simplify
+        
+    Returns:
+        Dictionary with simplified expression and LaTeX
+    """
+    return simplify_expression(formula_str)
+
+
+def expand_formula(formula_str: str) -> Dict[str, Any]:
+    """
+    Expand a mathematical formula.
+    
+    Args:
+        formula_str: Formula to expand
+        
+    Returns:
+        Dictionary with expanded expression
+        
+    Example:
+        >>> expand_formula("(x + 1)**2")
+        {'expanded': 'x**2 + 2*x + 1', 'latex': '...', ...}
+    """
+    check_sympy_dependency()
+    
+    try:
+        expr = parse_expr(formula_str)
+        expanded = expand(expr)
+        
+        return {
+            "original": formula_str,
+            "expanded": str(expanded),
+            "latex": latex(expanded),
+            "success": True,
+        }
+    except Exception as e:
+        return {
+            "original": formula_str,
+            "expanded": None,
+            "success": False,
+            "error": str(e),
+        }
+
+
+def factor_formula(formula_str: str) -> Dict[str, Any]:
+    """
+    Factor a mathematical formula.
+    
+    Args:
+        formula_str: Formula to factor
+        
+    Returns:
+        Dictionary with factored expression
+        
+    Example:
+        >>> factor_formula("x**2 + 2*x + 1")
+        {'factored': '(x + 1)**2', 'latex': '...', ...}
+    """
+    check_sympy_dependency()
+    
+    try:
+        expr = parse_expr(formula_str)
+        factored = factor(expr)
+        
+        return {
+            "original": formula_str,
+            "factored": str(factored),
+            "latex": latex(factored),
+            "success": True,
+        }
+    except Exception as e:
+        return {
+            "original": formula_str,
+            "factored": None,
+            "success": False,
+            "error": str(e),
+        }
+
+
+def differentiate_formula(formula_str: str, variable: str, order: int = 1) -> Dict[str, Any]:
+    """
+    Wrapper for differentiate_expression for backward compatibility.
+    
+    Args:
+        formula_str: Formula to differentiate
+        variable: Variable to differentiate with respect to
+        order: Order of differentiation (default: 1)
+        
+    Returns:
+        Dictionary with derivative
+    """
+    return differentiate_expression(formula_str, variable, order)
+
+
+def integrate_formula(
+    formula_str: str, 
+    variable: str, 
+    lower_limit: Optional[float] = None,
+    upper_limit: Optional[float] = None
+) -> Dict[str, Any]:
+    """
+    Wrapper for integrate_expression for backward compatibility.
+    
+    Args:
+        formula_str: Formula to integrate
+        variable: Variable to integrate with respect to
+        lower_limit: Lower limit for definite integral (optional)
+        upper_limit: Upper limit for definite integral (optional)
+        
+    Returns:
+        Dictionary with integral
+    """
+    return integrate_expression(formula_str, variable, lower_limit, upper_limit)
+
+
+def substitute_variables(formula_str: str, substitutions: Dict[str, float]) -> Dict[str, Any]:
+    """
+    Substitute values into a formula.
+    
+    Args:
+        formula_str: Mathematical formula
+        substitutions: Dictionary mapping variable names to values
+        
+    Returns:
+        Dictionary with result
+        
+    Example:
+        >>> substitute_variables("x**2 + y", {"x": 3, "y": 5})
+        {'result': 14, 'formula': 'x**2 + y', 'substitutions': {...}}
+    """
+    check_sympy_dependency()
+    
+    try:
+        expr = parse_expr(formula_str)
+        
+        # Convert string keys to symbols
+        subs_dict = {symbols(k): v for k, v in substitutions.items()}
+        
+        # Substitute
+        result_expr = expr.subs(subs_dict)
+        
+        # Try to evaluate to a number
+        try:
+            result = float(result_expr)
+        except (TypeError, ValueError):
+            result = str(result_expr)
+        
+        return {
+            "formula": formula_str,
+            "substitutions": substitutions,
+            "result": result,
+            "result_expr": str(result_expr),
+            "latex": latex(result_expr),
+            "success": True,
+        }
+    except Exception as e:
+        return {
+            "formula": formula_str,
+            "substitutions": substitutions,
+            "result": None,
+            "success": False,
+            "error": str(e),
+        }
+
+
+def render_latex(expression_str: str, display_mode: bool = False) -> Dict[str, Any]:
+    """
+    Wrapper for render_equation_latex for backward compatibility.
+    
+    Args:
+        expression_str: Mathematical expression
+        display_mode: Use display math mode (True) or inline mode (False)
+        
+    Returns:
+        Dictionary with LaTeX representation
+    """
+    return render_equation_latex(expression_str, display_mode)
+
+
+def validate_sports_stat(stat_name: str, value: float) -> Dict[str, Any]:
+    """
+    Validate a sports statistic value.
+    
+    Args:
+        stat_name: Name of the statistic (e.g., 'FG%', 'PTS', 'AST')
+        value: The value to validate
+        
+    Returns:
+        Dictionary with validation result
+        
+    Example:
+        >>> validate_sports_stat('FG%', 0.45)
+        {'valid': True, 'stat': 'FG%', 'value': 0.45}
+        
+        >>> validate_sports_stat('PTS', -5)
+        {'valid': False, 'stat': 'PTS', 'value': -5, 'error': 'Points cannot be negative'}
+    """
+    # Define valid ranges for common stats
+    stat_ranges = {
+        'PTS': (0, 150),  # Points: 0-150 (max realistic per game)
+        'AST': (0, 50),   # Assists: 0-50
+        'REB': (0, 50),   # Rebounds: 0-50
+        'STL': (0, 20),   # Steals: 0-20
+        'BLK': (0, 20),   # Blocks: 0-20
+        'FG%': (0, 1),    # Field goal percentage: 0-1
+        'FT%': (0, 1),    # Free throw percentage: 0-1
+        '3P%': (0, 1),    # 3-point percentage: 0-1
+        'MIN': (0, 60),   # Minutes: 0-60
+        'FGA': (0, 100),  # Field goal attempts: 0-100
+        'FGM': (0, 100),  # Field goals made: 0-100
+        'FTA': (0, 50),   # Free throw attempts: 0-50
+        'FTM': (0, 50),   # Free throws made: 0-50
+        '3PA': (0, 50),   # 3-point attempts: 0-50
+        '3PM': (0, 50),   # 3-pointers made: 0-50
+        'TOV': (0, 20),   # Turnovers: 0-20
+        'PF': (0, 10),    # Personal fouls: 0-10
+    }
+    
+    # Normalize stat name
+    stat_upper = stat_name.upper()
+    
+    if stat_upper in stat_ranges:
+        min_val, max_val = stat_ranges[stat_upper]
+        
+        if value < min_val:
+            return {
+                'valid': False,
+                'stat': stat_name,
+                'value': value,
+                'error': f'{stat_name} cannot be less than {min_val}',
+                'range': {'min': min_val, 'max': max_val}
+            }
+        elif value > max_val:
+            return {
+                'valid': False,
+                'stat': stat_name,
+                'value': value,
+                'error': f'{stat_name} exceeds maximum realistic value of {max_val}',
+                'range': {'min': min_val, 'max': max_val}
+            }
+        else:
+            return {
+                'valid': True,
+                'stat': stat_name,
+                'value': value,
+                'range': {'min': min_val, 'max': max_val}
+            }
+    else:
+        # Unknown stat - accept any non-negative value
+        if value < 0:
+            return {
+                'valid': False,
+                'stat': stat_name,
+                'value': value,
+                'error': f'{stat_name} cannot be negative'
+            }
+        else:
+            return {
+                'valid': True,
+                'stat': stat_name,
+                'value': value,
+                'warning': 'Unknown stat - validation range not defined'
+            }
