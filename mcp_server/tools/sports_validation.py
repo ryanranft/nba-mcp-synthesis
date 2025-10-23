@@ -48,12 +48,13 @@ def validate_sports_stat(
     if value is None:
         raise ValidationError(f"{stat_name} cannot be None")
 
-    try:
-        float_value = float(value)
-    except (ValueError, TypeError):
+    # Check type before conversion - reject strings even if numeric
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
         raise ValidationError(
-            f"{stat_name} must be a number, got {type(value).__name__}"
+            f"{stat_name} must be a numeric type (int or float), got {type(value).__name__}"
         )
+
+    float_value = float(value)
 
     if stat_type == StatType.PERCENTAGE:
         if not (0.0 <= float_value <= 1.0):
@@ -241,10 +242,11 @@ def validate_formula_inputs(
 
     if formula_name not in validation_rules:
         logger.warning(f"No validation rules defined for formula: {formula_name}")
-        return variables
+        return {"valid": True, "variables": variables}
 
     rules = validation_rules[formula_name]
     validated_vars = {}
+    errors = []
 
     for var_name, var_value in variables.items():
         if var_name in rules:
@@ -253,14 +255,19 @@ def validate_formula_inputs(
                 validated_vars[var_name] = var_value
             except ValidationError as e:
                 logger.error(f"Validation failed for {formula_name}.{var_name}: {e}")
-                raise ValidationError(f"Invalid input for {var_name}: {e}")
+                errors.append(f"{var_name}: {e}")
+                # Don't raise - collect errors and return them
         else:
             logger.warning(
                 f"No validation rule for variable {var_name} in formula {formula_name}"
             )
             validated_vars[var_name] = var_value
 
-    return validated_vars
+    # If there are errors, return invalid result
+    if errors:
+        return {"valid": False, "variables": validated_vars, "errors": errors}
+    
+    return {"valid": True, "variables": validated_vars, "errors": []}
 
 
 def suggest_fixes_for_error(error_message: str, formula_name: str) -> List[str]:
@@ -525,9 +532,6 @@ def validate_stat_type(stat_name: str, value: Any) -> bool:
         >>> validate_stat_type('PTS', "twenty-five")
         False
     """
-    try:
-        # All stats should be numeric
-        float(value)
-        return True
-    except (TypeError, ValueError):
-        return False
+    # Check if value is already a number (int or float)
+    # Reject strings even if they're numeric (like "25")
+    return isinstance(value, (int, float)) and not isinstance(value, bool)

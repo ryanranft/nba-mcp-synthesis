@@ -296,13 +296,14 @@ class TestSportsValidation(unittest.TestCase):
         self.assertFalse(validate_stat_range("FG%", 1.5))
         self.assertFalse(validate_stat_range("FG%", -0.1))
 
-        # Valid minutes
-        self.assertTrue(validate_stat_range("MP", 35.0))
+        # Valid minutes (supports both per-game and season totals)
+        self.assertTrue(validate_stat_range("MP", 35.0))  # Per-game
         self.assertTrue(validate_stat_range("MP", 0.0))
-        self.assertTrue(validate_stat_range("MP", 48.0))
+        self.assertTrue(validate_stat_range("MP", 48.0))  # Per-game max
+        self.assertTrue(validate_stat_range("MP", 2877.0))  # Season total
 
         # Invalid minutes
-        self.assertFalse(validate_stat_range("MP", 50.0))
+        self.assertFalse(validate_stat_range("MP", 5000.0))  # Beyond season max
         self.assertFalse(validate_stat_range("MP", -5.0))
 
     def test_validate_stat_type(self):

@@ -727,20 +727,26 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
     try:
         # Validate inputs if variables are provided
         if kwargs:
-            try:
-                validated_kwargs = validate_formula_inputs(formula_name, kwargs)
-                # Check for consistency warnings
-                warnings = validate_formula_consistency(formula_name, validated_kwargs)
-                if warnings:
-                    logger.warning(
-                        f"Formula consistency warnings for {formula_name}: {warnings}"
-                    )
-            except SportsValidationError as e:
-                suggestions = suggest_fixes_for_error(str(e), formula_name)
-                error_msg = f"Validation error for {formula_name}: {e}"
+            # Validate formula inputs
+            validation_result = validate_formula_inputs(formula_name, kwargs)
+            
+            # Check if validation failed
+            if not validation_result.get("valid", True):
+                errors = validation_result.get("errors", [])
+                error_msg = f"Validation error for {formula_name}: {'; '.join(errors)}"
+                suggestions = suggest_fixes_for_error(error_msg, formula_name)
                 if suggestions:
                     error_msg += f"\nSuggestions: {'; '.join(suggestions)}"
                 raise ValueError(error_msg)
+            
+            validated_kwargs = validation_result.get("variables", kwargs)
+            
+            # Check for consistency warnings
+            warnings = validate_formula_consistency(formula_name, validated_kwargs)
+            if warnings:
+                logger.warning(
+                    f"Formula consistency warnings for {formula_name}: {warnings}"
+                )
 
         # Parse the formula
         formula_parts = formula_info["formula"].split("=", 1)
@@ -889,9 +895,16 @@ def render_equation_latex(
         expr = parse_expr(expression_str)
         latex_code = latex(expr)
 
+        # Wrap in LaTeX delimiters to include backslashes
+        if display_mode:
+            formatted_latex = f"\\[{latex_code}\\]"  # Display mode with backslashes
+        else:
+            formatted_latex = f"\\({latex_code}\\)"  # Inline mode with backslashes
+
         result = {
             "expression": expression_str,
-            "latex": latex_code,
+            "latex": formatted_latex,
+            "raw_latex": latex_code,  # Keep raw version too
             "display_mode": display_mode,
             "success": True,
         }
