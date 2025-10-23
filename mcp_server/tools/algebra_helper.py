@@ -163,6 +163,10 @@ def simplify_expression(expression_str: str) -> Dict[str, Any]:
             "success": True,
         }
 
+    except (SyntaxError, ValueError) as e:
+        # Re-raise syntax and validation errors
+        logger.error(f"Invalid expression '{expression_str}': {e}")
+        raise
     except Exception as e:
         logger.error(f"Failed to simplify expression '{expression_str}': {e}")
         return {
@@ -772,10 +776,31 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
             if var in kwargs:
                 substituted_values[var] = kwargs[var]
 
-        # Check for missing required variables
-        missing_vars = set(formula_info["variables"]) - set(kwargs.keys())
-        if missing_vars:
-            raise ValueError(f"Missing required variables: {', '.join(sorted(missing_vars))}")
+        # Only validate if variables were provided
+        if kwargs:
+            # Check for missing required variables
+            missing_vars = set(formula_info["variables"]) - set(kwargs.keys())
+            if missing_vars:
+                raise ValueError(f"Missing required variables: {', '.join(sorted(missing_vars))}")
+
+            # Check for negative values (counts/stats should be non-negative)
+            for var, val in kwargs.items():
+                if isinstance(val, (int, float)) and val < 0:
+                    raise ValueError(f"Invalid input for {formula_name}: {var} cannot be negative, got {val}")
+
+            # Check for division by zero scenarios and invalid denominators
+            if formula_name == "true_shooting":
+                fga = kwargs.get("FGA", 0)
+                fta = kwargs.get("FTA", 0)
+                # FGA of 0 with any FTA is invalid for shooting percentage
+                if fga == 0:
+                    raise ValueError("Invalid input for true_shooting: FGA cannot be zero")
+                denominator = fga + 0.44 * fta
+                if denominator == 0:
+                    raise ZeroDivisionError("Division by zero: FGA + 0.44*FTA cannot be zero")
+            elif formula_name in ["effective_field_goal_percentage", "effective_fg"]:
+                if kwargs.get("FGA", 0) == 0:
+                    raise ValueError("Invalid input: FGA cannot be zero for field goal percentage")
 
         # Perform symbolic substitution (respects variable boundaries)
         # Map original variable names to preprocessed names if needed
@@ -813,7 +838,12 @@ def get_sports_formula(formula_name: str, **kwargs) -> Dict[str, Any]:
             "success": True,
         }
 
+    except (ValueError, ZeroDivisionError) as e:
+        # Re-raise validation errors for proper error handling
+        logger.error(f"Validation error for formula '{formula_name}': {e}")
+        raise
     except Exception as e:
+        # Catch other errors and return as error dict
         logger.error(f"Failed to process formula '{formula_name}': {e}")
         return {
             "formula_name": formula_name,
@@ -1279,6 +1309,12 @@ def substitute_variables(formula_str: str, substitutions: Dict[str, float]) -> D
         # Substitute
         result_expr = expr.subs(subs_dict)
 
+        # Check for remaining free symbols (unknown variables)
+        free_symbols = result_expr.free_symbols
+        if free_symbols:
+            unknown_vars = [str(sym) for sym in free_symbols]
+            raise ValueError(f"Unknown variables remain after substitution: {', '.join(unknown_vars)}")
+
         # Try to evaluate to a number
         try:
             result = float(result_expr)
@@ -1294,6 +1330,9 @@ def substitute_variables(formula_str: str, substitutions: Dict[str, float]) -> D
             "latex": latex(result_expr),
             "success": True,
         }
+    except ValueError as e:
+        # Re-raise validation errors
+        raise
     except Exception as e:
         return {
             "formula": formula_str,
