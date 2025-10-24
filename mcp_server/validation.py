@@ -1,6 +1,6 @@
 """Request validation and sanitization using Pydantic"""
 
-from pydantic import BaseModel, Field, validator, ValidationError
+from pydantic import field_validator, BaseModel, Field, ValidationError
 from typing import Optional, List, Dict, Any
 import re
 import html
@@ -42,11 +42,13 @@ class PlayerQuery(BaseModel):
     season: Optional[int] = Field(None, ge=1946, le=2100)
     team: Optional[str] = Field(None, max_length=50)
 
-    @validator("player_name")
+    @field_validator("player_name")
+    @classmethod
     def sanitize_name(cls, v):
         return sanitize_html(sanitize_sql_string(v))
 
-    @validator("team")
+    @field_validator("team")
+    @classmethod
     def sanitize_team(cls, v):
         if v:
             return sanitize_html(sanitize_sql_string(v))
@@ -62,7 +64,8 @@ class GameQuery(BaseModel):
     limit: int = Field(50, ge=1, le=1000)
     offset: int = Field(0, ge=0)
 
-    @validator("team_name")
+    @field_validator("team_name")
+    @classmethod
     def sanitize_team_name(cls, v):
         if v:
             return sanitize_html(sanitize_sql_string(v))
@@ -72,7 +75,7 @@ class GameQuery(BaseModel):
 class StatsQuery(BaseModel):
     """Validate statistics query"""
 
-    metric: str = Field(..., regex=r"^[a-zA-Z_]+$")
+    metric: str = Field(..., pattern=r"^[a-zA-Z_]+$")
     season: Optional[int] = Field(None, ge=1946, le=2100)
     min_games: int = Field(10, ge=0, le=82)
     limit: int = Field(100, ge=1, le=5000)
@@ -85,7 +88,8 @@ class DatabaseQuery(BaseModel):
     params: Optional[Dict[str, Any]] = None
     max_rows: int = Field(1000, ge=1, le=10000)
 
-    @validator("query")
+    @field_validator("query")
+    @classmethod
     def validate_query_safety(cls, v):
         # Only allow SELECT statements
         if not v.strip().upper().startswith("SELECT"):
@@ -110,7 +114,7 @@ class DatabaseQuery(BaseModel):
 class BookReadRequest(BaseModel):
     """Validate book read request"""
 
-    book_path: str = Field(..., regex=r"^books/[a-zA-Z0-9_\-./]+\.(pdf|epub|txt)$")
+    book_path: str = Field(..., pattern=r"^books/[a-zA-Z0-9_\-./]+\.(pdf|epub|txt)$")
     page_number: Optional[int] = Field(None, ge=0)
     chunk_size: int = Field(50000, ge=1000, le=200000)
 
@@ -118,10 +122,11 @@ class BookReadRequest(BaseModel):
 class MLModelRequest(BaseModel):
     """Validate ML model prediction request"""
 
-    features: Dict[str, float] = Field(..., min_items=1, max_items=100)
-    model_name: str = Field(..., regex=r"^[a-zA-Z0-9_\-]+$", max_length=100)
+    features: Dict[str, float] = Field(..., min_length=1, max_length=100)
+    model_name: str = Field(..., pattern=r"^[a-zA-Z0-9_\-]+$", max_length=100)
 
-    @validator("features")
+    @field_validator("features")
+    @classmethod
     def validate_features(cls, v):
         # Check for NaN/Inf values
         for key, value in v.items():

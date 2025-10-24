@@ -4,7 +4,7 @@ Provides automatic validation for all tool parameters
 Based on Graphiti MCP best practices
 """
 
-from pydantic import BaseModel, Field, validator, field_validator, model_validator
+from pydantic import ConfigDict, BaseModel, Field, field_validator, model_validator
 from typing import Optional, List, Dict, Any, Literal, Tuple, Union
 import re
 
@@ -24,7 +24,8 @@ class QueryDatabaseParams(BaseModel):
         default=1000, ge=1, le=10000, description="Maximum number of rows to return"
     )
 
-    @validator("sql_query")
+    @field_validator("sql_query")
+    @classmethod
     def validate_sql_query(cls, v):
         """Validate SQL query is safe"""
         # Only SELECT and WITH allowed
@@ -53,8 +54,8 @@ class QueryDatabaseParams(BaseModel):
 
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "sql_query": "SELECT * FROM games WHERE season = 2024 LIMIT 10",
@@ -62,6 +63,7 @@ class QueryDatabaseParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class GetTableSchemaParams(BaseModel):
@@ -75,7 +77,8 @@ class GetTableSchemaParams(BaseModel):
         description="Table name (alphanumeric and underscore only)",
     )
 
-    @validator("table_name")
+    @field_validator("table_name")
+    @classmethod
     def validate_table_name(cls, v):
         """Additional validation for table name"""
         if not re.match(r"^[a-zA-Z0-9_]+$", v):
@@ -84,10 +87,11 @@ class GetTableSchemaParams(BaseModel):
             )
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [{"table_name": "games"}, {"table_name": "player_stats"}]
         }
+    )
 
 
 class ListTablesParams(BaseModel):
@@ -101,7 +105,8 @@ class ListTablesParams(BaseModel):
         alias="schema",
     )
 
-    @validator("schema_name")
+    @field_validator("schema_name")
+    @classmethod
     def validate_schema_name(cls, v):
         """Validate schema name is safe"""
         if v and not re.match(r"^[a-zA-Z0-9_]+$", v):
@@ -110,9 +115,10 @@ class ListTablesParams(BaseModel):
             )
         return v
 
-    class Config:
-        json_schema_extra = {"examples": [{}, {"schema": "public"}]}
-        populate_by_name = True  # Allow using alias or field name
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{}, {"schema": "public"}]},
+        populate_by_name=True,
+    )
 
 
 # ============================================================================
@@ -130,7 +136,8 @@ class ListS3FilesParams(BaseModel):
         default=100, ge=1, le=1000, description="Maximum number of files to return"
     )
 
-    @validator("prefix")
+    @field_validator("prefix")
+    @classmethod
     def validate_prefix(cls, v):
         """Validate S3 prefix is safe"""
         # Prevent path traversal
@@ -138,13 +145,14 @@ class ListS3FilesParams(BaseModel):
             raise ValueError("Path traversal not allowed in prefix")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"prefix": "2024/games/", "max_keys": 100},
                 {"prefix": "players/", "max_keys": 50},
             ]
         }
+    )
 
 
 class GetS3FileParams(BaseModel):
@@ -154,7 +162,8 @@ class GetS3FileParams(BaseModel):
         ..., min_length=1, max_length=1000, description="S3 object key"
     )
 
-    @validator("file_key")
+    @field_validator("file_key")
+    @classmethod
     def validate_file_key(cls, v):
         """Validate S3 file key is safe"""
         if ".." in v:
@@ -163,8 +172,9 @@ class GetS3FileParams(BaseModel):
             raise ValueError("File key should not start with /")
         return v
 
-    class Config:
-        json_schema_extra = {"examples": [{"file_key": "2024/games/game_12345.json"}]}
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"file_key": "2024/games/game_12345.json"}]}
+    )
 
 
 # ============================================================================
@@ -182,9 +192,9 @@ class GetGlueTableMetadataParams(BaseModel):
         pattern=r"^[a-zA-Z0-9_]+$",
         description="Glue table name",
     )
-
-    class Config:
-        json_schema_extra = {"examples": [{"table_name": "raw_games"}]}
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"table_name": "raw_games"}]}
+    )
 
 
 class ListGlueTablesParams(BaseModel):
@@ -215,7 +225,8 @@ class ListGamesParams(BaseModel):
     )
     limit: int = Field(default=50, ge=1, le=100, description="Number of games per page")
 
-    @validator("team_name")
+    @field_validator("team_name")
+    @classmethod
     def validate_team_name(cls, v):
         """Validate team name is safe"""
         if v and not re.match(r"^[a-zA-Z0-9\s\-]+$", v):
@@ -224,14 +235,15 @@ class ListGamesParams(BaseModel):
             )
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"season": 2024, "limit": 50},
                 {"team_name": "Lakers", "limit": 20},
                 {"season": 2024, "cursor": "MTIzNDU=", "limit": 50},
             ]
         }
+    )
 
 
 class ListPlayersParams(BaseModel):
@@ -252,7 +264,8 @@ class ListPlayersParams(BaseModel):
         default=50, ge=1, le=100, description="Number of players per page"
     )
 
-    @validator("team_name")
+    @field_validator("team_name")
+    @classmethod
     def validate_team_name(cls, v):
         """Validate team name is safe"""
         if v and not re.match(r"^[a-zA-Z0-9\s\-]+$", v):
@@ -261,7 +274,8 @@ class ListPlayersParams(BaseModel):
             )
         return v
 
-    @validator("position")
+    @field_validator("position")
+    @classmethod
     def validate_position(cls, v):
         """Validate position is valid"""
         valid_positions = ["PG", "SG", "SF", "PF", "C", "G", "F"]
@@ -269,14 +283,15 @@ class ListPlayersParams(BaseModel):
             raise ValueError(f"Position must be one of: {', '.join(valid_positions)}")
         return v.upper() if v else v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"limit": 50},
                 {"team_name": "Lakers", "limit": 20},
                 {"position": "PG", "cursor": "MTIzNDU=", "limit": 50},
             ]
         }
+    )
 
 
 # ============================================================================
@@ -295,14 +310,14 @@ class ListBooksParams(BaseModel):
     max_keys: int = Field(
         default=100, ge=1, le=1000, description="Maximum number of books to return"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"prefix": "books/"},
                 {"prefix": "books/technical/", "max_keys": 50},
             ]
         }
+    )
 
 
 class ReadBookParams(BaseModel):
@@ -324,7 +339,8 @@ class ReadBookParams(BaseModel):
         default=0, ge=0, description="Chunk number to retrieve (0-indexed)"
     )
 
-    @validator("book_path")
+    @field_validator("book_path")
+    @classmethod
     def validate_book_path(cls, v):
         """Validate book path is safe"""
         # Prevent path traversal
@@ -332,8 +348,8 @@ class ReadBookParams(BaseModel):
             raise ValueError("Invalid book path")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"book_path": "books/nba-analytics-guide.txt"},
                 {
@@ -343,6 +359,7 @@ class ReadBookParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 class SearchBooksParams(BaseModel):
@@ -357,14 +374,14 @@ class SearchBooksParams(BaseModel):
     max_results: int = Field(
         default=10, ge=1, le=100, description="Maximum number of results to return"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"query": "machine learning", "max_results": 10},
                 {"query": "database optimization", "book_prefix": "books/technical/"},
             ]
         }
+    )
 
 
 # ============================================================================
@@ -382,7 +399,8 @@ class GetEpubMetadataParams(BaseModel):
         description="S3 path or local path to EPUB file",
     )
 
-    @validator("book_path")
+    @field_validator("book_path")
+    @classmethod
     def validate_book_path(cls, v):
         """Validate book path is safe and is .epub"""
         if ".." in v or (v.startswith("/") and not v.startswith("/tmp")):
@@ -391,13 +409,14 @@ class GetEpubMetadataParams(BaseModel):
             raise ValueError("File must be an EPUB (.epub)")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"book_path": "books/python-guide.epub"},
                 {"book_path": "books/technical/nba-analytics.epub"},
             ]
         }
+    )
 
 
 class GetEpubTocParams(BaseModel):
@@ -410,7 +429,8 @@ class GetEpubTocParams(BaseModel):
         description="S3 path or local path to EPUB file",
     )
 
-    @validator("book_path")
+    @field_validator("book_path")
+    @classmethod
     def validate_book_path(cls, v):
         """Validate book path is safe and is .epub"""
         if ".." in v or (v.startswith("/") and not v.startswith("/tmp")):
@@ -419,8 +439,9 @@ class GetEpubTocParams(BaseModel):
             raise ValueError("File must be an EPUB (.epub)")
         return v
 
-    class Config:
-        json_schema_extra = {"examples": [{"book_path": "books/python-guide.epub"}]}
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"book_path": "books/python-guide.epub"}]}
+    )
 
 
 class ReadEpubChapterParams(BaseModel):
@@ -442,7 +463,8 @@ class ReadEpubChapterParams(BaseModel):
         default="markdown", description="Output format for chapter content"
     )
 
-    @validator("book_path")
+    @field_validator("book_path")
+    @classmethod
     def validate_book_path(cls, v):
         """Validate book path is safe and is .epub"""
         if ".." in v or (v.startswith("/") and not v.startswith("/tmp")):
@@ -451,8 +473,8 @@ class ReadEpubChapterParams(BaseModel):
             raise ValueError("File must be an EPUB (.epub)")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "book_path": "books/python-guide.epub",
@@ -466,6 +488,7 @@ class ReadEpubChapterParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 # ============================================================================
@@ -483,7 +506,8 @@ class GetPdfMetadataParams(BaseModel):
         description="S3 path or local path to PDF file",
     )
 
-    @validator("book_path")
+    @field_validator("book_path")
+    @classmethod
     def validate_book_path(cls, v):
         """Validate book path is safe and is .pdf"""
         if ".." in v or (v.startswith("/") and not v.startswith("/tmp")):
@@ -492,13 +516,14 @@ class GetPdfMetadataParams(BaseModel):
             raise ValueError("File must be a PDF (.pdf)")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"book_path": "books/statistics-textbook.pdf"},
                 {"book_path": "books/technical/machine-learning.pdf"},
             ]
         }
+    )
 
 
 class GetPdfTocParams(BaseModel):
@@ -511,7 +536,8 @@ class GetPdfTocParams(BaseModel):
         description="S3 path or local path to PDF file",
     )
 
-    @validator("book_path")
+    @field_validator("book_path")
+    @classmethod
     def validate_book_path(cls, v):
         """Validate book path is safe and is .pdf"""
         if ".." in v or (v.startswith("/") and not v.startswith("/tmp")):
@@ -520,10 +546,9 @@ class GetPdfTocParams(BaseModel):
             raise ValueError("File must be a PDF (.pdf)")
         return v
 
-    class Config:
-        json_schema_extra = {
-            "examples": [{"book_path": "books/statistics-textbook.pdf"}]
-        }
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"book_path": "books/statistics-textbook.pdf"}]}
+    )
 
 
 class ReadPdfPageParams(BaseModel):
@@ -540,7 +565,8 @@ class ReadPdfPageParams(BaseModel):
         default="text", description="Output format for page content"
     )
 
-    @validator("book_path")
+    @field_validator("book_path")
+    @classmethod
     def validate_book_path(cls, v):
         """Validate book path is safe and is .pdf"""
         if ".." in v or (v.startswith("/") and not v.startswith("/tmp")):
@@ -549,8 +575,8 @@ class ReadPdfPageParams(BaseModel):
             raise ValueError("File must be a PDF (.pdf)")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "book_path": "books/statistics-textbook.pdf",
@@ -564,6 +590,7 @@ class ReadPdfPageParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 class ReadPdfPageRangeParams(BaseModel):
@@ -585,7 +612,8 @@ class ReadPdfPageRangeParams(BaseModel):
         default="text", description="Output format for page content"
     )
 
-    @validator("book_path")
+    @field_validator("book_path")
+    @classmethod
     def validate_book_path(cls, v):
         """Validate book path is safe and is .pdf"""
         if ".." in v or (v.startswith("/") and not v.startswith("/tmp")):
@@ -605,8 +633,8 @@ class ReadPdfPageRangeParams(BaseModel):
             raise ValueError("start_page must be <= end_page")
         return self
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "book_path": "books/statistics-textbook.pdf",
@@ -622,6 +650,7 @@ class ReadPdfPageRangeParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 class ReadPdfChapterParams(BaseModel):
@@ -643,7 +672,8 @@ class ReadPdfChapterParams(BaseModel):
         default="text", description="Output format for chapter content"
     )
 
-    @validator("book_path")
+    @field_validator("book_path")
+    @classmethod
     def validate_book_path(cls, v):
         """Validate book path is safe and is .pdf"""
         if ".." in v or (v.startswith("/") and not v.startswith("/tmp")):
@@ -652,8 +682,8 @@ class ReadPdfChapterParams(BaseModel):
             raise ValueError("File must be a PDF (.pdf)")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "book_path": "books/statistics-textbook.pdf",
@@ -667,6 +697,7 @@ class ReadPdfChapterParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 class SearchPdfParams(BaseModel):
@@ -686,7 +717,8 @@ class SearchPdfParams(BaseModel):
         description="Number of characters to include before/after match",
     )
 
-    @validator("book_path")
+    @field_validator("book_path")
+    @classmethod
     def validate_book_path(cls, v):
         """Validate book path is safe and is .pdf"""
         if ".." in v or (v.startswith("/") and not v.startswith("/tmp")):
@@ -695,8 +727,8 @@ class SearchPdfParams(BaseModel):
             raise ValueError("File must be a PDF (.pdf)")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "book_path": "books/statistics-textbook.pdf",
@@ -710,6 +742,7 @@ class SearchPdfParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 # ============================================================================
@@ -727,7 +760,8 @@ class ReadProjectFileParams(BaseModel):
         description="Relative path to file within project",
     )
 
-    @validator("file_path")
+    @field_validator("file_path")
+    @classmethod
     def validate_file_path(cls, v):
         """Validate file path is safe"""
         # Prevent path traversal
@@ -737,10 +771,11 @@ class ReadProjectFileParams(BaseModel):
             raise ValueError("Use relative paths only")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [{"file_path": "synthesis/models/ollama_model.py"}]
         }
+    )
 
 
 class SearchProjectFilesParams(BaseModel):
@@ -755,9 +790,8 @@ class SearchProjectFilesParams(BaseModel):
     max_results: int = Field(
         default=50, ge=1, le=500, description="Maximum number of results"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "pattern": "def.*synthesize",
@@ -766,6 +800,7 @@ class SearchProjectFilesParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 # ============================================================================
@@ -781,7 +816,8 @@ class SaveToProjectParams(BaseModel):
     )
     content: str = Field(..., min_length=1, description="Content to save")
 
-    @validator("filename")
+    @field_validator("filename")
+    @classmethod
     def validate_filename(cls, v):
         """Validate filename is safe"""
         if ".." in v or "/" in v:
@@ -793,8 +829,8 @@ class SaveToProjectParams(BaseModel):
             )
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "filename": "lakers_analysis_2024.md",
@@ -802,6 +838,7 @@ class SaveToProjectParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class LogSynthesisResultParams(BaseModel):
@@ -810,9 +847,8 @@ class LogSynthesisResultParams(BaseModel):
     query: str = Field(..., min_length=1, description="Original query")
     result: Dict[str, Any] = Field(..., description="Synthesis result")
     model_used: str = Field(..., description="Model used for synthesis")
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "query": "Analyze Lakers performance",
@@ -821,6 +857,7 @@ class LogSynthesisResultParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class SendNotificationParams(BaseModel):
@@ -832,13 +869,13 @@ class SendNotificationParams(BaseModel):
     level: Literal["info", "warning", "error", "success"] = Field(
         default="info", description="Notification level"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"message": "Synthesis completed successfully", "level": "success"}
             ]
         }
+    )
 
 
 # ============================================================================
@@ -853,9 +890,9 @@ class MathTwoNumberParams(BaseModel):
 
     a: Union[int, float] = Field(..., description="First number")
     b: Union[int, float] = Field(..., description="Second number")
-
-    class Config:
-        json_schema_extra = {"examples": [{"a": 5, "b": 3}, {"a": 10.5, "b": 2.3}]}
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"a": 5, "b": 3}, {"a": 10.5, "b": 2.3}]}
+    )
 
 
 class MathDivideParams(BaseModel):
@@ -871,13 +908,14 @@ class MathDivideParams(BaseModel):
             raise ValueError("Denominator cannot be zero")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"numerator": 10, "denominator": 2},
                 {"numerator": 7.5, "denominator": 2.5},
             ]
         }
+    )
 
 
 class MathNumberListParams(BaseModel):
@@ -886,11 +924,11 @@ class MathNumberListParams(BaseModel):
     numbers: List[Union[int, float]] = Field(
         ..., min_length=1, description="List of numbers"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [{"numbers": [1, 2, 3, 4, 5]}, {"numbers": [10.5, 20.3, 15.2]}]
         }
+    )
 
 
 class MathRoundParams(BaseModel):
@@ -898,32 +936,32 @@ class MathRoundParams(BaseModel):
 
     number: Union[int, float] = Field(..., description="Number to round")
     decimals: int = Field(default=0, ge=0, le=10, description="Decimal places")
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"number": 3.14159, "decimals": 2},
                 {"number": 10.7, "decimals": 0},
             ]
         }
+    )
 
 
 class MathSingleNumberParams(BaseModel):
     """Parameters for operations on a single number"""
 
     number: Union[int, float] = Field(..., description="The number")
-
-    class Config:
-        json_schema_extra = {"examples": [{"number": 3.7}, {"number": -2.3}]}
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"number": 3.7}, {"number": -2.3}]}
+    )
 
 
 class MathAngleParams(BaseModel):
     """Parameters for angle conversion"""
 
     angle: float = Field(..., description="Angle value")
-
-    class Config:
-        json_schema_extra = {"examples": [{"angle": 180}, {"angle": 3.14159}]}
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"angle": 180}, {"angle": 3.14159}]}
+    )
 
 
 class StatsPercentileParams(BaseModel):
@@ -935,14 +973,14 @@ class StatsPercentileParams(BaseModel):
     percentile: float = Field(
         ..., ge=0, le=100, description="Percentile to calculate (0-100)"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"numbers": [1, 2, 3, 4, 5], "percentile": 50},
                 {"numbers": [10, 20, 30, 40], "percentile": 75},
             ]
         }
+    )
 
 
 class StatsVarianceParams(BaseModel):
@@ -955,11 +993,9 @@ class StatsVarianceParams(BaseModel):
         default=True,
         description="Calculate sample variance (True) or population variance (False)",
     )
-
-    class Config:
-        json_schema_extra = {
-            "examples": [{"numbers": [2, 4, 6, 8, 10], "sample": True}]
-        }
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"numbers": [2, 4, 6, 8, 10], "sample": True}]}
+    )
 
 
 # ============================================================================
@@ -996,8 +1032,8 @@ class NbaPerParams(BaseModel):
             raise ValueError("Free throws attempted must be >= free throws made")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "points": 250,
@@ -1014,6 +1050,7 @@ class NbaPerParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class NbaTrueShootingParams(BaseModel):
@@ -1022,9 +1059,9 @@ class NbaTrueShootingParams(BaseModel):
     points: Union[int, float] = Field(..., ge=0, description="Points scored")
     fga: Union[int, float] = Field(..., ge=0, description="Field goals attempted")
     fta: Union[int, float] = Field(..., ge=0, description="Free throws attempted")
-
-    class Config:
-        json_schema_extra = {"examples": [{"points": 250, "fga": 200, "fta": 75}]}
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"points": 250, "fga": 200, "fta": 75}]}
+    )
 
 
 class NbaEffectiveFgParams(BaseModel):
@@ -1041,8 +1078,9 @@ class NbaEffectiveFgParams(BaseModel):
             raise ValueError("FGA must be >= FGM")
         return v
 
-    class Config:
-        json_schema_extra = {"examples": [{"fgm": 95, "fga": 200, "three_pm": 30}]}
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"fgm": 95, "fga": 200, "three_pm": 30}]}
+    )
 
 
 class NbaUsageRateParams(BaseModel):
@@ -1056,9 +1094,8 @@ class NbaUsageRateParams(BaseModel):
     team_fga: Union[int, float] = Field(..., ge=0, description="Team FGA")
     team_fta: Union[int, float] = Field(..., ge=0, description="Team FTA")
     team_turnovers: Union[int, float] = Field(..., ge=0, description="Team turnovers")
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "fga": 200,
@@ -1072,6 +1109,7 @@ class NbaUsageRateParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class NbaRatingParams(BaseModel):
@@ -1081,9 +1119,9 @@ class NbaRatingParams(BaseModel):
         ..., ge=0, description="Points (scored or allowed)"
     )
     possessions: Union[int, float] = Field(..., gt=0, description="Total possessions")
-
-    class Config:
-        json_schema_extra = {"examples": [{"points": 2500, "possessions": 2200}]}
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"points": 2500, "possessions": 2200}]}
+    )
 
 
 # ============================================================================
@@ -1112,10 +1150,9 @@ class CorrelationParams(BaseModel):
             )
         return v
 
-    class Config:
-        json_schema_extra = {
-            "examples": [{"x": [1, 2, 3, 4, 5], "y": [2, 4, 6, 8, 10]}]
-        }
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"x": [1, 2, 3, 4, 5], "y": [2, 4, 6, 8, 10]}]}
+    )
 
 
 class CovarianceParams(BaseModel):
@@ -1135,10 +1172,11 @@ class CovarianceParams(BaseModel):
             raise ValueError(f"Lists must have same length")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [{"x": [1, 2, 3, 4, 5], "y": [2, 4, 5, 4, 5], "sample": True}]
         }
+    )
 
 
 class LinearRegressionParams(BaseModel):
@@ -1158,10 +1196,9 @@ class LinearRegressionParams(BaseModel):
             raise ValueError("Lists must have same length")
         return v
 
-    class Config:
-        json_schema_extra = {
-            "examples": [{"x": [1, 2, 3, 4, 5], "y": [2, 4, 6, 8, 10]}]
-        }
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"x": [1, 2, 3, 4, 5], "y": [2, 4, 6, 8, 10]}]}
+    )
 
 
 class PredictParams(BaseModel):
@@ -1172,11 +1209,11 @@ class PredictParams(BaseModel):
     x_values: List[Union[int, float]] = Field(
         ..., min_length=1, description="New x values to predict"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [{"slope": 2.0, "intercept": 1.0, "x_values": [6, 7, 8]}]
         }
+    )
 
 
 class CorrelationMatrixParams(BaseModel):
@@ -1203,8 +1240,8 @@ class CorrelationMatrixParams(BaseModel):
 
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "data": {
@@ -1215,6 +1252,7 @@ class CorrelationMatrixParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 # Time Series Parameters
@@ -1237,10 +1275,11 @@ class MovingAverageParams(BaseModel):
             )
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [{"data": [10, 12, 14, 16, 18, 20], "window": 3}]
         }
+    )
 
 
 class ExponentialMovingAverageParams(BaseModel):
@@ -1255,9 +1294,9 @@ class ExponentialMovingAverageParams(BaseModel):
         le=1,
         description="Smoothing factor (0-1, higher = more weight to recent values)",
     )
-
-    class Config:
-        json_schema_extra = {"examples": [{"data": [10, 12, 14, 16, 18], "alpha": 0.3}]}
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"data": [10, 12, 14, 16, 18], "alpha": 0.3}]}
+    )
 
 
 class TrendDetectionParams(BaseModel):
@@ -1266,9 +1305,9 @@ class TrendDetectionParams(BaseModel):
     data: List[Union[int, float]] = Field(
         ..., min_length=1, description="Time series data"
     )
-
-    class Config:
-        json_schema_extra = {"examples": [{"data": [10, 12, 15, 17, 20]}]}
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"data": [10, 12, 15, 17, 20]}]}
+    )
 
 
 class PercentChangeParams(BaseModel):
@@ -1284,8 +1323,9 @@ class PercentChangeParams(BaseModel):
             raise ValueError("Previous value cannot be zero (would divide by zero)")
         return v
 
-    class Config:
-        json_schema_extra = {"examples": [{"current": 120, "previous": 100}]}
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"current": 120, "previous": 100}]}
+    )
 
 
 class GrowthRateParams(BaseModel):
@@ -1298,11 +1338,11 @@ class GrowthRateParams(BaseModel):
         ..., gt=0, description="Final value (must be positive)"
     )
     periods: int = Field(..., gt=0, description="Number of time periods")
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [{"start_value": 100, "end_value": 150, "periods": 3}]
         }
+    )
 
 
 class VolatilityParams(BaseModel):
@@ -1311,9 +1351,9 @@ class VolatilityParams(BaseModel):
     data: List[Union[int, float]] = Field(
         ..., min_length=2, description="Time series data"
     )
-
-    class Config:
-        json_schema_extra = {"examples": [{"data": [100, 102, 98, 101, 99]}]}
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"data": [100, 102, 98, 101, 99]}]}
+    )
 
 
 # Advanced NBA Metrics Parameters
@@ -1357,9 +1397,8 @@ class FourFactorsParams(BaseModel):
     opp_orb: Union[int, float] = Field(
         ..., ge=0, description="Opponent offensive rebounds"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "fgm": 3200,
@@ -1381,6 +1420,7 @@ class FourFactorsParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class TurnoverPercentageParams(BaseModel):
@@ -1389,9 +1429,9 @@ class TurnoverPercentageParams(BaseModel):
     tov: Union[int, float] = Field(..., ge=0, description="Turnovers")
     fga: Union[int, float] = Field(..., ge=0, description="Field goals attempted")
     fta: Union[int, float] = Field(..., ge=0, description="Free throws attempted")
-
-    class Config:
-        json_schema_extra = {"examples": [{"tov": 250, "fga": 1800, "fta": 600}]}
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"tov": 250, "fga": 1800, "fta": 600}]}
+    )
 
 
 class ReboundPercentageParams(BaseModel):
@@ -1402,11 +1442,11 @@ class ReboundPercentageParams(BaseModel):
         ..., ge=0, description="Total team rebounds"
     )
     opp_rebounds: Union[int, float] = Field(..., ge=0, description="Opponent rebounds")
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [{"rebounds": 900, "team_rebounds": 900, "opp_rebounds": 2800}]
         }
+    )
 
 
 class AssistPercentageParams(BaseModel):
@@ -1419,9 +1459,8 @@ class AssistPercentageParams(BaseModel):
     player_fgm: Union[int, float] = Field(
         default=0, ge=0, description="Player's own field goals made"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "assists": 500,
@@ -1432,6 +1471,7 @@ class AssistPercentageParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class StealPercentageParams(BaseModel):
@@ -1443,9 +1483,8 @@ class StealPercentageParams(BaseModel):
     opp_possessions: Union[int, float] = Field(
         ..., gt=0, description="Opponent possessions"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "steals": 120,
@@ -1455,6 +1494,7 @@ class StealPercentageParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class BlockPercentageParams(BaseModel):
@@ -1466,9 +1506,8 @@ class BlockPercentageParams(BaseModel):
     opp_two_pa: Union[int, float] = Field(
         ..., gt=0, description="Opponent 2-point attempts"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "blocks": 100,
@@ -1478,6 +1517,7 @@ class BlockPercentageParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class WinSharesParams(BaseModel):
@@ -1492,9 +1532,8 @@ class WinSharesParams(BaseModel):
     marginal_points_per_win: float = Field(
         default=30.0, gt=0, description="Points needed for a win (default: 30)"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "marginal_offense": 120,
@@ -1503,6 +1542,7 @@ class WinSharesParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class BoxPlusMinusParams(BaseModel):
@@ -1516,9 +1556,8 @@ class BoxPlusMinusParams(BaseModel):
     league_avg_pace: float = Field(
         default=100.0, gt=0, description="League average pace (default: 100.0)"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "per": 20,
@@ -1528,6 +1567,7 @@ class BoxPlusMinusParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 # ============================================================================
@@ -1549,15 +1589,15 @@ class AlgebraSolveParams(BaseModel):
         max_length=10,
         description="Variable to solve for (auto-detected if not specified)",
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"equation": "x**2 + 2*x - 3 = 0"},
                 {"equation": "2*y + 5 = 13", "variable": "y"},
                 {"equation": "x**3 - 8 = 0"},
             ]
         }
+    )
 
 
 class AlgebraSimplifyParams(BaseModel):
@@ -1569,15 +1609,15 @@ class AlgebraSimplifyParams(BaseModel):
         max_length=500,
         description="Algebraic expression to simplify",
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"expression": "x**2 + 2*x + 1"},
                 {"expression": "(x + 1)**2 - 1"},
                 {"expression": "x**3 + 3*x**2 + 3*x + 1"},
             ]
         }
+    )
 
 
 class AlgebraDifferentiateParams(BaseModel):
@@ -1595,15 +1635,15 @@ class AlgebraDifferentiateParams(BaseModel):
     order: int = Field(
         default=1, ge=1, le=10, description="Order of differentiation (1st, 2nd, etc.)"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"expression": "x**3 + 2*x**2 + x", "variable": "x"},
                 {"expression": "sin(x)", "variable": "x", "order": 2},
                 {"expression": "x**2 + y**2", "variable": "x"},
             ]
         }
+    )
 
 
 class AlgebraIntegrateParams(BaseModel):
@@ -1624,9 +1664,8 @@ class AlgebraIntegrateParams(BaseModel):
     upper_limit: Optional[Union[int, float]] = Field(
         default=None, description="Upper limit for definite integral"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"expression": "x**2", "variable": "x"},
                 {
@@ -1638,6 +1677,7 @@ class AlgebraIntegrateParams(BaseModel):
                 {"expression": "sin(x)", "variable": "x"},
             ]
         }
+    )
 
 
 class AlgebraSportsFormulaParams(BaseModel):
@@ -1693,8 +1733,8 @@ class AlgebraSportsFormulaParams(BaseModel):
             raise ValueError(f"Invalid formula name. Available: {valid_formulas}")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "formula_name": "per",
@@ -1758,6 +1798,7 @@ class AlgebraSportsFormulaParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 class AlgebraLatexParams(BaseModel):
@@ -1772,15 +1813,15 @@ class AlgebraLatexParams(BaseModel):
     display_mode: bool = Field(
         default=False, description="Use display math mode ($$) instead of inline ($)"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"expression": "x**2 + 2*x + 1"},
                 {"expression": "x**2 + 2*x + 1", "display_mode": True},
                 {"expression": "sin(x) + cos(x)"},
             ]
         }
+    )
 
 
 class AlgebraMatrixParams(BaseModel):
@@ -1810,8 +1851,8 @@ class AlgebraMatrixParams(BaseModel):
             raise ValueError(f"Invalid operation. Available: {valid_operations}")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"matrix_data": [[1, 2], [3, 4]], "operation": "determinant"},
                 {
@@ -1822,6 +1863,7 @@ class AlgebraMatrixParams(BaseModel):
                 {"matrix_data": [[2, 0], [0, 3]], "operation": "eigenvalues"},
             ]
         }
+    )
 
 
 class AlgebraSystemSolveParams(BaseModel):
@@ -1833,9 +1875,8 @@ class AlgebraSystemSolveParams(BaseModel):
     variables: List[str] = Field(
         ..., min_length=1, max_length=10, description="List of variable names"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"equations": ["x + y = 5", "x - y = 1"], "variables": ["x", "y"]},
                 {"equations": ["2*x + 3*y = 13", "x - y = 1"], "variables": ["x", "y"]},
@@ -1845,6 +1886,7 @@ class AlgebraSystemSolveParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 # ============================================================================
@@ -1858,9 +1900,8 @@ class FormulaAnalysisParams(BaseModel):
     formula: str = Field(
         ..., min_length=1, max_length=1000, description="Formula string to analyze"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "formula": "PER = (FGM * 85.910 + STL * 53.897 + 3PM * 51.757 + FTM * 46.845 + BLK * 39.190 + OREB * 39.190 + AST * 34.677 + DREB * 14.707 - PF * 17.174 - (FTA - FTM) * 20.091 - (FGA - FGM) * 39.190 - TOV * 53.897) * (1 / MP)"
@@ -1871,6 +1912,7 @@ class FormulaAnalysisParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 class FormulaValidationParams(BaseModel):
@@ -1882,9 +1924,8 @@ class FormulaValidationParams(BaseModel):
     variables: Dict[str, Union[int, float]] = Field(
         default={}, description="Variable values for validation"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "formula": "PER = (FGM * 85.910 + ...) / MP",
@@ -1896,6 +1937,7 @@ class FormulaValidationParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 class FormulaUsageRecommendationParams(BaseModel):
@@ -1909,9 +1951,8 @@ class FormulaUsageRecommendationParams(BaseModel):
         max_length=200,
         description="Optional context for recommendations (e.g., 'player analysis', 'team comparison')",
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "formula": "PER = (FGM * 85.910 + ...) / MP",
@@ -1924,6 +1965,7 @@ class FormulaUsageRecommendationParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 # ============================================================================
@@ -1950,9 +1992,8 @@ class FormulaExtractionParams(BaseModel):
     max_formulas: int = Field(
         default=50, ge=1, le=200, description="Maximum number of formulas to extract"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "pdf_path": "books/Basketball_on_Paper_Dean_Oliver.pdf",
@@ -1968,6 +2009,7 @@ class FormulaExtractionParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 class LaTeXConversionParams(BaseModel):
@@ -1979,9 +2021,8 @@ class LaTeXConversionParams(BaseModel):
         max_length=1000,
         description="LaTeX formula string to convert",
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"latex_formula": "\\frac{PTS}{2 \\cdot (FGA + 0.44 \\cdot FTA)}"},
                 {
@@ -1990,6 +2031,7 @@ class LaTeXConversionParams(BaseModel):
                 {"latex_formula": "\\sum_{i=1}^{n} x_i"},
             ]
         }
+    )
 
 
 class FormulaStructureAnalysisParams(BaseModel):
@@ -1998,15 +2040,15 @@ class FormulaStructureAnalysisParams(BaseModel):
     formula: str = Field(
         ..., min_length=1, max_length=1000, description="Formula string to analyze"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"formula": "PER = (FGM * 85.910 + STL * 53.897) / MP"},
                 {"formula": "TS% = PTS / (2 * (FGA + 0.44 * FTA))"},
                 {"formula": "Net Rating = ORtg - DRtg"},
             ]
         }
+    )
 
 
 # ============================================================================
@@ -2024,9 +2066,8 @@ class FormulaBuilderValidationParams(BaseModel):
         default="semantic",
         description="Validation level: syntax, semantic, sports_context, units",
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "formula": "PER = (FGM * 85.910 + STL * 53.897) / MP",
@@ -2039,6 +2080,7 @@ class FormulaBuilderValidationParams(BaseModel):
                 {"formula": "x + y = z", "validation_level": "syntax"},
             ]
         }
+    )
 
 
 class FormulaBuilderSuggestionParams(BaseModel):
@@ -2055,15 +2097,15 @@ class FormulaBuilderSuggestionParams(BaseModel):
         max_length=200,
         description="Optional context for suggestions (e.g., 'shooting', 'defensive')",
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"partial_formula": "PTS / (2 * (FGA +", "context": "shooting"},
                 {"partial_formula": "PER = (FGM *", "context": "advanced"},
                 {"partial_formula": "ORtg -", "context": "team"},
             ]
         }
+    )
 
 
 class FormulaBuilderPreviewParams(BaseModel):
@@ -2075,9 +2117,8 @@ class FormulaBuilderPreviewParams(BaseModel):
     variable_values: Optional[Dict[str, float]] = Field(
         default={}, description="Optional variable values for calculation preview"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "formula": "PTS / (2 * (FGA + 0.44 * FTA))",
@@ -2093,6 +2134,7 @@ class FormulaBuilderPreviewParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 class FormulaBuilderTemplateParams(BaseModel):
@@ -2105,15 +2147,15 @@ class FormulaBuilderTemplateParams(BaseModel):
         default=None,
         description="Template category filter (shooting, defensive, team, advanced)",
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"template_name": "True Shooting Percentage"},
                 {"category": "shooting"},
                 {"category": "advanced"},
             ]
         }
+    )
 
 
 class FormulaBuilderCreateParams(BaseModel):
@@ -2125,9 +2167,8 @@ class FormulaBuilderCreateParams(BaseModel):
     variable_values: Dict[str, float] = Field(
         ..., description="Values for template variables"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "template_name": "True Shooting Percentage",
@@ -2157,6 +2198,7 @@ class FormulaBuilderCreateParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 class FormulaBuilderExportParams(BaseModel):
@@ -2168,9 +2210,8 @@ class FormulaBuilderExportParams(BaseModel):
     format_type: str = Field(
         default="latex", description="Export format: latex, python, sympy, json"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"formula": "PTS / (2 * (FGA + 0.44 * FTA))", "format_type": "latex"},
                 {
@@ -2180,6 +2221,7 @@ class FormulaBuilderExportParams(BaseModel):
                 {"formula": "ORtg - DRtg", "format_type": "json"},
             ]
         }
+    )
 
 
 # ============================================================================
@@ -2198,9 +2240,8 @@ class PlaygroundCreateSessionParams(BaseModel):
     template_name: Optional[str] = Field(
         default=None, description="Template name to use for the session"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "user_id": "user123",
@@ -2215,6 +2256,7 @@ class PlaygroundCreateSessionParams(BaseModel):
                 {"user_id": "user789", "mode": "build", "template_name": None},
             ]
         }
+    )
 
 
 class PlaygroundAddFormulaParams(BaseModel):
@@ -2223,9 +2265,8 @@ class PlaygroundAddFormulaParams(BaseModel):
     session_id: str = Field(..., description="Session ID")
     formula: str = Field(..., description="Formula string to add")
     description: str = Field(default="", description="Description of the formula")
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "session_id": "session123",
@@ -2239,6 +2280,7 @@ class PlaygroundAddFormulaParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 class PlaygroundUpdateVariablesParams(BaseModel):
@@ -2248,9 +2290,8 @@ class PlaygroundUpdateVariablesParams(BaseModel):
     variables: Dict[str, float] = Field(
         ..., description="Dictionary of variable names and values"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "session_id": "session123",
@@ -2262,15 +2303,16 @@ class PlaygroundUpdateVariablesParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 class PlaygroundCalculateResultsParams(BaseModel):
     """Parameters for calculating formula results in a playground session"""
 
     session_id: str = Field(..., description="Session ID")
-
-    class Config:
-        json_schema_extra = {"examples": [{"session_id": "session123"}]}
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"session_id": "session123"}]}
+    )
 
 
 class PlaygroundGenerateVisualizationsParams(BaseModel):
@@ -2281,41 +2323,41 @@ class PlaygroundGenerateVisualizationsParams(BaseModel):
         default=["latex", "table"],
         description="List of visualization types to generate",
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"session_id": "session123", "visualization_types": ["latex", "table"]},
                 {"session_id": "session456", "visualization_types": ["chart", "graph"]},
             ]
         }
+    )
 
 
 class PlaygroundGetRecommendationsParams(BaseModel):
     """Parameters for getting playground recommendations"""
 
     session_id: str = Field(..., description="Session ID")
-
-    class Config:
-        json_schema_extra = {"examples": [{"session_id": "session123"}]}
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"session_id": "session123"}]}
+    )
 
 
 class PlaygroundShareSessionParams(BaseModel):
     """Parameters for sharing a playground session"""
 
     session_id: str = Field(..., description="Session ID")
-
-    class Config:
-        json_schema_extra = {"examples": [{"session_id": "session123"}]}
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"session_id": "session123"}]}
+    )
 
 
 class PlaygroundGetSharedSessionParams(BaseModel):
     """Parameters for getting a shared playground session"""
 
     share_token: str = Field(..., description="Share token for the session")
-
-    class Config:
-        json_schema_extra = {"examples": [{"share_token": "abc123def456"}]}
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"share_token": "abc123def456"}]}
+    )
 
 
 class PlaygroundCreateExperimentParams(BaseModel):
@@ -2324,9 +2366,8 @@ class PlaygroundCreateExperimentParams(BaseModel):
     session_id: str = Field(..., description="Session ID")
     experiment_name: str = Field(..., description="Name for the experiment")
     description: str = Field(default="", description="Description of the experiment")
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "session_id": "session123",
@@ -2340,6 +2381,7 @@ class PlaygroundCreateExperimentParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 # ============================================================================
@@ -2375,8 +2417,8 @@ class KMeansClusteringParams(BaseModel):
             )
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "data": [[25, 3, 5], [22, 4, 4], [15, 2, 12]],
@@ -2385,6 +2427,7 @@ class KMeansClusteringParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class EuclideanDistanceParams(BaseModel):
@@ -2404,8 +2447,9 @@ class EuclideanDistanceParams(BaseModel):
             raise ValueError(f"Points must have same dimensions")
         return v
 
-    class Config:
-        json_schema_extra = {"examples": [{"point1": [1, 2, 3], "point2": [4, 5, 6]}]}
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"point1": [1, 2, 3], "point2": [4, 5, 6]}]}
+    )
 
 
 class CosineSimilarityParams(BaseModel):
@@ -2425,8 +2469,9 @@ class CosineSimilarityParams(BaseModel):
             raise ValueError("Vectors must have same dimensions")
         return v
 
-    class Config:
-        json_schema_extra = {"examples": [{"vector1": [1, 2, 3], "vector2": [2, 4, 6]}]}
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"vector1": [1, 2, 3], "vector2": [2, 4, 6]}]}
+    )
 
 
 class KnnParams(BaseModel):
@@ -2460,8 +2505,8 @@ class KnnParams(BaseModel):
             )
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "point": [15, 8, 3],
@@ -2471,6 +2516,7 @@ class KnnParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class HierarchicalClusteringParams(BaseModel):
@@ -2493,8 +2539,8 @@ class HierarchicalClusteringParams(BaseModel):
             )
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "data": [[25, 5], [22, 6], [15, 12]],
@@ -2503,6 +2549,7 @@ class HierarchicalClusteringParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 # Classification Parameters
@@ -2538,8 +2585,8 @@ class LogisticRegressionParams(BaseModel):
             )
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "X_train": [[25, 5, 0.6], [18, 8, 0.55], [30, 4, 0.65]],
@@ -2548,6 +2595,7 @@ class LogisticRegressionParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class LogisticPredictParams(BaseModel):
@@ -2565,9 +2613,8 @@ class LogisticPredictParams(BaseModel):
     return_probabilities: bool = Field(
         default=False, description="Return probabilities instead of binary predictions"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "X": [[28, 6, 0.62]],
@@ -2576,6 +2623,7 @@ class LogisticPredictParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class NaiveBayesTrainParams(BaseModel):
@@ -2593,8 +2641,8 @@ class NaiveBayesTrainParams(BaseModel):
             raise ValueError("X_train and y_train must have same length")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "X_train": [[198, 88, 18], [206, 95, 22], [213, 110, 15]],
@@ -2602,6 +2650,7 @@ class NaiveBayesTrainParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class NaiveBayesPredictParams(BaseModel):
@@ -2613,9 +2662,8 @@ class NaiveBayesPredictParams(BaseModel):
     model: Dict[str, Any] = Field(
         ..., description="Trained model from naive_bayes_train"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "X": [[200, 90, 20]],
@@ -2623,6 +2671,7 @@ class NaiveBayesPredictParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class DecisionTreeTrainParams(BaseModel):
@@ -2644,8 +2693,8 @@ class DecisionTreeTrainParams(BaseModel):
             raise ValueError("X_train and y_train must have same length")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "X_train": [[0.62, 115, 108], [0.55, 108, 112]],
@@ -2654,6 +2703,7 @@ class DecisionTreeTrainParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class DecisionTreePredictParams(BaseModel):
@@ -2665,13 +2715,13 @@ class DecisionTreePredictParams(BaseModel):
     tree: Dict[str, Any] = Field(
         ..., description="Trained tree from decision_tree_train"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"X": [[0.58, 110, 110]], "tree": {"type": "split", "feature": 0}}
             ]
         }
+    )
 
 
 class RandomForestTrainParams(BaseModel):
@@ -2699,8 +2749,8 @@ class RandomForestTrainParams(BaseModel):
             raise ValueError("X_train and y_train must have same length")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "X_train": [[28, 8, 27], [25, 6, 22]],
@@ -2709,6 +2759,7 @@ class RandomForestTrainParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class RandomForestPredictParams(BaseModel):
@@ -2720,11 +2771,11 @@ class RandomForestPredictParams(BaseModel):
     model: Dict[str, Any] = Field(
         ..., description="Trained model from random_forest_train"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [{"X": [[29, 7, 25]], "model": {"trees": [], "n_trees": 50}}]
         }
+    )
 
 
 # Anomaly Detection Parameters
@@ -2752,12 +2803,13 @@ class ZScoreOutliersParams(BaseModel):
             raise ValueError("Labels must have same length as data")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"data": [[25, 5, 5], [22, 6, 4], [50, 12, 15]], "threshold": 3.0}
             ]
         }
+    )
 
 
 class IsolationForestParams(BaseModel):
@@ -2780,9 +2832,8 @@ class IsolationForestParams(BaseModel):
     random_seed: Optional[int] = Field(
         default=None, description="Random seed for reproducibility"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "data": [[25, 5], [22, 6], [28, 7]],
@@ -2791,6 +2842,7 @@ class IsolationForestParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class LocalOutlierFactorParams(BaseModel):
@@ -2813,12 +2865,13 @@ class LocalOutlierFactorParams(BaseModel):
             )
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"data": [[25, 5], [22, 6], [28, 7]], "k": 5, "contamination": 0.1}
             ]
         }
+    )
 
 
 # Feature Engineering Parameters
@@ -2844,8 +2897,8 @@ class NormalizeFeaturesParams(BaseModel):
             raise ValueError(f"feature_range must be (min, max): {v}")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "data": [[25, 5, 5], [22, 6, 4]],
@@ -2854,6 +2907,7 @@ class NormalizeFeaturesParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class FeatureImportanceParams(BaseModel):
@@ -2887,8 +2941,8 @@ class FeatureImportanceParams(BaseModel):
             raise ValueError("model_predictions must have same length as y")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "X": [[25, 5], [22, 6]],
@@ -2898,6 +2952,7 @@ class FeatureImportanceParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 # ============================================================================
@@ -2920,10 +2975,11 @@ class AccuracyScoreParams(BaseModel):
             raise ValueError("y_true and y_pred must have same length")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [{"y_true": [1, 0, 1, 1, 0], "y_pred": [1, 0, 1, 0, 0]}]
         }
+    )
 
 
 class PrecisionRecallF1Params(BaseModel):
@@ -2945,8 +3001,8 @@ class PrecisionRecallF1Params(BaseModel):
             raise ValueError("y_true and y_pred must have same length")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "y_true": [1, 0, 1, 1, 0, 1],
@@ -2955,6 +3011,7 @@ class PrecisionRecallF1Params(BaseModel):
                 }
             ]
         }
+    )
 
 
 class ConfusionMatrixParams(BaseModel):
@@ -2973,10 +3030,11 @@ class ConfusionMatrixParams(BaseModel):
             raise ValueError("y_true and y_pred must have same length")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [{"y_true": [1, 0, 1, 1, 0], "y_pred": [1, 0, 1, 0, 1]}]
         }
+    )
 
 
 class RocAucScoreParams(BaseModel):
@@ -3009,8 +3067,8 @@ class RocAucScoreParams(BaseModel):
             raise ValueError("y_true and y_scores must have same length")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "y_true": [0, 0, 1, 1],
@@ -3019,6 +3077,7 @@ class RocAucScoreParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class ClassificationReportParams(BaseModel):
@@ -3034,8 +3093,8 @@ class ClassificationReportParams(BaseModel):
             raise ValueError("y_true and y_pred must have same length")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "y_true": ["PG", "SG", "PG", "C", "PF"],
@@ -3043,6 +3102,7 @@ class ClassificationReportParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class LogLossParams(BaseModel):
@@ -3078,10 +3138,11 @@ class LogLossParams(BaseModel):
             raise ValueError("y_true and y_pred_proba must have same length")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [{"y_true": [1, 0, 1, 0], "y_pred_proba": [0.9, 0.1, 0.8, 0.2]}]
         }
+    )
 
 
 # Regression Metrics Parameters
@@ -3104,12 +3165,13 @@ class MseRmseMaeParams(BaseModel):
             raise ValueError("y_true and y_pred must have same length")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"y_true": [3.0, -0.5, 2.0, 7.0], "y_pred": [2.5, 0.0, 2.0, 8.0]}
             ]
         }
+    )
 
 
 class R2ScoreParams(BaseModel):
@@ -3129,12 +3191,13 @@ class R2ScoreParams(BaseModel):
             raise ValueError("y_true and y_pred must have same length")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"y_true": [3.0, -0.5, 2.0, 7.0], "y_pred": [2.5, 0.0, 2.0, 8.0]}
             ]
         }
+    )
 
 
 class MapeParams(BaseModel):
@@ -3163,8 +3226,8 @@ class MapeParams(BaseModel):
             raise ValueError("y_true and y_pred must have same length")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "y_true": [100.0, 50.0, 30.0, 20.0],
@@ -3172,6 +3235,7 @@ class MapeParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 # Cross-Validation Parameters
@@ -3198,10 +3262,11 @@ class KFoldSplitParams(BaseModel):
             )
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [{"n_samples": 100, "n_folds": 5, "shuffle": True}]
         }
+    )
 
 
 class StratifiedKFoldSplitParams(BaseModel):
@@ -3225,10 +3290,11 @@ class StratifiedKFoldSplitParams(BaseModel):
             )
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [{"y": [0, 0, 1, 1, 0, 1, 1, 0], "n_folds": 4, "shuffle": True}]
         }
+    )
 
 
 class CrossValidateParams(BaseModel):
@@ -3258,12 +3324,13 @@ class CrossValidateParams(BaseModel):
             )
         return self
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"n_samples": 100, "n_folds": 5, "stratify": False, "shuffle": True}
             ]
         }
+    )
 
 
 # Model Comparison Parameters
@@ -3289,8 +3356,8 @@ class CompareModelsParams(BaseModel):
                 raise ValueError("Each model must have 'name' and 'predictions' keys")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "models": [
@@ -3302,6 +3369,7 @@ class CompareModelsParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class PairedTTestParams(BaseModel):
@@ -3318,8 +3386,8 @@ class PairedTTestParams(BaseModel):
             raise ValueError("scores_a and scores_b must have same length")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "scores_a": [0.85, 0.87, 0.82, 0.90, 0.88],
@@ -3328,6 +3396,7 @@ class PairedTTestParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 # Hyperparameter Tuning Parameters
@@ -3357,8 +3426,8 @@ class GridSearchParams(BaseModel):
                 )
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "param_grid": {
@@ -3369,6 +3438,7 @@ class GridSearchParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 # ============================================================================
@@ -3420,9 +3490,8 @@ class VisualizationGenerateParams(BaseModel):
     chart_type: Optional[str] = Field(
         default=None, description="Specific chart type for chart visualizations"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "visualization_type": "scatter",
@@ -3444,6 +3513,7 @@ class VisualizationGenerateParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 class VisualizationExportParams(BaseModel):
@@ -3456,9 +3526,8 @@ class VisualizationExportParams(BaseModel):
     filename: Optional[str] = Field(
         default=None, description="Optional filename for export"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "visualization_data": {
@@ -3477,6 +3546,7 @@ class VisualizationExportParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 class VisualizationTemplateParams(BaseModel):
@@ -3485,15 +3555,15 @@ class VisualizationTemplateParams(BaseModel):
     template_name: Optional[str] = Field(
         default=None, description="Specific template name to retrieve"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"template_name": "player_comparison"},
                 {"template_name": "team_metrics"},
                 {},
             ]
         }
+    )
 
 
 class VisualizationConfigParams(BaseModel):
@@ -3514,9 +3584,8 @@ class VisualizationConfigParams(BaseModel):
     )
     animation: bool = Field(default=False, description="Enable animations")
     export_format: str = Field(default="png", description="Default export format")
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "width": 1000,
@@ -3536,6 +3605,7 @@ class VisualizationConfigParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 class DataPointParams(BaseModel):
@@ -3550,15 +3620,15 @@ class DataPointParams(BaseModel):
     metadata: Optional[Dict[str, Any]] = Field(
         default=None, description="Additional metadata"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"x": 25.0, "y": 15.0, "label": "Player A", "color": "#FF6B6B"},
                 {"x": 1.0, "y": 2.0, "z": 3.0, "label": "3D Point"},
                 {"x": 10.0, "y": 20.0, "size": 5.0, "metadata": {"team": "Lakers"}},
             ]
         }
+    )
 
 
 class DatasetParams(BaseModel):
@@ -3574,9 +3644,8 @@ class DatasetParams(BaseModel):
     metadata: Optional[Dict[str, Any]] = Field(
         default=None, description="Dataset metadata"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "name": "Player Stats",
@@ -3597,6 +3666,7 @@ class DatasetParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 # ============================================================================
@@ -3617,9 +3687,8 @@ class FormulaValidationParams(BaseModel):
     validation_types: Optional[List[str]] = Field(
         default=None, description="Types of validation to perform"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "formula": "PTS / (2 * (FGA + 0.44 * FTA))",
@@ -3634,6 +3703,7 @@ class FormulaValidationParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 class FormulaReferenceParams(BaseModel):
@@ -3653,9 +3723,8 @@ class FormulaReferenceParams(BaseModel):
     description: Optional[str] = Field(
         default=None, description="Description of the formula"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "formula_id": "usage_rate",
@@ -3678,6 +3747,7 @@ class FormulaReferenceParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class ValidationReportParams(BaseModel):
@@ -3695,15 +3765,15 @@ class ValidationReportParams(BaseModel):
     date_range: Optional[Dict[str, str]] = Field(
         default=None, description="Date range filter"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"report_id": "report_123"},
                 {"formula_id": "per", "status_filter": "valid"},
                 {"date_range": {"start": "2025-01-01", "end": "2025-01-31"}},
             ]
         }
+    )
 
 
 class ValidationComparisonParams(BaseModel):
@@ -3716,9 +3786,8 @@ class ValidationComparisonParams(BaseModel):
     test_data: Optional[Dict[str, float]] = Field(
         default=None, description="Test data for comparison"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "formula_ids": ["per", "true_shooting", "usage_rate"],
@@ -3727,6 +3796,7 @@ class ValidationComparisonParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class ValidationRulesParams(BaseModel):
@@ -3747,9 +3817,8 @@ class ValidationRulesParams(BaseModel):
     performance_threshold: Optional[float] = Field(
         default=None, description="Performance threshold in seconds"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "accuracy_threshold": 0.95,
@@ -3759,6 +3828,7 @@ class ValidationRulesParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 # ============================================================================
@@ -3776,9 +3846,8 @@ class FormulaComparisonParams(BaseModel):
     include_historical: bool = Field(
         default=True, description="Include historical evolution analysis"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "formula_id": "per",
@@ -3792,6 +3861,7 @@ class FormulaComparisonParams(BaseModel):
                 },
             ]
         }
+    )
 
 
 class FormulaVersionParams(BaseModel):
@@ -3818,9 +3888,8 @@ class FormulaVersionParams(BaseModel):
     is_primary: bool = Field(
         default=False, description="Whether this is the primary version"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "version_id": "per_modern_2023",
@@ -3835,6 +3904,7 @@ class FormulaVersionParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class FormulaSourceParams(BaseModel):
@@ -3857,9 +3927,8 @@ class FormulaSourceParams(BaseModel):
     description: Optional[str] = Field(
         default=None, description="Description of the source"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "source_id": "new_analytics_book",
@@ -3872,6 +3941,7 @@ class FormulaSourceParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 class FormulaEvolutionParams(BaseModel):
@@ -3884,13 +3954,13 @@ class FormulaEvolutionParams(BaseModel):
     include_changes: bool = Field(
         default=True, description="Include key changes analysis"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {"formula_id": "per", "include_timeline": True, "include_changes": True}
             ]
         }
+    )
 
 
 class FormulaRecommendationParams(BaseModel):
@@ -3905,9 +3975,8 @@ class FormulaRecommendationParams(BaseModel):
     context: Optional[str] = Field(
         default=None, description="Use context for recommendations"
     )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "examples": [
                 {
                     "formula_id": "per",
@@ -3916,6 +3985,7 @@ class FormulaRecommendationParams(BaseModel):
                 }
             ]
         }
+    )
 
 
 # ============================================================================
