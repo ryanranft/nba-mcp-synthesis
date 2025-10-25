@@ -1,15 +1,30 @@
 # Test Suite Documentation
 
-This document describes the comprehensive test suite for the unified secrets management system.
+**NBA MCP Synthesis - Complete Test Suite**
+**Last Updated**: 2025-10-24
+**Total Tests**: 482+ tests across 44 files
+
+This document describes the comprehensive test suite for the NBA MCP Synthesis project.
 
 ## Overview
 
-The test suite provides:
+The test suite provides comprehensive coverage across 5 major categories:
+
+**Test Categories**:
+- **Category A**: Core Functionality (385 tests) - Security, resilience, auth
+- **Category B**: Critical Infrastructure (78 tests) - MCP server, database, security
+- **Category C**: E2E Workflows (22 tests) - Complete workflows and deployment
+- **Category D**: Analysis Frameworks (37 tests) - Book analysis and recommendations
+- **Category E**: Edge Cases (26 tests) - Error handling and specialized tests
+
+**Features**:
 - Unit tests for individual components
 - Integration tests for system interactions
-- Docker scenario tests for containerized environments
+- End-to-end workflow validation
 - Performance and security testing
 - Coverage reporting and analysis
+- Async test support
+- Parallel execution capabilities
 
 ## Directory Structure
 

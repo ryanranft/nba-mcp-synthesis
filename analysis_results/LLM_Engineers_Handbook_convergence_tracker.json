@@ -1,11 +1,11 @@
 {
   "book_title": "LLM Engineers Handbook",
   "s3_path": "books/LLM Engineers Handbook.pdf",
-  "start_time": "2025-10-21T20:16:27.845157",
+  "start_time": "2025-10-25T09:09:56.904672",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-21T20:16:29.663222",
+      "timestamp": "2025-10-25T09:09:59.092167",
       "recommendations": {
         "critical": [
           {
@@ -608,7 +608,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-21T20:16:42.525271",
+      "timestamp": "2025-10-25T09:10:11.460029",
       "recommendations": {
         "critical": [
           {
@@ -1211,7 +1211,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-21T20:16:54.993977",
+      "timestamp": "2025-10-25T09:10:23.549984",
       "recommendations": {
         "critical": [
           {
@@ -1814,7 +1814,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-21T20:17:07.095242",
+      "timestamp": "2025-10-25T09:10:35.890547",
       "recommendations": {
         "critical": [
           {
@@ -2417,7 +2417,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-21T20:17:19.483712",
+      "timestamp": "2025-10-25T09:10:48.434240",
       "recommendations": {
         "critical": [
           {
@@ -3020,7 +3020,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-21T20:17:31.714207",
+      "timestamp": "2025-10-25T09:11:01.023782",
       "recommendations": {
         "critical": [
           {
@@ -3623,7 +3623,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-21T20:17:44.167650",
+      "timestamp": "2025-10-25T09:11:13.459426",
       "recommendations": {
         "critical": [
           {
@@ -4226,7 +4226,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-21T20:17:56.453017",
+      "timestamp": "2025-10-25T09:11:26.030118",
       "recommendations": {
         "critical": [
           {
@@ -4829,7 +4829,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-21T20:18:08.627078",
+      "timestamp": "2025-10-25T09:11:38.328559",
       "recommendations": {
         "critical": [
           {
@@ -5432,7 +5432,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-21T20:18:20.704582",
+      "timestamp": "2025-10-25T09:11:50.670359",
       "recommendations": {
         "critical": [
           {
@@ -6035,7 +6035,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-21T20:18:32.759148",
+      "timestamp": "2025-10-25T09:12:03.240403",
       "recommendations": {
         "critical": [
           {
@@ -6638,7 +6638,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-21T20:18:45.010263",
+      "timestamp": "2025-10-25T09:12:15.761201",
       "recommendations": {
         "critical": [
           {
@@ -7241,7 +7241,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-21T20:18:57.036434",
+      "timestamp": "2025-10-25T09:12:28.252791",
       "recommendations": {
         "critical": [
           {
@@ -7844,7 +7844,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-21T20:19:09.120407",
+      "timestamp": "2025-10-25T09:12:40.657585",
       "recommendations": {
         "critical": [
           {
@@ -8447,7 +8447,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-21T20:19:21.233775",
+      "timestamp": "2025-10-25T09:12:53.056488",
       "recommendations": {
         "critical": [
           {
@@ -9059,6 +9059,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-21T20:19:31.752861",
+  "end_time": "2025-10-25T09:13:03.485424",
   "total_iterations": 15
 }

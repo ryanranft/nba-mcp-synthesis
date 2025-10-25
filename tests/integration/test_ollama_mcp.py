@@ -6,6 +6,7 @@ This demonstrates how local LLMs can use your MCP server.
 
 import asyncio
 import json
+import pytest
 from openai import OpenAI
 
 # Connect to Ollama's OpenAI-compatible endpoint
@@ -15,6 +16,7 @@ ollama = OpenAI(
 )
 
 
+@pytest.mark.asyncio
 async def test_ollama_connection():
     """Test basic Ollama connectivity."""
     print("🔍 Testing Ollama Connection...")
@@ -39,6 +41,7 @@ async def test_ollama_connection():
         return False
 
 
+@pytest.mark.asyncio
 async def test_mcp_server():
     """Test MCP server availability."""
     print("🔍 Testing MCP Server...")

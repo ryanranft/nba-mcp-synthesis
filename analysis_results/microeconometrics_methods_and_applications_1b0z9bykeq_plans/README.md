@@ -1,6 +1,6 @@
-# 🚀 Implementation Plans: microeconometrics methods and applications 1b0z9bykeq
+# 🚀 Implementation Plans: microeconometrics-methods-and-applications-1b0z9bykeq
 
-**Generated:** 2025-10-21T20:39:02.683714
+**Generated:** 2025-10-23T14:55:46.758739
 **Total Plans:** 0
 
 ---

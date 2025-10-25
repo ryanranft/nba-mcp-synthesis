@@ -8,6 +8,7 @@ Tests the A/B Testing Framework and Smart Book Discovery system.
 import asyncio
 import logging
 import json
+import pytest
 from pathlib import Path
 from datetime import datetime
 
@@ -18,6 +19,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.asyncio
 async def test_ab_framework():
     """Test the A/B Testing Framework with a minimal configuration."""
     logger.info("\n" + "=" * 80)
@@ -87,6 +89,7 @@ async def test_ab_framework():
         return False
 
 
+@pytest.mark.asyncio
 async def test_smart_discovery():
     """Test the Smart Book Discovery system."""
     logger.info("\n" + "=" * 80)
@@ -131,6 +134,7 @@ async def test_smart_discovery():
         return False
 
 
+@pytest.mark.asyncio
 async def test_integration():
     """Test integration between the two frameworks."""
     logger.info("\n" + "=" * 80)

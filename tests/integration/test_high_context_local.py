@@ -9,6 +9,7 @@ import asyncio
 import logging
 import sys
 import os
+import pytest
 import pymupdf  # PyMuPDF
 
 # Add project root to path
@@ -22,6 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.asyncio
 async def test_with_local_file():
     """Test high-context analyzer with a local PDF file."""
 

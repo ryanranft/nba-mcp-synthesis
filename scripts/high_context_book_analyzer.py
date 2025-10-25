@@ -117,8 +117,32 @@ class HighContextBookAnalyzer:
         self.project_config_path = project_config_path
         self.project_context = None
 
-        # Load project context if config path provided
-        if project_config_path:
+        # Load project context from workflow config or explicit path
+        project_context_config = None
+
+        # Try loading from workflow_config.yaml if not explicitly provided
+        if not project_config_path:
+            try:
+                import yaml
+
+                config_path = (
+                    Path(__file__).parent.parent / "config" / "workflow_config.yaml"
+                )
+                if config_path.exists():
+                    with open(config_path) as f:
+                        workflow_config = yaml.safe_load(f)
+                        if workflow_config.get("project_context", {}).get(
+                            "enabled", False
+                        ):
+                            project_context_config = workflow_config["project_context"]
+                            logger.info(
+                                "🔍 Loading project context from workflow_config.yaml"
+                            )
+            except Exception as e:
+                logger.warning(f"⚠️  Could not load workflow config: {e}")
+
+        # Load project context if config path provided (legacy support)
+        elif project_config_path:
             logger.info(f"🔍 Loading project context from: {project_config_path}")
             try:
                 from scripts.project_code_analyzer import EnhancedProjectScanner
@@ -131,6 +155,21 @@ class HighContextBookAnalyzer:
                 )
             except Exception as e:
                 logger.warning(f"⚠️  Failed to load project context: {e}")
+                logger.warning("⚠️  Continuing without project context")
+                self.project_context = None
+
+        # Load context from workflow config
+        if project_context_config:
+            try:
+                self.project_context = self._load_project_context_from_config(
+                    project_context_config
+                )
+                logger.info("✅ Project context loaded from workflow config")
+                if self.project_context:
+                    projects = self.project_context.get("projects", [])
+                    logger.info(f"📂 Loaded context for {len(projects)} project(s)")
+            except Exception as e:
+                logger.warning(f"⚠️  Failed to load project context from config: {e}")
                 logger.warning("⚠️  Continuing without project context")
                 self.project_context = None
 
@@ -883,3 +922,111 @@ class HighContextBookAnalyzer:
                 logger.info(f"     - {tier}: {count}")
 
         return prioritized_recs
+
+    def _load_project_context_from_config(self, config: Dict) -> Optional[Dict]:
+        """
+        Load project context from workflow config.
+
+        Args:
+            config: Project context configuration from workflow_config.yaml
+
+        Returns:
+            Dictionary containing project context information
+        """
+        import os
+
+        context = {
+            "projects": [],
+            "context_files_content": {},
+            "max_context_size": config.get("max_context_size", 500000),
+        }
+
+        # Scan each project
+        for project_config in config.get("scan_projects", []):
+            project_path = project_config.get("path")
+            project_name = project_config.get("name")
+
+            if not os.path.exists(project_path):
+                logger.warning(f"⚠️  Project path not found: {project_path}")
+                continue
+
+            logger.info(f"📂 Scanning project: {project_name}")
+
+            project_info = {
+                "name": project_name,
+                "path": project_path,
+                "files": [],
+                "readme_content": None,
+            }
+
+            # Read README if requested
+            if project_config.get("include_readme", False):
+                readme_path = os.path.join(project_path, "README.md")
+                if os.path.exists(readme_path):
+                    try:
+                        with open(readme_path, "r", encoding="utf-8") as f:
+                            project_info["readme_content"] = f.read()
+                        logger.info(
+                            f"  ✅ Loaded README.md ({len(project_info['readme_content'])} chars)"
+                        )
+                    except Exception as e:
+                        logger.warning(f"  ⚠️  Could not read README: {e}")
+
+            # Scan project structure (limited depth for performance)
+            scan_depth = project_config.get("scan_depth", 2)
+            try:
+                for root, dirs, files in os.walk(project_path):
+                    # Calculate current depth
+                    depth = root[len(project_path) :].count(os.sep)
+                    if depth > scan_depth:
+                        continue
+
+                    # Skip common ignore patterns
+                    dirs[:] = [
+                        d
+                        for d in dirs
+                        if d
+                        not in [
+                            ".git",
+                            "__pycache__",
+                            "node_modules",
+                            "venv",
+                            ".venv",
+                            "dist",
+                            "build",
+                        ]
+                    ]
+
+                    for file in files:
+                        if file.endswith(
+                            (".py", ".js", ".ts", ".yaml", ".yml", ".json", ".md")
+                        ):
+                            rel_path = os.path.relpath(
+                                os.path.join(root, file), project_path
+                            )
+                            project_info["files"].append(rel_path)
+
+                logger.info(f"  ✅ Found {len(project_info['files'])} relevant files")
+            except Exception as e:
+                logger.warning(f"  ⚠️  Error scanning project: {e}")
+
+            context["projects"].append(project_info)
+
+        # Load additional context files
+        for context_file in config.get("context_files", []):
+            # Try to find the file in any of the scanned projects
+            for project in context["projects"]:
+                file_path = os.path.join(project["path"], context_file)
+                if os.path.exists(file_path):
+                    try:
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            content = f.read()
+                        context["context_files_content"][context_file] = content
+                        logger.info(
+                            f"  ✅ Loaded {context_file} ({len(content)} chars)"
+                        )
+                        break
+                    except Exception as e:
+                        logger.warning(f"  ⚠️  Could not read {context_file}: {e}")
+
+        return context if context["projects"] else None

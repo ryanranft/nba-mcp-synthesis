@@ -20,9 +20,7 @@ from datetime import datetime
 import sys
 import pytest
 
-# Add the scripts directory to the path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
-
+# Scripts directory is added to path via conftest.py fixture
 from phase_mapper import PhaseMapper
 from recommendation_integrator import RecommendationIntegrator
 from plan_override_manager import PlanOverrideManager

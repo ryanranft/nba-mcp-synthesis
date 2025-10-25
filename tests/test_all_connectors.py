@@ -351,7 +351,8 @@ class TestDocumentedConnectors:
     def test_streamlit_implementation_documented(self):
         """Test: Streamlit implementation is documented"""
         doc_file = (
-            Path(__file__).parent.parent / "CONNECTORS_IMPLEMENTATION_COMPLETE.md"
+            Path(__file__).parent.parent
+            / "docs/archive/2025-10/completion/CONNECTORS_IMPLEMENTATION_COMPLETE.md"
         )
         assert doc_file.exists()
 
@@ -365,7 +366,8 @@ class TestDocumentedConnectors:
     def test_basketball_reference_implementation_documented(self):
         """Test: Basketball-Reference scraper is documented"""
         doc_file = (
-            Path(__file__).parent.parent / "CONNECTORS_IMPLEMENTATION_COMPLETE.md"
+            Path(__file__).parent.parent
+            / "docs/archive/2025-10/completion/CONNECTORS_IMPLEMENTATION_COMPLETE.md"
         )
 
         with open(doc_file, "r") as f:
@@ -378,7 +380,8 @@ class TestDocumentedConnectors:
     def test_notion_implementation_documented(self):
         """Test: Notion API implementation is documented"""
         doc_file = (
-            Path(__file__).parent.parent / "CONNECTORS_IMPLEMENTATION_COMPLETE.md"
+            Path(__file__).parent.parent
+            / "docs/archive/2025-10/completion/CONNECTORS_IMPLEMENTATION_COMPLETE.md"
         )
 
         with open(doc_file, "r") as f:
@@ -391,7 +394,8 @@ class TestDocumentedConnectors:
     def test_google_sheets_implementation_documented(self):
         """Test: Google Sheets implementation is documented"""
         doc_file = (
-            Path(__file__).parent.parent / "CONNECTORS_IMPLEMENTATION_COMPLETE.md"
+            Path(__file__).parent.parent
+            / "docs/archive/2025-10/completion/CONNECTORS_IMPLEMENTATION_COMPLETE.md"
         )
 
         with open(doc_file, "r") as f:
@@ -404,7 +408,8 @@ class TestDocumentedConnectors:
     def test_airflow_implementation_documented(self):
         """Test: Airflow setup is documented"""
         doc_file = (
-            Path(__file__).parent.parent / "CONNECTORS_IMPLEMENTATION_COMPLETE.md"
+            Path(__file__).parent.parent
+            / "docs/archive/2025-10/completion/CONNECTORS_IMPLEMENTATION_COMPLETE.md"
         )
 
         with open(doc_file, "r") as f:
@@ -456,8 +461,8 @@ class TestSystemIntegration:
         project_root = Path(__file__).parent.parent
 
         required_docs = [
-            "CONNECTORS_IMPLEMENTATION_COMPLETE.md",
-            "ALL_CONNECTORS_DEPLOYMENT_SUMMARY.md",
+            "docs/archive/2025-10/completion/CONNECTORS_IMPLEMENTATION_COMPLETE.md",
+            "docs/archive/2025-10/completion/ALL_CONNECTORS_DEPLOYMENT_SUMMARY.md",
             "notebooks/README.md",
         ]
 

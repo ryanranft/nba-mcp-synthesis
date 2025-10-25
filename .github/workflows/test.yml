@@ -74,13 +74,34 @@ jobs:
         python scripts/test_phase_1_foundation.py
       continue-on-error: true
 
-    - name: Run new test suite (E2E, DIMS, Security)
+    - name: Run Category C - E2E Workflows (22 tests)
       run: |
-        pytest tests/test_e2e_deployment_flow.py \
-               tests/test_dims_integration.py \
-               tests/test_security_hooks.py \
+        pytest tests/test_e2e_workflow.py \
+               tests/test_e2e_deployment_flow.py \
                -v --tb=short
-      continue-on-error: true
+      continue-on-error: false
+
+    - name: Run Category D - Analysis Frameworks (37 tests)
+      run: |
+        pytest tests/test_recursive_book_analysis.py \
+               tests/test_recommendation_integration.py \
+               tests/test_phase6_1_automated_book_analysis.py \
+               -v --tb=short
+      continue-on-error: false
+
+    - name: Run Category E - Edge Cases (26 tests)
+      run: |
+        pytest tests/test_tier4_edge_cases.py \
+               tests/test_dims_integration.py \
+               -v --tb=short
+      continue-on-error: false
+
+    - name: Run Critical Infrastructure Tests (78 tests)
+      run: |
+        pytest tests/integration/ \
+               tests/security/ \
+               -v --tb=short
+      continue-on-error: false
 
     - name: Run unit tests
       env:

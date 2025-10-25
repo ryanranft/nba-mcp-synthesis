@@ -1,6 +1,6 @@
 # 🚀 Implementation Plans: Generative Deep Learning
 
-**Generated:** 2025-10-21T20:06:25.435534
+**Generated:** 2025-10-25T06:23:41.190328
 **Total Plans:** 21
 
 ---
@@ -21,17 +21,17 @@
 7. [Compare the use of recurrent and attentional models](07_Compare_the_use_of_recurrent_and_attentional_models.md)
 8. [Create data with a model to save time.](08_Create_data_with_a_model_to_save_time.md)
 9. [Design a model with a wide range of testability](09_Design_a_model_with_a_wide_range_of_testability.md)
-10. [Determine best-guess strategies for modeling a car environment in World Models.](10_Determine_best-guess_strategies_for_modeling_a_car_environment_in_World_Models.md)
+10. [Determine best-guess strategies for modeling a car environment in World Models.](10_Determine_best_guess_strategies_for_modeling_a_car_environment_in_World_Models.md)
 11. [Evaluate RNN Extensions: GRUs](11_Evaluate_RNN_Extensions_GRUs.md)
 12. [Experiment with Dropout Regularization](12_Experiment_with_Dropout_Regularization.md)
-13. [Implement Wasserstein GAN with Gradient Penalty (WGAN-GP) for Improved GAN Training Stability](13_Implement_Wasserstein_GAN_with_Gradient_Penalty_WGAN-GP_for_Improved_GAN_Training_Stability.md)
-14. [Implement a diffusion model for more complex game-state generation](14_Implement_a_diffusion_model_for_more_complex_game-state_generation.md)
+13. [Implement Wasserstein GAN with Gradient Penalty (WGAN-GP) for Improved GAN Training Stability](13_Implement_Wasserstein_GAN_with_Gradient_Penalty_WGAN_GP_for_Improved_GAN_Training_Stability.md)
+14. [Implement a diffusion model for more complex game-state generation](14_Implement_a_diffusion_model_for_more_complex_game_state_generation.md)
 15. [Model Joint and Conditional Probability for Better Player Trajectory Prediction](15_Model_Joint_and_Conditional_Probability_for_Better_Player_Trajectory_Prediction.md)
 16. [Monitor average reward scores over different test sets.](16_Monitor_average_reward_scores_over_different_test_sets.md)
 17. [Train the network with specific types of rewards](17_Train_the_network_with_specific_types_of_rewards.md)
 18. [Use a Text Vector Encoding on descriptions and compare](18_Use_a_Text_Vector_Encoding_on_descriptions_and_compare.md)
 19. [Utilize Conv2D Layers to Process Basketball Court Images](19_Utilize_Conv2D_Layers_to_Process_Basketball_Court_Images.md)
-20. [Utilize ReLU-based Activation Functions](20_Utilize_ReLU-based_Activation_Functions.md)
+20. [Utilize ReLU-based Activation Functions](20_Utilize_ReLU_based_Activation_Functions.md)
 21. [Utilize attention to model NBA game play](21_Utilize_attention_to_model_NBA_game_play.md)
 
 ---

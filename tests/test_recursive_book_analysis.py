@@ -21,8 +21,7 @@ from datetime import datetime
 import sys
 import pytest
 
-# Add the scripts directory to the path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
+# Scripts directory is added to path via conftest.py fixture
 
 # Mark all tests in this file to run in isolation (no parallel execution)
 pytestmark = pytest.mark.isolation

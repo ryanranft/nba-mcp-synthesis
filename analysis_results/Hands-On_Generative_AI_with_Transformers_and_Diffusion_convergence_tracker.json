@@ -1,11 +1,11 @@
 {
   "book_title": "Hands-On Generative AI with Transformers and Diffusion",
   "s3_path": "books/Hands-On Generative AI with Transformers and Diffusion.pdf",
-  "start_time": "2025-10-21T20:46:03.579511",
+  "start_time": "2025-10-23T14:42:35.727170",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-21T20:46:14.649082",
+      "timestamp": "2025-10-23T14:42:38.137855",
       "recommendations": {
         "critical": [
           {
@@ -672,7 +672,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-21T20:46:26.174315",
+      "timestamp": "2025-10-23T14:42:51.505712",
       "recommendations": {
         "critical": [
           {
@@ -1339,7 +1339,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-21T20:46:37.533644",
+      "timestamp": "2025-10-23T14:43:04.682473",
       "recommendations": {
         "critical": [
           {
@@ -2006,7 +2006,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-21T20:46:49.259342",
+      "timestamp": "2025-10-23T14:43:20.312337",
       "recommendations": {
         "critical": [
           {
@@ -2673,7 +2673,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-21T20:47:00.851603",
+      "timestamp": "2025-10-23T14:43:33.527391",
       "recommendations": {
         "critical": [
           {
@@ -3340,7 +3340,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-21T20:47:12.482058",
+      "timestamp": "2025-10-23T14:43:47.010982",
       "recommendations": {
         "critical": [
           {
@@ -4007,7 +4007,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-21T20:47:33.480685",
+      "timestamp": "2025-10-23T14:44:00.589751",
       "recommendations": {
         "critical": [
           {
@@ -4674,7 +4674,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-21T20:47:45.142549",
+      "timestamp": "2025-10-23T14:44:14.051372",
       "recommendations": {
         "critical": [
           {
@@ -5341,7 +5341,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-21T20:47:56.685282",
+      "timestamp": "2025-10-23T14:44:27.767582",
       "recommendations": {
         "critical": [
           {
@@ -6008,7 +6008,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-21T20:48:08.254656",
+      "timestamp": "2025-10-23T14:44:41.020780",
       "recommendations": {
         "critical": [
           {
@@ -6675,7 +6675,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-21T20:48:28.848593",
+      "timestamp": "2025-10-23T14:44:54.516455",
       "recommendations": {
         "critical": [
           {
@@ -7342,7 +7342,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-21T20:48:40.632618",
+      "timestamp": "2025-10-23T14:45:08.226466",
       "recommendations": {
         "critical": [
           {
@@ -8009,7 +8009,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-21T20:49:01.625632",
+      "timestamp": "2025-10-23T14:45:21.620188",
       "recommendations": {
         "critical": [
           {
@@ -8676,7 +8676,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-21T20:49:13.599842",
+      "timestamp": "2025-10-23T14:45:35.020013",
       "recommendations": {
         "critical": [
           {
@@ -9343,7 +9343,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-21T20:49:25.299133",
+      "timestamp": "2025-10-23T14:45:48.379857",
       "recommendations": {
         "critical": [
           {
@@ -10019,6 +10019,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-21T20:49:35.445435",
+  "end_time": "2025-10-23T14:45:59.572133",
   "total_iterations": 15
 }

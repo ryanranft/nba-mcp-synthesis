@@ -49,3 +49,4 @@ pytest tests/test_basketball_reference.py
 ## Rate Limiting
 Respects Basketball-Reference's rate limits automatically.
 
+

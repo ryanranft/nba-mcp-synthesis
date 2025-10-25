@@ -1,0 +1,138 @@
+{
+  "expectation_suite_name": "team_data_suite",
+  "data_asset_type": "Dataset",
+  "meta": {
+    "great_expectations_version": "0.18.0",
+    "description": "Expectation suite for NBA team data validation",
+    "created_by": "NBA MCP Synthesis - Phase 10A Week 2",
+    "created_at": "2025-10-25"
+  },
+  "expectations": [
+    {
+      "expectation_type": "expect_table_row_count_to_equal",
+      "kwargs": {
+        "value": 30
+      },
+      "meta": {
+        "notes": "NBA has exactly 30 teams"
+      }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {
+        "column": "team_id"
+      }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {
+        "column": "team_name"
+      }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {
+        "column": "conference"
+      }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {
+        "column": "wins"
+      }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {
+        "column": "losses"
+      }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {
+        "column": "win_pct"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_unique",
+      "kwargs": {
+        "column": "team_id"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_unique",
+      "kwargs": {
+        "column": "team_name"
+      },
+      "meta": {
+        "notes": "Team names must be unique"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "team_id"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "team_name"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "conference",
+        "value_set": ["East", "West", "Eastern", "Western"]
+      },
+      "meta": {
+        "notes": "Conference must be East or West (with variations)"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "wins",
+        "min_value": 0,
+        "max_value": 82
+      },
+      "meta": {
+        "notes": "Wins in regular season (0-82)"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "losses",
+        "min_value": 0,
+        "max_value": 82
+      },
+      "meta": {
+        "notes": "Losses in regular season (0-82)"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "win_pct",
+        "min_value": 0.0,
+        "max_value": 1.0
+      },
+      "meta": {
+        "notes": "Win percentage must be between 0 and 1"
+      }
+    },
+    {
+      "expectation_type": "expect_column_mean_to_be_between",
+      "kwargs": {
+        "column": "win_pct",
+        "min_value": 0.45,
+        "max_value": 0.55
+      },
+      "meta": {
+        "notes": "Average win percentage across league should be ~0.5"
+      }
+    }
+  ]
+}
