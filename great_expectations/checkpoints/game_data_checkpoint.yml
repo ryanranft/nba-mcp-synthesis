@@ -1,0 +1,140 @@
+# Game Data Validation Checkpoint
+# Automated validation for NBA game data
+# Phase 10A Week 2 - Agent 4
+
+name: game_data_checkpoint
+config_version: 1.0
+class_name: SimpleCheckpoint
+module_name: great_expectations.checkpoint
+
+# Template name for reusable configuration
+template_name: ~
+
+# Validation configuration
+validations:
+  - batch_request:
+      datasource_name: nba_postgres
+      data_connector_name: default_inferred_data_connector_name
+      data_asset_name: games
+      data_connector_query:
+        index: -1
+    expectation_suite_name: game_data_suite
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+      - name: store_evaluation_params
+        action:
+          class_name: StoreEvaluationParametersAction
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
+          site_names: []
+
+# Runtime configuration
+runtime_configuration:
+  result_format:
+    result_format: COMPLETE
+    include_unexpected_rows: true
+    unexpected_index_column_names:
+      - game_id
+      - game_date
+    return_unexpected_index_query: true
+    partial_unexpected_count: 20
+
+# Evaluation parameters
+evaluation_parameters:
+  # Dynamic parameters
+  validation_date: "$validation_date"
+  current_season: "$current_season"
+  # Quality thresholds
+  min_quality_score: 0.90
+  alert_threshold: 0.10
+  # Game-specific parameters
+  max_game_score: 200
+  min_game_score: 0
+  expected_games_per_season: 1230
+
+# Action list for checkpoint execution
+action_list:
+  # Store validation results
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
+
+  # Update data docs site
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+      site_names:
+        - local_site
+
+  # Send notification on validation result
+  - name: send_notification_on_validation_result
+    action:
+      class_name: SlackNotificationAction
+      slack_webhook: "${SLACK_WEBHOOK_URL}"
+      notify_on: failure
+      notify_with:
+        - local_site
+      renderer:
+        module_name: great_expectations.render.renderer.slack_renderer
+        class_name: SlackRenderer
+
+  # Email notification for critical failures
+  - name: send_email_on_critical_failure
+    action:
+      class_name: EmailAction
+      notify_on: failure
+      notify_with: []
+      renderer:
+        module_name: great_expectations.render.renderer.email_renderer
+        class_name: EmailRenderer
+      smtp_address: "${SMTP_ADDRESS}"
+      smtp_port: 587
+      sender_login: "${SMTP_USERNAME}"
+      sender_password: "${SMTP_PASSWORD}"
+      sender_alias: "NBA MCP Data Validation"
+      receiver_emails:
+        - "${ADMIN_EMAIL}"
+      use_tls: true
+      use_ssl: false
+
+# Metadata
+meta:
+  created_by: NBA MCP Synthesis - Phase 10A Week 2 Agent 4
+  created_at: "2025-10-25"
+  description: |
+    Automated validation checkpoint for NBA game data.
+
+    Validates:
+    - Game data completeness (game_id, teams, scores required)
+    - Score validity (0-200 range for both teams)
+    - Date/time consistency
+    - Team reference integrity
+    - Game state validity (scheduled, in_progress, final)
+    - Attendance ranges
+    - No duplicate games
+
+    Triggers:
+    - Scheduled: Hourly during game days
+    - On-demand: After data ingestion
+    - Manual: Via ge_integration.py module
+
+    Notifications:
+    - Slack on any validation failure
+    - Email on critical failures (>10% failed expectations)
+    - Data docs update always
+
+    Critical for:
+    - Real-time game data validation
+    - Ensuring betting models have quality data
+    - Historical data integrity
+
+  version: "1.0"
+  tags:
+    - game_data
+    - nba
+    - real_time
+    - critical
+    - automated
