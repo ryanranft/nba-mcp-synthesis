@@ -56,3 +56,17 @@ def mock_config_manager():
 
     config = UnifiedConfigurationManager(TEST_CONFIG["project"], TEST_CONFIG["context"])
     return config
+
+
+# pytest-xdist hook to handle isolation marker
+def pytest_xdist_setupnodes(config, specs):
+    """Configure pytest-xdist to respect isolation marker"""
+    pass  # Marker-based isolation configured in pytest_collection_modifyitems
+
+
+def pytest_collection_modifyitems(config, items):
+    """Modify test collection to group isolated tests together"""
+    # Group tests marked with 'isolation' to run on same worker
+    for item in items:
+        if 'isolation' in item.keywords:
+            item.add_marker(pytest.mark.xdist_group(name="isolated_tests"))

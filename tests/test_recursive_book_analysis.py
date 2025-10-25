@@ -19,9 +19,13 @@ import shutil
 from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime
 import sys
+import pytest
 
 # Add the scripts directory to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
+
+# Mark all tests in this file to run in isolation (no parallel execution)
+pytestmark = pytest.mark.isolation
 
 from recursive_book_analysis import (
     BookManager,
