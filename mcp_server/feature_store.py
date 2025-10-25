@@ -1,15 +1,45 @@
 """
 Feature Store Module
 Centralized repository for reusable ML features with versioning.
+
+**Phase 10A Week 2 - Agent 4: Data Validation & Quality**
+Enhanced with CI/CD hooks, Week 1 integration, and advanced feature management.
 """
 
 import logging
-from typing import Dict, Optional, Any, List
+from typing import Dict, Optional, Any, List, Callable, Tuple
 from datetime import datetime
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 import json
 from pathlib import Path
 import hashlib
+
+# Week 1 Integration
+try:
+    from mcp_server.error_handling import handle_errors, ErrorContext
+    from mcp_server.monitoring import get_health_monitor
+    from mcp_server.auth_enhanced import require_permission, Permission
+
+    WEEK1_AVAILABLE = True
+except ImportError:
+    WEEK1_AVAILABLE = False
+
+    def handle_errors(reraise=True, notify=False):
+        def decorator(func):
+            return func
+
+        return decorator
+
+    def require_permission(permission):
+        def decorator(func):
+            return func
+
+        return decorator
+
+    class Permission:
+        READ = "read"
+        WRITE = "write"
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -63,6 +93,13 @@ class FeatureStore:
         self.feature_values: Dict[str, Dict[str, Any]] = (
             {}
         )  # {entity_id: {feature_id: value}}
+        self.deployment_hooks: Dict[str, List[Callable]] = {
+            "pre_deployment": [],
+            "post_deployment": [],
+        }
+        self.feature_lineage: Dict[str, List[str]] = (
+            {}
+        )  # {feature_id: [dependency_ids]}
 
         self._load_store()
 
@@ -108,8 +145,16 @@ class FeatureStore:
         with open(features_file, "w") as f:
             json.dump(data, f, indent=2)
 
+        # Save lineage if available
+        if self.feature_lineage:
+            lineage_file = self.store_path / "lineage.json"
+            with open(lineage_file, "w") as f:
+                json.dump(self.feature_lineage, f, indent=2)
+
         logger.debug(f"Saved {len(self.features)} features to store")
 
+    @handle_errors(reraise=True, notify=False) if WEEK1_AVAILABLE else lambda f: f
+    @require_permission(Permission.WRITE) if WEEK1_AVAILABLE else lambda f: f
     def register_feature(
         self,
         feature_id: str,
@@ -120,9 +165,12 @@ class FeatureStore:
         transformation: Optional[str] = None,
         created_by: str = "system",
         tags: Optional[Dict[str, str]] = None,
+        dependencies: Optional[List[str]] = None,
     ) -> FeatureDefinition:
         """
         Register a new feature.
+
+        **Week 1 Integration:** Uses error handling, monitoring, and RBAC from Phase 10A Week 1.
 
         Args:
             feature_id: Unique feature identifier
@@ -133,10 +181,15 @@ class FeatureStore:
             transformation: Transformation logic
             created_by: Creator
             tags: Custom tags
+            dependencies: List of feature IDs this feature depends on
 
         Returns:
             FeatureDefinition object
         """
+        import time
+
+        start_time = time.time()
+
         feature = FeatureDefinition(
             feature_id=feature_id,
             name=name,
@@ -149,7 +202,24 @@ class FeatureStore:
         )
 
         self.features[feature_id] = feature
+
+        # Track lineage if dependencies provided
+        if dependencies:
+            self.track_feature_lineage(feature_id, dependencies)
+
         self._save_store()
+
+        # Week 1 Monitoring Integration
+        if WEEK1_AVAILABLE:
+            try:
+                monitor = get_health_monitor()
+                registration_time_ms = (time.time() - start_time) * 1000
+                monitor.track_metric("feature_store.registrations", 1)
+                monitor.track_metric(
+                    "feature_store.registration_time_ms", registration_time_ms
+                )
+            except Exception as e:
+                logger.debug(f"Could not track monitoring metrics: {e}")
 
         logger.info(f"Registered feature: {feature_id} ({name})")
 
@@ -202,32 +272,58 @@ class FeatureStore:
 
         return feature_set
 
+    @handle_errors(reraise=True, notify=False) if WEEK1_AVAILABLE else lambda f: f
     def write_features(self, entity_id: str, features: Dict[str, Any]):
         """
         Write feature values for an entity.
+
+        **Week 1 Integration:** Uses error handling and monitoring from Phase 10A Week 1.
 
         Args:
             entity_id: Entity identifier (e.g., player_id, game_id)
             features: Dictionary of {feature_id: value}
         """
+        import time
+
+        start_time = time.time()
+
         # Validate features
-        for feat_id in features:
+        valid_features = {}
+        for feat_id, value in features.items():
             if feat_id not in self.features:
                 logger.warning(f"Feature {feat_id} not registered, skipping")
                 continue
+            valid_features[feat_id] = value
 
         if entity_id not in self.feature_values:
             self.feature_values[entity_id] = {}
 
-        self.feature_values[entity_id].update(features)
+        self.feature_values[entity_id].update(valid_features)
 
-        logger.debug(f"Wrote {len(features)} features for entity {entity_id}")
+        # Week 1 Monitoring Integration
+        if WEEK1_AVAILABLE:
+            try:
+                monitor = get_health_monitor()
+                write_time_ms = (time.time() - start_time) * 1000
+                monitor.track_metric("feature_store.writes", 1)
+                monitor.track_metric("feature_store.write_time_ms", write_time_ms)
+                monitor.track_metric(
+                    "feature_store.features_written", len(valid_features)
+                )
+            except Exception as e:
+                logger.debug(f"Could not track monitoring metrics: {e}")
 
+        logger.debug(f"Wrote {len(valid_features)} features for entity {entity_id}")
+
+    @handle_errors(reraise=True, notify=False) if WEEK1_AVAILABLE else lambda f: f
+    @require_permission(Permission.READ) if WEEK1_AVAILABLE else lambda f: f
     def read_features(
         self, entity_ids: List[str], feature_ids: Optional[List[str]] = None
     ) -> Dict[str, Dict[str, Any]]:
         """
         Read features for entities.
+
+        **Week 1 Integration:** Uses error handling, monitoring, and RBAC from Phase 10A Week 1.
 
         Args:
             entity_ids: List of entity identifiers
@@ -236,6 +332,10 @@ class FeatureStore:
         Returns:
             Dictionary of {entity_id: {feature_id: value}}
         """
+        import time
+
+        start_time = time.time()
+
         result = {}
 
         for entity_id in entity_ids:
@@ -255,6 +355,18 @@ class FeatureStore:
             else:
                 # Return all features
                 result[entity_id] = entity_features.copy()
+
+        # Week 1 Monitoring Integration
+        if WEEK1_AVAILABLE:
+            try:
+                monitor = get_health_monitor()
+                read_time_ms = (time.time() - start_time) * 1000
+                monitor.track_metric("feature_store.reads", 1)
+                monitor.track_metric("feature_store.read_time_ms", read_time_ms)
+                total_features = sum(len(feats) for feats in result.values())
+                monitor.track_metric("feature_store.features_read", total_features)
+            except Exception as e:
+                logger.debug(f"Could not track monitoring metrics: {e}")
 
         return result
 
@@ -322,6 +434,275 @@ class FeatureStore:
             "total_entities": len(self.feature_values),
             "by_data_type": type_counts,
         }
+
+    # CI/CD and Deployment Methods
+
+    def register_deployment_hook(
+        self, hook_type: str, callback: Callable[[Dict[str, Any]], None]
+    ):
+        """
+        Register a deployment hook callback.
+
+        **Phase 10A Week 2 - Agent 4:** CI/CD integration for feature deployments.
+
+        Args:
+            hook_type: Type of hook ('pre_deployment' or 'post_deployment')
+            callback: Function to call during deployment
+
+        Raises:
+            ValueError: If hook_type is not recognized
+        """
+        if hook_type not in self.deployment_hooks:
+            raise ValueError(
+                f"Invalid hook type '{hook_type}'. Must be 'pre_deployment' or 'post_deployment'"
+            )
+
+        self.deployment_hooks[hook_type].append(callback)
+        logger.info(f"Registered {hook_type} hook: {callback.__name__}")
+
+    def notify_deployment(
+        self,
+        deployment_type: str,
+        features: List[str],
+        metadata: Optional[Dict[str, Any]] = None,
+    ):
+        """
+        Trigger deployment notifications and hooks.
+
+        **Phase 10A Week 2 - Agent 4:** Execute CI/CD deployment pipeline.
+
+        Args:
+            deployment_type: Type of deployment ('pre' or 'post')
+            features: List of feature IDs being deployed
+            metadata: Additional deployment metadata
+        """
+        hook_key = f"{deployment_type}_deployment"
+        if hook_key not in self.deployment_hooks:
+            logger.warning(f"Unknown deployment type: {deployment_type}")
+            return
+
+        deployment_info = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "features": features,
+            "metadata": metadata or {},
+        }
+
+        # Execute all registered hooks
+        for hook in self.deployment_hooks[hook_key]:
+            try:
+                hook(deployment_info)
+                logger.debug(f"Executed {deployment_type} hook: {hook.__name__}")
+            except Exception as e:
+                logger.error(
+                    f"Error executing {deployment_type} hook {hook.__name__}: {e}"
+                )
+
+    def validate_deployment_compatibility(
+        self, feature_ids: List[str]
+    ) -> Tuple[bool, List[str]]:
+        """
+        Validate feature compatibility before deployment.
+
+        **Phase 10A Week 2 - Agent 4:** Pre-deployment validation.
+
+        Args:
+            feature_ids: List of feature IDs to validate
+
+        Returns:
+            Tuple of (is_valid, list of error messages)
+        """
+        errors = []
+
+        # Check all features exist
+        for feat_id in feature_ids:
+            if feat_id not in self.features:
+                errors.append(f"Feature '{feat_id}' not found in store")
+
+        # Check dependencies
+        for feat_id in feature_ids:
+            if feat_id in self.feature_lineage:
+                deps = self.feature_lineage[feat_id]
+                for dep_id in deps:
+                    if dep_id not in feature_ids and dep_id not in self.features:
+                        errors.append(
+                            f"Feature '{feat_id}' depends on '{dep_id}' which is not available"
+                        )
+
+        is_valid = len(errors) == 0
+        return is_valid, errors
+
+    # Feature Versioning Methods
+
+    def compare_feature_versions(
+        self, feature_id: str, version1: str, version2: str
+    ) -> Dict[str, Any]:
+        """
+        Compare two versions of a feature.
+
+        **Phase 10A Week 2 - Agent 4:** Feature version comparison.
+
+        Args:
+            feature_id: Feature identifier
+            version1: First version
+            version2: Second version
+
+        Returns:
+            Dictionary with comparison details
+
+        Note:
+            This is a basic implementation. For full version control,
+            integrate with DVC or MLflow Model Registry.
+        """
+        if feature_id not in self.features:
+            raise ValueError(f"Feature '{feature_id}' not found")
+
+        feature = self.features[feature_id]
+
+        # Basic comparison based on stored version
+        # In production, would load from version history
+        comparison = {
+            "feature_id": feature_id,
+            "current_version": feature.version,
+            "versions_compared": [version1, version2],
+            "differences": [],  # Would contain actual diffs
+            "note": "Full version comparison requires version history storage",
+        }
+
+        # Check if current version matches either requested version
+        if feature.version == version1:
+            comparison["status"] = "version1 is current"
+        elif feature.version == version2:
+            comparison["status"] = "version2 is current"
+        else:
+            comparison["status"] = "neither version matches current"
+
+        return comparison
+
+    def rollback_feature_version(
+        self, feature_id: str, target_version: str
+    ) -> FeatureDefinition:
+        """
+        Rollback a feature to a previous version.
+
+        **Phase 10A Week 2 - Agent 4:** Feature version rollback.
+
+        Args:
+            feature_id: Feature identifier
+            target_version: Version to rollback to
+
+        Returns:
+            Updated FeatureDefinition
+
+        Note:
+            This is a placeholder. Full implementation requires version history storage.
+        """
+        if feature_id not in self.features:
+            raise ValueError(f"Feature '{feature_id}' not found")
+
+        feature = self.features[feature_id]
+
+        logger.warning(
+            f"Rollback feature '{feature_id}' to version {target_version} "
+            f"(current: {feature.version}). Full versioning requires DVC/MLflow integration."
+        )
+
+        # In production, would load from version history and restore
+        # For now, just log the intent
+        return feature
+
+    # Feature Lineage Methods
+
+    def track_feature_lineage(self, feature_id: str, dependencies: List[str]):
+        """
+        Track feature lineage and dependencies.
+
+        **Phase 10A Week 2 - Agent 4:** Feature lineage tracking for data governance.
+
+        Args:
+            feature_id: Feature identifier
+            dependencies: List of feature IDs this feature depends on
+        """
+        # Validate dependencies exist
+        for dep_id in dependencies:
+            if dep_id not in self.features:
+                logger.warning(
+                    f"Dependency '{dep_id}' for feature '{feature_id}' not found in store"
+                )
+
+        self.feature_lineage[feature_id] = dependencies
+        logger.info(
+            f"Tracked lineage for '{feature_id}': {len(dependencies)} dependencies"
+        )
+
+    def get_feature_lineage(
+        self, feature_id: str, recursive: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Get feature lineage and dependency graph.
+
+        **Phase 10A Week 2 - Agent 4:** Retrieve feature lineage for impact analysis.
+
+        Args:
+            feature_id: Feature identifier
+            recursive: If True, get full dependency tree
+
+        Returns:
+            Dictionary with lineage information
+        """
+        if feature_id not in self.features:
+            raise ValueError(f"Feature '{feature_id}' not found")
+
+        lineage = {
+            "feature_id": feature_id,
+            "direct_dependencies": self.feature_lineage.get(feature_id, []),
+            "dependent_features": [],  # Features that depend on this one
+        }
+
+        # Find features that depend on this one
+        for feat_id, deps in self.feature_lineage.items():
+            if feature_id in deps:
+                lineage["dependent_features"].append(feat_id)
+
+        # Recursive dependency resolution
+        if recursive and lineage["direct_dependencies"]:
+            lineage["full_dependency_tree"] = self._build_dependency_tree(feature_id)
+
+        return lineage
+
+    def _build_dependency_tree(
+        self, feature_id: str, visited: Optional[set] = None
+    ) -> Dict[str, Any]:
+        """
+        Recursively build dependency tree.
+
+        Args:
+            feature_id: Feature identifier
+            visited: Set of already visited features (for cycle detection)
+
+        Returns:
+            Nested dependency tree
+        """
+        if visited is None:
+            visited = set()
+
+        if feature_id in visited:
+            return {"feature_id": feature_id, "cycle_detected": True}
+
+        visited.add(feature_id)
+
+        tree = {
+            "feature_id": feature_id,
+            "dependencies": [],
+        }
+
+        direct_deps = self.feature_lineage.get(feature_id, [])
+        for dep_id in direct_deps:
+            if dep_id in self.features:
+                tree["dependencies"].append(
+                    self._build_dependency_tree(dep_id, visited.copy())
+                )
+
+        return tree
 
 
 # Example usage
