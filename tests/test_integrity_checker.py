@@ -310,6 +310,7 @@ def test_comprehensive_check(sample_player_data):
 
 # Bonus tests to reach 16 total
 
+
 # Test 17: IntegrityReport to_dict
 def test_integrity_report_to_dict(sample_player_data):
     """Test IntegrityReport to_dict conversion"""

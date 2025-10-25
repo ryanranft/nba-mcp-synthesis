@@ -262,9 +262,7 @@ class TestWorkflowFailureScenarios:
         )
 
         # Should handle gracefully
-        result = validation_pipeline.validate(
-            malformed_df, dataset_type="player_stats"
-        )
+        result = validation_pipeline.validate(malformed_df, dataset_type="player_stats")
 
         # Should detect issues
         assert result.current_stage == PipelineStage.COMPLETE
@@ -407,7 +405,9 @@ class TestWeek1Integration:
 
         # Capture completion metrics
         metrics["end_time"] = datetime.now()
-        metrics["duration"] = (metrics["end_time"] - metrics["start_time"]).total_seconds()
+        metrics["duration"] = (
+            metrics["end_time"] - metrics["start_time"]
+        ).total_seconds()
         metrics["validation_passed"] = result.passed
         metrics["quality_score"] = result.quality_score
         metrics["issues_count"] = len(result.issues)
@@ -419,7 +419,9 @@ class TestWeek1Integration:
         print(f"  Quality Score: {metrics['quality_score']:.2%}")
         print(f"  Issues: {metrics['issues_count']}")
 
-        assert all(key in metrics for key in ["start_time", "end_time", "quality_score"])
+        assert all(
+            key in metrics for key in ["start_time", "end_time", "quality_score"]
+        )
         print("=" * 80)
 
 

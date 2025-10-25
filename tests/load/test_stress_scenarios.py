@@ -125,7 +125,9 @@ class ResourceMonitor:
 # ==================== Dataset Generators ====================
 
 
-def generate_large_player_dataset(num_rows: int, add_noise: bool = True) -> pd.DataFrame:
+def generate_large_player_dataset(
+    num_rows: int, add_noise: bool = True
+) -> pd.DataFrame:
     """
     Generate large synthetic player dataset for load testing.
 
@@ -266,7 +268,9 @@ class TestMassiveDatasetLoad:
         # Generate 1M row dataset
         print("Generating 1M row dataset...")
         df = generate_large_player_dataset(1_000_000)
-        print(f"Dataset size: {len(df):,} rows, {df.memory_usage(deep=True).sum() / 1024 / 1024:.2f} MB")
+        print(
+            f"Dataset size: {len(df):,} rows, {df.memory_usage(deep=True).sum() / 1024 / 1024:.2f} MB"
+        )
 
         # Setup monitoring
         monitor = ResourceMonitor()
@@ -325,7 +329,9 @@ class TestConcurrentLoad:
 
         # Generate datasets
         print(f"Generating {num_workers} datasets of {dataset_size:,} rows each...")
-        datasets = [generate_large_player_dataset(dataset_size) for _ in range(num_workers)]
+        datasets = [
+            generate_large_player_dataset(dataset_size) for _ in range(num_workers)
+        ]
 
         # Setup monitoring
         monitor = ResourceMonitor()
@@ -400,8 +406,12 @@ class TestConcurrentLoad:
 
             # Assertions
             assert metrics.passed, "Concurrent load test failed criteria"
-            assert metrics.error_rate < 0.1, f"Error rate too high: {metrics.error_rate * 100:.2f}%"
-            assert metrics.memory_leaked_mb < 200, f"Excessive memory leak: {metrics.memory_leaked_mb:.2f} MB"
+            assert (
+                metrics.error_rate < 0.1
+            ), f"Error rate too high: {metrics.error_rate * 100:.2f}%"
+            assert (
+                metrics.memory_leaked_mb < 200
+            ), f"Excessive memory leak: {metrics.memory_leaked_mb:.2f} MB"
 
         finally:
             monitor.stop()
@@ -496,8 +506,12 @@ class TestSustainedLoad:
 
             # Assertions
             assert metrics.passed, "Sustained load test failed criteria"
-            assert metrics.error_rate < 0.05, f"Error rate too high: {metrics.error_rate * 100:.2f}%"
-            assert metrics.memory_leaked_mb < 50, f"Memory leak detected: {metrics.memory_leaked_mb:.2f} MB"
+            assert (
+                metrics.error_rate < 0.05
+            ), f"Error rate too high: {metrics.error_rate * 100:.2f}%"
+            assert (
+                metrics.memory_leaked_mb < 50
+            ), f"Memory leak detected: {metrics.memory_leaked_mb:.2f} MB"
 
         finally:
             monitor.stop()
@@ -548,7 +562,9 @@ class TestMemoryPressure:
         print(f"{'=' * 80}\n")
 
         # Memory leak threshold: <1 MB per operation
-        assert memory_growth / num_operations < 1.0, f"Memory leak detected: {memory_growth / num_operations:.2f} MB/op"
+        assert (
+            memory_growth / num_operations < 1.0
+        ), f"Memory leak detected: {memory_growth / num_operations:.2f} MB/op"
 
 
 class TestGracefulDegradation:
@@ -566,7 +582,9 @@ class TestGracefulDegradation:
 
         # Generate datasets
         print(f"Generating {num_workers} datasets of {dataset_size:,} rows each...")
-        datasets = [generate_large_player_dataset(dataset_size) for _ in range(num_workers)]
+        datasets = [
+            generate_large_player_dataset(dataset_size) for _ in range(num_workers)
+        ]
 
         # Setup monitoring
         monitor = ResourceMonitor()
@@ -610,7 +628,9 @@ class TestGracefulDegradation:
             print(f"{'=' * 80}\n")
 
             # Under extreme load, accept higher error rate but system shouldn't crash
-            assert error_rate < 0.15, f"Error rate too high even under stress: {error_rate * 100:.2f}%"
+            assert (
+                error_rate < 0.15
+            ), f"Error rate too high even under stress: {error_rate * 100:.2f}%"
             assert successful > 0, "System completely failed under load"
 
         finally:

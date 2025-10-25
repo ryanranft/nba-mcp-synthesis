@@ -44,6 +44,7 @@ except ImportError:
         WRITE = "write"
         ADMIN = "admin"
 
+
 # Phase 1 Integration
 try:
     from mcp_server.data_quality import DataQualityChecker, DataQualityReport
@@ -398,7 +399,10 @@ class DataValidationPipeline:
                         severity=ValidationSeverity.WARNING,
                         message=f"Column '{col}' has {null_pct:.2%} null values (threshold: {self.config.max_null_percentage:.2%})",
                         field_name=col,
-                        details={"null_percentage": null_pct, "null_count": int(null_counts[col])},
+                        details={
+                            "null_percentage": null_pct,
+                            "null_count": int(null_counts[col]),
+                        },
                     )
                 )
 
@@ -452,9 +456,7 @@ class DataValidationPipeline:
         if "team" in dataset_name.lower() or "win_pct" in df.columns:
             self._validate_team_data(df, result)
 
-    def _validate_player_stats(
-        self, df: pd.DataFrame, result: PipelineResult
-    ) -> None:
+    def _validate_player_stats(self, df: pd.DataFrame, result: PipelineResult) -> None:
         """Validate player statistics"""
         # Check PPG range
         if "ppg" in df.columns:
@@ -505,9 +507,7 @@ class DataValidationPipeline:
                 )
 
             # Check for unrealistic scores
-            unrealistic_scores = df[
-                (df["home_score"] > 200) | (df["away_score"] > 200)
-            ]
+            unrealistic_scores = df[(df["home_score"] > 200) | (df["away_score"] > 200)]
             if len(unrealistic_scores) > 0:
                 result.issues.append(
                     ValidationIssue(
@@ -581,11 +581,25 @@ class DataValidationPipeline:
                 profile["numeric_columns"].append(
                     {
                         "name": col,
-                        "mean": float(df[col].mean()) if not df[col].isnull().all() else None,
-                        "median": float(df[col].median()) if not df[col].isnull().all() else None,
-                        "std": float(df[col].std()) if not df[col].isnull().all() else None,
-                        "min": float(df[col].min()) if not df[col].isnull().all() else None,
-                        "max": float(df[col].max()) if not df[col].isnull().all() else None,
+                        "mean": (
+                            float(df[col].mean())
+                            if not df[col].isnull().all()
+                            else None
+                        ),
+                        "median": (
+                            float(df[col].median())
+                            if not df[col].isnull().all()
+                            else None
+                        ),
+                        "std": (
+                            float(df[col].std()) if not df[col].isnull().all() else None
+                        ),
+                        "min": (
+                            float(df[col].min()) if not df[col].isnull().all() else None
+                        ),
+                        "max": (
+                            float(df[col].max()) if not df[col].isnull().all() else None
+                        ),
                     }
                 )
             elif pd.api.types.is_categorical_dtype(dtype) or dtype == object:
@@ -593,15 +607,25 @@ class DataValidationPipeline:
                     {
                         "name": col,
                         "unique_values": int(df[col].nunique()),
-                        "most_common": str(df[col].mode()[0]) if len(df[col].mode()) > 0 else None,
+                        "most_common": (
+                            str(df[col].mode()[0]) if len(df[col].mode()) > 0 else None
+                        ),
                     }
                 )
             elif pd.api.types.is_datetime64_any_dtype(dtype):
                 profile["datetime_columns"].append(
                     {
                         "name": col,
-                        "min": df[col].min().isoformat() if not df[col].isnull().all() else None,
-                        "max": df[col].max().isoformat() if not df[col].isnull().all() else None,
+                        "min": (
+                            df[col].min().isoformat()
+                            if not df[col].isnull().all()
+                            else None
+                        ),
+                        "max": (
+                            df[col].max().isoformat()
+                            if not df[col].isnull().all()
+                            else None
+                        ),
                     }
                 )
 
@@ -635,7 +659,9 @@ class DataValidationPipeline:
             dataset = result.dataset_name
 
             # Track success/failure
-            monitor.track_metric(f"validation.{dataset}.passed", 1 if result.passed else 0)
+            monitor.track_metric(
+                f"validation.{dataset}.passed", 1 if result.passed else 0
+            )
 
             # Track duration
             monitor.track_metric(
@@ -649,7 +675,9 @@ class DataValidationPipeline:
             monitor.track_metric(
                 f"validation.{dataset}.error_issues", len(result.error_issues)
             )
-            monitor.track_metric(f"validation.{dataset}.total_issues", len(result.issues))
+            monitor.track_metric(
+                f"validation.{dataset}.total_issues", len(result.issues)
+            )
 
             # Alert on critical issues
             if result.critical_issues:
@@ -699,8 +727,9 @@ class DataValidationPipeline:
             "successful_executions": successful,
             "failed_executions": total - successful,
             "success_rate": successful / total if total > 0 else 0.0,
-            "avg_duration_seconds": sum(r.duration_seconds for r in self.execution_history)
-            / total
-            if total > 0
-            else 0.0,
+            "avg_duration_seconds": (
+                sum(r.duration_seconds for r in self.execution_history) / total
+                if total > 0
+                else 0.0
+            ),
         }

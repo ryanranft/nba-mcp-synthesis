@@ -32,6 +32,7 @@ except ImportError:
 
         return decorator
 
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -182,18 +183,30 @@ class DataProfiler:
             count=len(series),
             unique_count=series.nunique(),
             null_count=series.isnull().sum(),
-            null_percentage=series.isnull().sum() / len(series) if len(series) > 0 else 0,
+            null_percentage=(
+                series.isnull().sum() / len(series) if len(series) > 0 else 0
+            ),
         )
 
         # Numeric statistics
         if pd.api.types.is_numeric_dtype(series):
             profile.mean = float(series.mean()) if not series.isnull().all() else None
-            profile.median = float(series.median()) if not series.isnull().all() else None
+            profile.median = (
+                float(series.median()) if not series.isnull().all() else None
+            )
             profile.std = float(series.std()) if not series.isnull().all() else None
-            profile.min_value = float(series.min()) if not series.isnull().all() else None
-            profile.max_value = float(series.max()) if not series.isnull().all() else None
-            profile.q25 = float(series.quantile(0.25)) if not series.isnull().all() else None
-            profile.q75 = float(series.quantile(0.75)) if not series.isnull().all() else None
+            profile.min_value = (
+                float(series.min()) if not series.isnull().all() else None
+            )
+            profile.max_value = (
+                float(series.max()) if not series.isnull().all() else None
+            )
+            profile.q25 = (
+                float(series.quantile(0.25)) if not series.isnull().all() else None
+            )
+            profile.q75 = (
+                float(series.quantile(0.75)) if not series.isnull().all() else None
+            )
 
             # Skewness and kurtosis
             try:
@@ -444,11 +457,11 @@ class DataProfiler:
                 "interpretation": (
                     "No significant change"
                     if psi < 0.1
-                    else "Small change"
-                    if psi < 0.2
-                    else "Medium change"
-                    if psi < 0.25
-                    else "Large change"
+                    else (
+                        "Small change"
+                        if psi < 0.2
+                        else "Medium change" if psi < 0.25 else "Large change"
+                    )
                 ),
             },
         )
@@ -546,7 +559,13 @@ class DataProfiler:
         profile = self.profile(df, dataset_name="nba_game_data")
 
         # Add NBA-specific validations
-        expected_columns = ["home_score", "away_score", "date", "home_team", "away_team"]
+        expected_columns = [
+            "home_score",
+            "away_score",
+            "date",
+            "home_team",
+            "away_team",
+        ]
         missing_cols = [col for col in expected_columns if col not in df.columns]
 
         if missing_cols:
@@ -582,9 +601,15 @@ class DataProfiler:
             dataset = profile.dataset_name
 
             monitor.track_metric(f"profiling.{dataset}.row_count", profile.row_count)
-            monitor.track_metric(f"profiling.{dataset}.column_count", profile.column_count)
-            monitor.track_metric(f"profiling.{dataset}.memory_mb", profile.memory_usage_mb)
-            monitor.track_metric(f"profiling.{dataset}.quality_score", profile.quality_score)
+            monitor.track_metric(
+                f"profiling.{dataset}.column_count", profile.column_count
+            )
+            monitor.track_metric(
+                f"profiling.{dataset}.memory_mb", profile.memory_usage_mb
+            )
+            monitor.track_metric(
+                f"profiling.{dataset}.quality_score", profile.quality_score
+            )
 
         except Exception as e:
             logger.error(f"Failed to track metrics: {e}")
@@ -599,6 +624,10 @@ class DataProfiler:
 
         return {
             "total_profiles": len(self.profile_history),
-            "avg_quality_score": np.mean([p.quality_score for p in self.profile_history]),
-            "datasets_profiled": list(set(p.dataset_name for p in self.profile_history)),
+            "avg_quality_score": np.mean(
+                [p.quality_score for p in self.profile_history]
+            ),
+            "datasets_profiled": list(
+                set(p.dataset_name for p in self.profile_history)
+            ),
         }

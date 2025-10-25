@@ -32,6 +32,7 @@ except ImportError:
 
         return decorator
 
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -126,7 +127,10 @@ class DataCleaner:
 
     @handle_errors(reraise=True, notify=False)
     def detect_outliers_iqr(
-        self, df: pd.DataFrame, columns: Optional[List[str]] = None, threshold: float = 1.5
+        self,
+        df: pd.DataFrame,
+        columns: Optional[List[str]] = None,
+        threshold: float = 1.5,
     ) -> pd.Series:
         """
         Detect outliers using IQR (Interquartile Range) method.
@@ -163,7 +167,10 @@ class DataCleaner:
 
     @handle_errors(reraise=True, notify=False)
     def detect_outliers_zscore(
-        self, df: pd.DataFrame, columns: Optional[List[str]] = None, threshold: float = 3.0
+        self,
+        df: pd.DataFrame,
+        columns: Optional[List[str]] = None,
+        threshold: float = 3.0,
     ) -> pd.Series:
         """
         Detect outliers using Z-score method.
@@ -187,7 +194,7 @@ class DataCleaner:
                 continue
 
             # Calculate z-scores
-            z_scores = np.abs(stats.zscore(df[col], nan_policy='omit'))
+            z_scores = np.abs(stats.zscore(df[col], nan_policy="omit"))
             col_outliers = z_scores > threshold
             outlier_mask = outlier_mask | col_outliers
 
@@ -304,9 +311,9 @@ class DataCleaner:
                 if len(mode_value) > 0:
                     df_cleaned[col].fillna(mode_value[0], inplace=True)
             elif strategy == ImputationStrategy.FORWARD_FILL:
-                df_cleaned[col].fillna(method='ffill', inplace=True)
+                df_cleaned[col].fillna(method="ffill", inplace=True)
             elif strategy == ImputationStrategy.BACKWARD_FILL:
-                df_cleaned[col].fillna(method='bfill', inplace=True)
+                df_cleaned[col].fillna(method="bfill", inplace=True)
             elif strategy == ImputationStrategy.INTERPOLATE:
                 if pd.api.types.is_numeric_dtype(df_cleaned[col]):
                     df_cleaned[col].interpolate(inplace=True)
@@ -320,7 +327,9 @@ class DataCleaner:
         final_missing = df_cleaned.isnull().sum().sum()
         imputed_count = initial_missing - final_missing
 
-        logger.info(f"Imputed {imputed_count} missing values using {strategy.value} strategy")
+        logger.info(
+            f"Imputed {imputed_count} missing values using {strategy.value} strategy"
+        )
         return df_cleaned, imputed_count
 
     @handle_errors(reraise=True, notify=False)
@@ -413,13 +422,19 @@ class DataCleaner:
 
             try:
                 if target_type == "int":
-                    df_converted[col] = pd.to_numeric(df_converted[col], errors='coerce').astype('Int64')
+                    df_converted[col] = pd.to_numeric(
+                        df_converted[col], errors="coerce"
+                    ).astype("Int64")
                 elif target_type == "float":
-                    df_converted[col] = pd.to_numeric(df_converted[col], errors='coerce')
+                    df_converted[col] = pd.to_numeric(
+                        df_converted[col], errors="coerce"
+                    )
                 elif target_type == "str":
                     df_converted[col] = df_converted[col].astype(str)
                 elif target_type == "datetime":
-                    df_converted[col] = pd.to_datetime(df_converted[col], errors='coerce')
+                    df_converted[col] = pd.to_datetime(
+                        df_converted[col], errors="coerce"
+                    )
                 elif target_type == "bool":
                     df_converted[col] = df_converted[col].astype(bool)
                 else:
@@ -479,23 +494,33 @@ class DataCleaner:
 
         # Impute missing values
         if impute_missing:
-            df_cleaned, imputed = self.impute_missing_values(df_cleaned, imputation_strategy)
+            df_cleaned, imputed = self.impute_missing_values(
+                df_cleaned, imputation_strategy
+            )
             report.missing_values_imputed = imputed
-            report.operations.append(f"Imputed {imputed} missing values ({imputation_strategy.value})")
+            report.operations.append(
+                f"Imputed {imputed} missing values ({imputation_strategy.value})"
+            )
 
         # Remove outliers
         if remove_outliers:
             df_cleaned, outliers = self.remove_outliers(df_cleaned, outlier_method)
             report.outliers_removed = outliers
             report.rows_after = len(df_cleaned)
-            report.operations.append(f"Removed {outliers} outliers ({outlier_method.value})")
+            report.operations.append(
+                f"Removed {outliers} outliers ({outlier_method.value})"
+            )
 
         # Scale features
         if scale_features:
-            numeric_cols = df_cleaned.select_dtypes(include=[np.number]).columns.tolist()
+            numeric_cols = df_cleaned.select_dtypes(
+                include=[np.number]
+            ).columns.tolist()
             df_cleaned = self.scale_features(df_cleaned, scaling_method)
             report.scaled_columns = numeric_cols
-            report.operations.append(f"Scaled {len(numeric_cols)} columns ({scaling_method.value})")
+            report.operations.append(
+                f"Scaled {len(numeric_cols)} columns ({scaling_method.value})"
+            )
 
         report.columns_after = len(df_cleaned.columns)
 
@@ -514,11 +539,15 @@ class DataCleaner:
             monitor = get_health_monitor()
 
             monitor.track_metric("data_cleaning.rows_removed", report.rows_removed)
-            monitor.track_metric("data_cleaning.outliers_removed", report.outliers_removed)
+            monitor.track_metric(
+                "data_cleaning.outliers_removed", report.outliers_removed
+            )
             monitor.track_metric(
                 "data_cleaning.missing_values_imputed", report.missing_values_imputed
             )
-            monitor.track_metric("data_cleaning.duplicates_removed", report.duplicates_removed)
+            monitor.track_metric(
+                "data_cleaning.duplicates_removed", report.duplicates_removed
+            )
 
         except Exception as e:
             logger.error(f"Failed to track metrics: {e}")
@@ -537,7 +566,9 @@ class DataCleaner:
         return {
             "total_cleanings": len(self.cleaning_history),
             "total_rows_removed": sum(r.rows_removed for r in self.cleaning_history),
-            "total_outliers_removed": sum(r.outliers_removed for r in self.cleaning_history),
+            "total_outliers_removed": sum(
+                r.outliers_removed for r in self.cleaning_history
+            ),
             "total_missing_imputed": sum(
                 r.missing_values_imputed for r in self.cleaning_history
             ),

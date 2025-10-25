@@ -1,0 +1,114 @@
+{
+  "pipeline_id": "teams_20251025_184941",
+  "dataset_name": "teams",
+  "start_time": "2025-10-25T18:49:41.178392",
+  "end_time": "2025-10-25T18:49:41.186900",
+  "current_stage": "completed",
+  "passed": true,
+  "duration_seconds": 0.008508,
+  "issues": [
+    {
+      "stage": "business_rules",
+      "severity": "error",
+      "message": "Found 2 rows with invalid win percentage",
+      "field": "win_pct",
+      "row_count": 2,
+      "details": {}
+    }
+  ],
+  "metrics": {},
+  "data_summary": {
+    "row_count": 30,
+    "column_count": 10,
+    "columns": [
+      "team_id",
+      "team_name",
+      "city",
+      "name",
+      "conference",
+      "division",
+      "season",
+      "wins",
+      "losses",
+      "win_pct"
+    ],
+    "dtypes": {
+      "team_id": "object",
+      "team_name": "object",
+      "city": "object",
+      "name": "object",
+      "conference": "object",
+      "division": "object",
+      "season": "object",
+      "wins": "int64",
+      "losses": "int64",
+      "win_pct": "float64"
+    },
+    "profile": {
+      "numeric_columns": [
+        {
+          "name": "wins",
+          "mean": 41.233333333333334,
+          "median": 40.5,
+          "std": 15.740751709108942,
+          "min": 17.0,
+          "max": 65.0
+        },
+        {
+          "name": "losses",
+          "mean": 21.6,
+          "median": 22.5,
+          "std": 17.309754077019598,
+          "min": -13.0,
+          "max": 64.0
+        },
+        {
+          "name": "win_pct",
+          "mean": 0.6678666666666666,
+          "median": 0.669,
+          "std": 0.2591151698846824,
+          "min": 0.21,
+          "max": 1.302
+        }
+      ],
+      "categorical_columns": [
+        {
+          "name": "team_id",
+          "unique_values": 30,
+          "most_common": "team_01"
+        },
+        {
+          "name": "team_name",
+          "unique_values": 30,
+          "most_common": "Atlanta Hawks"
+        },
+        {
+          "name": "city",
+          "unique_values": 30,
+          "most_common": "Atlanta"
+        },
+        {
+          "name": "name",
+          "unique_values": 30,
+          "most_common": "76ers"
+        },
+        {
+          "name": "conference",
+          "unique_values": 2,
+          "most_common": "Eastern"
+        },
+        {
+          "name": "division",
+          "unique_values": 6,
+          "most_common": "Atlantic"
+        },
+        {
+          "name": "season",
+          "unique_values": 1,
+          "most_common": "2024-25"
+        }
+      ],
+      "datetime_columns": []
+    }
+  }
+}

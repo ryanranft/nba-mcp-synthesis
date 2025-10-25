@@ -1,0 +1,132 @@
+{
+  "pipeline_id": "games_20251025_183851",
+  "dataset_name": "games",
+  "start_time": "2025-10-25T18:38:51.606290",
+  "end_time": "2025-10-25T18:38:51.609730",
+  "current_stage": "completed",
+  "passed": true,
+  "duration_seconds": 0.00344,
+  "issues": [
+    {
+      "stage": "quality_check",
+      "severity": "warning",
+      "message": "Column 'home_score' has 35.00% null values (threshold: 5.00%)",
+      "field": "home_score",
+      "row_count": null,
+      "details": {
+        "null_percentage": 0.35,
+        "null_count": 35
+      }
+    },
+    {
+      "stage": "quality_check",
+      "severity": "warning",
+      "message": "Column 'away_score' has 35.00% null values (threshold: 5.00%)",
+      "field": "away_score",
+      "row_count": null,
+      "details": {
+        "null_percentage": 0.35,
+        "null_count": 35
+      }
+    },
+    {
+      "stage": "quality_check",
+      "severity": "warning",
+      "message": "Column 'attendance' has 20.00% null values (threshold: 5.00%)",
+      "field": "attendance",
+      "row_count": null,
+      "details": {
+        "null_percentage": 0.2,
+        "null_count": 20
+      }
+    }
+  ],
+  "metrics": {},
+  "data_summary": {
+    "row_count": 100,
+    "column_count": 9,
+    "columns": [
+      "game_id",
+      "season",
+      "game_date",
+      "home_team",
+      "away_team",
+      "home_score",
+      "away_score",
+      "attendance",
+      "game_state"
+    ],
+    "dtypes": {
+      "game_id": "object",
+      "season": "object",
+      "game_date": "object",
+      "home_team": "object",
+      "away_team": "object",
+      "home_score": "float64",
+      "away_score": "float64",
+      "attendance": "float64",
+      "game_state": "object"
+    },
+    "profile": {
+      "numeric_columns": [
+        {
+          "name": "home_score",
+          "mean": 107.03076923076924,
+          "median": 107.0,
+          "std": 12.09205476590056,
+          "min": 85.0,
+          "max": 128.0
+        },
+        {
+          "name": "away_score",
+          "mean": 105.9076923076923,
+          "median": 106.0,
+          "std": 12.810790223629695,
+          "min": 85.0,
+          "max": 129.0
+        },
+        {
+          "name": "attendance",
+          "mean": 17705.775,
+          "median": 18025.5,
+          "std": 1414.5365388070586,
+          "min": 15067.0,
+          "max": 19984.0
+        }
+      ],
+      "categorical_columns": [
+        {
+          "name": "game_id",
+          "unique_values": 100,
+          "most_common": "game_000001"
+        },
+        {
+          "name": "season",
+          "unique_values": 1,
+          "most_common": "2024-25"
+        },
+        {
+          "name": "game_date",
+          "unique_values": 89,
+          "most_common": "2024-10-17"
+        },
+        {
+          "name": "home_team",
+          "unique_values": 28,
+          "most_common": "San Antonio Spurs"
+        },
+        {
+          "name": "away_team",
+          "unique_values": 30,
+          "most_common": "Orlando Magic"
+        },
+        {
+          "name": "game_state",
+          "unique_values": 3,
+          "most_common": "final"
+        }
+      ],
+      "datetime_columns": []
+    }
+  }
+}

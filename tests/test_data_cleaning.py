@@ -145,7 +145,9 @@ def test_impute_missing_median(sample_data_with_missing):
     """Test median imputation"""
     cleaner = DataCleaner()
     cleaned_df, imputed_count = cleaner.impute_missing_values(
-        sample_data_with_missing, strategy=ImputationStrategy.MEDIAN, columns=["numeric"]
+        sample_data_with_missing,
+        strategy=ImputationStrategy.MEDIAN,
+        columns=["numeric"],
     )
 
     assert cleaned_df["numeric"].isnull().sum() == 0
@@ -177,7 +179,10 @@ def test_impute_missing_forward_fill(sample_data_with_missing):
     )
 
     # Should reduce missing values (but maybe not all if first value is null)
-    assert cleaned_df["numeric"].isnull().sum() <= sample_data_with_missing["numeric"].isnull().sum()
+    assert (
+        cleaned_df["numeric"].isnull().sum()
+        <= sample_data_with_missing["numeric"].isnull().sum()
+    )
 
 
 # Test 10: Remove duplicates

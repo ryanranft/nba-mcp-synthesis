@@ -30,7 +30,13 @@ def sample_player_data():
     return pd.DataFrame(
         {
             "player_id": [1, 2, 3, 4, 5],
-            "player_name": ["LeBron James", "Kevin Durant", "Stephen Curry", "Giannis Antetokounmpo", "Luka Doncic"],
+            "player_name": [
+                "LeBron James",
+                "Kevin Durant",
+                "Stephen Curry",
+                "Giannis Antetokounmpo",
+                "Luka Doncic",
+            ],
             "ppg": [27.2, 29.1, 28.7, 29.9, 28.4],
             "rpg": [7.5, 7.1, 5.2, 11.6, 9.1],
             "apg": [7.3, 5.0, 6.5, 5.8, 8.7],
@@ -155,7 +161,15 @@ def test_validate_with_schema(sample_player_data, pipeline_config):
 def test_schema_validation_missing_columns(sample_player_data, pipeline_config):
     """Test schema validation with missing columns"""
     schema = {
-        "columns": ["player_id", "player_name", "ppg", "rpg", "apg", "fg_pct", "missing_column"],
+        "columns": [
+            "player_id",
+            "player_name",
+            "ppg",
+            "rpg",
+            "apg",
+            "fg_pct",
+            "missing_column",
+        ],
     }
 
     pipeline = DataValidationPipeline(config=pipeline_config)
@@ -190,7 +204,10 @@ def test_schema_validation_extra_columns(sample_player_data, pipeline_config):
         and i.severity == ValidationSeverity.WARNING
     ]
     assert len(schema_issues) > 0
-    assert any("unexpected" in i.message.lower() or "extra" in i.message.lower() for i in schema_issues)
+    assert any(
+        "unexpected" in i.message.lower() or "extra" in i.message.lower()
+        for i in schema_issues
+    )
 
 
 # Test 7: Quality check - null values
@@ -254,9 +271,7 @@ def test_business_rules_player_stats(pipeline_config):
 
     # Should have business rule errors
     business_issues = [
-        i
-        for i in result.issues
-        if i.stage == PipelineStage.BUSINESS_RULES
+        i for i in result.issues if i.stage == PipelineStage.BUSINESS_RULES
     ]
     assert len(business_issues) > 0
 
@@ -293,9 +308,7 @@ def test_business_rules_invalid_game_scores(pipeline_config):
 
     # Should have business rule errors
     business_issues = [
-        i
-        for i in result.issues
-        if i.stage == PipelineStage.BUSINESS_RULES
+        i for i in result.issues if i.stage == PipelineStage.BUSINESS_RULES
     ]
     assert len(business_issues) > 0
 
@@ -333,12 +346,12 @@ def test_business_rules_invalid_win_percentage(pipeline_config):
 
     # Should have business rule errors
     business_issues = [
-        i
-        for i in result.issues
-        if i.stage == PipelineStage.BUSINESS_RULES
+        i for i in result.issues if i.stage == PipelineStage.BUSINESS_RULES
     ]
     # Check that at least one business rule issue was found
-    assert len(business_issues) > 0, f"Expected business rule issues but got: {result.issues}"
+    assert (
+        len(business_issues) > 0
+    ), f"Expected business rule issues but got: {result.issues}"
 
 
 # Test 14: Custom validation rules
@@ -365,11 +378,7 @@ def test_custom_validation_rules(sample_player_data, pipeline_config):
     )
 
     # Should have issues from failing custom rules
-    custom_issues = [
-        i
-        for i in result.issues
-        if "custom" in i.message.lower()
-    ]
+    custom_issues = [i for i in result.issues if "custom" in i.message.lower()]
     assert len(custom_issues) >= 2  # At least from fails and error
 
 

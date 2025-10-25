@@ -30,6 +30,7 @@ except ImportError:
 
         return decorator
 
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -162,7 +163,9 @@ class IntegrityChecker:
                     field_names=[column],
                     row_indices=invalid_rows.index.tolist(),
                     details={
-                        "invalid_values": invalid_rows[column].unique().tolist()[:10],  # Limit to 10
+                        "invalid_values": invalid_rows[column]
+                        .unique()
+                        .tolist()[:10],  # Limit to 10
                     },
                 )
             )
@@ -196,7 +199,9 @@ class IntegrityChecker:
         violations = []
 
         # Check all fields exist
-        missing_fields = [f for f in [field_a, field_b, field_result] if f not in df.columns]
+        missing_fields = [
+            f for f in [field_a, field_b, field_result] if f not in df.columns
+        ]
         if missing_fields:
             violations.append(
                 IntegrityViolation(
@@ -273,7 +278,7 @@ class IntegrityChecker:
             )
             return violations
 
-        dates = pd.to_datetime(df[date_field], errors='coerce')
+        dates = pd.to_datetime(df[date_field], errors="coerce")
 
         # Check for unparseable dates
         null_dates = dates.isnull()
@@ -388,7 +393,12 @@ class IntegrityChecker:
         # Check total points calculation (PPG × Games = Total Points)
         if all(col in df.columns for col in ["ppg", "games_played", "total_points"]):
             pts_violations = self.check_cross_field_math(
-                df, "ppg", "games_played", "total_points", operation="multiply", tolerance=1.0
+                df,
+                "ppg",
+                "games_played",
+                "total_points",
+                operation="multiply",
+                tolerance=1.0,
             )
             violations.extend(pts_violations)
 
@@ -410,7 +420,9 @@ class IntegrityChecker:
 
         if "minutes_per_game" in df.columns:
             # Minutes per game should be between 0 and 48 (max game length)
-            valid_minutes = (df["minutes_per_game"] >= 0) & (df["minutes_per_game"] <= 48)
+            valid_minutes = (df["minutes_per_game"] >= 0) & (
+                df["minutes_per_game"] <= 48
+            )
             minute_violations = self.check_business_rule(
                 df, "minutes_per_game must be 0-48", valid_minutes
             )
@@ -521,12 +533,16 @@ class IntegrityChecker:
         # Check wins and losses are non-negative
         if "wins" in df.columns:
             valid_wins = df["wins"] >= 0
-            win_violations = self.check_business_rule(df, "wins must be >= 0", valid_wins)
+            win_violations = self.check_business_rule(
+                df, "wins must be >= 0", valid_wins
+            )
             violations.extend(win_violations)
 
         if "losses" in df.columns:
             valid_losses = df["losses"] >= 0
-            loss_violations = self.check_business_rule(df, "losses must be >= 0", valid_losses)
+            loss_violations = self.check_business_rule(
+                df, "losses must be >= 0", valid_losses
+            )
             violations.extend(loss_violations)
 
         # Check valid conference values
@@ -608,9 +624,15 @@ class IntegrityChecker:
             monitor = get_health_monitor()
             dataset = report.dataset_name
 
-            monitor.track_metric(f"integrity.{dataset}.total_checks", report.total_checks)
-            monitor.track_metric(f"integrity.{dataset}.violations", report.violation_count)
-            monitor.track_metric(f"integrity.{dataset}.passed", 1 if report.passed else 0)
+            monitor.track_metric(
+                f"integrity.{dataset}.total_checks", report.total_checks
+            )
+            monitor.track_metric(
+                f"integrity.{dataset}.violations", report.violation_count
+            )
+            monitor.track_metric(
+                f"integrity.{dataset}.passed", 1 if report.passed else 0
+            )
 
         except Exception as e:
             logger.error(f"Failed to track metrics: {e}")
@@ -631,6 +653,8 @@ class IntegrityChecker:
         return {
             "total_checks": total_checks,
             "total_violations": total_violations,
-            "pass_rate": passed / len(self.check_history) if self.check_history else 0.0,
+            "pass_rate": (
+                passed / len(self.check_history) if self.check_history else 0.0
+            ),
             "datasets_checked": len(self.check_history),
         }

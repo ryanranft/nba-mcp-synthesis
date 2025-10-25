@@ -206,7 +206,9 @@ def test_detect_drift_ks_test():
     """Test KS test drift detection"""
     np.random.seed(42)
     reference_data = pd.DataFrame({"value": np.random.normal(100, 15, 100)})
-    current_data = pd.DataFrame({"value": np.random.normal(110, 15, 100)})  # Shifted mean
+    current_data = pd.DataFrame(
+        {"value": np.random.normal(110, 15, 100)}
+    )  # Shifted mean
 
     profiler = DataProfiler()
     result = profiler.detect_drift_ks_test(
@@ -227,11 +229,16 @@ def test_detect_drift_psi():
     reference_data = pd.DataFrame({"value": np.random.normal(100, 15, 1000)})
     # Use same seed for reproducibility
     np.random.seed(42)
-    current_data = pd.DataFrame({"value": np.random.normal(100, 15, 1000)})  # Same distribution
+    current_data = pd.DataFrame(
+        {"value": np.random.normal(100, 15, 1000)}
+    )  # Same distribution
 
     profiler = DataProfiler()
     result = profiler.detect_drift_psi(
-        reference_data, current_data, "value", threshold=0.5  # Higher threshold for test
+        reference_data,
+        current_data,
+        "value",
+        threshold=0.5,  # Higher threshold for test
     )
 
     assert isinstance(result, DriftResult)
@@ -339,9 +346,7 @@ def test_drift_result_to_dict():
     current_data = pd.DataFrame({"value": np.random.normal(100, 15, 100)})
 
     profiler = DataProfiler()
-    result = profiler.detect_drift_kl_divergence(
-        reference_data, current_data, "value"
-    )
+    result = profiler.detect_drift_kl_divergence(reference_data, current_data, "value")
 
     result_dict = result.to_dict()
 
