@@ -35,6 +35,18 @@ from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.stats.diagnostic import acorr_ljungbox
 import scipy.stats as stats
 
+# Advanced time series models (Phase 2 Day 2)
+try:
+    from statsmodels.tsa.statespace.sarimax import SARIMAX
+    from statsmodels.tsa.statespace.varmax import VARMAX
+    from statsmodels.tsa.seasonal import MSTL
+    ADVANCED_TS_AVAILABLE = True
+except ImportError:
+    SARIMAX = None
+    VARMAX = None
+    MSTL = None
+    ADVANCED_TS_AVAILABLE = False
+
 # MLflow integration
 try:
     import mlflow
@@ -138,6 +150,48 @@ class ARIMAModelResult:
     aic: float
     bic: float
     summary: str
+
+
+@dataclass
+class ARIMAXResult:
+    """Results from ARIMAX model (ARIMA with exogenous variables)."""
+
+    model: Any  # fitted SARIMAX model
+    order: Tuple[int, int, int]
+    seasonal_order: Optional[Tuple[int, int, int, int]]
+    exog_names: List[str]
+    exog_coefficients: Optional[pd.Series]
+    aic: float
+    bic: float
+    log_likelihood: float
+    summary: str
+
+
+@dataclass
+class VARMAXResult:
+    """Results from VARMAX model (Vector ARMA with exogenous variables)."""
+
+    model: Any  # fitted VARMAX model
+    order: Tuple[int, int]  # (p, q) for VAR and MA orders
+    n_variables: int
+    variable_names: List[str]
+    aic: float
+    bic: float
+    log_likelihood: float
+    summary: str
+    granger_causality: Optional[Dict[str, Any]] = None
+
+
+@dataclass
+class MSTLResult:
+    """Results from MSTL decomposition (Multiple Seasonal-Trend using Loess)."""
+
+    observed: pd.Series
+    trend: pd.Series
+    seasonal_components: Dict[int, pd.Series]  # period -> seasonal component
+    residual: pd.Series
+    periods: List[int]
+    seasonal_strength: Dict[int, float]  # period -> strength metric
 
 
 # ==============================================================================
@@ -846,3 +900,428 @@ class TimeSeriesAnalyzer:
             "rmse": float(np.sqrt(squared_errors.mean())),
             "mape": float(percentage_errors.mean()),
         }
+
+    # ==========================================================================
+    # Advanced Time Series Methods (Phase 2 Day 2)
+    # ==========================================================================
+
+    def fit_arimax(
+        self,
+        order: Tuple[int, int, int],
+        exog: Union[pd.DataFrame, np.ndarray],
+        seasonal_order: Optional[Tuple[int, int, int, int]] = None,
+        exog_forecast: Optional[Union[pd.DataFrame, np.ndarray]] = None,
+        **kwargs,
+    ) -> ARIMAXResult:
+        """
+        Fit ARIMAX model (ARIMA with exogenous variables).
+
+        ARIMAX extends ARIMA by including external regressors that can
+        help explain variation in the target series.
+
+        Parameters
+        ----------
+        order : Tuple[int, int, int]
+            (p, d, q) order of ARIMA model
+            p: autoregressive order
+            d: differencing order
+            q: moving average order
+        exog : pd.DataFrame or np.ndarray
+            Exogenous variables (external regressors)
+        seasonal_order : Tuple[int, int, int, int], optional
+            (P, D, Q, s) seasonal order
+        exog_forecast : pd.DataFrame or np.ndarray, optional
+            Future values of exogenous variables for forecasting
+        **kwargs : dict
+            Additional arguments for SARIMAX model
+
+        Returns
+        -------
+        ARIMAXResult
+            Fitted ARIMAX model results with coefficients and diagnostics
+
+        Examples
+        --------
+        >>> # Predict points using assists and opponent strength as exog vars
+        >>> exog_data = df[['assists', 'opponent_rating']]
+        >>> result = analyzer.fit_arimax(
+        ...     order=(1, 1, 1),
+        ...     exog=exog_data
+        ... )
+        >>> print(f"AIC: {result.aic:.2f}")
+        >>> print(result.exog_coefficients)
+        """
+        if not ADVANCED_TS_AVAILABLE:
+            raise ImportError(
+                "SARIMAX not available. Install statsmodels>=0.12.0"
+            )
+
+        series_clean = self.series.dropna()
+
+        # Align exog with series
+        if isinstance(exog, pd.DataFrame):
+            exog_names = list(exog.columns)
+            exog_aligned = exog.loc[series_clean.index]
+        elif isinstance(exog, np.ndarray):
+            exog_names = [f"exog_{i}" for i in range(exog.shape[1])]
+            exog_aligned = exog
+        else:
+            raise ValueError("exog must be DataFrame or ndarray")
+
+        # Fit SARIMAX model (which handles ARIMAX)
+        if seasonal_order is not None:
+            model = SARIMAX(
+                series_clean,
+                exog=exog_aligned,
+                order=order,
+                seasonal_order=seasonal_order,
+                **kwargs,
+            )
+        else:
+            model = SARIMAX(
+                series_clean, exog=exog_aligned, order=order, **kwargs
+            )
+
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore")
+            fitted_model = model.fit(disp=False)
+
+        # Extract exogenous coefficients
+        if hasattr(fitted_model, "params"):
+            # Exog coefficients are typically at the end
+            n_exog = exog_aligned.shape[1] if len(exog_aligned.shape) > 1 else 1
+            exog_coef = fitted_model.params[-n_exog:]
+            exog_coefficients = pd.Series(exog_coef, index=exog_names)
+        else:
+            exog_coefficients = None
+
+        result = ARIMAXResult(
+            model=fitted_model,
+            order=order,
+            seasonal_order=seasonal_order,
+            exog_names=exog_names,
+            exog_coefficients=exog_coefficients,
+            aic=fitted_model.aic,
+            bic=fitted_model.bic,
+            log_likelihood=fitted_model.llf,
+            summary=str(fitted_model.summary()),
+        )
+
+        # MLflow logging
+        if self.mlflow_tracker:
+            try:
+                run = self.mlflow_tracker.start_run(run_name=f"ARIMAX_{order}")
+                self.mlflow_tracker.log_params(
+                    run,
+                    {
+                        "p": order[0],
+                        "d": order[1],
+                        "q": order[2],
+                        "n_exog": len(exog_names),
+                        "seasonal": seasonal_order is not None,
+                    },
+                )
+                self.mlflow_tracker.log_metrics(
+                    run,
+                    {
+                        "aic": fitted_model.aic,
+                        "bic": fitted_model.bic,
+                        "log_likelihood": fitted_model.llf,
+                    },
+                )
+                self.mlflow_tracker.end_run(run)
+            except Exception as e:
+                logger.warning(f"Failed to log to MLflow: {e}")
+
+        logger.info(f"ARIMAX{order} fitted with {len(exog_names)} exog variables")
+        return result
+
+    def fit_varmax(
+        self,
+        endog_data: pd.DataFrame,
+        order: Tuple[int, int] = (1, 0),
+        exog: Optional[Union[pd.DataFrame, np.ndarray]] = None,
+        trend: str = "c",
+        **kwargs,
+    ) -> VARMAXResult:
+        """
+        Fit VARMAX model (Vector Autoregression Moving Average with exogenous variables).
+
+        VARMAX models multiple time series jointly, capturing cross-variable
+        dynamics through vector autoregression and moving average components.
+
+        Parameters
+        ----------
+        endog_data : pd.DataFrame
+            Multivariate endogenous data (multiple time series)
+        order : Tuple[int, int], default=(1, 0)
+            (p, q) order where:
+            p: VAR order (lags of endogenous variables)
+            q: MA order (lags of errors)
+        exog : pd.DataFrame or np.ndarray, optional
+            Exogenous variables
+        trend : str, default='c'
+            Trend specification: 'n' (none), 'c' (constant), 't' (time trend),
+            'ct' (constant + time trend)
+        **kwargs : dict
+            Additional arguments for VARMAX model
+
+        Returns
+        -------
+        VARMAXResult
+            Fitted VARMAX model results with diagnostics
+
+        Examples
+        --------
+        >>> # Model points, assists, and rebounds jointly
+        >>> endog = df[['points', 'assists', 'rebounds']]
+        >>> result = analyzer.fit_varmax(
+        ...     endog_data=endog,
+        ...     order=(2, 1)
+        ... )
+        >>> print(f"AIC: {result.aic:.2f}")
+        """
+        if not ADVANCED_TS_AVAILABLE:
+            raise ImportError(
+                "VARMAX not available. Install statsmodels>=0.12.0"
+            )
+
+        # Clean data
+        endog_clean = endog_data.dropna()
+        n_vars = endog_clean.shape[1]
+        var_names = list(endog_clean.columns)
+
+        # Align exog if provided
+        if exog is not None:
+            if isinstance(exog, pd.DataFrame):
+                exog_aligned = exog.loc[endog_clean.index]
+            else:
+                exog_aligned = exog
+        else:
+            exog_aligned = None
+
+        # Fit VARMAX model
+        model = VARMAX(
+            endog_clean, exog=exog_aligned, order=order, trend=trend, **kwargs
+        )
+
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore")
+            fitted_model = model.fit(disp=False)
+
+        result = VARMAXResult(
+            model=fitted_model,
+            order=order,
+            n_variables=n_vars,
+            variable_names=var_names,
+            aic=fitted_model.aic,
+            bic=fitted_model.bic,
+            log_likelihood=fitted_model.llf,
+            summary=str(fitted_model.summary()),
+            granger_causality=None,  # Could add Granger causality tests later
+        )
+
+        # MLflow logging
+        if self.mlflow_tracker:
+            try:
+                run = self.mlflow_tracker.start_run(
+                    run_name=f"VARMAX_{order}_{n_vars}vars"
+                )
+                self.mlflow_tracker.log_params(
+                    run,
+                    {"p": order[0], "q": order[1], "n_variables": n_vars, "trend": trend},
+                )
+                self.mlflow_tracker.log_metrics(
+                    run,
+                    {
+                        "aic": fitted_model.aic,
+                        "bic": fitted_model.bic,
+                        "log_likelihood": fitted_model.llf,
+                    },
+                )
+                self.mlflow_tracker.end_run(run)
+            except Exception as e:
+                logger.warning(f"Failed to log to MLflow: {e}")
+
+        logger.info(
+            f"VARMAX{order} fitted with {n_vars} endogenous variables: {var_names}"
+        )
+        return result
+
+    def mstl_decompose(
+        self,
+        periods: Union[int, List[int]],
+        windows: Optional[Union[int, List[int]]] = None,
+        iterate: int = 2,
+        **kwargs,
+    ) -> MSTLResult:
+        """
+        Multiple Seasonal-Trend decomposition using Loess (MSTL).
+
+        MSTL extends STL to handle time series with multiple seasonal patterns,
+        such as hourly data with daily, weekly, and yearly seasonality.
+
+        Parameters
+        ----------
+        periods : int or List[int]
+            Seasonal period(s). Can be a single period or list of multiple periods.
+            Examples: 7 (weekly), [7, 365] (weekly + yearly), [24, 168] (daily + weekly for hourly data)
+        windows : int or List[int], optional
+            Seasonal smoother window size(s). If None, uses defaults.
+            Must match length of periods if provided as list.
+        iterate : int, default=2
+            Number of iterations for MSTL algorithm
+        **kwargs : dict
+            Additional arguments passed to MSTL
+
+        Returns
+        -------
+        MSTLResult
+            Decomposition results with trend, multiple seasonal components, and residual
+
+        Examples
+        --------
+        >>> # Decompose daily data with weekly and yearly seasonality
+        >>> result = analyzer.mstl_decompose(periods=[7, 365])
+        >>> print(f"Weekly seasonal strength: {result.seasonal_strength[7]:.3f}")
+        >>> print(f"Yearly seasonal strength: {result.seasonal_strength[365]:.3f}")
+        """
+        if not ADVANCED_TS_AVAILABLE or MSTL is None:
+            raise ImportError(
+                "MSTL not available. Install statsmodels>=0.13.0"
+            )
+
+        series_clean = self.series.dropna()
+
+        # Convert single period to list
+        if isinstance(periods, int):
+            periods = [periods]
+
+        # Validate minimum series length
+        max_period = max(periods)
+        if len(series_clean) < 2 * max_period:
+            raise ValueError(
+                f"Series too short ({len(series_clean)}) for period {max_period}. "
+                f"Need at least {2 * max_period} observations."
+            )
+
+        # Fit MSTL
+        try:
+            mstl = MSTL(series_clean, periods=periods, windows=windows, iterate=iterate, **kwargs)
+            decomp = mstl.fit()
+        except Exception as e:
+            logger.error(f"MSTL decomposition failed: {e}")
+            raise
+
+        # Extract components
+        trend = decomp.trend
+        residual = decomp.resid
+        observed = decomp.observed
+
+        # Extract seasonal components (MSTL creates one seasonal component per period)
+        seasonal_components = {}
+        seasonal_strength = {}
+
+        # MSTL returns seasonal components as seasonal_{period}
+        for period in periods:
+            seasonal_col = f"seasonal_{period}"
+            if hasattr(decomp, seasonal_col):
+                seasonal = getattr(decomp, seasonal_col)
+            else:
+                # Try to access from seasonal attribute (different statsmodels versions)
+                seasonal = decomp.seasonal.iloc[:, periods.index(period)]
+
+            seasonal_components[period] = seasonal
+
+            # Calculate seasonal strength: Var(seasonal) / Var(seasonal + residual)
+            var_seasonal = np.var(seasonal.dropna())
+            var_remainder = np.var((seasonal + residual).dropna())
+            strength = 1 - (var_remainder / max(var_seasonal, 1e-10))
+            seasonal_strength[period] = max(0.0, min(1.0, strength))
+
+        result = MSTLResult(
+            observed=observed,
+            trend=trend,
+            seasonal_components=seasonal_components,
+            residual=residual,
+            periods=periods,
+            seasonal_strength=seasonal_strength,
+        )
+
+        logger.info(
+            f"MSTL decomposition complete with periods: {periods}, "
+            f"strengths: {seasonal_strength}"
+        )
+        return result
+
+    def stl_decompose(
+        self,
+        period: int,
+        seasonal: int = 7,
+        trend: Optional[int] = None,
+        robust: bool = True,
+        **kwargs,
+    ) -> DecompositionResult:
+        """
+        Enhanced STL (Seasonal-Trend decomposition using Loess) with additional diagnostics.
+
+        STL is a robust decomposition method that handles various types of seasonality
+        and is resistant to outliers when robust=True.
+
+        Parameters
+        ----------
+        period : int
+            Seasonal period (e.g., 7 for weekly, 12 for monthly, 365 for yearly)
+        seasonal : int, default=7
+            Length of seasonal smoother. Must be odd. Larger values = smoother seasonal component.
+        trend : int, optional
+            Length of trend smoother. If None, uses default heuristic.
+            Must be odd and >= period.
+        robust : bool, default=True
+            Use robust weights to handle outliers
+        **kwargs : dict
+            Additional arguments passed to STL
+
+        Returns
+        -------
+        DecompositionResult
+            Enhanced decomposition with trend, seasonal, and residual components
+
+        Examples
+        --------
+        >>> # Decompose with weekly seasonality
+        >>> result = analyzer.stl_decompose(period=7, seasonal=13, robust=True)
+        >>> print(f"Trend component: {result.trend.head()}")
+        >>> seasonal_adj = result.observed - result.seasonal
+        """
+        series_clean = self.series.dropna()
+
+        # Validate inputs
+        if len(series_clean) < 2 * period:
+            raise ValueError(
+                f"Series too short ({len(series_clean)}) for period {period}. "
+                f"Need at least {2 * period} observations."
+            )
+
+        # Ensure seasonal is odd
+        if seasonal % 2 == 0:
+            seasonal += 1
+            logger.warning(f"seasonal must be odd, using {seasonal}")
+
+        # Fit STL
+        stl = STL(
+            series_clean, period=period, seasonal=seasonal, trend=trend, robust=robust, **kwargs
+        )
+        decomp = stl.fit()
+
+        result = DecompositionResult(
+            observed=series_clean,
+            trend=decomp.trend,
+            seasonal=decomp.seasonal,
+            residual=decomp.resid,
+            model="stl",
+            period=period,
+        )
+
+        logger.info(f"STL decomposition complete: period={period}, robust={robust}")
+        return result

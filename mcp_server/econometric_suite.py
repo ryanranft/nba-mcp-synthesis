@@ -580,14 +580,54 @@ class EconometricSuite:
         Access time series analysis methods.
 
         Args:
-            method: Time series method ('arima', 'var', 'seasonal_decompose')
-            **kwargs: Method-specific parameters
+            method: Time series method:
+                - 'arima': ARIMA modeling
+                - 'auto_arima': Automatic ARIMA model selection
+                - 'arimax': ARIMA with exogenous variables (Phase 2)
+                - 'varmax': Vector ARMA with exogenous variables (Phase 2)
+                - 'mstl': Multiple Seasonal-Trend decomposition (Phase 2)
+                - 'stl': Enhanced STL decomposition (Phase 2)
+            **kwargs: Method-specific parameters:
+                For ARIMAX: order, exog (required), seasonal_order
+                For VARMAX: endog_data (required), order, exog, trend
+                For MSTL: periods (required), windows, iterate
+                For STL: period (required), seasonal, trend, robust
 
         Returns:
             SuiteResult with time series analysis results
 
         Examples:
+            >>> # ARIMA
             >>> result = suite.time_series_analysis(method='arima', order=(1,1,1))
+            >>>
+            >>> # ARIMAX with exogenous variables
+            >>> exog_data = df[['assists', 'opponent_rating']]
+            >>> result = suite.time_series_analysis(
+            ...     method='arimax',
+            ...     order=(1,1,1),
+            ...     exog=exog_data
+            ... )
+            >>>
+            >>> # VARMAX for multivariate series
+            >>> endog = df[['points', 'assists', 'rebounds']]
+            >>> result = suite.time_series_analysis(
+            ...     method='varmax',
+            ...     endog_data=endog,
+            ...     order=(2, 1)
+            ... )
+            >>>
+            >>> # MSTL with multiple seasonal patterns
+            >>> result = suite.time_series_analysis(
+            ...     method='mstl',
+            ...     periods=[7, 365]  # weekly + yearly
+            ... )
+            >>>
+            >>> # Enhanced STL
+            >>> result = suite.time_series_analysis(
+            ...     method='stl',
+            ...     period=7,
+            ...     robust=True
+            ... )
         """
         from mcp_server.time_series import TimeSeriesAnalyzer
 
@@ -619,6 +659,73 @@ class EconometricSuite:
                 aic=result.aic,
                 bic=result.bic,
             )
+
+        # Phase 2 Day 2: New time series methods
+        elif method == "arimax":
+            # ARIMAX: ARIMA with exogenous variables
+            exog = kwargs.get("exog")
+            if exog is None:
+                raise ValueError("exog parameter required for ARIMAX method")
+
+            if "order" not in kwargs:
+                kwargs["order"] = (1, 1, 1)
+
+            result = analyzer.fit_arimax(**kwargs)
+            return self._create_suite_result(
+                method_category=MethodCategory.TIME_SERIES,
+                method_used="ARIMAX",
+                result=result,
+                model=result.model,
+                aic=result.aic,
+                bic=result.bic,
+                log_likelihood=result.log_likelihood,
+            )
+
+        elif method == "varmax":
+            # VARMAX: Vector ARMA with exogenous variables
+            endog_data = kwargs.get("endog_data")
+            if endog_data is None:
+                raise ValueError("endog_data parameter required for VARMAX method")
+
+            result = analyzer.fit_varmax(**kwargs)
+            return self._create_suite_result(
+                method_category=MethodCategory.TIME_SERIES,
+                method_used="VARMAX",
+                result=result,
+                model=result.model,
+                aic=result.aic,
+                bic=result.bic,
+                log_likelihood=result.log_likelihood,
+            )
+
+        elif method == "mstl":
+            # MSTL: Multiple Seasonal-Trend decomposition
+            periods = kwargs.get("periods")
+            if periods is None:
+                raise ValueError("periods parameter required for MSTL method")
+
+            result = analyzer.mstl_decompose(**kwargs)
+            return self._create_suite_result(
+                method_category=MethodCategory.TIME_SERIES,
+                method_used="MSTL",
+                result=result,
+                model=None,
+            )
+
+        elif method == "stl":
+            # Enhanced STL decomposition
+            period = kwargs.get("period")
+            if period is None:
+                raise ValueError("period parameter required for STL method")
+
+            result = analyzer.stl_decompose(**kwargs)
+            return self._create_suite_result(
+                method_category=MethodCategory.TIME_SERIES,
+                method_used="STL",
+                result=result,
+                model=None,
+            )
+
         else:
             raise ValueError(f"Unknown time series method: {method}")
 
