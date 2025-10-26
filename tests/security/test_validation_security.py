@@ -25,14 +25,16 @@ class TestInputValidation:
 
     def test_malformed_data_handling(self):
         """Test graceful handling of malformed data"""
-        malformed_df = pd.DataFrame({
-            'player_id': ['not_int', 'also_str', 3],
-            'points': [-999, 'invalid', None],
-            'team_id': [None, None, None],
-        })
+        malformed_df = pd.DataFrame(
+            {
+                "player_id": ["not_int", "also_str", 3],
+                "points": [-999, "invalid", None],
+                "team_id": [None, None, None],
+            }
+        )
 
         pipeline = DataValidationPipeline()
-        result = pipeline.validate(malformed_df, 'player_stats')
+        result = pipeline.validate(malformed_df, "player_stats")
 
         # Should complete without crashing
         assert result is not None
@@ -41,11 +43,13 @@ class TestInputValidation:
 
     def test_extreme_values_handling(self):
         """Test handling of extreme numeric values"""
-        extreme_df = pd.DataFrame({
-            'player_id': [1, 2, 3],
-            'points': [np.inf, -np.inf, 1e308],
-            'games_played': [np.nan, np.nan, np.nan],
-        })
+        extreme_df = pd.DataFrame(
+            {
+                "player_id": [1, 2, 3],
+                "points": [np.inf, -np.inf, 1e308],
+                "games_played": [np.nan, np.nan, np.nan],
+            }
+        )
 
         cleaner = DataCleaner()
         # Should handle inf/nan gracefully
@@ -54,13 +58,15 @@ class TestInputValidation:
 
     def test_type_violations(self):
         """Test handling of data type violations"""
-        mixed_types = pd.DataFrame({
-            'player_id': [1, '2', 3.0],
-            'points': ['high', 25, None],
-        })
+        mixed_types = pd.DataFrame(
+            {
+                "player_id": [1, "2", 3.0],
+                "points": ["high", 25, None],
+            }
+        )
 
         pipeline = DataValidationPipeline()
-        result = pipeline.validate(mixed_types, 'player_stats')
+        result = pipeline.validate(mixed_types, "player_stats")
         # Should handle gracefully
         assert result is not None
 
@@ -69,16 +75,18 @@ class TestInputValidation:
         empty_df = pd.DataFrame()
 
         pipeline = DataValidationPipeline()
-        result = pipeline.validate(empty_df, 'player_stats')
+        result = pipeline.validate(empty_df, "player_stats")
         assert result is not None  # Should handle gracefully
 
     def test_none_values_handling(self):
         """Test handling of None/null values"""
-        null_df = pd.DataFrame({
-            'player_id': [None, None, None],
-            'points': [None, None, None],
-            'games_played': [None, None, None],
-        })
+        null_df = pd.DataFrame(
+            {
+                "player_id": [None, None, None],
+                "points": [None, None, None],
+                "games_played": [None, None, None],
+            }
+        )
 
         cleaner = DataCleaner()
         cleaned_df, report = cleaner.clean(null_df)
@@ -93,40 +101,42 @@ class TestResourceLimits:
     def test_large_payload_handling(self):
         """Test handling of very large datasets"""
         # Generate large dataset
-        large_df = pd.DataFrame({
-            f'col_{i}': np.random.random(10000)
-            for i in range(100)  # 100 columns × 10K rows = 1M cells
-        })
+        large_df = pd.DataFrame(
+            {
+                f"col_{i}": np.random.random(10000)
+                for i in range(100)  # 100 columns × 10K rows = 1M cells
+            }
+        )
 
         pipeline = DataValidationPipeline()
         # Should handle without memory error
-        result = pipeline.validate(large_df, 'player_stats')
+        result = pipeline.validate(large_df, "player_stats")
         assert result is not None
 
     def test_maximum_dataset_size(self):
         """Test dataset size limits"""
         # Very wide dataset
-        wide_df = pd.DataFrame({
-            f'col_{i}': [1] for i in range(500)  # 500 columns
-        })
+        wide_df = pd.DataFrame({f"col_{i}": [1] for i in range(500)})  # 500 columns
 
         pipeline = DataValidationPipeline()
-        result = pipeline.validate(wide_df, 'player_stats')
+        result = pipeline.validate(wide_df, "player_stats")
         # Should complete (may have issues)
         assert result is not None
 
     def test_memory_efficiency(self):
         """Test memory efficiency with repeated operations"""
-        df = pd.DataFrame({
-            'player_id': range(1000),
-            'points': np.random.randint(0, 50, 1000),
-            'games_played': np.random.randint(1, 82, 1000),
-        })
+        df = pd.DataFrame(
+            {
+                "player_id": range(1000),
+                "points": np.random.randint(0, 50, 1000),
+                "games_played": np.random.randint(1, 82, 1000),
+            }
+        )
 
         # Run multiple validations
         pipeline = DataValidationPipeline()
         for _ in range(10):
-            result = pipeline.validate(df.copy(), 'player_stats')
+            result = pipeline.validate(df.copy(), "player_stats")
             assert result is not None
 
         # If we get here without OOM, test passes
@@ -137,16 +147,18 @@ class TestDataPrivacy:
 
     def test_pii_not_exposed_in_logs(self):
         """Test PII is not exposed in validation results"""
-        pii_df = pd.DataFrame({
-            'player_id': [1, 2, 3],
-            'player_name': ['John Doe', 'Jane Smith', 'Bob Johnson'],
-            'ssn': ['123-45-6789', '987-65-4321', '555-55-5555'],
-            'email': ['john@example.com', 'jane@example.com', 'bob@example.com'],
-            'points': [25, 30, 22],
-        })
+        pii_df = pd.DataFrame(
+            {
+                "player_id": [1, 2, 3],
+                "player_name": ["John Doe", "Jane Smith", "Bob Johnson"],
+                "ssn": ["123-45-6789", "987-65-4321", "555-55-5555"],
+                "email": ["john@example.com", "jane@example.com", "bob@example.com"],
+                "points": [25, 30, 22],
+            }
+        )
 
         pipeline = DataValidationPipeline()
-        result = pipeline.validate(pii_df, 'player_stats')
+        result = pipeline.validate(pii_df, "player_stats")
 
         # Check that PII is not in issues/reports
         result_str = str(result.issues)
@@ -156,24 +168,28 @@ class TestDataPrivacy:
 
     def test_sensitive_data_not_in_error_messages(self):
         """Test sensitive data is masked in error messages"""
-        sensitive_df = pd.DataFrame({
-            'player_id': [1],
-            'password': ['secret123'],
-            'api_key': ['sk-12345'],
-        })
+        sensitive_df = pd.DataFrame(
+            {
+                "player_id": [1],
+                "password": ["secret123"],
+                "api_key": ["sk-12345"],
+            }
+        )
 
         # Validation should not expose sensitive data in error messages
         pipeline = DataValidationPipeline()
-        result = pipeline.validate(sensitive_df, 'player_stats')
+        result = pipeline.validate(sensitive_df, "player_stats")
         assert result is not None
 
     def test_data_profiling_privacy(self):
         """Test data profiling doesn't expose individual records"""
-        pii_df = pd.DataFrame({
-            'player_id': range(100),
-            'player_name': [f'Player {i}' for i in range(100)],
-            'salary': np.random.randint(1000000, 50000000, 100),
-        })
+        pii_df = pd.DataFrame(
+            {
+                "player_id": range(100),
+                "player_name": [f"Player {i}" for i in range(100)],
+                "salary": np.random.randint(1000000, 50000000, 100),
+            }
+        )
 
         profiler = DataProfiler()
         profile = profiler.profile(pii_df)
@@ -190,31 +206,35 @@ class TestInputSanitization:
 
     def test_sql_injection_prevention(self):
         """Test prevention of SQL injection-like patterns"""
-        malicious_df = pd.DataFrame({
-            'player_id': [1, 2, 3],
-            'player_name': [
-                "'; DROP TABLE players; --",
-                "1' OR '1'='1",
-                "normal_name"
-            ],
-            'points': [25, 30, 22],
-        })
+        malicious_df = pd.DataFrame(
+            {
+                "player_id": [1, 2, 3],
+                "player_name": [
+                    "'; DROP TABLE players; --",
+                    "1' OR '1'='1",
+                    "normal_name",
+                ],
+                "points": [25, 30, 22],
+            }
+        )
 
         # Should handle without executing any malicious code
         pipeline = DataValidationPipeline()
-        result = pipeline.validate(malicious_df, 'player_stats')
+        result = pipeline.validate(malicious_df, "player_stats")
         assert result is not None
 
     def test_special_characters_handling(self):
         """Test handling of special characters"""
-        special_chars_df = pd.DataFrame({
-            'player_id': [1, 2, 3],
-            'team_name': ['Team<script>', 'Team&Co', 'Team"Quote'],
-            'points': [25, 30, 22],
-        })
+        special_chars_df = pd.DataFrame(
+            {
+                "player_id": [1, 2, 3],
+                "team_name": ["Team<script>", "Team&Co", 'Team"Quote'],
+                "points": [25, 30, 22],
+            }
+        )
 
         pipeline = DataValidationPipeline()
-        result = pipeline.validate(special_chars_df, 'player_stats')
+        result = pipeline.validate(special_chars_df, "player_stats")
         # Should handle gracefully without XSS-like issues
         assert result is not None
 
@@ -225,26 +245,30 @@ class TestErrorHandling:
     def test_corrupted_data_handling(self):
         """Test handling of corrupted data"""
         # Create DataFrame with mixed types and missing values
-        corrupted_df = pd.DataFrame({
-            'player_id': [1, None, 'invalid', 4.5, []],
-            'points': [25, -999, None, np.inf, 'high'],
-        })
+        corrupted_df = pd.DataFrame(
+            {
+                "player_id": [1, None, "invalid", 4.5, []],
+                "points": [25, -999, None, np.inf, "high"],
+            }
+        )
 
         pipeline = DataValidationPipeline()
         # Should not crash
-        result = pipeline.validate(corrupted_df, 'player_stats')
+        result = pipeline.validate(corrupted_df, "player_stats")
         assert result is not None
 
     def test_invalid_dataset_type(self):
         """Test handling of invalid dataset type"""
-        df = pd.DataFrame({
-            'player_id': [1, 2, 3],
-            'points': [25, 30, 22],
-        })
+        df = pd.DataFrame(
+            {
+                "player_id": [1, 2, 3],
+                "points": [25, 30, 22],
+            }
+        )
 
         pipeline = DataValidationPipeline()
         # Test with invalid dataset type
-        result = pipeline.validate(df, 'invalid_dataset_type')
+        result = pipeline.validate(df, "invalid_dataset_type")
         assert result is not None
         # Should have completed or flagged the issue
         assert result.current_stage is not None
@@ -252,11 +276,13 @@ class TestErrorHandling:
     def test_exception_recovery(self):
         """Test recovery from exceptions during validation"""
         # Create data that might cause issues
-        problematic_df = pd.DataFrame({
-            'player_id': [1, 2],
-            'points': [np.nan, np.nan],
-            'games_played': [0, 0],  # Division by zero potential
-        })
+        problematic_df = pd.DataFrame(
+            {
+                "player_id": [1, 2],
+                "points": [np.nan, np.nan],
+                "games_played": [0, 0],  # Division by zero potential
+            }
+        )
 
         cleaner = DataCleaner()
         # Should handle potential division by zero gracefully
@@ -274,20 +300,24 @@ class TestIntegrityAndConsistency:
     def test_referential_integrity_violation(self):
         """Test detection of referential integrity violations"""
         # Player stats with invalid team reference
-        player_df = pd.DataFrame({
-            'player_id': [1, 2, 3],
-            'team_id': [999, 999, 999],  # Non-existent team
-            'points': [25, 30, 22],
-        })
+        player_df = pd.DataFrame(
+            {
+                "player_id": [1, 2, 3],
+                "team_id": [999, 999, 999],  # Non-existent team
+                "points": [25, 30, 22],
+            }
+        )
 
-        team_df = pd.DataFrame({
-            'team_id': [1, 2, 3],
-            'team_name': ['Lakers', 'Celtics', 'Bulls'],
-        })
+        team_df = pd.DataFrame(
+            {
+                "team_id": [1, 2, 3],
+                "team_name": ["Lakers", "Celtics", "Bulls"],
+            }
+        )
 
         checker = IntegrityChecker()
         result = checker.check_referential_integrity(
-            player_df, 'team_id', team_df, 'team_id'
+            player_df, "team_id", team_df, "team_id"
         )
 
         # Should complete without error (may or may not detect violations depending on implementation)
@@ -297,17 +327,19 @@ class TestIntegrityAndConsistency:
         """Test temporal consistency validation"""
         # Game data with valid dates (pandas will error on invalid dates during creation)
         try:
-            game_df = pd.DataFrame({
-                'game_id': [1, 2, 3],
-                'game_date': pd.to_datetime(['2024-01-01', '2024-02-01', '2024-01-03']),
-                'home_score': [100, 95, 110],
-            })
+            game_df = pd.DataFrame(
+                {
+                    "game_id": [1, 2, 3],
+                    "game_date": pd.to_datetime(
+                        ["2024-01-01", "2024-02-01", "2024-01-03"]
+                    ),
+                    "home_score": [100, 95, 110],
+                }
+            )
 
             checker = IntegrityChecker()
             result = checker.check_temporal_consistency(
-                game_df, 'game_date',
-                start_date='2024-01-01',
-                end_date='2024-12-31'
+                game_df, "game_date", start_date="2024-01-01", end_date="2024-12-31"
             )
             assert result is not None
         except Exception:
