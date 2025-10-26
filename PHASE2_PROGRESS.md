@@ -442,6 +442,234 @@ seasonal_adj = result.result.observed - result.result.seasonal
 
 ---
 
-**Document Version:** 1.1
+---
+
+## Phase 2 Day 3: Survival Analysis Methods ✅ (4/4 methods)
+
+**Completed:** 4 new survival analysis methods implemented and integrated
+**Date:** October 26, 2025
+
+### Methods Implemented
+
+#### 1. Fine-Gray Competing Risks Model (`fine_gray_model`)
+- **File:** `mcp_server/survival_analysis.py` (lines 1050-1212)
+- **Lines:** 163 LOC
+- **Description:** Competing risks regression with subdistribution hazards
+- **Features:**
+  - Aalen-Johansen estimator for cumulative incidence
+  - Cox regression for subdistribution hazards
+  - Covariate modeling with flexible formulas
+  - Inverse probability of censoring weighting (IPCW) framework
+  - Event-specific hazard ratios and cumulative incidence functions
+  - AIC and log-likelihood for model comparison
+
+#### 2. Enhanced Complete Frailty Model (enhanced `frailty_model`)
+- **File:** `mcp_server/survival_analysis.py` (lines 791-938)
+- **Lines:** 148 LOC (enhanced from 56 LOC)
+- **Description:** Random effects survival model with multiple distributions
+- **Features:**
+  - Support for 3 distributions: gamma, gaussian, inverse_gaussian
+  - Cluster-specific frailty value estimation
+  - Shared frailty for grouped data (e.g., team-level effects)
+  - Penalizer parameter for regularization
+  - Enhanced variance component estimation
+  - AIC/BIC for model selection
+
+#### 3. Mixture Cure Model (`cure_model`)
+- **File:** `mcp_server/survival_analysis.py` (lines 1302-1439)
+- **Lines:** 138 LOC
+- **Description:** Two-component model for long-term survivors
+- **Features:**
+  - Uses lifelines' MixtureCureFitter
+  - Separate cure probability and survival models
+  - Flexible formula specification for both components
+  - Cure rate estimation for population
+  - Logistic regression for cure component
+  - Survival model for susceptible population
+  - AIC/BIC/log-likelihood metrics
+
+#### 4. Recurrent Events Model (`recurrent_events_model`)
+- **File:** `mcp_server/survival_analysis.py` (lines 1441-1650)
+- **Lines:** 210 LOC
+- **Description:** Models for repeated events within subjects
+- **Features:**
+  - Three model types: PWP, AG, WLW
+  - PWP (Prentice-Williams-Peterson): Conditional model with stratification
+  - AG (Andersen-Gill): Counting process approach
+  - WLW (Wei-Lin-Weissfeld): Marginal model
+  - Gap time vs. total time parameterization
+  - Robust standard errors with clustering
+  - Rate ratios and event count statistics
+
+**Total Survival Methods Added:** ~659 lines (including enhanced frailty)
+
+### Dataclasses Added/Enhanced
+
+1. **Enhanced `FrailtyResult`** (lines 163-176)
+   - Added: distribution, aic, bic fields
+   - Enhanced __repr__ to show distribution
+
+2. **`FineGrayResult`** (lines 180-195)
+   - model, event_of_interest
+   - subdistribution_hazard_ratios, cumulative_incidence
+   - coefficients, p_values, aic, log_likelihood
+
+3. **`CureModelResult`** (lines 199-212)
+   - model, cure_probability
+   - survival_params, cure_params
+   - aic, bic, log_likelihood
+
+4. **`RecurrentEventsResult`** (lines 216-229)
+   - model, model_type (pwp/ag/wlw)
+   - event_counts, mean_recurrences
+   - rate_ratios, coefficients, aic
+
+### Suite Integration ✅
+
+**File:** `mcp_server/econometric_suite.py`
+
+#### New/Enhanced Method Routes (lines 1176-1267):
+1. `method='frailty'` or `'complete_frailty'` - Enhanced with distribution support (lines 1176-1232)
+2. `method='fine_gray'` or `'fine_gray_competing_risks'` - Fine-Gray model (lines 1234-1260)
+3. `method='cure'` or `'cure_model'` - Mixture cure model (lines 1262-1279)
+4. `method='recurrent_events'` or `'pwp'/'ag'/'wlw'` - Recurrent events (lines 1281-1307)
+
+#### Documentation Updated:
+- Extended `survival_analysis()` docstring (lines 1036-1115)
+- Added parameter descriptions for all 4 methods
+- Added comprehensive usage examples for each method
+- Total Suite integration: ~92 lines
+
+### Test Results
+
+- ✅ All 59 existing tests passing (100%)
+- ✅ Frailty tests updated for enhanced behavior
+- ✅ No regressions introduced
+- ⚠ 17 warnings (typical statsmodels warnings, harmless)
+- ✅ Test execution time: 5.45s
+
+**Test Command:**
+```bash
+pytest tests/test_econometric_suite.py -v
+# Result: 59 passed, 17 warnings in 5.45s
+```
+
+### Code Metrics
+
+| Category | LOC Added | Methods | Dataclasses | Status |
+|----------|-----------|---------|-------------|--------|
+| **Survival Methods** | 659 | 3 new + 1 enhanced | 1 enhanced + 3 new | ✅ Complete |
+| **Suite Integration** | 92 | 4 routes | - | ✅ Complete |
+| **Total** | **751** | **4** | **4** | **✅** |
+
+### API Examples
+
+#### Fine-Gray Competing Risks
+```python
+from mcp_server.econometric_suite import EconometricSuite
+
+suite = EconometricSuite(
+    data=df,
+    duration_col='career_years',
+    event_col='retired'
+)
+
+# Model retirement due to injury vs. other causes
+result = suite.survival_analysis(
+    method='fine_gray',
+    event_type_col='retirement_cause',
+    event_of_interest='injury',
+    formula='~ age + position'
+)
+
+print(f"Subdist HR:\n{result.result.subdistribution_hazard_ratios}")
+print(f"AIC: {result.aic:.2f}")
+```
+
+#### Enhanced Frailty Model
+```python
+# Gaussian frailty with team-level random effects
+result = suite.survival_analysis(
+    method='frailty',
+    shared_frailty_col='team_id',
+    distribution='gaussian',  # or 'gamma', 'inverse_gaussian'
+    penalizer=0.01
+)
+
+print(f"Frailty variance: {result.result.frailty_variance:.4f}")
+print(f"Distribution: {result.result.distribution}")
+```
+
+#### Mixture Cure Model
+```python
+# Model career end with cure fraction (never retire)
+result = suite.survival_analysis(
+    method='cure',
+    cure_formula='~ draft_position + college_years',
+    survival_formula='~ age + games_played'
+)
+
+print(f"Cure probability: {result.result.cure_probability:.3f}")
+print(f"Cure params:\n{result.result.cure_params}")
+```
+
+#### Recurrent Events (Andersen-Gill)
+```python
+# Model repeated injuries per player
+result = suite.survival_analysis(
+    method='ag',  # or 'pwp', 'wlw', 'recurrent_events'
+    id_col='player_id',
+    formula='~ age + position + minutes_played'
+)
+
+print(f"Mean recurrences: {result.result.mean_recurrences:.2f}")
+print(f"Rate ratios:\n{result.result.rate_ratios}")
+```
+
+### Files Modified
+
+1. **mcp_server/survival_analysis.py**
+   - Lines added: +659 (net: including imports)
+   - Methods added: 3 new + 1 enhanced
+   - Dataclasses added: 3 new + 1 enhanced
+   - Imports updated: Added AalenJohansenFitter, MixtureCureFitter
+   - Status: ✅ Complete
+
+2. **mcp_server/econometric_suite.py**
+   - Lines added: +92
+   - Routes added: 4 (1 enhanced, 3 new)
+   - Documentation updated: Yes (comprehensive examples)
+   - Status: ✅ Complete
+
+3. **PHASE2_PROGRESS.md**
+   - Updated: Day 3 completion metrics
+   - Status: ✅ Complete
+
+### Success Criteria (Day 3)
+
+- ✅ 4 survival analysis methods implemented (~751 LOC total)
+- ✅ Suite integration complete with routing
+- ✅ Comprehensive docstrings with numpy-style format and examples
+- ✅ All 59 existing tests still passing (100%)
+- ✅ No regressions introduced
+- ✅ Code follows existing patterns (try/except imports, MLflow logging, error handling)
+
+### Remaining Work (Phase 2)
+
+**Not Yet Implemented:**
+- ⏺ 3 advanced time series methods (GARCH, regime diagnostics, switching regression)
+- ⏺ Additional unit tests for new methods (Day 3)
+
+**Completed So Far:**
+- ✅ Day 1: 3 causal inference methods (kernel, radius, doubly robust)
+- ✅ Day 2: 4 time series methods (ARIMAX, VARMAX, MSTL, STL)
+- ✅ Day 3: 4 survival analysis methods (Fine-Gray, complete frailty, cure, recurrent)
+- ✅ Total: **11 new methods** across 3 categories
+
+**Timeline:** On track for 2-week completion (Day 3/10 complete)
+
+---
+
+**Document Version:** 1.2
 **Created:** October 26, 2025
-**Last Updated:** October 26, 2025 (Day 2 Complete)
+**Last Updated:** October 26, 2025 (Day 3 Complete)

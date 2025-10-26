@@ -1041,13 +1041,22 @@ class EconometricSuite:
                 - 'kaplan_meier' or 'km': Kaplan-Meier estimator
                 - 'parametric': Parametric survival models (Weibull, Log-Normal, etc.)
                 - 'competing_risks': Competing risks analysis
-                - 'frailty': Frailty model (random effects)
+                - 'frailty' or 'complete_frailty': Frailty model with multiple distributions
+                - 'fine_gray': Fine-Gray competing risks regression
+                - 'cure' or 'cure_model': Mixture cure model
+                - 'recurrent_events' or 'pwp'/'ag'/'wlw': Recurrent events models
             **kwargs: Method-specific parameters:
                 For KM: groups, alpha, timeline
                 For Parametric: model ('weibull', 'lognormal', 'loglogistic', 'exponential'),
                                formula, timeline
                 For Competing Risks: event_type_col (required), event_types (required), method
-                For Frailty: shared_frailty_col, distribution
+                For Frailty: shared_frailty_col, distribution ('gamma', 'gaussian',
+                             'inverse_gaussian'), penalizer
+                For Fine-Gray: event_type_col (required), event_of_interest (required),
+                              covariates, formula
+                For Cure Model: cure_formula, survival_formula, timeline
+                For Recurrent Events: id_col (required), event_count_col, model_type
+                                     ('pwp', 'ag', 'wlw'), gap_time, formula, robust
 
         Returns:
             SuiteResult with survival analysis results
@@ -1072,6 +1081,36 @@ class EconometricSuite:
             ...     event_col='retired',
             ...     method='parametric',
             ...     model='weibull'
+            ... )
+            >>> # Frailty model with gaussian distribution
+            >>> result = suite.survival_analysis(
+            ...     duration_col='career_years',
+            ...     event_col='retired',
+            ...     method='frailty',
+            ...     shared_frailty_col='team_id',
+            ...     distribution='gaussian'
+            ... )
+            >>> # Fine-Gray competing risks
+            >>> result = suite.survival_analysis(
+            ...     duration_col='career_years',
+            ...     event_col='retired',
+            ...     method='fine_gray',
+            ...     event_type_col='retirement_cause',
+            ...     event_of_interest='injury'
+            ... )
+            >>> # Mixture cure model
+            >>> result = suite.survival_analysis(
+            ...     duration_col='career_years',
+            ...     event_col='retired',
+            ...     method='cure',
+            ...     cure_formula='~ age + position'
+            ... )
+            >>> # Recurrent events (Andersen-Gill)
+            >>> result = suite.survival_analysis(
+            ...     duration_col='days_between_injuries',
+            ...     event_col='injury_occurred',
+            ...     method='ag',
+            ...     id_col='player_id'
             ... )
         """
         from mcp_server.survival_analysis import SurvivalAnalyzer
@@ -1173,11 +1212,12 @@ class EconometricSuite:
                 model=None,
             )
 
-        elif method == "frailty":
+        elif method == "frailty" or method == "complete_frailty":
             # Frailty model (random effects survival)
             result = analyzer.frailty_model(
                 shared_frailty_col=kwargs.get("shared_frailty_col"),
                 distribution=kwargs.get("distribution", "gamma"),
+                penalizer=kwargs.get("penalizer", 0.0),
             )
             return self._create_suite_result(
                 method_category=MethodCategory.SURVIVAL_ANALYSIS,
@@ -1189,6 +1229,80 @@ class EconometricSuite:
                 log_likelihood=(
                     result.log_likelihood if hasattr(result, "log_likelihood") else None
                 ),
+            )
+
+        elif method == "fine_gray" or method == "fine_gray_competing_risks":
+            # Fine-Gray competing risks model
+            event_type_col = kwargs.get("event_type_col")
+            event_of_interest = kwargs.get("event_of_interest")
+
+            if event_type_col is None or event_of_interest is None:
+                raise ValueError(
+                    "event_type_col and event_of_interest required for Fine-Gray model"
+                )
+
+            result = analyzer.fine_gray_model(
+                event_type_col=event_type_col,
+                event_of_interest=event_of_interest,
+                covariates=kwargs.get("covariates"),
+                formula=kwargs.get("formula"),
+            )
+            return self._create_suite_result(
+                method_category=MethodCategory.SURVIVAL_ANALYSIS,
+                method_used="Fine-Gray Competing Risks",
+                result=result,
+                model=None,
+                aic=result.aic if hasattr(result, "aic") else None,
+                log_likelihood=(
+                    result.log_likelihood if hasattr(result, "log_likelihood") else None
+                ),
+            )
+
+        elif method == "cure" or method == "cure_model":
+            # Mixture cure model
+            result = analyzer.cure_model(
+                cure_formula=kwargs.get("cure_formula"),
+                survival_formula=kwargs.get("survival_formula"),
+                timeline=kwargs.get("timeline"),
+            )
+            return self._create_suite_result(
+                method_category=MethodCategory.SURVIVAL_ANALYSIS,
+                method_used="Mixture Cure Model",
+                result=result,
+                model=None,
+                aic=result.aic if hasattr(result, "aic") else None,
+                bic=result.bic if hasattr(result, "bic") else None,
+                log_likelihood=(
+                    result.log_likelihood if hasattr(result, "log_likelihood") else None
+                ),
+            )
+
+        elif method == "recurrent_events" or method in ["pwp", "ag", "wlw"]:
+            # Recurrent events model
+            id_col = kwargs.get("id_col")
+            if id_col is None:
+                raise ValueError("id_col required for recurrent events model")
+
+            # Determine model_type from method name
+            if method in ["pwp", "ag", "wlw"]:
+                model_type = method
+            else:
+                model_type = kwargs.get("model_type", "ag")
+
+            result = analyzer.recurrent_events_model(
+                id_col=id_col,
+                event_count_col=kwargs.get("event_count_col"),
+                model_type=model_type,
+                gap_time=kwargs.get("gap_time", False),
+                formula=kwargs.get("formula"),
+                robust=kwargs.get("robust", True),
+            )
+            return self._create_suite_result(
+                method_category=MethodCategory.SURVIVAL_ANALYSIS,
+                method_used=f"Recurrent Events ({result.model_type.upper()})",
+                result=result,
+                model=None,
+                aic=result.aic if hasattr(result, "aic") else None,
             )
 
         else:
