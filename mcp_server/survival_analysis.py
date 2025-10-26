@@ -50,14 +50,18 @@ try:
         LogNormalFitter,
         LogLogisticFitter,
         ExponentialFitter,
-        CoxTimeVaryingFitter
+        CoxTimeVaryingFitter,
+        WeibullAFTFitter,
+        LogNormalAFTFitter,
+        LogLogisticAFTFitter,
     )
     from lifelines.statistics import (
         logrank_test,
         multivariate_logrank_test,
-        pairwise_logrank_test
+        pairwise_logrank_test,
     )
     from lifelines.utils import concordance_index
+
     LIFELINES_AVAILABLE = True
 except ImportError:
     LIFELINES_AVAILABLE = False
@@ -68,6 +72,7 @@ except ImportError:
 try:
     from sksurv.linear_model import CoxPHSurvivalAnalysis, CoxnetSurvivalAnalysis
     from sksurv.ensemble import RandomSurvivalForest
+
     SKSURV_AVAILABLE = True
 except ImportError:
     SKSURV_AVAILABLE = False
@@ -77,6 +82,7 @@ except ImportError:
 try:
     import mlflow
     from mcp_server.mlflow_integration import MLflowExperimentTracker
+
     MLFLOW_AVAILABLE = True
 except ImportError:
     MLFLOW_AVAILABLE = False
@@ -88,6 +94,7 @@ logger = logging.getLogger(__name__)
 
 class SurvivalModel(Enum):
     """Type of survival model."""
+
     COX_PH = "cox_ph"
     COX_TIME_VARYING = "cox_tv"
     WEIBULL = "weibull"
@@ -100,6 +107,7 @@ class SurvivalModel(Enum):
 @dataclass
 class SurvivalResult:
     """Results from survival analysis."""
+
     model_type: str
     coefficients: Optional[pd.Series] = None
     hazard_ratios: Optional[pd.Series] = None
@@ -113,14 +121,21 @@ class SurvivalResult:
     survival_function: Optional[pd.DataFrame] = None
 
     def __repr__(self) -> str:
-        c_index = f"C-index={self.concordance_index:.3f}" if self.concordance_index else ""
-        median = f"median={self.median_survival_time:.2f}" if self.median_survival_time else ""
+        c_index = (
+            f"C-index={self.concordance_index:.3f}" if self.concordance_index else ""
+        )
+        median = (
+            f"median={self.median_survival_time:.2f}"
+            if self.median_survival_time
+            else ""
+        )
         return f"SurvivalResult(model={self.model_type}, {c_index}, {median})"
 
 
 @dataclass
 class KaplanMeierResult:
     """Results from Kaplan-Meier estimation."""
+
     survival_function: pd.DataFrame
     confidence_interval: pd.DataFrame
     median_survival_time: float
@@ -134,6 +149,7 @@ class KaplanMeierResult:
 @dataclass
 class CompetingRisksResult:
     """Results from competing risks analysis."""
+
     cumulative_incidence: Dict[str, pd.DataFrame]
     subdistribution_hazards: Optional[Dict[str, pd.Series]] = None
     cause_specific_hazards: Optional[Dict[str, pd.Series]] = None
@@ -146,6 +162,7 @@ class CompetingRisksResult:
 @dataclass
 class FrailtyResult:
     """Results from frailty model."""
+
     coefficients: pd.Series
     frailty_variance: float
     frailty_values: Optional[np.ndarray] = None
@@ -171,7 +188,7 @@ class SurvivalAnalyzer:
         event_col: str,
         covariates: Optional[List[str]] = None,
         entity_col: Optional[str] = None,
-        mlflow_experiment: Optional[str] = None
+        mlflow_experiment: Optional[str] = None,
     ):
         """
         Initialize survival analyzer.
@@ -238,7 +255,7 @@ class SurvivalAnalyzer:
         formula: Optional[str] = None,
         robust: bool = True,
         penalizer: float = 0.0,
-        strata: Optional[List[str]] = None
+        strata: Optional[List[str]] = None,
     ) -> SurvivalResult:
         """
         Fit Cox Proportional Hazards model.
@@ -274,7 +291,7 @@ class SurvivalAnalyzer:
 
         # Prepare data
         if formula is None:
-            covariates_str = ' + '.join(self.covariates)
+            covariates_str = " + ".join(self.covariates)
             formula = f"~ {covariates_str}" if covariates_str else None
 
         # Fit model
@@ -285,7 +302,7 @@ class SurvivalAnalyzer:
                 event_col=self.event_col,
                 formula=formula,
                 robust=robust,
-                strata=strata
+                strata=strata,
             )
         else:
             cph.fit(
@@ -293,19 +310,20 @@ class SurvivalAnalyzer:
                 duration_col=self.duration_col,
                 event_col=self.event_col,
                 formula=formula,
-                robust=robust
+                robust=robust,
             )
 
         # Extract results
         coefficients = cph.params_
         hazard_ratios = np.exp(coefficients)
         confidence_intervals = cph.confidence_intervals_
-        p_values = cph.summary['p']
+        p_values = cph.summary["p"]
 
         # Model fit metrics
         concordance_index = cph.concordance_index_
         log_likelihood = cph.log_likelihood_
-        aic = cph.AIC_
+        # Cox PH is semi-parametric, use AIC_partial_ instead of AIC_
+        aic = cph.AIC_partial_
         bic = -2 * log_likelihood + len(coefficients) * np.log(len(self.data))
 
         # Median survival time (if possible)
@@ -315,7 +333,7 @@ class SurvivalAnalyzer:
             median_survival = None
 
         result = SurvivalResult(
-            model_type='cox_ph',
+            model_type="cox_ph",
             coefficients=coefficients,
             hazard_ratios=hazard_ratios,
             confidence_intervals=confidence_intervals,
@@ -324,26 +342,24 @@ class SurvivalAnalyzer:
             log_likelihood=log_likelihood,
             aic=aic,
             bic=bic,
-            median_survival_time=median_survival
+            median_survival_time=median_survival,
         )
 
         # MLflow logging
         if self.tracker:
-            self.tracker.log_metrics({
-                'cox_concordance_index': concordance_index,
-                'cox_aic': aic,
-                'cox_log_likelihood': log_likelihood
-            })
+            self.tracker.log_metrics(
+                {
+                    "cox_concordance_index": concordance_index,
+                    "cox_aic": aic,
+                    "cox_log_likelihood": log_likelihood,
+                }
+            )
 
         logger.info(f"Cox PH model fitted: {result}")
         return result
 
     def cox_time_varying(
-        self,
-        id_col: str,
-        start_col: str,
-        stop_col: str,
-        formula: Optional[str] = None
+        self, id_col: str, start_col: str, stop_col: str, formula: Optional[str] = None
     ) -> SurvivalResult:
         """
         Fit Cox model with time-varying covariates.
@@ -381,7 +397,7 @@ class SurvivalAnalyzer:
 
         # Prepare data
         if formula is None:
-            covariates_str = ' + '.join(self.covariates)
+            covariates_str = " + ".join(self.covariates)
             formula = f"~ {covariates_str}" if covariates_str else None
 
         # Fit model
@@ -391,19 +407,19 @@ class SurvivalAnalyzer:
             event_col=self.event_col,
             start_col=start_col,
             stop_col=stop_col,
-            formula=formula
+            formula=formula,
         )
 
         # Extract results
         result = SurvivalResult(
-            model_type='cox_time_varying',
+            model_type="cox_time_varying",
             coefficients=ctv.params_,
             hazard_ratios=np.exp(ctv.params_),
             confidence_intervals=ctv.confidence_intervals_,
-            p_values=ctv.summary['p'],
+            p_values=ctv.summary["p"],
             concordance_index=ctv.concordance_index_,
             log_likelihood=ctv.log_likelihood_,
-            aic=ctv.AIC_
+            aic=ctv.AIC_,
         )
 
         logger.info(f"Cox time-varying model fitted: {result}")
@@ -411,9 +427,9 @@ class SurvivalAnalyzer:
 
     def parametric_survival(
         self,
-        model: Union[str, SurvivalModel] = 'weibull',
+        model: Union[str, SurvivalModel] = "weibull",
         formula: Optional[str] = None,
-        timeline: Optional[np.ndarray] = None
+        timeline: Optional[np.ndarray] = None,
     ) -> SurvivalResult:
         """
         Fit parametric survival model.
@@ -443,13 +459,27 @@ class SurvivalAnalyzer:
             formula="~ draft_position + height + weight"
         )
         """
-        # Select model
-        model_map = {
-            'weibull': WeibullFitter,
-            'lognormal': LogNormalFitter,
-            'loglogistic': LogLogisticFitter,
-            'exponential': ExponentialFitter
-        }
+        # Select model - use AFT fitters when covariates/formulas are present
+        has_covariates = formula is not None or (
+            self.covariates and len(self.covariates) > 0
+        )
+
+        if has_covariates:
+            # AFT (Accelerated Failure Time) fitters support covariates
+            model_map = {
+                "weibull": WeibullAFTFitter,
+                "lognormal": LogNormalAFTFitter,
+                "loglogistic": LogLogisticAFTFitter,
+                "exponential": WeibullAFTFitter,  # Use Weibull AFT for exponential
+            }
+        else:
+            # Univariate fitters for no covariates
+            model_map = {
+                "weibull": WeibullFitter,
+                "lognormal": LogNormalFitter,
+                "loglogistic": LogLogisticFitter,
+                "exponential": ExponentialFitter,
+            }
 
         if isinstance(model, SurvivalModel):
             model = model.value
@@ -461,47 +491,54 @@ class SurvivalAnalyzer:
 
         # Prepare data
         if formula is None:
-            covariates_str = ' + '.join(self.covariates) if self.covariates else None
+            covariates_str = " + ".join(self.covariates) if self.covariates else None
             formula = f"~ {covariates_str}" if covariates_str else None
 
         # Fit model
         if formula:
+            # Parametric AFT models use duration_col/event_col even with formula
             fitter.fit(
                 self.data,
                 duration_col=self.duration_col,
                 event_col=self.event_col,
-                formula=formula
+                formula=formula,
             )
         else:
-            fitter.fit(
-                self.data[self.duration_col],
-                self.data[self.event_col]
-            )
+            fitter.fit(self.data[self.duration_col], self.data[self.event_col])
 
         # Extract results
-        if hasattr(fitter, 'params_'):
+        if hasattr(fitter, "params_"):
             coefficients = fitter.params_
-            p_values = fitter.summary['p'] if hasattr(fitter, 'summary') else None
+            p_values = fitter.summary["p"] if hasattr(fitter, "summary") else None
         else:
             coefficients = None
             p_values = None
 
-        # Survival function
+        # Survival function - handle both univariate and AFT fitters
         if timeline is None:
             timeline = np.linspace(0, self.data[self.duration_col].max(), 100)
 
-        survival_function = fitter.survival_function_at_times(timeline)
+        if has_covariates:
+            # AFT fitters use predict_survival_function
+            survival_function = fitter.predict_survival_function(self.data).mean(axis=1)
+        else:
+            # Univariate fitters use survival_function_at_times
+            survival_function = fitter.survival_function_at_times(timeline)
 
         # Median survival
-        median_survival = fitter.median_survival_time_
+        median_survival = (
+            fitter.median_survival_time_
+            if hasattr(fitter, "median_survival_time_")
+            else None
+        )
 
         result = SurvivalResult(
-            model_type=f'parametric_{model}',
+            model_type=f"parametric_{model}",
             coefficients=coefficients,
             p_values=p_values,
             median_survival_time=median_survival,
             survival_function=survival_function,
-            aic=fitter.AIC_ if hasattr(fitter, 'AIC_') else None
+            aic=fitter.AIC_ if hasattr(fitter, "AIC_") else None,
         )
 
         logger.info(f"Parametric {model} model fitted: {result}")
@@ -511,7 +548,7 @@ class SurvivalAnalyzer:
         self,
         groups: Optional[str] = None,
         alpha: float = 0.05,
-        timeline: Optional[np.ndarray] = None
+        timeline: Optional[np.ndarray] = None,
     ) -> Union[KaplanMeierResult, Dict[str, KaplanMeierResult]]:
         """
         Estimate survival function using Kaplan-Meier estimator.
@@ -547,7 +584,7 @@ class SurvivalAnalyzer:
             kmf.fit(
                 self.data[self.duration_col],
                 self.data[self.event_col],
-                timeline=timeline
+                timeline=timeline,
             )
 
             result = KaplanMeierResult(
@@ -555,7 +592,7 @@ class SurvivalAnalyzer:
                 confidence_interval=kmf.confidence_interval_survival_function_,
                 median_survival_time=kmf.median_survival_time_,
                 event_table=kmf.event_table,
-                timeline=kmf.timeline
+                timeline=kmf.timeline,
             )
 
             logger.info(f"Kaplan-Meier estimation complete: {result}")
@@ -574,7 +611,7 @@ class SurvivalAnalyzer:
                     group_data[self.duration_col],
                     group_data[self.event_col],
                     timeline=timeline,
-                    label=str(group)
+                    label=str(group),
                 )
 
                 results[str(group)] = KaplanMeierResult(
@@ -582,16 +619,16 @@ class SurvivalAnalyzer:
                     confidence_interval=kmf.confidence_interval_survival_function_,
                     median_survival_time=kmf.median_survival_time_,
                     event_table=kmf.event_table,
-                    timeline=kmf.timeline
+                    timeline=kmf.timeline,
                 )
 
-            logger.info(f"Grouped Kaplan-Meier estimation complete: {len(results)} groups")
+            logger.info(
+                f"Grouped Kaplan-Meier estimation complete: {len(results)} groups"
+            )
             return results
 
     def logrank_test(
-        self,
-        group1_idx: np.ndarray,
-        group2_idx: np.ndarray
+        self, group1_idx: np.ndarray, group2_idx: np.ndarray
     ) -> Dict[str, Any]:
         """
         Perform log-rank test to compare survival curves.
@@ -623,23 +660,20 @@ class SurvivalAnalyzer:
         durations_2 = self.data.loc[group2_idx, self.duration_col]
         events_2 = self.data.loc[group2_idx, self.event_col]
 
-        result = logrank_test(
-            durations_1, durations_2,
-            events_1, events_2
-        )
+        result = logrank_test(durations_1, durations_2, events_1, events_2)
 
         return {
-            'statistic': result.test_statistic,
-            'p_value': result.p_value,
-            'df': 1,
-            'null_hypothesis': 'Survival functions are equal'
+            "statistic": result.test_statistic,
+            "p_value": result.p_value,
+            "df": 1,
+            "null_hypothesis": "Survival functions are equal",
         }
 
     def competing_risks(
         self,
         event_type_col: str,
         event_types: List[Any],
-        method: str = 'cumulative_incidence'
+        method: str = "cumulative_incidence",
     ) -> CompetingRisksResult:
         """
         Analyze competing risks.
@@ -682,23 +716,19 @@ class SurvivalAnalyzer:
             kmf.fit(
                 self.data[self.duration_col],
                 event_this_cause,
-                label=f'Event {event_type}'
+                label=f"Event {event_type}",
             )
 
             # Cumulative incidence = 1 - S(t)
             cumulative_incidence[str(event_type)] = 1 - kmf.survival_function_
 
-        result = CompetingRisksResult(
-            cumulative_incidence=cumulative_incidence
-        )
+        result = CompetingRisksResult(cumulative_incidence=cumulative_incidence)
 
         logger.info(f"Competing risks analysis complete: {result}")
         return result
 
     def frailty_model(
-        self,
-        shared_frailty_col: Optional[str] = None,
-        distribution: str = 'gamma'
+        self, shared_frailty_col: Optional[str] = None, distribution: str = "gamma"
     ) -> FrailtyResult:
         """
         Fit frailty model (random effects survival model).
@@ -737,15 +767,11 @@ class SurvivalAnalyzer:
                 self.data,
                 duration_col=self.duration_col,
                 event_col=self.event_col,
-                formula=f"~ {' + '.join(self.covariates)}"
+                formula=f"~ {' + '.join(self.covariates)}",
             )
         else:
             # Just frailty, no covariates
-            cph.fit(
-                self.data,
-                duration_col=self.duration_col,
-                event_col=self.event_col
-            )
+            cph.fit(self.data, duration_col=self.duration_col, event_col=self.event_col)
 
         # Estimate frailty variance (simplified)
         # In practice, would use EM algorithm or Bayesian methods
@@ -756,7 +782,7 @@ class SurvivalAnalyzer:
             coefficients=cph.params_,
             frailty_variance=frailty_variance,
             log_likelihood=cph.log_likelihood_,
-            concordance_index=cph.concordance_index_
+            concordance_index=cph.concordance_index_,
         )
 
         logger.info(f"Frailty model fitted: {result}")
@@ -766,7 +792,7 @@ class SurvivalAnalyzer:
         self,
         model_result: SurvivalResult,
         new_data: pd.DataFrame,
-        times: Optional[np.ndarray] = None
+        times: Optional[np.ndarray] = None,
     ) -> pd.DataFrame:
         """
         Predict survival probabilities for new data.
@@ -804,15 +830,12 @@ class SurvivalAnalyzer:
         predictions = pd.DataFrame(
             np.random.rand(len(new_data), len(times)),
             columns=times,
-            index=new_data.index
+            index=new_data.index,
         )
 
         return predictions
 
-    def proportional_hazards_test(
-        self,
-        model_result: SurvivalResult
-    ) -> Dict[str, Any]:
+    def proportional_hazards_test(self, model_result: SurvivalResult) -> Dict[str, Any]:
         """
         Test proportional hazards assumption.
 
@@ -848,9 +871,9 @@ class SurvivalAnalyzer:
                 p_value = 2 * (1 - stats.norm.cdf(np.abs(test_stat)))
 
                 results[covariate] = {
-                    'statistic': test_stat,
-                    'p_value': p_value,
-                    'null_hypothesis': 'Proportional hazards holds'
+                    "statistic": test_stat,
+                    "p_value": p_value,
+                    "null_hypothesis": "Proportional hazards holds",
                 }
 
         return results
@@ -859,7 +882,7 @@ class SurvivalAnalyzer:
         self,
         model_result: SurvivalResult,
         current_time: float,
-        covariate_values: Optional[Dict[str, Any]] = None
+        covariate_values: Optional[Dict[str, Any]] = None,
     ) -> float:
         """
         Compute expected remaining lifetime given survival to current_time.
@@ -912,10 +935,7 @@ class SurvivalAnalyzer:
             else:
                 return np.nan
 
-    def model_comparison(
-        self,
-        results: List[SurvivalResult]
-    ) -> pd.DataFrame:
+    def model_comparison(self, results: List[SurvivalResult]) -> pd.DataFrame:
         """
         Compare multiple survival models.
 
@@ -942,28 +962,33 @@ class SurvivalAnalyzer:
         comparison_data = []
 
         for i, result in enumerate(results):
-            comparison_data.append({
-                'model': result.model_type,
-                'aic': result.aic,
-                'bic': result.bic,
-                'concordance_index': result.concordance_index,
-                'log_likelihood': result.log_likelihood
-            })
+            comparison_data.append(
+                {
+                    "model": result.model_type,
+                    "aic": result.aic,
+                    "bic": result.bic,
+                    "concordance_index": result.concordance_index,
+                    "log_likelihood": result.log_likelihood,
+                }
+            )
 
         comparison_df = pd.DataFrame(comparison_data)
 
         # Rank by AIC (lower is better)
-        if 'aic' in comparison_df.columns:
-            comparison_df['aic_rank'] = comparison_df['aic'].rank()
+        if "aic" in comparison_df.columns:
+            comparison_df["aic_rank"] = comparison_df["aic"].rank()
 
         # Rank by C-index (higher is better)
-        if 'concordance_index' in comparison_df.columns:
-            comparison_df['cindex_rank'] = comparison_df['concordance_index'].rank(ascending=False)
+        if "concordance_index" in comparison_df.columns:
+            comparison_df["cindex_rank"] = comparison_df["concordance_index"].rank(
+                ascending=False
+            )
 
         return comparison_df
 
 
 # --- Utility functions ---
+
 
 def hazard_ratio_interpretation(hr: float) -> str:
     """
@@ -993,7 +1018,7 @@ def median_survival_comparison(
     median1: float,
     median2: float,
     group1_name: str = "Group 1",
-    group2_name: str = "Group 2"
+    group2_name: str = "Group 2",
 ) -> str:
     """
     Compare median survival times between groups.

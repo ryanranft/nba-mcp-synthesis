@@ -46,6 +46,7 @@ from sklearn.preprocessing import StandardScaler
 # Specialized causal inference libraries
 try:
     from linearmodels.iv import IV2SLS
+
     LINEARMODELS_AVAILABLE = True
 except ImportError:
     LINEARMODELS_AVAILABLE = False
@@ -55,6 +56,7 @@ except ImportError:
 try:
     import dowhy
     from dowhy import CausalModel
+
     DOWHY_AVAILABLE = True
 except ImportError:
     DOWHY_AVAILABLE = False
@@ -64,6 +66,7 @@ except ImportError:
 # NetworkX for DAG visualization
 try:
     import networkx as nx
+
     NETWORKX_AVAILABLE = True
 except ImportError:
     NETWORKX_AVAILABLE = False
@@ -73,6 +76,7 @@ except ImportError:
 try:
     import mlflow
     from mcp_server.mlflow_integration import MLflowExperimentTracker
+
     MLFLOW_AVAILABLE = True
 except ImportError:
     MLFLOW_AVAILABLE = False
@@ -84,6 +88,7 @@ logger = logging.getLogger(__name__)
 
 class TreatmentType(Enum):
     """Type of treatment in causal analysis."""
+
     BINARY = "binary"
     CONTINUOUS = "continuous"
     CATEGORICAL = "categorical"
@@ -92,6 +97,7 @@ class TreatmentType(Enum):
 @dataclass
 class IVResult:
     """Results from instrumental variables analysis."""
+
     treatment_effect: float
     std_error: float
     t_statistic: float
@@ -116,6 +122,7 @@ class IVResult:
 @dataclass
 class RDDResult:
     """Results from regression discontinuity design."""
+
     treatment_effect: float
     std_error: float
     t_statistic: float
@@ -140,6 +147,7 @@ class RDDResult:
 @dataclass
 class PSMResult:
     """Results from propensity score matching."""
+
     ate: float  # Average Treatment Effect
     att: float  # Average Treatment Effect on Treated
     atc: float  # Average Treatment Effect on Controls
@@ -161,6 +169,7 @@ class PSMResult:
 @dataclass
 class SyntheticControlResult:
     """Results from synthetic control method."""
+
     treatment_effect: np.ndarray
     average_effect: float
     std_error: float
@@ -182,6 +191,7 @@ class SyntheticControlResult:
 @dataclass
 class SensitivityResult:
     """Results from sensitivity analysis."""
+
     method: str
     original_effect: float
     sensitivity_bounds: Dict[str, Tuple[float, float]]
@@ -209,7 +219,7 @@ class CausalInferenceAnalyzer:
         covariates: Optional[List[str]] = None,
         entity_col: Optional[str] = None,
         time_col: Optional[str] = None,
-        mlflow_experiment: Optional[str] = None
+        mlflow_experiment: Optional[str] = None,
     ):
         """
         Initialize causal inference analyzer.
@@ -271,7 +281,7 @@ class CausalInferenceAnalyzer:
         instruments: Union[str, List[str]],
         formula: Optional[str] = None,
         robust: bool = True,
-        entity_effects: bool = False
+        entity_effects: bool = False,
     ) -> IVResult:
         """
         Estimate treatment effect using instrumental variables (2SLS).
@@ -306,13 +316,15 @@ class CausalInferenceAnalyzer:
         )
         """
         if not LINEARMODELS_AVAILABLE:
-            raise ImportError("linearmodels required for IV estimation. Install with: pip install linearmodels")
+            raise ImportError(
+                "linearmodels required for IV estimation. Install with: pip install linearmodels"
+            )
 
         instruments = [instruments] if isinstance(instruments, str) else instruments
 
         # Prepare data
         if formula is None:
-            covariates_str = ' + '.join(self.covariates) if self.covariates else '1'
+            covariates_str = " + ".join(self.covariates) if self.covariates else "1"
             formula = f"{self.outcome_col} ~ {covariates_str}"
 
         # Build IV model
@@ -320,23 +332,18 @@ class CausalInferenceAnalyzer:
             if entity_effects and self.entity_col:
                 # Panel IV with entity effects
                 from linearmodels.panel import PanelIV
+
                 data_panel = self.data.set_index([self.entity_col, self.time_col])
 
-                model = PanelIV.from_formula(
-                    formula,
-                    data=data_panel,
-                    weights=None
-                )
+                model = PanelIV.from_formula(formula, data=data_panel, weights=None)
             else:
                 # Cross-sectional IV
                 model = IV2SLS.from_formula(
-                    formula,
-                    data=self.data,
-                    instruments=' + '.join(instruments)
+                    formula, data=self.data, instruments=" + ".join(instruments)
                 )
 
             # Estimate
-            fit = model.fit(cov_type='robust' if robust else 'unadjusted')
+            fit = model.fit(cov_type="robust" if robust else "unadjusted")
 
             # Extract treatment effect
             treatment_effect = fit.params[self.treatment_col]
@@ -347,35 +354,43 @@ class CausalInferenceAnalyzer:
             # Confidence interval
             ci = (
                 treatment_effect - 1.96 * std_error,
-                treatment_effect + 1.96 * std_error
+                treatment_effect + 1.96 * std_error,
             )
 
             # First stage diagnostics
-            first_stage_f = fit.first_stage.diagnostics['f.stat'].values[0]
+            first_stage_f = fit.first_stage.diagnostics["f.stat"].values[0]
 
             # Weak instrument test (Stock-Yogo critical values)
             weak_instrument_test = {
-                'f_statistic': first_stage_f,
-                'critical_value_10pct': 16.38,  # For 1 instrument, 1 endogenous
-                'is_weak': first_stage_f < 10,
-                'warning': 'Weak instruments detected' if first_stage_f < 10 else 'Instruments appear strong'
+                "f_statistic": first_stage_f,
+                "critical_value_10pct": 16.38,  # For 1 instrument, 1 endogenous
+                "is_weak": first_stage_f < 10,
+                "warning": (
+                    "Weak instruments detected"
+                    if first_stage_f < 10
+                    else "Instruments appear strong"
+                ),
             }
 
             # Overidentification test (Sargan-Hansen J)
             overid_test = None
             if len(instruments) > 1:
                 overid_test = {
-                    'statistic': fit.sargan.stat,
-                    'p_value': fit.sargan.pval,
-                    'df': fit.sargan.df,
-                    'null_hypothesis': 'Instruments are valid (orthogonality condition)'
+                    "statistic": fit.sargan.stat,
+                    "p_value": fit.sargan.pval,
+                    "df": fit.sargan.df,
+                    "null_hypothesis": "Instruments are valid (orthogonality condition)",
                 }
 
             # Endogeneity test (Durbin-Wu-Hausman)
             endog_test = {
-                'statistic': fit.wu_hausman.stat if hasattr(fit, 'wu_hausman') else np.nan,
-                'p_value': fit.wu_hausman.pval if hasattr(fit, 'wu_hausman') else np.nan,
-                'null_hypothesis': 'Treatment is exogenous (IV not needed)'
+                "statistic": (
+                    fit.wu_hausman.stat if hasattr(fit, "wu_hausman") else np.nan
+                ),
+                "p_value": (
+                    fit.wu_hausman.pval if hasattr(fit, "wu_hausman") else np.nan
+                ),
+                "null_hypothesis": "Treatment is exogenous (IV not needed)",
             }
 
             result = IVResult(
@@ -389,16 +404,18 @@ class CausalInferenceAnalyzer:
                 overidentification_test=overid_test,
                 endogeneity_test=endog_test,
                 coefficients=fit.params,
-                residuals=fit.resids.values
+                residuals=fit.resids.values,
             )
 
             # MLflow logging
             if self.tracker:
-                self.tracker.log_metrics({
-                    'iv_treatment_effect': treatment_effect,
-                    'iv_p_value': p_value,
-                    'iv_first_stage_f': first_stage_f
-                })
+                self.tracker.log_metrics(
+                    {
+                        "iv_treatment_effect": treatment_effect,
+                        "iv_p_value": p_value,
+                        "iv_first_stage_f": first_stage_f,
+                    }
+                )
 
             logger.info(f"IV estimation complete: {result}")
             return result
@@ -412,10 +429,10 @@ class CausalInferenceAnalyzer:
         running_var: str,
         cutoff: float,
         bandwidth: Optional[float] = None,
-        kernel: str = 'triangular',
+        kernel: str = "triangular",
         polynomial_order: int = 1,
         fuzzy: bool = False,
-        optimal_bandwidth_method: str = 'ik'
+        optimal_bandwidth_method: str = "ik",
     ) -> RDDResult:
         """
         Estimate treatment effect using Regression Discontinuity Design.
@@ -481,14 +498,15 @@ class CausalInferenceAnalyzer:
         above = (X_bw >= 0).astype(float)
         features = []
         for p in range(1, polynomial_order + 1):
-            features.append(X_bw ** p)
-            features.append(above * (X_bw ** p))
+            features.append(X_bw**p)
+            features.append(above * (X_bw**p))
 
         features.append(above)  # Treatment indicator
         X_poly = np.column_stack(features)
 
         # Weighted least squares
         from sklearn.linear_model import LinearRegression
+
         model = LinearRegression()
 
         # Apply weights
@@ -513,12 +531,9 @@ class CausalInferenceAnalyzer:
         std_error = np.sqrt(var_robust[-1, -1])
 
         t_stat = treatment_effect / std_error
-        p_value = 2 * (1 - stats.t.cdf(np.abs(t_stat), df=n-k))
+        p_value = 2 * (1 - stats.t.cdf(np.abs(t_stat), df=n - k))
 
-        ci = (
-            treatment_effect - 1.96 * std_error,
-            treatment_effect + 1.96 * std_error
-        )
+        ci = (treatment_effect - 1.96 * std_error, treatment_effect + 1.96 * std_error)
 
         # Count observations
         n_left = np.sum((X_bw < 0))
@@ -538,29 +553,31 @@ class CausalInferenceAnalyzer:
             n_right=n_right,
             optimal_bandwidth=bandwidth,
             continuity_test=continuity_test,
-            density_test=None
+            density_test=None,
         )
 
         # MLflow logging
         if self.tracker:
-            self.tracker.log_metrics({
-                'rdd_treatment_effect': treatment_effect,
-                'rdd_p_value': p_value,
-                'rdd_bandwidth': bandwidth,
-                'rdd_n_left': n_left,
-                'rdd_n_right': n_right
-            })
+            self.tracker.log_metrics(
+                {
+                    "rdd_treatment_effect": treatment_effect,
+                    "rdd_p_value": p_value,
+                    "rdd_bandwidth": bandwidth,
+                    "rdd_n_left": n_left,
+                    "rdd_n_right": n_right,
+                }
+            )
 
         logger.info(f"RDD estimation complete: {result}")
         return result
 
     def propensity_score_matching(
         self,
-        method: str = 'nearest',
+        method: str = "nearest",
         n_neighbors: int = 1,
         caliper: Optional[float] = None,
         replace: bool = False,
-        estimate_std_error: bool = True
+        estimate_std_error: bool = True,
     ) -> PSMResult:
         """
         Estimate treatment effect using Propensity Score Matching.
@@ -612,9 +629,8 @@ class CausalInferenceAnalyzer:
         ps_treated = propensity_scores[treatment == 1]
         ps_control = propensity_scores[treatment == 0]
         common_support = (
-            (propensity_scores >= max(ps_treated.min(), ps_control.min())) &
-            (propensity_scores <= min(ps_treated.max(), ps_control.max()))
-        )
+            propensity_scores >= max(ps_treated.min(), ps_control.min())
+        ) & (propensity_scores <= min(ps_treated.max(), ps_control.max()))
 
         # Restrict to common support
         propensity_scores_cs = propensity_scores[common_support]
@@ -626,9 +642,9 @@ class CausalInferenceAnalyzer:
         treated_idx = np.where(treatment_cs == 1)[0]
         control_idx = np.where(treatment_cs == 0)[0]
 
-        if method == 'nearest':
+        if method == "nearest":
             # Nearest neighbor matching
-            nn = NearestNeighbors(n_neighbors=n_neighbors, algorithm='ball_tree')
+            nn = NearestNeighbors(n_neighbors=n_neighbors, algorithm="ball_tree")
             nn.fit(propensity_scores_cs[control_idx].reshape(-1, 1))
 
             distances, matches = nn.kneighbors(
@@ -657,7 +673,9 @@ class CausalInferenceAnalyzer:
             att = (treated_outcomes - matched_control_outcomes).mean()
 
             # For ATE, also match controls to treated
-            nn_reverse = NearestNeighbors(n_neighbors=n_neighbors, algorithm='ball_tree')
+            nn_reverse = NearestNeighbors(
+                n_neighbors=n_neighbors, algorithm="ball_tree"
+            )
             nn_reverse.fit(propensity_scores_cs[treated_idx].reshape(-1, 1))
             _, matches_reverse = nn_reverse.kneighbors(
                 propensity_scores_cs[control_idx].reshape(-1, 1)
@@ -689,7 +707,11 @@ class CausalInferenceAnalyzer:
 
             # Balance statistics
             balance_stats = self._compute_balance_statistics(
-                X_cs, treatment_cs, propensity_scores_cs, treated_idx, control_idx[matches.flatten()]
+                X_cs,
+                treatment_cs,
+                propensity_scores_cs,
+                treated_idx,
+                control_idx[matches.flatten()],
             )
 
             n_matched = len(treated_idx)
@@ -705,16 +727,14 @@ class CausalInferenceAnalyzer:
                 n_unmatched=n_unmatched,
                 balance_statistics=balance_stats,
                 propensity_scores=propensity_scores,
-                common_support=common_support
+                common_support=common_support,
             )
 
             # MLflow logging
             if self.tracker:
-                self.tracker.log_metrics({
-                    'psm_ate': ate,
-                    'psm_att': att,
-                    'psm_n_matched': n_matched
-                })
+                self.tracker.log_metrics(
+                    {"psm_ate": ate, "psm_att": att, "psm_n_matched": n_matched}
+                )
 
             logger.info(f"PSM estimation complete: {result}")
             return result
@@ -729,7 +749,7 @@ class CausalInferenceAnalyzer:
         treatment_period: int,
         donor_pool: Optional[List[Any]] = None,
         covariates_for_matching: Optional[List[str]] = None,
-        n_placebo: int = 0
+        n_placebo: int = 0,
     ) -> SyntheticControlResult:
         """
         Estimate treatment effect using Synthetic Control Method.
@@ -772,9 +792,7 @@ class CausalInferenceAnalyzer:
 
         # Prepare panel data
         panel = self.data.pivot_table(
-            index=self.time_col,
-            columns=self.entity_col,
-            values=self.outcome_col
+            index=self.time_col, columns=self.entity_col, values=self.outcome_col
         )
 
         # Identify treated and control units
@@ -799,16 +817,17 @@ class CausalInferenceAnalyzer:
 
         # Constraints: weights sum to 1, non-negative
         from scipy.optimize import minimize
+
         n_donors = len(donor_pool)
-        constraints = {'type': 'eq', 'fun': lambda w: np.sum(w) - 1}
+        constraints = {"type": "eq", "fun": lambda w: np.sum(w) - 1}
         bounds = [(0, 1) for _ in range(n_donors)]
 
         result_opt = minimize(
             objective,
             x0=np.ones(n_donors) / n_donors,
-            method='SLSQP',
+            method="SLSQP",
             bounds=bounds,
-            constraints=constraints
+            constraints=constraints,
         )
 
         weights = result_opt.x
@@ -819,16 +838,20 @@ class CausalInferenceAnalyzer:
 
         # Treatment effects
         treatment_effect = actual_trajectory - synthetic_trajectory
-        average_effect = treatment_effect[len(pre_periods):].mean()
+        average_effect = treatment_effect[len(pre_periods) :].mean()
 
         # Pre-treatment fit
-        pre_treatment_fit = np.sqrt(np.mean((treated_pre - donor_matrix @ weights) ** 2))
+        pre_treatment_fit = np.sqrt(
+            np.mean((treated_pre - donor_matrix @ weights) ** 2)
+        )
 
         # Placebo tests for inference
         placebo_distribution = None
         if n_placebo > 0:
             placebo_effects = []
-            for placebo_unit in np.random.choice(donor_pool, size=min(n_placebo, len(donor_pool)), replace=False):
+            for placebo_unit in np.random.choice(
+                donor_pool, size=min(n_placebo, len(donor_pool)), replace=False
+            ):
                 placebo_treated = panel.loc[pre_periods, placebo_unit].values
                 placebo_donors = [u for u in donor_pool if u != placebo_unit]
                 placebo_donor_matrix = panel.loc[pre_periods, placebo_donors].values
@@ -840,16 +863,18 @@ class CausalInferenceAnalyzer:
                 placebo_result = minimize(
                     placebo_obj,
                     x0=np.ones(len(placebo_donors)) / len(placebo_donors),
-                    method='SLSQP',
+                    method="SLSQP",
                     bounds=[(0, 1) for _ in range(len(placebo_donors))],
-                    constraints={'type': 'eq', 'fun': lambda w: np.sum(w) - 1}
+                    constraints={"type": "eq", "fun": lambda w: np.sum(w) - 1},
                 )
 
                 placebo_weights = placebo_result.x
                 placebo_donor_full = panel.loc[outcome_periods, placebo_donors].values
                 placebo_synthetic = placebo_donor_full @ placebo_weights
                 placebo_actual = panel.loc[outcome_periods, placebo_unit].values
-                placebo_effect = (placebo_actual - placebo_synthetic)[len(pre_periods):].mean()
+                placebo_effect = (placebo_actual - placebo_synthetic)[
+                    len(pre_periods) :
+                ].mean()
                 placebo_effects.append(placebo_effect)
 
             placebo_distribution = np.array(placebo_effects)
@@ -859,7 +884,9 @@ class CausalInferenceAnalyzer:
             p_value = np.nan
 
         # Standard error (from placebo distribution)
-        std_error = np.std(placebo_distribution) if placebo_distribution is not None else np.nan
+        std_error = (
+            np.std(placebo_distribution) if placebo_distribution is not None else np.nan
+        )
 
         result_sc = SyntheticControlResult(
             treatment_effect=treatment_effect,
@@ -870,16 +897,18 @@ class CausalInferenceAnalyzer:
             weights=pd.Series(weights, index=donor_pool),
             synthetic_trajectory=synthetic_trajectory,
             actual_trajectory=actual_trajectory,
-            placebo_distribution=placebo_distribution
+            placebo_distribution=placebo_distribution,
         )
 
         # MLflow logging
         if self.tracker:
-            self.tracker.log_metrics({
-                'sc_average_effect': average_effect,
-                'sc_p_value': p_value,
-                'sc_pre_rmse': pre_treatment_fit
-            })
+            self.tracker.log_metrics(
+                {
+                    "sc_average_effect": average_effect,
+                    "sc_p_value": p_value,
+                    "sc_pre_rmse": pre_treatment_fit,
+                }
+            )
 
         logger.info(f"Synthetic control complete: {result_sc}")
         return result_sc
@@ -890,7 +919,7 @@ class CausalInferenceAnalyzer:
         effect_estimate: float,
         se_estimate: Optional[float] = None,
         gamma_range: Tuple[float, float] = (1.0, 3.0),
-        n_gamma: int = 20
+        n_gamma: int = 20,
     ) -> SensitivityResult:
         """
         Perform sensitivity analysis for unobserved confounding.
@@ -925,10 +954,10 @@ class CausalInferenceAnalyzer:
             gamma_range=(1.0, 2.5)
         )
         """
-        if method == 'rosenbaum':
+        if method == "rosenbaum":
             # Rosenbaum bounds for matched data
             gammas = np.linspace(gamma_range[0], gamma_range[1], n_gamma)
-            bounds = {'lower': [], 'upper': []}
+            bounds = {"lower": [], "upper": []}
 
             for gamma in gammas:
                 # Upper bound (odds ratio of treatment assignment)
@@ -940,27 +969,27 @@ class CausalInferenceAnalyzer:
                 upper_bound = effect_estimate * (1 + (gamma - 1) * 0.5)
                 lower_bound = effect_estimate * (1 - (gamma - 1) * 0.5)
 
-                bounds['upper'].append(upper_bound)
-                bounds['lower'].append(lower_bound)
+                bounds["upper"].append(upper_bound)
+                bounds["lower"].append(lower_bound)
 
             # Critical gamma (where CI includes 0)
             if se_estimate is not None:
                 critical_gamma = None
                 for i, gamma in enumerate(gammas):
-                    if bounds['lower'][i] - 1.96 * se_estimate <= 0:
+                    if bounds["lower"][i] - 1.96 * se_estimate <= 0:
                         critical_gamma = gamma
                         break
             else:
                 critical_gamma = None
 
             result = SensitivityResult(
-                method='rosenbaum',
+                method="rosenbaum",
                 original_effect=effect_estimate,
-                sensitivity_bounds={'gamma': gammas.tolist(), **bounds},
-                critical_value=critical_gamma
+                sensitivity_bounds={"gamma": gammas.tolist(), **bounds},
+                critical_value=critical_gamma,
             )
 
-        elif method == 'e_value':
+        elif method == "e_value":
             # E-value: minimum strength of confounding to explain away effect
             # E-value = effect_estimate + sqrt(effect_estimate * (effect_estimate - 1))
             # (Assumes effect is relative risk or odds ratio)
@@ -968,31 +997,33 @@ class CausalInferenceAnalyzer:
             if effect_estimate <= 0:
                 e_value = 1.0
             else:
-                e_value = effect_estimate + np.sqrt(effect_estimate * (effect_estimate - 1))
+                e_value = effect_estimate + np.sqrt(
+                    effect_estimate * (effect_estimate - 1)
+                )
 
             result = SensitivityResult(
-                method='e_value',
+                method="e_value",
                 original_effect=effect_estimate,
                 sensitivity_bounds={},
                 critical_value=e_value,
-                robustness_metric=e_value
+                robustness_metric=e_value,
             )
 
-        elif method == 'confounding_function':
+        elif method == "confounding_function":
             # Partial R^2 approach
             # How much variance would confounder need to explain?
 
             # Placeholder - full implementation requires regression details
             confounding_strength = {
-                'partial_r2_treatment': 0.0,  # Fraction of treatment variance
-                'partial_r2_outcome': 0.0     # Fraction of outcome variance
+                "partial_r2_treatment": 0.0,  # Fraction of treatment variance
+                "partial_r2_outcome": 0.0,  # Fraction of outcome variance
             }
 
             result = SensitivityResult(
-                method='confounding_function',
+                method="confounding_function",
                 original_effect=effect_estimate,
                 sensitivity_bounds={},
-                confounding_strength=confounding_strength
+                confounding_strength=confounding_strength,
             )
 
         else:
@@ -1028,23 +1059,25 @@ class CausalInferenceAnalyzer:
         f0 = max(f0, 0.01)  # Avoid division by zero
 
         # IK formula (simplified)
-        C1 = (var_left + var_right) / (f0 ** 2)
-        bandwidth = 3.56 * C1 ** (1/5) * n ** (-1/5)
+        C1 = (var_left + var_right) / (f0**2)
+        bandwidth = 3.56 * C1 ** (1 / 5) * n ** (-1 / 5)
 
         return bandwidth
 
     def _kernel_weight(self, u: np.ndarray, kernel: str) -> np.ndarray:
         """Compute kernel weights."""
-        if kernel == 'triangular':
+        if kernel == "triangular":
             return np.maximum(1 - np.abs(u), 0)
-        elif kernel == 'uniform':
+        elif kernel == "uniform":
             return (np.abs(u) <= 1).astype(float)
-        elif kernel == 'epanechnikov':
+        elif kernel == "epanechnikov":
             return np.maximum(0.75 * (1 - u**2), 0)
         else:
             raise ValueError(f"Unknown kernel: {kernel}")
 
-    def _mccrary_test(self, X: np.ndarray, cutoff: float, bandwidth: float) -> Dict[str, Any]:
+    def _mccrary_test(
+        self, X: np.ndarray, cutoff: float, bandwidth: float
+    ) -> Dict[str, Any]:
         """
         McCrary density discontinuity test.
 
@@ -1065,7 +1098,7 @@ class CausalInferenceAnalyzer:
         if density_left > 0 and density_right > 0:
             log_diff = np.log(density_right) - np.log(density_left)
             # Standard error (approximate)
-            se = np.sqrt(1/density_left + 1/density_right)
+            se = np.sqrt(1 / density_left + 1 / density_right)
             t_stat = log_diff / se
             p_value = 2 * (1 - stats.norm.cdf(np.abs(t_stat)))
         else:
@@ -1073,11 +1106,11 @@ class CausalInferenceAnalyzer:
             p_value = np.nan
 
         return {
-            'statistic': log_diff,
-            'p_value': p_value,
-            'null_hypothesis': 'No density discontinuity (no manipulation)',
-            'density_left': density_left,
-            'density_right': density_right
+            "statistic": log_diff,
+            "p_value": p_value,
+            "null_hypothesis": "No density discontinuity (no manipulation)",
+            "density_left": density_left,
+            "density_right": density_right,
         }
 
     def _bootstrap_psm_se(
@@ -1085,7 +1118,7 @@ class CausalInferenceAnalyzer:
         propensity_scores: np.ndarray,
         treatment: np.ndarray,
         outcome: np.ndarray,
-        n_bootstrap: int = 200
+        n_bootstrap: int = 200,
     ) -> float:
         """Bootstrap standard error for PSM estimate."""
         ate_bootstrap = []
@@ -1107,7 +1140,10 @@ class CausalInferenceAnalyzer:
                 nn.fit(ps_boot[control_idx].reshape(-1, 1))
                 _, matches = nn.kneighbors(ps_boot[treated_idx].reshape(-1, 1))
 
-                att_boot = (outcome_boot[treated_idx] - outcome_boot[control_idx[matches.flatten()]]).mean()
+                att_boot = (
+                    outcome_boot[treated_idx]
+                    - outcome_boot[control_idx[matches.flatten()]]
+                ).mean()
                 ate_bootstrap.append(att_boot)
 
         return np.std(ate_bootstrap)
@@ -1118,7 +1154,7 @@ class CausalInferenceAnalyzer:
         treatment: np.ndarray,
         propensity_scores: np.ndarray,
         treated_idx: np.ndarray,
-        matched_control_idx: np.ndarray
+        matched_control_idx: np.ndarray,
     ) -> pd.DataFrame:
         """Compute covariate balance statistics before/after matching."""
         balance = []
@@ -1130,29 +1166,36 @@ class CausalInferenceAnalyzer:
             std_pooled = np.sqrt(
                 (X[treatment == 1, j].var() + X[treatment == 0, j].var()) / 2
             )
-            smd_before = (mean_treated - mean_control) / std_pooled if std_pooled > 0 else 0
+            smd_before = (
+                (mean_treated - mean_control) / std_pooled if std_pooled > 0 else 0
+            )
 
             # After matching
             mean_treated_matched = X[treated_idx, j].mean()
             mean_control_matched = X[matched_control_idx, j].mean()
-            smd_after = (mean_treated_matched - mean_control_matched) / std_pooled if std_pooled > 0 else 0
+            smd_after = (
+                (mean_treated_matched - mean_control_matched) / std_pooled
+                if std_pooled > 0
+                else 0
+            )
 
-            balance.append({
-                'covariate': cov_name,
-                'smd_before': smd_before,
-                'smd_after': smd_after,
-                'improvement': smd_before - smd_after
-            })
+            balance.append(
+                {
+                    "covariate": cov_name,
+                    "smd_before": smd_before,
+                    "smd_after": smd_after,
+                    "improvement": smd_before - smd_after,
+                }
+            )
 
         return pd.DataFrame(balance)
 
 
 # --- Utility functions ---
 
+
 def ate_inference(
-    ate: float,
-    se: float,
-    confidence_level: float = 0.95
+    ate: float, se: float, confidence_level: float = 0.95
 ) -> Dict[str, Any]:
     """
     Perform inference on Average Treatment Effect.
@@ -1177,10 +1220,10 @@ def ate_inference(
     p_value = 2 * (1 - stats.norm.cdf(np.abs(z_stat)))
 
     return {
-        'ate': ate,
-        'se': se,
-        'confidence_interval': ci,
-        'z_statistic': z_stat,
-        'p_value': p_value,
-        'significant': p_value < (1 - confidence_level)
+        "ate": ate,
+        "se": se,
+        "confidence_interval": ci,
+        "z_statistic": z_stat,
+        "p_value": p_value,
+        "significant": p_value < (1 - confidence_level),
     }
