@@ -67,6 +67,10 @@ mlflow>=2.9.0              # Experiment tracking, model registry
 linearmodels>=5.3          # Panel data econometrics (fixed/random effects)
 pymc>=5.0.0                # Bayesian modeling and probabilistic programming
 arviz>=0.15.0              # Exploratory analysis of Bayesian models
+dowhy>=0.11.0              # Causal inference and causal graphs
+networkx>=3.2.0            # Graph algorithms for DAGs
+lifelines>=0.28.0          # Survival analysis (Cox, Kaplan-Meier, parametric)
+scikit-survival>=0.21.0    # Machine learning survival models
 
 # ============================================
 # Data Quality & Validation
