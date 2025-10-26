@@ -29,14 +29,16 @@ def production_nba_data():
     np.random.seed(42)
     n = 500
 
-    return pd.DataFrame({
-        'game_id': range(1, n + 1),
-        'home_ppg': np.random.normal(110, 10, n),
-        'away_ppg': np.random.normal(108, 10, n),
-        'home_def_rating': np.random.normal(105, 5, n),
-        'away_def_rating': np.random.normal(107, 5, n),
-        'home_win': np.random.choice([0, 1], n),
-    })
+    return pd.DataFrame(
+        {
+            "game_id": range(1, n + 1),
+            "home_ppg": np.random.normal(110, 10, n),
+            "away_ppg": np.random.normal(108, 10, n),
+            "home_def_rating": np.random.normal(105, 5, n),
+            "away_def_rating": np.random.normal(107, 5, n),
+            "home_win": np.random.choice([0, 1], n),
+        }
+    )
 
 
 @pytest.fixture
@@ -58,9 +60,9 @@ def test_blue_green_deployment_with_validation(production_nba_data, temp_prod_en
     - Keep blue for rollback
     """
 
-    feature_cols = ['home_ppg', 'away_ppg', 'home_def_rating', 'away_def_rating']
+    feature_cols = ["home_ppg", "away_ppg", "home_def_rating", "away_def_rating"]
     X = production_nba_data[feature_cols]
-    y = production_nba_data['home_win']
+    y = production_nba_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
@@ -74,20 +76,36 @@ def test_blue_green_deployment_with_validation(production_nba_data, temp_prod_en
     green_model.fit(X_train, y_train)
     green_score = green_model.score(X_test, y_test)
 
-    registry = ModelRegistry(registry_dir=str(temp_prod_env / 'registry'))
+    registry = ModelRegistry(registry_dir=str(temp_prod_env / "registry"))
     serving = ModelServingManager(mock_mode=True)
 
     # Deploy blue (production)
-    registry.register_model("nba_model", "v1.0", ModelStage.PRODUCTION, "sklearn", "RF", {"accuracy": blue_score})
+    registry.register_model(
+        "nba_model",
+        "v1.0",
+        ModelStage.PRODUCTION,
+        "sklearn",
+        "RF",
+        {"accuracy": blue_score},
+    )
     serving.deploy_model("nba_model", "v1.0", blue_model, set_active=True)
 
     # Deploy green (staging)
-    registry.register_model("nba_model", "v2.0", ModelStage.STAGING, "sklearn", "RF", {"accuracy": green_score})
+    registry.register_model(
+        "nba_model",
+        "v2.0",
+        ModelStage.STAGING,
+        "sklearn",
+        "RF",
+        {"accuracy": green_score},
+    )
     serving.deploy_model("nba_model", "v2.0", green_model, set_active=False)
 
     # Validate green
-    test_inputs = X_test.head(10).to_dict('records')
-    green_predictions = serving.predict("nba_model", test_inputs)  # Will use blue (active)
+    test_inputs = X_test.head(10).to_dict("records")
+    green_predictions = serving.predict(
+        "nba_model", test_inputs
+    )  # Will use blue (active)
 
     # Switch to green if validation passes
     if green_score >= blue_score * 0.95:  # Within 5% of blue
@@ -97,7 +115,9 @@ def test_blue_green_deployment_with_validation(production_nba_data, temp_prod_en
     active = serving.active_models.get("nba_model")
     assert active in ["v1.0", "v2.0"]
 
-    print(f"\n✅ Blue-green deployment: blue={blue_score:.2%}, green={green_score:.2%}, active={active}")
+    print(
+        f"\n✅ Blue-green deployment: blue={blue_score:.2%}, green={green_score:.2%}, active={active}"
+    )
 
 
 def test_canary_deployment_with_gradual_rollout(production_nba_data):
@@ -110,9 +130,9 @@ def test_canary_deployment_with_gradual_rollout(production_nba_data):
     - Gradually increase to 25%, 50%, 100%
     """
 
-    feature_cols = ['home_ppg', 'away_ppg']
+    feature_cols = ["home_ppg", "away_ppg"]
     X = production_nba_data[feature_cols]
-    y = production_nba_data['home_win']
+    y = production_nba_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
@@ -130,7 +150,7 @@ def test_canary_deployment_with_gradual_rollout(production_nba_data):
     serving.setup_ab_test("nba_model", ["v1.0", "v2.0"], [0.95, 0.05])
 
     for _ in range(20):
-        test_input = X_test.sample(1).to_dict('records')
+        test_input = X_test.sample(1).to_dict("records")
         serving.predict("nba_model", test_input)
 
     # Stage 2: 25% canary (simulated - would check metrics first)
@@ -154,9 +174,9 @@ def test_shadow_deployment_comparison(production_nba_data):
     - Compare predictions without affecting users
     """
 
-    feature_cols = ['home_ppg', 'away_ppg']
+    feature_cols = ["home_ppg", "away_ppg"]
     X = production_nba_data[feature_cols]
-    y = production_nba_data['home_win']
+    y = production_nba_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
@@ -170,11 +190,13 @@ def test_shadow_deployment_comparison(production_nba_data):
     shadow_serving = ModelServingManager(mock_mode=True)
 
     prod_serving.deploy_model("nba_model", "v1.0", prod_model, set_active=True)
-    shadow_serving.deploy_model("nba_model_shadow", "v2.0", shadow_model, set_active=True)
+    shadow_serving.deploy_model(
+        "nba_model_shadow", "v2.0", shadow_model, set_active=True
+    )
 
     differences = []
     for i in range(20):
-        test_input = X_test.iloc[i:i+1].to_dict('records')
+        test_input = X_test.iloc[i : i + 1].to_dict("records")
 
         prod_pred = prod_serving.predict("nba_model", test_input)
         shadow_pred = shadow_serving.predict("nba_model_shadow", test_input)
@@ -197,9 +219,9 @@ def test_champion_challenger_pattern(production_nba_data, temp_prod_env):
     - Best challenger becomes new champion
     """
 
-    feature_cols = ['home_ppg', 'away_ppg', 'home_def_rating']
+    feature_cols = ["home_ppg", "away_ppg", "home_def_rating"]
     X = production_nba_data[feature_cols]
-    y = production_nba_data['home_win']
+    y = production_nba_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
@@ -217,12 +239,33 @@ def test_champion_challenger_pattern(production_nba_data, temp_prod_env):
     challenger2.fit(X_train, y_train)
     challenger2_score = challenger2.score(X_test, y_test)
 
-    registry = ModelRegistry(registry_dir=str(temp_prod_env / 'registry'))
+    registry = ModelRegistry(registry_dir=str(temp_prod_env / "registry"))
 
     # Register all models
-    registry.register_model("nba_model", "champion", ModelStage.PRODUCTION, "sklearn", "RF", {"accuracy": champion_score})
-    registry.register_model("nba_model", "challenger1", ModelStage.STAGING, "sklearn", "RF", {"accuracy": challenger1_score})
-    registry.register_model("nba_model", "challenger2", ModelStage.STAGING, "sklearn", "RF", {"accuracy": challenger2_score})
+    registry.register_model(
+        "nba_model",
+        "champion",
+        ModelStage.PRODUCTION,
+        "sklearn",
+        "RF",
+        {"accuracy": champion_score},
+    )
+    registry.register_model(
+        "nba_model",
+        "challenger1",
+        ModelStage.STAGING,
+        "sklearn",
+        "RF",
+        {"accuracy": challenger1_score},
+    )
+    registry.register_model(
+        "nba_model",
+        "challenger2",
+        ModelStage.STAGING,
+        "sklearn",
+        "RF",
+        {"accuracy": challenger2_score},
+    )
 
     # Compare models
     comp1 = registry.compare_models("nba_model", "champion", "challenger1")
@@ -255,9 +298,9 @@ def test_automated_retraining_trigger(production_nba_data):
     - Deploy new model
     """
 
-    feature_cols = ['home_ppg', 'away_ppg']
+    feature_cols = ["home_ppg", "away_ppg"]
     X = production_nba_data[feature_cols]
-    y = production_nba_data['home_win']
+    y = production_nba_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
@@ -270,7 +313,7 @@ def test_automated_retraining_trigger(production_nba_data):
 
     # Simulate drifted data
     X_drifted = X_test.copy()
-    X_drifted['home_ppg'] += 25  # Significant drift
+    X_drifted["home_ppg"] += 25  # Significant drift
 
     # Detect drift
     drift_results = monitor.detect_feature_drift(X_drifted, DriftMethod.KS_TEST)
@@ -286,7 +329,9 @@ def test_automated_retraining_trigger(production_nba_data):
         model_v2 = RandomForestClassifier(n_estimators=50, random_state=42)
         model_v2.fit(X_combined, y_combined)
 
-        print(f"\n✅ Automated retraining triggered: {len(drifted_features)} features drifted")
+        print(
+            f"\n✅ Automated retraining triggered: {len(drifted_features)} features drifted"
+        )
     else:
         print(f"\n✅ No retraining needed")
 
@@ -302,9 +347,9 @@ def test_performance_degradation_detection_and_rollback(production_nba_data):
     - Automatic rollback to previous version
     """
 
-    feature_cols = ['home_ppg', 'away_ppg']
+    feature_cols = ["home_ppg", "away_ppg"]
     X = production_nba_data[feature_cols]
-    y = production_nba_data['home_win']
+    y = production_nba_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
@@ -325,12 +370,14 @@ def test_performance_degradation_detection_and_rollback(production_nba_data):
     serving.deploy_model("nba_model", "v2.0", poor_model, set_active=True)
 
     # Monitor v2.0
-    monitor = ModelMonitor("nba_model", "v2.0", error_rate_threshold=0.2, mock_mode=True)
+    monitor = ModelMonitor(
+        "nba_model", "v2.0", error_rate_threshold=0.2, mock_mode=True
+    )
 
     # Make predictions and track errors
     for i in range(20):
         try:
-            test_input = X_test.iloc[i:i+1].to_dict('records')
+            test_input = X_test.iloc[i : i + 1].to_dict("records")
             pred = serving.predict("nba_model", test_input)
 
             monitor.log_prediction(
@@ -338,7 +385,7 @@ def test_performance_degradation_detection_and_rollback(production_nba_data):
                 X_test.iloc[i].to_dict(),
                 pred[0] if pred else None,
                 actual=y_test.iloc[i],
-                latency_ms=50
+                latency_ms=50,
             )
         except Exception as e:
             monitor.log_prediction(f"pred_{i}", {}, None, error=str(e), latency_ms=0)
@@ -353,7 +400,9 @@ def test_performance_degradation_detection_and_rollback(production_nba_data):
     else:
         rollback = False
 
-    print(f"\n✅ Performance monitoring: error_rate={perf.error_rate:.2%}, rollback={rollback}")
+    print(
+        f"\n✅ Performance monitoring: error_rate={perf.error_rate:.2%}, rollback={rollback}"
+    )
 
 
 def test_multi_model_ensemble_serving(production_nba_data):
@@ -366,9 +415,9 @@ def test_multi_model_ensemble_serving(production_nba_data):
     - Serve ensemble prediction
     """
 
-    feature_cols = ['home_ppg', 'away_ppg']
+    feature_cols = ["home_ppg", "away_ppg"]
     X = production_nba_data[feature_cols]
-    y = production_nba_data['home_win']
+    y = production_nba_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
@@ -390,7 +439,7 @@ def test_multi_model_ensemble_serving(production_nba_data):
     serving.deploy_model("ensemble_model_3", "v1.0", model3, set_active=True)
 
     # Get predictions from all models and ensemble
-    test_input = X_test.head(10).to_dict('records')
+    test_input = X_test.head(10).to_dict("records")
 
     pred1 = serving.predict("ensemble_model_1", test_input)
     pred2 = serving.predict("ensemble_model_2", test_input)
@@ -415,9 +464,9 @@ def test_load_balancing_across_versions(production_nba_data):
     - Monitor each version's performance
     """
 
-    feature_cols = ['home_ppg', 'away_ppg']
+    feature_cols = ["home_ppg", "away_ppg"]
     X = production_nba_data[feature_cols]
-    y = production_nba_data['home_win']
+    y = production_nba_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
@@ -437,7 +486,9 @@ def test_load_balancing_across_versions(production_nba_data):
 
     # Make predictions
     for i in range(100):
-        test_input = X_test.iloc[i % len(X_test):i % len(X_test) + 1].to_dict('records')
+        test_input = X_test.iloc[i % len(X_test) : i % len(X_test) + 1].to_dict(
+            "records"
+        )
         serving.predict("nba_model", test_input)
 
     # Check distribution

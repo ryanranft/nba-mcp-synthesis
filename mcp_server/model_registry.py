@@ -29,29 +29,39 @@ try:
     from mcp_server.error_handling import handle_errors, NBAMCPError
     from mcp_server.monitoring import track_metric
     from mcp_server.rbac import require_permission, Permission
+
     WEEK1_AVAILABLE = True
 except ImportError:
     WEEK1_AVAILABLE = False
+
     # Fallback decorators
     def handle_errors(reraise=True, notify=False):
         def decorator(func):
             return func
+
         return decorator
+
     def track_metric(metric_name):
         def decorator(func):
             return func
+
         return decorator
+
     def require_permission(permission):
         def decorator(func):
             return func
+
         return decorator
+
     class Permission:
         READ = "read"
         WRITE = "write"
 
+
 # MLflow imports
 try:
     from mcp_server.mlflow_integration import get_mlflow_tracker
+
     MLFLOW_AVAILABLE = True
 except ImportError:
     MLFLOW_AVAILABLE = False
@@ -105,7 +115,7 @@ class ModelRegistry:
         registry_path: str = "./model_registry",
         mlflow_tracker=None,
         enable_mlflow: bool = False,
-        mock_mode: bool = False
+        mock_mode: bool = False,
     ):
         """
         Initialize model registry.
@@ -128,8 +138,7 @@ class ModelRegistry:
         if self.enable_mlflow and not self.mlflow_tracker:
             try:
                 self.mlflow_tracker = get_mlflow_tracker(
-                    experiment_name="model_registry",
-                    mock_mode=mock_mode
+                    experiment_name="model_registry", mock_mode=mock_mode
                 )
             except Exception as e:
                 logger.warning(f"Could not initialize MLflow: {e}")
@@ -266,15 +275,19 @@ class ModelRegistry:
         # Log to MLflow
         if self.enable_mlflow and self.mlflow_tracker:
             try:
-                with self.mlflow_tracker.start_run(f"register_{model_id}_{version}") as run_id:
-                    self.mlflow_tracker.log_params({
-                        "model_id": model_id,
-                        "version": version,
-                        "framework": framework,
-                        "algorithm": algorithm,
-                        "stage": stage.value,
-                        "created_by": created_by
-                    })
+                with self.mlflow_tracker.start_run(
+                    f"register_{model_id}_{version}"
+                ) as run_id:
+                    self.mlflow_tracker.log_params(
+                        {
+                            "model_id": model_id,
+                            "version": version,
+                            "framework": framework,
+                            "algorithm": algorithm,
+                            "stage": stage.value,
+                            "created_by": created_by,
+                        }
+                    )
                     if metrics:
                         self.mlflow_tracker.log_metrics(metrics)
             except Exception as e:
@@ -377,13 +390,17 @@ class ModelRegistry:
         # Log to MLflow
         if self.enable_mlflow and self.mlflow_tracker:
             try:
-                with self.mlflow_tracker.start_run(f"promote_{model_id}_{version}") as run_id:
-                    self.mlflow_tracker.log_params({
-                        "model_id": model_id,
-                        "version": version,
-                        "from_stage": old_stage.value,
-                        "to_stage": to_stage.value
-                    })
+                with self.mlflow_tracker.start_run(
+                    f"promote_{model_id}_{version}"
+                ) as run_id:
+                    self.mlflow_tracker.log_params(
+                        {
+                            "model_id": model_id,
+                            "version": version,
+                            "from_stage": old_stage.value,
+                            "to_stage": to_stage.value,
+                        }
+                    )
             except Exception as e:
                 logger.warning(f"Could not log promotion to MLflow: {e}")
 
@@ -497,10 +514,7 @@ class ModelRegistry:
     @require_permission(Permission.READ)
     @track_metric("model_registry.compare")
     def compare_models(
-        self,
-        model_id: str,
-        version1: str,
-        version2: str
+        self, model_id: str, version1: str, version2: str
     ) -> Dict[str, Any]:
         """
         Compare two model versions.
@@ -530,7 +544,7 @@ class ModelRegistry:
                 "v1": val1,
                 "v2": val2,
                 "diff": val2 - val1,
-                "pct_change": ((val2 - val1) / val1 * 100) if val1 != 0 else 0
+                "pct_change": ((val2 - val1) / val1 * 100) if val1 != 0 else 0,
             }
 
         comparison = {
@@ -541,7 +555,7 @@ class ModelRegistry:
                 "framework": v1.framework,
                 "algorithm": v1.algorithm,
                 "created_at": v1.created_at.isoformat(),
-                "metrics": v1.metrics
+                "metrics": v1.metrics,
             },
             "version2": {
                 "version": version2,
@@ -549,7 +563,7 @@ class ModelRegistry:
                 "framework": v2.framework,
                 "algorithm": v2.algorithm,
                 "created_at": v2.created_at.isoformat(),
-                "metrics": v2.metrics
+                "metrics": v2.metrics,
             },
             "metrics_comparison": metrics_diff,
             "algorithm_changed": v1.algorithm != v2.algorithm,

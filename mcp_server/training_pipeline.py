@@ -27,7 +27,11 @@ from pathlib import Path
 
 # Week 1 Integration
 try:
-    from mcp_server.error_handling import handle_errors, ErrorContext, DataValidationError
+    from mcp_server.error_handling import (
+        handle_errors,
+        ErrorContext,
+        DataValidationError,
+    )
     from mcp_server.monitoring import get_health_monitor, track_metric
     from mcp_server.rbac import require_permission, Permission
 
@@ -239,7 +243,8 @@ class TrainingPipeline:
             mlflow_run_id = None
             if self.enable_mlflow and self.mlflow_tracker:
                 mlflow_run_id = self.mlflow_tracker.start_run(
-                    run_name=run_id, tags={"pipeline": self.name, "stage": "full_pipeline"}
+                    run_name=run_id,
+                    tags={"pipeline": self.name, "stage": "full_pipeline"},
                 ).__enter__()
                 self.mlflow_tracker.log_params(self.config)
                 logger.info(f"📊 Started MLflow run: {mlflow_run_id}")
@@ -260,7 +265,9 @@ class TrainingPipeline:
 
                 for stage in stage_order:
                     if stage not in self.stages:
-                        logger.debug(f"⏭️  Skipping stage {stage.value} (not configured)")
+                        logger.debug(
+                            f"⏭️  Skipping stage {stage.value} (not configured)"
+                        )
                         continue
 
                     stage_result = self._execute_stage(
@@ -282,7 +289,9 @@ class TrainingPipeline:
 
                     if stage_result.status == PipelineStatus.FAILED:
                         run.status = PipelineStatus.FAILED
-                        logger.error(f"❌ Pipeline {run_id} failed at stage {stage.value}")
+                        logger.error(
+                            f"❌ Pipeline {run_id} failed at stage {stage.value}"
+                        )
                         break
 
                     previous_output = stage_result.output
@@ -296,13 +305,22 @@ class TrainingPipeline:
 
                 # Log final metrics to MLflow
                 if self.enable_mlflow and self.mlflow_tracker:
-                    self.mlflow_tracker.log_metric("pipeline.duration_seconds", duration)
                     self.mlflow_tracker.log_metric(
-                        "pipeline.stages_completed",
-                        len([r for r in run.stage_results if r.status == PipelineStatus.SUCCESS]),
+                        "pipeline.duration_seconds", duration
                     )
                     self.mlflow_tracker.log_metric(
-                        "pipeline.success", 1.0 if run.status == PipelineStatus.SUCCESS else 0.0
+                        "pipeline.stages_completed",
+                        len(
+                            [
+                                r
+                                for r in run.stage_results
+                                if r.status == PipelineStatus.SUCCESS
+                            ]
+                        ),
+                    )
+                    self.mlflow_tracker.log_metric(
+                        "pipeline.success",
+                        1.0 if run.status == PipelineStatus.SUCCESS else 0.0,
                     )
 
             except Exception as e:
@@ -315,7 +333,11 @@ class TrainingPipeline:
                 # End MLflow run
                 if self.enable_mlflow and self.mlflow_tracker and mlflow_run_id:
                     self.mlflow_tracker.end_run(
-                        status="FINISHED" if run.status == PipelineStatus.SUCCESS else "FAILED"
+                        status=(
+                            "FINISHED"
+                            if run.status == PipelineStatus.SUCCESS
+                            else "FAILED"
+                        )
                     )
                     logger.info(f"📊 Ended MLflow run: {mlflow_run_id}")
 

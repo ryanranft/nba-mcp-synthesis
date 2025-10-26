@@ -37,29 +37,39 @@ try:
     from mcp_server.error_handling import handle_errors, NBAMCPError
     from mcp_server.monitoring import track_metric
     from mcp_server.rbac import require_permission, Permission
+
     WEEK1_AVAILABLE = True
 except ImportError:
     WEEK1_AVAILABLE = False
+
     # Fallback decorators
     def handle_errors(reraise=True, notify=False):
         def decorator(func):
             return func
+
         return decorator
+
     def track_metric(metric_name):
         def decorator(func):
             return func
+
         return decorator
+
     def require_permission(permission):
         def decorator(func):
             return func
+
         return decorator
+
     class Permission:
         READ = "read"
         WRITE = "write"
 
+
 # MLflow imports
 try:
     from mcp_server.mlflow_integration import get_mlflow_tracker
+
     MLFLOW_AVAILABLE = True
 except ImportError:
     MLFLOW_AVAILABLE = False
@@ -130,7 +140,7 @@ class ServingModel:
         model_instance: Any,
         mlflow_run_id: Optional[str] = None,
         error_threshold: float = 0.5,
-        health_check_fn: Optional[Callable] = None
+        health_check_fn: Optional[Callable] = None,
     ):
         """
         Initialize serving model.
@@ -243,7 +253,9 @@ class ServingModel:
 
         # Check if model is responsive (recent requests)
         if self.metrics.last_request_time:
-            seconds_since_request = (datetime.utcnow() - self.metrics.last_request_time).total_seconds()
+            seconds_since_request = (
+                datetime.utcnow() - self.metrics.last_request_time
+            ).total_seconds()
             if seconds_since_request > 3600:  # 1 hour
                 return HealthStatus.UNKNOWN
 
@@ -264,8 +276,16 @@ class ServingModel:
             "circuit_breaker_open": self.circuit_breaker_open,
             "circuit_breaker_trips": self.metrics.circuit_breaker_trips,
             "uptime_seconds": (datetime.utcnow() - self.loaded_at).total_seconds(),
-            "last_request_time": self.metrics.last_request_time.isoformat() if self.metrics.last_request_time else None,
-            "last_error_time": self.metrics.last_error_time.isoformat() if self.metrics.last_error_time else None,
+            "last_request_time": (
+                self.metrics.last_request_time.isoformat()
+                if self.metrics.last_request_time
+                else None
+            ),
+            "last_error_time": (
+                self.metrics.last_error_time.isoformat()
+                if self.metrics.last_error_time
+                else None
+            ),
         }
 
 
@@ -282,10 +302,7 @@ class ModelServingManager:
     """
 
     def __init__(
-        self,
-        mlflow_tracker=None,
-        enable_mlflow: bool = False,
-        mock_mode: bool = False
+        self, mlflow_tracker=None, enable_mlflow: bool = False, mock_mode: bool = False
     ):
         """
         Initialize serving manager.
@@ -297,7 +314,9 @@ class ModelServingManager:
         """
         self.models: Dict[str, List[ServingModel]] = {}  # model_id -> list of versions
         self.active_models: Dict[str, str] = {}  # model_id -> active version
-        self.ab_tests: Dict[str, Dict[str, float]] = {}  # model_id -> {version: traffic_percent}
+        self.ab_tests: Dict[str, Dict[str, float]] = (
+            {}
+        )  # model_id -> {version: traffic_percent}
 
         self.mlflow_tracker = mlflow_tracker
         self.enable_mlflow = enable_mlflow and MLFLOW_AVAILABLE
@@ -307,8 +326,7 @@ class ModelServingManager:
         if self.enable_mlflow and not self.mlflow_tracker:
             try:
                 self.mlflow_tracker = get_mlflow_tracker(
-                    experiment_name="model_serving",
-                    mock_mode=mock_mode
+                    experiment_name="model_serving", mock_mode=mock_mode
                 )
             except Exception as e:
                 logger.warning(f"Could not initialize MLflow: {e}")
@@ -327,7 +345,7 @@ class ModelServingManager:
         set_active: bool = True,
         mlflow_run_id: Optional[str] = None,
         error_threshold: float = 0.5,
-        health_check_fn: Optional[Callable] = None
+        health_check_fn: Optional[Callable] = None,
     ) -> bool:
         """
         Deploy a model for serving.
@@ -350,7 +368,7 @@ class ModelServingManager:
             model_instance=model_instance,
             mlflow_run_id=mlflow_run_id,
             error_threshold=error_threshold,
-            health_check_fn=health_check_fn
+            health_check_fn=health_check_fn,
         )
 
         if model_id not in self.models:
@@ -373,13 +391,17 @@ class ModelServingManager:
         # Log to MLflow
         if self.enable_mlflow and self.mlflow_tracker:
             try:
-                with self.mlflow_tracker.start_run(f"deploy_{model_id}_{version}") as run_id:
-                    self.mlflow_tracker.log_params({
-                        "model_id": model_id,
-                        "version": version,
-                        "set_active": set_active,
-                        "error_threshold": error_threshold
-                    })
+                with self.mlflow_tracker.start_run(
+                    f"deploy_{model_id}_{version}"
+                ) as run_id:
+                    self.mlflow_tracker.log_params(
+                        {
+                            "model_id": model_id,
+                            "version": version,
+                            "set_active": set_active,
+                            "error_threshold": error_threshold,
+                        }
+                    )
             except Exception as e:
                 logger.warning(f"Could not log deployment to MLflow: {e}")
 
@@ -415,11 +437,7 @@ class ModelServingManager:
     @handle_errors(reraise=False, notify=True)
     @require_permission(Permission.WRITE)
     @track_metric("model_serving.setup_ab_test")
-    def setup_ab_test(
-        self,
-        model_id: str,
-        version_weights: Dict[str, float]
-    ) -> bool:
+    def setup_ab_test(self, model_id: str, version_weights: Dict[str, float]) -> bool:
         """
         Setup A/B test for model versions.
 
@@ -449,10 +467,9 @@ class ModelServingManager:
         if self.enable_mlflow and self.mlflow_tracker:
             try:
                 with self.mlflow_tracker.start_run(f"ab_test_{model_id}") as run_id:
-                    self.mlflow_tracker.log_params({
-                        "model_id": model_id,
-                        "ab_test_config": str(version_weights)
-                    })
+                    self.mlflow_tracker.log_params(
+                        {"model_id": model_id, "ab_test_config": str(version_weights)}
+                    )
             except Exception as e:
                 logger.warning(f"Could not log A/B test to MLflow: {e}")
 
@@ -462,9 +479,7 @@ class ModelServingManager:
     @handle_errors(reraise=True, notify=False)
     @require_permission(Permission.READ)
     def get_model_for_prediction(
-        self,
-        model_id: str,
-        traffic_split: Optional[float] = None
+        self, model_id: str, traffic_split: Optional[float] = None
     ) -> Optional[ServingModel]:
         """
         Get model instance for prediction (handles A/B testing).
@@ -509,10 +524,7 @@ class ModelServingManager:
     @require_permission(Permission.READ)
     @track_metric("model_serving.predict")
     def predict(
-        self,
-        model_id: str,
-        inputs: Any,
-        traffic_split: Optional[float] = None
+        self, model_id: str, inputs: Any, traffic_split: Optional[float] = None
     ) -> Any:
         """
         Make a prediction using the appropriate model version.
@@ -607,12 +619,7 @@ class ModelServingManager:
         health_status = {}
 
         for model_id, models in self.models.items():
-            model_health = {
-                "healthy": 0,
-                "unhealthy": 0,
-                "unknown": 0,
-                "versions": {}
-            }
+            model_health = {"healthy": 0, "unhealthy": 0, "unknown": 0, "versions": {}}
 
             for m in models:
                 health = m.check_health()
@@ -643,6 +650,7 @@ if __name__ == "__main__":
 
         def predict(self, inputs):
             import numpy as np
+
             return np.random.rand() < self.accuracy
 
     # Initialize serving manager
@@ -657,8 +665,7 @@ if __name__ == "__main__":
 
     # Setup A/B test
     serving_mgr.setup_ab_test(
-        "nba_predictor",
-        {"v1.0": 0.7, "v1.1": 0.3}  # 70% v1.0, 30% v1.1
+        "nba_predictor", {"v1.0": 0.7, "v1.1": 0.3}  # 70% v1.0, 30% v1.1
     )
 
     print("\n✅ A/B test configured: 70% v1.0, 30% v1.1")
@@ -669,12 +676,11 @@ if __name__ == "__main__":
     print("=" * 80)
 
     import random
+
     for i in range(10):
         traffic_split = random.random()
         result = serving_mgr.predict(
-            "nba_predictor",
-            [1, 2, 3],
-            traffic_split=traffic_split
+            "nba_predictor", [1, 2, 3], traffic_split=traffic_split
         )
         print(f"Prediction {i+1}: {result} (traffic_split: {traffic_split:.2f})")
 
@@ -686,7 +692,7 @@ if __name__ == "__main__":
     for model_id, status in health.items():
         print(f"\n🏥 {model_id}:")
         print(f"   Healthy: {status['healthy']}, Unhealthy: {status['unhealthy']}")
-        for version, health_status in status['versions'].items():
+        for version, health_status in status["versions"].items():
             print(f"   - v{version}: {health_status}")
 
     # Get metrics

@@ -36,11 +36,13 @@ def sample_reference_data():
     np.random.seed(42)
     n_samples = 1000
 
-    return pd.DataFrame({
-        'feature1': np.random.normal(0, 1, n_samples),
-        'feature2': np.random.uniform(0, 10, n_samples),
-        'feature3': np.random.exponential(2, n_samples),
-    })
+    return pd.DataFrame(
+        {
+            "feature1": np.random.normal(0, 1, n_samples),
+            "feature2": np.random.uniform(0, 10, n_samples),
+            "feature3": np.random.exponential(2, n_samples),
+        }
+    )
 
 
 @pytest.fixture
@@ -49,11 +51,13 @@ def sample_current_data_no_drift():
     np.random.seed(43)
     n_samples = 500
 
-    return pd.DataFrame({
-        'feature1': np.random.normal(0, 1, n_samples),
-        'feature2': np.random.uniform(0, 10, n_samples),
-        'feature3': np.random.exponential(2, n_samples),
-    })
+    return pd.DataFrame(
+        {
+            "feature1": np.random.normal(0, 1, n_samples),
+            "feature2": np.random.uniform(0, 10, n_samples),
+            "feature3": np.random.exponential(2, n_samples),
+        }
+    )
 
 
 @pytest.fixture
@@ -62,11 +66,13 @@ def sample_current_data_with_drift():
     np.random.seed(44)
     n_samples = 500
 
-    return pd.DataFrame({
-        'feature1': np.random.normal(2, 1, n_samples),  # Mean shifted
-        'feature2': np.random.uniform(5, 15, n_samples),  # Range shifted
-        'feature3': np.random.exponential(5, n_samples),  # Scale changed
-    })
+    return pd.DataFrame(
+        {
+            "feature1": np.random.normal(2, 1, n_samples),  # Mean shifted
+            "feature2": np.random.uniform(5, 15, n_samples),  # Range shifted
+            "feature3": np.random.exponential(5, n_samples),  # Scale changed
+        }
+    )
 
 
 @pytest.fixture
@@ -76,7 +82,7 @@ def monitor():
         model_id="test_model",
         model_version="v1.0",
         drift_threshold=0.05,
-        mock_mode=True
+        mock_mode=True,
     )
 
 
@@ -88,7 +94,7 @@ def monitor_with_mlflow():
         model_version="v1.0",
         enable_mlflow=True,
         mlflow_experiment="test_monitoring",
-        mock_mode=True
+        mock_mode=True,
     )
 
 
@@ -99,11 +105,7 @@ def monitor_with_mlflow():
 
 def test_monitor_initialization_basic():
     """Test basic monitor initialization"""
-    monitor = ModelMonitor(
-        model_id="test_model",
-        model_version="v1.0",
-        mock_mode=True
-    )
+    monitor = ModelMonitor(model_id="test_model", model_version="v1.0", mock_mode=True)
 
     assert monitor.model_id == "test_model"
     assert monitor.model_version == "v1.0"
@@ -123,7 +125,7 @@ def test_monitor_initialization_with_thresholds():
         performance_threshold=0.2,
         error_rate_threshold=0.15,
         latency_threshold_ms=500.0,
-        mock_mode=True
+        mock_mode=True,
     )
 
     assert monitor.drift_threshold == 0.1
@@ -147,7 +149,7 @@ def test_monitor_initialization_with_alert_callback():
         model_id="test_model",
         model_version="v1.0",
         alert_callback=callback,
-        mock_mode=True
+        mock_mode=True,
     )
 
     assert monitor.alert_callback == callback
@@ -164,7 +166,7 @@ def test_log_prediction_basic(monitor):
         prediction_id="pred_001",
         features={"feature1": 0.5, "feature2": 1.2},
         prediction=0.8,
-        latency_ms=45.2
+        latency_ms=45.2,
     )
 
     assert len(monitor.prediction_history) == 1
@@ -183,7 +185,7 @@ def test_log_prediction_with_actual(monitor):
         features={"feature1": 0.5},
         prediction=0.8,
         actual=0.9,
-        latency_ms=30.0
+        latency_ms=30.0,
     )
 
     record = monitor.prediction_history[0]
@@ -197,7 +199,7 @@ def test_log_prediction_with_error(monitor):
         features={"feature1": 0.5},
         prediction=None,
         error="Model failed to load",
-        latency_ms=0.0
+        latency_ms=0.0,
     )
 
     record = monitor.prediction_history[0]
@@ -216,7 +218,7 @@ def test_log_prediction_high_latency(monitor):
         prediction_id="pred_004",
         features={"feature1": 0.5},
         prediction=0.8,
-        latency_ms=150.0  # Above threshold
+        latency_ms=150.0,  # Above threshold
     )
 
     # Should generate a latency alert
@@ -232,7 +234,7 @@ def test_log_multiple_predictions(monitor):
             prediction_id=f"pred_{i:03d}",
             features={"feature1": float(i)},
             prediction=float(i) * 0.1,
-            latency_ms=10.0 + i
+            latency_ms=10.0 + i,
         )
 
     assert len(monitor.prediction_history) == 10
@@ -249,7 +251,9 @@ def test_set_reference_data_features_only(monitor, sample_reference_data):
 
     assert monitor.reference_features is not None
     assert len(monitor.reference_features) == len(sample_reference_data)
-    assert list(monitor.reference_features.columns) == list(sample_reference_data.columns)
+    assert list(monitor.reference_features.columns) == list(
+        sample_reference_data.columns
+    )
     assert monitor.reference_predictions is None
 
 
@@ -257,10 +261,7 @@ def test_set_reference_data_with_predictions(monitor, sample_reference_data):
     """Test setting reference data with predictions"""
     predictions = np.random.rand(len(sample_reference_data))
 
-    monitor.set_reference_data(
-        features=sample_reference_data,
-        predictions=predictions
-    )
+    monitor.set_reference_data(features=sample_reference_data, predictions=predictions)
 
     assert monitor.reference_features is not None
     assert monitor.reference_predictions is not None
@@ -272,13 +273,14 @@ def test_set_reference_data_with_predictions(monitor, sample_reference_data):
 # ==============================================================================
 
 
-def test_drift_detection_ks_test_no_drift(monitor, sample_reference_data, sample_current_data_no_drift):
+def test_drift_detection_ks_test_no_drift(
+    monitor, sample_reference_data, sample_current_data_no_drift
+):
     """Test drift detection with KS test - no drift expected"""
     monitor.set_reference_data(features=sample_reference_data)
 
     results = monitor.detect_feature_drift(
-        current_data=sample_current_data_no_drift,
-        method=DriftMethod.KS_TEST
+        current_data=sample_current_data_no_drift, method=DriftMethod.KS_TEST
     )
 
     assert len(results) == 3  # 3 features
@@ -287,13 +289,14 @@ def test_drift_detection_ks_test_no_drift(monitor, sample_reference_data, sample
     assert len(drifted) <= 1  # Allow for some statistical variance
 
 
-def test_drift_detection_ks_test_with_drift(monitor, sample_reference_data, sample_current_data_with_drift):
+def test_drift_detection_ks_test_with_drift(
+    monitor, sample_reference_data, sample_current_data_with_drift
+):
     """Test drift detection with KS test - drift expected"""
     monitor.set_reference_data(features=sample_reference_data)
 
     results = monitor.detect_feature_drift(
-        current_data=sample_current_data_with_drift,
-        method=DriftMethod.KS_TEST
+        current_data=sample_current_data_with_drift, method=DriftMethod.KS_TEST
     )
 
     assert len(results) == 3
@@ -302,31 +305,36 @@ def test_drift_detection_ks_test_with_drift(monitor, sample_reference_data, samp
     assert len(drifted) >= 2  # At least 2 features should drift
 
 
-def test_drift_detection_ks_test_specific_features(monitor, sample_reference_data, sample_current_data_with_drift):
+def test_drift_detection_ks_test_specific_features(
+    monitor, sample_reference_data, sample_current_data_with_drift
+):
     """Test drift detection for specific features only"""
     monitor.set_reference_data(features=sample_reference_data)
 
     results = monitor.detect_feature_drift(
         current_data=sample_current_data_with_drift,
         method=DriftMethod.KS_TEST,
-        features=['feature1', 'feature2']
+        features=["feature1", "feature2"],
     )
 
     assert len(results) == 2
-    assert all(r.feature_name in ['feature1', 'feature2'] for r in results)
+    assert all(r.feature_name in ["feature1", "feature2"] for r in results)
 
 
-def test_drift_detection_generates_alerts(monitor, sample_reference_data, sample_current_data_with_drift):
+def test_drift_detection_generates_alerts(
+    monitor, sample_reference_data, sample_current_data_with_drift
+):
     """Test that drift detection generates alerts"""
     monitor.set_reference_data(features=sample_reference_data)
 
     results = monitor.detect_feature_drift(
-        current_data=sample_current_data_with_drift,
-        method=DriftMethod.KS_TEST
+        current_data=sample_current_data_with_drift, method=DriftMethod.KS_TEST
     )
 
     # Should have drift alerts
-    drift_alerts = [a for a in monitor.alerts if a.alert_type == AlertType.FEATURE_DRIFT]
+    drift_alerts = [
+        a for a in monitor.alerts if a.alert_type == AlertType.FEATURE_DRIFT
+    ]
     drifted_features = [r for r in results if r.is_drift]
 
     assert len(drift_alerts) == len(drifted_features)
@@ -337,13 +345,14 @@ def test_drift_detection_generates_alerts(monitor, sample_reference_data, sample
 # ==============================================================================
 
 
-def test_drift_detection_psi_no_drift(monitor, sample_reference_data, sample_current_data_no_drift):
+def test_drift_detection_psi_no_drift(
+    monitor, sample_reference_data, sample_current_data_no_drift
+):
     """Test drift detection with PSI - no drift expected"""
     monitor.set_reference_data(features=sample_reference_data)
 
     results = monitor.detect_feature_drift(
-        current_data=sample_current_data_no_drift,
-        method=DriftMethod.PSI
+        current_data=sample_current_data_no_drift, method=DriftMethod.PSI
     )
 
     assert len(results) == 3
@@ -353,13 +362,14 @@ def test_drift_detection_psi_no_drift(monitor, sample_reference_data, sample_cur
         assert result.drift_score >= 0.0
 
 
-def test_drift_detection_psi_with_drift(monitor, sample_reference_data, sample_current_data_with_drift):
+def test_drift_detection_psi_with_drift(
+    monitor, sample_reference_data, sample_current_data_with_drift
+):
     """Test drift detection with PSI - drift expected"""
     monitor.set_reference_data(features=sample_reference_data)
 
     results = monitor.detect_feature_drift(
-        current_data=sample_current_data_with_drift,
-        method=DriftMethod.PSI
+        current_data=sample_current_data_with_drift, method=DriftMethod.PSI
     )
 
     assert len(results) == 3
@@ -373,13 +383,14 @@ def test_drift_detection_psi_with_drift(monitor, sample_reference_data, sample_c
 # ==============================================================================
 
 
-def test_drift_detection_kl_divergence_no_drift(monitor, sample_reference_data, sample_current_data_no_drift):
+def test_drift_detection_kl_divergence_no_drift(
+    monitor, sample_reference_data, sample_current_data_no_drift
+):
     """Test drift detection with KL divergence - no drift expected"""
     monitor.set_reference_data(features=sample_reference_data)
 
     results = monitor.detect_feature_drift(
-        current_data=sample_current_data_no_drift,
-        method=DriftMethod.KL_DIVERGENCE
+        current_data=sample_current_data_no_drift, method=DriftMethod.KL_DIVERGENCE
     )
 
     assert len(results) == 3
@@ -388,13 +399,14 @@ def test_drift_detection_kl_divergence_no_drift(monitor, sample_reference_data, 
         assert result.drift_score >= 0.0  # KL divergence is always non-negative
 
 
-def test_drift_detection_kl_divergence_with_drift(monitor, sample_reference_data, sample_current_data_with_drift):
+def test_drift_detection_kl_divergence_with_drift(
+    monitor, sample_reference_data, sample_current_data_with_drift
+):
     """Test drift detection with KL divergence - drift expected"""
     monitor.set_reference_data(features=sample_reference_data)
 
     results = monitor.detect_feature_drift(
-        current_data=sample_current_data_with_drift,
-        method=DriftMethod.KL_DIVERGENCE
+        current_data=sample_current_data_with_drift, method=DriftMethod.KL_DIVERGENCE
     )
 
     assert len(results) == 3
@@ -406,8 +418,7 @@ def test_drift_detection_without_reference_data(monitor, sample_current_data_no_
     """Test drift detection fails without reference data"""
     with pytest.raises(ValueError, match="Reference data not set"):
         monitor.detect_feature_drift(
-            current_data=sample_current_data_no_drift,
-            method=DriftMethod.KS_TEST
+            current_data=sample_current_data_no_drift, method=DriftMethod.KS_TEST
         )
 
 
@@ -424,7 +435,7 @@ def test_calculate_performance_basic(monitor):
             prediction_id=f"pred_{i}",
             features={"feature1": float(i)},
             prediction=float(i) * 0.1,
-            latency_ms=50.0
+            latency_ms=50.0,
         )
 
     metrics = monitor.calculate_performance(window_hours=24)
@@ -444,7 +455,7 @@ def test_calculate_performance_with_errors(monitor):
             features={"feature1": float(i)},
             prediction=float(i) * 0.1 if error is None else None,
             latency_ms=50.0,
-            error=error
+            error=error,
         )
 
     metrics = monitor.calculate_performance(window_hours=24)
@@ -467,7 +478,7 @@ def test_calculate_performance_with_actuals(monitor):
             features={"feature1": float(i)},
             prediction=pred,
             actual=actual,
-            latency_ms=50.0
+            latency_ms=50.0,
         )
 
     metrics = monitor.calculate_performance(window_hours=24)
@@ -488,13 +499,15 @@ def test_calculate_performance_high_error_rate_alert(monitor):
             features={"feature1": float(i)},
             prediction=float(i) * 0.1 if error is None else None,
             latency_ms=50.0,
-            error=error
+            error=error,
         )
 
     metrics = monitor.calculate_performance(window_hours=24)
 
     # Should generate high error rate alert
-    error_alerts = [a for a in monitor.alerts if a.alert_type == AlertType.HIGH_ERROR_RATE]
+    error_alerts = [
+        a for a in monitor.alerts if a.alert_type == AlertType.HIGH_ERROR_RATE
+    ]
     # Expect alerts from individual errors plus performance calculation
     assert len(error_alerts) > 0
 
@@ -523,7 +536,7 @@ def test_get_alerts_all(monitor):
             prediction_id=f"pred_{i}",
             features={"feature1": float(i)},
             prediction=0.8,
-            latency_ms=100.0  # Above threshold
+            latency_ms=100.0,  # Above threshold
         )
 
     alerts = monitor.get_alerts()
@@ -540,7 +553,7 @@ def test_get_alerts_by_severity(monitor):
             prediction_id=f"pred_{i}",
             features={"feature1": float(i)},
             prediction=0.8,
-            latency_ms=100.0
+            latency_ms=100.0,
         )
 
     # Alerts should be WARNING severity
@@ -557,7 +570,7 @@ def test_get_alerts_by_type(monitor):
             prediction_id=f"pred_{i}",
             features={"feature1": float(i)},
             prediction=0.8,
-            latency_ms=100.0
+            latency_ms=100.0,
         )
 
     latency_alerts = monitor.get_alerts(alert_type=AlertType.HIGH_LATENCY)
@@ -574,7 +587,7 @@ def test_get_alerts_by_time_window(monitor):
             prediction_id=f"pred_{i}",
             features={"feature1": float(i)},
             prediction=0.8,
-            latency_ms=100.0
+            latency_ms=100.0,
         )
 
     # Get recent alerts (should get all)
@@ -595,7 +608,7 @@ def test_acknowledge_alert(monitor):
         prediction_id="pred_001",
         features={"feature1": 0.5},
         prediction=0.8,
-        latency_ms=100.0
+        latency_ms=100.0,
     )
 
     # Get the alert
@@ -627,7 +640,7 @@ def test_alert_callback(monitor):
         model_version="v1.0",
         alert_callback=callback,
         latency_threshold_ms=10.0,
-        mock_mode=True
+        mock_mode=True,
     )
 
     # Generate an alert
@@ -635,7 +648,7 @@ def test_alert_callback(monitor):
         prediction_id="pred_001",
         features={"feature1": 0.5},
         prediction=0.8,
-        latency_ms=100.0
+        latency_ms=100.0,
     )
 
     # Callback should have been called
@@ -647,32 +660,34 @@ def test_alert_callback(monitor):
 # ==============================================================================
 
 
-def test_get_drift_history(monitor, sample_reference_data, sample_current_data_with_drift):
+def test_get_drift_history(
+    monitor, sample_reference_data, sample_current_data_with_drift
+):
     """Test getting drift history"""
     monitor.set_reference_data(features=sample_reference_data)
 
     # Run drift detection
     monitor.detect_feature_drift(
-        current_data=sample_current_data_with_drift,
-        method=DriftMethod.KS_TEST
+        current_data=sample_current_data_with_drift, method=DriftMethod.KS_TEST
     )
 
     history = monitor.get_drift_history()
     assert len(history) == 3  # 3 features checked
 
 
-def test_get_drift_history_by_feature(monitor, sample_reference_data, sample_current_data_with_drift):
+def test_get_drift_history_by_feature(
+    monitor, sample_reference_data, sample_current_data_with_drift
+):
     """Test filtering drift history by feature"""
     monitor.set_reference_data(features=sample_reference_data)
 
     monitor.detect_feature_drift(
-        current_data=sample_current_data_with_drift,
-        method=DriftMethod.KS_TEST
+        current_data=sample_current_data_with_drift, method=DriftMethod.KS_TEST
     )
 
-    history = monitor.get_drift_history(feature='feature1')
+    history = monitor.get_drift_history(feature="feature1")
     assert len(history) == 1
-    assert history[0].feature_name == 'feature1'
+    assert history[0].feature_name == "feature1"
 
 
 def test_get_performance_history(monitor):
@@ -683,7 +698,7 @@ def test_get_performance_history(monitor):
             prediction_id=f"pred_{i}",
             features={"feature1": float(i)},
             prediction=float(i) * 0.1,
-            latency_ms=50.0
+            latency_ms=50.0,
         )
 
     # Calculate performance multiple times
@@ -701,7 +716,7 @@ def test_get_prediction_history(monitor):
             prediction_id=f"pred_{i}",
             features={"feature1": float(i)},
             prediction=float(i) * 0.1,
-            latency_ms=50.0
+            latency_ms=50.0,
         )
 
     history = monitor.get_prediction_history()
@@ -717,7 +732,7 @@ def test_get_prediction_history_exclude_errors(monitor):
             features={"feature1": float(i)},
             prediction=float(i) * 0.1 if error is None else None,
             latency_ms=50.0,
-            error=error
+            error=error,
         )
 
     # Get all predictions
@@ -734,7 +749,9 @@ def test_get_prediction_history_exclude_errors(monitor):
 # ==============================================================================
 
 
-def test_complete_monitoring_workflow(monitor, sample_reference_data, sample_current_data_with_drift):
+def test_complete_monitoring_workflow(
+    monitor, sample_reference_data, sample_current_data_with_drift
+):
     """Test complete monitoring workflow"""
     # 1. Set reference data
     monitor.set_reference_data(features=sample_reference_data)
@@ -744,18 +761,21 @@ def test_complete_monitoring_workflow(monitor, sample_reference_data, sample_cur
         monitor.log_prediction(
             prediction_id=f"pred_{i:03d}",
             features={
-                'feature1': sample_current_data_with_drift.iloc[i % len(sample_current_data_with_drift)]['feature1'],
-                'feature2': sample_current_data_with_drift.iloc[i % len(sample_current_data_with_drift)]['feature2'],
+                "feature1": sample_current_data_with_drift.iloc[
+                    i % len(sample_current_data_with_drift)
+                ]["feature1"],
+                "feature2": sample_current_data_with_drift.iloc[
+                    i % len(sample_current_data_with_drift)
+                ]["feature2"],
             },
             prediction=float(i) * 0.1,
             actual=float(i) * 0.1 + 0.01,
-            latency_ms=50.0 + i
+            latency_ms=50.0 + i,
         )
 
     # 3. Detect drift
     drift_results = monitor.detect_feature_drift(
-        current_data=sample_current_data_with_drift,
-        method=DriftMethod.KS_TEST
+        current_data=sample_current_data_with_drift, method=DriftMethod.KS_TEST
     )
 
     # 4. Calculate performance
@@ -782,13 +802,12 @@ def test_thread_safety(monitor):
                 prediction_id=f"pred_{i:04d}",
                 features={"feature1": float(i)},
                 prediction=float(i) * 0.1,
-                latency_ms=50.0
+                latency_ms=50.0,
             )
 
     # Create multiple threads
     threads = [
-        threading.Thread(target=log_predictions, args=(i * 100,))
-        for i in range(5)
+        threading.Thread(target=log_predictions, args=(i * 100,)) for i in range(5)
     ]
 
     # Start all threads
@@ -812,11 +831,10 @@ def test_drift_detection_with_empty_data(monitor, sample_reference_data):
     """Test drift detection with empty current data"""
     monitor.set_reference_data(features=sample_reference_data)
 
-    empty_df = pd.DataFrame(columns=['feature1', 'feature2', 'feature3'])
+    empty_df = pd.DataFrame(columns=["feature1", "feature2", "feature3"])
 
     results = monitor.detect_feature_drift(
-        current_data=empty_df,
-        method=DriftMethod.KS_TEST
+        current_data=empty_df, method=DriftMethod.KS_TEST
     )
 
     # Should handle gracefully
@@ -828,19 +846,20 @@ def test_drift_detection_with_missing_features(monitor, sample_reference_data):
     monitor.set_reference_data(features=sample_reference_data)
 
     # Current data missing feature3
-    partial_df = pd.DataFrame({
-        'feature1': np.random.normal(0, 1, 100),
-        'feature2': np.random.uniform(0, 10, 100),
-    })
+    partial_df = pd.DataFrame(
+        {
+            "feature1": np.random.normal(0, 1, 100),
+            "feature2": np.random.uniform(0, 10, 100),
+        }
+    )
 
     results = monitor.detect_feature_drift(
-        current_data=partial_df,
-        method=DriftMethod.KS_TEST
+        current_data=partial_df, method=DriftMethod.KS_TEST
     )
 
     # Should only check available features
     assert len(results) == 2
-    assert all(r.feature_name in ['feature1', 'feature2'] for r in results)
+    assert all(r.feature_name in ["feature1", "feature2"] for r in results)
 
 
 def test_performance_with_no_actuals(monitor):
@@ -850,7 +869,7 @@ def test_performance_with_no_actuals(monitor):
             prediction_id=f"pred_{i}",
             features={"feature1": float(i)},
             prediction=float(i) * 0.1,
-            latency_ms=50.0
+            latency_ms=50.0,
             # No actual provided
         )
 

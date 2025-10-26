@@ -41,9 +41,7 @@ def registry(temp_registry_path):
 def registry_with_mlflow(temp_registry_path):
     """Create a model registry with MLflow enabled"""
     return ModelRegistry(
-        registry_path=temp_registry_path,
-        enable_mlflow=True,
-        mock_mode=True
+        registry_path=temp_registry_path, enable_mlflow=True, mock_mode=True
     )
 
 
@@ -64,9 +62,7 @@ def test_registry_initialization_basic(temp_registry_path):
 def test_registry_initialization_with_mlflow(temp_registry_path):
     """Test registry initialization with MLflow"""
     registry = ModelRegistry(
-        registry_path=temp_registry_path,
-        enable_mlflow=True,
-        mock_mode=True
+        registry_path=temp_registry_path, enable_mlflow=True, mock_mode=True
     )
 
     assert registry.enable_mlflow is True
@@ -96,7 +92,7 @@ def test_register_model_basic(registry):
         algorithm="RandomForest",
         created_by="test_user",
         metrics={"accuracy": 0.85, "f1": 0.83},
-        hyperparameters={"n_estimators": 100, "max_depth": 10}
+        hyperparameters={"n_estimators": 100, "max_depth": 10},
     )
 
     assert model_version.model_id == "test_model"
@@ -116,7 +112,7 @@ def test_register_multiple_versions(registry):
         framework="sklearn",
         algorithm="RandomForest",
         created_by="user1",
-        metrics={"accuracy": 0.80}
+        metrics={"accuracy": 0.80},
     )
 
     # Register v1.1.0
@@ -127,7 +123,7 @@ def test_register_multiple_versions(registry):
         algorithm="GradientBoosting",
         created_by="user2",
         metrics={"accuracy": 0.85},
-        parent_version="1.0.0"
+        parent_version="1.0.0",
     )
 
     assert len(registry.models["model_a"]) == 2
@@ -150,7 +146,7 @@ def test_register_model_with_all_metadata(registry):
         artifact_path="/models/full_model/1.0.0",
         description="Production CNN model",
         tags={"team": "ml", "project": "nba"},
-        stage=ModelStage.PRODUCTION
+        stage=ModelStage.PRODUCTION,
     )
 
     assert model_version.training_dataset == "nba_stats_2023"
@@ -172,14 +168,14 @@ def test_get_model_version_specific(registry):
         version="1.0.0",
         framework="sklearn",
         algorithm="SVM",
-        created_by="user1"
+        created_by="user1",
     )
     registry.register_model(
         model_id="model_b",
         version="2.0.0",
         framework="sklearn",
         algorithm="SVM",
-        created_by="user1"
+        created_by="user1",
     )
 
     version = registry.get_model_version("model_b", "1.0.0")
@@ -195,14 +191,14 @@ def test_get_model_version_latest(registry):
         version="1.0.0",
         framework="sklearn",
         algorithm="SVM",
-        created_by="user1"
+        created_by="user1",
     )
     registry.register_model(
         model_id="model_c",
         version="2.0.0",
         framework="sklearn",
         algorithm="SVM",
-        created_by="user1"
+        created_by="user1",
     )
 
     # Get latest (should be v2.0.0)
@@ -227,7 +223,7 @@ def test_get_production_model(registry):
         framework="sklearn",
         algorithm="RandomForest",
         created_by="user1",
-        stage=ModelStage.DEVELOPMENT
+        stage=ModelStage.DEVELOPMENT,
     )
     registry.register_model(
         model_id="prod_model",
@@ -235,7 +231,7 @@ def test_get_production_model(registry):
         framework="sklearn",
         algorithm="RandomForest",
         created_by="user1",
-        stage=ModelStage.PRODUCTION
+        stage=ModelStage.PRODUCTION,
     )
 
     prod_version = registry.get_production_model("prod_model")
@@ -253,7 +249,7 @@ def test_get_production_model_none_available(registry):
         framework="sklearn",
         algorithm="RandomForest",
         created_by="user1",
-        stage=ModelStage.DEVELOPMENT
+        stage=ModelStage.DEVELOPMENT,
     )
 
     prod_version = registry.get_production_model("dev_model")
@@ -274,7 +270,7 @@ def test_promote_model(registry):
         framework="sklearn",
         algorithm="RandomForest",
         created_by="user1",
-        stage=ModelStage.DEVELOPMENT
+        stage=ModelStage.DEVELOPMENT,
     )
 
     result = registry.promote_model("promote_test", "1.0.0", ModelStage.PRODUCTION)
@@ -302,14 +298,14 @@ def test_search_models_by_framework(registry):
         version="1.0.0",
         framework="sklearn",
         algorithm="SVM",
-        created_by="user1"
+        created_by="user1",
     )
     registry.register_model(
         model_id="model_2",
         version="1.0.0",
         framework="pytorch",
         algorithm="CNN",
-        created_by="user1"
+        created_by="user1",
     )
 
     results = registry.search_models(framework="sklearn")
@@ -326,7 +322,7 @@ def test_search_models_by_stage(registry):
         framework="sklearn",
         algorithm="SVM",
         created_by="user1",
-        stage=ModelStage.PRODUCTION
+        stage=ModelStage.PRODUCTION,
     )
     registry.register_model(
         model_id="model_4",
@@ -334,7 +330,7 @@ def test_search_models_by_stage(registry):
         framework="sklearn",
         algorithm="SVM",
         created_by="user1",
-        stage=ModelStage.DEVELOPMENT
+        stage=ModelStage.DEVELOPMENT,
     )
 
     results = registry.search_models(stage=ModelStage.PRODUCTION)
@@ -351,7 +347,7 @@ def test_search_models_by_min_accuracy(registry):
         framework="sklearn",
         algorithm="SVM",
         created_by="user1",
-        metrics={"accuracy": 0.75}
+        metrics={"accuracy": 0.75},
     )
     registry.register_model(
         model_id="model_6",
@@ -359,7 +355,7 @@ def test_search_models_by_min_accuracy(registry):
         framework="sklearn",
         algorithm="SVM",
         created_by="user1",
-        metrics={"accuracy": 0.90}
+        metrics={"accuracy": 0.90},
     )
 
     results = registry.search_models(min_accuracy=0.85)
@@ -378,7 +374,7 @@ def test_search_models_combined_criteria(registry):
         created_by="user1",
         metrics={"accuracy": 0.90},
         tags={"team": "ml"},
-        stage=ModelStage.PRODUCTION
+        stage=ModelStage.PRODUCTION,
     )
     registry.register_model(
         model_id="model_8",
@@ -387,14 +383,14 @@ def test_search_models_combined_criteria(registry):
         algorithm="CNN",
         created_by="user1",
         metrics={"accuracy": 0.85},
-        stage=ModelStage.DEVELOPMENT
+        stage=ModelStage.DEVELOPMENT,
     )
 
     results = registry.search_models(
         framework="sklearn",
         stage=ModelStage.PRODUCTION,
         tags={"team": "ml"},
-        min_accuracy=0.85
+        min_accuracy=0.85,
     )
 
     assert len(results) == 1
@@ -413,7 +409,7 @@ def test_get_model_lineage(registry):
         version="1.0.0",
         framework="sklearn",
         algorithm="RandomForest",
-        created_by="user1"
+        created_by="user1",
     )
     registry.register_model(
         model_id="lineage_model",
@@ -421,7 +417,7 @@ def test_get_model_lineage(registry):
         framework="sklearn",
         algorithm="RandomForest",
         created_by="user1",
-        parent_version="1.0.0"
+        parent_version="1.0.0",
     )
     registry.register_model(
         model_id="lineage_model",
@@ -429,7 +425,7 @@ def test_get_model_lineage(registry):
         framework="sklearn",
         algorithm="RandomForest",
         created_by="user1",
-        parent_version="1.1.0"
+        parent_version="1.1.0",
     )
 
     lineage = registry.get_model_lineage("lineage_model", "1.2.0")
@@ -453,7 +449,7 @@ def test_get_registry_stats(registry):
         framework="sklearn",
         algorithm="SVM",
         created_by="user1",
-        stage=ModelStage.PRODUCTION
+        stage=ModelStage.PRODUCTION,
     )
     registry.register_model(
         model_id="stats_model_2",
@@ -461,7 +457,7 @@ def test_get_registry_stats(registry):
         framework="pytorch",
         algorithm="CNN",
         created_by="user1",
-        stage=ModelStage.DEVELOPMENT
+        stage=ModelStage.DEVELOPMENT,
     )
     registry.register_model(
         model_id="stats_model_2",
@@ -469,7 +465,7 @@ def test_get_registry_stats(registry):
         framework="pytorch",
         algorithm="CNN",
         created_by="user1",
-        stage=ModelStage.STAGING
+        stage=ModelStage.STAGING,
     )
 
     stats = registry.get_registry_stats()
@@ -496,7 +492,7 @@ def test_compare_models(registry):
         framework="sklearn",
         algorithm="RandomForest",
         created_by="user1",
-        metrics={"accuracy": 0.80, "f1": 0.78}
+        metrics={"accuracy": 0.80, "f1": 0.78},
     )
     registry.register_model(
         model_id="compare_model",
@@ -504,7 +500,7 @@ def test_compare_models(registry):
         framework="sklearn",
         algorithm="GradientBoosting",
         created_by="user2",
-        metrics={"accuracy": 0.90, "f1": 0.88}
+        metrics={"accuracy": 0.90, "f1": 0.88},
     )
 
     comparison = registry.compare_models("compare_model", "1.0.0", "2.0.0")
@@ -523,7 +519,7 @@ def test_compare_models_invalid_version(registry):
         version="1.0.0",
         framework="sklearn",
         algorithm="RandomForest",
-        created_by="user1"
+        created_by="user1",
     )
 
     comparison = registry.compare_models("invalid_compare", "1.0.0", "2.0.0")
@@ -545,7 +541,7 @@ def test_registry_persistence(temp_registry_path):
         version="1.0.0",
         framework="sklearn",
         algorithm="RandomForest",
-        created_by="user1"
+        created_by="user1",
     )
 
     # Create second instance and verify model exists

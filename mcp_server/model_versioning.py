@@ -19,6 +19,7 @@ try:
     import mlflow
     import mlflow.sklearn
     import mlflow.pytorch
+
     MLFLOW_AVAILABLE = True
 except ImportError:
     MLFLOW_AVAILABLE = False
@@ -34,25 +35,34 @@ try:
     from mcp_server.error_handling import handle_errors, NBAMCPError
     from mcp_server.monitoring import track_metric
     from mcp_server.rbac import require_permission, Permission
+
     WEEK1_AVAILABLE = True
 except ImportError:
     WEEK1_AVAILABLE = False
+
     # Fallback decorators
     def handle_errors(reraise=True, notify=False):
         def decorator(func):
             return func
+
         return decorator
+
     def track_metric(metric_name):
         def decorator(func):
             return func
+
         return decorator
+
     def require_permission(permission):
         def decorator(func):
             return func
+
         return decorator
+
     class Permission:
         READ = "read"
         WRITE = "write"
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -70,9 +80,7 @@ class ModelRegistry:
     """
 
     def __init__(
-        self,
-        tracking_uri: str = "sqlite:///mlflow.db",
-        mock_mode: bool = False
+        self, tracking_uri: str = "sqlite:///mlflow.db", mock_mode: bool = False
     ):
         """
         Initialize model registry.
@@ -88,7 +96,9 @@ class ModelRegistry:
             try:
                 mlflow.set_tracking_uri(tracking_uri)
                 self.client = mlflow.tracking.MlflowClient()
-                logger.info(f"ModelRegistry initialized with MLflow (uri: {tracking_uri})")
+                logger.info(
+                    f"ModelRegistry initialized with MLflow (uri: {tracking_uri})"
+                )
             except Exception as e:
                 logger.warning(f"Could not initialize MLflow client: {e}")
                 self.mock_mode = True
@@ -223,7 +233,9 @@ class ModelRegistry:
             True if promotion successful
         """
         if self.mock_mode or not MLFLOW_AVAILABLE:
-            logger.info(f"Mock mode: Would promote {model_name} v{version} to production")
+            logger.info(
+                f"Mock mode: Would promote {model_name} v{version} to production"
+            )
             return True
 
         self.client.transition_model_version_stage(
@@ -383,12 +395,14 @@ class ModelRegistry:
             Comparison results
         """
         if self.mock_mode or not MLFLOW_AVAILABLE:
-            logger.info(f"Mock mode: Would compare {model_name} v{version1} vs v{version2}")
+            logger.info(
+                f"Mock mode: Would compare {model_name} v{version1} vs v{version2}"
+            )
             return {
                 "model_name": model_name,
                 "version1": {"version": version1, "metrics": {}, "params": {}},
                 "version2": {"version": version2, "metrics": {}, "params": {}},
-                "metrics_comparison": {}
+                "metrics_comparison": {},
             }
 
         v1_info = self.get_model_info(model_name, version1)
@@ -408,7 +422,7 @@ class ModelRegistry:
                 "v1": val1,
                 "v2": val2,
                 "diff": val2 - val1,
-                "pct_change": ((val2 - val1) / val1 * 100) if val1 != 0 else 0
+                "pct_change": ((val2 - val1) / val1 * 100) if val1 != 0 else 0,
             }
 
         comparison = {

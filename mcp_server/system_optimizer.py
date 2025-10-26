@@ -149,7 +149,7 @@ class LRUCache:
                 "hits": self.hits,
                 "misses": self.misses,
                 "hit_rate": hit_rate,
-                "utilization": len(self.cache) / self.max_size
+                "utilization": len(self.cache) / self.max_size,
             }
 
 
@@ -266,6 +266,7 @@ def profile_performance(func: Callable) -> Callable:
     Returns:
         Wrapped function
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         start_time = time.time()
@@ -274,9 +275,7 @@ def profile_performance(func: Callable) -> Callable:
             result = func(*args, **kwargs)
             elapsed = time.time() - start_time
 
-            logger.info(
-                f"Performance: {func.__name__} completed in {elapsed:.4f}s"
-            )
+            logger.info(f"Performance: {func.__name__} completed in {elapsed:.4f}s")
 
             # Store in result if it's a dict
             if isinstance(result, dict):
@@ -312,6 +311,7 @@ def batch_optimize(batch_size: int = 100):
     Returns:
         Decorator function
     """
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(items: List[Any], *args, **kwargs):
@@ -322,7 +322,7 @@ def batch_optimize(batch_size: int = 100):
             total_batches = (len(items) + batch_size - 1) // batch_size
 
             for i in range(0, len(items), batch_size):
-                batch = items[i:i + batch_size]
+                batch = items[i : i + batch_size]
                 batch_num = i // batch_size + 1
 
                 logger.debug(
@@ -348,10 +348,7 @@ class ConnectionPool:
     """
 
     def __init__(
-        self,
-        create_connection: Callable,
-        max_size: int = 10,
-        timeout: float = 30.0
+        self, create_connection: Callable, max_size: int = 10, timeout: float = 30.0
     ):
         """
         Initialize connection pool.
@@ -420,7 +417,7 @@ class ConnectionPool:
         """Close all connections in pool."""
         with self.lock:
             for conn in self.pool:
-                if hasattr(conn, 'close'):
+                if hasattr(conn, "close"):
                     try:
                         conn.close()
                     except Exception as e:
@@ -436,7 +433,7 @@ class ConnectionPool:
                 "pool_size": len(self.pool),
                 "in_use": len(self.in_use),
                 "max_size": self.max_size,
-                "utilization": len(self.in_use) / self.max_size
+                "utilization": len(self.in_use) / self.max_size,
             }
 
 
@@ -463,8 +460,7 @@ class MemoryManager:
         # Handle collections recursively
         if isinstance(obj, dict):
             size += sum(
-                MemoryManager.get_object_size(k) +
-                MemoryManager.get_object_size(v)
+                MemoryManager.get_object_size(k) + MemoryManager.get_object_size(v)
                 for k, v in obj.items()
             )
         elif isinstance(obj, (list, tuple, set)):
@@ -483,7 +479,7 @@ class MemoryManager:
         Returns:
             Formatted string (e.g., "1.5 MB")
         """
-        for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+        for unit in ["B", "KB", "MB", "GB", "TB"]:
             if size_bytes < 1024.0:
                 return f"{size_bytes:.2f} {unit}"
             size_bytes /= 1024.0
@@ -499,7 +495,7 @@ class QueryOptimizer:
     def optimize_dataframe_query(
         df,
         filters: List[Tuple[str, str, Any]],
-        select_columns: Optional[List[str]] = None
+        select_columns: Optional[List[str]] = None,
     ):
         """
         Optimize pandas DataFrame queries.
@@ -521,21 +517,21 @@ class QueryOptimizer:
 
         # Apply filters efficiently
         for column, operator, value in filters:
-            if operator == '==':
+            if operator == "==":
                 result = result[result[column] == value]
-            elif operator == '!=':
+            elif operator == "!=":
                 result = result[result[column] != value]
-            elif operator == '>':
+            elif operator == ">":
                 result = result[result[column] > value]
-            elif operator == '>=':
+            elif operator == ">=":
                 result = result[result[column] >= value]
-            elif operator == '<':
+            elif operator == "<":
                 result = result[result[column] < value]
-            elif operator == '<=':
+            elif operator == "<=":
                 result = result[result[column] <= value]
-            elif operator == 'in':
+            elif operator == "in":
                 result = result[result[column].isin(value)]
-            elif operator == 'not in':
+            elif operator == "not in":
                 result = result[~result[column].isin(value)]
 
         # Select only needed columns
@@ -600,5 +596,5 @@ def get_system_stats() -> Dict[str, Any]:
     return {
         "model_cache": _model_cache.get_stats(),
         "data_cache": _data_cache.get_stats(),
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }

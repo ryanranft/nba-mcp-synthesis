@@ -40,29 +40,39 @@ try:
     from mcp_server.error_handling import handle_errors, NBAMCPError
     from mcp_server.monitoring import track_metric
     from mcp_server.rbac import require_permission, Permission
+
     WEEK1_AVAILABLE = True
 except ImportError:
     WEEK1_AVAILABLE = False
+
     # Fallback decorators
     def handle_errors(reraise=True, notify=False):
         def decorator(func):
             return func
+
         return decorator
+
     def track_metric(metric_name):
         def decorator(func):
             return func
+
         return decorator
+
     def require_permission(permission):
         def decorator(func):
             return func
+
         return decorator
+
     class Permission:
         READ = "read"
         WRITE = "write"
 
+
 # MLflow imports
 try:
     from mcp_server.mlflow_integration import get_mlflow_tracker
+
     MLFLOW_AVAILABLE = True
 except ImportError:
     MLFLOW_AVAILABLE = False
@@ -201,7 +211,7 @@ class ModelMonitor:
         enable_mlflow: bool = False,
         mlflow_experiment: Optional[str] = None,
         alert_callback: Optional[Callable[[Alert], None]] = None,
-        mock_mode: bool = False
+        mock_mode: bool = False,
     ):
         """
         Initialize model monitor.
@@ -247,8 +257,7 @@ class ModelMonitor:
             try:
                 experiment_name = mlflow_experiment or f"monitoring_{model_id}"
                 self.mlflow_tracker = get_mlflow_tracker(
-                    experiment_name=experiment_name,
-                    mock_mode=mock_mode
+                    experiment_name=experiment_name, mock_mode=mock_mode
                 )
                 logger.info(f"MLflow tracking enabled for {model_id}")
             except Exception as e:
@@ -269,7 +278,7 @@ class ModelMonitor:
         prediction: Any,
         actual: Optional[Any] = None,
         latency_ms: float = 0.0,
-        error: Optional[str] = None
+        error: Optional[str] = None,
     ) -> None:
         """
         Log a prediction for monitoring.
@@ -290,7 +299,7 @@ class ModelMonitor:
             prediction=prediction,
             actual=actual,
             latency_ms=latency_ms,
-            error=error
+            error=error,
         )
 
         with self.lock:
@@ -305,8 +314,8 @@ class ModelMonitor:
                 details={
                     "prediction_id": prediction_id,
                     "latency_ms": latency_ms,
-                    "threshold_ms": self.latency_threshold_ms
-                }
+                    "threshold_ms": self.latency_threshold_ms,
+                },
             )
 
         if error:
@@ -314,22 +323,26 @@ class ModelMonitor:
                 alert_type=AlertType.HIGH_ERROR_RATE,
                 severity=AlertSeverity.WARNING,
                 message=f"Prediction error: {error}",
-                details={
-                    "prediction_id": prediction_id,
-                    "error": error
-                }
+                details={"prediction_id": prediction_id, "error": error},
             )
 
         # Log to MLflow
         if self.enable_mlflow and self.mlflow_tracker:
             try:
-                with self.mlflow_tracker.start_run(f"prediction_{prediction_id}") as run_id:
-                    self.mlflow_tracker.log_metrics({
-                        "latency_ms": latency_ms,
-                        "has_error": 1.0 if error else 0.0
-                    })
-                    if actual is not None and isinstance(prediction, (int, float)) and isinstance(actual, (int, float)):
-                        self.mlflow_tracker.log_metric("absolute_error", abs(prediction - actual))
+                with self.mlflow_tracker.start_run(
+                    f"prediction_{prediction_id}"
+                ) as run_id:
+                    self.mlflow_tracker.log_metrics(
+                        {"latency_ms": latency_ms, "has_error": 1.0 if error else 0.0}
+                    )
+                    if (
+                        actual is not None
+                        and isinstance(prediction, (int, float))
+                        and isinstance(actual, (int, float))
+                    ):
+                        self.mlflow_tracker.log_metric(
+                            "absolute_error", abs(prediction - actual)
+                        )
             except Exception as e:
                 logger.warning(f"Could not log prediction to MLflow: {e}")
 
@@ -339,9 +352,7 @@ class ModelMonitor:
     @require_permission(Permission.WRITE)
     @track_metric("model_monitor.set_reference_data")
     def set_reference_data(
-        self,
-        features: pd.DataFrame,
-        predictions: Optional[np.ndarray] = None
+        self, features: pd.DataFrame, predictions: Optional[np.ndarray] = None
     ) -> None:
         """
         Set reference data for drift detection.
@@ -367,7 +378,7 @@ class ModelMonitor:
         self,
         current_data: pd.DataFrame,
         method: DriftMethod = DriftMethod.KS_TEST,
-        features: Optional[List[str]] = None
+        features: Optional[List[str]] = None,
     ) -> List[DriftResult]:
         """
         Detect feature drift using specified method.
@@ -411,7 +422,7 @@ class ModelMonitor:
                     drift_score=drift_score,
                     threshold=self.drift_threshold,
                     is_drift=is_drift,
-                    p_value=p_value
+                    p_value=p_value,
                 )
             elif method == DriftMethod.PSI:
                 drift_score = self._psi(reference, current)
@@ -420,7 +431,7 @@ class ModelMonitor:
                     method=method,
                     drift_score=drift_score,
                     threshold=self.drift_threshold,
-                    is_drift=drift_score > self.drift_threshold
+                    is_drift=drift_score > self.drift_threshold,
                 )
             elif method == DriftMethod.KL_DIVERGENCE:
                 drift_score = self._kl_divergence(reference, current)
@@ -429,7 +440,7 @@ class ModelMonitor:
                     method=method,
                     drift_score=drift_score,
                     threshold=self.drift_threshold,
-                    is_drift=drift_score > self.drift_threshold
+                    is_drift=drift_score > self.drift_threshold,
                 )
             else:
                 raise ValueError(f"Unknown drift method: {method}")
@@ -450,20 +461,26 @@ class ModelMonitor:
                         "method": method.value,
                         "drift_score": drift_score,
                         "threshold": self.drift_threshold,
-                        "p_value": result.p_value
-                    }
+                        "p_value": result.p_value,
+                    },
                 )
 
         # Log to MLflow
         if self.enable_mlflow and self.mlflow_tracker:
             try:
                 drift_count = sum(1 for r in results if r.is_drift)
-                with self.mlflow_tracker.start_run(f"drift_check_{datetime.now().isoformat()}") as run_id:
-                    self.mlflow_tracker.log_metrics({
-                        "features_checked": len(results),
-                        "features_drifted": drift_count,
-                        "drift_rate": drift_count / len(results) if results else 0.0
-                    })
+                with self.mlflow_tracker.start_run(
+                    f"drift_check_{datetime.now().isoformat()}"
+                ) as run_id:
+                    self.mlflow_tracker.log_metrics(
+                        {
+                            "features_checked": len(results),
+                            "features_drifted": drift_count,
+                            "drift_rate": (
+                                drift_count / len(results) if results else 0.0
+                            ),
+                        }
+                    )
             except Exception as e:
                 logger.warning(f"Could not log drift metrics to MLflow: {e}")
 
@@ -475,9 +492,7 @@ class ModelMonitor:
         return results
 
     def _ks_test(
-        self,
-        reference: pd.Series,
-        current: pd.Series
+        self, reference: pd.Series, current: pd.Series
     ) -> Tuple[float, float, bool]:
         """
         Kolmogorov-Smirnov test for drift detection.
@@ -493,12 +508,7 @@ class ModelMonitor:
         is_drift = p_value < self.drift_threshold
         return statistic, p_value, is_drift
 
-    def _psi(
-        self,
-        reference: pd.Series,
-        current: pd.Series,
-        n_bins: int = 10
-    ) -> float:
+    def _psi(self, reference: pd.Series, current: pd.Series, n_bins: int = 10) -> float:
         """
         Population Stability Index (PSI) for drift detection.
 
@@ -536,10 +546,7 @@ class ModelMonitor:
         return float(psi)
 
     def _kl_divergence(
-        self,
-        reference: pd.Series,
-        current: pd.Series,
-        n_bins: int = 10
+        self, reference: pd.Series, current: pd.Series, n_bins: int = 10
     ) -> float:
         """
         Kullback-Leibler divergence for drift detection.
@@ -580,10 +587,7 @@ class ModelMonitor:
     @handle_errors(reraise=True, notify=True)
     @require_permission(Permission.READ)
     @track_metric("model_monitor.calculate_performance")
-    def calculate_performance(
-        self,
-        window_hours: int = 24
-    ) -> PerformanceMetrics:
+    def calculate_performance(self, window_hours: int = 24) -> PerformanceMetrics:
         """
         Calculate performance metrics for recent predictions.
 
@@ -597,8 +601,7 @@ class ModelMonitor:
 
         with self.lock:
             recent_predictions = [
-                p for p in self.prediction_history
-                if p.timestamp >= cutoff_time
+                p for p in self.prediction_history if p.timestamp >= cutoff_time
             ]
 
         if not recent_predictions:
@@ -610,24 +613,25 @@ class ModelMonitor:
         error_rate = errors / total if total > 0 else 0.0
 
         avg_latency = (
-            sum(p.latency_ms for p in recent_predictions) / total
-            if total > 0 else 0.0
+            sum(p.latency_ms for p in recent_predictions) / total if total > 0 else 0.0
         )
 
         # Calculate accuracy if we have actuals
         predictions_with_actuals = [
-            p for p in recent_predictions
-            if p.actual is not None and p.error is None
+            p for p in recent_predictions if p.actual is not None and p.error is None
         ]
 
         accuracy = None
         if predictions_with_actuals:
             # For classification (assuming binary or matching predictions)
             correct = sum(
-                1 for p in predictions_with_actuals
-                if (isinstance(p.prediction, (int, float)) and
-                    isinstance(p.actual, (int, float)) and
-                    abs(p.prediction - p.actual) < 0.5)  # Threshold for classification
+                1
+                for p in predictions_with_actuals
+                if (
+                    isinstance(p.prediction, (int, float))
+                    and isinstance(p.actual, (int, float))
+                    and abs(p.prediction - p.actual) < 0.5
+                )  # Threshold for classification
             )
             accuracy = correct / len(predictions_with_actuals)
 
@@ -635,7 +639,7 @@ class ModelMonitor:
             accuracy=accuracy,
             avg_latency_ms=avg_latency,
             error_rate=error_rate,
-            total_predictions=total
+            total_predictions=total,
         )
 
         with self.lock:
@@ -651,18 +655,20 @@ class ModelMonitor:
                     "error_rate": error_rate,
                     "threshold": self.error_rate_threshold,
                     "window_hours": window_hours,
-                    "total_predictions": total
-                }
+                    "total_predictions": total,
+                },
             )
 
         # Log to MLflow
         if self.enable_mlflow and self.mlflow_tracker:
             try:
-                with self.mlflow_tracker.start_run(f"performance_{datetime.now().isoformat()}") as run_id:
+                with self.mlflow_tracker.start_run(
+                    f"performance_{datetime.now().isoformat()}"
+                ) as run_id:
                     metrics_dict = {
                         "avg_latency_ms": avg_latency,
                         "error_rate": error_rate,
-                        "total_predictions": float(total)
+                        "total_predictions": float(total),
                     }
                     if accuracy is not None:
                         metrics_dict["accuracy"] = accuracy
@@ -682,7 +688,7 @@ class ModelMonitor:
         alert_type: AlertType,
         severity: AlertSeverity,
         message: str,
-        details: Dict[str, Any]
+        details: Dict[str, Any],
     ) -> None:
         """
         Generate a monitoring alert.
@@ -700,7 +706,7 @@ class ModelMonitor:
             alert_type=alert_type,
             severity=severity,
             message=message,
-            details=details
+            details=details,
         )
 
         with self.lock:
@@ -722,7 +728,7 @@ class ModelMonitor:
         severity: Optional[AlertSeverity] = None,
         alert_type: Optional[AlertType] = None,
         acknowledged: Optional[bool] = None,
-        hours: Optional[int] = None
+        hours: Optional[int] = None,
     ) -> List[Alert]:
         """
         Get monitoring alerts with optional filtering.
@@ -779,9 +785,7 @@ class ModelMonitor:
     @handle_errors(reraise=False, notify=False)
     @require_permission(Permission.READ)
     def get_drift_history(
-        self,
-        feature: Optional[str] = None,
-        hours: Optional[int] = None
+        self, feature: Optional[str] = None, hours: Optional[int] = None
     ) -> List[DriftResult]:
         """
         Get drift detection history.
@@ -808,8 +812,7 @@ class ModelMonitor:
     @handle_errors(reraise=False, notify=False)
     @require_permission(Permission.READ)
     def get_performance_history(
-        self,
-        hours: Optional[int] = None
+        self, hours: Optional[int] = None
     ) -> List[PerformanceMetrics]:
         """
         Get performance metrics history.
@@ -832,9 +835,7 @@ class ModelMonitor:
     @handle_errors(reraise=False, notify=False)
     @require_permission(Permission.READ)
     def get_prediction_history(
-        self,
-        hours: Optional[int] = None,
-        include_errors: bool = True
+        self, hours: Optional[int] = None, include_errors: bool = True
     ) -> List[PredictionRecord]:
         """
         Get prediction history.

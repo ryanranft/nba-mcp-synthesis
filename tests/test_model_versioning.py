@@ -75,7 +75,7 @@ def test_log_model_mock_mode(mock_registry, mock_model):
         model=mock_model,
         model_name="test_model",
         params={"n_estimators": 100},
-        metrics={"accuracy": 0.85}
+        metrics={"accuracy": 0.85},
     )
 
     assert run_id is not None
@@ -90,7 +90,7 @@ def test_log_model_with_all_parameters(mock_registry, mock_model):
         experiment_name="test_experiment",
         params={"learning_rate": 0.001, "batch_size": 32},
         metrics={"accuracy": 0.92, "loss": 0.15},
-        artifacts={"config": {"version": "1.0.0"}}
+        artifacts={"config": {"version": "1.0.0"}},
     )
 
     assert run_id is not None
@@ -228,7 +228,7 @@ def test_complete_workflow_mock_mode(mock_registry, mock_model):
         model=mock_model,
         model_name="workflow_model",
         params={"n_estimators": 100},
-        metrics={"accuracy": 0.85}
+        metrics={"accuracy": 0.85},
     )
 
     assert run_id is not None
@@ -276,8 +276,7 @@ def test_log_model_handles_exceptions(mock_registry):
     # In mock mode, should not raise exceptions
     try:
         run_id = mock_registry.log_model(
-            model=None,  # Invalid model
-            model_name="error_model"
+            model=None, model_name="error_model"  # Invalid model
         )
         # Mock mode should return a mock run_id
         assert run_id is not None
@@ -330,7 +329,7 @@ def test_multiple_model_logging(mock_registry, mock_model):
             model=mock_model,
             model_name=f"model_{i}",
             params={"iteration": i},
-            metrics={"accuracy": 0.80 + (i * 0.05)}
+            metrics={"accuracy": 0.80 + (i * 0.05)},
         )
         run_ids.append(run_id)
 

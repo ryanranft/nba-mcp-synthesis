@@ -188,7 +188,9 @@ def test_execute_pipeline_stage_failure(simple_stage_fn, failing_stage_fn):
 
     pipeline.add_stage(PipelineStage.DATA_VALIDATION, simple_stage_fn)
     pipeline.add_stage(PipelineStage.MODEL_TRAINING, failing_stage_fn)  # This will fail
-    pipeline.add_stage(PipelineStage.MODEL_EVALUATION, simple_stage_fn)  # Should not execute
+    pipeline.add_stage(
+        PipelineStage.MODEL_EVALUATION, simple_stage_fn
+    )  # Should not execute
 
     run = pipeline.execute()
 

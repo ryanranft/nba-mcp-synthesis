@@ -35,7 +35,11 @@ import numpy as np
 
 # Week 1 Integration
 try:
-    from mcp_server.error_handling import handle_errors, ErrorContext, DataValidationError
+    from mcp_server.error_handling import (
+        handle_errors,
+        ErrorContext,
+        DataValidationError,
+    )
     from mcp_server.monitoring import get_health_monitor, track_metric
     from mcp_server.rbac import require_permission, Permission
 
@@ -169,7 +173,9 @@ class MockMLflowClient:
         self._run_counter = 0
         self._experiment_counter = 0
 
-    def create_experiment(self, name: str, artifact_location: Optional[str] = None) -> str:
+    def create_experiment(
+        self, name: str, artifact_location: Optional[str] = None
+    ) -> str:
         """Create a mock experiment"""
         exp_id = f"exp_{self._experiment_counter}"
         self._experiment_counter += 1
@@ -213,7 +219,9 @@ class MockMLflowClient:
             self.runs[run_id]["params"][key] = str(value)
             logger.debug(f"[MOCK] Logged param: {key}={value}")
 
-    def log_metric(self, run_id: str, key: str, value: float, step: Optional[int] = None):
+    def log_metric(
+        self, run_id: str, key: str, value: float, step: Optional[int] = None
+    ):
         """Log a metric"""
         if run_id in self.runs:
             metric_key = f"{key}_{step}" if step is not None else key
@@ -449,7 +457,11 @@ class MLflowExperimentTracker:
     @handle_errors(reraise=True, notify=False)
     @require_permission(Permission.WRITE)
     def log_metric(
-        self, key: str, value: float, step: Optional[int] = None, run_id: Optional[str] = None
+        self,
+        key: str,
+        value: float,
+        step: Optional[int] = None,
+        run_id: Optional[str] = None,
     ):
         """
         Log a metric to the active or specified run.
@@ -470,12 +482,17 @@ class MLflowExperimentTracker:
             with mlflow.start_run(run_id=target_run):
                 mlflow.log_metric(key, value, step)
 
-        logger.debug(f"📊 Logged metric: {key}={value}" + (f" (step {step})" if step else ""))
+        logger.debug(
+            f"📊 Logged metric: {key}={value}" + (f" (step {step})" if step else "")
+        )
 
     @handle_errors(reraise=True, notify=False)
     @require_permission(Permission.WRITE)
     def log_metrics(
-        self, metrics: Dict[str, float], step: Optional[int] = None, run_id: Optional[str] = None
+        self,
+        metrics: Dict[str, float],
+        step: Optional[int] = None,
+        run_id: Optional[str] = None,
     ):
         """
         Log multiple metrics to the active or specified run.
@@ -492,7 +509,12 @@ class MLflowExperimentTracker:
 
     @handle_errors(reraise=True, notify=False)
     @require_permission(Permission.WRITE)
-    def log_artifact(self, local_path: str, artifact_path: Optional[str] = None, run_id: Optional[str] = None):
+    def log_artifact(
+        self,
+        local_path: str,
+        artifact_path: Optional[str] = None,
+        run_id: Optional[str] = None,
+    ):
         """
         Log an artifact (file) to the active or specified run.
 

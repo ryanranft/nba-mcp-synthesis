@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 class HealthStatus(Enum):
     """Health status levels."""
+
     HEALTHY = "healthy"
     DEGRADED = "degraded"
     UNHEALTHY = "unhealthy"
@@ -58,7 +59,7 @@ class HealthCheckResult:
         status: HealthStatus,
         message: str,
         details: Optional[Dict[str, Any]] = None,
-        response_time_ms: Optional[float] = None
+        response_time_ms: Optional[float] = None,
     ):
         """Initialize health check result."""
         self.status = status
@@ -74,7 +75,7 @@ class HealthCheckResult:
             "message": self.message,
             "details": self.details,
             "timestamp": self.timestamp.isoformat(),
-            "response_time_ms": self.response_time_ms
+            "response_time_ms": self.response_time_ms,
         }
 
     def is_healthy(self) -> bool:
@@ -100,14 +101,14 @@ class SystemHealthChecker:
     def __init__(self):
         """Initialize system health checker."""
         self.component_checkers = {
-            'data_validation': self._check_data_validation_health,
-            'model_training': self._check_training_health,
-            'model_deployment': self._check_deployment_health,
-            'model_monitoring': self._check_monitoring_health,
-            'database': self._check_database_health,
-            'storage': self._check_storage_health,
-            'mlflow': self._check_mlflow_health,
-            'cache': self._check_cache_health
+            "data_validation": self._check_data_validation_health,
+            "model_training": self._check_training_health,
+            "model_deployment": self._check_deployment_health,
+            "model_monitoring": self._check_monitoring_health,
+            "database": self._check_database_health,
+            "storage": self._check_storage_health,
+            "mlflow": self._check_mlflow_health,
+            "cache": self._check_cache_health,
         }
 
     def check_system_health(self) -> Dict[str, Any]:
@@ -133,7 +134,7 @@ class SystemHealthChecker:
                 component_results[component_name] = {
                     "status": HealthStatus.UNKNOWN.value,
                     "message": f"Health check failed: {str(e)}",
-                    "timestamp": datetime.now().isoformat()
+                    "timestamp": datetime.now().isoformat(),
                 }
                 statuses.append(HealthStatus.UNKNOWN)
 
@@ -147,10 +148,8 @@ class SystemHealthChecker:
             "components": component_results,
             "timestamp": datetime.now().isoformat(),
             "response_time_ms": elapsed_ms,
-            "healthy_components": sum(
-                1 for s in statuses if s == HealthStatus.HEALTHY
-            ),
-            "total_components": len(statuses)
+            "healthy_components": sum(1 for s in statuses if s == HealthStatus.HEALTHY),
+            "total_components": len(statuses),
         }
 
     def check_component_health(self, component_name: str) -> HealthCheckResult:
@@ -189,7 +188,9 @@ class SystemHealthChecker:
             details = {
                 "pipeline_initialized": True,
                 "cleaner_initialized": True,
-                "validation_rules_count": len(pipeline.rules) if hasattr(pipeline, 'rules') else 0
+                "validation_rules_count": (
+                    len(pipeline.rules) if hasattr(pipeline, "rules") else 0
+                ),
             }
 
             elapsed_ms = (time.time() - start_time) * 1000
@@ -198,20 +199,20 @@ class SystemHealthChecker:
                 status=HealthStatus.HEALTHY,
                 message="Data validation components operational",
                 details=details,
-                response_time_ms=elapsed_ms
+                response_time_ms=elapsed_ms,
             )
 
         except ImportError as e:
             return HealthCheckResult(
                 status=HealthStatus.UNHEALTHY,
                 message=f"Failed to import data validation components: {e}",
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
         except Exception as e:
             return HealthCheckResult(
                 status=HealthStatus.DEGRADED,
                 message=f"Data validation initialization issues: {e}",
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
 
     def _check_training_health(self) -> HealthCheckResult:
@@ -229,7 +230,7 @@ class SystemHealthChecker:
             details = {
                 "pipeline_initialized": True,
                 "tuner_initialized": True,
-                "has_mlflow": hasattr(pipeline, 'mlflow_client')
+                "has_mlflow": hasattr(pipeline, "mlflow_client"),
             }
 
             elapsed_ms = (time.time() - start_time) * 1000
@@ -238,20 +239,20 @@ class SystemHealthChecker:
                 status=HealthStatus.HEALTHY,
                 message="Model training components operational",
                 details=details,
-                response_time_ms=elapsed_ms
+                response_time_ms=elapsed_ms,
             )
 
         except ImportError as e:
             return HealthCheckResult(
                 status=HealthStatus.UNHEALTHY,
                 message=f"Failed to import training components: {e}",
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
         except Exception as e:
             return HealthCheckResult(
                 status=HealthStatus.DEGRADED,
                 message=f"Training initialization issues: {e}",
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
 
     def _check_deployment_health(self) -> HealthCheckResult:
@@ -269,7 +270,11 @@ class SystemHealthChecker:
             details = {
                 "serving_initialized": True,
                 "registry_initialized": True,
-                "deployed_models": len(serving.deployed_models) if hasattr(serving, 'deployed_models') else 0
+                "deployed_models": (
+                    len(serving.deployed_models)
+                    if hasattr(serving, "deployed_models")
+                    else 0
+                ),
             }
 
             elapsed_ms = (time.time() - start_time) * 1000
@@ -278,20 +283,20 @@ class SystemHealthChecker:
                 status=HealthStatus.HEALTHY,
                 message="Model deployment components operational",
                 details=details,
-                response_time_ms=elapsed_ms
+                response_time_ms=elapsed_ms,
             )
 
         except ImportError as e:
             return HealthCheckResult(
                 status=HealthStatus.UNHEALTHY,
                 message=f"Failed to import deployment components: {e}",
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
         except Exception as e:
             return HealthCheckResult(
                 status=HealthStatus.DEGRADED,
                 message=f"Deployment initialization issues: {e}",
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
 
     def _check_monitoring_health(self) -> HealthCheckResult:
@@ -302,15 +307,12 @@ class SystemHealthChecker:
             from mcp_server.model_monitoring import ModelMonitor
 
             # Check if component can be instantiated
-            monitor = ModelMonitor(
-                model_id="health_check_test",
-                model_version="v1.0"
-            )
+            monitor = ModelMonitor(model_id="health_check_test", model_version="v1.0")
 
             details = {
                 "monitor_initialized": True,
                 "drift_detection_available": True,
-                "alert_system_available": hasattr(monitor, 'alerts')
+                "alert_system_available": hasattr(monitor, "alerts"),
             }
 
             elapsed_ms = (time.time() - start_time) * 1000
@@ -319,20 +321,20 @@ class SystemHealthChecker:
                 status=HealthStatus.HEALTHY,
                 message="Model monitoring components operational",
                 details=details,
-                response_time_ms=elapsed_ms
+                response_time_ms=elapsed_ms,
             )
 
         except ImportError as e:
             return HealthCheckResult(
                 status=HealthStatus.UNHEALTHY,
                 message=f"Failed to import monitoring components: {e}",
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
         except Exception as e:
             return HealthCheckResult(
                 status=HealthStatus.DEGRADED,
                 message=f"Monitoring initialization issues: {e}",
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
 
     def _check_database_health(self) -> HealthCheckResult:
@@ -343,9 +345,10 @@ class SystemHealthChecker:
             # Import database tools if available
             try:
                 import sqlite3
+
                 # Try to create in-memory database as health check
-                conn = sqlite3.connect(':memory:')
-                conn.execute('SELECT 1')
+                conn = sqlite3.connect(":memory:")
+                conn.execute("SELECT 1")
                 conn.close()
 
                 elapsed_ms = (time.time() - start_time) * 1000
@@ -354,21 +357,21 @@ class SystemHealthChecker:
                     status=HealthStatus.HEALTHY,
                     message="Database connectivity operational",
                     details={"database_type": "sqlite3"},
-                    response_time_ms=elapsed_ms
+                    response_time_ms=elapsed_ms,
                 )
 
             except Exception as e:
                 return HealthCheckResult(
                     status=HealthStatus.DEGRADED,
                     message=f"Database connectivity issues: {e}",
-                    details={"error": str(e)}
+                    details={"error": str(e)},
                 )
 
         except ImportError:
             return HealthCheckResult(
                 status=HealthStatus.UNKNOWN,
                 message="Database module not available",
-                details={}
+                details={},
             )
 
     def _check_storage_health(self) -> HealthCheckResult:
@@ -380,8 +383,8 @@ class SystemHealthChecker:
             import tempfile
 
             # Try to write/read from temp directory
-            with tempfile.NamedTemporaryFile(mode='w', delete=True) as f:
-                f.write('health_check')
+            with tempfile.NamedTemporaryFile(mode="w", delete=True) as f:
+                f.write("health_check")
                 f.flush()
                 # If we can write, storage is working
                 pass
@@ -392,14 +395,14 @@ class SystemHealthChecker:
                 status=HealthStatus.HEALTHY,
                 message="Storage system operational",
                 details={"temp_dir_writable": True},
-                response_time_ms=elapsed_ms
+                response_time_ms=elapsed_ms,
             )
 
         except Exception as e:
             return HealthCheckResult(
                 status=HealthStatus.UNHEALTHY,
                 message=f"Storage system issues: {e}",
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
 
     def _check_mlflow_health(self) -> HealthCheckResult:
@@ -412,10 +415,7 @@ class SystemHealthChecker:
             # Check if MLflow is available
             version = mlflow.__version__
 
-            details = {
-                "mlflow_version": version,
-                "mlflow_available": True
-            }
+            details = {"mlflow_version": version, "mlflow_available": True}
 
             elapsed_ms = (time.time() - start_time) * 1000
 
@@ -423,20 +423,20 @@ class SystemHealthChecker:
                 status=HealthStatus.HEALTHY,
                 message="MLflow system operational",
                 details=details,
-                response_time_ms=elapsed_ms
+                response_time_ms=elapsed_ms,
             )
 
         except ImportError:
             return HealthCheckResult(
                 status=HealthStatus.DEGRADED,
                 message="MLflow not available (optional)",
-                details={"mlflow_available": False}
+                details={"mlflow_available": False},
             )
         except Exception as e:
             return HealthCheckResult(
                 status=HealthStatus.DEGRADED,
                 message=f"MLflow issues: {e}",
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
 
     def _check_cache_health(self) -> HealthCheckResult:
@@ -456,7 +456,7 @@ class SystemHealthChecker:
             details = {
                 "model_cache": model_stats,
                 "data_cache": data_stats,
-                "caches_operational": True
+                "caches_operational": True,
             }
 
             elapsed_ms = (time.time() - start_time) * 1000
@@ -465,20 +465,20 @@ class SystemHealthChecker:
                 status=HealthStatus.HEALTHY,
                 message="Caching system operational",
                 details=details,
-                response_time_ms=elapsed_ms
+                response_time_ms=elapsed_ms,
             )
 
         except ImportError as e:
             return HealthCheckResult(
                 status=HealthStatus.DEGRADED,
                 message=f"Cache system not available: {e}",
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
         except Exception as e:
             return HealthCheckResult(
                 status=HealthStatus.DEGRADED,
                 message=f"Cache system issues: {e}",
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
 
     def _aggregate_status(self, statuses: List[HealthStatus]) -> HealthStatus:
@@ -529,8 +529,8 @@ class SystemHealthChecker:
         summary += f"Response Time: {health['response_time_ms']:.2f}ms\n\n"
 
         summary += "Component Status:\n"
-        for component, result in health['components'].items():
-            status_symbol = "✓" if result['status'] == "healthy" else "✗"
+        for component, result in health["components"].items():
+            status_symbol = "✓" if result["status"] == "healthy" else "✗"
             summary += f"  {status_symbol} {component}: {result['status']}\n"
 
         return summary
@@ -546,7 +546,7 @@ def quick_health_check() -> bool:
     try:
         checker = SystemHealthChecker()
         health = checker.check_system_health()
-        return health['status'] in ['healthy', 'degraded']
+        return health["status"] in ["healthy", "degraded"]
     except Exception as e:
         logger.error(f"Quick health check failed: {e}")
         return False

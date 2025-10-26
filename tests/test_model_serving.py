@@ -46,7 +46,11 @@ class MockModel:
         self.predict_count += 1
         if self.should_fail:
             raise ValueError("Mock prediction failure")
-        return [self.prediction_value] * len(inputs) if isinstance(inputs, list) else self.prediction_value
+        return (
+            [self.prediction_value] * len(inputs)
+            if isinstance(inputs, list)
+            else self.prediction_value
+        )
 
 
 # ==============================================================================
@@ -121,7 +125,7 @@ def test_deploy_model_basic(serving_manager, mock_model):
         model_id="test_model",
         version="v1.0",
         model_instance=mock_model,
-        set_active=True
+        set_active=True,
     )
 
     assert result is True
@@ -166,7 +170,7 @@ def test_deploy_model_with_error_threshold(serving_manager, mock_model):
         version="v1.0",
         model_instance=mock_model,
         error_threshold=0.3,  # Custom threshold
-        set_active=True
+        set_active=True,
     )
 
     assert result is True
@@ -236,8 +240,12 @@ def test_predict_with_ab_testing(serving_manager):
     serving_manager.setup_ab_test("ab_model", {"v1.0": 0.8, "v2.0": 0.2})
 
     # Make predictions with controlled traffic split
-    serving_manager.predict("ab_model", [1, 2, 3], traffic_split=0.5)  # Should go to v1.0
-    serving_manager.predict("ab_model", [1, 2, 3], traffic_split=0.9)  # Should go to v2.0
+    serving_manager.predict(
+        "ab_model", [1, 2, 3], traffic_split=0.5
+    )  # Should go to v1.0
+    serving_manager.predict(
+        "ab_model", [1, 2, 3], traffic_split=0.9
+    )  # Should go to v2.0
 
     # At least one prediction should have been made
     assert model_v1.predict_count + model_v2.predict_count >= 2
@@ -251,7 +259,9 @@ def test_predict_nonexistent_model(serving_manager):
 
 def test_predict_concurrent(serving_manager, mock_model):
     """Test concurrent predictions are thread-safe"""
-    serving_manager.deploy_model("concurrent_model", "v1.0", mock_model, set_active=True)
+    serving_manager.deploy_model(
+        "concurrent_model", "v1.0", mock_model, set_active=True
+    )
 
     results = []
     errors = []
@@ -291,7 +301,7 @@ def test_circuit_breaker_trips_on_error_rate(serving_manager, failing_model):
         "v1.0",
         failing_model,
         error_threshold=0.4,  # 40% error threshold
-        set_active=True
+        set_active=True,
     )
 
     model = serving_manager.models["failing_model"][0]
@@ -324,7 +334,9 @@ def test_circuit_breaker_prevents_predictions(serving_manager):
 
 def test_circuit_breaker_reset(serving_manager, failing_model):
     """Test manual circuit breaker reset"""
-    serving_manager.deploy_model("reset_model", "v1.0", failing_model, error_threshold=0.3, set_active=True)
+    serving_manager.deploy_model(
+        "reset_model", "v1.0", failing_model, error_threshold=0.3, set_active=True
+    )
 
     model = serving_manager.models["reset_model"][0]
 
@@ -366,7 +378,9 @@ def test_health_check_healthy(serving_manager, mock_model):
 
 def test_health_check_unhealthy_circuit_breaker(serving_manager, failing_model):
     """Test health check when circuit breaker is open"""
-    serving_manager.deploy_model("unhealthy_model", "v1.0", failing_model, error_threshold=0.3, set_active=True)
+    serving_manager.deploy_model(
+        "unhealthy_model", "v1.0", failing_model, error_threshold=0.3, set_active=True
+    )
 
     model = serving_manager.models["unhealthy_model"][0]
 
@@ -419,7 +433,9 @@ def test_setup_ab_test(serving_manager):
 def test_setup_ab_test_invalid_weights(serving_manager):
     """Test A/B test setup with invalid weights (don't sum to 1.0)"""
     serving_manager.deploy_model("invalid_ab", "v1.0", MockModel(0.80), set_active=True)
-    serving_manager.deploy_model("invalid_ab", "v1.1", MockModel(0.85), set_active=False)
+    serving_manager.deploy_model(
+        "invalid_ab", "v1.1", MockModel(0.85), set_active=False
+    )
 
     # Weights sum to 0.9, should fail
     result = serving_manager.setup_ab_test("invalid_ab", {"v1.0": 0.5, "v1.1": 0.4})
@@ -429,7 +445,9 @@ def test_setup_ab_test_invalid_weights(serving_manager):
 
 def test_setup_ab_test_nonexistent_version(serving_manager):
     """Test A/B test setup with nonexistent version"""
-    serving_manager.deploy_model("missing_ver", "v1.0", MockModel(0.80), set_active=True)
+    serving_manager.deploy_model(
+        "missing_ver", "v1.0", MockModel(0.80), set_active=True
+    )
 
     # v2.0 doesn't exist
     result = serving_manager.setup_ab_test("missing_ver", {"v1.0": 0.6, "v2.0": 0.4})

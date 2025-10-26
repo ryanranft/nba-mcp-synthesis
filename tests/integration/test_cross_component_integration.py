@@ -39,6 +39,7 @@ from mcp_server.model_monitoring import ModelMonitor, DriftMethod
 try:
     from mcp_server.error_handling import handle_errors
     from mcp_server.monitoring import track_metric
+
     WEEK1_AVAILABLE = True
 except ImportError:
     WEEK1_AVAILABLE = False
@@ -55,16 +56,18 @@ def sample_nba_data():
     np.random.seed(42)
     n = 100
 
-    return pd.DataFrame({
-        'game_id': range(1, n + 1),
-        'home_team': np.random.choice(['Lakers', 'Warriors'], n),
-        'away_team': np.random.choice(['Celtics', 'Heat'], n),
-        'home_ppg': np.random.normal(110, 10, n),
-        'away_ppg': np.random.normal(108, 10, n),
-        'home_def_rating': np.random.normal(105, 5, n),
-        'away_def_rating': np.random.normal(107, 5, n),
-        'home_win': np.random.choice([0, 1], n),
-    })
+    return pd.DataFrame(
+        {
+            "game_id": range(1, n + 1),
+            "home_team": np.random.choice(["Lakers", "Warriors"], n),
+            "away_team": np.random.choice(["Celtics", "Heat"], n),
+            "home_ppg": np.random.normal(110, 10, n),
+            "away_ppg": np.random.normal(108, 10, n),
+            "home_def_rating": np.random.normal(105, 5, n),
+            "away_def_rating": np.random.normal(107, 5, n),
+            "home_win": np.random.choice([0, 1], n),
+        }
+    )
 
 
 @pytest.fixture
@@ -91,13 +94,11 @@ def test_validation_to_training_integration(sample_nba_data, temp_workspace):
 
     # ========== Step 1: Validate Data ==========
     config = PipelineConfig(
-        enable_schema_validation=True,
-        enable_quality_check=True,
-        min_quality_score=0.7
+        enable_schema_validation=True, enable_quality_check=True, min_quality_score=0.7
     )
 
     pipeline = DataValidationPipeline(config=config)
-    val_result = pipeline.validate(sample_nba_data, 'nba_games')
+    val_result = pipeline.validate(sample_nba_data, "nba_games")
 
     assert val_result.passed, "Validation should pass"
 
@@ -107,16 +108,16 @@ def test_validation_to_training_integration(sample_nba_data, temp_workspace):
         sample_nba_data.copy(),
         remove_outliers=True,
         outlier_method=OutlierMethod.IQR,
-        impute_missing=True
+        impute_missing=True,
     )
 
     assert len(cleaned_data) > 0
     assert cleaned_data.isnull().sum().sum() == 0
 
     # ========== Step 3: Train Model ==========
-    feature_cols = ['home_ppg', 'away_ppg', 'home_def_rating', 'away_def_rating']
+    feature_cols = ["home_ppg", "away_ppg", "home_def_rating", "away_def_rating"]
     X = cleaned_data[feature_cols]
-    y = cleaned_data['home_win']
+    y = cleaned_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
@@ -141,7 +142,7 @@ def test_data_profiling_informs_feature_engineering(sample_nba_data):
 
     # ========== Step 1: Profile Data ==========
     profiler = DataProfiler()
-    profile = profiler.profile_dataset(sample_nba_data, 'nba_games')
+    profile = profiler.profile_dataset(sample_nba_data, "nba_games")
 
     assert profile.row_count > 0
     assert len(profile.column_stats) > 0
@@ -151,19 +152,19 @@ def test_data_profiling_informs_feature_engineering(sample_nba_data):
     engineered_data = sample_nba_data.copy()
 
     # Point differential (based on ppg distributions)
-    engineered_data['point_diff'] = (
-        engineered_data['home_ppg'] - engineered_data['away_ppg']
+    engineered_data["point_diff"] = (
+        engineered_data["home_ppg"] - engineered_data["away_ppg"]
     )
 
     # Defensive advantage
-    engineered_data['def_advantage'] = (
-        engineered_data['away_def_rating'] - engineered_data['home_def_rating']
+    engineered_data["def_advantage"] = (
+        engineered_data["away_def_rating"] - engineered_data["home_def_rating"]
     )
 
     # ========== Step 3: Train with Engineered Features ==========
-    feature_cols = ['home_ppg', 'away_ppg', 'point_diff', 'def_advantage']
+    feature_cols = ["home_ppg", "away_ppg", "point_diff", "def_advantage"]
     X = engineered_data[feature_cols]
-    y = engineered_data['home_win']
+    y = engineered_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
@@ -193,9 +194,9 @@ def test_training_to_registry_integration(sample_nba_data, temp_workspace):
     """
 
     # ========== Step 1: Train Model ==========
-    feature_cols = ['home_ppg', 'away_ppg', 'home_def_rating', 'away_def_rating']
+    feature_cols = ["home_ppg", "away_ppg", "home_def_rating", "away_def_rating"]
     X = sample_nba_data[feature_cols]
-    y = sample_nba_data['home_win']
+    y = sample_nba_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
@@ -206,7 +207,7 @@ def test_training_to_registry_integration(sample_nba_data, temp_workspace):
     test_score = model.score(X_test, y_test)
 
     # ========== Step 2: Register in Registry ==========
-    registry = ModelRegistry(registry_dir=str(temp_workspace / 'registry'))
+    registry = ModelRegistry(registry_dir=str(temp_workspace / "registry"))
 
     registry.register_model(
         model_id="nba_model",
@@ -215,7 +216,7 @@ def test_training_to_registry_integration(sample_nba_data, temp_workspace):
         framework="sklearn",
         algorithm="RandomForest",
         metrics={"train_acc": train_score, "test_acc": test_score},
-        hyperparameters={"n_estimators": 10}
+        hyperparameters={"n_estimators": 10},
     )
 
     # ========== Step 3: Promote Through Stages ==========
@@ -233,10 +234,7 @@ def test_training_to_registry_integration(sample_nba_data, temp_workspace):
     # ========== Step 4: Deploy from Registry ==========
     serving = ModelServingManager(mock_mode=True)
     deploy_success = serving.deploy_model(
-        "nba_model",
-        prod_model.version,
-        model,
-        set_active=True
+        "nba_model", prod_model.version, model, set_active=True
     )
 
     assert deploy_success
@@ -256,13 +254,12 @@ def test_mlflow_tracking_to_registry(sample_nba_data, temp_workspace):
 
     # ========== Step 1: Track Experiment ==========
     mlflow_tracker = get_mlflow_tracker(
-        experiment_name="nba_experiment",
-        mock_mode=True
+        experiment_name="nba_experiment", mock_mode=True
     )
 
-    feature_cols = ['home_ppg', 'away_ppg']
+    feature_cols = ["home_ppg", "away_ppg"]
     X = sample_nba_data[feature_cols]
-    y = sample_nba_data['home_win']
+    y = sample_nba_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
@@ -277,7 +274,7 @@ def test_mlflow_tracking_to_registry(sample_nba_data, temp_workspace):
         mlflow_tracker.log_metric("accuracy", score)
 
     # ========== Step 2: Register in Model Registry ==========
-    registry = ModelRegistry(registry_dir=str(temp_workspace / 'registry'))
+    registry = ModelRegistry(registry_dir=str(temp_workspace / "registry"))
 
     registry.register_model(
         model_id="nba_mlflow_model",
@@ -286,17 +283,14 @@ def test_mlflow_tracking_to_registry(sample_nba_data, temp_workspace):
         framework="sklearn",
         algorithm="RandomForest",
         metrics={"accuracy": score},
-        tags={"mlflow_run_id": run_id} if run_id else {}
+        tags={"mlflow_run_id": run_id} if run_id else {},
     )
 
     # ========== Step 3: Deploy ==========
     serving = ModelServingManager(mock_mode=True)
     serving.deploy_model("nba_mlflow_model", "v1.0", model, set_active=True)
 
-    predictions = serving.predict(
-        "nba_mlflow_model",
-        X_test.head(5).to_dict('records')
-    )
+    predictions = serving.predict("nba_mlflow_model", X_test.head(5).to_dict("records"))
 
     assert predictions is not None
     assert len(predictions) == 5
@@ -321,9 +315,9 @@ def test_serving_to_monitoring_integration(sample_nba_data):
     """
 
     # ========== Step 1: Deploy Model ==========
-    feature_cols = ['home_ppg', 'away_ppg']
+    feature_cols = ["home_ppg", "away_ppg"]
     X = sample_nba_data[feature_cols]
-    y = sample_nba_data['home_win']
+    y = sample_nba_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
@@ -334,11 +328,7 @@ def test_serving_to_monitoring_integration(sample_nba_data):
     serving.deploy_model("nba_model", "v1.0", model, set_active=True)
 
     # ========== Step 2: Setup Monitoring ==========
-    monitor = ModelMonitor(
-        model_id="nba_model",
-        model_version="v1.0",
-        mock_mode=True
-    )
+    monitor = ModelMonitor(model_id="nba_model", model_version="v1.0", mock_mode=True)
 
     monitor.set_reference_data(features=X_train)
 
@@ -354,7 +344,7 @@ def test_serving_to_monitoring_integration(sample_nba_data):
             features=row.to_dict(),
             prediction=prediction[0],
             actual=y_test.iloc[i],
-            latency_ms=np.random.uniform(10, 50)
+            latency_ms=np.random.uniform(10, 50),
         )
 
     # ========== Step 4: Calculate Performance ==========
@@ -363,7 +353,9 @@ def test_serving_to_monitoring_integration(sample_nba_data):
     assert perf.total_predictions == 10
     assert perf.accuracy is not None
 
-    print(f"\n✅ Serving → Monitoring integration: {perf.total_predictions} predictions logged")
+    print(
+        f"\n✅ Serving → Monitoring integration: {perf.total_predictions} predictions logged"
+    )
 
 
 def test_monitoring_triggers_redeployment(sample_nba_data):
@@ -377,9 +369,9 @@ def test_monitoring_triggers_redeployment(sample_nba_data):
     4. Trigger redeployment/rollback
     """
 
-    feature_cols = ['home_ppg', 'away_ppg']
+    feature_cols = ["home_ppg", "away_ppg"]
     X = sample_nba_data[feature_cols]
-    y = sample_nba_data['home_win']
+    y = sample_nba_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
@@ -399,7 +391,7 @@ def test_monitoring_triggers_redeployment(sample_nba_data):
         model_id="nba_model",
         model_version="v2.0",
         error_rate_threshold=0.3,
-        mock_mode=True
+        mock_mode=True,
     )
 
     # Log predictions with high error rate
@@ -411,15 +403,11 @@ def test_monitoring_triggers_redeployment(sample_nba_data):
                 X_test.iloc[i].to_dict(),
                 pred,
                 actual=y_test.iloc[i],
-                latency_ms=50
+                latency_ms=50,
             )
         except Exception as e:
             monitor.log_prediction(
-                f"pred_{i}",
-                X_test.iloc[i].to_dict(),
-                None,
-                error=str(e),
-                latency_ms=0
+                f"pred_{i}", X_test.iloc[i].to_dict(), None, error=str(e), latency_ms=0
             )
 
     # ========== Check for Performance Degradation ==========
@@ -431,7 +419,9 @@ def test_monitoring_triggers_redeployment(sample_nba_data):
         active_version = serving.active_models.get("nba_model")
         assert active_version == "v1.0"
 
-        print(f"\n✅ Monitoring triggered rollback to v1.0 (error_rate={perf.error_rate:.2%})")
+        print(
+            f"\n✅ Monitoring triggered rollback to v1.0 (error_rate={perf.error_rate:.2%})"
+        )
     else:
         print(f"\n✅ Monitoring integration verified")
 
@@ -449,7 +439,7 @@ def test_week1_error_handling_integration(sample_nba_data):
 
     # Data Validation
     pipeline = DataValidationPipeline()
-    result = pipeline.validate(sample_nba_data, 'nba_games')
+    result = pipeline.validate(sample_nba_data, "nba_games")
     assert result is not None  # Should handle errors gracefully
 
     # Training
@@ -467,9 +457,9 @@ def test_week1_metrics_collection(sample_nba_data):
 
     # Components with @track_metric should collect metrics
 
-    feature_cols = ['home_ppg', 'away_ppg']
+    feature_cols = ["home_ppg", "away_ppg"]
     X = sample_nba_data[feature_cols]
-    y = sample_nba_data['home_win']
+    y = sample_nba_data["home_win"]
 
     model = RandomForestClassifier(n_estimators=10, random_state=42)
     model.fit(X, y)
@@ -479,7 +469,7 @@ def test_week1_metrics_collection(sample_nba_data):
     serving.deploy_model("nba_model", "v1.0", model, set_active=True)
 
     # Make predictions (should track prediction metrics)
-    serving.predict("nba_model", X.head(5).to_dict('records'))
+    serving.predict("nba_model", X.head(5).to_dict("records"))
 
     # Metrics should be tracked
     metrics = serving.get_model_metrics("nba_model", "v1.0")
@@ -509,9 +499,9 @@ def test_mlflow_end_to_end(sample_nba_data, temp_workspace):
     # ========== Step 1: Track Training Experiment ==========
     tracker = get_mlflow_tracker("nba_e2e", mock_mode=True)
 
-    feature_cols = ['home_ppg', 'away_ppg']
+    feature_cols = ["home_ppg", "away_ppg"]
     X = sample_nba_data[feature_cols]
-    y = sample_nba_data['home_win']
+    y = sample_nba_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
@@ -529,12 +519,7 @@ def test_mlflow_end_to_end(sample_nba_data, temp_workspace):
     serving.deploy_model("nba_model", "v1.0", model, set_active=True)
 
     # ========== Step 3: Monitor ==========
-    monitor = ModelMonitor(
-        "nba_model",
-        "v1.0",
-        enable_mlflow=True,
-        mock_mode=True
-    )
+    monitor = ModelMonitor("nba_model", "v1.0", enable_mlflow=True, mock_mode=True)
 
     monitor.set_reference_data(features=X_train)
 
@@ -548,12 +533,14 @@ def test_mlflow_end_to_end(sample_nba_data, temp_workspace):
             X_test.iloc[i].to_dict(),
             prediction[0],
             actual=y_test.iloc[i],
-            latency_ms=25.0
+            latency_ms=25.0,
         )
 
     perf = monitor.calculate_performance(window_hours=24)
 
-    print(f"\n✅ MLflow E2E integration: trained, deployed, monitored {perf.total_predictions} predictions")
+    print(
+        f"\n✅ MLflow E2E integration: trained, deployed, monitored {perf.total_predictions} predictions"
+    )
 
 
 # ==============================================================================
@@ -568,32 +555,20 @@ def test_configuration_consistency_across_components(temp_workspace):
 
     # Data validation config
     val_config = PipelineConfig(
-        enable_schema_validation=True,
-        enable_quality_check=True
+        enable_schema_validation=True, enable_quality_check=True
     )
     assert val_config.enable_schema_validation
 
     # Training config
-    train_config = TrainingConfig(
-        model_type="classification",
-        validation_split=0.2
-    )
+    train_config = TrainingConfig(model_type="classification", validation_split=0.2)
     assert train_config.validation_split == 0.2
 
     # Serving config (via initialization)
-    serving = ModelServingManager(
-        error_threshold=0.1,
-        mock_mode=True
-    )
+    serving = ModelServingManager(error_threshold=0.1, mock_mode=True)
     assert serving.error_threshold == 0.1
 
     # Monitoring config (via initialization)
-    monitor = ModelMonitor(
-        "model",
-        "v1.0",
-        drift_threshold=0.05,
-        mock_mode=True
-    )
+    monitor = ModelMonitor("model", "v1.0", drift_threshold=0.05, mock_mode=True)
     assert monitor.drift_threshold == 0.05
 
     print("\n✅ Configuration consistency verified")
@@ -603,19 +578,14 @@ def test_state_persistence_across_components(temp_workspace):
     """Test state persists correctly across components"""
 
     # ========== Registry Persistence ==========
-    registry1 = ModelRegistry(registry_dir=str(temp_workspace / 'registry'))
+    registry1 = ModelRegistry(registry_dir=str(temp_workspace / "registry"))
 
     registry1.register_model(
-        "model1",
-        "v1.0",
-        ModelStage.PRODUCTION,
-        "sklearn",
-        "RF",
-        {"acc": 0.9}
+        "model1", "v1.0", ModelStage.PRODUCTION, "sklearn", "RF", {"acc": 0.9}
     )
 
     # Create new registry instance - should load persisted state
-    registry2 = ModelRegistry(registry_dir=str(temp_workspace / 'registry'))
+    registry2 = ModelRegistry(registry_dir=str(temp_workspace / "registry"))
 
     model = registry2.get_model("model1", stage=ModelStage.PRODUCTION)
     assert model is not None
@@ -627,9 +597,9 @@ def test_state_persistence_across_components(temp_workspace):
 def test_recovery_scenarios(sample_nba_data):
     """Test system recovers from various failure scenarios"""
 
-    feature_cols = ['home_ppg', 'away_ppg']
+    feature_cols = ["home_ppg", "away_ppg"]
     X = sample_nba_data[feature_cols]
-    y = sample_nba_data['home_win']
+    y = sample_nba_data["home_win"]
 
     model = RandomForestClassifier(n_estimators=10, random_state=42)
     model.fit(X, y)

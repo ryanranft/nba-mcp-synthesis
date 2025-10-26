@@ -53,23 +53,29 @@ def nba_sample_data():
     np.random.seed(42)
     n_samples = 200
 
-    data = pd.DataFrame({
-        'game_id': range(1, n_samples + 1),
-        'home_team': np.random.choice(['Lakers', 'Warriors', 'Celtics', 'Heat'], n_samples),
-        'away_team': np.random.choice(['Lakers', 'Warriors', 'Celtics', 'Heat'], n_samples),
-        'home_ppg': np.random.normal(110, 10, n_samples),
-        'away_ppg': np.random.normal(108, 10, n_samples),
-        'home_def_rating': np.random.normal(105, 5, n_samples),
-        'away_def_rating': np.random.normal(107, 5, n_samples),
-        'home_wins': np.random.randint(20, 50, n_samples),
-        'away_wins': np.random.randint(20, 50, n_samples),
-        'season': np.random.choice(['2023-24', '2024-25'], n_samples),
-    })
+    data = pd.DataFrame(
+        {
+            "game_id": range(1, n_samples + 1),
+            "home_team": np.random.choice(
+                ["Lakers", "Warriors", "Celtics", "Heat"], n_samples
+            ),
+            "away_team": np.random.choice(
+                ["Lakers", "Warriors", "Celtics", "Heat"], n_samples
+            ),
+            "home_ppg": np.random.normal(110, 10, n_samples),
+            "away_ppg": np.random.normal(108, 10, n_samples),
+            "home_def_rating": np.random.normal(105, 5, n_samples),
+            "away_def_rating": np.random.normal(107, 5, n_samples),
+            "home_wins": np.random.randint(20, 50, n_samples),
+            "away_wins": np.random.randint(20, 50, n_samples),
+            "season": np.random.choice(["2023-24", "2024-25"], n_samples),
+        }
+    )
 
     # Create target (home team win)
-    data['home_win'] = (
-        (data['home_ppg'] > data['away_ppg']) &
-        (data['home_def_rating'] < data['away_def_rating'])
+    data["home_win"] = (
+        (data["home_ppg"] > data["away_ppg"])
+        & (data["home_def_rating"] < data["away_def_rating"])
     ).astype(int)
 
     return data
@@ -80,9 +86,9 @@ def temp_dirs():
     """Create temporary directories for testing"""
     with tempfile.TemporaryDirectory() as tmpdir:
         paths = {
-            'registry': Path(tmpdir) / 'registry',
-            'models': Path(tmpdir) / 'models',
-            'mlflow': Path(tmpdir) / 'mlflow',
+            "registry": Path(tmpdir) / "registry",
+            "models": Path(tmpdir) / "models",
+            "mlflow": Path(tmpdir) / "mlflow",
         }
         for path in paths.values():
             path.mkdir(parents=True, exist_ok=True)
@@ -121,7 +127,7 @@ def test_complete_workflow_data_to_production(nba_sample_data, temp_dirs):
     pipeline = DataValidationPipeline(config=val_config)
 
     # Validate data
-    val_result = pipeline.validate(nba_sample_data, 'nba_games')
+    val_result = pipeline.validate(nba_sample_data, "nba_games")
 
     assert val_result.passed, f"Validation failed: {val_result.issues}"
     assert val_result.quality_score >= 0.8
@@ -143,16 +149,16 @@ def test_complete_workflow_data_to_production(nba_sample_data, temp_dirs):
     # ============ Step 3: Data Profiling ============
     profiler = DataProfiler()
 
-    profile = profiler.profile_dataset(cleaned_data, 'nba_games')
+    profile = profiler.profile_dataset(cleaned_data, "nba_games")
 
     assert profile.row_count > 0
     assert len(profile.column_stats) > 0
 
     # ============ Step 4: Model Training ============
     # Prepare training data
-    feature_cols = ['home_ppg', 'away_ppg', 'home_def_rating', 'away_def_rating']
+    feature_cols = ["home_ppg", "away_ppg", "home_def_rating", "away_def_rating"]
     X = cleaned_data[feature_cols]
-    y = cleaned_data['home_win']
+    y = cleaned_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
@@ -171,8 +177,7 @@ def test_complete_workflow_data_to_production(nba_sample_data, temp_dirs):
 
     # ============ Step 5: Model Registration ============
     registry = ModelRegistry(
-        registry_dir=str(temp_dirs['registry']),
-        enable_mlflow=False  # Mock mode
+        registry_dir=str(temp_dirs["registry"]), enable_mlflow=False  # Mock mode
     )
 
     registry.register_model(
@@ -182,14 +187,12 @@ def test_complete_workflow_data_to_production(nba_sample_data, temp_dirs):
         framework="sklearn",
         algorithm="RandomForest",
         metrics={"train_accuracy": train_score, "test_accuracy": test_score},
-        hyperparameters={"n_estimators": 50, "max_depth": 5}
+        hyperparameters={"n_estimators": 50, "max_depth": 5},
     )
 
     # Promote to production
     registry.promote_model(
-        model_id="nba_win_predictor",
-        version="v1.0",
-        target_stage=ModelStage.PRODUCTION
+        model_id="nba_win_predictor", version="v1.0", target_stage=ModelStage.PRODUCTION
     )
 
     prod_model = registry.get_model("nba_win_predictor", stage=ModelStage.PRODUCTION)
@@ -203,13 +206,13 @@ def test_complete_workflow_data_to_production(nba_sample_data, temp_dirs):
         model_id="nba_win_predictor",
         version="v1.0",
         model_instance=model,
-        set_active=True
+        set_active=True,
     )
 
     assert deploy_success
 
     # ============ Step 7: Make Predictions ============
-    test_game = X_test.iloc[0:1].to_dict('records')
+    test_game = X_test.iloc[0:1].to_dict("records")
     prediction = serving_manager.predict("nba_win_predictor", test_game)
 
     assert prediction is not None
@@ -218,9 +221,7 @@ def test_complete_workflow_data_to_production(nba_sample_data, temp_dirs):
 
     # ============ Step 8: Model Monitoring ============
     monitor = ModelMonitor(
-        model_id="nba_win_predictor",
-        model_version="v1.0",
-        mock_mode=True
+        model_id="nba_win_predictor", model_version="v1.0", mock_mode=True
     )
 
     # Set reference data
@@ -236,7 +237,7 @@ def test_complete_workflow_data_to_production(nba_sample_data, temp_dirs):
             features=row.to_dict(),
             prediction=pred,
             actual=actual,
-            latency_ms=np.random.uniform(10, 50)
+            latency_ms=np.random.uniform(10, 50),
         )
 
     # Calculate performance
@@ -247,8 +248,7 @@ def test_complete_workflow_data_to_production(nba_sample_data, temp_dirs):
 
     # Check for drift
     drift_results = monitor.detect_feature_drift(
-        current_data=X_test,
-        method=DriftMethod.KS_TEST
+        current_data=X_test, method=DriftMethod.KS_TEST
     )
 
     assert len(drift_results) == len(feature_cols)
@@ -273,9 +273,9 @@ def test_model_update_workflow(nba_sample_data, temp_dirs):
     """
 
     # Prepare data
-    feature_cols = ['home_ppg', 'away_ppg', 'home_def_rating', 'away_def_rating']
+    feature_cols = ["home_ppg", "away_ppg", "home_def_rating", "away_def_rating"]
     X = nba_sample_data[feature_cols]
-    y = nba_sample_data['home_win']
+    y = nba_sample_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
@@ -286,7 +286,7 @@ def test_model_update_workflow(nba_sample_data, temp_dirs):
     model_v1.fit(X_train, y_train)
     score_v1 = model_v1.score(X_test, y_test)
 
-    registry = ModelRegistry(registry_dir=str(temp_dirs['registry']))
+    registry = ModelRegistry(registry_dir=str(temp_dirs["registry"]))
     serving = ModelServingManager(mock_mode=True)
 
     registry.register_model(
@@ -295,7 +295,7 @@ def test_model_update_workflow(nba_sample_data, temp_dirs):
         stage=ModelStage.PRODUCTION,
         framework="sklearn",
         algorithm="RandomForest",
-        metrics={"test_accuracy": score_v1}
+        metrics={"test_accuracy": score_v1},
     )
 
     serving.deploy_model("nba_model", "v1.0", model_v1, set_active=True)
@@ -312,7 +312,7 @@ def test_model_update_workflow(nba_sample_data, temp_dirs):
         stage=ModelStage.STAGING,
         framework="sklearn",
         algorithm="RandomForest",
-        metrics={"test_accuracy": score_v1_1}
+        metrics={"test_accuracy": score_v1_1},
     )
 
     # ============ Deploy v1.1 Alongside v1.0 ============
@@ -322,7 +322,7 @@ def test_model_update_workflow(nba_sample_data, temp_dirs):
     comparison = registry.compare_models("nba_model", "v1.0", "v1.1")
 
     assert comparison is not None
-    assert 'metrics_diff' in comparison
+    assert "metrics_diff" in comparison
 
     # ============ Promote v1.1 if Better ============
     if score_v1_1 >= score_v1:
@@ -350,9 +350,9 @@ def test_ab_testing_workflow(nba_sample_data, temp_dirs):
     """
 
     # Prepare models
-    feature_cols = ['home_ppg', 'away_ppg', 'home_def_rating', 'away_def_rating']
+    feature_cols = ["home_ppg", "away_ppg", "home_def_rating", "away_def_rating"]
     X = nba_sample_data[feature_cols]
-    y = nba_sample_data['home_win']
+    y = nba_sample_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
@@ -373,16 +373,16 @@ def test_ab_testing_workflow(nba_sample_data, temp_dirs):
 
     # ============ Setup A/B Test ============
     serving.setup_ab_test(
-        model_id="nba_model",
-        versions=["v1.0", "v2.0"],
-        weights=[0.7, 0.3]
+        model_id="nba_model", versions=["v1.0", "v2.0"], weights=[0.7, 0.3]
     )
 
     # ============ Run Predictions ============
-    predictions_count = {'v1.0': 0, 'v2.0': 0}
+    predictions_count = {"v1.0": 0, "v2.0": 0}
 
     for i in range(100):
-        test_input = X_test.iloc[i % len(X_test):i % len(X_test) + 1].to_dict('records')
+        test_input = X_test.iloc[i % len(X_test) : i % len(X_test) + 1].to_dict(
+            "records"
+        )
         prediction = serving.predict("nba_model", test_input)
 
         # Track which version was used (approximately 70/30 split expected)
@@ -418,9 +418,9 @@ def test_rollback_workflow(nba_sample_data, temp_dirs):
     """
 
     # Prepare data
-    feature_cols = ['home_ppg', 'away_ppg', 'home_def_rating', 'away_def_rating']
+    feature_cols = ["home_ppg", "away_ppg", "home_def_rating", "away_def_rating"]
     X = nba_sample_data[feature_cols]
-    y = nba_sample_data['home_win']
+    y = nba_sample_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
@@ -442,7 +442,7 @@ def test_rollback_workflow(nba_sample_data, temp_dirs):
 
     # ============ Detect Issues ============
     # Make predictions with v2.0
-    test_input = X_test.head(10).to_dict('records')
+    test_input = X_test.head(10).to_dict("records")
     predictions_v2 = serving.predict("nba_model", test_input)
 
     # Check performance (should be poor)
@@ -481,9 +481,9 @@ def test_monitoring_and_alerting_workflow(nba_sample_data, temp_dirs):
     """
 
     # Prepare data
-    feature_cols = ['home_ppg', 'away_ppg', 'home_def_rating', 'away_def_rating']
+    feature_cols = ["home_ppg", "away_ppg", "home_def_rating", "away_def_rating"]
     X = nba_sample_data[feature_cols]
-    y = nba_sample_data['home_win']
+    y = nba_sample_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
@@ -509,7 +509,7 @@ def test_monitoring_and_alerting_workflow(nba_sample_data, temp_dirs):
         error_rate_threshold=0.1,
         latency_threshold_ms=100.0,
         alert_callback=alert_callback,
-        mock_mode=True
+        mock_mode=True,
     )
 
     # Set reference data
@@ -530,7 +530,7 @@ def test_monitoring_and_alerting_workflow(nba_sample_data, temp_dirs):
             features=features,
             prediction=prediction,
             actual=actual,
-            latency_ms=latency
+            latency_ms=latency,
         )
 
     # ============ Check for Alerts ============
@@ -542,11 +542,10 @@ def test_monitoring_and_alerting_workflow(nba_sample_data, temp_dirs):
     # ============ Detect Drift ============
     # Create drifted data
     X_drifted = X_test.copy()
-    X_drifted['home_ppg'] += 20  # Significant shift
+    X_drifted["home_ppg"] += 20  # Significant shift
 
     drift_results = monitor.detect_feature_drift(
-        current_data=X_drifted,
-        method=DriftMethod.KS_TEST
+        current_data=X_drifted, method=DriftMethod.KS_TEST
     )
 
     # Should detect drift in home_ppg
@@ -574,16 +573,13 @@ def test_invalid_data_handling(temp_dirs):
     """Test handling of invalid data throughout the pipeline"""
 
     # Create invalid data (missing required columns)
-    invalid_data = pd.DataFrame({
-        'col1': [1, 2, 3],
-        'col2': [4, 5, 6]
-    })
+    invalid_data = pd.DataFrame({"col1": [1, 2, 3], "col2": [4, 5, 6]})
 
     # Data validation should fail gracefully
     config = PipelineConfig(enable_schema_validation=True)
     pipeline = DataValidationPipeline(config=config)
 
-    result = pipeline.validate(invalid_data, 'nba_games')
+    result = pipeline.validate(invalid_data, "nba_games")
 
     # Should not pass validation
     assert not result.passed
@@ -594,8 +590,8 @@ def test_training_failure_recovery(nba_sample_data):
     """Test recovery from training failures"""
 
     # Create data that will cause training issues
-    X = nba_sample_data[['home_ppg', 'away_ppg']]
-    y = nba_sample_data['home_win']
+    X = nba_sample_data[["home_ppg", "away_ppg"]]
+    y = nba_sample_data["home_win"]
 
     # Intentionally use tiny dataset to cause issues
     X_tiny = X.head(2)
@@ -615,9 +611,9 @@ def test_training_failure_recovery(nba_sample_data):
 def test_deployment_failure_rollback(nba_sample_data, temp_dirs):
     """Test rollback on deployment failure"""
 
-    feature_cols = ['home_ppg', 'away_ppg']
+    feature_cols = ["home_ppg", "away_ppg"]
     X = nba_sample_data[feature_cols]
-    y = nba_sample_data['home_win']
+    y = nba_sample_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
@@ -640,9 +636,9 @@ def test_deployment_failure_rollback(nba_sample_data, temp_dirs):
 def test_drift_detection_and_auto_retrain(nba_sample_data, temp_dirs):
     """Test drift detection triggers retraining workflow"""
 
-    feature_cols = ['home_ppg', 'away_ppg', 'home_def_rating']
+    feature_cols = ["home_ppg", "away_ppg", "home_def_rating"]
     X = nba_sample_data[feature_cols]
-    y = nba_sample_data['home_win']
+    y = nba_sample_data["home_win"]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
@@ -652,22 +648,18 @@ def test_drift_detection_and_auto_retrain(nba_sample_data, temp_dirs):
 
     # Setup monitoring
     monitor = ModelMonitor(
-        model_id="nba_model",
-        model_version="v1.0",
-        drift_threshold=0.05,
-        mock_mode=True
+        model_id="nba_model", model_version="v1.0", drift_threshold=0.05, mock_mode=True
     )
 
     monitor.set_reference_data(features=X_train)
 
     # Create drifted data
     X_drifted = X_test.copy()
-    X_drifted['home_ppg'] += 30  # Major drift
+    X_drifted["home_ppg"] += 30  # Major drift
 
     # Detect drift
     drift_results = monitor.detect_feature_drift(
-        current_data=X_drifted,
-        method=DriftMethod.KS_TEST
+        current_data=X_drifted, method=DriftMethod.KS_TEST
     )
 
     drifted = [r for r in drift_results if r.is_drift]
@@ -690,11 +682,12 @@ def test_drift_detection_and_auto_retrain(nba_sample_data, temp_dirs):
 def test_circuit_breaker_integration(nba_sample_data):
     """Test circuit breaker prevents cascading failures"""
 
-    feature_cols = ['home_ppg', 'away_ppg']
+    feature_cols = ["home_ppg", "away_ppg"]
     X = nba_sample_data[feature_cols]
 
     class FailingModel:
         """Model that fails frequently"""
+
         def predict(self, inputs):
             # Fail most of the time
             if np.random.random() < 0.8:
@@ -702,8 +695,7 @@ def test_circuit_breaker_integration(nba_sample_data):
             return [0.5] * len(inputs)
 
     serving = ModelServingManager(
-        error_threshold=0.5,  # Trip at 50% error rate
-        mock_mode=True
+        error_threshold=0.5, mock_mode=True  # Trip at 50% error rate
     )
 
     failing_model = FailingModel()
@@ -713,7 +705,7 @@ def test_circuit_breaker_integration(nba_sample_data):
     errors = 0
     for i in range(20):
         try:
-            test_input = X.iloc[i:i+1].to_dict('records')
+            test_input = X.iloc[i : i + 1].to_dict("records")
             serving.predict("nba_model", test_input)
         except Exception:
             errors += 1
@@ -733,9 +725,9 @@ def test_circuit_breaker_integration(nba_sample_data):
 def test_batch_prediction_throughput(nba_sample_data):
     """Test batch prediction performance"""
 
-    feature_cols = ['home_ppg', 'away_ppg']
+    feature_cols = ["home_ppg", "away_ppg"]
     X = nba_sample_data[feature_cols]
-    y = nba_sample_data['home_win']
+    y = nba_sample_data["home_win"]
 
     model = RandomForestClassifier(n_estimators=10, random_state=42)
     model.fit(X, y)
@@ -745,7 +737,7 @@ def test_batch_prediction_throughput(nba_sample_data):
 
     # Test batch prediction
     batch_size = 100
-    test_input = X.head(batch_size).to_dict('records')
+    test_input = X.head(batch_size).to_dict("records")
 
     start_time = time.time()
     predictions = serving.predict("nba_model", test_input)
@@ -775,7 +767,7 @@ def test_large_dataset_validation(nba_sample_data):
     pipeline = DataValidationPipeline(config=config)
 
     start_time = time.time()
-    result = pipeline.validate(large_data, 'nba_games')
+    result = pipeline.validate(large_data, "nba_games")
     elapsed = time.time() - start_time
 
     assert result is not None
@@ -787,7 +779,7 @@ def test_large_dataset_validation(nba_sample_data):
 def test_model_registry_scalability(temp_dirs):
     """Test model registry performance with many models"""
 
-    registry = ModelRegistry(registry_dir=str(temp_dirs['registry']))
+    registry = ModelRegistry(registry_dir=str(temp_dirs["registry"]))
 
     # Register many models
     num_models = 50
@@ -800,7 +792,7 @@ def test_model_registry_scalability(temp_dirs):
             stage=ModelStage.DEVELOPMENT,
             framework="sklearn",
             algorithm="RandomForest",
-            metrics={"accuracy": 0.8 + i * 0.001}
+            metrics={"accuracy": 0.8 + i * 0.001},
         )
 
     elapsed = time.time() - start_time
@@ -812,9 +804,9 @@ def test_model_registry_scalability(temp_dirs):
 def test_monitoring_overhead_measurement(nba_sample_data):
     """Test monitoring overhead on predictions"""
 
-    feature_cols = ['home_ppg', 'away_ppg']
+    feature_cols = ["home_ppg", "away_ppg"]
     X = nba_sample_data[feature_cols]
-    y = nba_sample_data['home_win']
+    y = nba_sample_data["home_win"]
 
     model = RandomForestClassifier(n_estimators=10, random_state=42)
     model.fit(X, y)

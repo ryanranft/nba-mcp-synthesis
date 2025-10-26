@@ -11,7 +11,7 @@ from mcp_server.system_health import (
     SystemHealthChecker,
     HealthStatus,
     HealthCheckResult,
-    quick_health_check
+    quick_health_check,
 )
 
 
@@ -24,7 +24,7 @@ class TestHealthCheckResult:
             status=HealthStatus.HEALTHY,
             message="Component is healthy",
             details={"key": "value"},
-            response_time_ms=10.5
+            response_time_ms=10.5,
         )
 
         assert result.status == HealthStatus.HEALTHY
@@ -39,7 +39,7 @@ class TestHealthCheckResult:
             status=HealthStatus.DEGRADED,
             message="Component degraded",
             details={"reason": "high latency"},
-            response_time_ms=50.0
+            response_time_ms=50.0,
         )
 
         result_dict = result.to_dict()
@@ -52,17 +52,12 @@ class TestHealthCheckResult:
 
     def test_is_healthy_check(self):
         """Test is_healthy() method."""
-        healthy_result = HealthCheckResult(
-            status=HealthStatus.HEALTHY,
-            message="OK"
-        )
+        healthy_result = HealthCheckResult(status=HealthStatus.HEALTHY, message="OK")
         degraded_result = HealthCheckResult(
-            status=HealthStatus.DEGRADED,
-            message="Degraded"
+            status=HealthStatus.DEGRADED, message="Degraded"
         )
         unhealthy_result = HealthCheckResult(
-            status=HealthStatus.UNHEALTHY,
-            message="Unhealthy"
+            status=HealthStatus.UNHEALTHY, message="Unhealthy"
         )
 
         assert healthy_result.is_healthy() is True
@@ -71,13 +66,9 @@ class TestHealthCheckResult:
 
     def test_is_degraded_check(self):
         """Test is_degraded() method."""
-        healthy_result = HealthCheckResult(
-            status=HealthStatus.HEALTHY,
-            message="OK"
-        )
+        healthy_result = HealthCheckResult(status=HealthStatus.HEALTHY, message="OK")
         degraded_result = HealthCheckResult(
-            status=HealthStatus.DEGRADED,
-            message="Degraded"
+            status=HealthStatus.DEGRADED, message="Degraded"
         )
 
         assert healthy_result.is_degraded() is False
@@ -86,13 +77,9 @@ class TestHealthCheckResult:
     def test_is_unhealthy_check(self):
         """Test is_unhealthy() method."""
         unhealthy_result = HealthCheckResult(
-            status=HealthStatus.UNHEALTHY,
-            message="Failed"
+            status=HealthStatus.UNHEALTHY, message="Failed"
         )
-        healthy_result = HealthCheckResult(
-            status=HealthStatus.HEALTHY,
-            message="OK"
-        )
+        healthy_result = HealthCheckResult(status=HealthStatus.HEALTHY, message="OK")
 
         assert unhealthy_result.is_unhealthy() is True
         assert healthy_result.is_unhealthy() is False
@@ -106,11 +93,11 @@ class TestSystemHealthChecker:
         checker = SystemHealthChecker()
 
         assert checker is not None
-        assert hasattr(checker, 'component_checkers')
-        assert 'data_validation' in checker.component_checkers
-        assert 'model_training' in checker.component_checkers
-        assert 'model_deployment' in checker.component_checkers
-        assert 'model_monitoring' in checker.component_checkers
+        assert hasattr(checker, "component_checkers")
+        assert "data_validation" in checker.component_checkers
+        assert "model_training" in checker.component_checkers
+        assert "model_deployment" in checker.component_checkers
+        assert "model_monitoring" in checker.component_checkers
 
     def test_check_system_health(self):
         """Test checking overall system health."""
@@ -127,20 +114,18 @@ class TestSystemHealthChecker:
         assert "total_components" in health
 
         # Verify status is valid
-        assert health["status"] in [
-            "healthy", "degraded", "unhealthy", "unknown"
-        ]
+        assert health["status"] in ["healthy", "degraded", "unhealthy", "unknown"]
 
         # Verify we checked all expected components
         expected_components = [
-            'data_validation',
-            'model_training',
-            'model_deployment',
-            'model_monitoring',
-            'database',
-            'storage',
-            'mlflow',
-            'cache'
+            "data_validation",
+            "model_training",
+            "model_deployment",
+            "model_monitoring",
+            "database",
+            "storage",
+            "mlflow",
+            "cache",
         ]
         for component in expected_components:
             assert component in health["components"]
@@ -152,13 +137,13 @@ class TestSystemHealthChecker:
         """Test checking data validation component health."""
         checker = SystemHealthChecker()
 
-        result = checker.check_component_health('data_validation')
+        result = checker.check_component_health("data_validation")
 
         assert isinstance(result, HealthCheckResult)
         assert result.status in [
             HealthStatus.HEALTHY,
             HealthStatus.DEGRADED,
-            HealthStatus.UNHEALTHY
+            HealthStatus.UNHEALTHY,
         ]
         assert result.message != ""
         assert isinstance(result.details, dict)
@@ -167,13 +152,13 @@ class TestSystemHealthChecker:
         """Test checking training component health."""
         checker = SystemHealthChecker()
 
-        result = checker.check_component_health('model_training')
+        result = checker.check_component_health("model_training")
 
         assert isinstance(result, HealthCheckResult)
         assert result.status in [
             HealthStatus.HEALTHY,
             HealthStatus.DEGRADED,
-            HealthStatus.UNHEALTHY
+            HealthStatus.UNHEALTHY,
         ]
         assert result.message != ""
 
@@ -181,13 +166,13 @@ class TestSystemHealthChecker:
         """Test checking deployment component health."""
         checker = SystemHealthChecker()
 
-        result = checker.check_component_health('model_deployment')
+        result = checker.check_component_health("model_deployment")
 
         assert isinstance(result, HealthCheckResult)
         assert result.status in [
             HealthStatus.HEALTHY,
             HealthStatus.DEGRADED,
-            HealthStatus.UNHEALTHY
+            HealthStatus.UNHEALTHY,
         ]
         assert result.message != ""
 
@@ -195,13 +180,13 @@ class TestSystemHealthChecker:
         """Test checking monitoring component health."""
         checker = SystemHealthChecker()
 
-        result = checker.check_component_health('model_monitoring')
+        result = checker.check_component_health("model_monitoring")
 
         assert isinstance(result, HealthCheckResult)
         assert result.status in [
             HealthStatus.HEALTHY,
             HealthStatus.DEGRADED,
-            HealthStatus.UNHEALTHY
+            HealthStatus.UNHEALTHY,
         ]
         assert result.message != ""
 
@@ -209,20 +194,17 @@ class TestSystemHealthChecker:
         """Test checking database health."""
         checker = SystemHealthChecker()
 
-        result = checker.check_component_health('database')
+        result = checker.check_component_health("database")
 
         assert isinstance(result, HealthCheckResult)
         # Database should be healthy (sqlite3 in-memory test)
-        assert result.status in [
-            HealthStatus.HEALTHY,
-            HealthStatus.UNKNOWN
-        ]
+        assert result.status in [HealthStatus.HEALTHY, HealthStatus.UNKNOWN]
 
     def test_check_component_health_storage(self):
         """Test checking storage health."""
         checker = SystemHealthChecker()
 
-        result = checker.check_component_health('storage')
+        result = checker.check_component_health("storage")
 
         assert isinstance(result, HealthCheckResult)
         # Storage should be healthy (temp file write test)
@@ -232,26 +214,20 @@ class TestSystemHealthChecker:
         """Test checking MLflow health."""
         checker = SystemHealthChecker()
 
-        result = checker.check_component_health('mlflow')
+        result = checker.check_component_health("mlflow")
 
         assert isinstance(result, HealthCheckResult)
         # MLflow might not be installed, so degraded is OK
-        assert result.status in [
-            HealthStatus.HEALTHY,
-            HealthStatus.DEGRADED
-        ]
+        assert result.status in [HealthStatus.HEALTHY, HealthStatus.DEGRADED]
 
     def test_check_component_health_cache(self):
         """Test checking cache system health."""
         checker = SystemHealthChecker()
 
-        result = checker.check_component_health('cache')
+        result = checker.check_component_health("cache")
 
         assert isinstance(result, HealthCheckResult)
-        assert result.status in [
-            HealthStatus.HEALTHY,
-            HealthStatus.DEGRADED
-        ]
+        assert result.status in [HealthStatus.HEALTHY, HealthStatus.DEGRADED]
 
         # Should have cache stats in details
         if result.status == HealthStatus.HEALTHY:
@@ -263,17 +239,13 @@ class TestSystemHealthChecker:
         checker = SystemHealthChecker()
 
         with pytest.raises(ValueError, match="Unknown component"):
-            checker.check_component_health('invalid_component')
+            checker.check_component_health("invalid_component")
 
     def test_aggregate_status_all_healthy(self):
         """Test status aggregation with all healthy."""
         checker = SystemHealthChecker()
 
-        statuses = [
-            HealthStatus.HEALTHY,
-            HealthStatus.HEALTHY,
-            HealthStatus.HEALTHY
-        ]
+        statuses = [HealthStatus.HEALTHY, HealthStatus.HEALTHY, HealthStatus.HEALTHY]
 
         aggregated = checker._aggregate_status(statuses)
         assert aggregated == HealthStatus.HEALTHY
@@ -282,11 +254,7 @@ class TestSystemHealthChecker:
         """Test status aggregation with degraded component."""
         checker = SystemHealthChecker()
 
-        statuses = [
-            HealthStatus.HEALTHY,
-            HealthStatus.DEGRADED,
-            HealthStatus.HEALTHY
-        ]
+        statuses = [HealthStatus.HEALTHY, HealthStatus.DEGRADED, HealthStatus.HEALTHY]
 
         aggregated = checker._aggregate_status(statuses)
         assert aggregated == HealthStatus.DEGRADED
@@ -295,11 +263,7 @@ class TestSystemHealthChecker:
         """Test status aggregation with unhealthy component."""
         checker = SystemHealthChecker()
 
-        statuses = [
-            HealthStatus.HEALTHY,
-            HealthStatus.DEGRADED,
-            HealthStatus.UNHEALTHY
-        ]
+        statuses = [HealthStatus.HEALTHY, HealthStatus.DEGRADED, HealthStatus.UNHEALTHY]
 
         aggregated = checker._aggregate_status(statuses)
         assert aggregated == HealthStatus.UNHEALTHY
@@ -345,16 +309,25 @@ class TestSystemHealthChecker:
         checker = SystemHealthChecker()
 
         # Check data validation details
-        val_result = checker.check_component_health('data_validation')
-        assert "pipeline_initialized" in val_result.details or "error" in val_result.details
+        val_result = checker.check_component_health("data_validation")
+        assert (
+            "pipeline_initialized" in val_result.details
+            or "error" in val_result.details
+        )
 
         # Check training details
-        train_result = checker.check_component_health('model_training')
-        assert "pipeline_initialized" in train_result.details or "error" in train_result.details
+        train_result = checker.check_component_health("model_training")
+        assert (
+            "pipeline_initialized" in train_result.details
+            or "error" in train_result.details
+        )
 
         # Check deployment details
-        deploy_result = checker.check_component_health('model_deployment')
-        assert "serving_initialized" in deploy_result.details or "error" in deploy_result.details
+        deploy_result = checker.check_component_health("model_deployment")
+        assert (
+            "serving_initialized" in deploy_result.details
+            or "error" in deploy_result.details
+        )
 
     def test_quick_health_check_function(self):
         """Test quick health check utility function."""
@@ -403,9 +376,7 @@ class TestSystemHealthChecker:
 
         # All should have valid status
         for result in results:
-            assert result["status"] in [
-                "healthy", "degraded", "unhealthy", "unknown"
-            ]
+            assert result["status"] in ["healthy", "degraded", "unhealthy", "unknown"]
 
 
 class TestHealthStatusEnum:

@@ -251,7 +251,8 @@ class HyperparameterTuner:
                     # Early stopping check
                     if (
                         self.enable_early_stopping
-                        and iterations_without_improvement >= self.early_stopping_patience
+                        and iterations_without_improvement
+                        >= self.early_stopping_patience
                     ):
                         logger.info(
                             f"⏹️  Early stopping after {i} iterations "
@@ -373,7 +374,8 @@ class HyperparameterTuner:
                     # Early stopping check
                     if (
                         self.enable_early_stopping
-                        and iterations_without_improvement >= self.early_stopping_patience
+                        and iterations_without_improvement
+                        >= self.early_stopping_patience
                     ):
                         logger.info(
                             f"⏹️  Early stopping after {i+1} iterations "
