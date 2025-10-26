@@ -587,11 +587,19 @@ class EconometricSuite:
                 - 'varmax': Vector ARMA with exogenous variables (Phase 2)
                 - 'mstl': Multiple Seasonal-Trend decomposition (Phase 2)
                 - 'stl': Enhanced STL decomposition (Phase 2)
+                - 'johansen'/'cointegration': Johansen cointegration test (Phase 2 Day 4)
+                - 'granger'/'granger_causality': Granger causality test (Phase 2 Day 4)
+                - 'var': Vector Autoregression model (Phase 2 Day 4)
+                - 'diagnostics'/'ts_diagnostics': Time series diagnostics (Phase 2 Day 4)
             **kwargs: Method-specific parameters:
                 For ARIMAX: order, exog (required), seasonal_order
                 For VARMAX: endog_data (required), order, exog, trend
                 For MSTL: periods (required), windows, iterate
                 For STL: period (required), seasonal, trend, robust
+                For Johansen: endog_data (required), det_order, k_ar_diff
+                For Granger: caused_series (required), causing_series (required), maxlag
+                For VAR: endog_data (required), maxlags, ic, trend
+                For Diagnostics: residuals (required), lags, alpha
 
         Returns:
             SuiteResult with time series analysis results
@@ -627,6 +635,40 @@ class EconometricSuite:
             ...     method='stl',
             ...     period=7,
             ...     robust=True
+            ... )
+            >>>
+            >>> # Johansen cointegration test
+            >>> endog = df[['points', 'assists', 'rebounds']]
+            >>> result = suite.time_series_analysis(
+            ...     method='johansen',
+            ...     endog_data=endog,
+            ...     k_ar_diff=2
+            ... )
+            >>>
+            >>> # Granger causality test
+            >>> result = suite.time_series_analysis(
+            ...     method='granger',
+            ...     caused_series='points',
+            ...     causing_series='assists',
+            ...     maxlag=4
+            ... )
+            >>>
+            >>> # VAR model
+            >>> endog = df[['points', 'assists', 'rebounds']]
+            >>> result = suite.time_series_analysis(
+            ...     method='var',
+            ...     endog_data=endog,
+            ...     maxlags=5,
+            ...     ic='aic'
+            ... )
+            >>>
+            >>> # Time series diagnostics
+            >>> arima_result = suite.time_series_analysis(method='arima', order=(1,1,1))
+            >>> residuals = arima_result.result.model.resid
+            >>> diag = suite.time_series_analysis(
+            ...     method='diagnostics',
+            ...     residuals=residuals,
+            ...     lags=10
             ... )
         """
         from mcp_server.time_series import TimeSeriesAnalyzer
@@ -722,6 +764,69 @@ class EconometricSuite:
             return self._create_suite_result(
                 method_category=MethodCategory.TIME_SERIES,
                 method_used="STL",
+                result=result,
+                model=None,
+            )
+
+        # Phase 2 Day 4: Advanced econometric time series methods
+        elif method in ["johansen", "johansen_test", "cointegration"]:
+            # Johansen cointegration test
+            endog_data = kwargs.get("endog_data")
+            if endog_data is None:
+                raise ValueError("endog_data parameter required for Johansen test")
+
+            result = analyzer.johansen_test(**kwargs)
+            return self._create_suite_result(
+                method_category=MethodCategory.TIME_SERIES,
+                method_used="Johansen Cointegration Test",
+                result=result,
+                model=None,
+            )
+
+        elif method in ["granger", "granger_causality", "granger_test"]:
+            # Granger causality test
+            caused_series = kwargs.get("caused_series")
+            causing_series = kwargs.get("causing_series")
+            if caused_series is None or causing_series is None:
+                raise ValueError(
+                    "Both caused_series and causing_series required for Granger causality test"
+                )
+
+            result = analyzer.granger_causality_test(**kwargs)
+            return self._create_suite_result(
+                method_category=MethodCategory.TIME_SERIES,
+                method_used="Granger Causality Test",
+                result=result,
+                model=None,
+            )
+
+        elif method == "var":
+            # Vector Autoregression model
+            endog_data = kwargs.get("endog_data")
+            if endog_data is None:
+                raise ValueError("endog_data parameter required for VAR model")
+
+            result = analyzer.fit_var(**kwargs)
+            return self._create_suite_result(
+                method_category=MethodCategory.TIME_SERIES,
+                method_used="VAR Model",
+                result=result,
+                model=result.model,
+                aic=result.aic,
+                bic=result.bic,
+                log_likelihood=result.log_likelihood,
+            )
+
+        elif method in ["diagnostics", "ts_diagnostics", "time_series_diagnostics"]:
+            # Time series diagnostics
+            residuals = kwargs.get("residuals")
+            if residuals is None:
+                raise ValueError("residuals parameter required for diagnostics")
+
+            result = analyzer.time_series_diagnostics(**kwargs)
+            return self._create_suite_result(
+                method_category=MethodCategory.TIME_SERIES,
+                method_used="Time Series Diagnostics",
                 result=result,
                 model=None,
             )

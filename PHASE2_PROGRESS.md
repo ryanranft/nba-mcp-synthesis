@@ -670,6 +670,247 @@ print(f"Rate ratios:\n{result.result.rate_ratios}")
 
 ---
 
-**Document Version:** 1.2
+## Phase 2 Day 4: Advanced Time Series Methods ✅ (4/4 methods)
+
+**Completed:** 4 new advanced econometric time series methods implemented and integrated
+**Date:** October 26, 2025
+
+### Methods Implemented
+
+#### 1. Johansen Cointegration Test (`johansen_test`)
+- **File:** `mcp_server/time_series.py` (lines 1426-1557)
+- **Lines:** 132 LOC
+- **Description:** Test for cointegrating relationships between multiple time series
+- **Features:**
+  - Trace and maximum eigenvalue test statistics
+  - Critical values at 90%, 95%, 99% significance levels
+  - Automatic cointegration rank determination
+  - Support for multiple deterministic trend specifications (nc, c, ct, ctt)
+  - Configurable lag order for VAR model
+  - Extracts cointegrating vectors (eigenvectors)
+
+#### 2. Granger Causality Test (`granger_causality_test`)
+- **File:** `mcp_server/time_series.py` (lines 1559-1701)
+- **Lines:** 143 LOC
+- **Description:** Test if one time series helps predict another (Granger causality)
+- **Features:**
+  - Tests causality from multiple lags (1 to maxlag)
+  - F-test statistics with p-values for each lag
+  - Identifies minimum p-value across lags
+  - Automatic significance determination at 5% level
+  - Supports both pd.Series and column name inputs
+  - VAR-based causality framework
+
+#### 3. VAR Model (`fit_var`)
+- **File:** `mcp_server/time_series.py` (lines 1703-1839)
+- **Lines:** 137 LOC
+- **Description:** Vector Autoregression for multivariate time series
+- **Features:**
+  - Automatic lag order selection via information criteria (AIC, BIC, HQIC, FPE)
+  - Default heuristic for maxlags based on sample size
+  - Multiple trend specifications (n, c, ct, ctt)
+  - Coefficient summary extraction
+  - Model diagnostics (AIC, BIC, HQIC, FPE, log-likelihood)
+  - Suitable for impulse response and forecast error variance decomposition
+
+#### 4. Time Series Diagnostics (`time_series_diagnostics`)
+- **File:** `mcp_server/time_series.py` (lines 1841-1988)
+- **Lines:** 148 LOC
+- **Description:** Comprehensive diagnostic tests for model residuals
+- **Features:**
+  - Ljung-Box test for autocorrelation
+  - Jarque-Bera test for normality
+  - Heteroscedasticity test (ARCH effects via squared residuals)
+  - Durbin-Watson statistic for first-order autocorrelation
+  - Residual statistics (mean, std, skewness, kurtosis)
+  - Overall pass/fail assessment at configurable significance level
+
+**Total Time Series Methods Added:** ~560 lines (methods only)
+
+### Dataclasses Added
+
+1. **`JohansenCointegrationResult`** (lines 197-215)
+   - trace_statistic, max_eigen_statistic
+   - critical_values_trace, critical_values_max_eigen
+   - cointegration_rank, variable_names
+   - n_lags, deterministic_trend, eigenvectors
+
+2. **`GrangerCausalityResult`** (lines 218-234)
+   - caused_variable, causing_variable
+   - max_lag, test_results (by lag)
+   - min_p_value, significant_at_5pct
+
+3. **`VARResult`** (lines 237-257)
+   - model, order, n_variables, variable_names
+   - aic, bic, hqic, fpe, log_likelihood
+   - coef_summary
+
+4. **`TimeSeriesDiagnosticsResult`** (lines 260-276)
+   - ljung_box_test, jarque_bera_test, heteroscedasticity_test
+   - durbin_watson, residual stats
+   - all_tests_pass
+
+### Suite Integration ✅
+
+**File:** `mcp_server/econometric_suite.py`
+
+#### New Method Routes Added (lines 729-790):
+1. `method='johansen'/'cointegration'` - Johansen cointegration test (lines 730-742)
+2. `method='granger'/'granger_causality'` - Granger causality test (lines 744-759)
+3. `method='var'` - Vector Autoregression model (lines 761-776)
+4. `method='diagnostics'/'ts_diagnostics'` - Time series diagnostics (lines 778-790)
+
+#### Documentation Updated:
+- Extended `time_series_analysis()` docstring (lines 579-673)
+- Added parameter descriptions for all 4 methods
+- Added comprehensive usage examples for each method
+- Total Suite integration: ~105 lines (including docstring updates)
+
+### Test Results
+
+- ✅ All 59 existing tests passing (100%)
+- ✅ No regressions introduced
+- ⚠ 17 warnings (typical statsmodels warnings, harmless)
+- ✅ Test execution time: 6.80s
+
+**Test Command:**
+```bash
+pytest tests/test_econometric_suite.py -v
+# Result: 59 passed, 17 warnings in 6.80s
+```
+
+### Code Metrics
+
+| Category | LOC Added | Methods | Dataclasses | Status |
+|----------|-----------|---------|-------------|--------|
+| **Time Series Methods** | 560 | 4 | - | ✅ Complete |
+| **Dataclasses** | 101 | - | 4 | ✅ Complete |
+| **Imports** | 14 | - | - | ✅ Complete |
+| **Suite Integration** | 105 | 4 routes | - | ✅ Complete |
+| **Total (time_series.py)** | **+661** | **4** | **4** | **✅** |
+| **Total (econometric_suite.py)** | **+105** | **4 routes** | - | **✅** |
+| **Grand Total** | **+766** | **4** | **4** | **✅** |
+
+### API Examples
+
+#### Johansen Cointegration Test
+```python
+from mcp_server.econometric_suite import EconometricSuite
+
+suite = EconometricSuite(data=df, target='points')
+
+# Test cointegration between points, assists, rebounds
+endog = df[['points', 'assists', 'rebounds']]
+result = suite.time_series_analysis(
+    method='johansen',
+    endog_data=endog,
+    det_order=0,  # constant term
+    k_ar_diff=2   # 2 lagged differences
+)
+
+print(f"Cointegration rank: {result.result.cointegration_rank}")
+print(f"Trace statistic: {result.result.trace_statistic}")
+print(f"Variables: {result.result.variable_names}")
+```
+
+#### Granger Causality Test
+```python
+# Test if assists Granger-cause points
+result = suite.time_series_analysis(
+    method='granger',
+    caused_series='points',
+    causing_series='assists',
+    maxlag=4
+)
+
+print(f"Significant: {result.result.significant_at_5pct}")
+print(f"Min p-value: {result.result.min_p_value:.4f}")
+print(f"Test results: {result.result.test_results}")
+```
+
+#### VAR Model
+```python
+# Fit VAR model for multivariate time series
+endog = df[['points', 'assists', 'rebounds']]
+result = suite.time_series_analysis(
+    method='var',
+    endog_data=endog,
+    maxlags=5,
+    ic='aic',
+    trend='c'
+)
+
+print(f"Optimal lag order: {result.result.order}")
+print(f"AIC: {result.aic:.2f}, BIC: {result.bic:.2f}")
+print(f"Variables: {result.result.variable_names}")
+```
+
+#### Time Series Diagnostics
+```python
+# Fit ARIMA and check residuals
+arima_result = suite.time_series_analysis(method='arima', order=(1,1,1))
+residuals = arima_result.result.model.resid
+
+# Run diagnostics
+diag = suite.time_series_analysis(
+    method='diagnostics',
+    residuals=residuals,
+    lags=10,
+    alpha=0.05
+)
+
+print(f"All tests pass: {diag.result.all_tests_pass}")
+print(f"Durbin-Watson: {diag.result.durbin_watson:.3f}")
+print(f"Ljung-Box p-value: {diag.result.ljung_box_test['p_value']:.4f}")
+print(f"Jarque-Bera p-value: {diag.result.jarque_bera_test['p_value']:.4f}")
+```
+
+### Files Modified
+
+1. **mcp_server/time_series.py**
+   - Lines added: +661 (now 1988 total, was 1327)
+   - Methods added: 4 public
+   - Dataclasses added: 4
+   - Imports updated: Added coint_johansen, grangercausalitytests, VAR, jarque_bera, durbin_watson
+   - Status: ✅ Complete
+
+2. **mcp_server/econometric_suite.py**
+   - Lines added: +105 (now 1715 total, was 1610)
+   - Routes added: 4
+   - Documentation updated: Yes (comprehensive examples)
+   - Status: ✅ Complete
+
+3. **PHASE2_PROGRESS.md**
+   - Updated: Day 4 completion metrics
+   - Status: ✅ Complete
+
+### Success Criteria (Day 4)
+
+- ✅ 4 advanced time series methods implemented (~766 LOC total)
+- ✅ Suite integration complete with routing and aliases
+- ✅ Comprehensive docstrings with numpy-style format and examples
+- ✅ All 59 existing tests still passing (100%)
+- ✅ No regressions introduced
+- ✅ Code follows existing patterns (try/except imports, MLflow logging, error handling)
+- ✅ Methods use only existing dependencies (statsmodels) - no new packages required
+
+### Remaining Work (Phase 2)
+
+**Not Yet Implemented:**
+- ⏺ Additional advanced methods (GARCH, spatial econometrics, Bayesian extensions)
+- ⏺ Additional unit tests for new methods (Days 1-4)
+
+**Completed So Far:**
+- ✅ Day 1: 3 causal inference methods (kernel, radius, doubly robust)
+- ✅ Day 2: 4 time series methods (ARIMAX, VARMAX, MSTL, STL)
+- ✅ Day 3: 4 survival analysis methods (Fine-Gray, complete frailty, cure, recurrent)
+- ✅ Day 4: 4 advanced time series methods (Johansen, Granger, VAR, diagnostics)
+- ✅ Total: **15 new methods** across 4 categories
+
+**Timeline:** On track for 2-week completion (Day 4/10 complete)
+
+---
+
+**Document Version:** 1.3
 **Created:** October 26, 2025
-**Last Updated:** October 26, 2025 (Day 3 Complete)
+**Last Updated:** October 26, 2025 (Day 4 Complete)

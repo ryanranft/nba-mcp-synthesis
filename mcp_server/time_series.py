@@ -47,6 +47,21 @@ except ImportError:
     MSTL = None
     ADVANCED_TS_AVAILABLE = False
 
+# Advanced time series methods (Phase 2 Day 4)
+try:
+    from statsmodels.tsa.vector_ar.vecm import coint_johansen
+    from statsmodels.tsa.stattools import grangercausalitytests
+    from statsmodels.tsa.api import VAR
+    from statsmodels.stats.stattools import jarque_bera, durbin_watson
+    ECONOMETRIC_TS_AVAILABLE = True
+except ImportError:
+    coint_johansen = None
+    grangercausalitytests = None
+    VAR = None
+    jarque_bera = None
+    durbin_watson = None
+    ECONOMETRIC_TS_AVAILABLE = False
+
 # MLflow integration
 try:
     import mlflow
@@ -192,6 +207,88 @@ class MSTLResult:
     residual: pd.Series
     periods: List[int]
     seasonal_strength: Dict[int, float]  # period -> strength metric
+
+
+@dataclass
+class JohansenCointegrationResult:
+    """Results from Johansen cointegration test."""
+
+    trace_statistic: np.ndarray
+    max_eigen_statistic: np.ndarray
+    critical_values_trace: np.ndarray
+    critical_values_max_eigen: np.ndarray
+    cointegration_rank: int  # number of cointegrating relationships
+    variable_names: List[str]
+    n_lags: int
+    deterministic_trend: str  # 'nc', 'c', 'ct', 'ctt'
+    eigenvectors: np.ndarray  # cointegrating vectors
+
+    def __repr__(self) -> str:
+        return (
+            f"JohansenCointegrationResult(rank={self.cointegration_rank}, "
+            f"variables={len(self.variable_names)}, lags={self.n_lags})"
+        )
+
+
+@dataclass
+class GrangerCausalityResult:
+    """Results from Granger causality test."""
+
+    caused_variable: str  # variable being predicted
+    causing_variable: str  # variable being tested for causality
+    max_lag: int
+    test_results: Dict[int, Dict[str, float]]  # lag -> {statistic, p_value, df_denom, df_num}
+    min_p_value: float
+    significant_at_5pct: bool
+
+    def __repr__(self) -> str:
+        sig = "YES" if self.significant_at_5pct else "NO"
+        return (
+            f"GrangerCausalityResult({self.causing_variable} -> {self.caused_variable}: "
+            f"significant={sig}, min_p={self.min_p_value:.4f})"
+        )
+
+
+@dataclass
+class VARResult:
+    """Results from Vector Autoregression model."""
+
+    model: Any  # fitted VAR model
+    order: int  # VAR lag order (p)
+    n_variables: int
+    variable_names: List[str]
+    aic: float
+    bic: float
+    hqic: float  # Hannan-Quinn criterion
+    fpe: float  # Final prediction error
+    log_likelihood: float
+    coef_summary: pd.DataFrame  # coefficient estimates
+    granger_causality: Optional[Dict[str, Any]] = None
+
+    def __repr__(self) -> str:
+        return (
+            f"VARResult(order={self.order}, variables={self.n_variables}, "
+            f"aic={self.aic:.2f}, bic={self.bic:.2f})"
+        )
+
+
+@dataclass
+class TimeSeriesDiagnosticsResult:
+    """Comprehensive diagnostics for time series models."""
+
+    ljung_box_test: Dict[str, Any]  # test for autocorrelation in residuals
+    jarque_bera_test: Dict[str, Any]  # test for normality
+    heteroscedasticity_test: Dict[str, Any]  # test for changing variance
+    durbin_watson: float  # autocorrelation test statistic
+    residual_mean: float
+    residual_std: float
+    residual_skewness: float
+    residual_kurtosis: float
+    all_tests_pass: bool  # True if all diagnostic tests pass at 5% level
+
+    def __repr__(self) -> str:
+        status = "PASS" if self.all_tests_pass else "FAIL"
+        return f"TimeSeriesDiagnosticsResult(status={status}, DW={self.durbin_watson:.3f})"
 
 
 # ==============================================================================
@@ -1325,3 +1422,567 @@ class TimeSeriesAnalyzer:
 
         logger.info(f"STL decomposition complete: period={period}, robust={robust}")
         return result
+
+    def johansen_test(
+        self,
+        endog_data: pd.DataFrame,
+        det_order: int = 0,
+        k_ar_diff: int = 1,
+    ) -> JohansenCointegrationResult:
+        """
+        Johansen cointegration test for multivariate time series.
+
+        Tests for cointegrating relationships between multiple time series variables.
+        Cointegration implies that despite being non-stationary individually, a linear
+        combination of the series is stationary (long-run equilibrium relationship).
+
+        Parameters
+        ----------
+        endog_data : pd.DataFrame
+            DataFrame with multiple time series variables to test for cointegration.
+            Each column is a different variable.
+        det_order : int, default=0
+            Deterministic trend order:
+            - -1: No deterministic terms
+            - 0: Constant term (default)
+            - 1: Constant + linear trend
+        k_ar_diff : int, default=1
+            Number of lagged differences in the VAR model.
+            Higher values capture more dynamics but use more degrees of freedom.
+
+        Returns
+        -------
+        JohansenCointegrationResult
+            Contains test statistics, critical values, and cointegration rank.
+
+        Examples
+        --------
+        >>> # Test cointegration between points, assists, rebounds
+        >>> endog = df[['points', 'assists', 'rebounds']]
+        >>> result = analyzer.johansen_test(endog_data=endog, k_ar_diff=2)
+        >>> print(f"Cointegration rank: {result.cointegration_rank}")
+        >>> print(f"Trace stat: {result.trace_statistic}")
+
+        Notes
+        -----
+        The test computes two test statistics:
+        - Trace statistic: Tests H0: rank <= r vs H1: rank > r
+        - Maximum eigenvalue: Tests H0: rank = r vs H1: rank = r+1
+
+        Cointegration rank is determined by comparing test statistics to critical values.
+        """
+        if not ECONOMETRIC_TS_AVAILABLE:
+            raise ImportError(
+                "coint_johansen required. This should be available in statsmodels>=0.12. "
+                "Try: pip install --upgrade statsmodels"
+            )
+
+        # Validate inputs
+        if not isinstance(endog_data, pd.DataFrame):
+            raise TypeError("endog_data must be a pandas DataFrame")
+
+        if endog_data.shape[1] < 2:
+            raise ValueError(
+                f"Need at least 2 variables for cointegration test, got {endog_data.shape[1]}"
+            )
+
+        # Drop missing values
+        endog_clean = endog_data.dropna()
+        if len(endog_clean) < 2 * endog_data.shape[1]:
+            raise ValueError(
+                f"Insufficient observations ({len(endog_clean)}) for {endog_data.shape[1]} variables"
+            )
+
+        variable_names = list(endog_data.columns)
+
+        # Map det_order to deterministic trend specification
+        # Johansen test uses string codes: 'nc' (no constant), 'c' (constant),
+        # 'ct' (constant + trend), 'ctt' (constant + trend + trend^2)
+        det_order_map = {-1: "nc", 0: "c", 1: "ct", 2: "ctt"}
+        det_str = det_order_map.get(det_order, "c")
+
+        try:
+            # Run Johansen test
+            result = coint_johansen(endog_clean.values, det_order=det_order, k_ar_diff=k_ar_diff)
+
+            # Extract test statistics
+            trace_stat = result.lr1  # trace statistic
+            max_eigen_stat = result.lr2  # maximum eigenvalue statistic
+
+            # Critical values (90%, 95%, 99%)
+            cv_trace = result.cvt  # critical values for trace test
+            cv_max_eigen = result.cvm  # critical values for max eigenvalue test
+
+            # Eigenvectors (cointegrating vectors)
+            eigenvectors = result.evec
+
+            # Determine cointegration rank at 95% significance level (index 1)
+            # Count how many trace statistics exceed the 95% critical value
+            cointegration_rank = 0
+            for i in range(len(trace_stat)):
+                if trace_stat[i] > cv_trace[i, 1]:  # 95% critical value is at index 1
+                    cointegration_rank += 1
+                else:
+                    break
+
+            logger.info(
+                f"Johansen test: rank={cointegration_rank}/{len(variable_names)}, "
+                f"lags={k_ar_diff}, det={det_str}"
+            )
+
+        except Exception as e:
+            logger.error(f"Johansen test failed: {e}")
+            raise
+
+        # MLflow logging
+        if self.tracker:
+            self.tracker.log_metrics(
+                {
+                    "cointegration_rank": float(cointegration_rank),
+                    "n_variables": float(len(variable_names)),
+                    "trace_stat_max": float(trace_stat[0]) if len(trace_stat) > 0 else 0.0,
+                }
+            )
+
+        return JohansenCointegrationResult(
+            trace_statistic=trace_stat,
+            max_eigen_statistic=max_eigen_stat,
+            critical_values_trace=cv_trace,
+            critical_values_max_eigen=cv_max_eigen,
+            cointegration_rank=cointegration_rank,
+            variable_names=variable_names,
+            n_lags=k_ar_diff,
+            deterministic_trend=det_str,
+            eigenvectors=eigenvectors,
+        )
+
+    def granger_causality_test(
+        self,
+        caused_series: Union[pd.Series, str],
+        causing_series: Union[pd.Series, str],
+        maxlag: int = 4,
+        addconst: bool = True,
+    ) -> GrangerCausalityResult:
+        """
+        Granger causality test to determine if one series helps predict another.
+
+        Tests the null hypothesis that the coefficients of past values of the
+        'causing' variable in a VAR model are jointly zero. If rejected, the causing
+        variable Granger-causes the caused variable (helps predict it).
+
+        Parameters
+        ----------
+        caused_series : pd.Series or str
+            The series being predicted (dependent variable), or column name if str.
+        causing_series : pd.Series or str
+            The series tested for causality (independent variable), or column name if str.
+        maxlag : int, default=4
+            Maximum number of lags to test. Tests will be run for lags 1 through maxlag.
+        addconst : bool, default=True
+            Add a constant term to the model.
+
+        Returns
+        -------
+        GrangerCausalityResult
+            Contains test statistics, p-values for each lag, and overall conclusion.
+
+        Examples
+        --------
+        >>> # Test if assists Granger-cause points
+        >>> result = analyzer.granger_causality_test(
+        ...     caused_series='points',
+        ...     causing_series='assists',
+        ...     maxlag=3
+        ... )
+        >>> print(f"Significant: {result.significant_at_5pct}")
+        >>> print(f"Min p-value: {result.min_p_value:.4f}")
+
+        Notes
+        -----
+        Granger causality is a statistical concept of causality based on prediction.
+        X Granger-causes Y if past values of X improve the prediction of Y beyond
+        what past values of Y alone can provide. This does NOT imply true causation.
+        """
+        if not ECONOMETRIC_TS_AVAILABLE:
+            raise ImportError(
+                "grangercausalitytests required. This should be available in statsmodels>=0.12. "
+                "Try: pip install --upgrade statsmodels"
+            )
+
+        # Handle string column names
+        if isinstance(caused_series, str):
+            if caused_series not in self.data.columns:
+                raise ValueError(f"Column '{caused_series}' not found in data")
+            caused_var_name = caused_series
+            caused_data = self.data[caused_series]
+        else:
+            caused_var_name = getattr(caused_series, "name", "caused_variable")
+            caused_data = caused_series
+
+        if isinstance(causing_series, str):
+            if causing_series not in self.data.columns:
+                raise ValueError(f"Column '{causing_series}' not found in data")
+            causing_var_name = causing_series
+            causing_data = self.data[causing_series]
+        else:
+            causing_var_name = getattr(causing_series, "name", "causing_variable")
+            causing_data = causing_series
+
+        # Validate inputs
+        if maxlag < 1:
+            raise ValueError(f"maxlag must be >= 1, got {maxlag}")
+
+        # Create bivariate DataFrame: [caused, causing]
+        # grangercausalitytests expects [y, x] format
+        test_data = pd.DataFrame({caused_var_name: caused_data, causing_var_name: causing_data})
+        test_data_clean = test_data.dropna()
+
+        if len(test_data_clean) < maxlag + 10:
+            raise ValueError(
+                f"Insufficient observations ({len(test_data_clean)}) for maxlag={maxlag}"
+            )
+
+        try:
+            # Run Granger causality test
+            # Returns dict: lag -> {test_name: (statistic, p_value, df)}
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                gc_results = grangercausalitytests(
+                    test_data_clean[[caused_var_name, causing_var_name]],
+                    maxlag=maxlag,
+                    addconst=addconst,
+                    verbose=False,
+                )
+
+            # Extract results for each lag
+            test_results = {}
+            p_values = []
+
+            for lag in range(1, maxlag + 1):
+                # Get F-test results (most common test)
+                # gc_results[lag] is a tuple: (test_results_dict, ...)
+                lag_result = gc_results[lag][0]  # first element is test results dict
+                f_test = lag_result["ssr_ftest"]  # F-test: (statistic, p_value, df_denom, df_num)
+
+                test_results[lag] = {
+                    "statistic": f_test[0],
+                    "p_value": f_test[1],
+                    "df_denom": f_test[2],
+                    "df_num": f_test[3],
+                }
+                p_values.append(f_test[1])
+
+            # Determine overall conclusion
+            min_p_value = min(p_values)
+            significant_at_5pct = min_p_value < 0.05
+
+            logger.info(
+                f"Granger test: {causing_var_name} -> {caused_var_name}, "
+                f"lags={maxlag}, significant={significant_at_5pct}, min_p={min_p_value:.4f}"
+            )
+
+        except Exception as e:
+            logger.error(f"Granger causality test failed: {e}")
+            raise
+
+        # MLflow logging
+        if self.tracker:
+            self.tracker.log_metrics(
+                {"granger_min_p_value": float(min_p_value), "granger_significant": float(significant_at_5pct)}
+            )
+
+        return GrangerCausalityResult(
+            caused_variable=caused_var_name,
+            causing_variable=causing_var_name,
+            max_lag=maxlag,
+            test_results=test_results,
+            min_p_value=min_p_value,
+            significant_at_5pct=significant_at_5pct,
+        )
+
+    def fit_var(
+        self,
+        endog_data: pd.DataFrame,
+        maxlags: Optional[int] = None,
+        ic: str = "aic",
+        trend: str = "c",
+    ) -> VARResult:
+        """
+        Fit Vector Autoregression (VAR) model for multivariate time series.
+
+        VAR is a generalization of AR for multiple time series. Each variable is modeled
+        as a linear combination of its own lags and the lags of all other variables.
+
+        Parameters
+        ----------
+        endog_data : pd.DataFrame
+            DataFrame with multiple time series variables.
+            Each column represents a different endogenous variable.
+        maxlags : int, optional
+            Maximum number of lags to consider. If None, uses int(12 * (nobs/100)^(1/4))
+            as a default heuristic.
+        ic : str, default='aic'
+            Information criterion for model selection: 'aic', 'bic', 'hqic', or 'fpe'.
+        trend : str, default='c'
+            Trend specification:
+            - 'n': No trend
+            - 'c': Constant term (default)
+            - 'ct': Constant + linear trend
+            - 'ctt': Constant + linear + quadratic trend
+
+        Returns
+        -------
+        VARResult
+            Contains fitted VAR model, coefficients, and information criteria.
+
+        Examples
+        --------
+        >>> # Fit VAR model for points, assists, rebounds
+        >>> endog = df[['points', 'assists', 'rebounds']]
+        >>> result = analyzer.fit_var(endog_data=endog, maxlags=5, ic='aic')
+        >>> print(f"Optimal lag order: {result.order}")
+        >>> print(f"AIC: {result.aic:.2f}, BIC: {result.bic:.2f}")
+
+        Notes
+        -----
+        VAR models are useful for:
+        - Modeling joint dynamics of multiple series
+        - Impulse response analysis
+        - Forecast error variance decomposition
+        - Granger causality testing
+        """
+        if not ECONOMETRIC_TS_AVAILABLE:
+            raise ImportError(
+                "VAR model required. This should be available in statsmodels>=0.12. "
+                "Try: pip install --upgrade statsmodels"
+            )
+
+        # Validate inputs
+        if not isinstance(endog_data, pd.DataFrame):
+            raise TypeError("endog_data must be a pandas DataFrame")
+
+        if endog_data.shape[1] < 2:
+            raise ValueError(f"VAR requires at least 2 variables, got {endog_data.shape[1]}")
+
+        # Drop missing values
+        endog_clean = endog_data.dropna()
+        variable_names = list(endog_data.columns)
+        n_obs = len(endog_clean)
+
+        # Set default maxlags if not provided
+        if maxlags is None:
+            # Default heuristic: int(12 * (nobs/100)^(1/4))
+            maxlags = int(12 * (n_obs / 100) ** 0.25)
+            maxlags = max(1, min(maxlags, n_obs // 3))  # ensure reasonable range
+            logger.info(f"Using default maxlags={maxlags} based on {n_obs} observations")
+
+        if n_obs < maxlags + 10:
+            raise ValueError(
+                f"Insufficient observations ({n_obs}) for maxlags={maxlags}. "
+                f"Need at least {maxlags + 10}."
+            )
+
+        try:
+            # Fit VAR model
+            var_model = VAR(endog_clean)
+
+            # Select optimal lag order based on information criterion
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                var_fitted = var_model.fit(maxlags=maxlags, ic=ic, trend=trend)
+
+            # Extract model information
+            order_selected = var_fitted.k_ar  # selected lag order
+            aic_value = var_fitted.aic
+            bic_value = var_fitted.bic
+            hqic_value = var_fitted.hqic
+            fpe_value = var_fitted.fpe
+            log_likelihood = var_fitted.llf
+
+            # Extract coefficient summary
+            # params is (n_vars * n_lags + const) x n_vars matrix
+            coef_df = pd.DataFrame(
+                var_fitted.params, columns=variable_names, index=var_fitted.params.index
+            )
+
+            logger.info(
+                f"VAR model fitted: order={order_selected}, variables={len(variable_names)}, "
+                f"aic={aic_value:.2f}, bic={bic_value:.2f}"
+            )
+
+        except Exception as e:
+            logger.error(f"VAR model fitting failed: {e}")
+            raise
+
+        # MLflow logging
+        if self.tracker:
+            self.tracker.log_metrics(
+                {
+                    "var_order": float(order_selected),
+                    "var_aic": float(aic_value),
+                    "var_bic": float(bic_value),
+                    "var_n_variables": float(len(variable_names)),
+                }
+            )
+
+        return VARResult(
+            model=var_fitted,
+            order=order_selected,
+            n_variables=len(variable_names),
+            variable_names=variable_names,
+            aic=aic_value,
+            bic=bic_value,
+            hqic=hqic_value,
+            fpe=fpe_value,
+            log_likelihood=log_likelihood,
+            coef_summary=coef_df,
+        )
+
+    def time_series_diagnostics(
+        self, residuals: pd.Series, lags: int = 10, alpha: float = 0.05
+    ) -> TimeSeriesDiagnosticsResult:
+        """
+        Comprehensive diagnostic tests for time series model residuals.
+
+        Runs a battery of diagnostic tests to validate model assumptions:
+        - Ljung-Box test for autocorrelation
+        - Jarque-Bera test for normality
+        - Heteroscedasticity test (ARCH effects)
+        - Durbin-Watson statistic for autocorrelation
+        - Residual statistics (mean, std, skewness, kurtosis)
+
+        Parameters
+        ----------
+        residuals : pd.Series
+            Model residuals to test (observed - fitted).
+        lags : int, default=10
+            Number of lags to use in autocorrelation tests.
+        alpha : float, default=0.05
+            Significance level for hypothesis tests.
+
+        Returns
+        -------
+        TimeSeriesDiagnosticsResult
+            Comprehensive diagnostics with test statistics and p-values.
+
+        Examples
+        --------
+        >>> # Fit ARIMA and check residuals
+        >>> arima_result = analyzer.fit_arima(order=(1, 1, 1))
+        >>> residuals = arima_result.model.resid
+        >>> diagnostics = analyzer.time_series_diagnostics(residuals, lags=12)
+        >>> print(f"All tests pass: {diagnostics.all_tests_pass}")
+        >>> print(f"Durbin-Watson: {diagnostics.durbin_watson:.3f}")
+
+        Notes
+        -----
+        Good model residuals should be:
+        - Uncorrelated (white noise) - Ljung-Box p > 0.05
+        - Normally distributed - Jarque-Bera p > 0.05
+        - Homoscedastic (constant variance) - ARCH p > 0.05
+        - Durbin-Watson near 2.0 indicates no autocorrelation
+        """
+        if not isinstance(residuals, pd.Series):
+            residuals = pd.Series(residuals)
+
+        residuals_clean = residuals.dropna()
+
+        if len(residuals_clean) < lags + 5:
+            raise ValueError(
+                f"Insufficient residuals ({len(residuals_clean)}) for lags={lags}"
+            )
+
+        try:
+            # 1. Ljung-Box test for autocorrelation
+            lb_result = acorr_ljungbox(residuals_clean, lags=lags, return_df=False)
+            ljung_box = {
+                "statistic": float(lb_result[0][-1]),  # test statistic for max lag
+                "p_value": float(lb_result[1][-1]),  # p-value for max lag
+                "lags": lags,
+                "pass": float(lb_result[1][-1]) > alpha,
+            }
+
+            # 2. Jarque-Bera test for normality
+            if ECONOMETRIC_TS_AVAILABLE and jarque_bera is not None:
+                jb_stat, jb_pvalue, jb_skew, jb_kurtosis = jarque_bera(residuals_clean.values)
+                jarque_bera_test = {
+                    "statistic": float(jb_stat),
+                    "p_value": float(jb_pvalue),
+                    "pass": float(jb_pvalue) > alpha,
+                }
+            else:
+                # Fallback using scipy
+                from scipy.stats import jarque_bera as scipy_jb
+
+                jb_stat, jb_pvalue = scipy_jb(residuals_clean.values)
+                jarque_bera_test = {
+                    "statistic": float(jb_stat),
+                    "p_value": float(jb_pvalue),
+                    "pass": float(jb_pvalue) > alpha,
+                }
+
+            # 3. Heteroscedasticity test (ARCH effects)
+            # Use Ljung-Box on squared residuals as a simple ARCH test
+            squared_resid = residuals_clean**2
+            arch_lb = acorr_ljungbox(squared_resid, lags=lags, return_df=False)
+            heteroscedasticity = {
+                "statistic": float(arch_lb[0][-1]),
+                "p_value": float(arch_lb[1][-1]),
+                "lags": lags,
+                "pass": float(arch_lb[1][-1]) > alpha,  # p > alpha means no ARCH effects
+            }
+
+            # 4. Durbin-Watson statistic
+            if ECONOMETRIC_TS_AVAILABLE and durbin_watson is not None:
+                dw_stat = durbin_watson(residuals_clean.values)
+            else:
+                # Manual calculation: DW = sum((e_t - e_{t-1})^2) / sum(e_t^2)
+                resid_diff = residuals_clean.diff().dropna()
+                dw_stat = (resid_diff**2).sum() / (residuals_clean**2).sum()
+            dw_stat = float(dw_stat)
+
+            # 5. Residual statistics
+            resid_mean = float(residuals_clean.mean())
+            resid_std = float(residuals_clean.std())
+            resid_skewness = float(residuals_clean.skew())
+            resid_kurtosis = float(residuals_clean.kurtosis())
+
+            # Overall assessment: all tests pass?
+            all_tests_pass = (
+                ljung_box["pass"]
+                and jarque_bera_test["pass"]
+                and heteroscedasticity["pass"]
+            )
+
+            logger.info(
+                f"Diagnostics: LB_p={ljung_box['p_value']:.3f}, "
+                f"JB_p={jarque_bera_test['p_value']:.3f}, "
+                f"DW={dw_stat:.3f}, all_pass={all_tests_pass}"
+            )
+
+        except Exception as e:
+            logger.error(f"Time series diagnostics failed: {e}")
+            raise
+
+        # MLflow logging
+        if self.tracker:
+            self.tracker.log_metrics(
+                {
+                    "diagnostics_all_pass": float(all_tests_pass),
+                    "durbin_watson": dw_stat,
+                    "ljung_box_p_value": ljung_box["p_value"],
+                    "jarque_bera_p_value": jarque_bera_test["p_value"],
+                }
+            )
+
+        return TimeSeriesDiagnosticsResult(
+            ljung_box_test=ljung_box,
+            jarque_bera_test=jarque_bera_test,
+            heteroscedasticity_test=heteroscedasticity,
+            durbin_watson=dw_stat,
+            residual_mean=resid_mean,
+            residual_std=resid_std,
+            residual_skewness=resid_skewness,
+            residual_kurtosis=resid_kurtosis,
+            all_tests_pass=all_tests_pass,
+        )
