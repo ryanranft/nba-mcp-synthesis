@@ -65,6 +65,8 @@ mlflow>=2.9.0              # Experiment tracking, model registry
 # Advanced Analytics & Econometrics
 # ============================================
 linearmodels>=5.3          # Panel data econometrics (fixed/random effects)
+pymc>=5.0.0                # Bayesian modeling and probabilistic programming
+arviz>=0.15.0              # Exploratory analysis of Bayesian models
 
 # ============================================
 # Data Quality & Validation
