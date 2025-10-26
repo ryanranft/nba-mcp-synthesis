@@ -62,6 +62,11 @@ tenacity>=9.0.0        # Retry logic
 mlflow>=2.9.0              # Experiment tracking, model registry
 
 # ============================================
+# Advanced Analytics & Econometrics
+# ============================================
+linearmodels>=5.3          # Panel data econometrics (fixed/random effects)
+
+# ============================================
 # Data Quality & Validation
 # ============================================
 great-expectations>=1.2.5
