@@ -695,6 +695,9 @@ class EconometricSuite:
                 - 'iv' or 'instrumental_variables': Instrumental Variables (2SLS)
                 - 'rdd' or 'regression_discontinuity': Regression Discontinuity Design
                 - 'synthetic' or 'synthetic_control': Synthetic Control Method
+                - 'kernel' or 'kernel_matching': Kernel Matching (weighted PSM)
+                - 'radius' or 'radius_matching': Radius (Caliper) Matching
+                - 'doubly_robust' or 'doubly_robust_estimation': Doubly Robust Estimation
             **kwargs: Method-specific parameters:
                 For IV: instruments (required), formula, robust, entity_effects
                 For RDD: running_var (required), cutoff (required), bandwidth, kernel,
@@ -702,6 +705,10 @@ class EconometricSuite:
                 For Synthetic: treated_unit (required), outcome_periods (required),
                               treatment_period (required), donor_pool, covariates_for_matching,
                               n_placebo
+                For Kernel: kernel ('gaussian', 'epanechnikov', 'tricube'), bandwidth,
+                           estimate_std_error
+                For Radius: radius (default 0.05), estimate_std_error
+                For Doubly Robust: estimate_std_error
 
         Returns:
             SuiteResult with causal analysis results
@@ -727,6 +734,19 @@ class EconometricSuite:
             ...     method='rdd',
             ...     running_var='test_score',
             ...     cutoff=70.0
+            ... )
+            >>> # Kernel Matching
+            >>> result = suite.causal_analysis(
+            ...     treatment_col='training',
+            ...     outcome_col='performance',
+            ...     method='kernel',
+            ...     kernel='gaussian'
+            ... )
+            >>> # Doubly Robust
+            >>> result = suite.causal_analysis(
+            ...     treatment_col='treatment',
+            ...     outcome_col='outcome',
+            ...     method='doubly_robust'
             ... )
         """
         from mcp_server.causal_inference import CausalInferenceAnalyzer
@@ -850,6 +870,45 @@ class EconometricSuite:
             return self._create_suite_result(
                 method_category=MethodCategory.CAUSAL_INFERENCE,
                 method_used="Regression Discontinuity Design",
+                result=result,
+                model=None,
+            )
+
+        elif method == "kernel" or method == "kernel_matching":
+            # Kernel Matching (weighted PSM)
+            result = analyzer.kernel_matching(
+                kernel=kwargs.get("kernel", "gaussian"),
+                bandwidth=kwargs.get("bandwidth"),
+                estimate_std_error=kwargs.get("estimate_std_error", True),
+            )
+            return self._create_suite_result(
+                method_category=MethodCategory.CAUSAL_INFERENCE,
+                method_used="Kernel Matching",
+                result=result,
+                model=None,
+            )
+
+        elif method == "radius" or method == "radius_matching":
+            # Radius (Caliper) Matching
+            result = analyzer.radius_matching(
+                radius=kwargs.get("radius", 0.05),
+                estimate_std_error=kwargs.get("estimate_std_error", True),
+            )
+            return self._create_suite_result(
+                method_category=MethodCategory.CAUSAL_INFERENCE,
+                method_used="Radius Matching",
+                result=result,
+                model=None,
+            )
+
+        elif method == "doubly_robust" or method == "doubly_robust_estimation":
+            # Doubly Robust Estimation
+            result = analyzer.doubly_robust_estimation(
+                estimate_std_error=kwargs.get("estimate_std_error", True),
+            )
+            return self._create_suite_result(
+                method_category=MethodCategory.CAUSAL_INFERENCE,
+                method_used="Doubly Robust Estimation",
                 result=result,
                 model=None,
             )

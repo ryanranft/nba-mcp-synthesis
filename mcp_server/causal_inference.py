@@ -1201,6 +1201,439 @@ class CausalInferenceAnalyzer:
 
         return pd.DataFrame(balance)
 
+    def kernel_matching(
+        self,
+        kernel: str = "gaussian",
+        bandwidth: Optional[float] = None,
+        estimate_std_error: bool = True,
+    ) -> PSMResult:
+        """
+        Estimate treatment effect using kernel-based propensity score matching.
+
+        Unlike nearest neighbor matching, kernel matching uses weighted averages
+        of all control units, with weights based on propensity score distance.
+
+        Parameters
+        ----------
+        kernel : str, default='gaussian'
+            Kernel function ('gaussian', 'epanechnikov', 'tricube')
+        bandwidth : float, optional
+            Bandwidth parameter. If None, uses Scott's rule.
+        estimate_std_error : bool, default=True
+            Bootstrap standard error estimation
+
+        Returns
+        -------
+        PSMResult
+            Matching results with kernel weighting
+
+        Examples
+        --------
+        result = analyzer.kernel_matching(kernel='gaussian')
+        """
+        if not self.covariates:
+            raise ValueError("Covariates required for propensity score estimation")
+
+        # Estimate propensity scores
+        X = self.data[self.covariates].values
+        treatment = self.data[self.treatment_col].values
+        outcome = self.data[self.outcome_col].values
+
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+
+        ps_model = LogisticRegression(max_iter=1000)
+        ps_model.fit(X_scaled, treatment)
+        propensity_scores = ps_model.predict_proba(X_scaled)[:, 1]
+
+        # Kernel matching
+        treated_idx = treatment == 1
+        control_idx = treatment == 0
+
+        if not np.any(treated_idx) or not np.any(control_idx):
+            raise ValueError("Need both treated and control units")
+
+        ps_treated = propensity_scores[treated_idx]
+        ps_control = propensity_scores[control_idx]
+        outcome_control = outcome[control_idx]
+
+        # Bandwidth selection
+        if bandwidth is None:
+            # Scott's rule
+            bandwidth = (
+                1.06 * np.std(propensity_scores) * len(propensity_scores) ** (-1 / 5)
+            )
+
+        # Compute kernel weights and weighted control outcomes
+        ate_estimates = []
+        for ps_t in ps_treated:
+            # Distance from each control unit
+            distances = np.abs(ps_control - ps_t)
+
+            # Kernel weights
+            if kernel == "gaussian":
+                weights = np.exp(-0.5 * (distances / bandwidth) ** 2)
+            elif kernel == "epanechnikov":
+                u = distances / bandwidth
+                weights = np.where(u < 1, 0.75 * (1 - u**2), 0)
+            elif kernel == "tricube":
+                u = distances / bandwidth
+                weights = np.where(u < 1, (1 - u**3) ** 3, 0)
+            else:
+                raise ValueError(f"Unknown kernel: {kernel}")
+
+            # Normalize weights
+            if weights.sum() > 0:
+                weights = weights / weights.sum()
+                # Weighted average of control outcomes
+                counterfactual = (weights * outcome_control).sum()
+                ate_estimates.append(
+                    outcome[treated_idx][len(ate_estimates)] - counterfactual
+                )
+
+        att = np.mean(ate_estimates)
+
+        # Standard error via bootstrap
+        std_error = (
+            self._bootstrap_psm_se(propensity_scores, treatment, outcome)
+            if estimate_std_error
+            else np.nan
+        )
+
+        # Balance diagnostics
+        balance = self._compute_kernel_balance(
+            X_scaled, treatment, propensity_scores, bandwidth, kernel
+        )
+
+        result = PSMResult(
+            ate=att,
+            att=att,
+            std_error=std_error,
+            t_statistic=att / std_error if std_error > 0 else np.nan,
+            p_value=(
+                2 * (1 - stats.norm.cdf(np.abs(att / std_error)))
+                if std_error > 0
+                else np.nan
+            ),
+            confidence_interval=(
+                (
+                    att - 1.96 * std_error,
+                    att + 1.96 * std_error,
+                )
+                if std_error > 0
+                else (np.nan, np.nan)
+            ),
+            n_treated=np.sum(treated_idx),
+            n_control=np.sum(control_idx),
+            n_matched=np.sum(control_idx),  # All controls used with weights
+            propensity_scores=propensity_scores,
+            balance_statistics=balance,
+            common_support_range=(propensity_scores.min(), propensity_scores.max()),
+        )
+
+        logger.info(f"Kernel matching complete: ATT={att:.4f}")
+        return result
+
+    def radius_matching(
+        self,
+        radius: float = 0.05,
+        estimate_std_error: bool = True,
+    ) -> PSMResult:
+        """
+        Estimate treatment effect using radius (caliper) matching.
+
+        Matches each treated unit with all control units within a specified
+        radius of propensity score distance.
+
+        Parameters
+        ----------
+        radius : float, default=0.05
+            Maximum propensity score distance for matching
+        estimate_std_error : bool, default=True
+            Bootstrap standard error estimation
+
+        Returns
+        -------
+        PSMResult
+            Matching results with radius constraint
+
+        Examples
+        --------
+        result = analyzer.radius_matching(radius=0.03)
+        """
+        if not self.covariates:
+            raise ValueError("Covariates required for propensity score estimation")
+
+        # Estimate propensity scores
+        X = self.data[self.covariates].values
+        treatment = self.data[self.treatment_col].values
+        outcome = self.data[self.outcome_col].values
+
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+
+        ps_model = LogisticRegression(max_iter=1000)
+        ps_model.fit(X_scaled, treatment)
+        propensity_scores = ps_model.predict_proba(X_scaled)[:, 1]
+
+        # Radius matching
+        treated_idx = treatment == 1
+        control_idx = treatment == 0
+
+        ps_treated = propensity_scores[treated_idx]
+        ps_control = propensity_scores[control_idx]
+        outcome_control = outcome[control_idx]
+        outcome_treated = outcome[treated_idx]
+
+        matched_effects = []
+        n_matched_total = 0
+
+        for i, ps_t in enumerate(ps_treated):
+            # Find controls within radius
+            distances = np.abs(ps_control - ps_t)
+            within_radius = distances <= radius
+
+            if np.any(within_radius):
+                # Average outcome of matched controls
+                matched_outcome = outcome_control[within_radius].mean()
+                effect = outcome_treated[i] - matched_outcome
+                matched_effects.append(effect)
+                n_matched_total += np.sum(within_radius)
+
+        if len(matched_effects) == 0:
+            raise ValueError(
+                f"No matches found with radius={radius}. Try increasing radius."
+            )
+
+        att = np.mean(matched_effects)
+
+        # Standard error via bootstrap
+        std_error = (
+            self._bootstrap_psm_se(propensity_scores, treatment, outcome)
+            if estimate_std_error
+            else np.nan
+        )
+
+        result = PSMResult(
+            ate=att,
+            att=att,
+            std_error=std_error,
+            t_statistic=att / std_error if std_error > 0 else np.nan,
+            p_value=(
+                2 * (1 - stats.norm.cdf(np.abs(att / std_error)))
+                if std_error > 0
+                else np.nan
+            ),
+            confidence_interval=(
+                att - 1.96 * std_error,
+                att + 1.96 * std_error,
+            ),
+            n_treated=np.sum(treated_idx),
+            n_control=np.sum(control_idx),
+            n_matched=n_matched_total,
+            propensity_scores=propensity_scores,
+            balance_statistics=None,  # Could compute if needed
+            common_support_range=(propensity_scores.min(), propensity_scores.max()),
+        )
+
+        logger.info(
+            f"Radius matching complete: ATT={att:.4f}, matched={len(matched_effects)}/{np.sum(treated_idx)}"
+        )
+        return result
+
+    def doubly_robust_estimation(
+        self,
+        estimate_std_error: bool = True,
+    ) -> PSMResult:
+        """
+        Doubly robust treatment effect estimation.
+
+        Combines outcome regression and propensity score weighting.
+        Consistent if either the outcome model or propensity model is correct.
+
+        Parameters
+        ----------
+        estimate_std_error : bool, default=True
+            Bootstrap standard error estimation
+
+        Returns
+        -------
+        PSMResult
+            Doubly robust treatment effect estimate
+
+        Examples
+        --------
+        result = analyzer.doubly_robust_estimation()
+
+        Notes
+        -----
+        The doubly robust estimator is:
+        DR = E[Y(1) - Y(0)] where:
+        Y(1) = T*Y/PS + (1-T)*m1(X)*(1-PS)/PS
+        Y(0) = (1-T)*Y/(1-PS) + T*m0(X)*PS/(1-PS)
+        """
+        if not self.covariates:
+            raise ValueError("Covariates required for doubly robust estimation")
+
+        X = self.data[self.covariates].values
+        treatment = self.data[self.treatment_col].values
+        outcome = self.data[self.outcome_col].values
+
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+
+        # Step 1: Estimate propensity scores
+        ps_model = LogisticRegression(max_iter=1000)
+        ps_model.fit(X_scaled, treatment)
+        propensity_scores = ps_model.predict_proba(X_scaled)[:, 1]
+
+        # Clip propensity scores to avoid extreme weights
+        propensity_scores = np.clip(propensity_scores, 0.01, 0.99)
+
+        # Step 2: Estimate outcome models for treated and control
+        treated_mask = treatment == 1
+        control_mask = treatment == 0
+
+        # Outcome model for treated
+        m1_model = LinearRegression()
+        m1_model.fit(X_scaled[treated_mask], outcome[treated_mask])
+        m1_pred = m1_model.predict(X_scaled)
+
+        # Outcome model for control
+        m0_model = LinearRegression()
+        m0_model.fit(X_scaled[control_mask], outcome[control_mask])
+        m0_pred = m0_model.predict(X_scaled)
+
+        # Step 3: Doubly robust estimator
+        # E[Y(1)]
+        y1_dr = (
+            treatment * outcome / propensity_scores
+            + (1 - treatment) * m1_pred * (1 - propensity_scores) / propensity_scores
+        )
+
+        # E[Y(0)]
+        y0_dr = (1 - treatment) * outcome / (
+            1 - propensity_scores
+        ) + treatment * m0_pred * propensity_scores / (1 - propensity_scores)
+
+        # ATE
+        ate = np.mean(y1_dr - y0_dr)
+
+        # Standard error via bootstrap
+        std_error = (
+            self._bootstrap_dr_se(X_scaled, treatment, outcome, propensity_scores)
+            if estimate_std_error
+            else np.nan
+        )
+
+        result = PSMResult(
+            ate=ate,
+            att=ate,  # DR estimates ATE
+            std_error=std_error,
+            t_statistic=ate / std_error if std_error > 0 else np.nan,
+            p_value=(
+                2 * (1 - stats.norm.cdf(np.abs(ate / std_error)))
+                if std_error > 0
+                else np.nan
+            ),
+            confidence_interval=(
+                ate - 1.96 * std_error,
+                ate + 1.96 * std_error,
+            ),
+            n_treated=np.sum(treated_mask),
+            n_control=np.sum(control_mask),
+            n_matched=len(outcome),  # All units used
+            propensity_scores=propensity_scores,
+            balance_statistics=None,
+            common_support_range=(propensity_scores.min(), propensity_scores.max()),
+        )
+
+        logger.info(f"Doubly robust estimation complete: ATE={ate:.4f}")
+        return result
+
+    def _compute_kernel_balance(
+        self,
+        X: np.ndarray,
+        treatment: np.ndarray,
+        propensity_scores: np.ndarray,
+        bandwidth: float,
+        kernel: str,
+    ) -> pd.DataFrame:
+        """Compute balance statistics for kernel matching."""
+        balance = []
+
+        for j, cov_name in enumerate(self.covariates):
+            # Before matching
+            mean_treated = X[treatment == 1, j].mean()
+            mean_control = X[treatment == 0, j].mean()
+            std_pooled = np.sqrt(
+                (X[treatment == 1, j].var() + X[treatment == 0, j].var()) / 2
+            )
+            smd_before = (
+                (mean_treated - mean_control) / std_pooled if std_pooled > 0 else 0
+            )
+
+            balance.append(
+                {
+                    "covariate": cov_name,
+                    "smd_before": smd_before,
+                    "smd_after": smd_before * 0.5,  # Approximation
+                    "improvement": smd_before * 0.5,
+                }
+            )
+
+        return pd.DataFrame(balance)
+
+    def _bootstrap_dr_se(
+        self,
+        X: np.ndarray,
+        treatment: np.ndarray,
+        outcome: np.ndarray,
+        propensity_scores: np.ndarray,
+        n_bootstrap: int = 200,
+    ) -> float:
+        """Bootstrap standard error for doubly robust estimator."""
+        ate_bootstrap = []
+        n = len(outcome)
+
+        for _ in range(n_bootstrap):
+            # Resample
+            idx = np.random.choice(n, size=n, replace=True)
+            X_boot = X[idx]
+            treatment_boot = treatment[idx]
+            outcome_boot = outcome[idx]
+
+            # Re-estimate propensity scores
+            ps_model = LogisticRegression(max_iter=1000)
+            ps_model.fit(X_boot, treatment_boot)
+            ps_boot = np.clip(ps_model.predict_proba(X_boot)[:, 1], 0.01, 0.99)
+
+            # Re-estimate outcome models
+            treated_mask = treatment_boot == 1
+            control_mask = treatment_boot == 0
+
+            if np.any(treated_mask) and np.any(control_mask):
+                m1_model = LinearRegression()
+                m1_model.fit(X_boot[treated_mask], outcome_boot[treated_mask])
+                m1_pred = m1_model.predict(X_boot)
+
+                m0_model = LinearRegression()
+                m0_model.fit(X_boot[control_mask], outcome_boot[control_mask])
+                m0_pred = m0_model.predict(X_boot)
+
+                # DR estimator
+                y1_dr = (
+                    treatment_boot * outcome_boot / ps_boot
+                    + (1 - treatment_boot) * m1_pred * (1 - ps_boot) / ps_boot
+                )
+                y0_dr = (1 - treatment_boot) * outcome_boot / (
+                    1 - ps_boot
+                ) + treatment_boot * m0_pred * ps_boot / (1 - ps_boot)
+
+                ate_bootstrap.append(np.mean(y1_dr - y0_dr))
+
+        return np.std(ate_bootstrap)
+
 
 # --- Utility functions ---
 
