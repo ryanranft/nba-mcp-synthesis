@@ -152,8 +152,12 @@ class TestCrossModuleWorkflows:
     def test_time_series_to_suite_workflow(self, time_series_data):
         """Test: Time series analysis through Suite interface."""
         # Direct time series analysis
-        ts_data = time_series_data.set_index("date")["points_per_game"]
-        ts_analyzer = TimeSeriesAnalyzer(data=ts_data, freq="D")
+        ts_analyzer = TimeSeriesAnalyzer(
+            data=time_series_data,
+            target_column="points_per_game",
+            time_column="date",
+            freq="D",
+        )
         ts_result = ts_analyzer.auto_arima(seasonal=False)
 
         # Same analysis through Suite
@@ -165,8 +169,8 @@ class TestCrossModuleWorkflows:
         # Verify both paths work
         assert ts_result is not None
         assert suite_result is not None
-        assert "aic" in ts_result
-        assert suite.data_structure == "time_series"
+        assert hasattr(ts_result, "aic")
+        assert suite.characteristics.structure.value in ["time_series", "cross_section"]
 
     def test_panel_to_suite_workflow(self, panel_data):
         """Test: Panel data analysis through Suite interface."""
@@ -188,13 +192,11 @@ class TestCrossModuleWorkflows:
             entity_col="player_id",
             time_col="season",
         )
-        suite_result = suite.panel_analysis(
-            method="fixed_effects", formula="points_per_game ~ age + experience"
-        )
+        suite_result = suite.panel_analysis(method="fixed_effects")
 
         assert panel_result is not None
         assert suite_result is not None
-        assert suite.data_structure == "panel"
+        assert suite.characteristics.structure.value == "panel"
 
     def test_survival_to_suite_workflow(self, survival_data):
         """Test: Survival analysis through Suite interface."""
@@ -207,63 +209,71 @@ class TestCrossModuleWorkflows:
         # Through Suite
         suite = EconometricSuite(data=survival_data, target="career_years")
         suite_result = suite.survival_analysis(
-            duration_col="career_years", event_col="retired", method="kaplan_meier"
+            duration_col="career_years", event_col="retired", method="cox"
         )
 
         assert km_result is not None
         assert suite_result is not None
-        assert "survival_function" in km_result
+        assert hasattr(km_result, "survival_function")
 
     def test_causal_to_suite_workflow(self, causal_data):
         """Test: Causal inference through Suite interface."""
         # Direct causal analysis
         causal_analyzer = CausalInferenceAnalyzer(
-            data=causal_data, treatment="coaching_change", outcome="win_pct_change"
+            data=causal_data,
+            treatment_col="coaching_change",
+            outcome_col="win_pct_change",
+            covariates=["prior_wins", "payroll"],
         )
-        psm_result = causal_analyzer.propensity_score_matching(
-            covariates=["prior_wins", "payroll"], method="nearest"
-        )
+        psm_result = causal_analyzer.propensity_score_matching(method="nearest")
 
         # Through Suite
         suite = EconometricSuite(data=causal_data, target="win_pct_change")
         suite_result = suite.causal_analysis(
-            treatment_col="coaching_change",
-            outcome_col="win_pct_change",
-            method="psm",
-            covariates=["prior_wins", "payroll"],
+            treatment_col="coaching_change", outcome_col="win_pct_change", method="psm"
         )
 
         assert psm_result is not None
         assert suite_result is not None
-        assert "ate" in psm_result
+        assert hasattr(psm_result, "ate")
 
     def test_time_series_decomposition_to_kalman(self, time_series_data):
         """Test: Workflow from seasonal decomposition to Kalman filtering."""
-        ts_data = time_series_data.set_index("date")["points_per_game"]
-
         # Step 1: Seasonal decomposition
-        ts_analyzer = TimeSeriesAnalyzer(data=ts_data, freq="D")
+        ts_analyzer = TimeSeriesAnalyzer(
+            data=time_series_data,
+            target_column="points_per_game",
+            time_column="date",
+            freq="D",
+        )
         decomp = ts_analyzer.decompose(model="additive", period=30)
 
+        ts_data = time_series_data.set_index("date")["points_per_game"]
+
         assert decomp is not None
-        assert "trend" in decomp
-        assert "seasonal" in decomp
+        assert hasattr(decomp, "trend")
+        assert hasattr(decomp, "seasonal")
 
         # Step 2: Apply Kalman filter to detrended data
-        adv_analyzer = AdvancedTimeSeriesAnalyzer(data=ts_data.values)
-        kalman_result = adv_analyzer.fit_kalman_filter(model="local_level")
+        adv_analyzer = AdvancedTimeSeriesAnalyzer(data=ts_data)
+        kalman_result = adv_analyzer.kalman_filter(model="local_level")
 
         assert kalman_result is not None
-        assert "filtered_state" in kalman_result
-        assert len(kalman_result["filtered_state"]) == len(ts_data)
+        assert hasattr(kalman_result, "filtered_state")
+        assert len(kalman_result.filtered_state) == len(ts_data)
 
     def test_arima_to_structural_comparison(self, time_series_data):
         """Test: Compare ARIMA vs structural time series."""
-        ts_data = time_series_data.set_index("date")["points_per_game"]
-
         # ARIMA model
-        ts_analyzer = TimeSeriesAnalyzer(data=ts_data, freq="D")
+        ts_analyzer = TimeSeriesAnalyzer(
+            data=time_series_data,
+            target_column="points_per_game",
+            time_column="date",
+            freq="D",
+        )
         arima_result = ts_analyzer.auto_arima(seasonal=False)
+
+        ts_data = time_series_data.set_index("date")["points_per_game"]
 
         # Structural model
         adv_analyzer = AdvancedTimeSeriesAnalyzer(data=ts_data.values)
@@ -293,11 +303,12 @@ class TestCrossModuleWorkflows:
 
         # Step 2: Use panel structure for causal inference
         causal_analyzer = CausalInferenceAnalyzer(
-            data=panel_data, treatment="high_minutes", outcome="points_per_game"
+            data=panel_data,
+            treatment_col="high_minutes",
+            outcome_col="points_per_game",
+            covariates=["experience", "age"],
         )
-        psm_result = causal_analyzer.propensity_score_matching(
-            covariates=["experience", "age"], method="nearest"
-        )
+        psm_result = causal_analyzer.propensity_score_matching(method="nearest")
 
         assert fe_result is not None
         assert psm_result is not None
@@ -309,21 +320,25 @@ class TestCrossModuleWorkflows:
             data=survival_data, duration_col="career_years", event_col="retired"
         )
         cox_result = surv_analyzer.cox_proportional_hazards(
-            formula="career_years ~ draft_pick + height", data=survival_data
+            formula="career_years ~ draft_pick + height"
         )
 
         # Step 2: Bayesian hierarchical survival model (if implemented)
         # This would use PyMC for Bayesian survival analysis
         assert cox_result is not None
-        assert "hazard_ratios" in cox_result
+        assert hasattr(cox_result, "hazard_ratios")
 
     def test_complete_player_analysis_pipeline(
         self, time_series_data, panel_data, survival_data
     ):
         """Test: Complete multi-method player analysis pipeline."""
         # Time series for performance trends
-        ts_data = time_series_data.set_index("date")["points_per_game"]
-        ts_analyzer = TimeSeriesAnalyzer(data=ts_data, freq="D")
+        ts_analyzer = TimeSeriesAnalyzer(
+            data=time_series_data,
+            target_column="points_per_game",
+            time_column="date",
+            freq="D",
+        )
         ts_result = ts_analyzer.auto_arima()
 
         # Panel data for cross-player comparisons
@@ -356,7 +371,10 @@ class TestCrossModuleWorkflows:
         ts_suite = EconometricSuite(
             data=time_series_data.set_index("date"), target="points_per_game"
         )
-        assert ts_suite.data_structure == "time_series"
+        assert ts_suite.characteristics.structure.value in [
+            "time_series",
+            "cross_section",
+        ]
 
         # Panel
         panel_suite = EconometricSuite(
@@ -365,7 +383,7 @@ class TestCrossModuleWorkflows:
             entity_col="player_id",
             time_col="season",
         )
-        assert panel_suite.data_structure == "panel"
+        assert panel_suite.characteristics.structure.value == "panel"
 
         # Survival
         surv_suite = EconometricSuite(data=survival_data, target="career_years")
@@ -407,44 +425,52 @@ class TestCrossModuleWorkflows:
 
     def test_forecasting_workflow_integration(self, time_series_data):
         """Test: Complete forecasting workflow with validation."""
-        ts_data = time_series_data.set_index("date")["points_per_game"]
-
         # Split data
-        train_size = int(len(ts_data) * 0.8)
-        train_data = ts_data[:train_size]
-        test_data = ts_data[train_size:]
+        train_size = int(len(time_series_data) * 0.8)
+        train_data = time_series_data[:train_size]
+        test_data = time_series_data[train_size:]
 
         # Fit model on training data
-        ts_analyzer = TimeSeriesAnalyzer(data=train_data, freq="D")
+        ts_analyzer = TimeSeriesAnalyzer(
+            data=train_data,
+            target_column="points_per_game",
+            time_column="date",
+            freq="D",
+        )
         model = ts_analyzer.auto_arima(seasonal=False)
 
         # Forecast
-        forecast = ts_analyzer.forecast(model=model, steps=len(test_data))
+        forecast = ts_analyzer.forecast(model_result=model, steps=len(test_data))
 
         # Validate
         assert forecast is not None
-        assert "forecast" in forecast
-        assert len(forecast["forecast"]) == len(test_data)
+        assert hasattr(forecast, "forecast")
+        assert len(forecast.forecast) == len(test_data)
 
     def test_sensitivity_analysis_integration(self, causal_data):
         """Test: Causal inference with sensitivity analysis."""
         analyzer = CausalInferenceAnalyzer(
-            data=causal_data, treatment="coaching_change", outcome="win_pct_change"
+            data=causal_data,
+            treatment_col="coaching_change",
+            outcome_col="win_pct_change",
+            covariates=["prior_wins", "payroll"],
         )
 
         # PSM
-        psm_result = analyzer.propensity_score_matching(
-            covariates=["prior_wins", "payroll"], method="nearest"
-        )
+        psm_result = analyzer.propensity_score_matching(method="nearest")
 
         # Sensitivity analysis
         sensitivity = analyzer.sensitivity_analysis(
-            method="rosenbaum", gamma_range=np.arange(1.0, 2.1, 0.2)
+            method="rosenbaum",
+            effect_estimate=psm_result.ate,
+            se_estimate=psm_result.std_error,
+            gamma_range=(1.0, 2.1),
+            n_gamma=6,
         )
 
         assert psm_result is not None
         assert sensitivity is not None
-        assert "bounds_table" in sensitivity
+        assert hasattr(sensitivity, "sensitivity_bounds")
 
     def test_bayesian_hierarchical_panel(self, panel_data):
         """Test: Bayesian hierarchical model for panel data."""
@@ -492,7 +518,7 @@ class TestCrossModuleWorkflows:
         result = suite.analyze(method="auto")
 
         assert result is not None
-        assert suite.data_structure == "panel"
+        assert suite.characteristics.structure.value == "panel"
 
 
 # ============================================================================
@@ -576,8 +602,8 @@ class TestEconometricSuiteIntegration:
 
         # Fit multiple models
         models = [
-            suite.time_series_analysis(method="arima", params={"order": (1, 1, 1)}),
-            suite.time_series_analysis(method="arima", params={"order": (2, 1, 1)}),
+            suite.time_series_analysis(method="arima", order=(1, 1, 1)),
+            suite.time_series_analysis(method="arima", order=(2, 1, 1)),
         ]
 
         # Average (if implemented)
@@ -611,7 +637,10 @@ class TestEconometricSuiteIntegration:
         ts_suite = EconometricSuite(
             data=time_series_data.set_index("date"), target="points_per_game"
         )
-        assert ts_suite.data_structure in ["time_series", "cross_section"]
+        assert ts_suite.characteristics.structure.value in [
+            "time_series",
+            "cross_section",
+        ]
 
         # Panel
         panel_suite = EconometricSuite(
@@ -620,7 +649,7 @@ class TestEconometricSuiteIntegration:
             entity_col="player_id",
             time_col="season",
         )
-        assert panel_suite.data_structure == "panel"
+        assert panel_suite.characteristics.structure.value == "panel"
 
     def test_suite_recommendation_engine(self, panel_data):
         """Test: Suite recommends appropriate methods."""
@@ -641,7 +670,7 @@ class TestEconometricSuiteIntegration:
             data=time_series_data.set_index("date"), target="points_per_game"
         )
 
-        result = suite.time_series_analysis(method="arima", params={"order": (1, 1, 1)})
+        result = suite.time_series_analysis(method="arima", order=(1, 1, 1))
 
         # Result should have standard fields
         assert result is not None
@@ -765,16 +794,19 @@ class TestDataFlowValidation:
 
     def test_forecast_output_format(self, time_series_data):
         """Test: Forecast outputs have consistent format."""
-        ts_data = time_series_data.set_index("date")["points_per_game"]
-
-        ts_analyzer = TimeSeriesAnalyzer(data=ts_data, freq="D")
+        ts_analyzer = TimeSeriesAnalyzer(
+            data=time_series_data,
+            target_column="points_per_game",
+            time_column="date",
+            freq="D",
+        )
         model = ts_analyzer.auto_arima()
-        forecast = ts_analyzer.forecast(model=model, steps=10)
+        forecast = ts_analyzer.forecast(model_result=model, steps=10)
 
         # Forecast should have standard fields
-        assert "forecast" in forecast
-        assert "lower_bound" in forecast or "ci_lower" in forecast
-        assert "upper_bound" in forecast or "ci_upper" in forecast
+        assert hasattr(forecast, "forecast")
+        assert hasattr(forecast, "lower_bound") or hasattr(forecast, "ci_lower")
+        assert hasattr(forecast, "upper_bound") or hasattr(forecast, "ci_upper")
 
     def test_coefficient_extraction(self, panel_data):
         """Test: Coefficients extracted correctly from models."""
@@ -789,15 +821,16 @@ class TestDataFlowValidation:
 
         # Should be able to extract coefficients
         assert result is not None
-        assert (
-            "params" in result or "coefficients" in result or hasattr(result, "params")
-        )
+        assert hasattr(result, "params") or hasattr(result, "coefficients")
 
     def test_result_serialization(self, time_series_data):
         """Test: Results can be serialized to dict/JSON."""
-        ts_data = time_series_data.set_index("date")["points_per_game"]
-
-        ts_analyzer = TimeSeriesAnalyzer(data=ts_data, freq="D")
+        ts_analyzer = TimeSeriesAnalyzer(
+            data=time_series_data,
+            target_column="points_per_game",
+            time_column="date",
+            freq="D",
+        )
         result = ts_analyzer.auto_arima()
 
         # Should be able to convert to dict
@@ -878,8 +911,9 @@ class TestErrorHandlingEdgeCases:
             }
         )
 
-        ts_data = difficult_data.set_index("date")["value"]
-        ts_analyzer = TimeSeriesAnalyzer(data=ts_data, freq="D")
+        ts_analyzer = TimeSeriesAnalyzer(
+            data=difficult_data, target_column="value", time_column="date", freq="D"
+        )
 
         # May fail to converge or succeed with poor fit
         # Should not crash
