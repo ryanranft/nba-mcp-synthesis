@@ -286,9 +286,7 @@ class DataClassifier:
                 )
 
         # Default to cross-section
-        return DataCharacteristics(
-            structure=DataStructure.CROSS_SECTION, n_obs=n_obs
-        )
+        return DataCharacteristics(structure=DataStructure.CROSS_SECTION, n_obs=n_obs)
 
     def recommend_methods(
         self, characteristics: Optional[DataCharacteristics] = None
@@ -386,7 +384,9 @@ class ModelAverager:
             weight_arr = np.ones(n_models) / n_models
         elif weights in ["aic", "bic"] and model_metrics is not None:
             # Information criteria weights (lower is better)
-            ic_values = np.array([model_metrics[name][weights] for name in predictions.keys()])
+            ic_values = np.array(
+                [model_metrics[name][weights] for name in predictions.keys()]
+            )
             # Convert to weights using Akaike weights formula
             delta_ic = ic_values - ic_values.min()
             likelihood = np.exp(-0.5 * delta_ic)
@@ -496,7 +496,9 @@ class EconometricSuite:
         )
 
         self.characteristics = self.classifier.detect_structure()
-        self.recommended_methods = self.classifier.recommend_methods(self.characteristics)
+        self.recommended_methods = self.classifier.recommend_methods(
+            self.characteristics
+        )
 
         # MLflow setup
         if mlflow_experiment and MLFLOW_AVAILABLE:
@@ -565,7 +567,9 @@ class EconometricSuite:
         else:
             # Delegate to appropriate module based on method name
             # This would require a method registry
-            raise NotImplementedError(f"Specific method selection '{method}' not yet implemented")
+            raise NotImplementedError(
+                f"Specific method selection '{method}' not yet implemented"
+            )
 
     # ==========================================================================
     # Module Access Methods
@@ -594,8 +598,8 @@ class EconometricSuite:
 
         if method == "arima":
             # Set default order if not provided
-            if 'order' not in kwargs:
-                kwargs['order'] = (1, 1, 1)
+            if "order" not in kwargs:
+                kwargs["order"] = (1, 1, 1)
             result = analyzer.fit_arima(**kwargs)
             return self._create_suite_result(
                 method_category=MethodCategory.TIME_SERIES,
@@ -635,7 +639,9 @@ class EconometricSuite:
         from mcp_server.panel_data import PanelDataAnalyzer
 
         if self.entity_col is None or self.time_col is None:
-            raise ValueError("entity_col and time_col must be specified for panel analysis")
+            raise ValueError(
+                "entity_col and time_col must be specified for panel analysis"
+            )
 
         if self.target is None:
             raise ValueError("target column must be specified for panel analysis")
@@ -684,33 +690,115 @@ class EconometricSuite:
         Args:
             treatment_col: Treatment variable (uses self.treatment_col if None)
             outcome_col: Outcome variable (uses self.outcome_col if None)
-            method: Causal method ('iv', 'rdd', 'psm', 'synthetic_control')
-            **kwargs: Method-specific parameters
+            method: Causal method:
+                - 'psm': Propensity Score Matching
+                - 'iv' or 'instrumental_variables': Instrumental Variables (2SLS)
+                - 'rdd' or 'regression_discontinuity': Regression Discontinuity Design
+                - 'synthetic' or 'synthetic_control': Synthetic Control Method
+            **kwargs: Method-specific parameters:
+                For IV: instruments (required), formula, robust, entity_effects
+                For RDD: running_var (required), cutoff (required), bandwidth, kernel,
+                        polynomial_order, fuzzy, optimal_bandwidth_method
+                For Synthetic: treated_unit (required), outcome_periods (required),
+                              treatment_period (required), donor_pool, covariates_for_matching,
+                              n_placebo
 
         Returns:
             SuiteResult with causal analysis results
 
         Examples:
+            >>> # Propensity Score Matching
             >>> result = suite.causal_analysis(
             ...     treatment_col='new_coach',
             ...     outcome_col='wins',
             ...     method='psm'
             ... )
+            >>> # Instrumental Variables
+            >>> result = suite.causal_analysis(
+            ...     treatment_col='training',
+            ...     outcome_col='performance',
+            ...     method='iv',
+            ...     instruments=['prior_exposure']
+            ... )
+            >>> # Regression Discontinuity
+            >>> result = suite.causal_analysis(
+            ...     treatment_col='scholarship',
+            ...     outcome_col='graduation_rate',
+            ...     method='rdd',
+            ...     running_var='test_score',
+            ...     cutoff=70.0
+            ... )
         """
         from mcp_server.causal_inference import CausalInferenceAnalyzer
 
+        # Synthetic Control handles treatment differently (no treatment_col needed)
+        if method == "synthetic" or method == "synthetic_control":
+            outcome = outcome_col or self.outcome_col
+            if outcome is None:
+                raise ValueError("outcome_col must be specified")
+
+            treated_unit = kwargs.get("treated_unit")
+            outcome_periods = kwargs.get("outcome_periods")
+            treatment_period = kwargs.get("treatment_period")
+
+            if (
+                treated_unit is None
+                or outcome_periods is None
+                or treatment_period is None
+            ):
+                raise ValueError(
+                    "treated_unit, outcome_periods, and treatment_period required for synthetic control"
+                )
+
+            # For synthetic control, create analyzer with dummy treatment (not used)
+            analyzer = CausalInferenceAnalyzer(
+                data=self.data,
+                treatment_col=self.entity_col,  # Dummy, not actually used
+                outcome_col=outcome,
+                covariates=[],
+                entity_col=self.entity_col,
+                time_col=self.time_col,
+            )
+
+            result = analyzer.synthetic_control(
+                treated_unit=treated_unit,
+                outcome_periods=outcome_periods,
+                treatment_period=treatment_period,
+                donor_pool=kwargs.get("donor_pool"),
+                covariates_for_matching=kwargs.get("covariates_for_matching"),
+                n_placebo=kwargs.get("n_placebo", 0),
+            )
+            return self._create_suite_result(
+                method_category=MethodCategory.CAUSAL_INFERENCE,
+                method_used="Synthetic Control",
+                result=result,
+                model=None,
+            )
+
+        # For other methods, require treatment_col
         treatment = treatment_col or self.treatment_col
         outcome = outcome_col or self.outcome_col
 
         if treatment is None or outcome is None:
             raise ValueError("treatment_col and outcome_col must be specified")
 
+        # For IV, exclude instruments from covariates
+        instruments = kwargs.get("instruments", [])
+        if isinstance(instruments, str):
+            instruments = [instruments]
+
         covariates = [
-            col for col in self.data.columns if col not in [treatment, outcome, self.entity_col, self.time_col]
+            col
+            for col in self.data.columns
+            if col
+            not in [treatment, outcome, self.entity_col, self.time_col] + instruments
         ]
 
         analyzer = CausalInferenceAnalyzer(
-            data=self.data, treatment_col=treatment, outcome_col=outcome, covariates=covariates[:10]  # Limit covariates
+            data=self.data,
+            treatment_col=treatment,
+            outcome_col=outcome,
+            covariates=covariates[:10],  # Limit covariates
         )
 
         if method == "psm":
@@ -721,6 +809,51 @@ class EconometricSuite:
                 result=result,
                 model=None,  # PSMResult doesn't have model attribute
             )
+
+        elif method == "iv" or method == "instrumental_variables":
+            # Instrumental Variables (2SLS)
+            instruments = kwargs.get("instruments")
+            if instruments is None:
+                raise ValueError("instruments parameter required for IV method")
+
+            result = analyzer.instrumental_variables(
+                instruments=instruments,
+                formula=kwargs.get("formula"),
+                robust=kwargs.get("robust", True),
+                entity_effects=kwargs.get("entity_effects", False),
+            )
+            return self._create_suite_result(
+                method_category=MethodCategory.CAUSAL_INFERENCE,
+                method_used="Instrumental Variables (2SLS)",
+                result=result,
+                model=None,
+            )
+
+        elif method == "rdd" or method == "regression_discontinuity":
+            # Regression Discontinuity Design
+            running_var = kwargs.get("running_var")
+            cutoff = kwargs.get("cutoff")
+            if running_var is None or cutoff is None:
+                raise ValueError(
+                    "running_var and cutoff parameters required for RDD method"
+                )
+
+            result = analyzer.regression_discontinuity(
+                running_var=running_var,
+                cutoff=cutoff,
+                bandwidth=kwargs.get("bandwidth"),
+                kernel=kwargs.get("kernel", "triangular"),
+                polynomial_order=kwargs.get("polynomial_order", 1),
+                fuzzy=kwargs.get("fuzzy", False),
+                optimal_bandwidth_method=kwargs.get("optimal_bandwidth_method", "ik"),
+            )
+            return self._create_suite_result(
+                method_category=MethodCategory.CAUSAL_INFERENCE,
+                method_used="Regression Discontinuity Design",
+                result=result,
+                model=None,
+            )
+
         else:
             raise ValueError(f"Unknown causal method: {method}")
 
@@ -737,17 +870,42 @@ class EconometricSuite:
         Args:
             duration_col: Duration variable (uses self.duration_col if None)
             event_col: Event indicator (uses self.event_col if None)
-            method: Survival method ('cox', 'weibull', 'kaplan_meier')
-            **kwargs: Method-specific parameters
+            method: Survival method:
+                - 'cox': Cox Proportional Hazards (default)
+                - 'kaplan_meier' or 'km': Kaplan-Meier estimator
+                - 'parametric': Parametric survival models (Weibull, Log-Normal, etc.)
+                - 'competing_risks': Competing risks analysis
+                - 'frailty': Frailty model (random effects)
+            **kwargs: Method-specific parameters:
+                For KM: groups, alpha, timeline
+                For Parametric: model ('weibull', 'lognormal', 'loglogistic', 'exponential'),
+                               formula, timeline
+                For Competing Risks: event_type_col (required), event_types (required), method
+                For Frailty: shared_frailty_col, distribution
 
         Returns:
             SuiteResult with survival analysis results
 
         Examples:
+            >>> # Cox Proportional Hazards
             >>> result = suite.survival_analysis(
             ...     duration_col='career_years',
             ...     event_col='retired',
             ...     method='cox'
+            ... )
+            >>> # Kaplan-Meier
+            >>> result = suite.survival_analysis(
+            ...     duration_col='career_years',
+            ...     event_col='retired',
+            ...     method='kaplan_meier',
+            ...     groups='position'
+            ... )
+            >>> # Parametric (Weibull)
+            >>> result = suite.survival_analysis(
+            ...     duration_col='career_years',
+            ...     event_col='retired',
+            ...     method='parametric',
+            ...     model='weibull'
             ... )
         """
         from mcp_server.survival_analysis import SurvivalAnalyzer
@@ -759,7 +917,9 @@ class EconometricSuite:
             raise ValueError("duration_col and event_col must be specified")
 
         covariates = [
-            col for col in self.data.columns if col not in [duration, event, self.entity_col, self.time_col]
+            col
+            for col in self.data.columns
+            if col not in [duration, event, self.entity_col, self.time_col]
         ]
 
         analyzer = SurvivalAnalyzer(
@@ -780,6 +940,91 @@ class EconometricSuite:
                 aic=result.aic,
                 bic=result.bic,
             )
+
+        elif method == "kaplan_meier" or method == "km":
+            # Kaplan-Meier non-parametric estimator
+            result = analyzer.kaplan_meier(
+                groups=kwargs.get("groups"),
+                alpha=kwargs.get("alpha", 0.05),
+                timeline=kwargs.get("timeline"),
+            )
+            # Handle grouped vs ungrouped results
+            if isinstance(result, dict):
+                # Grouped K-M returns dict of results
+                # For Suite, we'll wrap the first group's result
+                first_group = list(result.values())[0]
+                return self._create_suite_result(
+                    method_category=MethodCategory.SURVIVAL_ANALYSIS,
+                    method_used="Kaplan-Meier Estimator",
+                    result=result,  # Store full dict
+                    model=None,
+                )
+            else:
+                return self._create_suite_result(
+                    method_category=MethodCategory.SURVIVAL_ANALYSIS,
+                    method_used="Kaplan-Meier Estimator",
+                    result=result,
+                    model=None,
+                )
+
+        elif method == "parametric":
+            # Parametric survival models
+            model_type = kwargs.get("model", "weibull")
+            result = analyzer.parametric_survival(
+                model=model_type,
+                formula=kwargs.get("formula"),
+                timeline=kwargs.get("timeline"),
+            )
+            return self._create_suite_result(
+                method_category=MethodCategory.SURVIVAL_ANALYSIS,
+                method_used=f"Parametric Survival ({model_type.capitalize()})",
+                result=result,
+                model=None,
+                aic=result.aic,
+                bic=result.bic,
+                log_likelihood=result.log_likelihood,
+            )
+
+        elif method == "competing_risks":
+            # Competing risks analysis
+            event_type_col = kwargs.get("event_type_col")
+            event_types = kwargs.get("event_types")
+
+            if event_type_col is None or event_types is None:
+                raise ValueError(
+                    "event_type_col and event_types parameters required for competing_risks method"
+                )
+
+            result = analyzer.competing_risks(
+                event_type_col=event_type_col,
+                event_types=event_types,
+                method=kwargs.get("method", "cumulative_incidence"),
+            )
+            return self._create_suite_result(
+                method_category=MethodCategory.SURVIVAL_ANALYSIS,
+                method_used="Competing Risks",
+                result=result,
+                model=None,
+            )
+
+        elif method == "frailty":
+            # Frailty model (random effects survival)
+            result = analyzer.frailty_model(
+                shared_frailty_col=kwargs.get("shared_frailty_col"),
+                distribution=kwargs.get("distribution", "gamma"),
+            )
+            return self._create_suite_result(
+                method_category=MethodCategory.SURVIVAL_ANALYSIS,
+                method_used="Frailty Model",
+                result=result,
+                model=None,
+                aic=result.aic if hasattr(result, "aic") else None,
+                bic=result.bic if hasattr(result, "bic") else None,
+                log_likelihood=(
+                    result.log_likelihood if hasattr(result, "log_likelihood") else None
+                ),
+            )
+
         else:
             raise ValueError(f"Unknown survival method: {method}")
 
@@ -815,19 +1060,43 @@ class EconometricSuite:
         else:
             raise ValueError(f"Unknown Bayesian method: {method}")
 
-    def advanced_time_series_analysis(self, method: str = "kalman", **kwargs) -> SuiteResult:
+    def advanced_time_series_analysis(
+        self, method: str = "kalman", **kwargs
+    ) -> SuiteResult:
         """
         Access advanced time series methods.
 
         Args:
-            method: Advanced method ('kalman', 'markov_switching', 'dynamic_factor')
-            **kwargs: Method-specific parameters
+            method: Advanced method:
+                - 'kalman': Kalman filter for state estimation
+                - 'markov_switching' or 'markov': Markov switching models
+                - 'dynamic_factor': Dynamic factor models
+                - 'structural': Structural time series (unobserved components)
+            **kwargs: Method-specific parameters:
+                For Kalman: model ('local_level', 'local_linear_trend', 'seasonal'), exog
+                For Markov: n_regimes, regime_type, exog, switching_variance
+                For Dynamic Factor: data (DataFrame), n_factors, factor_order
+                For Structural: level, trend, seasonal, cycle
 
         Returns:
             SuiteResult with advanced time series results
 
         Examples:
-            >>> result = suite.advanced_time_series_analysis(method='kalman')
+            >>> # Kalman filter
+            >>> result = suite.advanced_time_series_analysis(
+            ...     method='kalman',
+            ...     model='local_level'
+            ... )
+            >>> # Markov switching
+            >>> result = suite.advanced_time_series_analysis(
+            ...     method='markov_switching',
+            ...     n_regimes=2
+            ... )
+            >>> # Dynamic factor
+            >>> result = suite.advanced_time_series_analysis(
+            ...     method='dynamic_factor',
+            ...     n_factors=2
+            ... )
         """
         from mcp_server.advanced_time_series import AdvancedTimeSeriesAnalyzer
 
@@ -845,6 +1114,80 @@ class EconometricSuite:
                 model=None,
                 log_likelihood=result.log_likelihood,
             )
+
+        elif method == "markov_switching" or method == "markov":
+            # Markov switching regime models
+            n_regimes = kwargs.get("n_regimes", 2)
+            result = analyzer.markov_switching(
+                n_regimes=n_regimes,
+                regime_type=kwargs.get("regime_type", "mean_shift"),
+                exog=kwargs.get("exog"),
+                switching_variance=kwargs.get("switching_variance", False),
+            )
+            return self._create_suite_result(
+                method_category=MethodCategory.ADVANCED_TIME_SERIES,
+                method_used="Markov Switching",
+                result=result,
+                model=None,
+                aic=result.aic if hasattr(result, "aic") else None,
+                bic=result.bic if hasattr(result, "bic") else None,
+                log_likelihood=(
+                    result.log_likelihood if hasattr(result, "log_likelihood") else None
+                ),
+            )
+
+        elif method == "dynamic_factor":
+            # Dynamic factor model
+            # For dynamic factor, we might need multivariate data
+            data_for_dfm = kwargs.get("data", self.data)
+            n_factors = kwargs.get("n_factors", 1)
+            factor_order = kwargs.get("factor_order", 2)
+
+            # Extract model_kwargs (anything not data, n_factors, factor_order)
+            model_kwargs = {
+                k: v
+                for k, v in kwargs.items()
+                if k not in ["data", "n_factors", "factor_order"]
+            }
+
+            result = analyzer.dynamic_factor_model(
+                data=data_for_dfm if isinstance(data_for_dfm, pd.DataFrame) else None,
+                n_factors=n_factors,
+                factor_order=factor_order,
+                **model_kwargs,  # Pass through additional kwargs like enforce_stationarity
+            )
+            return self._create_suite_result(
+                method_category=MethodCategory.ADVANCED_TIME_SERIES,
+                method_used="Dynamic Factor Model",
+                result=result,
+                model=None,
+                aic=result.aic if hasattr(result, "aic") else None,
+                bic=result.bic if hasattr(result, "bic") else None,
+                log_likelihood=(
+                    result.log_likelihood if hasattr(result, "log_likelihood") else None
+                ),
+            )
+
+        elif method == "structural":
+            # Structural time series (unobserved components)
+            result = analyzer.structural_time_series(
+                level=kwargs.get("level", True),
+                trend=kwargs.get("trend", False),
+                seasonal=kwargs.get("seasonal"),
+                cycle=kwargs.get("cycle", False),
+            )
+            return self._create_suite_result(
+                method_category=MethodCategory.ADVANCED_TIME_SERIES,
+                method_used="Structural Time Series",
+                result=result,
+                model=None,
+                aic=result.aic if hasattr(result, "aic") else None,
+                bic=result.bic if hasattr(result, "bic") else None,
+                log_likelihood=(
+                    result.log_likelihood if hasattr(result, "log_likelihood") else None
+                ),
+            )
+
         else:
             raise ValueError(f"Unknown advanced time series method: {method}")
 
@@ -880,22 +1223,22 @@ class EconometricSuite:
         results = []
 
         for spec in methods:
-            category = spec['category']
-            method = spec['method']
-            params = spec.get('params', {})
+            category = spec["category"]
+            method = spec["method"]
+            params = spec.get("params", {})
 
             try:
-                if category == 'time_series':
+                if category == "time_series":
                     result = self.time_series_analysis(method=method, **params)
-                elif category == 'panel':
+                elif category == "panel":
                     result = self.panel_analysis(method=method, **params)
-                elif category == 'causal':
+                elif category == "causal":
                     result = self.causal_analysis(method=method, **params)
-                elif category == 'survival':
+                elif category == "survival":
                     result = self.survival_analysis(method=method, **params)
-                elif category == 'bayesian':
+                elif category == "bayesian":
                     result = self.bayesian_analysis(method=method, **params)
-                elif category == 'advanced_time_series':
+                elif category == "advanced_time_series":
                     result = self.advanced_time_series_analysis(method=method, **params)
                 else:
                     logger.warning(f"Unknown category: {category}")
@@ -903,11 +1246,11 @@ class EconometricSuite:
 
                 results.append(
                     {
-                        'method': result.method_used,
-                        'aic': result.aic,
-                        'bic': result.bic,
-                        'r_squared': result.r_squared,
-                        'log_likelihood': result.log_likelihood,
+                        "method": result.method_used,
+                        "aic": result.aic,
+                        "bic": result.bic,
+                        "r_squared": result.r_squared,
+                        "log_likelihood": result.log_likelihood,
                     }
                 )
             except Exception as e:
@@ -919,9 +1262,9 @@ class EconometricSuite:
         # Add ranking column
         if metric in comparison_df.columns and comparison_df[metric].notna().any():
             # Lower is better for AIC/BIC, higher is better for R²
-            ascending = metric in ['aic', 'bic']
-            comparison_df['rank'] = comparison_df[metric].rank(ascending=ascending)
-            comparison_df = comparison_df.sort_values('rank')
+            ascending = metric in ["aic", "bic"]
+            comparison_df["rank"] = comparison_df[metric].rank(ascending=ascending)
+            comparison_df = comparison_df.sort_values("rank")
 
         return comparison_df
 
@@ -952,13 +1295,13 @@ class EconometricSuite:
         if self.mlflow_experiment and MLFLOW_AVAILABLE:
             metrics = {}
             if suite_result.aic is not None:
-                metrics['aic'] = suite_result.aic
+                metrics["aic"] = suite_result.aic
             if suite_result.bic is not None:
-                metrics['bic'] = suite_result.bic
+                metrics["bic"] = suite_result.bic
             if suite_result.r_squared is not None:
-                metrics['r_squared'] = suite_result.r_squared
+                metrics["r_squared"] = suite_result.r_squared
             if suite_result.log_likelihood is not None:
-                metrics['log_likelihood'] = suite_result.log_likelihood
+                metrics["log_likelihood"] = suite_result.log_likelihood
 
             if metrics:
                 mlflow.log_metrics(metrics)

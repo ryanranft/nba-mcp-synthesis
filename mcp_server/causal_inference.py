@@ -323,9 +323,19 @@ class CausalInferenceAnalyzer:
         instruments = [instruments] if isinstance(instruments, str) else instruments
 
         # Prepare data
+        # For IV2SLS, formula must be: "outcome ~ [treatment ~ instrument] + covariates"
         if formula is None:
-            covariates_str = " + ".join(self.covariates) if self.covariates else "1"
-            formula = f"{self.outcome_col} ~ {covariates_str}"
+            # Build IV formula with treatment as endogenous variable
+            instruments_str = " + ".join(instruments)
+            covariates_str = " + ".join(self.covariates) if self.covariates else ""
+
+            # IV2SLS formula format: dependent ~ [endogenous ~ instruments] + exogenous
+            if covariates_str:
+                formula = f"{self.outcome_col} ~ [{self.treatment_col} ~ {instruments_str}] + {covariates_str}"
+            else:
+                formula = (
+                    f"{self.outcome_col} ~ [{self.treatment_col} ~ {instruments_str}]"
+                )
 
         # Build IV model
         try:
@@ -338,9 +348,7 @@ class CausalInferenceAnalyzer:
                 model = PanelIV.from_formula(formula, data=data_panel, weights=None)
             else:
                 # Cross-sectional IV
-                model = IV2SLS.from_formula(
-                    formula, data=self.data, instruments=" + ".join(instruments)
-                )
+                model = IV2SLS.from_formula(formula, data=self.data)
 
             # Estimate
             fit = model.fit(cov_type="robust" if robust else "unadjusted")
@@ -383,15 +391,18 @@ class CausalInferenceAnalyzer:
                 }
 
             # Endogeneity test (Durbin-Wu-Hausman)
-            endog_test = {
-                "statistic": (
-                    fit.wu_hausman.stat if hasattr(fit, "wu_hausman") else np.nan
-                ),
-                "p_value": (
-                    fit.wu_hausman.pval if hasattr(fit, "wu_hausman") else np.nan
-                ),
-                "null_hypothesis": "Treatment is exogenous (IV not needed)",
-            }
+            endog_test = None
+            try:
+                if hasattr(fit, "wu_hausman") and callable(fit.wu_hausman):
+                    wh_test = fit.wu_hausman()
+                    endog_test = {
+                        "statistic": wh_test.stat,
+                        "p_value": wh_test.pval,
+                        "null_hypothesis": "Treatment is exogenous (IV not needed)",
+                    }
+            except (AttributeError, TypeError):
+                # Some IV2SLS versions don't have wu_hausman test
+                pass
 
             result = IVResult(
                 treatment_effect=treatment_effect,
