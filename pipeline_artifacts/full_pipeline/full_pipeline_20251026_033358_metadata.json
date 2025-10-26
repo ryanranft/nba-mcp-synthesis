@@ -1,0 +1,49 @@
+{
+  "run_id": "full_pipeline_20251026_033358",
+  "pipeline_name": "full_pipeline",
+  "start_time": "2025-10-26T03:33:58.867505",
+  "end_time": "2025-10-26T03:33:58.868107",
+  "status": "success",
+  "config": {
+    "model_type": "random_forest"
+  },
+  "stages": [
+    {
+      "stage": "data_validation",
+      "status": "success",
+      "duration_seconds": 5.9e-05,
+      "metrics": {
+        "validation_score": 0.95
+      },
+      "error": null
+    },
+    {
+      "stage": "data_preparation",
+      "status": "success",
+      "duration_seconds": 9.9e-05,
+      "metrics": {
+        "train_size": 800
+      },
+      "error": null
+    },
+    {
+      "stage": "model_training",
+      "status": "success",
+      "duration_seconds": 5.8e-05,
+      "metrics": {
+        "accuracy": 0.92
+      },
+      "error": null
+    },
+    {
+      "stage": "model_evaluation",
+      "status": "success",
+      "duration_seconds": 6.2e-05,
+      "metrics": {
+        "test_accuracy": 0.9,
+        "f1_score": 0.88
+      },
+      "error": null
+    }
+  ]
+}

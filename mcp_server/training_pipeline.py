@@ -1,15 +1,85 @@
 """
 Training Pipeline Automation Module
-Automates the end-to-end ML model training process.
+
+**Phase 10A Week 3 - Agent 5: Model Training & Experimentation**
+Enhanced with MLflow integration, Week 1 patterns, and Agent 4 data validation integration.
+
+Features:
+- Multi-stage training pipeline orchestration
+- MLflow experiment tracking integration
+- Agent 4 data validation integration
+- Week 1 integration (error handling, monitoring, RBAC)
+- Automatic artifact management
+- Pipeline run history and comparison
+- Comprehensive metrics logging
+
+Author: NBA MCP Server Team - Phase 10A Agent 5
+Date: 2025-10-25
 """
 
 import logging
-from typing import Dict, Optional, Any, Callable, List
+from typing import Dict, Optional, Any, Callable, List, Tuple
 from datetime import datetime
 from dataclasses import dataclass, field
 from enum import Enum
 import json
 from pathlib import Path
+
+# Week 1 Integration
+try:
+    from mcp_server.error_handling import handle_errors, ErrorContext, DataValidationError
+    from mcp_server.monitoring import get_health_monitor, track_metric
+    from mcp_server.rbac import require_permission, Permission
+
+    WEEK1_AVAILABLE = True
+except ImportError:
+    WEEK1_AVAILABLE = False
+
+    # Fallback decorators for standalone usage
+    def handle_errors(reraise=True, notify=False):
+        def decorator(func):
+            return func
+
+        return decorator
+
+    def track_metric(metric_name):
+        from contextlib import contextmanager
+
+        @contextmanager
+        def dummy_context():
+            yield
+
+        return dummy_context()
+
+    def require_permission(permission):
+        def decorator(func):
+            return func
+
+        return decorator
+
+    class Permission:
+        READ = "read"
+        WRITE = "write"
+        ADMIN = "admin"
+
+
+# MLflow Integration (optional)
+try:
+    from mcp_server.mlflow_integration import MLflowExperimentTracker
+
+    MLFLOW_AVAILABLE = True
+except ImportError:
+    MLFLOW_AVAILABLE = False
+    MLflowExperimentTracker = None
+
+# Agent 4 Data Validation Integration (optional)
+try:
+    from mcp_server.data_validation_pipeline import DataValidationPipeline
+
+    DATA_VALIDATION_AVAILABLE = True
+except ImportError:
+    DATA_VALIDATION_AVAILABLE = False
+    DataValidationPipeline = None
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -66,24 +136,63 @@ class TrainingPipelineRun:
 
 
 class TrainingPipeline:
-    """Automated ML training pipeline"""
+    """
+    Automated ML training pipeline with MLflow and Week 1 integration.
 
-    def __init__(self, name: str, config: Optional[Dict] = None):
+    Orchestrates end-to-end model training with experiment tracking, data validation,
+    and comprehensive monitoring.
+
+    Examples:
+        >>> pipeline = TrainingPipeline(
+        ...     name="nba_player_performance",
+        ...     mlflow_tracker=tracker,
+        ...     enable_validation=True
+        ... )
+        >>> pipeline.add_stage(PipelineStage.DATA_VALIDATION, validate_fn)
+        >>> pipeline.add_stage(PipelineStage.MODEL_TRAINING, train_fn)
+        >>> run = pipeline.execute()
+    """
+
+    def __init__(
+        self,
+        name: str,
+        config: Optional[Dict] = None,
+        mlflow_tracker: Optional[Any] = None,
+        enable_mlflow: bool = True,
+        enable_validation: bool = True,
+    ):
         """
         Initialize training pipeline.
 
         Args:
             name: Pipeline name
             config: Pipeline configuration
+            mlflow_tracker: Optional MLflow tracker for experiment logging
+            enable_mlflow: Whether to enable MLflow integration
+            enable_validation: Whether to enable data validation
         """
         self.name = name
         self.config = config or {}
         self.stages: Dict[PipelineStage, Callable] = {}
         self.runs: List[TrainingPipelineRun] = []
 
+        # MLflow integration
+        self.mlflow_tracker = mlflow_tracker
+        self.enable_mlflow = enable_mlflow and MLFLOW_AVAILABLE
+        self.enable_validation = enable_validation and DATA_VALIDATION_AVAILABLE
+
+        if self.enable_mlflow and not self.mlflow_tracker:
+            logger.warning("MLflow enabled but no tracker provided")
+            self.enable_mlflow = False
+
         # Storage path for pipeline artifacts
         self.artifacts_path = Path(f"./pipeline_artifacts/{name}")
         self.artifacts_path.mkdir(parents=True, exist_ok=True)
+
+        logger.info(
+            f"Initialized training pipeline '{name}' "
+            f"(MLflow: {self.enable_mlflow}, Validation: {self.enable_validation})"
+        )
 
     def add_stage(self, stage: PipelineStage, func: Callable):
         """
@@ -96,77 +205,134 @@ class TrainingPipeline:
         self.stages[stage] = func
         logger.info(f"Added stage {stage.value} to pipeline {self.name}")
 
+    @handle_errors(reraise=True, notify=True)
+    @require_permission(Permission.WRITE)
     def execute(self, run_id: Optional[str] = None) -> TrainingPipelineRun:
         """
-        Execute the training pipeline.
+        Execute the training pipeline with MLflow tracking.
 
         Args:
             run_id: Optional run identifier
 
         Returns:
             TrainingPipelineRun object with results
+
+        Raises:
+            DataValidationError: If data validation fails
+            Exception: If pipeline execution fails
         """
-        if not run_id:
-            run_id = f"{self.name}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+        with track_metric("pipeline.execution"):
+            if not run_id:
+                run_id = f"{self.name}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
 
-        run = TrainingPipelineRun(
-            run_id=run_id,
-            pipeline_name=self.name,
-            start_time=datetime.utcnow(),
-            status=PipelineStatus.RUNNING,
-            config=self.config.copy(),
-        )
-
-        logger.info(f"Starting pipeline run: {run_id}")
-
-        # Execute stages in order
-        stage_order = [
-            PipelineStage.DATA_VALIDATION,
-            PipelineStage.DATA_PREPARATION,
-            PipelineStage.FEATURE_ENGINEERING,
-            PipelineStage.MODEL_TRAINING,
-            PipelineStage.MODEL_EVALUATION,
-            PipelineStage.MODEL_REGISTRATION,
-            PipelineStage.MODEL_DEPLOYMENT,
-        ]
-
-        previous_output = None
-
-        for stage in stage_order:
-            if stage not in self.stages:
-                logger.debug(f"Skipping stage {stage.value} (not configured)")
-                continue
-
-            stage_result = self._execute_stage(
-                stage, self.stages[stage], previous_output, run
+            run = TrainingPipelineRun(
+                run_id=run_id,
+                pipeline_name=self.name,
+                start_time=datetime.utcnow(),
+                status=PipelineStatus.RUNNING,
+                config=self.config.copy(),
             )
 
-            run.stage_results.append(stage_result)
+            logger.info(f"🚀 Starting pipeline run: {run_id}")
 
-            if stage_result.status == PipelineStatus.FAILED:
+            # Start MLflow run if enabled
+            mlflow_run_id = None
+            if self.enable_mlflow and self.mlflow_tracker:
+                mlflow_run_id = self.mlflow_tracker.start_run(
+                    run_name=run_id, tags={"pipeline": self.name, "stage": "full_pipeline"}
+                ).__enter__()
+                self.mlflow_tracker.log_params(self.config)
+                logger.info(f"📊 Started MLflow run: {mlflow_run_id}")
+
+            try:
+                # Execute stages in order
+                stage_order = [
+                    PipelineStage.DATA_VALIDATION,
+                    PipelineStage.DATA_PREPARATION,
+                    PipelineStage.FEATURE_ENGINEERING,
+                    PipelineStage.MODEL_TRAINING,
+                    PipelineStage.MODEL_EVALUATION,
+                    PipelineStage.MODEL_REGISTRATION,
+                    PipelineStage.MODEL_DEPLOYMENT,
+                ]
+
+                previous_output = None
+
+                for stage in stage_order:
+                    if stage not in self.stages:
+                        logger.debug(f"⏭️  Skipping stage {stage.value} (not configured)")
+                        continue
+
+                    stage_result = self._execute_stage(
+                        stage, self.stages[stage], previous_output, run
+                    )
+
+                    run.stage_results.append(stage_result)
+
+                    # Log stage metrics to MLflow
+                    if self.enable_mlflow and self.mlflow_tracker:
+                        for metric_name, metric_value in stage_result.metrics.items():
+                            self.mlflow_tracker.log_metric(
+                                f"{stage.value}.{metric_name}", metric_value
+                            )
+                        self.mlflow_tracker.log_metric(
+                            f"{stage.value}.duration_seconds",
+                            stage_result.duration_seconds or 0,
+                        )
+
+                    if stage_result.status == PipelineStatus.FAILED:
+                        run.status = PipelineStatus.FAILED
+                        logger.error(f"❌ Pipeline {run_id} failed at stage {stage.value}")
+                        break
+
+                    previous_output = stage_result.output
+
+                # Finalize run
+                if run.status != PipelineStatus.FAILED:
+                    run.status = PipelineStatus.SUCCESS
+
+                run.end_time = datetime.utcnow()
+                duration = (run.end_time - run.start_time).total_seconds()
+
+                # Log final metrics to MLflow
+                if self.enable_mlflow and self.mlflow_tracker:
+                    self.mlflow_tracker.log_metric("pipeline.duration_seconds", duration)
+                    self.mlflow_tracker.log_metric(
+                        "pipeline.stages_completed",
+                        len([r for r in run.stage_results if r.status == PipelineStatus.SUCCESS]),
+                    )
+                    self.mlflow_tracker.log_metric(
+                        "pipeline.success", 1.0 if run.status == PipelineStatus.SUCCESS else 0.0
+                    )
+
+            except Exception as e:
                 run.status = PipelineStatus.FAILED
-                logger.error(f"Pipeline {run_id} failed at stage {stage.value}")
-                break
+                run.end_time = datetime.utcnow()
+                logger.error(f"❌ Pipeline execution failed: {e}")
+                raise
 
-            previous_output = stage_result.output
+            finally:
+                # End MLflow run
+                if self.enable_mlflow and self.mlflow_tracker and mlflow_run_id:
+                    self.mlflow_tracker.end_run(
+                        status="FINISHED" if run.status == PipelineStatus.SUCCESS else "FAILED"
+                    )
+                    logger.info(f"📊 Ended MLflow run: {mlflow_run_id}")
 
-        # Finalize run
-        if run.status != PipelineStatus.FAILED:
-            run.status = PipelineStatus.SUCCESS
+                self.runs.append(run)
 
-        run.end_time = datetime.utcnow()
-        self.runs.append(run)
+                # Save run metadata
+                self._save_run_metadata(run)
 
-        # Save run metadata
-        self._save_run_metadata(run)
+                status_icon = "✅" if run.status == PipelineStatus.SUCCESS else "❌"
+                logger.info(
+                    f"{status_icon} Pipeline run {run_id} completed with status {run.status.value} "
+                    f"in {(run.end_time - run.start_time).total_seconds():.2f}s"
+                )
 
-        logger.info(
-            f"Pipeline run {run_id} completed with status {run.status.value} "
-            f"in {(run.end_time - run.start_time).total_seconds():.2f}s"
-        )
+            return run
 
-        return run
-
+    @handle_errors(reraise=True, notify=False)
     def _execute_stage(
         self,
         stage: PipelineStage,
@@ -174,38 +340,39 @@ class TrainingPipeline:
         input_data: Any,
         run: TrainingPipelineRun,
     ) -> PipelineStageResult:
-        """Execute a single pipeline stage"""
-        stage_result = PipelineStageResult(
-            stage=stage, status=PipelineStatus.RUNNING, start_time=datetime.utcnow()
-        )
+        """Execute a single pipeline stage with monitoring"""
+        with track_metric(f"pipeline.stage.{stage.value}"):
+            stage_result = PipelineStageResult(
+                stage=stage, status=PipelineStatus.RUNNING, start_time=datetime.utcnow()
+            )
 
-        logger.info(f"Executing stage: {stage.value}")
+            logger.info(f"⚙️  Executing stage: {stage.value}")
 
-        try:
-            # Execute stage function
-            output = func(input_data, self.config)
+            try:
+                # Execute stage function
+                output = func(input_data, self.config)
 
-            stage_result.status = PipelineStatus.SUCCESS
-            stage_result.output = output
+                stage_result.status = PipelineStatus.SUCCESS
+                stage_result.output = output
 
-            # Extract metrics if available
-            if isinstance(output, dict) and "metrics" in output:
-                stage_result.metrics = output["metrics"]
+                # Extract metrics if available
+                if isinstance(output, dict) and "metrics" in output:
+                    stage_result.metrics = output["metrics"]
 
-            logger.info(f"Stage {stage.value} completed successfully")
+                logger.info(f"✅ Stage {stage.value} completed successfully")
 
-        except Exception as e:
-            stage_result.status = PipelineStatus.FAILED
-            stage_result.error = str(e)
-            logger.error(f"Stage {stage.value} failed: {e}")
+            except Exception as e:
+                stage_result.status = PipelineStatus.FAILED
+                stage_result.error = str(e)
+                logger.error(f"❌ Stage {stage.value} failed: {e}")
 
-        finally:
-            stage_result.end_time = datetime.utcnow()
-            stage_result.duration_seconds = (
-                stage_result.end_time - stage_result.start_time
-            ).total_seconds()
+            finally:
+                stage_result.end_time = datetime.utcnow()
+                stage_result.duration_seconds = (
+                    stage_result.end_time - stage_result.start_time
+                ).total_seconds()
 
-        return stage_result
+            return stage_result
 
     def _save_run_metadata(self, run: TrainingPipelineRun):
         """Save run metadata to disk"""
@@ -235,8 +402,17 @@ class TrainingPipeline:
 
         logger.info(f"Saved run metadata to {metadata_file}")
 
+    @require_permission(Permission.READ)
     def get_run_history(self, limit: int = 10) -> List[Dict]:
-        """Get pipeline run history"""
+        """
+        Get pipeline run history.
+
+        Args:
+            limit: Maximum number of runs to return
+
+        Returns:
+            List of run summary dictionaries
+        """
         return [
             {
                 "run_id": run.run_id,
@@ -251,11 +427,63 @@ class TrainingPipeline:
                 "stages_completed": len(
                     [r for r in run.stage_results if r.status == PipelineStatus.SUCCESS]
                 ),
+                "total_stages": len(run.stage_results),
             }
             for run in sorted(self.runs, key=lambda r: r.start_time, reverse=True)[
                 :limit
             ]
         ]
+
+    @require_permission(Permission.READ)
+    def compare_runs(self, run_ids: List[str]) -> Dict[str, Any]:
+        """
+        Compare multiple pipeline runs.
+
+        Args:
+            run_ids: List of run IDs to compare
+
+        Returns:
+            Comparison dictionary with metrics and stage results
+        """
+        runs = [r for r in self.runs if r.run_id in run_ids]
+
+        if not runs:
+            return {"error": "No runs found with provided IDs"}
+
+        comparison = {
+            "runs": [],
+            "metrics_comparison": {},
+            "stage_comparison": {},
+        }
+
+        for run in runs:
+            run_summary = {
+                "run_id": run.run_id,
+                "status": run.status.value,
+                "duration_seconds": (
+                    (run.end_time - run.start_time).total_seconds()
+                    if run.end_time and run.start_time
+                    else None
+                ),
+                "stages": {},
+            }
+
+            for stage_result in run.stage_results:
+                run_summary["stages"][stage_result.stage.value] = {
+                    "status": stage_result.status.value,
+                    "duration_seconds": stage_result.duration_seconds,
+                    "metrics": stage_result.metrics,
+                }
+
+            comparison["runs"].append(run_summary)
+
+        return comparison
+
+    @require_permission(Permission.ADMIN)
+    def clear_run_history(self):
+        """Clear all pipeline run history."""
+        self.runs = []
+        logger.info(f"Cleared run history for pipeline {self.name}")
 
 
 # Example usage

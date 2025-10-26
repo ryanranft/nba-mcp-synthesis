@@ -1,0 +1,172 @@
+name: Model Training CI/CD
+
+on:
+  push:
+    paths:
+      - 'mcp_server/mlflow_integration.py'
+      - 'mcp_server/hyperparameter_tuning.py'
+      - 'mcp_server/training_pipeline.py'
+      - 'tests/test_mlflow_integration.py'
+      - 'tests/test_hyperparameter_tuning.py'
+      - 'tests/test_training_pipeline.py'
+      - '.github/workflows/model_training_ci.yml'
+  pull_request:
+    paths:
+      - 'mcp_server/mlflow_integration.py'
+      - 'mcp_server/hyperparameter_tuning.py'
+      - 'mcp_server/training_pipeline.py'
+      - 'tests/test_mlflow_integration.py'
+      - 'tests/test_hyperparameter_tuning.py'
+      - 'tests/test_training_pipeline.py'
+  workflow_dispatch:
+    inputs:
+      run_integration_tests:
+        description: 'Run integration tests with real MLflow server'
+        required: false
+        default: 'false'
+
+jobs:
+  test-model-training:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11']
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-mock pytest-xdist
+        pip install scikit-learn pandas numpy
+        # Optional: Bayesian optimization support
+        pip install scikit-optimize || echo "scikit-optimize installation skipped"
+
+    - name: Run model training tests (mock mode)
+      run: |
+        pytest tests/test_mlflow_integration.py \
+               tests/test_hyperparameter_tuning.py \
+               tests/test_training_pipeline.py \
+               -v \
+               --cov=mcp_server \
+               --cov-report=xml \
+               --cov-report=html \
+               --cov-report=term-missing \
+               -n auto
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./coverage.xml
+        flags: model-training
+        name: model-training-coverage
+
+    - name: Check test coverage threshold
+      run: |
+        python -c "
+        import xml.etree.ElementTree as ET
+        tree = ET.parse('coverage.xml')
+        root = tree.getroot()
+        coverage = float(root.attrib['line-rate']) * 100
+        print(f'Coverage: {coverage:.2f}%')
+        if coverage < 80:
+            raise Exception(f'Coverage {coverage:.2f}% is below threshold 80%')
+        "
+
+    - name: Archive test artifacts
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results-${{ matrix.python-version }}
+        path: |
+          htmlcov/
+          coverage.xml
+          .pytest_cache/
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.run_integration_tests == 'true'
+    services:
+      mlflow:
+        image: ghcr.io/mlflow/mlflow:v2.8.0
+        ports:
+          - 5000:5000
+        options: >-
+          --health-cmd "curl -f http://localhost:5000/health || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        env:
+          MLFLOW_BACKEND_STORE_URI: sqlite:///mlflow.db
+          MLFLOW_DEFAULT_ARTIFACT_ROOT: ./mlflow-artifacts
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest mlflow scikit-learn pandas numpy
+
+    - name: Wait for MLflow server
+      run: |
+        timeout 60 bash -c 'until curl -f http://localhost:5000/health; do sleep 2; done'
+
+    - name: Run integration tests with real MLflow
+      env:
+        MLFLOW_TRACKING_URI: http://localhost:5000
+        MLFLOW_MOCK_MODE: false
+      run: |
+        pytest tests/test_mlflow_integration.py -v -k "not mock"
+
+  code-quality:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install linting tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install ruff mypy
+
+    - name: Run ruff linter
+      run: |
+        ruff check mcp_server/mlflow_integration.py \
+                    mcp_server/hyperparameter_tuning.py \
+                    mcp_server/training_pipeline.py \
+                    || true
+
+    - name: Run type checking
+      run: |
+        mypy mcp_server/mlflow_integration.py \
+             mcp_server/hyperparameter_tuning.py \
+             mcp_server/training_pipeline.py \
+             --ignore-missing-imports \
+             || true
