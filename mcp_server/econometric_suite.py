@@ -591,6 +591,10 @@ class EconometricSuite:
                 - 'granger'/'granger_causality': Granger causality test (Phase 2 Day 4)
                 - 'var': Vector Autoregression model (Phase 2 Day 4)
                 - 'diagnostics'/'ts_diagnostics': Time series diagnostics (Phase 2 Day 4)
+                - 'vecm': Vector Error Correction Model (Phase 2 Day 5)
+                - 'structural_breaks'/'breaks'/'cusum'/'hansen': Structural break detection (Phase 2 Day 5)
+                - 'breusch_godfrey'/'bg_test'/'bg': Breusch-Godfrey autocorrelation test (Phase 2 Day 5)
+                - 'heteroscedasticity'/'het_test'/'breusch_pagan'/'white': Heteroscedasticity tests (Phase 2 Day 5)
             **kwargs: Method-specific parameters:
                 For ARIMAX: order, exog (required), seasonal_order
                 For VARMAX: endog_data (required), order, exog, trend
@@ -600,6 +604,10 @@ class EconometricSuite:
                 For Granger: caused_series (required), causing_series (required), maxlag
                 For VAR: endog_data (required), maxlags, ic, trend
                 For Diagnostics: residuals (required), lags, alpha
+                For VECM: endog_data (required), coint_rank (required), k_ar_diff, deterministic
+                For Structural Breaks: model_result (required), test_type
+                For Breusch-Godfrey: model_result (required), nlags
+                For Heteroscedasticity: model_result (required), test_type
 
         Returns:
             SuiteResult with time series analysis results
@@ -669,6 +677,44 @@ class EconometricSuite:
             ...     method='diagnostics',
             ...     residuals=residuals,
             ...     lags=10
+            ... )
+            >>>
+            >>> # VECM (after Johansen test confirms cointegration)
+            >>> johansen_result = suite.time_series_analysis(
+            ...     method='johansen',
+            ...     endog_data=endog,
+            ...     k_ar_diff=2
+            ... )
+            >>> vecm_result = suite.time_series_analysis(
+            ...     method='vecm',
+            ...     endog_data=endog,
+            ...     coint_rank=johansen_result.result.cointegration_rank,
+            ...     k_ar_diff=2
+            ... )
+            >>>
+            >>> # Structural break detection
+            >>> import statsmodels.api as sm
+            >>> X = sm.add_constant(df[['games', 'minutes']])
+            >>> y = df['points']
+            >>> ols_result = sm.OLS(y, X).fit()
+            >>> breaks = suite.time_series_analysis(
+            ...     method='structural_breaks',
+            ...     model_result=ols_result,
+            ...     test_type='both'
+            ... )
+            >>>
+            >>> # Breusch-Godfrey autocorrelation test
+            >>> bg_result = suite.time_series_analysis(
+            ...     method='breusch_godfrey',
+            ...     model_result=ols_result,
+            ...     nlags=4
+            ... )
+            >>>
+            >>> # Heteroscedasticity tests
+            >>> het_result = suite.time_series_analysis(
+            ...     method='heteroscedasticity',
+            ...     model_result=ols_result,
+            ...     test_type='both'
             ... )
         """
         from mcp_server.time_series import TimeSeriesAnalyzer
@@ -827,6 +873,67 @@ class EconometricSuite:
             return self._create_suite_result(
                 method_category=MethodCategory.TIME_SERIES,
                 method_used="Time Series Diagnostics",
+                result=result,
+                model=None,
+            )
+
+        # Phase 2 Day 5: Advanced econometric tests
+        elif method == "vecm":
+            # Vector Error Correction Model
+            endog_data = kwargs.get("endog_data")
+            coint_rank = kwargs.get("coint_rank")
+            if endog_data is None or coint_rank is None:
+                raise ValueError("endog_data and coint_rank required for VECM")
+
+            result = analyzer.fit_vecm(**kwargs)
+            return self._create_suite_result(
+                method_category=MethodCategory.TIME_SERIES,
+                method_used="VECM",
+                result=result,
+                model=result.model,
+                aic=result.aic,
+                bic=result.bic,
+                log_likelihood=result.log_likelihood,
+            )
+
+        elif method in ["structural_breaks", "breaks", "cusum", "hansen"]:
+            # Structural break detection
+            model_result = kwargs.get("model_result")
+            if model_result is None:
+                raise ValueError("model_result parameter required for structural break tests")
+
+            result = analyzer.detect_structural_breaks(**kwargs)
+            return self._create_suite_result(
+                method_category=MethodCategory.TIME_SERIES,
+                method_used="Structural Break Detection",
+                result=result,
+                model=None,
+            )
+
+        elif method in ["breusch_godfrey", "bg_test", "bg"]:
+            # Breusch-Godfrey autocorrelation test
+            model_result = kwargs.get("model_result")
+            if model_result is None:
+                raise ValueError("model_result parameter required for Breusch-Godfrey test")
+
+            result = analyzer.breusch_godfrey_test(**kwargs)
+            return self._create_suite_result(
+                method_category=MethodCategory.TIME_SERIES,
+                method_used="Breusch-Godfrey Test",
+                result=result,
+                model=None,
+            )
+
+        elif method in ["heteroscedasticity", "het_test", "breusch_pagan", "white"]:
+            # Heteroscedasticity tests
+            model_result = kwargs.get("model_result")
+            if model_result is None:
+                raise ValueError("model_result parameter required for heteroscedasticity tests")
+
+            result = analyzer.heteroscedasticity_tests(**kwargs)
+            return self._create_suite_result(
+                method_category=MethodCategory.TIME_SERIES,
+                method_used="Heteroscedasticity Tests",
                 result=result,
                 model=None,
             )

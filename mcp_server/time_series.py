@@ -62,6 +62,26 @@ except ImportError:
     durbin_watson = None
     ECONOMETRIC_TS_AVAILABLE = False
 
+# Advanced econometric tests (Phase 2 Day 5)
+try:
+    from statsmodels.tsa.vector_ar.vecm import VECM
+    from statsmodels.stats.diagnostic import (
+        acorr_breusch_godfrey,
+        het_breuschpagan,
+        het_white,
+        breaks_cusumolsresid,
+        breaks_hansen,
+    )
+    ECONOMETRIC_TESTS_AVAILABLE = True
+except ImportError:
+    VECM = None
+    acorr_breusch_godfrey = None
+    het_breuschpagan = None
+    het_white = None
+    breaks_cusumolsresid = None
+    breaks_hansen = None
+    ECONOMETRIC_TESTS_AVAILABLE = False
+
 # MLflow integration
 try:
     import mlflow
@@ -289,6 +309,95 @@ class TimeSeriesDiagnosticsResult:
     def __repr__(self) -> str:
         status = "PASS" if self.all_tests_pass else "FAIL"
         return f"TimeSeriesDiagnosticsResult(status={status}, DW={self.durbin_watson:.3f})"
+
+
+@dataclass
+class VECMResult:
+    """Results from Vector Error Correction Model."""
+
+    model: Any  # fitted VECM model
+    order: int  # lag order (k_ar_diff)
+    coint_rank: int  # cointegration rank
+    n_variables: int
+    variable_names: List[str]
+    deterministic: str  # trend specification
+    alpha: np.ndarray  # loading/adjustment coefficients
+    beta: np.ndarray  # cointegrating vectors
+    aic: float
+    bic: float
+    hqic: float
+    log_likelihood: float
+    coef_summary: pd.DataFrame  # coefficient estimates
+
+    def __repr__(self) -> str:
+        return (
+            f"VECMResult(rank={self.coint_rank}, order={self.order}, "
+            f"variables={self.n_variables}, aic={self.aic:.2f})"
+        )
+
+
+@dataclass
+class StructuralBreakResult:
+    """Results from structural break detection tests."""
+
+    cusum_statistic: Optional[np.ndarray]  # CUSUM test statistics
+    cusum_significant: Optional[bool]  # breaks detected via CUSUM
+    hansen_statistic: Optional[float]  # Hansen stability test statistic
+    hansen_p_value: Optional[float]  # p-value for Hansen test
+    hansen_significant: Optional[bool]  # breaks detected via Hansen
+    break_points: Optional[List[int]]  # detected break point indices
+    test_type: str  # 'cusum', 'hansen', or 'both'
+
+    def __repr__(self) -> str:
+        if self.hansen_significant is not None:
+            status = "BREAKS DETECTED" if self.hansen_significant else "STABLE"
+            return f"StructuralBreakResult({status}, Hansen_p={self.hansen_p_value:.4f})"
+        elif self.cusum_significant is not None:
+            status = "BREAKS DETECTED" if self.cusum_significant else "STABLE"
+            return f"StructuralBreakResult({status}, type=CUSUM)"
+        return "StructuralBreakResult(test_type={self.test_type})"
+
+
+@dataclass
+class BreuschGodfreyResult:
+    """Results from Breusch-Godfrey LM test for autocorrelation."""
+
+    lm_statistic: float  # Lagrange multiplier statistic
+    lm_p_value: float  # p-value for LM test
+    f_statistic: float  # F-statistic version
+    f_p_value: float  # p-value for F-test
+    nlags: int  # number of lags tested
+    nobs: int  # number of observations
+    significant_at_5pct: bool  # autocorrelation detected at 5% level
+
+    def __repr__(self) -> str:
+        status = "AUTOCORRELATION DETECTED" if self.significant_at_5pct else "NO AUTOCORRELATION"
+        return f"BreuschGodfreyResult({status}, lags={self.nlags}, p={self.lm_p_value:.4f})"
+
+
+@dataclass
+class HeteroscedasticityResult:
+    """Results from heteroscedasticity tests."""
+
+    breusch_pagan_statistic: Optional[float]
+    breusch_pagan_p_value: Optional[float]
+    breusch_pagan_significant: Optional[bool]
+    white_statistic: Optional[float]
+    white_p_value: Optional[float]
+    white_significant: Optional[bool]
+    arch_statistic: Optional[float]  # from time_series_diagnostics
+    arch_p_value: Optional[float]
+    arch_significant: Optional[bool]
+    test_type: str  # 'breusch_pagan', 'white', 'arch', or 'all'
+
+    def __repr__(self) -> str:
+        if self.breusch_pagan_significant is not None:
+            status = "HETEROSCEDASTIC" if self.breusch_pagan_significant else "HOMOSCEDASTIC"
+            return f"HeteroscedasticityResult({status}, BP_p={self.breusch_pagan_p_value:.4f})"
+        elif self.white_significant is not None:
+            status = "HETEROSCEDASTIC" if self.white_significant else "HOMOSCEDASTIC"
+            return f"HeteroscedasticityResult({status}, White_p={self.white_p_value:.4f})"
+        return f"HeteroscedasticityResult(type={self.test_type})"
 
 
 # ==============================================================================
@@ -1985,4 +2094,501 @@ class TimeSeriesAnalyzer:
             residual_skewness=resid_skewness,
             residual_kurtosis=resid_kurtosis,
             all_tests_pass=all_tests_pass,
+        )
+
+    def fit_vecm(
+        self,
+        endog_data: pd.DataFrame,
+        coint_rank: int,
+        k_ar_diff: int = 1,
+        deterministic: str = "ci",
+    ) -> VECMResult:
+        """
+        Fit Vector Error Correction Model for cointegrated time series.
+
+        VECM extends VAR for cointegrated series, separating short-run dynamics
+        from long-run equilibrium relationships. Use after Johansen test confirms
+        cointegration.
+
+        Parameters
+        ----------
+        endog_data : pd.DataFrame
+            DataFrame with multiple cointegrated time series variables.
+            Each column is a different endogenous variable.
+        coint_rank : int
+            Number of cointegrating relationships (from Johansen test).
+            Must be between 0 and n_variables-1.
+        k_ar_diff : int, default=1
+            Number of lagged differences in the VECM.
+            Equivalent to VAR lag order minus 1.
+        deterministic : str, default='ci'
+            Deterministic trend specification:
+            - 'nc': No deterministic terms
+            - 'co': Constant outside cointegrating relation
+            - 'ci': Constant inside cointegrating relation (default)
+            - 'lo': Linear trend outside
+            - 'li': Linear trend inside
+
+        Returns
+        -------
+        VECMResult
+            Contains fitted model, cointegrating vectors, loading coefficients, and metrics.
+
+        Examples
+        --------
+        >>> # First run Johansen test
+        >>> johansen_result = analyzer.johansen_test(endog_data=endog, k_ar_diff=2)
+        >>> print(f"Coint rank: {johansen_result.cointegration_rank}")
+        >>>
+        >>> # Fit VECM with detected rank
+        >>> vecm_result = analyzer.fit_vecm(
+        ...     endog_data=endog,
+        ...     coint_rank=johansen_result.cointegration_rank,
+        ...     k_ar_diff=2
+        ... )
+        >>> print(f"AIC: {vecm_result.aic:.2f}")
+        >>> print(f"Loading coefficients:\\n{vecm_result.alpha}")
+
+        Notes
+        -----
+        VECM representation: Δy_t = α β' y_{t-1} + Γ_1 Δy_{t-1} + ... + Γ_{p-1} Δy_{t-p+1} + ε_t
+
+        - α (alpha): Loading/adjustment coefficients (speed of adjustment to equilibrium)
+        - β (beta): Cointegrating vectors (long-run equilibrium relationships)
+        - Γ (gamma): Short-run dynamics coefficients
+
+        Use VECM when:
+        - Johansen test confirms cointegration
+        - You need to model both short-run and long-run dynamics
+        - Variables have long-term equilibrium relationship
+        """
+        if not ECONOMETRIC_TESTS_AVAILABLE or VECM is None:
+            raise ImportError(
+                "VECM required. This should be available in statsmodels>=0.12. "
+                "Try: pip install --upgrade statsmodels"
+            )
+
+        # Validate inputs
+        if not isinstance(endog_data, pd.DataFrame):
+            raise TypeError("endog_data must be a pandas DataFrame")
+
+        if endog_data.shape[1] < 2:
+            raise ValueError(f"VECM requires at least 2 variables, got {endog_data.shape[1]}")
+
+        if coint_rank < 0 or coint_rank >= endog_data.shape[1]:
+            raise ValueError(
+                f"coint_rank must be between 0 and {endog_data.shape[1]-1}, got {coint_rank}"
+            )
+
+        # Drop missing values
+        endog_clean = endog_data.dropna()
+        variable_names = list(endog_data.columns)
+        n_obs = len(endog_clean)
+
+        if n_obs < k_ar_diff + 10:
+            raise ValueError(
+                f"Insufficient observations ({n_obs}) for k_ar_diff={k_ar_diff}"
+            )
+
+        try:
+            # Fit VECM model
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                vecm_model = VECM(
+                    endog_clean,
+                    k_ar_diff=k_ar_diff,
+                    coint_rank=coint_rank,
+                    deterministic=deterministic,
+                )
+                vecm_fitted = vecm_model.fit()
+
+            # Extract model information
+            aic_value = vecm_fitted.aic
+            bic_value = vecm_fitted.bic
+            hqic_value = vecm_fitted.hqic
+            log_likelihood = vecm_fitted.llf
+
+            # Extract cointegration parameters
+            alpha = vecm_fitted.alpha  # loading coefficients
+            beta = vecm_fitted.beta  # cointegrating vectors
+
+            # Extract coefficient summary
+            coef_df = pd.DataFrame(
+                vecm_fitted.params,
+                columns=variable_names,
+                index=vecm_fitted.params.index if hasattr(vecm_fitted.params, "index") else None,
+            )
+
+            logger.info(
+                f"VECM fitted: rank={coint_rank}, order={k_ar_diff}, "
+                f"variables={len(variable_names)}, aic={aic_value:.2f}"
+            )
+
+        except Exception as e:
+            logger.error(f"VECM fitting failed: {e}")
+            raise
+
+        # MLflow logging
+        if self.tracker:
+            self.tracker.log_metrics(
+                {
+                    "vecm_coint_rank": float(coint_rank),
+                    "vecm_order": float(k_ar_diff),
+                    "vecm_aic": float(aic_value),
+                    "vecm_bic": float(bic_value),
+                    "vecm_n_variables": float(len(variable_names)),
+                }
+            )
+
+        return VECMResult(
+            model=vecm_fitted,
+            order=k_ar_diff,
+            coint_rank=coint_rank,
+            n_variables=len(variable_names),
+            variable_names=variable_names,
+            deterministic=deterministic,
+            alpha=alpha,
+            beta=beta,
+            aic=aic_value,
+            bic=bic_value,
+            hqic=hqic_value,
+            log_likelihood=log_likelihood,
+            coef_summary=coef_df,
+        )
+
+    def detect_structural_breaks(
+        self,
+        model_result: Any,
+        test_type: str = "both",
+    ) -> StructuralBreakResult:
+        """
+        Detect structural breaks in time series using CUSUM and Hansen tests.
+
+        Structural breaks indicate parameter instability or regime changes in the
+        time series relationship (e.g., coaching changes, rule changes in NBA).
+
+        Parameters
+        ----------
+        model_result : Any
+            Fitted OLS regression model result (from statsmodels).
+            Should have `resid` attribute for residuals.
+        test_type : str, default='both'
+            Which test(s) to run:
+            - 'cusum': CUSUM test only (cumulative sum of recursive residuals)
+            - 'hansen': Hansen stability test only
+            - 'both': Run both tests (default)
+
+        Returns
+        -------
+        StructuralBreakResult
+            Contains test statistics, p-values, and detected break points.
+
+        Examples
+        --------
+        >>> # Fit OLS model first
+        >>> import statsmodels.api as sm
+        >>> X = sm.add_constant(df[['games', 'minutes']])
+        >>> y = df['points']
+        >>> ols_result = sm.OLS(y, X).fit()
+        >>>
+        >>> # Detect structural breaks
+        >>> breaks = analyzer.detect_structural_breaks(
+        ...     model_result=ols_result,
+        ...     test_type='both'
+        ... )
+        >>> print(f"Hansen significant: {breaks.hansen_significant}")
+        >>> print(f"CUSUM significant: {breaks.cusum_significant}")
+
+        Notes
+        -----
+        - CUSUM: Tests for parameter constancy using cumulative sums
+        - Hansen: Tests for parameter stability with F-statistic
+        - Both tests detect changes in regression coefficients over time
+        """
+        if not ECONOMETRIC_TESTS_AVAILABLE:
+            raise ImportError(
+                "Structural break tests required. Available in statsmodels>=0.12. "
+                "Try: pip install --upgrade statsmodels"
+            )
+
+        # Validate inputs
+        if not hasattr(model_result, "resid"):
+            raise ValueError("model_result must have 'resid' attribute (OLS results)")
+
+        cusum_stat = None
+        cusum_significant = None
+        hansen_stat = None
+        hansen_p_value = None
+        hansen_significant = None
+        break_points = None
+
+        try:
+            # CUSUM test
+            if test_type in ["cusum", "both"]:
+                if breaks_cusumolsresid is not None:
+                    cusum_result = breaks_cusumolsresid(model_result.resid)
+                    cusum_stat = cusum_result[0]  # CUSUM statistics
+                    # Check if any CUSUM statistic exceeds critical bounds
+                    # Typically, significant if max|CUSUM| > 1.36 (approx 5% level)
+                    cusum_significant = bool(np.max(np.abs(cusum_stat)) > 1.36) if cusum_stat is not None else None
+                else:
+                    logger.warning("CUSUM test not available")
+
+            # Hansen stability test
+            if test_type in ["hansen", "both"]:
+                if breaks_hansen is not None:
+                    hansen_result = breaks_hansen(model_result)
+                    hansen_stat = float(hansen_result[0])  # test statistic
+                    hansen_p_value = float(hansen_result[1])  # p-value
+                    hansen_significant = hansen_p_value < 0.05
+                else:
+                    logger.warning("Hansen test not available")
+
+            logger.info(
+                f"Structural break detection: test={test_type}, "
+                f"Hansen_sig={hansen_significant}, CUSUM_sig={cusum_significant}"
+            )
+
+        except Exception as e:
+            logger.error(f"Structural break detection failed: {e}")
+            raise
+
+        # MLflow logging
+        if self.tracker and hansen_p_value is not None:
+            self.tracker.log_metrics(
+                {
+                    "hansen_p_value": hansen_p_value,
+                    "hansen_significant": float(hansen_significant),
+                }
+            )
+
+        return StructuralBreakResult(
+            cusum_statistic=cusum_stat,
+            cusum_significant=cusum_significant,
+            hansen_statistic=hansen_stat,
+            hansen_p_value=hansen_p_value,
+            hansen_significant=hansen_significant,
+            break_points=break_points,
+            test_type=test_type,
+        )
+
+    def breusch_godfrey_test(
+        self, model_result: Any, nlags: int = 1
+    ) -> BreuschGodfreyResult:
+        """
+        Breusch-Godfrey LM test for autocorrelation in residuals.
+
+        More general than Durbin-Watson test, can detect higher-order serial correlation.
+        Tests null hypothesis of no autocorrelation against alternative of AR(nlags).
+
+        Parameters
+        ----------
+        model_result : Any
+            Fitted regression model result (from statsmodels).
+            Must have `model` and `resid` attributes.
+        nlags : int, default=1
+            Number of lags to test for autocorrelation.
+
+        Returns
+        -------
+        BreuschGodfreyResult
+            Contains LM statistic, F-statistic, p-values, and significance.
+
+        Examples
+        --------
+        >>> # Fit regression model
+        >>> import statsmodels.api as sm
+        >>> X = sm.add_constant(df[['assists', 'rebounds']])
+        >>> y = df['points']
+        >>> ols_result = sm.OLS(y, X).fit()
+        >>>
+        >>> # Test for autocorrelation
+        >>> bg_result = analyzer.breusch_godfrey_test(ols_result, nlags=4)
+        >>> print(f"Autocorrelation detected: {bg_result.significant_at_5pct}")
+        >>> print(f"LM p-value: {bg_result.lm_p_value:.4f}")
+
+        Notes
+        -----
+        Advantages over Durbin-Watson:
+        - Can test for higher-order autocorrelation (nlags > 1)
+        - Valid with lagged dependent variables
+        - Provides both LM and F-statistics
+        """
+        if not ECONOMETRIC_TESTS_AVAILABLE or acorr_breusch_godfrey is None:
+            raise ImportError(
+                "Breusch-Godfrey test required. Available in statsmodels>=0.12. "
+                "Try: pip install --upgrade statsmodels"
+            )
+
+        # Validate inputs
+        if not hasattr(model_result, "model") or not hasattr(model_result, "resid"):
+            raise ValueError("model_result must have 'model' and 'resid' attributes")
+
+        if nlags < 1:
+            raise ValueError(f"nlags must be >= 1, got {nlags}")
+
+        try:
+            # Run Breusch-Godfrey test
+            bg_result = acorr_breusch_godfrey(model_result, nlags=nlags)
+
+            # Extract results: (lm_stat, lm_p_value, f_stat, f_p_value)
+            lm_statistic = float(bg_result[0])
+            lm_p_value = float(bg_result[1])
+            f_statistic = float(bg_result[2])
+            f_p_value = float(bg_result[3])
+
+            significant_at_5pct = lm_p_value < 0.05
+            nobs = len(model_result.resid)
+
+            logger.info(
+                f"Breusch-Godfrey test: lags={nlags}, LM_p={lm_p_value:.4f}, "
+                f"significant={significant_at_5pct}"
+            )
+
+        except Exception as e:
+            logger.error(f"Breusch-Godfrey test failed: {e}")
+            raise
+
+        # MLflow logging
+        if self.tracker:
+            self.tracker.log_metrics(
+                {
+                    "bg_lm_p_value": lm_p_value,
+                    "bg_significant": float(significant_at_5pct),
+                    "bg_nlags": float(nlags),
+                }
+            )
+
+        return BreuschGodfreyResult(
+            lm_statistic=lm_statistic,
+            lm_p_value=lm_p_value,
+            f_statistic=f_statistic,
+            f_p_value=f_p_value,
+            nlags=nlags,
+            nobs=nobs,
+            significant_at_5pct=significant_at_5pct,
+        )
+
+    def heteroscedasticity_tests(
+        self,
+        model_result: Any,
+        test_type: str = "breusch_pagan",
+    ) -> HeteroscedasticityResult:
+        """
+        Test for heteroscedasticity in regression residuals.
+
+        Heteroscedasticity (non-constant variance) violates OLS assumptions and
+        affects standard errors. Common in cross-sectional NBA data.
+
+        Parameters
+        ----------
+        model_result : Any
+            Fitted OLS regression model result (from statsmodels).
+            Must have `model` and `resid` attributes.
+        test_type : str, default='breusch_pagan'
+            Which test(s) to run:
+            - 'breusch_pagan': Breusch-Pagan LM test (default)
+            - 'white': White test (more general)
+            - 'both': Run both tests
+
+        Returns
+        -------
+        HeteroscedasticityResult
+            Contains test statistics, p-values, and significance for each test.
+
+        Examples
+        --------
+        >>> # Fit regression model
+        >>> import statsmodels.api as sm
+        >>> X = sm.add_constant(df[['experience', 'height']])
+        >>> y = df['salary']
+        >>> ols_result = sm.OLS(y, X).fit()
+        >>>
+        >>> # Test for heteroscedasticity
+        >>> het_result = analyzer.heteroscedasticity_tests(
+        ...     ols_result,
+        ...     test_type='both'
+        ... )
+        >>> print(f"BP significant: {het_result.breusch_pagan_significant}")
+        >>> print(f"White significant: {het_result.white_significant}")
+
+        Notes
+        -----
+        - Breusch-Pagan: Tests if variance is related to independent variables
+        - White: More general, allows for non-linear relationships
+        - If heteroscedasticity detected, use robust standard errors
+        """
+        if not ECONOMETRIC_TESTS_AVAILABLE:
+            raise ImportError(
+                "Heteroscedasticity tests required. Available in statsmodels>=0.12. "
+                "Try: pip install --upgrade statsmodels"
+            )
+
+        # Validate inputs
+        if not hasattr(model_result, "model") or not hasattr(model_result, "resid"):
+            raise ValueError("model_result must have 'model' and 'resid' attributes")
+
+        bp_stat = None
+        bp_p_value = None
+        bp_significant = None
+        white_stat = None
+        white_p_value = None
+        white_significant = None
+        arch_stat = None
+        arch_p_value = None
+        arch_significant = None
+
+        try:
+            # Breusch-Pagan test
+            if test_type in ["breusch_pagan", "both"]:
+                if het_breuschpagan is not None:
+                    bp_result = het_breuschpagan(model_result.resid, model_result.model.exog)
+                    bp_stat = float(bp_result[0])  # LM statistic
+                    bp_p_value = float(bp_result[1])  # p-value
+                    bp_significant = bp_p_value < 0.05
+                else:
+                    logger.warning("Breusch-Pagan test not available")
+
+            # White test
+            if test_type in ["white", "both"]:
+                if het_white is not None:
+                    white_result = het_white(model_result.resid, model_result.model.exog)
+                    white_stat = float(white_result[0])  # LM statistic
+                    white_p_value = float(white_result[1])  # p-value
+                    white_significant = white_p_value < 0.05
+                else:
+                    logger.warning("White test not available")
+
+            logger.info(
+                f"Heteroscedasticity tests: type={test_type}, "
+                f"BP_sig={bp_significant}, White_sig={white_significant}"
+            )
+
+        except Exception as e:
+            logger.error(f"Heteroscedasticity tests failed: {e}")
+            raise
+
+        # MLflow logging
+        if self.tracker:
+            metrics = {}
+            if bp_p_value is not None:
+                metrics["bp_p_value"] = bp_p_value
+                metrics["bp_significant"] = float(bp_significant)
+            if white_p_value is not None:
+                metrics["white_p_value"] = white_p_value
+                metrics["white_significant"] = float(white_significant)
+            if metrics:
+                self.tracker.log_metrics(metrics)
+
+        return HeteroscedasticityResult(
+            breusch_pagan_statistic=bp_stat,
+            breusch_pagan_p_value=bp_p_value,
+            breusch_pagan_significant=bp_significant,
+            white_statistic=white_stat,
+            white_p_value=white_p_value,
+            white_significant=white_significant,
+            arch_statistic=arch_stat,
+            arch_p_value=arch_p_value,
+            arch_significant=arch_significant,
+            test_type=test_type,
         )

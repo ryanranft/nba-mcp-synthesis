@@ -914,3 +914,114 @@ print(f"Jarque-Bera p-value: {diag.result.jarque_bera_test['p_value']:.4f}")
 **Document Version:** 1.3
 **Created:** October 26, 2025
 **Last Updated:** October 26, 2025 (Day 4 Complete)
+
+---
+
+## Phase 2 Day 5: Advanced Econometric Tests ✅ (4/4 methods)
+
+**Completed:** 4 new advanced econometric time series tests implemented and integrated
+**Date:** October 26, 2025
+
+### Methods Implemented
+
+#### 1. VECM (`fit_vecm`)
+- **File:** `mcp_server/time_series.py` (lines 2099-2257)
+- **Lines:** 159 LOC
+- **Description:** Vector Error Correction Model for cointegrated time series
+- **Features:** Separates short-run and long-run dynamics, alpha/beta coefficients, natural follow-up to Johansen test
+
+#### 2. Structural Break Detection (`detect_structural_breaks`)
+- **File:** `mcp_server/time_series.py` (lines 2259-2375)
+- **Lines:** 117 LOC
+- **Description:** CUSUM and Hansen tests for parameter stability
+- **Features:** Detects regime changes, coaching/rule changes, parameter instability
+
+#### 3. Breusch-Godfrey Test (`breusch_godfrey_test`)
+- **File:** `mcp_server/time_series.py` (lines 2377-2467)
+- **Lines:** 91 LOC
+- **Description:** LM test for autocorrelation (more general than Durbin-Watson)
+- **Features:** Tests higher-order serial correlation, valid with lagged dependent variables
+
+#### 4. Heteroscedasticity Tests (`heteroscedasticity_tests`)
+- **File:** `mcp_server/time_series.py` (lines 2469-2594)
+- **Lines:** 126 LOC
+- **Description:** Breusch-Pagan and White tests for non-constant variance
+- **Features:** Detects heteroscedasticity, validates OLS assumptions
+
+**Total:** ~493 lines (methods) + 113 lines (dataclasses) = **606 LOC**
+
+### Dataclasses Added (lines 314-400)
+1. **VECMResult** - VECM model results with alpha/beta coefficients
+2. **StructuralBreakResult** - CUSUM/Hansen test results
+3. **BreuschGodfreyResult** - Autocorrelation test results
+4. **HeteroscedasticityResult** - Heteroscedasticity test results
+
+### Suite Integration ✅
+
+**File:** `mcp_server/econometric_suite.py` (+107 lines, now 1822 total)
+
+#### New Routes (lines 834-893):
+1. `method='vecm'` - Vector Error Correction Model
+2. `method='structural_breaks'/'breaks'/'cusum'/'hansen'` - Structural break detection
+3. `method='breusch_godfrey'/'bg_test'/'bg'` - Breusch-Godfrey test
+4. `method='heteroscedasticity'/'het_test'/'breusch_pagan'/'white'` - Heteroscedasticity tests
+
+#### Documentation Updated (lines 594-718):
+- Extended method list with all 4 Day 5 methods
+- Added parameter descriptions
+- Added comprehensive usage examples
+
+### Test Results
+- ✅ All 59 tests passing (100%)
+- ✅ No regressions introduced
+- ✅ Runtime: 6.67s
+
+### Code Metrics
+
+| Category | LOC Added | Methods | Dataclasses | Status |
+|----------|-----------|---------|-------------|--------|
+| **Time Series Methods** | 493 | 4 | - | ✅ Complete |
+| **Dataclasses** | 113 | - | 4 | ✅ Complete |
+| **Suite Integration** | 107 | 4 routes | - | ✅ Complete |
+| **Total (time_series.py)** | **+606** | **4** | **4** | **✅** |
+| **Total (econometric_suite.py)** | **+107** | **4 routes** | - | **✅** |
+| **Grand Total** | **+713** | **4** | **4** | **✅** |
+
+### Files Modified
+
+1. **mcp_server/time_series.py**
+   - Lines added: +606 (now 2594 total, was 1988)
+   - Methods added: 4 (VECM, structural breaks, B-G, heteroscedasticity)
+   - Dataclasses added: 4
+   - Imports updated: Added VECM, diagnostic tests from statsmodels
+
+2. **mcp_server/econometric_suite.py**
+   - Lines added: +107 (now 1822 total, was 1715)
+   - Routes added: 4 with multiple aliases
+   - Documentation: Comprehensive examples for all methods
+
+### Success Criteria (Day 5)
+
+- ✅ 4 advanced econometric tests implemented (~713 LOC total)
+- ✅ Suite integration with routing and aliases complete
+- ✅ Comprehensive numpy-style docstrings with examples
+- ✅ All 59 tests still passing (100%)
+- ✅ No regressions introduced
+- ✅ Uses only existing dependencies (statsmodels)
+
+### Completed So Far (Phase 2)
+
+- ✅ Day 1: 3 causal inference methods
+- ✅ Day 2: 4 time series methods (ARIMAX, VARMAX, MSTL, STL)
+- ✅ Day 3: 4 survival analysis methods
+- ✅ Day 4: 4 advanced time series methods (Johansen, Granger, VAR, diagnostics)
+- ✅ Day 5: 4 econometric tests (VECM, breaks, B-G, heteroscedasticity)
+- ✅ **Total: 19 new methods** across 5 categories
+
+**Timeline:** Exceeding expectations (Day 5/10 complete, 19 methods vs. 15 target)
+
+---
+
+**Document Version:** 1.4
+**Created:** October 26, 2025
+**Last Updated:** October 26, 2025 (Day 5 Complete)
