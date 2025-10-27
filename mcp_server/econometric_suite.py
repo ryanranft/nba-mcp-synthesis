@@ -943,17 +943,66 @@ class EconometricSuite:
 
     def panel_analysis(self, method: str = "fixed_effects", **kwargs) -> SuiteResult:
         """
-        Access panel data analysis methods.
+        Access panel data analysis methods including dynamic panel GMM.
+
+        Supports static panel methods (pooled OLS, fixed/random effects) and
+        dynamic panel GMM methods (Arellano-Bond, Blundell-Bond) for models with
+        lagged dependent variables and endogeneity.
 
         Args:
-            method: Panel method ('fixed_effects', 'random_effects', 'pooled_ols', 'diff_in_diff')
+            method: Panel method to use. Options:
+                Static Panel:
+                - 'fixed_effects', 'fe': Fixed effects (within) estimator
+                - 'random_effects', 're': Random effects (GLS) estimator
+                - 'pooled_ols', 'pooled': Pooled OLS (ignores panel structure)
+
+                Dynamic Panel GMM (Phase 2 Day 6):
+                - 'first_diff', 'fd', 'first_difference': First-difference OLS
+                - 'diff_gmm', 'arellano_bond', 'ab_gmm': Difference GMM (Arellano-Bond)
+                - 'sys_gmm', 'system_gmm', 'bb_gmm', 'blundell_bond': System GMM (Blundell-Bond)
+                - 'gmm_diagnostics', 'gmm_tests': GMM diagnostic tests
+
             **kwargs: Method-specific parameters
 
         Returns:
             SuiteResult with panel analysis results
 
         Examples:
+            >>> # Static panel methods
             >>> result = suite.panel_analysis(method='fixed_effects')
+            >>>
+            >>> # First-difference estimator
+            >>> result = suite.panel_analysis(
+            ...     method='first_diff',
+            ...     formula='points ~ minutes + age'
+            ... )
+            >>>
+            >>> # Arellano-Bond Difference GMM
+            >>> result = suite.panel_analysis(
+            ...     method='diff_gmm',
+            ...     formula='points ~ lag(points, 1) + minutes + age',
+            ...     gmm_type='two_step',
+            ...     max_lags=3,
+            ...     collapse=True
+            ... )
+            >>> print(f"Points persistence: {result.result.coefficients['lag(points, 1)']:.3f}")
+            >>> print(f"AR(2) valid: {result.result.ar2_pvalue > 0.05}")
+            >>>
+            >>> # Blundell-Bond System GMM (for persistent series)
+            >>> result = suite.panel_analysis(
+            ...     method='system_gmm',
+            ...     formula='wins ~ lag(wins, 1) + payroll + avg_age',
+            ...     gmm_type='two_step',
+            ...     max_lags=4
+            ... )
+            >>> print(f"Hansen J-test: {result.result.hansen_pvalue:.3f}")
+
+        Notes:
+            GMM Method Selection:
+            - Use First-Difference OLS when no lagged dependent variable
+            - Use Difference GMM (Arellano-Bond) for dynamic panels
+            - Use System GMM (Blundell-Bond) for highly persistent series
+            - Check AR(2) and Hansen tests to validate GMM specification
         """
         from mcp_server.panel_data import PanelDataAnalyzer
 
@@ -993,6 +1042,69 @@ class EconometricSuite:
                 model=None,  # PanelModelResult doesn't have model attribute
                 r_squared=result.r_squared,
             )
+
+        # Phase 2 Day 6: Dynamic Panel GMM Methods
+        elif method in ["first_diff", "fd", "first_difference"]:
+            # First-difference OLS
+            formula_str = kwargs.get("formula", formula)
+            result = analyzer.first_difference(formula=formula_str, **kwargs)
+            return self._create_suite_result(
+                method_category=MethodCategory.PANEL_DATA,
+                method_used="First-Difference OLS",
+                result=result,
+                model=None,
+                r_squared=result.r_squared,
+            )
+
+        elif method in ["diff_gmm", "arellano_bond", "ab_gmm", "difference_gmm"]:
+            # Arellano-Bond Difference GMM
+            formula_str = kwargs.get("formula")
+            if formula_str is None:
+                raise ValueError("formula parameter required for Difference GMM")
+
+            result = analyzer.difference_gmm(formula=formula_str, **kwargs)
+            return self._create_suite_result(
+                method_category=MethodCategory.PANEL_DATA,
+                method_used="Arellano-Bond Difference GMM",
+                result=result,
+                model=None,
+                n_obs=result.n_obs,
+                n_params=len(result.coefficients),
+            )
+
+        elif method in ["sys_gmm", "system_gmm", "bb_gmm", "blundell_bond"]:
+            # Blundell-Bond System GMM
+            formula_str = kwargs.get("formula")
+            if formula_str is None:
+                raise ValueError("formula parameter required for System GMM")
+
+            result = analyzer.system_gmm(formula=formula_str, **kwargs)
+            return self._create_suite_result(
+                method_category=MethodCategory.PANEL_DATA,
+                method_used="Blundell-Bond System GMM",
+                result=result,
+                model=None,
+                n_obs=result.n_obs,
+                n_params=len(result.coefficients),
+            )
+
+        elif method in ["gmm_diagnostics", "gmm_tests"]:
+            # GMM diagnostic tests
+            gmm_result = kwargs.get("gmm_result")
+            if gmm_result is None:
+                raise ValueError(
+                    "gmm_result parameter required for GMM diagnostics. "
+                    "Pass result from diff_gmm or system_gmm."
+                )
+
+            result = analyzer.gmm_diagnostics(gmm_result=gmm_result)
+            return self._create_suite_result(
+                method_category=MethodCategory.PANEL_DATA,
+                method_used="GMM Diagnostic Tests",
+                result=result,
+                model=None,
+            )
+
         else:
             raise ValueError(f"Unknown panel method: {method}")
 

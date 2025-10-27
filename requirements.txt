@@ -65,6 +65,7 @@ mlflow>=2.9.0              # Experiment tracking, model registry
 # Advanced Analytics & Econometrics
 # ============================================
 linearmodels>=5.3          # Panel data econometrics (fixed/random effects)
+pydynpd>=0.2.1             # Dynamic panel data GMM (Arellano-Bond, Blundell-Bond)
 pymc>=5.0.0                # Bayesian modeling and probabilistic programming
 arviz>=0.15.0              # Exploratory analysis of Bayesian models
 dowhy>=0.11.0              # Causal inference and causal graphs
