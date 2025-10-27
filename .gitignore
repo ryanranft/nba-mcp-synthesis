@@ -47,7 +47,20 @@ outputs/
 results/
 logs/
 synthesis_output/
+synthesis_outputs/
+synthesis_output_test/
 cache/
+
+# Root-level patterns to prevent clutter
+/*.log
+/test_*.py
+/*_RESULTS.json
+/*_report.json
+/*_COMPLETE.md
+/*_STATUS.md
+/*_REPORT.md
+/*_VERIFICATION*.md
+/*_SUCCESS.md
 
 # Sensitive files
 *.key

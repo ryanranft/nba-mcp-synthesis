@@ -1,0 +1,549 @@
+{
+  "simulator": {
+    "project_name": "nba-simulator-aws",
+    "path": "/Users/ryanranft/nba-simulator-aws",
+    "total_files": 978,
+    "modules": [
+      {
+        "name": "other",
+        "files": [
+          "tests/phases/phase_3/conftest.py",
+          "tests/phases/phase_4/conftest.py",
+          "tests/phases/phase_5/conftest.py",
+          "tests/phases/phase_2/conftest.py",
+          "tests/phases/phase_7/conftest.py",
+          "tests/phases/phase_0/conftest.py",
+          "tests/phases/phase_9/conftest.py",
+          "tests/phases/phase_8/conftest.py",
+          "tests/phases/phase_1/conftest.py",
+          "tests/phases/phase_6/conftest.py",
+          "docs/phases/phase_4/4.2_use_assessment_through_simulation_to_generate_reference_dist/implement_rec_026.py",
+          "docs/phases/phase_4/4.1_design_and_implement_mcmc_algorithms_to_compute_posterior_di/implement_rec_017.py",
+          "docs/phases/phase_5/5.31_apply_the_chain_rule_correctly_during_backpropagation/implement_rec_054.py",
+          "docs/phases/phase_5/5.9_automated_retraining/example_nba_automated_retraining.py",
+          "docs/phases/phase_5/5.139_experiment_with_temperature_and_top_p_sampling/implement_rec_182.py",
+          "docs/phases/phase_5/5.101_apply_k-means_clustering_for_identifying_player_archetypes/implement_rec_136.py",
+          "docs/phases/phase_5/5.12_learning_curves/example_nba_learning_curves.py",
+          "docs/phases/phase_5/5.22_implement_full_fine-tuning_lora_and_qlora_techniques/implement_rec_036.py",
+          "docs/phases/phase_5/5.32_implement_linear_regression_for_player_performance_predictio/implement_rec_055.py",
+          "docs/phases/phase_5/5.149_track_toxicity_to_maintain_integrity/implement_rec_197.py"
+        ],
+        "file_count": 431,
+        "capabilities": [
+          "General utilities"
+        ],
+        "extensibility": "low"
+      },
+      {
+        "name": "data_processing",
+        "files": [
+          "docs/phases/phase_3/3.2_set_up_qdrant_cloud_as_a_vector_database/implement_rec_041.py",
+          "docs/phases/phase_3/3.1_database_monitoring/implement_variation_14_92bde31c.py",
+          "docs/phases/phase_3/3.1_database_monitoring/implement_variation_10_49ea363a.py",
+          "docs/phases/phase_3/3.1_database_monitoring/implement_variation_17_62b1d92c.py",
+          "docs/phases/phase_3/3.1_database_monitoring/implement_consolidated_consolidated_rec_21.py",
+          "docs/phases/phase_3/3.1_database_monitoring/implement_variation_37_33b8e1ce.py",
+          "docs/phases/phase_3/3.1_set_up_mongodb_serverless_for_data_storage/implement_rec_040.py",
+          "docs/phases/phase_4/4.1_simulation_data/implement_consolidated_rec_58_2821.py",
+          "docs/phases/phase_4/4.1_simulation_data/implement_consolidated_rec_22.py",
+          "docs/phases/phase_4/4.1_simulation_data/implement_consolidated_consolidated_rec_58_2821.py",
+          "docs/phases/phase_4/4.1_simulation_data/implement_consolidated_rec_62_8709.py",
+          "docs/phases/phase_4/4.1_simulation_data/implement_consolidated_rec_59_5517.py",
+          "docs/phases/phase_5/5.81_data-constrained_training_datasets_with_synthetic_examples_d/implement_rec_111.py",
+          "docs/phases/phase_5/5.63_inspect_and_interrogate_attention_to_predict_future_data_bas/implement_rec_092.py",
+          "docs/phases/phase_5/5.45_store_data_in_a_system_for_scalability_and_reproducibility/implement_rec_070.py",
+          "docs/phases/phase_5/5.21_create_an_instruction_dataset_for_nba_analysis/implement_rec_035.py",
+          "docs/phases/phase_5/5.128_implement_a_system_to_handle_data_latency/implement_rec_170.py",
+          "docs/phases/phase_5/5.98_compare_data_distribution_to_training_data/implement_rec_132.py",
+          "docs/phases/phase_5/5.60_implement_normalization_for_input_data/implement_rec_089.py",
+          "docs/phases/phase_5/5.161_use_data_augmentation_to_improve_training/implement_rec_209.py"
+        ],
+        "file_count": 223,
+        "capabilities": [
+          "Data ingestion",
+          "Data cleaning",
+          "ETL pipelines"
+        ],
+        "extensibility": "medium"
+      },
+      {
+        "name": "models",
+        "files": [
+          "docs/phases/phase_3/3.3_deploy_zenml_pipelines_to_aws_using_zenml_cloud/implement_rec_042.py",
+          "docs/phases/phase_5/5.121_implement_ab_testing_for_model_variants/implement_rec_162.py",
+          "docs/phases/phase_5/5.157_use_traininghistory_callback_for_better_model_insight/implement_rec_205.py",
+          "docs/phases/phase_5/5.111_train_an_error_model_to_identify_poor-performing_data_slices/implement_rec_146.py",
+          "docs/phases/phase_5/5.75_create_data_with_a_model_to_save_time/implement_rec_105.py",
+          "docs/phases/phase_5/5.134_fine-tune_generative_models_with_human_preferences/implement_rec_176.py",
+          "docs/phases/phase_5/5.4_model_analysis/implement_consolidated_consolidated_consolidated_consolidated_rec_13.py",
+          "docs/phases/phase_5/5.4_model_analysis/implement_consolidated_ml_systems_8.py",
+          "docs/phases/phase_5/5.4_model_analysis/implement_consolidated_consolidated_consolidated_consolidated_rec_15.py",
+          "docs/phases/phase_5/5.23_advanced_ml_pipeline/implement_variation_79_63df36c2.py",
+          "docs/phases/phase_5/5.23_advanced_ml_pipeline/implement_variation_82_215db232.py",
+          "docs/phases/phase_5/5.23_advanced_ml_pipeline/implement_variation_147_a5b280fc.py",
+          "docs/phases/phase_5/5.23_advanced_ml_pipeline/implement_variation_96_e240f9a8.py",
+          "docs/phases/phase_5/5.23_advanced_ml_pipeline/implement_variation_45_7296d378.py",
+          "docs/phases/phase_5/5.23_advanced_ml_pipeline/implement_variation_60_d7369c40.py",
+          "docs/phases/phase_5/5.23_advanced_ml_pipeline/implement_variation_109_b68868b1.py",
+          "docs/phases/phase_5/5.23_advanced_ml_pipeline/implement_variation_5_1d89fa20.py",
+          "docs/phases/phase_5/5.23_advanced_ml_pipeline/implement_variation_38_8f57916d.py",
+          "docs/phases/phase_5/5.23_advanced_ml_pipeline/implement_variation_87_83da3bda.py",
+          "docs/phases/phase_5/5.23_advanced_ml_pipeline/implement_variation_34_7a4fb622.py"
+        ],
+        "file_count": 212,
+        "capabilities": [
+          "ML model training",
+          "Model persistence",
+          "Model evaluation"
+        ],
+        "extensibility": "medium"
+      },
+      {
+        "name": "feature_engineering",
+        "files": [
+          "docs/phases/phase_5/5.8_feature_store/example_nba_feature_store.py",
+          "docs/phases/phase_5/5.36_check_linear_independence_of_features/implement_rec_059.py",
+          "docs/phases/phase_5/5.10_feature_selection/example_nba_feature_selection.py",
+          "docs/phases/phase_5/5.100_implement_feature_importance_analysis_to_identify_predictive/implement_rec_135.py",
+          "docs/phases/phase_5/5.25_use_qdrant_as_a_logical_feature_store/implement_rec_045.py",
+          "docs/phases/phase_5/5.50_implement_one-hot_encoding_for_categorical_features_team_pos/implement_rec_075.py",
+          "docs/phases/phase_5/5.1_feature_engineering/implement_variation_50_5b0bb074.py",
+          "docs/phases/phase_5/5.1_feature_engineering/implement_consolidated_consolidated_rec_114_5445.py",
+          "docs/phases/phase_5/5.1_feature_engineering/implement_consolidated_rec_60_7422.py",
+          "docs/phases/phase_5/5.1_feature_engineering/implement_variation_138_d62b3d30.py",
+          "docs/phases/phase_5/5.1_feature_engineering/implement_variation_125_f33dee7f.py",
+          "docs/phases/phase_5/5.1_feature_engineering/implement_consolidated_consolidated_rec_60_7422.py",
+          "docs/phases/phase_5/5.1_feature_engineering/implement_variation_35_f7bfcaae.py",
+          "docs/phases/phase_5/5.1_feature_engineering/implement_variation_28_568cfcee.py",
+          "docs/phases/phase_5/5.1_feature_engineering/implement_consolidated_rec_114_5445.py",
+          "docs/phases/phase_5/5.1_feature_engineering/implement_variation_148_481fd184.py",
+          "docs/phases/phase_5/5.1_feature_engineering/implement_consolidated_consolidated_consolidated_rec_11.py",
+          "docs/phases/phase_5/5.1_feature_engineering/implement_consolidated_rec_93_6065.py",
+          "docs/phases/phase_5/5.1_feature_engineering/implement_variation_144_841b0eac.py",
+          "docs/phases/phase_5/5.1_feature_engineering/implement_consolidated_variation_28_568cfcee.py"
+        ],
+        "file_count": 41,
+        "capabilities": [
+          "Feature extraction",
+          "Feature transformation",
+          "Feature selection"
+        ],
+        "extensibility": "high"
+      },
+      {
+        "name": "api",
+        "files": [
+          "docs/phases/phase_5/5.87_utilize_tensorflow_hub_for_rapid_prototyping_with_pretrained/implement_rec_117.py",
+          "docs/phases/phase_5/5.62_leverage_the_keras_functional_api/implement_rec_091.py",
+          "docs/phases/phase_5/5.54_employ_flask_to_create_an_api_for_game_outcome_prediction/implement_rec_082.py",
+          "docs/phases/phase_0/0.17_external_apis/implement_rec_191.py",
+          "docs/phases/phase_6/6.3_implement_autoscaling_for_sagemaker_endpoint/implement_rec_050.py",
+          "docs/phases/phase_6/6.2_build_business_microservice_with_fastapi/implement_rec_039.py",
+          "scripts/pbp_to_boxscore/enhanced_nba_api_processor.py",
+          "scripts/utils/validate_nba_api_files.py",
+          "lambda/prediction_api/lambda_function_lightweight.py",
+          "lambda/prediction_api/lambda_function.py",
+          "api/9_4/schemas.py",
+          "api/9_4/routes.py",
+          "api/1_0/schemas.py",
+          "api/1_0/routes.py",
+          "api/9_3/schemas.py",
+          "api/9_3/routes.py",
+          "api/1_1/schemas.py",
+          "api/1_1/routes.py",
+          "api/9_2/schemas.py",
+          "api/9_2/routes.py"
+        ],
+        "file_count": 53,
+        "capabilities": [
+          "REST endpoints",
+          "Request handling",
+          "Response formatting"
+        ],
+        "extensibility": "medium"
+      },
+      {
+        "name": "evaluation",
+        "files": [
+          "docs/phases/phase_5/5.49_utilize_precision_and_recall_for_evaluating_player_performan/implement_rec_074.py",
+          "docs/phases/phase_5/5.26_leverage_llm-as-a-judge_for_evaluating_nba_content/implement_rec_046.py",
+          "docs/phases/phase_5/5.104_implement_counterfactual_evaluation_to_reduce_action_bias_in/implement_rec_139.py",
+          "docs/phases/phase_5/5.80_evaluate_gan_performance_with_fr\u00e9chet_inception_distance_fid/implement_rec_110.py",
+          "docs/phases/phase_5/5.125_evaluate_the_effect_of_home_advantage/implement_rec_167.py",
+          "docs/phases/phase_5/5.69_evaluate_rnn_extensions_grus/implement_rec_099.py",
+          "docs/phases/phase_5/5.28_implement_query_expansion_for_enhanced_retrieval/implement_rec_048.py",
+          "docs/phases/phase_5/5.155_evaluate_generative_performance_using_fr\u00e9chet_inception_dist/implement_rec_203.py",
+          "docs/phases/phase_5/5.12_evaluate_treatment_effects_with_experimental_design_principl/implement_rec_022.py",
+          "docs/phases/phase_5/5.159_evaluate_with_a_zero-shot_set-up/implement_rec_207.py",
+          "docs/phases/phase_9/9.2_evaluate_the_goodness_of_fit_of_the_mcmc_chain_using_gbr_dia/implement_rec_019.py",
+          "docs/phases/phase_8/8.2_implement_ab_testing_for_real-time_evaluation_of_recommendat/implement_rec_129.py",
+          "docs/phases/phase_6/6.2_business_metrics/implement_consolidated_rec_62_8709.py",
+          "docs/phases/phase_6/6.2_business_metrics/implement_consolidated_rec_28_9488.py",
+          "scripts/advanced_metrics/__init__.py",
+          "scripts/pbp_to_boxscore/enhanced_advanced_metrics.py"
+        ],
+        "file_count": 16,
+        "capabilities": [
+          "Model evaluation",
+          "Metrics calculation",
+          "Performance tracking"
+        ],
+        "extensibility": "high"
+      },
+      {
+        "name": "infrastructure",
+        "files": [
+          "scripts/deployment/shadow_deployment.py"
+        ],
+        "file_count": 1,
+        "capabilities": [
+          "Deployment",
+          "Configuration",
+          "Resource management"
+        ],
+        "extensibility": "low"
+      },
+      {
+        "name": "mcp_tools",
+        "files": [
+          "mcp_server/unified_secrets_manager.py"
+        ],
+        "file_count": 1,
+        "capabilities": [
+          "MCP tool implementation",
+          "NBA metrics",
+          "Data retrieval"
+        ],
+        "extensibility": "high"
+      }
+    ],
+    "key_directories": [
+      "api",
+      "backups",
+      "config",
+      "data",
+      "docker",
+      "docs",
+      "inventory",
+      "lambda",
+      "logs",
+      "mcp_server",
+      "mlruns",
+      "models",
+      "notebooks",
+      "reports",
+      "scripts",
+      "sql",
+      "synthesis_output",
+      "tests",
+      "tmp",
+      "validators"
+    ]
+  },
+  "mcp": {
+    "project_name": "nba-mcp-synthesis",
+    "path": "/Users/ryanranft/nba-mcp-synthesis",
+    "total_files": 9858,
+    "modules": [
+      {
+        "name": "mcp_tools",
+        "files": [
+          "ollama_mcp_chat.py",
+          "load_env_nba_mcp_synthesis_workflow.py",
+          "load_env_nba_mcp_synthesis_local.py",
+          "tests/mocks/mock_mcp_server.py",
+          "pycharm_integration/external_tool_wrapper.py",
+          "implementation_plans/recommendations/rec_408_implement_a_workflow_orchestration_tool/implementation.py",
+          "implementation_plans/backups/phase_2_20251025_035545_5604b645/implementation_plans/recommendations/rec_408_implement_a_workflow_orchestration_tool/implementation.py",
+          "synthesis/mcp_client.py",
+          "pycharm/mcp_external_tool.py",
+          "scripts/validate_mcp_structure.py",
+          "scripts/categorize_tools.py",
+          "mcp_server/distributed_lock.py",
+          "mcp_server/ab_testing.py",
+          "mcp_server/auth.py",
+          "mcp_server/prediction_caching.py",
+          "mcp_server/performance_tuner.py",
+          "mcp_server/dependency_health.py",
+          "mcp_server/automated_testing.py",
+          "mcp_server/secrets_manager.py",
+          "mcp_server/structured_logging.py"
+        ],
+        "file_count": 142,
+        "capabilities": [
+          "MCP tool implementation",
+          "NBA metrics",
+          "Data retrieval"
+        ],
+        "extensibility": "high"
+      },
+      {
+        "name": "other",
+        "files": [
+          "fix_config.py",
+          "book_analysis_example.py",
+          "migrate_pydantic_v2.py",
+          "run_ab_test.py",
+          "fix_validators.py",
+          "playground_adapter/config.py",
+          "playground_adapter/cache.py",
+          "playground_adapter/__init__.py",
+          "playground_adapter/app.py",
+          "docker/load_secrets_docker.py",
+          "tests/conftest.py",
+          "tests/run_tests.py",
+          "tests/__init__.py",
+          "tests/mocks/__init__.py",
+          "pycharm_integration/__init__.py",
+          "implementation_plans/recommendations/rec_043_implement_continuous_integration_ci_pipeline_with_/implementation.py",
+          "implementation_plans/recommendations/rec_158_leverage_latent_diffusion_for_generating_high_reso/implementation.py",
+          "implementation_plans/recommendations/rec_187_utilize_hybrid_searches/implementation.py",
+          "implementation_plans/recommendations/rec_494_develop_a_system_to_track_and_analyze_player_movem/implementation.py",
+          "implementation_plans/recommendations/rec_550_apply_the_chain_rule_correctly_during_backpropagat/implementation.py"
+        ],
+        "file_count": 4865,
+        "capabilities": [
+          "General utilities"
+        ],
+        "extensibility": "low"
+      },
+      {
+        "name": "data_processing",
+        "files": [
+          "data_quality/validator.py",
+          "data_quality/__init__.py",
+          "data_quality/expectations.py",
+          "data_quality/workflows.py",
+          "implementation_plans/recommendations/rec_038_implement_data_scrubbing_pipeline/implementation.py",
+          "implementation_plans/recommendations/rec_020_implement_simple_random_sampling_for_initial_data_/implementation.py",
+          "implementation_plans/recommendations/rec_261_develop_a_data_validation_pipeline_to_ensure_data_/implementation.py",
+          "implementation_plans/recommendations/rec_1374_implement_data_augmentation_techniques_for_imbalan/implementation.py",
+          "implementation_plans/recommendations/rec_762_implement_data_augmentation_techniques_for_compute/implementation.py",
+          "implementation_plans/recommendations/rec_003_implement_data_scrubbing_pipeline_for_data_quality/implementation.py",
+          "implementation_plans/recommendations/rec_1467_implement_secure_data_storage_and_access_controls/implementation.py",
+          "implementation_plans/recommendations/rec_078_implement_data_versioning_for_reproducibility/implementation.py",
+          "implementation_plans/recommendations/rec_1368_develop_a_data_pipeline_for_real_time_game_data_in/implementation.py",
+          "implementation_plans/recommendations/rec_131_implement_batch_processing_for_historical_data_ana/implementation.py",
+          "implementation_plans/recommendations/rec_247_implement_panel_data_regression_with_fixed_effects/implementation.py",
+          "implementation_plans/recommendations/rec_020_implement_statistical_process_control_spc_for_data/implementation.py",
+          "implementation_plans/recommendations/rec_398_implement_caching_for_frequently_accessed_data/implementation.py",
+          "implementation_plans/recommendations/rec_1104_implement_data_augmentation_techniques_for_imbalan/implementation.py",
+          "implementation_plans/recommendations/rec_179_automate_data_collection_and_etl_processes/implementation.py",
+          "implementation_plans/recommendations/rec_303_implement_panel_data_regression_with_fixed_effects/implementation.py"
+        ],
+        "file_count": 1798,
+        "capabilities": [
+          "Data ingestion",
+          "Data cleaning",
+          "ETL pipelines"
+        ],
+        "extensibility": "medium"
+      },
+      {
+        "name": "models",
+        "files": [
+          "implementation_plans/recommendations/rec_460_implement_exponential_family_models_for_game_outco/implementation.py",
+          "implementation_plans/recommendations/rec_1028_develop_a_regularized_regression_model_for_predict/implementation.py",
+          "implementation_plans/recommendations/rec_145_train_a_model_to_predict_player_injury_risk/implementation.py",
+          "implementation_plans/recommendations/rec_1550_develop_a_bayesian_hierarchical_model_for_player_s/implementation.py",
+          "implementation_plans/recommendations/rec_028_implement_model_retraining_pipeline/implementation.py",
+          "implementation_plans/recommendations/rec_526_develop_a_regularized_regression_model_for_overfit/implementation.py",
+          "implementation_plans/recommendations/rec_1599_validate_regression_models_with_out_of_sample_pred/implementation.py",
+          "implementation_plans/recommendations/rec_882_implement_bayesian_model_averaging_for_prediction/implementation.py",
+          "implementation_plans/recommendations/rec_1138_implement_ab_testing_for_model_evaluation/implementation.py",
+          "implementation_plans/recommendations/rec_809_develop_a_binary_classification_model_for_predicti/implementation.py",
+          "implementation_plans/recommendations/rec_017_implement_invariant_tests_to_validate_model_stabil/implementation.py",
+          "implementation_plans/recommendations/rec_191_apply_a_poisson_regression_model_for_count_data_an/implementation.py",
+          "implementation_plans/recommendations/rec_835_employ_gaussian_mixture_models_gmm_for_player_clus/implementation.py",
+          "implementation_plans/recommendations/rec_895_implement_automated_model_retraining_pipeline_with/implementation.py",
+          "implementation_plans/recommendations/rec_326_implement_model_monitoring_and_alerting/implementation.py",
+          "implementation_plans/recommendations/rec_1066_develop_a_generative_model_for_creating_personaliz/implementation.py",
+          "implementation_plans/recommendations/rec_872_utilize_gaussian_mixture_models_for_player_cluster/implementation.py",
+          "implementation_plans/recommendations/rec_954_implement_a_system_for_monitoring_model_performanc/implementation.py",
+          "implementation_plans/recommendations/rec_846_implement_gradient_based_optimization_for_model_tr/implementation.py",
+          "implementation_plans/recommendations/rec_990_employ_cross_validation_for_model_evaluation/implementation.py"
+        ],
+        "file_count": 1978,
+        "capabilities": [
+          "ML model training",
+          "Model persistence",
+          "Model evaluation"
+        ],
+        "extensibility": "medium"
+      },
+      {
+        "name": "evaluation",
+        "files": [
+          "implementation_plans/recommendations/rec_1442_evaluate_the_effect_of_home_advantage/implementation.py",
+          "implementation_plans/recommendations/rec_139_implement_counterfactual_evaluation_to_reduce_acti/implementation.py",
+          "implementation_plans/recommendations/rec_1408_evaluate_generative_performance_using_fr\u00e9chet_ince/implementation.py",
+          "implementation_plans/recommendations/rec_449_implement_evaluation_metrics_beyond_accuracy/implementation.py",
+          "implementation_plans/recommendations/rec_1077_implement_ab_testing_framework_for_evaluating_diff/implementation.py",
+          "implementation_plans/recommendations/rec_1257_implement_counterfactual_evaluation_to_reduce_acti/implementation.py",
+          "implementation_plans/recommendations/rec_1125_implement_ab_testing_framework_for_evaluating_team/implementation.py",
+          "implementation_plans/recommendations/rec_938_evaluate_calibration_of_probabilistic_predictions/implementation.py",
+          "implementation_plans/recommendations/rec_1091_develop_a_system_for_monitoring_and_evaluating_gen/implementation.py",
+          "implementation_plans/recommendations/rec_048_implement_query_expansion_for_enhanced_retrieval/implementation.py",
+          "implementation_plans/recommendations/rec_544_implement_query_expansion_for_enhanced_retrieval/implementation.py",
+          "implementation_plans/recommendations/rec_129_implement_ab_testing_for_real_time_evaluation_of_r/implementation.py",
+          "implementation_plans/recommendations/rec_478_implement_ab_testing_for_evaluating_new_strategies/implementation.py",
+          "implementation_plans/recommendations/rec_013_evaluate_sensitivity_of_hyperparameters/implementation.py",
+          "implementation_plans/recommendations/rec_1094_develop_a_retrieval_augmented_generation_rag_syste/implementation.py",
+          "implementation_plans/recommendations/rec_901_implement_ab_testing_framework_for_evaluating_new_/implementation.py",
+          "implementation_plans/recommendations/rec_1247_implement_ab_testing_for_real_time_evaluation_of_r/implementation.py",
+          "implementation_plans/recommendations/rec_194_evaluate_the_effect_of_home_advantage/implementation.py",
+          "implementation_plans/recommendations/rec_167_evaluate_the_effect_of_home_advantage/implementation.py",
+          "implementation_plans/recommendations/rec_1139_implement_a_retrieval_augmented_generation_rag_sys/implementation.py"
+        ],
+        "file_count": 429,
+        "capabilities": [
+          "Model evaluation",
+          "Metrics calculation",
+          "Performance tracking"
+        ],
+        "extensibility": "high"
+      },
+      {
+        "name": "feature_engineering",
+        "files": [
+          "implementation_plans/recommendations/rec_1126_develop_a_feature_store_for_reusable_features/implementation.py",
+          "implementation_plans/recommendations/rec_090_implement_ab_testing_framework_for_new_features/implementation.py",
+          "implementation_plans/recommendations/rec_203_implement_a_feature_store_for_reusable_feature_eng/implementation.py",
+          "implementation_plans/recommendations/rec_994_apply_principal_component_analysis_pca_for_feature/implementation.py",
+          "implementation_plans/recommendations/rec_1173_implement_monitoring_of_feature_distributions/implementation.py",
+          "implementation_plans/recommendations/rec_312_develop_a_scoring_function_for_feature_importance/implementation.py",
+          "implementation_plans/recommendations/rec_1375_develop_a_feature_importance_analysis_module/implementation.py",
+          "implementation_plans/recommendations/rec_786_implement_feature_selection_techniques/implementation.py",
+          "implementation_plans/recommendations/rec_387_implement_feature_store_for_machine_learning_pipel/implementation.py",
+          "implementation_plans/recommendations/rec_960_implement_a_system_for_ab_testing_of_new_features/implementation.py",
+          "implementation_plans/recommendations/rec_923_implement_a_feature_store_for_managing_and_sharing/implementation.py",
+          "implementation_plans/recommendations/rec_402_develop_a_feature_store_for_reusable_features/implementation.py",
+          "implementation_plans/recommendations/rec_111_implement_a_feature_store_for_reusable_features/implementation.py",
+          "implementation_plans/recommendations/rec_1084_implement_a_feature_store_for_managing_machine_lea/implementation.py",
+          "implementation_plans/recommendations/rec_959_implement_a_system_for_feature_importance_analysis/implementation.py",
+          "implementation_plans/recommendations/rec_1538_implement_deep_kernel_learning_for_feature_extract/implementation.py",
+          "implementation_plans/recommendations/rec_335_implement_feature_selection_techniques/implementation.py",
+          "implementation_plans/recommendations/rec_642_implement_a_feature_for_analyzing_forecast_errors/implementation.py",
+          "implementation_plans/recommendations/rec_395_implement_feature_importance_analysis/implementation.py",
+          "implementation_plans/recommendations/rec_672_implement_feature_selection_techniques/implementation.py"
+        ],
+        "file_count": 443,
+        "capabilities": [
+          "Feature extraction",
+          "Feature transformation",
+          "Feature selection"
+        ],
+        "extensibility": "high"
+      },
+      {
+        "name": "infrastructure",
+        "files": [
+          "implementation_plans/recommendations/rec_1200_create_a_cicd_pipeline_for_automated_deployments/implementation.py",
+          "implementation_plans/recommendations/rec_087_implement_automated_canary_deployments/implementation.py",
+          "implementation_plans/recommendations/rec_705_implement_logging_and_monitoring_infrastructure/implementation.py",
+          "implementation_plans/recommendations/rec_103_implement_canary_deployments_for_risk_mitigation/implementation.py",
+          "implementation_plans/recommendations/rec_098_implement_a_shadow_deployment_strategy/implementation.py",
+          "implementation_plans/recommendations/rec_018_incorporate_a_push_deployment/implementation.py",
+          "implementation_plans/backups/phase_3_5_20251019_010403_3c9dc876/implementation_plans/recommendations/rec_018_incorporate_a_push_deployment/implementation.py",
+          "implementation_plans/backups/phase_3_20251021_210019_e6926eea/implementation_plans/recommendations/rec_018_incorporate_a_push_deployment/implementation.py",
+          "implementation_plans/backups/phase_3_20251019_010402_4880921a/implementation_plans/recommendations/rec_018_incorporate_a_push_deployment/implementation.py",
+          "implementation_plans/backups/phase_3_20251019_054700_d0af5995/implementation_plans/recommendations/rec_018_incorporate_a_push_deployment/implementation.py",
+          "implementation_plans/backups/phase_4_20251018_232117_a86543f7/implementation_plans/recommendations/rec_018_incorporate_a_push_deployment/implementation.py",
+          "implementation_plans/backups/phase_4_20251019_054700_561186cf/implementation_plans/recommendations/rec_018_incorporate_a_push_deployment/implementation.py",
+          "implementation_plans/backups/phase_3_20251018_232117_ab8bf0d2/implementation_plans/recommendations/rec_018_incorporate_a_push_deployment/implementation.py",
+          "implementation_plans/backups/phase_2_20251021_195032_8f56254f/implementation_plans/recommendations/rec_018_incorporate_a_push_deployment/implementation.py",
+          "implementation_plans/backups/phase_2_20251019_044118_964da041/implementation_plans/recommendations/rec_018_incorporate_a_push_deployment/implementation.py",
+          "implementation_plans/backups/phase_2_20251023_073105_1a0f2730/implementation_plans/recommendations/rec_018_incorporate_a_push_deployment/implementation.py",
+          "implementation_plans/backups/phase_4_20251019_010403_ca6707f0/implementation_plans/recommendations/rec_018_incorporate_a_push_deployment/implementation.py",
+          "implementation_plans/backups/phase_3_20251023_145549_83c2467a/implementation_plans/recommendations/rec_018_incorporate_a_push_deployment/implementation.py",
+          "implementation_plans/backups/phase_3_5_20251021_210019_76832eb6/implementation_plans/recommendations/rec_018_incorporate_a_push_deployment/implementation.py",
+          "implementation_plans/backups/phase_2_20251025_035545_5604b645/implementation_plans/recommendations/rec_1200_create_a_cicd_pipeline_for_automated_deployments/implementation.py"
+        ],
+        "file_count": 39,
+        "capabilities": [
+          "Deployment",
+          "Configuration",
+          "Resource management"
+        ],
+        "extensibility": "low"
+      },
+      {
+        "name": "api",
+        "files": [
+          "implementation_plans/recommendations/rec_431_implement_rate_limiting_to_protect_api_endpoints/implementation.py",
+          "implementation_plans/recommendations/rec_818_employ_flask_to_create_an_api_for_game_outcome_pre/implementation.py",
+          "implementation_plans/recommendations/rec_1235_utilize_tensorflow_hub_for_rapid_prototyping_with_/implementation.py",
+          "implementation_plans/recommendations/rec_380_implement_load_balancing_for_api_requests_using_co/implementation.py",
+          "implementation_plans/recommendations/rec_117_implement_secure_api_endpoints_with_rate_limiting/implementation.py",
+          "implementation_plans/recommendations/rec_109_implement_input_validation_in_the_scoring_api/implementation.py",
+          "implementation_plans/recommendations/rec_1209_leverage_the_keras_functional_api/implementation.py",
+          "implementation_plans/recommendations/rec_117_utilize_tensorflow_hub_for_rapid_prototyping_with_/implementation.py",
+          "implementation_plans/recommendations/rec_039_build_business_microservice_with_fastapi/implementation.py",
+          "implementation_plans/recommendations/rec_050_implement_autoscaling_for_sagemaker_endpoint/implementation.py",
+          "implementation_plans/recommendations/rec_191_enhance_the_system_by_using_external_apis/implementation.py",
+          "implementation_plans/recommendations/rec_218_enhance_the_system_by_using_external_apis/implementation.py",
+          "implementation_plans/recommendations/rec_546_implement_autoscaling_for_sagemaker_endpoint/implementation.py",
+          "implementation_plans/recommendations/rec_535_build_business_microservice_with_fastapi/implementation.py",
+          "implementation_plans/recommendations/rec_091_leverage_the_keras_functional_api/implementation.py",
+          "implementation_plans/recommendations/rec_082_employ_flask_to_create_an_api_for_game_outcome_pre/implementation.py",
+          "implementation_plans/recommendations/rec_1466_enhance_the_system_by_using_external_apis/implementation.py",
+          "implementation_plans/recommendations/rec_093_implement_a_scoring_api_for_real_time_predictions/implementation.py",
+          "implementation_plans/recommendations/rec_368_implement_modular_exponentiation_for_secure_api_co/implementation.py",
+          "implementation_plans/backups/phase_3_5_20251019_010403_3c9dc876/implementation_plans/recommendations/rec_117_utilize_tensorflow_hub_for_rapid_prototyping_with_/implementation.py"
+        ],
+        "file_count": 164,
+        "capabilities": [
+          "REST endpoints",
+          "Request handling",
+          "Response formatting"
+        ],
+        "extensibility": "medium"
+      }
+    ],
+    "key_directories": [
+      "analysis_results",
+      "backups",
+      "benchmark_results",
+      "books",
+      "cache",
+      "checkpoints",
+      "config",
+      "data_quality",
+      "deploy",
+      "deployment",
+      "docker",
+      "docs",
+      "examples",
+      "great_expectations",
+      "implementation_plans",
+      "infrastructure",
+      "k8s",
+      "logs",
+      "mcp_server",
+      "monitoring",
+      "notebooks",
+      "operations",
+      "playground_adapter",
+      "project",
+      "project_configs",
+      "pycharm",
+      "pycharm_integration",
+      "reports",
+      "results",
+      "scripts",
+      "static",
+      "synthesis",
+      "synthesis_output",
+      "templates",
+      "test_results",
+      "tests",
+      "visualizations",
+      "workflow",
+      "workflow_state",
+      "workflows",
+      "~"
+    ]
+  },
+  "timestamp": "2025-10-23T14:55:49.522079",
+  "analysis_version": "1.0"
+}

@@ -48,6 +48,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ValidationResult:
     """Result of a validation check."""
+
     check_name: str
     passed: bool
     details: str
@@ -92,9 +93,9 @@ class Phase85Validator:
         Returns:
             Comprehensive validation report
         """
-        logger.info("\n" + "="*60)
+        logger.info("\n" + "=" * 60)
         logger.info("PHASE 8.5: PRE-INTEGRATION VALIDATION")
-        logger.info("="*60 + "\n")
+        logger.info("=" * 60 + "\n")
 
         # Check 1: Python syntax
         syntax_result = self.validate_python_syntax()
@@ -137,9 +138,9 @@ class Phase85Validator:
         overall_pass = all(r.passed for r in self.results)
 
         return {
-            'overall_pass': overall_pass,
-            'results': [asdict(r) for r in self.results],
-            'report_path': str(report_path)
+            "overall_pass": overall_pass,
+            "results": [asdict(r) for r in self.results],
+            "report_path": str(report_path),
         }
 
     def validate_python_syntax(self) -> ValidationResult:
@@ -157,7 +158,7 @@ class Phase85Validator:
 
         for py_file in python_files:
             try:
-                with open(py_file, 'r') as f:
+                with open(py_file, "r") as f:
                     code = f.read()
                 ast.parse(code, filename=str(py_file))
 
@@ -176,7 +177,9 @@ class Phase85Validator:
         if passed:
             logger.info(f"   ✅ All {len(python_files)} Python files have valid syntax")
         else:
-            logger.error(f"   ❌ {len(errors)} syntax errors found in {len(python_files)} files")
+            logger.error(
+                f"   ❌ {len(errors)} syntax errors found in {len(python_files)} files"
+            )
 
         return ValidationResult(
             check_name="Python Syntax Validation",
@@ -184,7 +187,7 @@ class Phase85Validator:
             details=f"Checked {len(python_files)} Python files",
             files_checked=len(python_files),
             errors=errors,
-            warnings=warnings
+            warnings=warnings,
         )
 
     def validate_imports(self) -> ValidationResult:
@@ -202,7 +205,7 @@ class Phase85Validator:
 
         for py_file in python_files:
             try:
-                with open(py_file, 'r') as f:
+                with open(py_file, "r") as f:
                     code = f.read()
 
                 tree = ast.parse(code, filename=str(py_file))
@@ -217,8 +220,12 @@ class Phase85Validator:
                                 __import__(module_name)
                             except ImportError:
                                 # Check if it's a local module (acceptable)
-                                if not module_name.startswith('.') and module_name not in ['implement_rec', 'test_rec']:
-                                    warning_msg = f"{py_file}: Cannot import '{module_name}'"
+                                if not module_name.startswith(
+                                    "."
+                                ) and module_name not in ["implement_rec", "test_rec"]:
+                                    warning_msg = (
+                                        f"{py_file}: Cannot import '{module_name}'"
+                                    )
                                     warnings.append(warning_msg)
 
                     elif isinstance(node, ast.ImportFrom):
@@ -227,8 +234,10 @@ class Phase85Validator:
                             try:
                                 __import__(module_name)
                             except ImportError:
-                                if not module_name.startswith('.'):
-                                    warning_msg = f"{py_file}: Cannot import from '{module_name}'"
+                                if not module_name.startswith("."):
+                                    warning_msg = (
+                                        f"{py_file}: Cannot import from '{module_name}'"
+                                    )
                                     warnings.append(warning_msg)
 
             except Exception as e:
@@ -250,7 +259,7 @@ class Phase85Validator:
             details=f"Checked imports in {len(python_files)} Python files",
             files_checked=len(python_files),
             errors=errors,
-            warnings=warnings
+            warnings=warnings,
         )
 
     def validate_test_discovery(self) -> ValidationResult:
@@ -274,24 +283,28 @@ class Phase85Validator:
                 details="No test files to discover",
                 files_checked=0,
                 errors=[],
-                warnings=["No test files found"]
+                warnings=["No test files found"],
             )
 
         # Try pytest collection
         try:
             result = subprocess.run(
-                ['pytest', '--collect-only', str(self.target_dir)],
+                ["pytest", "--collect-only", str(self.target_dir)],
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=30,
             )
 
-            if result.returncode == 0 or result.returncode == 5:  # 5 = no tests collected (acceptable)
+            if (
+                result.returncode == 0 or result.returncode == 5
+            ):  # 5 = no tests collected (acceptable)
                 # Parse output to count tests
                 output = result.stdout
-                test_count = output.count('<Function') + output.count('<Method')
+                test_count = output.count("<Function") + output.count("<Method")
 
-                logger.info(f"   ✅ Discovered {test_count} tests in {len(test_files)} test files")
+                logger.info(
+                    f"   ✅ Discovered {test_count} tests in {len(test_files)} test files"
+                )
 
                 return ValidationResult(
                     check_name="Test Discovery",
@@ -299,7 +312,7 @@ class Phase85Validator:
                     details=f"Discovered {test_count} tests in {len(test_files)} files",
                     files_checked=len(test_files),
                     errors=[],
-                    warnings=warnings
+                    warnings=warnings,
                 )
             else:
                 error_msg = f"pytest collection failed: {result.stderr[:200]}"
@@ -317,7 +330,7 @@ class Phase85Validator:
                 details="pytest not available",
                 files_checked=len(test_files),
                 errors=[],
-                warnings=warnings
+                warnings=warnings,
             )
 
         except Exception as e:
@@ -331,7 +344,7 @@ class Phase85Validator:
             details=f"Checked {len(test_files)} test files",
             files_checked=len(test_files),
             errors=errors,
-            warnings=warnings
+            warnings=warnings,
         )
 
     def validate_test_execution(self) -> ValidationResult:
@@ -354,30 +367,32 @@ class Phase85Validator:
                 details="No tests to execute",
                 files_checked=0,
                 errors=[],
-                warnings=["No test files found"]
+                warnings=["No test files found"],
             )
 
         try:
             result = subprocess.run(
-                ['pytest', str(self.target_dir), '-v', '--tb=short'],
+                ["pytest", str(self.target_dir), "-v", "--tb=short"],
                 capture_output=True,
                 text=True,
-                timeout=300  # 5 minute timeout
+                timeout=300,  # 5 minute timeout
             )
 
             # Parse output
             output = result.stdout + result.stderr
 
             # Extract stats
-            passed = output.count(' PASSED')
-            failed = output.count(' FAILED')
-            skipped = output.count(' SKIPPED')
+            passed = output.count(" PASSED")
+            failed = output.count(" FAILED")
+            skipped = output.count(" SKIPPED")
             total = passed + failed + skipped
 
             if total > 0:
                 pass_rate = (passed / total) * 100
 
-                logger.info(f"   Tests: {passed} passed, {failed} failed, {skipped} skipped")
+                logger.info(
+                    f"   Tests: {passed} passed, {failed} failed, {skipped} skipped"
+                )
                 logger.info(f"   Pass rate: {pass_rate:.1f}%")
 
                 # Success if >80% pass rate
@@ -394,7 +409,7 @@ class Phase85Validator:
                     details=f"{passed}/{total} tests passed ({pass_rate:.1f}%)",
                     files_checked=len(test_files),
                     errors=errors if not success else [],
-                    warnings=warnings
+                    warnings=warnings,
                 )
             else:
                 logger.warning("   ⚠️  No tests executed")
@@ -404,7 +419,7 @@ class Phase85Validator:
                     details="No tests executed",
                     files_checked=len(test_files),
                     errors=[],
-                    warnings=["No tests executed"]
+                    warnings=["No tests executed"],
                 )
 
         except FileNotFoundError:
@@ -428,7 +443,7 @@ class Phase85Validator:
             details=f"Attempted to run tests in {len(test_files)} files",
             files_checked=len(test_files),
             errors=errors,
-            warnings=warnings
+            warnings=warnings,
         )
 
     def validate_sql_migrations(self) -> ValidationResult:
@@ -452,7 +467,7 @@ class Phase85Validator:
                 details="No SQL files found",
                 files_checked=0,
                 errors=[],
-                warnings=[]
+                warnings=[],
             )
 
         # Basic SQL validation (check for common syntax)
@@ -461,7 +476,7 @@ class Phase85Validator:
                 content = sql_file.read_text()
 
                 # Check for dangerous operations
-                dangerous_keywords = ['DROP DATABASE', 'TRUNCATE TABLE', 'DELETE FROM']
+                dangerous_keywords = ["DROP DATABASE", "TRUNCATE TABLE", "DELETE FROM"]
                 for keyword in dangerous_keywords:
                     if keyword in content.upper():
                         warning_msg = f"{sql_file}: Contains potentially dangerous operation: {keyword}"
@@ -469,7 +484,10 @@ class Phase85Validator:
                         logger.warning(f"   ⚠️  {warning_msg}")
 
                 # Check for basic syntax
-                if not any(kw in content.upper() for kw in ['CREATE', 'ALTER', 'INSERT', 'UPDATE', 'SELECT']):
+                if not any(
+                    kw in content.upper()
+                    for kw in ["CREATE", "ALTER", "INSERT", "UPDATE", "SELECT"]
+                ):
                     warning_msg = f"{sql_file}: No recognized SQL statements"
                     warnings.append(warning_msg)
 
@@ -489,7 +507,7 @@ class Phase85Validator:
             details=f"Checked {len(sql_files)} SQL files",
             files_checked=len(sql_files),
             errors=errors,
-            warnings=warnings
+            warnings=warnings,
         )
 
     def validate_documentation(self) -> ValidationResult:
@@ -505,7 +523,11 @@ class Phase85Validator:
         warnings = []
 
         # Find all recommendation directories
-        rec_dirs = [d for d in self.target_dir.rglob("*") if d.is_dir() and (d.name.startswith("rec_") or d.name.startswith("5."))]
+        rec_dirs = [
+            d
+            for d in self.target_dir.rglob("*")
+            if d.is_dir() and (d.name.startswith("rec_") or d.name.startswith("5."))
+        ]
 
         if len(rec_dirs) == 0:
             return ValidationResult(
@@ -514,7 +536,7 @@ class Phase85Validator:
                 details="No recommendation directories found",
                 files_checked=0,
                 errors=[],
-                warnings=[]
+                warnings=[],
             )
 
         required_docs = ["README.md", "INTEGRATION_GUIDE.md"]
@@ -537,7 +559,9 @@ class Phase85Validator:
         passed = len(errors) == 0
 
         if passed and len(warnings) == 0:
-            logger.info(f"   ✅ Documentation complete for {len(rec_dirs)} recommendations")
+            logger.info(
+                f"   ✅ Documentation complete for {len(rec_dirs)} recommendations"
+            )
         else:
             logger.warning(f"   ⚠️  {len(warnings)} documentation warnings")
 
@@ -547,7 +571,7 @@ class Phase85Validator:
             details=f"Checked documentation for {len(rec_dirs)} recommendations",
             files_checked=len(rec_dirs),
             errors=errors,
-            warnings=warnings
+            warnings=warnings,
         )
 
     def estimate_integration_impact(self) -> ValidationResult:
@@ -573,8 +597,10 @@ class Phase85Validator:
         total_loc = 0
         for py_file in self.target_dir.rglob("*.py"):
             try:
-                lines = py_file.read_text().split('\n')
-                total_loc += len([l for l in lines if l.strip() and not l.strip().startswith('#')])
+                lines = py_file.read_text().split("\n")
+                total_loc += len(
+                    [l for l in lines if l.strip() and not l.strip().startswith("#")]
+                )
             except:
                 pass
 
@@ -582,14 +608,20 @@ class Phase85Validator:
         risk_level = "LOW"
         if total_files > 100 or total_loc > 10000:
             risk_level = "HIGH"
-            warning_msg = f"High integration impact: {total_files} files, ~{total_loc} LOC"
+            warning_msg = (
+                f"High integration impact: {total_files} files, ~{total_loc} LOC"
+            )
             warnings.append(warning_msg)
             logger.warning(f"   ⚠️  {warning_msg}")
         elif total_files > 50 or total_loc > 5000:
             risk_level = "MEDIUM"
-            logger.info(f"   ℹ️  Medium integration impact: {total_files} files, ~{total_loc} LOC")
+            logger.info(
+                f"   ℹ️  Medium integration impact: {total_files} files, ~{total_loc} LOC"
+            )
         else:
-            logger.info(f"   ✅ Low integration impact: {total_files} files, ~{total_loc} LOC")
+            logger.info(
+                f"   ✅ Low integration impact: {total_files} files, ~{total_loc} LOC"
+            )
 
         return ValidationResult(
             check_name="Integration Impact Estimation",
@@ -597,7 +629,7 @@ class Phase85Validator:
             details=f"{total_files} files, ~{total_loc} LOC, Risk: {risk_level}",
             files_checked=total_files,
             errors=errors,
-            warnings=warnings
+            warnings=warnings,
         )
 
     def generate_report(self) -> str:
@@ -649,7 +681,9 @@ class Phase85Validator:
 
         report += "\n## Next Steps\n\n"
         if overall_pass:
-            report += "✅ All validation checks passed. Files are ready for integration.\n\n"
+            report += (
+                "✅ All validation checks passed. Files are ready for integration.\n\n"
+            )
             report += "**To integrate:**\n"
             report += "```bash\n"
             report += "python scripts/phase9_overnight_implementation.py --execute\n"
@@ -669,12 +703,12 @@ async def main():
         "--target",
         type=Path,
         default=Path("implementation_plans"),
-        help="Target directory to validate"
+        help="Target directory to validate",
     )
     parser.add_argument(
         "--skip-tests",
         action="store_true",
-        help="Skip test execution (faster validation)"
+        help="Skip test execution (faster validation)",
     )
 
     args = parser.parse_args()
@@ -686,7 +720,7 @@ async def main():
     result = await validator.validate_all(skip_tests=args.skip_tests)
 
     # Exit with appropriate code
-    if result['overall_pass']:
+    if result["overall_pass"]:
         logger.info("\n✅ Phase 8.5 Validation: PASSED")
         sys.exit(0)
     else:
@@ -697,10 +731,6 @@ async def main():
 if __name__ == "__main__":
     import asyncio
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(message)s'
-    )
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     asyncio.run(main())
-

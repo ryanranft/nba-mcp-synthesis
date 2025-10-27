@@ -35,14 +35,14 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from mcp_server.env_helper import get_api_key
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 # Try to import Anthropic
 try:
     from anthropic import Anthropic
+
     ANTHROPIC_AVAILABLE = True
 except ImportError:
     ANTHROPIC_AVAILABLE = False
@@ -52,6 +52,7 @@ except ImportError:
 @dataclass
 class TestResult:
     """Result of test execution"""
+
     passed: bool
     total_tests: int
     passed_tests: int
@@ -65,6 +66,7 @@ class TestResult:
 @dataclass
 class GeneratedTest:
     """Generated test code"""
+
     code: str
     test_file_path: str
     num_test_cases: int
@@ -85,7 +87,7 @@ class TestGeneratorAndRunner:
     def __init__(
         self,
         project_root: str = "../nba-simulator-aws",
-        model: str = "claude-sonnet-4-5-20250929"
+        model: str = "claude-sonnet-4-5-20250929",
     ):
         """
         Initialize Test Generator & Runner.
@@ -98,7 +100,7 @@ class TestGeneratorAndRunner:
         self.model = model
 
         # Initialize Claude client with hierarchical secrets
-        api_key = get_api_key('ANTHROPIC')
+        api_key = get_api_key("ANTHROPIC")
         if api_key and ANTHROPIC_AVAILABLE:
             self.client = Anthropic(api_key=api_key)
             logger.info(f"🧪 Test Generator & Runner initialized")
@@ -112,10 +114,7 @@ class TestGeneratorAndRunner:
                 logger.warning("   Reason: anthropic package not installed")
 
     def generate_tests(
-        self,
-        implementation_code: str,
-        recommendation: Dict[str, Any],
-        module_path: str
+        self, implementation_code: str, recommendation: Dict[str, Any], module_path: str
     ) -> Optional[GeneratedTest]:
         """
         Generate comprehensive test suite using AI.
@@ -131,20 +130,16 @@ class TestGeneratorAndRunner:
         if not self.client:
             logger.warning("⚠️  Cannot generate tests - Claude client not available")
             return self._generate_basic_test_template(
-                implementation_code,
-                recommendation,
-                module_path
+                implementation_code, recommendation, module_path
             )
 
-        title = recommendation.get('title', 'Untitled')
+        title = recommendation.get("title", "Untitled")
         logger.info(f"🧪 Generating tests for: {title}")
 
         try:
             # Build test generation prompt
             prompt = self._build_test_generation_prompt(
-                implementation_code,
-                recommendation,
-                module_path
+                implementation_code, recommendation, module_path
             )
 
             # Call Claude
@@ -152,33 +147,33 @@ class TestGeneratorAndRunner:
                 model=self.model,
                 max_tokens=16000,  # Increased to handle larger test files with many test cases
                 temperature=0.1,
-                messages=[{"role": "user", "content": prompt}]
+                messages=[{"role": "user", "content": prompt}],
             )
 
             test_code = response.content[0].text.strip()
 
             # Extract code from markdown if present (handle both complete and incomplete fences)
             # Try complete fence first (```python ... ```)
-            code_match = re.search(r'```python\n(.*?)```', test_code, re.DOTALL)
+            code_match = re.search(r"```python\n(.*?)```", test_code, re.DOTALL)
             if code_match:
                 test_code = code_match.group(1).strip()
             else:
                 # Try incomplete fence (```python ... with no closing)
-                code_match = re.search(r'```python\n(.*)', test_code, re.DOTALL)
+                code_match = re.search(r"```python\n(.*)", test_code, re.DOTALL)
                 if code_match:
                     test_code = code_match.group(1).strip()
                 # Also check for just ```\n without python keyword
-                elif test_code.startswith('```'):
+                elif test_code.startswith("```"):
                     # Strip opening fence and any closing fence
-                    test_code = re.sub(r'^```[a-z]*\n', '', test_code)
-                    test_code = re.sub(r'\n```$', '', test_code).strip()
+                    test_code = re.sub(r"^```[a-z]*\n", "", test_code)
+                    test_code = re.sub(r"\n```$", "", test_code).strip()
 
             # Count test cases
-            num_tests = test_code.count('def test_')
+            num_tests = test_code.count("def test_")
 
             # Determine test file path
             module_name = Path(module_path).stem
-            test_file_path = str(self.project_root / 'tests' / f'test_{module_name}.py')
+            test_file_path = str(self.project_root / "tests" / f"test_{module_name}.py")
 
             logger.info(f"   ✅ Generated {num_tests} test cases")
 
@@ -186,31 +181,26 @@ class TestGeneratorAndRunner:
                 code=test_code,
                 test_file_path=test_file_path,
                 num_test_cases=num_tests,
-                test_types=['unit', 'integration', 'edge_case']
+                test_types=["unit", "integration", "edge_case"],
             )
 
         except Exception as e:
             logger.error(f"❌ Failed to generate tests: {e}")
             return self._generate_basic_test_template(
-                implementation_code,
-                recommendation,
-                module_path
+                implementation_code, recommendation, module_path
             )
 
     def _build_test_generation_prompt(
-        self,
-        implementation_code: str,
-        recommendation: Dict[str, Any],
-        module_path: str
+        self, implementation_code: str, recommendation: Dict[str, Any], module_path: str
     ) -> str:
         """Build prompt for test generation"""
-        title = recommendation.get('title', 'Untitled')
-        description = recommendation.get('description', '')
+        title = recommendation.get("title", "Untitled")
+        description = recommendation.get("description", "")
 
         # Extract module name and classes/functions
         module_name = Path(module_path).stem
-        classes = re.findall(r'class (\w+)', implementation_code)
-        functions = re.findall(r'def (\w+)', implementation_code)
+        classes = re.findall(r"class (\w+)", implementation_code)
+        functions = re.findall(r"def (\w+)", implementation_code)
 
         # Determine correct import path based on module location
         module_path_obj = Path(module_path)
@@ -218,13 +208,17 @@ class TestGeneratorAndRunner:
             # Get relative path from project root
             rel_path = module_path_obj.relative_to(self.project_root)
             # Convert to import path (remove .py, replace / with .)
-            import_path = str(rel_path.with_suffix('')).replace('/', '.')
+            import_path = str(rel_path.with_suffix("")).replace("/", ".")
         else:
             # Fallback to simple module name
             import_path = module_name
 
         # Get the directory containing the module for path manipulation
-        module_dir = module_path_obj.parent.relative_to(self.project_root) if self.project_root in module_path_obj.parents else Path('scripts')
+        module_dir = (
+            module_path_obj.parent.relative_to(self.project_root)
+            if self.project_root in module_path_obj.parents
+            else Path("scripts")
+        )
         module_dir_str = str(module_dir)
 
         prompt = f"""Generate a comprehensive pytest test suite for the following Python module.
@@ -335,18 +329,15 @@ Generate the complete test suite now:"""
         return prompt
 
     def _generate_basic_test_template(
-        self,
-        implementation_code: str,
-        recommendation: Dict[str, Any],
-        module_path: str
+        self, implementation_code: str, recommendation: Dict[str, Any], module_path: str
     ) -> GeneratedTest:
         """Generate basic test template as fallback"""
         module_name = Path(module_path).stem
-        title = recommendation.get('title', 'Untitled')
+        title = recommendation.get("title", "Untitled")
 
         # Extract classes and functions
-        classes = re.findall(r'class (\w+)', implementation_code)
-        functions = re.findall(r'def (\w+)', implementation_code)
+        classes = re.findall(r"class (\w+)", implementation_code)
+        functions = re.findall(r"def (\w+)", implementation_code)
 
         # Get module directory for path manipulation
         module_path_obj = Path(module_path)
@@ -354,7 +345,7 @@ Generate the complete test suite now:"""
             module_dir = module_path_obj.parent.relative_to(self.project_root)
             module_dir_str = str(module_dir)
         else:
-            module_dir_str = 'scripts'
+            module_dir_str = "scripts"
 
         test_code = f'''#!/usr/bin/env python3
 """
@@ -394,7 +385,7 @@ def test_{cls.lower()}_initialization():
 
         # Add basic tests for each function
         for func in functions[:5]:  # Limit to first 5
-            if not func.startswith('_'):  # Skip private functions
+            if not func.startswith("_"):  # Skip private functions
                 test_code += f'''
 def test_{func}_exists():
     """Test {func} function exists"""
@@ -403,20 +394,20 @@ def test_{func}_exists():
 
 '''
 
-        test_file_path = str(self.project_root / 'tests' / f'test_{module_name}.py')
+        test_file_path = str(self.project_root / "tests" / f"test_{module_name}.py")
 
         return GeneratedTest(
             code=test_code,
             test_file_path=test_file_path,
             num_test_cases=len(classes) + len(functions) + 1,
-            test_types=['basic']
+            test_types=["basic"],
         )
 
     def run_tests(
         self,
         test_file: str,
         pytest_args: Optional[List[str]] = None,
-        timeout: int = 300
+        timeout: int = 300,
     ) -> TestResult:
         """
         Run pytest tests.
@@ -432,7 +423,7 @@ def test_{func}_exists():
         logger.info(f"🧪 Running tests: {Path(test_file).name}")
 
         # Build pytest command
-        cmd = ['pytest', test_file, '-v', '--tb=short']
+        cmd = ["pytest", test_file, "-v", "--tb=short"]
 
         if pytest_args:
             cmd.extend(pytest_args)
@@ -444,16 +435,20 @@ def test_{func}_exists():
                 cwd=self.project_root,
                 capture_output=True,
                 text=True,
-                timeout=timeout
+                timeout=timeout,
             )
 
             # Parse output
             test_result = self._parse_pytest_output(result.stdout, result.stderr)
 
             if test_result.passed:
-                logger.info(f"   ✅ All tests passed ({test_result.passed_tests}/{test_result.total_tests})")
+                logger.info(
+                    f"   ✅ All tests passed ({test_result.passed_tests}/{test_result.total_tests})"
+                )
             else:
-                logger.error(f"   ❌ Tests failed ({test_result.failed_tests}/{test_result.total_tests})")
+                logger.error(
+                    f"   ❌ Tests failed ({test_result.failed_tests}/{test_result.total_tests})"
+                )
                 for failure in test_result.failures[:3]:  # Show first 3
                     logger.error(f"      - {failure}")
 
@@ -469,7 +464,7 @@ def test_{func}_exists():
                 skipped_tests=0,
                 execution_time=timeout,
                 failures=["Test execution timed out"],
-                output=""
+                output="",
             )
 
         except Exception as e:
@@ -482,7 +477,7 @@ def test_{func}_exists():
                 skipped_tests=0,
                 execution_time=0.0,
                 failures=[str(e)],
-                output=""
+                output="",
             )
 
     def _parse_pytest_output(self, stdout: str, stderr: str) -> TestResult:
@@ -492,8 +487,8 @@ def test_{func}_exists():
         # Extract test counts
         # Look for pattern like: "5 passed, 2 failed in 1.23s"
         match = re.search(
-            r'(\d+) passed(?:, (\d+) failed)?(?:, (\d+) skipped)?.* in ([\d.]+)s',
-            combined_output
+            r"(\d+) passed(?:, (\d+) failed)?(?:, (\d+) skipped)?.* in ([\d.]+)s",
+            combined_output,
         )
 
         if match:
@@ -505,7 +500,7 @@ def test_{func}_exists():
             total = passed + failed + skipped
 
             # Extract failure messages
-            failures = re.findall(r'FAILED (.*?) -', combined_output)
+            failures = re.findall(r"FAILED (.*?) -", combined_output)
 
             return TestResult(
                 passed=(failed == 0),
@@ -515,7 +510,7 @@ def test_{func}_exists():
                 skipped_tests=skipped,
                 execution_time=exec_time,
                 failures=failures,
-                output=combined_output
+                output=combined_output,
             )
         else:
             # Could not parse - assume failure
@@ -527,7 +522,7 @@ def test_{func}_exists():
                 skipped_tests=0,
                 execution_time=0.0,
                 failures=["Could not parse test results"],
-                output=combined_output
+                output=combined_output,
             )
 
     def save_test_file(self, generated_test: GeneratedTest) -> bool:
@@ -544,7 +539,7 @@ def test_{func}_exists():
             test_path = Path(generated_test.test_file_path)
             test_path.parent.mkdir(parents=True, exist_ok=True)
 
-            with open(test_path, 'w') as f:
+            with open(test_path, "w") as f:
                 f.write(generated_test.code)
 
             logger.info(f"💾 Saved test file: {test_path}")
@@ -559,7 +554,7 @@ def test_{func}_exists():
         implementation_code: str,
         recommendation: Dict[str, Any],
         module_path: str,
-        block_on_failure: bool = True
+        block_on_failure: bool = True,
     ) -> Tuple[bool, Optional[TestResult]]:
         """
         Generate tests and run them (convenience method).
@@ -575,9 +570,7 @@ def test_{func}_exists():
         """
         # Generate tests
         generated_test = self.generate_tests(
-            implementation_code,
-            recommendation,
-            module_path
+            implementation_code, recommendation, module_path
         )
 
         if not generated_test:
@@ -602,18 +595,20 @@ def main():
     """CLI for testing"""
     import argparse
 
-    parser = argparse.ArgumentParser(description='Test Generator & Runner')
-    parser.add_argument('--code-file', required=True, help='Implementation code file')
-    parser.add_argument('--recommendation', required=True, help='Recommendation JSON')
-    parser.add_argument('--project-root', default='../nba-simulator-aws', help='Project root')
+    parser = argparse.ArgumentParser(description="Test Generator & Runner")
+    parser.add_argument("--code-file", required=True, help="Implementation code file")
+    parser.add_argument("--recommendation", required=True, help="Recommendation JSON")
+    parser.add_argument(
+        "--project-root", default="../nba-simulator-aws", help="Project root"
+    )
     args = parser.parse_args()
 
     # Load code
-    with open(args.code_file, 'r') as f:
+    with open(args.code_file, "r") as f:
         code = f.read()
 
     # Load recommendation
-    with open(args.recommendation, 'r') as f:
+    with open(args.recommendation, "r") as f:
         rec_data = json.load(f)
         rec = rec_data[0] if isinstance(rec_data, list) else rec_data
 
@@ -622,9 +617,7 @@ def main():
 
     # Generate and run
     should_proceed, result = runner.generate_and_run_tests(
-        implementation_code=code,
-        recommendation=rec,
-        module_path=args.code_file
+        implementation_code=code, recommendation=rec, module_path=args.code_file
     )
 
     print(f"\n{'='*60}")
@@ -647,5 +640,5 @@ def main():
     print(f"\nShould proceed with deployment: {should_proceed}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

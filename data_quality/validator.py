@@ -66,7 +66,13 @@ class DataValidator:
     def _initialize_context(self):
         """Initialize Great Expectations context"""
         try:
-            if self.use_configured_context and os.path.exists(self.context_path):
+            if not self.use_configured_context:
+                # Always use ephemeral context when use_configured_context=False
+                self.context = gx.get_context()
+                logger.info(
+                    "Great Expectations ephemeral context initialized (explicit)"
+                )
+            elif os.path.exists(self.context_path):
                 # Use configured context with PostgreSQL and S3
                 self.context = gx.get_context(context_root_dir=self.context_path)
                 logger.info(
@@ -79,7 +85,11 @@ class DataValidator:
         except Exception as e:
             logger.error(f"Failed to initialize GX context: {e}")
             logger.warning("Falling back to ephemeral context")
-            self.context = gx.get_context()
+            try:
+                self.context = gx.get_context()
+            except Exception as fallback_error:
+                logger.error(f"Ephemeral context also failed: {fallback_error}")
+                self.context = None
 
     def _build_postgres_connection_string(self) -> str:
         """Build PostgreSQL connection string from environment variables"""

@@ -1022,7 +1022,7 @@ def detect_math_content(content: str) -> dict:
     )
 
     total_latex = latex_inline + latex_display + latex_env
-    has_math = total_latex > 0 or math_symbols > 5 or math_funcs > 3
+    has_math = total_latex > 0 or math_symbols >= 3 or math_funcs > 3
 
     # Difficulty score (0-1)
     # More LaTeX and symbols = higher difficulty

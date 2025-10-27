@@ -1,0 +1,78 @@
+{
+  "pipeline_id": "bad_player_stats_20251025_175345",
+  "dataset_name": "bad_player_stats",
+  "start_time": "2025-10-25T17:53:45.379869",
+  "end_time": "2025-10-25T17:53:45.381303",
+  "current_stage": "completed",
+  "passed": true,
+  "duration_seconds": 0.001434,
+  "issues": [
+    {
+      "stage": "ingestion",
+      "severity": "warning",
+      "message": "Dataset has only 3 rows",
+      "field": null,
+      "row_count": 3,
+      "details": {}
+    },
+    {
+      "stage": "quality_check",
+      "severity": "warning",
+      "message": "Column 'player_id' has 66.67% null values (threshold: 5.00%)",
+      "field": "player_id",
+      "row_count": null,
+      "details": {
+        "null_percentage": 0.6666666666666666,
+        "null_count": 2
+      }
+    },
+    {
+      "stage": "business_rules",
+      "severity": "error",
+      "message": "Found 2 rows with invalid PPG values",
+      "field": "ppg",
+      "row_count": 2,
+      "details": {}
+    }
+  ],
+  "metrics": {},
+  "data_summary": {
+    "row_count": 3,
+    "column_count": 3,
+    "columns": [
+      "player_id",
+      "player_name",
+      "ppg"
+    ],
+    "dtypes": {
+      "player_id": "object",
+      "player_name": "object",
+      "ppg": "float64"
+    },
+    "profile": {
+      "numeric_columns": [
+        {
+          "name": "ppg",
+          "mean": 338.46666666666664,
+          "median": 25.5,
+          "std": 573.0930145563924,
+          "min": -10.0,
+          "max": 999.9
+        }
+      ],
+      "categorical_columns": [
+        {
+          "name": "player_id",
+          "unique_values": 1,
+          "most_common": "player_003"
+        },
+        {
+          "name": "player_name",
+          "unique_values": 3,
+          "most_common": "Player 1"
+        }
+      ],
+      "datetime_columns": []
+    }
+  }
+}

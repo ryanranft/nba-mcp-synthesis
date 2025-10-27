@@ -76,7 +76,11 @@ def _read_inventory_from_report(path: str) -> Optional[Dict[str, Any]]:
 
 def _build_inventory_from_project_config() -> Optional[Dict[str, Any]]:
     project_cfg = load_project_config(cfg.project_config_path)
-    di = (project_cfg.get("data_inventory") or {}) if isinstance(project_cfg, dict) else {}
+    di = (
+        (project_cfg.get("data_inventory") or {})
+        if isinstance(project_cfg, dict)
+        else {}
+    )
     enabled = di.get("enabled", cfg.inventory_enabled_default)
     if not enabled:
         return {"enabled": False, "summary": "", "source": "disabled"}
@@ -157,7 +161,10 @@ def health():
         {
             "status": "ok",
             "mcp": {"up": mcp_up, "tools_count": tools_count},
-            "inventory": {"enabled": inv.get("enabled", False), "source": inv.get("source")},
+            "inventory": {
+                "enabled": inv.get("enabled", False),
+                "source": inv.get("source"),
+            },
             "environment": cfg.environment,
         }
     )
@@ -193,7 +200,9 @@ def call_tool():
         return _json_response(result, status=200 if result.get("success") else 400)
     except Exception as e:
         logger.error(f"Tool call failed: {e}\n{traceback.format_exc()}")
-        return _json_response({"success": False, "tool": name, "error": str(e)}, status=500)
+        return _json_response(
+            {"success": False, "tool": name, "error": str(e)}, status=500
+        )
 
 
 @app.route("/context/gather", methods=["POST"])
@@ -205,11 +214,17 @@ def gather_context():
     include_inventory = bool(payload.get("include_inventory", True))
 
     if not query_type or not user_input:
-        return _json_response({"error": "query_type and user_input are required"}, status=400)
+        return _json_response(
+            {"error": "query_type and user_input are required"}, status=400
+        )
 
     try:
         client = _ensure_mcp()
-        ctx = asyncio.run(client.gather_context(query_type=query_type, user_input=user_input, code=code))
+        ctx = asyncio.run(
+            client.gather_context(
+                query_type=query_type, user_input=user_input, code=code
+            )
+        )
         if include_inventory:
             inv = get_inventory_summary(force_refresh=False)
             if inv.get("enabled"):

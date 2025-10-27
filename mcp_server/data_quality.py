@@ -1,14 +1,44 @@
 """
 Data Quality Testing Module
 Validates data quality using expectation-based testing inspired by Great Expectations.
+
+**Phase 10A Week 2 - Agent 4: Data Validation & Quality**
+Enhanced with 15+ new expectations, Week 1 integration, and production-ready features.
 """
 
 import logging
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any, Callable, Tuple
 from datetime import datetime
 import numpy as np
 import pandas as pd
 from dataclasses import dataclass, field
+import re
+
+# Week 1 Integration
+try:
+    from mcp_server.error_handling import handle_errors, ErrorContext, get_error_handler
+    from mcp_server.monitoring import get_health_monitor, track_metric
+
+    WEEK1_AVAILABLE = True
+except ImportError:
+    WEEK1_AVAILABLE = False
+
+    # Fallback decorators for standalone usage
+    def handle_errors(reraise=True, notify=False):
+        def decorator(func):
+            return func
+
+        return decorator
+
+    def track_metric(metric_name):
+        from contextlib import contextmanager
+
+        @contextmanager
+        def dummy_context():
+            yield
+
+        return dummy_context()
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -301,9 +331,409 @@ class DataQualityValidator:
             },
         )
 
+    # ===== NEW EXPECTATIONS (Phase 10A Week 2 - Agent 4) =====
+
+    def expect_column_values_to_match_pattern(
+        self, df: pd.DataFrame, column: str, pattern: str
+    ) -> ValidationResult:
+        """Expect column values to match a regex pattern"""
+        if column not in df.columns:
+            return ValidationResult(
+                expectation=f"expect_column_values_to_match_pattern('{column}')",
+                passed=False,
+                details={"error": f"Column '{column}' not found"},
+            )
+
+        try:
+            regex = re.compile(pattern)
+            values = df[column].dropna().astype(str)
+            matches = values.apply(lambda x: bool(regex.match(x)))
+            passed = matches.all()
+
+            return ValidationResult(
+                expectation=f"expect_column_values_to_match_pattern('{column}', '{pattern}')",
+                passed=passed,
+                details={
+                    "column": column,
+                    "pattern": pattern,
+                    "matching_count": int(matches.sum()),
+                    "total_count": len(values),
+                    "match_rate": float(matches.mean()),
+                },
+            )
+        except re.error as e:
+            return ValidationResult(
+                expectation=f"expect_column_values_to_match_pattern('{column}')",
+                passed=False,
+                details={"error": f"Invalid regex pattern: {e}"},
+            )
+
+    def expect_column_values_to_be_of_type(
+        self, df: pd.DataFrame, column: str, expected_type: str
+    ) -> ValidationResult:
+        """Expect column values to be of a specific data type"""
+        if column not in df.columns:
+            return ValidationResult(
+                expectation=f"expect_column_values_to_be_of_type('{column}')",
+                passed=False,
+                details={"error": f"Column '{column}' not found"},
+            )
+
+        actual_dtype = str(df[column].dtype)
+        passed = actual_dtype == expected_type or actual_dtype.startswith(expected_type)
+
+        return ValidationResult(
+            expectation=f"expect_column_values_to_be_of_type('{column}', '{expected_type}')",
+            passed=passed,
+            details={
+                "column": column,
+                "expected_type": expected_type,
+                "actual_type": actual_dtype,
+            },
+        )
+
+    def expect_column_pair_correlation_to_be_less_than(
+        self, df: pd.DataFrame, column_A: str, column_B: str, max_correlation: float
+    ) -> ValidationResult:
+        """Expect correlation between two columns to be below threshold"""
+        if column_A not in df.columns or column_B not in df.columns:
+            return ValidationResult(
+                expectation=f"expect_column_pair_correlation_to_be_less_than('{column_A}', '{column_B}')",
+                passed=False,
+                details={"error": "One or both columns not found"},
+            )
+
+        try:
+            correlation = df[[column_A, column_B]].corr().iloc[0, 1]
+            passed = abs(correlation) < max_correlation
+
+            return ValidationResult(
+                expectation=f"expect_column_pair_correlation_to_be_less_than('{column_A}', '{column_B}', {max_correlation})",
+                passed=passed,
+                details={
+                    "column_A": column_A,
+                    "column_B": column_B,
+                    "correlation": float(correlation),
+                    "threshold": max_correlation,
+                },
+            )
+        except Exception as e:
+            return ValidationResult(
+                expectation=f"expect_column_pair_correlation_to_be_less_than('{column_A}', '{column_B}')",
+                passed=False,
+                details={"error": str(e)},
+            )
+
+    def expect_column_median_to_be_between(
+        self, df: pd.DataFrame, column: str, min_value: float, max_value: float
+    ) -> ValidationResult:
+        """Expect column median to be within range"""
+        if column not in df.columns:
+            return ValidationResult(
+                expectation=f"expect_column_median_to_be_between('{column}')",
+                passed=False,
+                details={"error": f"Column '{column}' not found"},
+            )
+
+        median_value = df[column].median()
+        passed = min_value <= median_value <= max_value
+
+        return ValidationResult(
+            expectation=f"expect_column_median_to_be_between('{column}', {min_value}, {max_value})",
+            passed=passed,
+            details={
+                "column": column,
+                "median": float(median_value),
+                "expected_min": min_value,
+                "expected_max": max_value,
+            },
+        )
+
+    def expect_column_quantile_to_be_between(
+        self,
+        df: pd.DataFrame,
+        column: str,
+        quantile: float,
+        min_value: float,
+        max_value: float,
+    ) -> ValidationResult:
+        """Expect column quantile to be within range"""
+        if column not in df.columns:
+            return ValidationResult(
+                expectation=f"expect_column_quantile_to_be_between('{column}')",
+                passed=False,
+                details={"error": f"Column '{column}' not found"},
+            )
+
+        quantile_value = df[column].quantile(quantile)
+        passed = min_value <= quantile_value <= max_value
+
+        return ValidationResult(
+            expectation=f"expect_column_quantile_to_be_between('{column}', q={quantile}, {min_value}, {max_value})",
+            passed=passed,
+            details={
+                "column": column,
+                "quantile": quantile,
+                "quantile_value": float(quantile_value),
+                "expected_min": min_value,
+                "expected_max": max_value,
+            },
+        )
+
+    def expect_column_sum_to_be_between(
+        self, df: pd.DataFrame, column: str, min_value: float, max_value: float
+    ) -> ValidationResult:
+        """Expect column sum to be within range"""
+        if column not in df.columns:
+            return ValidationResult(
+                expectation=f"expect_column_sum_to_be_between('{column}')",
+                passed=False,
+                details={"error": f"Column '{column}' not found"},
+            )
+
+        sum_value = df[column].sum()
+        passed = min_value <= sum_value <= max_value
+
+        return ValidationResult(
+            expectation=f"expect_column_sum_to_be_between('{column}', {min_value}, {max_value})",
+            passed=passed,
+            details={
+                "column": column,
+                "sum": float(sum_value),
+                "expected_min": min_value,
+                "expected_max": max_value,
+            },
+        )
+
+    def expect_column_proportion_of_unique_values_to_be_between(
+        self,
+        df: pd.DataFrame,
+        column: str,
+        min_proportion: float,
+        max_proportion: float,
+    ) -> ValidationResult:
+        """Expect proportion of unique values to be within range"""
+        if column not in df.columns:
+            return ValidationResult(
+                expectation=f"expect_column_proportion_of_unique_values_to_be_between('{column}')",
+                passed=False,
+                details={"error": f"Column '{column}' not found"},
+            )
+
+        unique_count = df[column].nunique()
+        total_count = len(df[column])
+        proportion = unique_count / total_count if total_count > 0 else 0
+        passed = min_proportion <= proportion <= max_proportion
+
+        return ValidationResult(
+            expectation=f"expect_column_proportion_of_unique_values_to_be_between('{column}', {min_proportion}, {max_proportion})",
+            passed=passed,
+            details={
+                "column": column,
+                "unique_count": unique_count,
+                "total_count": total_count,
+                "proportion": float(proportion),
+                "expected_min": min_proportion,
+                "expected_max": max_proportion,
+            },
+        )
+
+    def expect_column_values_to_not_contain_nulls(
+        self, df: pd.DataFrame, column: str
+    ) -> ValidationResult:
+        """Expect column to have zero null values (strict version)"""
+        return self.expect_column_values_to_not_be_null(df, column, max_null_ratio=0.0)
+
+    def expect_column_distinct_values_to_be_in_set(
+        self, df: pd.DataFrame, column: str, value_set: set
+    ) -> ValidationResult:
+        """Expect all distinct column values to be in a specified set (ignoring nulls)"""
+        return self.expect_column_values_to_be_in_set(df, column, value_set)
+
+    def expect_column_most_common_value_to_be_in_set(
+        self, df: pd.DataFrame, column: str, value_set: set
+    ) -> ValidationResult:
+        """Expect the most common value in column to be in the specified set"""
+        if column not in df.columns:
+            return ValidationResult(
+                expectation=f"expect_column_most_common_value_to_be_in_set('{column}')",
+                passed=False,
+                details={"error": f"Column '{column}' not found"},
+            )
+
+        if len(df[column].dropna()) == 0:
+            return ValidationResult(
+                expectation=f"expect_column_most_common_value_to_be_in_set('{column}')",
+                passed=False,
+                details={"error": "Column has no non-null values"},
+            )
+
+        most_common = df[column].value_counts().index[0]
+        passed = most_common in value_set
+
+        return ValidationResult(
+            expectation=f"expect_column_most_common_value_to_be_in_set('{column}', {value_set})",
+            passed=passed,
+            details={
+                "column": column,
+                "most_common_value": most_common,
+                "expected_set": list(value_set),
+            },
+        )
+
+    def expect_table_row_count_to_equal(
+        self, df: pd.DataFrame, expected_count: int
+    ) -> ValidationResult:
+        """Expect table to have exact row count"""
+        row_count = len(df)
+        passed = row_count == expected_count
+
+        return ValidationResult(
+            expectation=f"expect_table_row_count_to_equal({expected_count})",
+            passed=passed,
+            details={
+                "row_count": row_count,
+                "expected_count": expected_count,
+            },
+        )
+
+    def expect_column_max_to_be_between(
+        self, df: pd.DataFrame, column: str, min_value: float, max_value: float
+    ) -> ValidationResult:
+        """Expect column maximum value to be within range"""
+        if column not in df.columns:
+            return ValidationResult(
+                expectation=f"expect_column_max_to_be_between('{column}')",
+                passed=False,
+                details={"error": f"Column '{column}' not found"},
+            )
+
+        max_val = df[column].max()
+        passed = min_value <= max_val <= max_value
+
+        return ValidationResult(
+            expectation=f"expect_column_max_to_be_between('{column}', {min_value}, {max_value})",
+            passed=passed,
+            details={
+                "column": column,
+                "max_value": float(max_val),
+                "expected_min": min_value,
+                "expected_max": max_value,
+            },
+        )
+
+    def expect_column_min_to_be_between(
+        self, df: pd.DataFrame, column: str, min_value: float, max_value: float
+    ) -> ValidationResult:
+        """Expect column minimum value to be within range"""
+        if column not in df.columns:
+            return ValidationResult(
+                expectation=f"expect_column_min_to_be_between('{column}')",
+                passed=False,
+                details={"error": f"Column '{column}' not found"},
+            )
+
+        min_val = df[column].min()
+        passed = min_value <= min_val <= max_value
+
+        return ValidationResult(
+            expectation=f"expect_column_min_to_be_between('{column}', {min_value}, {max_value})",
+            passed=passed,
+            details={
+                "column": column,
+                "min_value": float(min_val),
+                "expected_min": min_value,
+                "expected_max": max_value,
+            },
+        )
+
+    def expect_column_kl_divergence_to_be_less_than(
+        self,
+        df: pd.DataFrame,
+        column: str,
+        reference_dist: Dict[Any, float],
+        max_divergence: float,
+    ) -> ValidationResult:
+        """
+        Expect KL divergence between column value distribution and reference to be below threshold.
+        Useful for detecting distribution drift.
+        """
+        if column not in df.columns:
+            return ValidationResult(
+                expectation=f"expect_column_kl_divergence_to_be_less_than('{column}')",
+                passed=False,
+                details={"error": f"Column '{column}' not found"},
+            )
+
+        try:
+            # Get observed distribution
+            value_counts = df[column].value_counts(normalize=True)
+
+            # Calculate KL divergence
+            kl_divergence = 0.0
+            for value, ref_prob in reference_dist.items():
+                obs_prob = value_counts.get(value, 0.0)
+                if obs_prob > 0 and ref_prob > 0:
+                    kl_divergence += obs_prob * np.log(obs_prob / ref_prob)
+
+            passed = kl_divergence < max_divergence
+
+            return ValidationResult(
+                expectation=f"expect_column_kl_divergence_to_be_less_than('{column}', {max_divergence})",
+                passed=passed,
+                details={
+                    "column": column,
+                    "kl_divergence": float(kl_divergence),
+                    "threshold": max_divergence,
+                },
+            )
+        except Exception as e:
+            return ValidationResult(
+                expectation=f"expect_column_kl_divergence_to_be_less_than('{column}')",
+                passed=False,
+                details={"error": str(e)},
+            )
+
+    def expect_multicolumn_sum_to_equal(
+        self,
+        df: pd.DataFrame,
+        columns: List[str],
+        expected_sum: float,
+        tolerance: float = 0.01,
+    ) -> ValidationResult:
+        """
+        Expect sum across multiple columns to equal expected value (useful for proportions that should sum to 1).
+        """
+        missing_cols = [col for col in columns if col not in df.columns]
+        if missing_cols:
+            return ValidationResult(
+                expectation=f"expect_multicolumn_sum_to_equal({columns})",
+                passed=False,
+                details={"error": f"Columns not found: {missing_cols}"},
+            )
+
+        row_sums = df[columns].sum(axis=1)
+        violations = ((row_sums - expected_sum).abs() > tolerance).sum()
+        passed = violations == 0
+
+        return ValidationResult(
+            expectation=f"expect_multicolumn_sum_to_equal({columns}, {expected_sum}, tolerance={tolerance})",
+            passed=passed,
+            details={
+                "columns": columns,
+                "expected_sum": expected_sum,
+                "tolerance": tolerance,
+                "violations": int(violations),
+                "total_rows": len(df),
+            },
+        )
+
+    @handle_errors(reraise=True, notify=False)
     def validate(self, df: pd.DataFrame) -> DataQualityReport:
         """
         Run all expectations and generate a data quality report.
+
+        **Week 1 Integration:** Uses error handling and monitoring from Phase 10A Week 1.
 
         Args:
             df: DataFrame to validate
@@ -311,6 +741,10 @@ class DataQualityValidator:
         Returns:
             DataQualityReport with validation results
         """
+        import time
+
+        start_time = time.time()
+
         self.results = []
 
         # Run all registered expectations
@@ -339,6 +773,35 @@ class DataQualityValidator:
             failed_expectations=failed_count,
             results=self.results,
         )
+
+        # Week 1 Monitoring Integration
+        if WEEK1_AVAILABLE:
+            try:
+                monitor = get_health_monitor()
+                validation_time_ms = (time.time() - start_time) * 1000
+
+                # Track validation metrics
+                monitor.track_metric(
+                    f"data_quality.{self.dataset_name}.success_rate",
+                    report.success_rate,
+                )
+                monitor.track_metric(
+                    f"data_quality.{self.dataset_name}.validation_time_ms",
+                    validation_time_ms,
+                )
+                monitor.track_metric(
+                    f"data_quality.{self.dataset_name}.failed_expectations",
+                    failed_count,
+                )
+
+                # Alert on quality issues
+                if report.success_rate < 90.0:
+                    logger.warning(
+                        f"⚠️  Data quality below threshold for '{self.dataset_name}': "
+                        f"{report.success_rate:.1f}% (threshold: 90%)"
+                    )
+            except Exception as e:
+                logger.debug(f"Could not track monitoring metrics: {e}")
 
         # Log summary
         logger.info(

@@ -71,13 +71,16 @@ class TestDataValidatorIntegration:
         import os
 
         # Mock PostgreSQL environment variables for testing
-        with patch.dict(os.environ, {
-            'RDS_HOST_NBA_MCP_SYNTHESIS_WORKFLOW': 'localhost',
-            'RDS_DATABASE_NBA_MCP_SYNTHESIS_WORKFLOW': 'nba_stats',
-            'RDS_USERNAME_NBA_MCP_SYNTHESIS_WORKFLOW': 'test_user',
-            'RDS_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW': 'test_password',
-            'RDS_PORT_NBA_MCP_SYNTHESIS_WORKFLOW': '5432'
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "RDS_HOST_NBA_MCP_SYNTHESIS_WORKFLOW": "localhost",
+                "RDS_DATABASE_NBA_MCP_SYNTHESIS_WORKFLOW": "nba_stats",
+                "RDS_USERNAME_NBA_MCP_SYNTHESIS_WORKFLOW": "test_user",
+                "RDS_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW": "test_password",
+                "RDS_PORT_NBA_MCP_SYNTHESIS_WORKFLOW": "5432",
+            },
+        ):
             # Test that validator can be initialized with config
             # (doesn't actually connect to database in init)
             validator = DataValidator(use_configured_context=True)
@@ -105,10 +108,15 @@ class TestDataValidatorIntegration:
         mock_validation_result = {
             "success": True,
             "summary": {"passed": 2, "failed": 0},
-            "expectations_met": True
+            "expectations_met": True,
         }
 
-        with patch.object(DataValidator, 'validate_table', new_callable=AsyncMock, return_value=mock_validation_result):
+        with patch.object(
+            DataValidator,
+            "validate_table",
+            new_callable=AsyncMock,
+            return_value=mock_validation_result,
+        ):
             validator = DataValidator(use_configured_context=False)
 
             mock_data = pd.DataFrame(
@@ -146,13 +154,16 @@ class TestDataValidatorIntegration:
         import os
 
         # Mock PostgreSQL environment variables for testing
-        with patch.dict(os.environ, {
-            'RDS_HOST_NBA_MCP_SYNTHESIS_WORKFLOW': 'test-db.amazonaws.com',
-            'RDS_DATABASE_NBA_MCP_SYNTHESIS_WORKFLOW': 'nba_stats',
-            'RDS_USERNAME_NBA_MCP_SYNTHESIS_WORKFLOW': 'nba_user',
-            'RDS_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW': 'test_password_123',
-            'RDS_PORT_NBA_MCP_SYNTHESIS_WORKFLOW': '5432'
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "RDS_HOST_NBA_MCP_SYNTHESIS_WORKFLOW": "test-db.amazonaws.com",
+                "RDS_DATABASE_NBA_MCP_SYNTHESIS_WORKFLOW": "nba_stats",
+                "RDS_USERNAME_NBA_MCP_SYNTHESIS_WORKFLOW": "nba_user",
+                "RDS_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW": "test_password_123",
+                "RDS_PORT_NBA_MCP_SYNTHESIS_WORKFLOW": "5432",
+            },
+        ):
             validator = DataValidator(use_configured_context=True)
 
             try:
@@ -189,10 +200,15 @@ class TestProductionWorkflows:
         mock_validation_result = {
             "success": True,
             "summary": {"passed": 5, "failed": 0},
-            "expectations_met": True
+            "expectations_met": True,
         }
 
-        with patch.object(DataValidator, 'validate_table', new_callable=AsyncMock, return_value=mock_validation_result):
+        with patch.object(
+            DataValidator,
+            "validate_table",
+            new_callable=AsyncMock,
+            return_value=mock_validation_result,
+        ):
             workflow = ProductionDataQualityWorkflow(use_slack=False)
             workflow.validator.use_configured_context = False  # Use in-memory mode
 
@@ -207,7 +223,9 @@ class TestProductionWorkflows:
             from data_quality.expectations import create_game_expectations
 
             result = await workflow.validator.validate_table(
-                table_name="games", data=mock_data, expectations=create_game_expectations()
+                table_name="games",
+                data=mock_data,
+                expectations=create_game_expectations(),
             )
 
             assert result["success"] == True

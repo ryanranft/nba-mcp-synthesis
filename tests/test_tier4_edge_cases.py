@@ -40,6 +40,7 @@ logger = logging.getLogger(__name__)
 # Test Fixtures
 # ==============================================================================
 
+
 @pytest.fixture
 def temp_inventory():
     """Create temporary inventory directory with test data"""
@@ -55,31 +56,35 @@ def malformed_yaml_files(temp_inventory):
     files = {}
 
     # Valid YAML
-    files['valid'] = temp_inventory / "metrics_valid.yaml"
-    files['valid'].write_text("""
+    files["valid"] = temp_inventory / "metrics_valid.yaml"
+    files["valid"].write_text(
+        """
 database:
   total_tables: 7
   total_rows: 485000
 coverage:
   seasons: "2014-2025"
-""")
+"""
+    )
 
     # Invalid YAML syntax
-    files['invalid_syntax'] = temp_inventory / "metrics_bad.yaml"
-    files['invalid_syntax'].write_text("""
+    files["invalid_syntax"] = temp_inventory / "metrics_bad.yaml"
+    files["invalid_syntax"].write_text(
+        """
 database:
   total_tables: 7
   invalid_indent
     missing_colon
-""")
+"""
+    )
 
     # Empty file
-    files['empty'] = temp_inventory / "metrics_empty.yaml"
-    files['empty'].write_text("")
+    files["empty"] = temp_inventory / "metrics_empty.yaml"
+    files["empty"].write_text("")
 
     # Non-YAML content
-    files['non_yaml'] = temp_inventory / "metrics_binary.yaml"
-    files['non_yaml'].write_bytes(b'\x00\x01\x02\xff\xfe')
+    files["non_yaml"] = temp_inventory / "metrics_binary.yaml"
+    files["non_yaml"].write_bytes(b"\x00\x01\x02\xff\xfe")
 
     return files
 
@@ -90,39 +95,47 @@ def malformed_sql_files(temp_inventory):
     files = {}
 
     # Valid SQL
-    files['valid'] = temp_inventory / "schema_valid.sql"
-    files['valid'].write_text("""
+    files["valid"] = temp_inventory / "schema_valid.sql"
+    files["valid"].write_text(
+        """
 CREATE TABLE player_stats (
     player_id INTEGER PRIMARY KEY,
     points REAL,
     assists INTEGER
 );
-""")
+"""
+    )
 
     # Invalid SQL syntax
-    files['invalid_syntax'] = temp_inventory / "schema_bad.sql"
-    files['invalid_syntax'].write_text("""
+    files["invalid_syntax"] = temp_inventory / "schema_bad.sql"
+    files["invalid_syntax"].write_text(
+        """
 CREATE TABLEE invalid_syntax (
     missing_type,
     bad column definition
 );
-""")
+"""
+    )
 
     # SQL injection attempt
-    files['injection'] = temp_inventory / "schema_inject.sql"
-    files['injection'].write_text("""
+    files["injection"] = temp_inventory / "schema_inject.sql"
+    files["injection"].write_text(
+        """
 CREATE TABLE users (
     id INT,
     name VARCHAR(100)
 ); DROP TABLE users; --
-""")
+"""
+    )
 
     # Incomplete SQL
-    files['incomplete'] = temp_inventory / "schema_incomplete.sql"
-    files['incomplete'].write_text("""
+    files["incomplete"] = temp_inventory / "schema_incomplete.sql"
+    files["incomplete"].write_text(
+        """
 CREATE TABLE incomplete (
     id INTEGER,
-""")
+"""
+    )
 
     return files
 
@@ -130,6 +143,7 @@ CREATE TABLE incomplete (
 # ==============================================================================
 # DIMS Edge Case Tests
 # ==============================================================================
+
 
 class TestDIMSEdgeCases:
     """Test DIMS error handling and edge cases"""
@@ -149,7 +163,6 @@ class TestDIMSEdgeCases:
         assert "does not exist" in str(exc_info.value).lower()
         logger.info("✅ Non-existent path error test passed")
 
-
     def test_02_malformed_yaml_handling(self, malformed_yaml_files):
         """
         Test: Handle malformed YAML files gracefully
@@ -161,19 +174,18 @@ class TestDIMSEdgeCases:
 
         # Test invalid syntax
         try:
-            with open(malformed_yaml_files['invalid_syntax']) as f:
+            with open(malformed_yaml_files["invalid_syntax"]) as f:
                 data = yaml.safe_load(f)
                 assert data is None or isinstance(data, dict)
         except yaml.YAMLError:
             pass  # Expected to fail
 
         # Test empty file
-        with open(malformed_yaml_files['empty']) as f:
+        with open(malformed_yaml_files["empty"]) as f:
             data = yaml.safe_load(f)
             assert data is None
 
         logger.info("✅ Malformed YAML handling test passed")
-
 
     def test_03_sql_injection_prevention(self, malformed_sql_files):
         """
@@ -182,15 +194,14 @@ class TestDIMSEdgeCases:
         """
         logger.info("Testing SQL injection prevention...")
 
-        injection_sql = malformed_sql_files['injection'].read_text()
+        injection_sql = malformed_sql_files["injection"].read_text()
 
         # Should not execute DROP statement
         assert "DROP TABLE" in injection_sql
         # Parser should handle safely
-        assert injection_sql.count(';') >= 2
+        assert injection_sql.count(";") >= 2
 
         logger.info("✅ SQL injection prevention test passed")
-
 
     def test_04_empty_inventory_directory(self, temp_inventory):
         """
@@ -205,6 +216,7 @@ class TestDIMSEdgeCases:
 
         # Scanner should handle empty directory
         from scripts.data_inventory_scanner import DataInventoryScanner
+
         scanner = DataInventoryScanner(str(temp_inventory), enable_live_queries=False)
 
         result = scanner.scan_full_inventory()
@@ -212,7 +224,6 @@ class TestDIMSEdgeCases:
         assert isinstance(result, dict)
 
         logger.info("✅ Empty inventory test passed")
-
 
     def test_05_large_file_handling(self, temp_inventory):
         """
@@ -223,7 +234,7 @@ class TestDIMSEdgeCases:
 
         # Create large YAML (10k lines)
         large_yaml = temp_inventory / "metrics_large.yaml"
-        with open(large_yaml, 'w') as f:
+        with open(large_yaml, "w") as f:
             f.write("database:\n")
             for i in range(10000):
                 f.write(f"  column_{i}: {i}\n")
@@ -234,10 +245,9 @@ class TestDIMSEdgeCases:
         with open(large_yaml) as f:
             data = yaml.safe_load(f)
             assert data is not None
-            assert 'database' in data
+            assert "database" in data
 
         logger.info("✅ Large file handling test passed")
-
 
     def test_06_special_characters_in_paths(self):
         """
@@ -257,7 +267,6 @@ class TestDIMSEdgeCases:
 
         logger.info("✅ Special characters test passed")
 
-
     def test_07_concurrent_scans(self, temp_inventory):
         """
         Test: Handle concurrent DIMS scans safely
@@ -273,7 +282,10 @@ class TestDIMSEdgeCases:
         def run_scan():
             try:
                 from scripts.data_inventory_scanner import DataInventoryScanner
-                scanner = DataInventoryScanner(str(temp_inventory), enable_live_queries=False)
+
+                scanner = DataInventoryScanner(
+                    str(temp_inventory), enable_live_queries=False
+                )
                 result = scanner.scan_full_inventory()
                 results.append(result)
             except Exception as e:
@@ -297,6 +309,7 @@ class TestDIMSEdgeCases:
 # Deployment Edge Case Tests
 # ==============================================================================
 
+
 class TestDeploymentEdgeCases:
     """Test deployment system edge cases"""
 
@@ -309,8 +322,8 @@ class TestDeploymentEdgeCases:
 
         # Simulate rate limit response
         rate_limit_error = {
-            'message': 'API rate limit exceeded',
-            'documentation_url': 'https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting'
+            "message": "API rate limit exceeded",
+            "documentation_url": "https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting",
         }
 
         # Should implement exponential backoff
@@ -319,7 +332,6 @@ class TestDeploymentEdgeCases:
             assert delay <= 60  # Max 60 second backoff
 
         logger.info("✅ Rate limit handling test passed")
-
 
     def test_02_network_timeout_recovery(self):
         """
@@ -338,14 +350,13 @@ class TestDeploymentEdgeCases:
                 pass
             except Exception:
                 if attempt < max_retries - 1:
-                    time.sleep(min(2 ** attempt, 10))  # Exponential backoff
+                    time.sleep(min(2**attempt, 10))  # Exponential backoff
                     continue
                 else:
                     # Final failure should be graceful
                     pass
 
         logger.info("✅ Network timeout recovery test passed")
-
 
     def test_03_disk_space_exhaustion(self, temp_inventory):
         """
@@ -366,7 +377,6 @@ class TestDeploymentEdgeCases:
 
         logger.info(f"✅ Disk space check passed (available: {available_gb:.1f} GB)")
 
-
     def test_04_invalid_recommendation_format(self):
         """
         Test: Handle invalid recommendation JSON
@@ -376,18 +386,19 @@ class TestDeploymentEdgeCases:
 
         invalid_recommendations = [
             {},  # Empty
-            {'missing': 'required_fields'},
-            {'formulas': []},  # No formulas
-            {'formulas': [{'incomplete': 'data'}]},  # Missing fields
+            {"missing": "required_fields"},
+            {"formulas": []},  # No formulas
+            {"formulas": [{"incomplete": "data"}]},  # Missing fields
         ]
 
         for rec in invalid_recommendations:
             # Should validate recommendation structure
-            has_required = all(key in rec for key in ['title', 'formulas', 'implementation'])
+            has_required = all(
+                key in rec for key in ["title", "formulas", "implementation"]
+            )
             assert not has_required  # These should all fail validation
 
         logger.info("✅ Invalid recommendation format test passed")
-
 
     def test_05_cost_limit_enforcement(self):
         """
@@ -396,24 +407,20 @@ class TestDeploymentEdgeCases:
         """
         logger.info("Testing cost limit enforcement...")
 
-        cost_limits = {
-            'per_request': 1.00,
-            'daily': 10.00,
-            'monthly': 250.00
-        }
+        cost_limits = {"per_request": 1.00, "daily": 10.00, "monthly": 250.00}
 
         # Simulate cost tracking
-        current_costs = {
-            'request': 0.95,
-            'daily': 8.50,
-            'monthly': 200.00
-        }
+        current_costs = {"request": 0.95, "daily": 8.50, "monthly": 200.00}
 
         # Check against limits
         next_request_cost = 0.50
 
-        would_exceed_request = (current_costs['request'] + next_request_cost) > cost_limits['per_request']
-        would_exceed_daily = (current_costs['daily'] + next_request_cost) > cost_limits['daily']
+        would_exceed_request = (
+            current_costs["request"] + next_request_cost
+        ) > cost_limits["per_request"]
+        would_exceed_daily = (current_costs["daily"] + next_request_cost) > cost_limits[
+            "daily"
+        ]
 
         # Should block if would exceed
         if would_exceed_request or would_exceed_daily:
@@ -421,7 +428,6 @@ class TestDeploymentEdgeCases:
             assert True
 
         logger.info("✅ Cost limit enforcement test passed")
-
 
     def test_06_branch_name_conflicts(self):
         """
@@ -445,7 +451,6 @@ class TestDeploymentEdgeCases:
         assert len(unique_branches) == len(set(unique_branches))
 
         logger.info("✅ Branch name conflicts test passed")
-
 
     def test_07_git_merge_conflicts(self):
         """
@@ -481,6 +486,7 @@ def calculate_per(player_stats):
 # Data Validation Edge Cases
 # ==============================================================================
 
+
 class TestDataValidationEdgeCases:
     """Test data validation edge cases"""
 
@@ -491,12 +497,7 @@ class TestDataValidationEdgeCases:
         """
         logger.info("Testing null value handling...")
 
-        test_data = {
-            'player_id': 123,
-            'points': None,
-            'assists': 0,
-            'rebounds': None
-        }
+        test_data = {"player_id": 123, "points": None, "assists": 0, "rebounds": None}
 
         # Should handle null values
         for key, value in test_data.items():
@@ -505,7 +506,6 @@ class TestDataValidationEdgeCases:
                 value = value or 0
 
         logger.info("✅ Null value handling test passed")
-
 
     def test_02_type_mismatch_handling(self):
         """
@@ -516,9 +516,9 @@ class TestDataValidationEdgeCases:
 
         # Expected: int, Actual: string
         test_cases = [
-            ('points', 'twenty-five', int),
-            ('assists', '5', int),
-            ('efficiency', '0.95', float),
+            ("points", "twenty-five", int),
+            ("assists", "5", int),
+            ("efficiency", "0.95", float),
         ]
 
         for name, value, expected_type in test_cases:
@@ -531,7 +531,6 @@ class TestDataValidationEdgeCases:
 
         logger.info("✅ Type mismatch handling test passed")
 
-
     def test_03_schema_version_mismatch(self):
         """
         Test: Handle schema version mismatches
@@ -540,15 +539,15 @@ class TestDataValidationEdgeCases:
         logger.info("Testing schema version mismatch...")
 
         schemas = {
-            'v1': {'player_id': 'INT', 'points': 'INT'},
-            'v2': {'player_id': 'INT', 'points': 'REAL', 'assists': 'INT'},
-            'v3': {'player_id': 'UUID', 'stats': 'JSONB'}
+            "v1": {"player_id": "INT", "points": "INT"},
+            "v2": {"player_id": "INT", "points": "REAL", "assists": "INT"},
+            "v3": {"player_id": "UUID", "stats": "JSONB"},
         }
 
         # Should detect breaking changes
-        v1_fields = set(schemas['v1'].keys())
-        v2_fields = set(schemas['v2'].keys())
-        v3_fields = set(schemas['v3'].keys())
+        v1_fields = set(schemas["v1"].keys())
+        v2_fields = set(schemas["v2"].keys())
+        v3_fields = set(schemas["v3"].keys())
 
         # v2 is backward compatible with v1
         assert v1_fields.issubset(v2_fields)
@@ -558,7 +557,6 @@ class TestDataValidationEdgeCases:
 
         logger.info("✅ Schema version mismatch test passed")
 
-
     def test_04_extreme_value_handling(self):
         """
         Test: Handle extreme values
@@ -567,18 +565,18 @@ class TestDataValidationEdgeCases:
         logger.info("Testing extreme value handling...")
 
         test_values = {
-            'points': [0, 50, 100, 150, 999999],  # Max reasonable: 100
-            'assists': [0, 10, 20, 30, -5],  # Negative invalid
-            'efficiency': [0.0, 0.5, 1.0, 50.0, -1.0]  # Range: 0-1
+            "points": [0, 50, 100, 150, 999999],  # Max reasonable: 100
+            "assists": [0, 10, 20, 30, -5],  # Negative invalid
+            "efficiency": [0.0, 0.5, 1.0, 50.0, -1.0],  # Range: 0-1
         }
 
         # Validate ranges
         for stat, values in test_values.items():
             for value in values:
-                if stat == 'points' and value > 150:
+                if stat == "points" and value > 150:
                     # Outlier - flag for review
                     pass
-                if stat == 'assists' and value < 0:
+                if stat == "assists" and value < 0:
                     # Invalid - reject
                     assert value < 0  # Would reject
 
@@ -588,6 +586,7 @@ class TestDataValidationEdgeCases:
 # ==============================================================================
 # Standalone Test Runner
 # ==============================================================================
+
 
 def run_all_edge_case_tests():
     """Run all edge case tests without pytest"""
@@ -608,22 +607,58 @@ def run_all_edge_case_tests():
 
         # DIMS edge case tests
         tests = [
-            ("Non-existent Path", lambda: dims_tests.test_01_nonexistent_inventory_path()),
-            ("Empty Inventory", lambda: dims_tests.test_04_empty_inventory_directory(temp_inv)),
-            ("Large File Handling", lambda: dims_tests.test_05_large_file_handling(temp_inv)),
-            ("Special Characters", lambda: dims_tests.test_06_special_characters_in_paths()),
+            (
+                "Non-existent Path",
+                lambda: dims_tests.test_01_nonexistent_inventory_path(),
+            ),
+            (
+                "Empty Inventory",
+                lambda: dims_tests.test_04_empty_inventory_directory(temp_inv),
+            ),
+            (
+                "Large File Handling",
+                lambda: dims_tests.test_05_large_file_handling(temp_inv),
+            ),
+            (
+                "Special Characters",
+                lambda: dims_tests.test_06_special_characters_in_paths(),
+            ),
             ("Concurrent Scans", lambda: dims_tests.test_07_concurrent_scans(temp_inv)),
-            ("Rate Limit Handling", lambda: deployment_tests.test_01_github_rate_limit_handling()),
-            ("Network Timeout", lambda: deployment_tests.test_02_network_timeout_recovery()),
-            ("Disk Space Check", lambda: deployment_tests.test_03_disk_space_exhaustion(temp_inv)),
-            ("Invalid Format", lambda: deployment_tests.test_04_invalid_recommendation_format()),
+            (
+                "Rate Limit Handling",
+                lambda: deployment_tests.test_01_github_rate_limit_handling(),
+            ),
+            (
+                "Network Timeout",
+                lambda: deployment_tests.test_02_network_timeout_recovery(),
+            ),
+            (
+                "Disk Space Check",
+                lambda: deployment_tests.test_03_disk_space_exhaustion(temp_inv),
+            ),
+            (
+                "Invalid Format",
+                lambda: deployment_tests.test_04_invalid_recommendation_format(),
+            ),
             ("Cost Limits", lambda: deployment_tests.test_05_cost_limit_enforcement()),
-            ("Branch Conflicts", lambda: deployment_tests.test_06_branch_name_conflicts()),
+            (
+                "Branch Conflicts",
+                lambda: deployment_tests.test_06_branch_name_conflicts(),
+            ),
             ("Merge Conflicts", lambda: deployment_tests.test_07_git_merge_conflicts()),
             ("Null Values", lambda: validation_tests.test_01_null_value_handling()),
-            ("Type Mismatches", lambda: validation_tests.test_02_type_mismatch_handling()),
-            ("Schema Versions", lambda: validation_tests.test_03_schema_version_mismatch()),
-            ("Extreme Values", lambda: validation_tests.test_04_extreme_value_handling()),
+            (
+                "Type Mismatches",
+                lambda: validation_tests.test_02_type_mismatch_handling(),
+            ),
+            (
+                "Schema Versions",
+                lambda: validation_tests.test_03_schema_version_mismatch(),
+            ),
+            (
+                "Extreme Values",
+                lambda: validation_tests.test_04_extreme_value_handling(),
+            ),
         ]
 
         passed = 0
@@ -652,6 +687,6 @@ def run_all_edge_case_tests():
 if __name__ == "__main__":
     # Can run standalone
     import sys
+
     success = run_all_edge_case_tests()
     sys.exit(0 if success else 1)
-

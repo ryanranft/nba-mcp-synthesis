@@ -1,11 +1,11 @@
 {
   "book_title": "Practical MLOps Operationalizing Machine Learning Models",
   "s3_path": "books/Practical MLOps_ Operationalizing Machine Learning Models.pdf",
-  "start_time": "2025-10-21T20:53:43.801376",
+  "start_time": "2025-10-23T14:50:03.838317",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-21T20:53:46.059902",
+      "timestamp": "2025-10-23T14:50:06.450828",
       "recommendations": {
         "critical": [
           {
@@ -368,7 +368,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-21T20:53:54.691437",
+      "timestamp": "2025-10-23T14:50:16.300160",
       "recommendations": {
         "critical": [
           {
@@ -731,7 +731,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-21T20:54:03.353718",
+      "timestamp": "2025-10-23T14:50:26.120416",
       "recommendations": {
         "critical": [
           {
@@ -1094,7 +1094,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-21T20:54:11.952199",
+      "timestamp": "2025-10-23T14:50:36.069669",
       "recommendations": {
         "critical": [
           {
@@ -1457,7 +1457,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-21T20:54:20.564618",
+      "timestamp": "2025-10-23T14:50:45.970877",
       "recommendations": {
         "critical": [
           {
@@ -1820,7 +1820,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-21T20:54:29.285742",
+      "timestamp": "2025-10-23T14:50:55.809357",
       "recommendations": {
         "critical": [
           {
@@ -2183,7 +2183,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-21T20:54:37.736322",
+      "timestamp": "2025-10-23T14:51:05.408392",
       "recommendations": {
         "critical": [
           {
@@ -2546,7 +2546,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-21T20:54:46.370225",
+      "timestamp": "2025-10-23T14:51:15.288846",
       "recommendations": {
         "critical": [
           {
@@ -2909,7 +2909,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-21T20:55:15.690473",
+      "timestamp": "2025-10-23T14:51:25.071770",
       "recommendations": {
         "critical": [
           {
@@ -3272,7 +3272,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-21T20:55:24.302092",
+      "timestamp": "2025-10-23T14:51:34.855862",
       "recommendations": {
         "critical": [
           {
@@ -3635,7 +3635,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-21T20:55:32.963258",
+      "timestamp": "2025-10-23T14:51:44.532737",
       "recommendations": {
         "critical": [
           {
@@ -3998,7 +3998,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-21T20:56:02.319318",
+      "timestamp": "2025-10-23T14:51:54.558558",
       "recommendations": {
         "critical": [
           {
@@ -4361,7 +4361,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-21T20:56:10.954155",
+      "timestamp": "2025-10-23T14:52:04.433262",
       "recommendations": {
         "critical": [
           {
@@ -4724,7 +4724,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-21T20:56:19.687950",
+      "timestamp": "2025-10-23T14:52:14.411007",
       "recommendations": {
         "critical": [
           {
@@ -5087,7 +5087,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-21T20:56:28.305480",
+      "timestamp": "2025-10-23T14:52:24.334070",
       "recommendations": {
         "critical": [
           {
@@ -5459,6 +5459,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-21T20:56:35.191941",
+  "end_time": "2025-10-23T14:52:31.473702",
   "total_iterations": 15
 }

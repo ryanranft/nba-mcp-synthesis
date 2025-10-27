@@ -15,6 +15,215 @@ This system combines:
 
 > Using PyCharm? See PyCharm AI Playground setup: docs/guides/PYCHARM_AI_PLAYGROUND_SETUP.md
 
+## 🎯 Project Vision: AI-Powered Sports Analytics Platform
+
+This system represents a complete AI-powered platform for reading technical books, analyzing GitHub repositories, and automatically implementing best practices in production NBA analytics systems.
+
+### The Complete Pipeline
+
+```
+📚 Knowledge Sources (88+ items in S3)
+    ├── 45+ Technical Books (ML, Econometrics, Basketball Analytics, AI/LLMs)
+    ├── 16+ GitHub Repos (MCP servers, Enterprise tools, Official SDKs)
+    └── 30+ Textbook Code Implementations
+            ↓
+    🔍 12-Phase Analysis Workflow
+            ↓
+    🤖 Multi-Model AI Synthesis (Gemini + Claude + GPT-4)
+            ↓
+    📋 1000+ Implementation Recommendations
+            ↓
+    🚀 Automated Deployment → /nba-simulator-aws
+```
+
+### Knowledge Library (S3 Storage)
+
+**Basketball Analytics (4 books):**
+- Basketball on Paper (Oliver) - Statistical analysis
+- Basketball Beyond Paper - Advanced metrics
+- Sports Analytics - Comprehensive overview
+- The Midrange Theory - Shot selection analytics
+
+**Machine Learning (18 books):**
+- Hands-On ML (Géron) - Practical scikit-learn & TensorFlow
+- Elements of Statistical Learning (Hastie) - Theory & algorithms
+- Pattern Recognition (Bishop) - Bayesian approaches
+- Deep Learning (Goodfellow) - Neural networks bible
+- Probabilistic ML (Murphy) - Advanced topics
+
+**Econometrics (9 books):**
+- Greene, Wooldridge (3 books) - Panel data & methods
+- Stock & Watson - Introduction
+- Angrist & Pischke (MHE) - Causal inference
+- Microeconometrics - Methods & applications
+
+**AI & LLMs (8 books):**
+- AI Modern Approach (Norvig) - Foundations
+- LLM Engineers Handbook - Production LLMs
+- Hands-On LLMs - Practical implementations
+- NLP with Transformers - State-of-the-art NLP
+
+**MLOps & Production (6 books):**
+- Designing ML Systems (Chip Huyen) - System design
+- Practical MLOps - Operations & deployment
+- ML-Powered Applications - Building products
+
+**GitHub Repositories (16+ repos):**
+- MCP servers (web scraping, ebook, firecrawl, math)
+- Official MCP SDK (Python, TypeScript)
+- Enterprise tools (Grafana, Redis, Cloudflare)
+- Graph neural networks (PyTorch Geometric)
+
+**Textbook Code (30+ implementations):**
+- Econometrics companion code (Angrist, Wooldridge)
+- ML implementations (ISLR, PRML, ESL)
+- Deep learning notebooks
+- LLM & NLP examples
+
+### 12-Phase Book Analysis Workflow
+
+**Foundation Phases (0-9)** - Core workflow for all analysis:
+- **Phase 0:** Environment discovery and validation
+- **Phase 1:** Book/repo discovery from S3
+- **Phase 2:** High-context analysis with convergence enhancement (up to 200 iterations/book)
+- **Phase 3:** Multi-model synthesis (Gemini + Claude consensus)
+- **Phase 3.5:** AI-powered plan modification (autonomous improvements)
+- **Phase 4:** Implementation file generation
+- **Phase 5:** Index and documentation updates
+- **Phase 6:** Status tracking and reporting
+- **Phase 7:** Dependency optimization
+- **Phase 8:** Progress monitoring
+- **Phase 9:** Integration planning
+
+**MCP Enhancement Phases (10A-12A)** - Improve MCP server:
+- **Phase 10A:** MCP tool validation
+- **Phase 11A:** Tool optimization
+- **Phase 12A:** MCP deployment
+
+**Simulator Enhancement Phases (10B-12B)** - Improve nba-simulator-aws:
+- **Phase 10B:** nba-simulator-aws structure analysis
+- **Phase 11B:** Model ensemble improvements
+- **Phase 12B:** Production deployment
+
+### Key Capabilities
+
+**Multi-Model AI Synthesis:**
+- Primary: Gemini 2.0 Flash ($0.075/1M tokens) - High-context book analysis
+- Synthesis: Claude 3.7 Sonnet - Quality assurance & consensus
+- Validation: GPT-4 Turbo (optional) - Third-party verification
+- Legacy: DeepSeek V3 - Mathematical reasoning
+
+**High-Context Book Analysis:**
+- Process entire books (up to 250K tokens)
+- Iterative convergence enhancement
+- Extract formulas, code, and best practices
+- Math content preservation (LaTeX support)
+
+**Intelligent Plan Management:**
+- Automatic duplicate detection
+- Smart plan merging
+- AI-powered modifications (ADD/MODIFY/DELETE)
+- Context-aware recommendations
+
+**Smart Integration:**
+- Analyze nba-simulator-aws structure
+- Generate optimal placement decisions
+- Detect integration conflicts
+- Estimate implementation impact
+
+### Implementation Tiers
+
+**Tier 0: Safety First** (~$25, 5 days)
+- Cost limits & budget tracking
+- Automatic rollback on failure
+- Pre-integration validation
+- Dry-run mode for all operations
+- **Status:** ✅ Complete (Oct 2024)
+
+**Tier 1: Performance** (~$5, 5 days)
+- Result caching (100% savings on re-runs)
+- Checkpoint/resume capability
+- Parallel execution (4-8 workers)
+- Configuration management (YAML)
+- **Status:** ✅ Complete (Oct 2024)
+
+**Tier 2: AI Intelligence** (~$25-45, 5 days)
+- Phase 3.5 autonomous modifications
+- Smart integrator for nba-simulator-aws
+- Conflict resolution between models
+- Comprehensive phase tracking
+- **Status:** 🚧 In Progress
+
+**Tier 3: Observability** (~$15-30, 7 days)
+- Real-time dashboard (http://localhost:8080)
+- A/B testing framework
+- GitHub book auto-discovery
+- Resource monitoring
+- Dependency visualization
+- **Status:** ⏸️ Planned
+
+### Cost Economics
+
+**One-Time Investment:**
+- Tier 0 Implementation & Testing: $25
+- Full 45-Book Analysis (Tier 1): $20-30
+- AI Enhancements (Tier 2): $25-45
+- Observability (Tier 3): $15-30
+- **Total First Run:** $75-110
+
+**Ongoing Costs:**
+- Re-runs with caching: **$0** (100% cached)
+- New AI modifications only: $0-15
+- **Sustainable:** Near-zero cost after initial run
+
+### Current Achievements
+
+✅ **88 MCP Tools Deployed** - Complete ML pipeline operational
+✅ **45+ Books Accessible** - Comprehensive technical library in S3
+✅ **Multi-Model Synthesis** - Gemini + Claude + GPT-4 consensus
+✅ **High-Context Analysis** - Up to 250K tokens per book
+✅ **GitHub Repo Analysis** - 16+ repos including MCP servers
+✅ **Textbook Code Integration** - 30+ implementations available
+✅ **Hierarchical Secrets** - Production-grade security
+✅ **Cost Optimization** - 93% cheaper than GPT-4 only
+
+### Roadmap
+
+**Q4 2024:**
+- ✅ Tier 0-1 Complete (Safety + Performance)
+- 🚧 Tier 2 In Progress (AI Intelligence)
+- 🚧 Full 45-book overnight analysis
+- ⏸️ Automated deployment to nba-simulator-aws
+
+**Q1 2025:**
+- ⏸️ Tier 3 Complete (Observability)
+- ⏸️ GitHub book auto-discovery
+- ⏸️ Continuous learning pipeline
+- ⏸️ A/B testing framework
+
+**Q2 2025:**
+- ⏸️ Real-time recommendation monitoring
+- ⏸️ Automated book updates
+- ⏸️ Community contribution framework
+
+### Quick Start: Book Analysis
+
+```bash
+# Analyze a single book (test)
+python3 scripts/run_overnight_with_secrets.py --book "Hands-On ML"
+
+# Analyze all 45+ books (overnight run)
+python3 scripts/run_overnight_with_secrets.py
+
+# Monitor progress
+open http://localhost:8080  # Real-time dashboard
+
+# Review results
+cat CONVERGENCE_ENHANCEMENT_RESULTS.md
+```
+
+**See [high-context-book-analyzer.plan.md](high-context-book-analyzer.plan.md) for complete workflow documentation.**
+
 ## AI Playground Adapter (New)
 
 A lightweight adapter exposes MCP capabilities and data-inventory-aware context to any UI.

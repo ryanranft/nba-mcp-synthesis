@@ -30,8 +30,7 @@ import subprocess
 import re
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -39,6 +38,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ImplementationStatus:
     """Status of a recommendation implementation"""
+
     recommendation_id: str
     title: str
     status: str  # not_started, in_progress, completed, blocked
@@ -75,10 +75,12 @@ class ProgressTracker:
     STATUS_COMPLETED = "completed"
     STATUS_BLOCKED = "blocked"
 
-    def __init__(self,
-                 recommendations_file: str,
-                 progress_file: str = "analysis_results/progress_tracker.json",
-                 project_root: str = "."):
+    def __init__(
+        self,
+        recommendations_file: str,
+        progress_file: str = "analysis_results/progress_tracker.json",
+        project_root: str = ".",
+    ):
         """
         Initialize progress tracker.
 
@@ -101,15 +103,15 @@ class ProgressTracker:
 
     def _load_recommendations(self) -> List[Dict]:
         """Load recommendations from JSON file"""
-        with open(self.recommendations_file, 'r') as f:
+        with open(self.recommendations_file, "r") as f:
             data = json.load(f)
 
         # Handle different file structures
         if isinstance(data, list):
             return data
         elif isinstance(data, dict):
-            if 'recommendations' in data:
-                return data['recommendations']
+            if "recommendations" in data:
+                return data["recommendations"]
             else:
                 return [data]
         return []
@@ -120,7 +122,7 @@ class ProgressTracker:
             logger.info("📝 Creating new progress tracking file")
             return self._initialize_progress()
 
-        with open(self.progress_file, 'r') as f:
+        with open(self.progress_file, "r") as f:
             data = json.load(f)
 
         # Convert to ImplementationStatus objects
@@ -136,12 +138,10 @@ class ProgressTracker:
 
         for rec in self.recommendations:
             rec_id = self._get_recommendation_id(rec)
-            title = rec.get('title', 'Untitled')
+            title = rec.get("title", "Untitled")
 
             progress[rec_id] = ImplementationStatus(
-                recommendation_id=rec_id,
-                title=title,
-                status=self.STATUS_NOT_STARTED
+                recommendation_id=rec_id, title=title, status=self.STATUS_NOT_STARTED
             )
 
         return progress
@@ -149,35 +149,34 @@ class ProgressTracker:
     def _get_recommendation_id(self, rec: Dict) -> str:
         """Get unique ID for recommendation"""
         # Try existing ID fields
-        for id_field in ['id', 'recommendation_id', 'title']:
+        for id_field in ["id", "recommendation_id", "title"]:
             if id_field in rec and rec[id_field]:
                 return str(rec[id_field])
 
         # Fallback: use title
-        return rec.get('title', 'unknown')
+        return rec.get("title", "unknown")
 
     def save_progress(self):
         """Save progress data to file"""
         # Convert to dict
-        data = {
-            rec_id: asdict(status)
-            for rec_id, status in self.progress.items()
-        }
+        data = {rec_id: asdict(status) for rec_id, status in self.progress.items()}
 
         # Ensure directory exists
         self.progress_file.parent.mkdir(parents=True, exist_ok=True)
 
         # Save
-        with open(self.progress_file, 'w') as f:
+        with open(self.progress_file, "w") as f:
             json.dump(data, f, indent=2)
 
         logger.info(f"💾 Progress saved: {self.progress_file}")
 
-    def update_status(self,
-                     recommendation_id: str,
-                     status: str,
-                     notes: str = "",
-                     assigned_to: Optional[str] = None):
+    def update_status(
+        self,
+        recommendation_id: str,
+        status: str,
+        notes: str = "",
+        assigned_to: Optional[str] = None,
+    ):
         """
         Update implementation status of a recommendation.
 
@@ -233,18 +232,14 @@ class ProgressTracker:
 
             # Run git log
             result = subprocess.run(
-                cmd,
-                cwd=self.project_root,
-                capture_output=True,
-                text=True,
-                timeout=30
+                cmd, cwd=self.project_root, capture_output=True, text=True, timeout=30
             )
 
             if result.returncode != 0:
                 logger.warning("⚠️  Git not available or not a git repository")
                 return
 
-            commits = result.stdout.strip().split('\n')
+            commits = result.stdout.strip().split("\n")
             logger.info(f"   Found {len(commits)} commits to analyze")
 
             # Check each recommendation
@@ -322,8 +317,8 @@ class ProgressTracker:
 
     def _title_to_module_name(self, title: str) -> str:
         """Convert title to module name (same logic as code generator)"""
-        name = re.sub(r'[^\w\s]', '', title.lower())
-        name = re.sub(r'\s+', '_', name)
+        name = re.sub(r"[^\w\s]", "", title.lower())
+        name = re.sub(r"\s+", "_", name)
         return name[:50]
 
     def get_statistics(self) -> Dict[str, Any]:
@@ -350,15 +345,15 @@ class ProgressTracker:
         blocked_pct = (by_status[self.STATUS_BLOCKED] / total) * 100
 
         return {
-            'total_recommendations': total,
-            'by_status': by_status,
-            'percentages': {
-                'completed': round(completed_pct, 1),
-                'in_progress': round(in_progress_pct, 1),
-                'not_started': round(not_started_pct, 1),
-                'blocked': round(blocked_pct, 1),
+            "total_recommendations": total,
+            "by_status": by_status,
+            "percentages": {
+                "completed": round(completed_pct, 1),
+                "in_progress": round(in_progress_pct, 1),
+                "not_started": round(not_started_pct, 1),
+                "blocked": round(blocked_pct, 1),
             },
-            'completion_rate': round(completed_pct, 1),
+            "completion_rate": round(completed_pct, 1),
         }
 
     def get_statistics_by_priority(self) -> Dict[str, Dict]:
@@ -374,25 +369,27 @@ class ProgressTracker:
             impl_status = self.progress[rec_id]
 
             # Get priority from recommendation
-            priority_score = rec.get('priority_score', {})
-            tier = priority_score.get('tier', 'MEDIUM')
+            priority_score = rec.get("priority_score", {})
+            tier = priority_score.get("tier", "MEDIUM")
 
             if tier not in by_priority:
                 by_priority[tier] = {
-                    'total': 0,
-                    'completed': 0,
-                    'in_progress': 0,
-                    'not_started': 0,
-                    'blocked': 0,
+                    "total": 0,
+                    "completed": 0,
+                    "in_progress": 0,
+                    "not_started": 0,
+                    "blocked": 0,
                 }
 
-            by_priority[tier]['total'] += 1
+            by_priority[tier]["total"] += 1
             by_priority[tier][impl_status.status] += 1
 
         # Calculate percentages
         for tier, stats in by_priority.items():
-            total = stats['total']
-            stats['completion_rate'] = round((stats['completed'] / total) * 100, 1) if total > 0 else 0
+            total = stats["total"]
+            stats["completion_rate"] = (
+                round((stats["completed"] / total) * 100, 1) if total > 0 else 0
+            )
 
         return by_priority
 
@@ -408,25 +405,27 @@ class ProgressTracker:
             impl_status = self.progress[rec_id]
 
             # Get category from recommendation
-            priority_score = rec.get('priority_score', {})
-            category = priority_score.get('category', 'Unknown')
+            priority_score = rec.get("priority_score", {})
+            category = priority_score.get("category", "Unknown")
 
             if category not in by_category:
                 by_category[category] = {
-                    'total': 0,
-                    'completed': 0,
-                    'in_progress': 0,
-                    'not_started': 0,
-                    'blocked': 0,
+                    "total": 0,
+                    "completed": 0,
+                    "in_progress": 0,
+                    "not_started": 0,
+                    "blocked": 0,
                 }
 
-            by_category[category]['total'] += 1
+            by_category[category]["total"] += 1
             by_category[category][impl_status.status] += 1
 
         # Calculate percentages
         for category, stats in by_category.items():
-            total = stats['total']
-            stats['completion_rate'] = round((stats['completed'] / total) * 100, 1) if total > 0 else 0
+            total = stats["total"]
+            stats["completion_rate"] = (
+                round((stats["completed"] / total) * 100, 1) if total > 0 else 0
+            )
 
         return by_category
 
@@ -455,60 +454,76 @@ class ProgressTracker:
         ]
 
         # Overall progress
-        lines.extend([
-            "## 📊 Overall Progress",
-            "",
-            self._generate_progress_bar(stats['completion_rate'], "Completed"),
-            "",
-            f"- ✅ **Completed**: {stats['by_status']['completed']} ({stats['percentages']['completed']}%)",
-            f"- 🔄 **In Progress**: {stats['by_status']['in_progress']} ({stats['percentages']['in_progress']}%)",
-            f"- ⏸️  **Not Started**: {stats['by_status']['not_started']} ({stats['percentages']['not_started']}%)",
-            f"- ⛔ **Blocked**: {stats['by_status']['blocked']} ({stats['percentages']['blocked']}%)",
-            "",
-        ])
+        lines.extend(
+            [
+                "## 📊 Overall Progress",
+                "",
+                self._generate_progress_bar(stats["completion_rate"], "Completed"),
+                "",
+                f"- ✅ **Completed**: {stats['by_status']['completed']} ({stats['percentages']['completed']}%)",
+                f"- 🔄 **In Progress**: {stats['by_status']['in_progress']} ({stats['percentages']['in_progress']}%)",
+                f"- ⏸️  **Not Started**: {stats['by_status']['not_started']} ({stats['percentages']['not_started']}%)",
+                f"- ⛔ **Blocked**: {stats['by_status']['blocked']} ({stats['percentages']['blocked']}%)",
+                "",
+            ]
+        )
 
         # Progress by priority
-        lines.extend([
-            "## 🎯 Progress by Priority Tier",
-            "",
-        ])
+        lines.extend(
+            [
+                "## 🎯 Progress by Priority Tier",
+                "",
+            ]
+        )
 
-        for tier in ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']:
+        for tier in ["CRITICAL", "HIGH", "MEDIUM", "LOW"]:
             if tier in by_priority:
                 stats = by_priority[tier]
                 lines.append(f"### {tier}")
                 lines.append("")
-                lines.append(self._generate_progress_bar(stats['completion_rate'], tier))
+                lines.append(
+                    self._generate_progress_bar(stats["completion_rate"], tier)
+                )
                 lines.append("")
                 lines.append(f"- Total: {stats['total']}")
-                lines.append(f"- Completed: {stats['completed']} ({stats['completion_rate']}%)")
+                lines.append(
+                    f"- Completed: {stats['completed']} ({stats['completion_rate']}%)"
+                )
                 lines.append(f"- In Progress: {stats['in_progress']}")
                 lines.append("")
 
         # Progress by category
-        lines.extend([
-            "## 📋 Progress by Category",
-            "",
-        ])
+        lines.extend(
+            [
+                "## 📋 Progress by Category",
+                "",
+            ]
+        )
 
         for category in sorted(by_category.keys()):
             stats = by_category[category]
             lines.append(f"### {category}")
             lines.append("")
-            lines.append(self._generate_progress_bar(stats['completion_rate'], category))
+            lines.append(
+                self._generate_progress_bar(stats["completion_rate"], category)
+            )
             lines.append("")
             lines.append(f"- Total: {stats['total']}")
-            lines.append(f"- Completed: {stats['completed']} ({stats['completion_rate']}%)")
+            lines.append(
+                f"- Completed: {stats['completed']} ({stats['completion_rate']}%)"
+            )
             lines.append(f"- In Progress: {stats['in_progress']}")
             lines.append("")
 
         # Recently completed
         recently_completed = self._get_recently_completed(limit=10)
         if recently_completed:
-            lines.extend([
-                "## ✅ Recently Completed",
-                "",
-            ])
+            lines.extend(
+                [
+                    "## ✅ Recently Completed",
+                    "",
+                ]
+            )
 
             for impl_status in recently_completed:
                 lines.append(f"- **{impl_status.title}**")
@@ -521,10 +536,12 @@ class ProgressTracker:
         # In progress
         in_progress = self._get_in_progress()
         if in_progress:
-            lines.extend([
-                "## 🔄 Currently In Progress",
-                "",
-            ])
+            lines.extend(
+                [
+                    "## 🔄 Currently In Progress",
+                    "",
+                ]
+            )
 
             for impl_status in in_progress[:20]:  # Top 20
                 lines.append(f"- **{impl_status.title}**")
@@ -539,10 +556,12 @@ class ProgressTracker:
         # Blocked
         blocked = self._get_blocked()
         if blocked:
-            lines.extend([
-                "## ⛔ Blocked Recommendations",
-                "",
-            ])
+            lines.extend(
+                [
+                    "## ⛔ Blocked Recommendations",
+                    "",
+                ]
+            )
 
             for impl_status in blocked:
                 lines.append(f"- **{impl_status.title}**")
@@ -555,7 +574,7 @@ class ProgressTracker:
         # Save to file if specified
         if output_file:
             Path(output_file).parent.mkdir(parents=True, exist_ok=True)
-            with open(output_file, 'w') as f:
+            with open(output_file, "w") as f:
                 f.write(report)
             logger.info(f"💾 Progress report saved: {output_file}")
 
@@ -573,7 +592,8 @@ class ProgressTracker:
     def _get_recently_completed(self, limit: int = 10) -> List[ImplementationStatus]:
         """Get recently completed recommendations"""
         completed = [
-            status for status in self.progress.values()
+            status
+            for status in self.progress.values()
             if status.status == self.STATUS_COMPLETED and status.completed_date
         ]
 
@@ -585,14 +605,16 @@ class ProgressTracker:
     def _get_in_progress(self) -> List[ImplementationStatus]:
         """Get recommendations currently in progress"""
         return [
-            status for status in self.progress.values()
+            status
+            for status in self.progress.values()
             if status.status == self.STATUS_IN_PROGRESS
         ]
 
     def _get_blocked(self) -> List[ImplementationStatus]:
         """Get blocked recommendations"""
         return [
-            status for status in self.progress.values()
+            status
+            for status in self.progress.values()
             if status.status == self.STATUS_BLOCKED
         ]
 
@@ -601,22 +623,34 @@ def main():
     """CLI for progress tracking"""
     import argparse
 
-    parser = argparse.ArgumentParser(description='Track implementation progress')
-    parser.add_argument('--recommendations', required=True, help='Path to recommendations JSON')
-    parser.add_argument('--progress-file', default='analysis_results/progress_tracker.json',
-                       help='Path to progress tracking file')
-    parser.add_argument('--detect-git', action='store_true', help='Detect implementations from git')
-    parser.add_argument('--detect-files', action='store_true', help='Detect implementations from files')
-    parser.add_argument('--report', help='Generate progress report (output file path)')
-    parser.add_argument('--update-status', nargs=3, metavar=('ID', 'STATUS', 'NOTES'),
-                       help='Update status: ID STATUS NOTES')
+    parser = argparse.ArgumentParser(description="Track implementation progress")
+    parser.add_argument(
+        "--recommendations", required=True, help="Path to recommendations JSON"
+    )
+    parser.add_argument(
+        "--progress-file",
+        default="analysis_results/progress_tracker.json",
+        help="Path to progress tracking file",
+    )
+    parser.add_argument(
+        "--detect-git", action="store_true", help="Detect implementations from git"
+    )
+    parser.add_argument(
+        "--detect-files", action="store_true", help="Detect implementations from files"
+    )
+    parser.add_argument("--report", help="Generate progress report (output file path)")
+    parser.add_argument(
+        "--update-status",
+        nargs=3,
+        metavar=("ID", "STATUS", "NOTES"),
+        help="Update status: ID STATUS NOTES",
+    )
 
     args = parser.parse_args()
 
     # Initialize tracker
     tracker = ProgressTracker(
-        recommendations_file=args.recommendations,
-        progress_file=args.progress_file
+        recommendations_file=args.recommendations, progress_file=args.progress_file
     )
 
     # Detect implementations
@@ -638,19 +672,27 @@ def main():
     else:
         # Print statistics
         stats = tracker.get_statistics()
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("IMPLEMENTATION PROGRESS")
-        print("="*60 + "\n")
+        print("=" * 60 + "\n")
 
         print(f"Total Recommendations: {stats['total_recommendations']}")
         print(f"Completion Rate: {stats['completion_rate']}%\n")
 
-        print(f"✅ Completed: {stats['by_status']['completed']} ({stats['percentages']['completed']}%)")
-        print(f"🔄 In Progress: {stats['by_status']['in_progress']} ({stats['percentages']['in_progress']}%)")
-        print(f"⏸️  Not Started: {stats['by_status']['not_started']} ({stats['percentages']['not_started']}%)")
-        print(f"⛔ Blocked: {stats['by_status']['blocked']} ({stats['percentages']['blocked']}%)")
+        print(
+            f"✅ Completed: {stats['by_status']['completed']} ({stats['percentages']['completed']}%)"
+        )
+        print(
+            f"🔄 In Progress: {stats['by_status']['in_progress']} ({stats['percentages']['in_progress']}%)"
+        )
+        print(
+            f"⏸️  Not Started: {stats['by_status']['not_started']} ({stats['percentages']['not_started']}%)"
+        )
+        print(
+            f"⛔ Blocked: {stats['by_status']['blocked']} ({stats['percentages']['blocked']}%)"
+        )
         print()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

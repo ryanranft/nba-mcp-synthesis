@@ -13,16 +13,13 @@ import json
 from pathlib import Path
 from collections import defaultdict
 
+
 def analyze_recommendation(rec_dir: Path) -> dict:
     """Analyze a single recommendation directory."""
     readme = rec_dir / "README.md"
 
     if not readme.exists():
-        return {
-            "name": rec_dir.name,
-            "target": "no_readme",
-            "confidence": "none"
-        }
+        return {"name": rec_dir.name, "target": "no_readme", "confidence": "none"}
 
     content = readme.read_text().lower()
 
@@ -36,7 +33,7 @@ def analyze_recommendation(rec_dir: Path) -> dict:
         "player performance",
         "nba analytics",
         "betting",
-        "odds"
+        "odds",
     ]
 
     mcp_keywords = [
@@ -46,7 +43,7 @@ def analyze_recommendation(rec_dir: Path) -> dict:
         "book analysis",
         "recommendation generation",
         "workflow",
-        "convergence"
+        "convergence",
     ]
 
     # Count mentions
@@ -79,8 +76,9 @@ def analyze_recommendation(rec_dir: Path) -> dict:
         "target": target,
         "confidence": confidence,
         "simulator_score": simulator_score,
-        "mcp_score": mcp_score
+        "mcp_score": mcp_score,
     }
+
 
 def main():
     """Main audit function."""
@@ -146,12 +144,16 @@ def main():
 
     # Save detailed results
     output_file = Path("RECOMMENDATION_AUDIT_RESULTS.json")
-    with open(output_file, 'w') as f:
-        json.dump({
-            "total": len(results),
-            "by_target": {k: len(v) for k, v in by_target.items()},
-            "details": results
-        }, f, indent=2)
+    with open(output_file, "w") as f:
+        json.dump(
+            {
+                "total": len(results),
+                "by_target": {k: len(v) for k, v in by_target.items()},
+                "details": results,
+            },
+            f,
+            indent=2,
+        )
 
     print(f"📄 Detailed results saved to: {output_file}")
     print()
@@ -168,15 +170,12 @@ def main():
         print("   Next step: Generate MCP-specific recommendations from books")
         print("   about ML systems, software engineering, MLOps, etc.")
     else:
-        print(f"✅ Found {len(by_target['nba-mcp-synthesis'])} MCP-specific recommendations")
+        print(
+            f"✅ Found {len(by_target['nba-mcp-synthesis'])} MCP-specific recommendations"
+        )
 
     print("=" * 70)
 
+
 if __name__ == "__main__":
     main()
-
-
-
-
-
-

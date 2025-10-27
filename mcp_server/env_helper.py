@@ -247,4 +247,3 @@ if __name__ == "__main__":
         print(f"  Missing required variables: {missing}")
     else:
         print("  All required variables are present")
-

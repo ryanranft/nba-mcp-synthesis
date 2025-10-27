@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class GeminiV2Response:
     """Response from Gemini 1.5 Pro API"""
+
     content: str
     tokens_input: int
     tokens_output: int
@@ -99,8 +100,7 @@ class GoogleModelV2:
             }
 
             self.model = genai.GenerativeModel(
-                model_name=self.model_name,
-                safety_settings=safety_settings
+                model_name=self.model_name, safety_settings=safety_settings
             )
 
             logger.info(f"✅ Gemini 1.5 Pro {self.model_name} initialized")
@@ -110,7 +110,10 @@ class GoogleModelV2:
             raise
 
     async def analyze_book_content(
-        self, book_content: str, book_metadata: Dict[str, Any], project_context: Optional[Dict] = None
+        self,
+        book_content: str,
+        book_metadata: Dict[str, Any],
+        project_context: Optional[Dict] = None,
     ) -> Dict[str, Any]:
         """
         Analyze book content using Gemini 1.5 Pro with full context
@@ -127,7 +130,9 @@ class GoogleModelV2:
 
         try:
             # Create analysis prompt optimized for Gemini's capabilities
-            prompt = self._create_book_analysis_prompt(book_content, book_metadata, project_context)
+            prompt = self._create_book_analysis_prompt(
+                book_content, book_metadata, project_context
+            )
 
             # Estimate input tokens
             input_tokens = self._estimate_tokens(prompt)
@@ -140,7 +145,11 @@ class GoogleModelV2:
 
             # Determine pricing tier
             pricing_tier = "low" if input_tokens < self.low_tier_threshold else "high"
-            logger.info(f"💰 Pricing tier: {pricing_tier} (<128k)" if pricing_tier == "low" else f"💰 Pricing tier: {pricing_tier} (>128k)")
+            logger.info(
+                f"💰 Pricing tier: {pricing_tier} (<128k)"
+                if pricing_tier == "low"
+                else f"💰 Pricing tier: {pricing_tier} (>128k)"
+            )
 
             # Generate response
             response = await self._generate_response(prompt)
@@ -186,7 +195,10 @@ class GoogleModelV2:
             }
 
     def _create_book_analysis_prompt(
-        self, book_content: str, book_metadata: Dict[str, Any], project_context: Optional[Dict] = None
+        self,
+        book_content: str,
+        book_metadata: Dict[str, Any],
+        project_context: Optional[Dict] = None,
     ) -> str:
         """Create optimized prompt for Gemini 1.5 Pro book analysis with project awareness"""
 
@@ -196,24 +208,24 @@ class GoogleModelV2:
         # Build project context section if available
         project_section = ""
         if project_context:
-            project_info = project_context.get('project_info', {})
-            project_name = project_info.get('name', 'NBA Analytics System')
-            project_sport = project_info.get('sport', 'basketball')
-            project_goals = project_info.get('goals', [])
-            project_phase = project_info.get('phase', 'Unknown')
-            project_tech = project_info.get('technologies', [])
+            project_info = project_context.get("project_info", {})
+            project_name = project_info.get("name", "NBA Analytics System")
+            project_sport = project_info.get("sport", "basketball")
+            project_goals = project_info.get("goals", [])
+            project_phase = project_info.get("phase", "Unknown")
+            project_tech = project_info.get("technologies", [])
 
             # Get file tree
-            file_tree = project_context.get('file_tree', '')
+            file_tree = project_context.get("file_tree", "")
 
             # Get recent work
-            recent_commits = project_context.get('recent_commits', [])[:5]
+            recent_commits = project_context.get("recent_commits", [])[:5]
 
             # Get completion status
-            completion = project_context.get('completion_status', {})
+            completion = project_context.get("completion_status", {})
 
             # Get sampled files (limited to avoid token explosion)
-            sampled_files = project_context.get('sampled_files', {})
+            sampled_files = project_context.get("sampled_files", {})
 
             project_section = f"""
 ## 🎯 PROJECT CONTEXT: {project_name}
@@ -361,16 +373,16 @@ Begin your comprehensive analysis now:"""
     async def _generate_response(self, prompt: str):
         """Generate response from Gemini 1.5 Pro"""
         loop = asyncio.get_event_loop()
-        response = await loop.run_in_executor(
-            None, self.model.generate_content, prompt
-        )
+        response = await loop.run_in_executor(None, self.model.generate_content, prompt)
         return response
 
     def _estimate_tokens(self, text: str) -> int:
         """Estimate token count (roughly 4 chars per token)"""
         return len(text) // 4
 
-    def _calculate_cost(self, input_tokens: int, output_tokens: int, pricing_tier: str) -> float:
+    def _calculate_cost(
+        self, input_tokens: int, output_tokens: int, pricing_tier: str
+    ) -> float:
         """Calculate cost based on pricing tier"""
         if pricing_tier == "low":
             input_cost = (input_tokens / 1_000_000) * self.low_tier_input_cost
@@ -389,13 +401,14 @@ Begin your comprehensive analysis now:"""
             json_end = response_text.rfind("```")
 
             if json_start != -1 and json_end != -1 and json_end > json_start:
-                json_str = response_text[json_start + len("```json"):json_end].strip()
+                json_str = response_text[json_start + len("```json") : json_end].strip()
                 recommendations = json.loads(json_str)
                 return recommendations if isinstance(recommendations, list) else []
             else:
                 # Try to find raw JSON array
                 import re
-                json_match = re.search(r'\[.*\]', response_text, re.DOTALL)
+
+                json_match = re.search(r"\[.*\]", response_text, re.DOTALL)
                 if json_match:
                     recommendations = json.loads(json_match.group(0))
                     return recommendations if isinstance(recommendations, list) else []
@@ -409,4 +422,3 @@ Begin your comprehensive analysis now:"""
         except Exception as e:
             logger.error(f"Error extracting recommendations: {e}")
             return []
-

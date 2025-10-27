@@ -30,6 +30,9 @@ from unittest.mock import patch, MagicMock
 # Add parent directory to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+# Import hierarchical env helpers
+from mcp_server.env_helper import get_database_config, get_api_key
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -39,6 +42,7 @@ logger = logging.getLogger(__name__)
 # Test Suite
 # ==============================================================================
 
+
 class Phase1FoundationTestSuite(unittest.TestCase):
     """Test suite for Phase 1: Foundation Infrastructure"""
 
@@ -47,15 +51,15 @@ class Phase1FoundationTestSuite(unittest.TestCase):
         logger.info("Testing environment variables validation...")
 
         required_vars = [
-            'RDS_HOST',
-            'RDS_DATABASE',
-            'RDS_USERNAME',
-            'RDS_PASSWORD',
-            'S3_BUCKET',
-            'AWS_ACCESS_KEY_ID',
-            'AWS_SECRET_ACCESS_KEY',
-            'DEEPSEEK_API_KEY',
-            'ANTHROPIC_API_KEY'
+            "RDS_HOST",
+            "RDS_DATABASE",
+            "RDS_USERNAME",
+            "RDS_PASSWORD",
+            "S3_BUCKET",
+            "AWS_ACCESS_KEY_ID",
+            "AWS_SECRET_ACCESS_KEY",
+            "DEEPSEEK_API_KEY",
+            "ANTHROPIC_API_KEY",
         ]
 
         missing_vars = []
@@ -72,7 +76,9 @@ class Phase1FoundationTestSuite(unittest.TestCase):
 
         logger.info("✓ Environment variables validation test passed")
 
-    @unittest.skipIf(not os.getenv('AWS_ACCESS_KEY_ID'), "AWS credentials not configured")
+    @unittest.skipIf(
+        not os.getenv("AWS_ACCESS_KEY_ID"), "AWS credentials not configured"
+    )
     def test_02_s3_bucket_accessibility(self):
         """Test: Verify S3 bucket is accessible"""
         logger.info("Testing S3 bucket accessibility...")
@@ -81,23 +87,20 @@ class Phase1FoundationTestSuite(unittest.TestCase):
             import boto3
             from botocore.exceptions import ClientError
 
-            s3_client = boto3.client('s3')
-            bucket_name = os.getenv('S3_BUCKET', 'test-bucket')
+            s3_client = boto3.client("s3")
+            bucket_name = os.getenv("S3_BUCKET", "test-bucket")
 
             try:
                 # List objects (limit to 1 to minimize cost)
-                response = s3_client.list_objects_v2(
-                    Bucket=bucket_name,
-                    MaxKeys=1
-                )
+                response = s3_client.list_objects_v2(Bucket=bucket_name, MaxKeys=1)
 
-                self.assertIn('ResponseMetadata', response)
-                self.assertEqual(response['ResponseMetadata']['HTTPStatusCode'], 200)
+                self.assertIn("ResponseMetadata", response)
+                self.assertEqual(response["ResponseMetadata"]["HTTPStatusCode"], 200)
 
                 logger.info(f"✅ S3 bucket '{bucket_name}' is accessible")
 
             except ClientError as e:
-                if e.response['Error']['Code'] == 'NoSuchBucket':
+                if e.response["Error"]["Code"] == "NoSuchBucket":
                     logger.warning(f"S3 bucket '{bucket_name}' does not exist")
                 else:
                     logger.warning(f"S3 access error: {e}")
@@ -107,7 +110,9 @@ class Phase1FoundationTestSuite(unittest.TestCase):
 
         logger.info("✓ S3 bucket accessibility test passed")
 
-    @unittest.skipIf(not os.getenv('RDS_HOST'), "Database credentials not configured")
+    @unittest.skipIf(
+        not get_database_config("RDS_HOST"), "Database credentials not configured"
+    )
     def test_03_database_connection(self):
         """Test: Verify database connection"""
         logger.info("Testing database connection...")
@@ -119,23 +124,25 @@ class Phase1FoundationTestSuite(unittest.TestCase):
             async def test_connection():
                 try:
                     conn = await asyncpg.connect(
-                        host=os.getenv('RDS_HOST'),
-                        database=os.getenv('RDS_DATABASE'),
-                        user=os.getenv('RDS_USERNAME'),
-                        password=os.getenv('RDS_PASSWORD'),
-                        timeout=10
+                        host=get_database_config("RDS_HOST"),
+                        database=get_database_config("RDS_DATABASE"),
+                        user=get_database_config("RDS_USERNAME"),
+                        password=get_database_config("RDS_PASSWORD"),
+                        timeout=10,
                     )
 
                     # Execute simple query
-                    result = await conn.fetchval('SELECT 1')
+                    result = await conn.fetchval("SELECT 1")
                     self.assertEqual(result, 1)
 
                     # Check if tables exist
-                    tables = await conn.fetch("""
+                    tables = await conn.fetch(
+                        """
                         SELECT table_name
                         FROM information_schema.tables
                         WHERE table_schema = 'public'
-                    """)
+                    """
+                    )
 
                     logger.info(f"✅ Database connected - found {len(tables)} tables")
 
@@ -158,7 +165,7 @@ class Phase1FoundationTestSuite(unittest.TestCase):
         config_paths = [
             Path("mcp_server/config.yaml"),
             Path("mcp_server/config.json"),
-            Path("config/mcp_config.yaml")
+            Path("config/mcp_config.yaml"),
         ]
 
         config_file = None
@@ -173,9 +180,10 @@ class Phase1FoundationTestSuite(unittest.TestCase):
             return
 
         # Load config
-        if config_file.suffix == '.yaml':
+        if config_file.suffix == ".yaml":
             try:
                 import yaml
+
                 with open(config_file) as f:
                     config = yaml.safe_load(f)
                 logger.info(f"✅ MCP configuration loaded from {config_file}")
@@ -183,6 +191,7 @@ class Phase1FoundationTestSuite(unittest.TestCase):
                 self.skipTest("yaml module not available")
         else:
             import json
+
             with open(config_file) as f:
                 config = json.load(f)
 
@@ -191,7 +200,9 @@ class Phase1FoundationTestSuite(unittest.TestCase):
 
         logger.info("✓ MCP server configuration test passed")
 
-    @unittest.skipIf(not os.getenv('AWS_ACCESS_KEY_ID'), "AWS credentials not configured")
+    @unittest.skipIf(
+        not os.getenv("AWS_ACCESS_KEY_ID"), "AWS credentials not configured"
+    )
     def test_05_aws_credentials_verification(self):
         """Test: Verify AWS credentials are valid"""
         logger.info("Testing AWS credentials verification...")
@@ -200,16 +211,18 @@ class Phase1FoundationTestSuite(unittest.TestCase):
             import boto3
             from botocore.exceptions import ClientError
 
-            sts_client = boto3.client('sts')
+            sts_client = boto3.client("sts")
 
             try:
                 # Get caller identity
                 response = sts_client.get_caller_identity()
 
-                self.assertIn('Account', response)
-                self.assertIn('Arn', response)
+                self.assertIn("Account", response)
+                self.assertIn("Arn", response)
 
-                logger.info(f"✅ AWS credentials valid - Account: {response['Account']}")
+                logger.info(
+                    f"✅ AWS credentials valid - Account: {response['Account']}"
+                )
 
             except ClientError as e:
                 logger.warning(f"AWS credentials invalid: {e}")
@@ -238,16 +251,19 @@ class Phase1FoundationTestSuite(unittest.TestCase):
             sys.path.insert(0, str(secrets_loader_path.parent))
             try:
                 import secrets_loader
-                self.assertTrue(hasattr(secrets_loader, 'init_secrets'))
+
+                self.assertTrue(hasattr(secrets_loader, "init_secrets"))
                 logger.info("✅ Secrets loader module available")
             except ImportError as e:
                 logger.warning(f"Failed to import secrets_loader: {e}")
         else:
-            logger.info("secrets_loader.py not found (may use different secrets management)")
+            logger.info(
+                "secrets_loader.py not found (may use different secrets management)"
+            )
 
         logger.info("✓ Secrets management setup test passed")
 
-    @unittest.skipIf(os.getenv('SKIP_NETWORK_TESTS') == '1', "Network tests disabled")
+    @unittest.skipIf(os.getenv("SKIP_NETWORK_TESTS") == "1", "Network tests disabled")
     def test_07_network_connectivity(self):
         """Test: Verify network connectivity to required services"""
         logger.info("Testing network connectivity...")
@@ -256,10 +272,10 @@ class Phase1FoundationTestSuite(unittest.TestCase):
             import requests
 
             endpoints = {
-                'DeepSeek': 'https://api.deepseek.com',
-                'Anthropic': 'https://api.anthropic.com',
-                'GitHub': 'https://api.github.com',
-                'AWS S3': 'https://s3.amazonaws.com'
+                "DeepSeek": "https://api.deepseek.com",
+                "Anthropic": "https://api.anthropic.com",
+                "GitHub": "https://api.github.com",
+                "AWS S3": "https://s3.amazonaws.com",
             }
 
             results = {}
@@ -267,14 +283,18 @@ class Phase1FoundationTestSuite(unittest.TestCase):
                 try:
                     response = requests.head(url, timeout=5)
                     results[name] = response.status_code < 500
-                    logger.info(f"✅ {name}: accessible (status {response.status_code})")
+                    logger.info(
+                        f"✅ {name}: accessible (status {response.status_code})"
+                    )
                 except Exception as e:
                     results[name] = False
                     logger.warning(f"⚠️  {name}: not accessible ({e})")
 
             # At least some endpoints should be accessible
             accessible_count = sum(1 for v in results.values() if v)
-            self.assertGreaterEqual(accessible_count, 2, f"Only {accessible_count} endpoints accessible")
+            self.assertGreaterEqual(
+                accessible_count, 2, f"Only {accessible_count} endpoints accessible"
+            )
 
         except ImportError:
             self.skipTest("requests module not available")
@@ -289,25 +309,26 @@ class Phase1FoundationTestSuite(unittest.TestCase):
             Path("mcp_server"),
             Path("synthesis"),
             Path("scripts"),
-            Path("tests")
+            Path("tests"),
         ]
 
-        optional_dirs = [
-            Path("docs"),
-            Path("deployment"),
-            Path("config")
-        ]
+        optional_dirs = [Path("docs"), Path("deployment"), Path("config")]
 
         missing_required = []
         for dir_path in required_dirs:
             if not dir_path.exists() or not dir_path.is_dir():
                 missing_required.append(str(dir_path))
 
-        self.assertEqual(len(missing_required), 0,
-                        f"Missing required directories: {missing_required}")
+        self.assertEqual(
+            len(missing_required),
+            0,
+            f"Missing required directories: {missing_required}",
+        )
 
         existing_optional = [str(d) for d in optional_dirs if d.exists()]
-        logger.info(f"✅ Directory structure valid - Optional dirs: {existing_optional}")
+        logger.info(
+            f"✅ Directory structure valid - Optional dirs: {existing_optional}"
+        )
 
         logger.info("✓ Project directory structure test passed")
 
@@ -316,24 +337,24 @@ class Phase1FoundationTestSuite(unittest.TestCase):
         logger.info("Testing Python dependencies...")
 
         required_packages = [
-            'pytest',
-            'pytest_asyncio',
-            'boto3',
-            'asyncpg',
-            'yaml',
-            'dotenv',
-            'pathlib'
+            "pytest",
+            "pytest_asyncio",
+            "boto3",
+            "asyncpg",
+            "yaml",
+            "dotenv",
+            "pathlib",
         ]
 
         missing_packages = []
         for package in required_packages:
             try:
-                if package == 'pytest_asyncio':
-                    __import__('pytest_asyncio')
-                elif package == 'yaml':
-                    __import__('yaml')
-                elif package == 'dotenv':
-                    __import__('dotenv')
+                if package == "pytest_asyncio":
+                    __import__("pytest_asyncio")
+                elif package == "yaml":
+                    __import__("yaml")
+                elif package == "dotenv":
+                    __import__("dotenv")
                 else:
                     __import__(package)
             except ImportError:
@@ -344,8 +365,11 @@ class Phase1FoundationTestSuite(unittest.TestCase):
 
         # Should have most packages installed
         installed_count = len(required_packages) - len(missing_packages)
-        self.assertGreaterEqual(installed_count, len(required_packages) * 0.7,
-                               f"Only {installed_count}/{len(required_packages)} packages installed")
+        self.assertGreaterEqual(
+            installed_count,
+            len(required_packages) * 0.7,
+            f"Only {installed_count}/{len(required_packages)} packages installed",
+        )
 
         logger.info("✓ Python dependencies test passed")
 
@@ -354,19 +378,19 @@ class Phase1FoundationTestSuite(unittest.TestCase):
         logger.info("Testing infrastructure health check...")
 
         health_status = {
-            'environment_vars': False,
-            'database': False,
-            's3': False,
-            'apis': False,
-            'configuration': False
+            "environment_vars": False,
+            "database": False,
+            "s3": False,
+            "apis": False,
+            "configuration": False,
         }
 
         # Check environment vars
-        required_vars = ['RDS_HOST', 'S3_BUCKET', 'DEEPSEEK_API_KEY']
-        health_status['environment_vars'] = all(os.getenv(var) for var in required_vars)
+        required_vars = ["RDS_HOST", "S3_BUCKET", "DEEPSEEK_API_KEY"]
+        health_status["environment_vars"] = all(os.getenv(var) for var in required_vars)
 
         # Check database (if configured)
-        if os.getenv('RDS_HOST'):
+        if get_database_config("RDS_HOST"):
             try:
                 import asyncpg
                 import asyncio
@@ -374,37 +398,38 @@ class Phase1FoundationTestSuite(unittest.TestCase):
                 async def test_db():
                     try:
                         conn = await asyncpg.connect(
-                            host=os.getenv('RDS_HOST'),
-                            database=os.getenv('RDS_DATABASE'),
-                            user=os.getenv('RDS_USERNAME'),
-                            password=os.getenv('RDS_PASSWORD'),
-                            timeout=5
+                            host=get_database_config("RDS_HOST"),
+                            database=get_database_config("RDS_DATABASE"),
+                            user=get_database_config("RDS_USERNAME"),
+                            password=get_database_config("RDS_PASSWORD"),
+                            timeout=5,
                         )
-                        await conn.fetchval('SELECT 1')
+                        await conn.fetchval("SELECT 1")
                         await conn.close()
                         return True
                     except:
                         return False
 
-                health_status['database'] = asyncio.run(test_db())
+                health_status["database"] = asyncio.run(test_db())
             except:
                 pass
 
         # Check S3 (if configured)
-        if os.getenv('AWS_ACCESS_KEY_ID'):
+        if os.getenv("AWS_ACCESS_KEY_ID"):
             try:
                 import boto3
-                s3 = boto3.client('s3')
-                s3.list_objects_v2(Bucket=os.getenv('S3_BUCKET', 'test'), MaxKeys=1)
-                health_status['s3'] = True
+
+                s3 = boto3.client("s3")
+                s3.list_objects_v2(Bucket=os.getenv("S3_BUCKET", "test"), MaxKeys=1)
+                health_status["s3"] = True
             except:
                 pass
 
         # Check configuration
-        health_status['configuration'] = (
-            Path("mcp_server/config.yaml").exists() or
-            Path("mcp_server/config.json").exists() or
-            Path("mcp_server/config.py").exists()
+        health_status["configuration"] = (
+            Path("mcp_server/config.yaml").exists()
+            or Path("mcp_server/config.json").exists()
+            or Path("mcp_server/config.py").exists()
         )
 
         # Generate health report
@@ -419,11 +444,16 @@ class Phase1FoundationTestSuite(unittest.TestCase):
 
         # Determine expected health based on environment
         # In test environments without real credentials, we expect lower health
-        has_real_credentials = all([
-            os.getenv('RDS_HOST') and not os.getenv('RDS_HOST').startswith('localhost'),
-            os.getenv('AWS_ACCESS_KEY_ID') and not os.getenv('AWS_ACCESS_KEY_ID').startswith('test'),
-            os.getenv('DEEPSEEK_API_KEY') and not os.getenv('DEEPSEEK_API_KEY').startswith('test')
-        ])
+        rds_host = get_database_config("RDS_HOST")
+        deepseek_key = get_api_key("DEEPSEEK")
+        has_real_credentials = all(
+            [
+                rds_host and not rds_host.startswith("localhost"),
+                os.getenv("AWS_ACCESS_KEY_ID")
+                and not os.getenv("AWS_ACCESS_KEY_ID").startswith("test"),
+                deepseek_key and not deepseek_key.startswith("test"),
+            ]
+        )
 
         if has_real_credentials:
             # Production environment - expect at least 60% health
@@ -434,8 +464,11 @@ class Phase1FoundationTestSuite(unittest.TestCase):
             min_health = 20
             logger.info("🧪 Test environment detected - expecting 20%+ health")
 
-        self.assertGreaterEqual(health_percentage, min_health,
-                               f"Infrastructure health too low: {health_percentage:.1f}% (expected {min_health}%+)")
+        self.assertGreaterEqual(
+            health_percentage,
+            min_health,
+            f"Infrastructure health too low: {health_percentage:.1f}% (expected {min_health}%+)",
+        )
 
         logger.info("✓ Infrastructure health check test passed")
 
@@ -473,10 +506,14 @@ def main():
     logger.info(f"Success Rate: {success_rate:.1f}%")
 
     if result.wasSuccessful():
-        logger.info("\n🎉 ALL TESTS PASSED! Phase 1 infrastructure is properly configured.")
+        logger.info(
+            "\n🎉 ALL TESTS PASSED! Phase 1 infrastructure is properly configured."
+        )
         return True
     else:
-        logger.info(f"\n⚠️  {failed_tests + error_tests} tests failed. Review infrastructure setup.")
+        logger.info(
+            f"\n⚠️  {failed_tests + error_tests} tests failed. Review infrastructure setup."
+        )
         return False
 
 

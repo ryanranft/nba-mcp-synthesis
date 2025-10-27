@@ -1,0 +1,131 @@
+{
+  "pipeline_id": "player_stats_20251025_223351",
+  "dataset_name": "player_stats",
+  "start_time": "2025-10-25T22:33:51.944916",
+  "end_time": "2025-10-25T22:33:51.973054",
+  "current_stage": "completed",
+  "passed": true,
+  "duration_seconds": 0.028138,
+  "issues": [
+    {
+      "stage": "quality_check",
+      "severity": "warning",
+      "message": "Column 'player_id' has 5.10% null values (threshold: 5.00%)",
+      "field": "player_id",
+      "row_count": null,
+      "details": {
+        "null_percentage": 0.05096,
+        "null_count": 2548
+      }
+    },
+    {
+      "stage": "quality_check",
+      "severity": "warning",
+      "message": "Column 'team_id' has 5.04% null values (threshold: 5.00%)",
+      "field": "team_id",
+      "row_count": null,
+      "details": {
+        "null_percentage": 0.05044,
+        "null_count": 2522
+      }
+    },
+    {
+      "stage": "quality_check",
+      "severity": "warning",
+      "message": "Column 'games_played' has 5.01% null values (threshold: 5.00%)",
+      "field": "games_played",
+      "row_count": null,
+      "details": {
+        "null_percentage": 0.0501,
+        "null_count": 2505
+      }
+    },
+    {
+      "stage": "quality_check",
+      "severity": "warning",
+      "message": "Column 'field_goals_made' has 5.05% null values (threshold: 5.00%)",
+      "field": "field_goals_made",
+      "row_count": null,
+      "details": {
+        "null_percentage": 0.05048,
+        "null_count": 2524
+      }
+    },
+    {
+      "stage": "quality_check",
+      "severity": "warning",
+      "message": "Column 'field_goals_attempted' has 5.04% null values (threshold: 5.00%)",
+      "field": "field_goals_attempted",
+      "row_count": null,
+      "details": {
+        "null_percentage": 0.05036,
+        "null_count": 2518
+      }
+    },
+    {
+      "stage": "quality_check",
+      "severity": "warning",
+      "message": "Column 'three_pointers_made' has 5.13% null values (threshold: 5.00%)",
+      "field": "three_pointers_made",
+      "row_count": null,
+      "details": {
+        "null_percentage": 0.05126,
+        "null_count": 2563
+      }
+    },
+    {
+      "stage": "quality_check",
+      "severity": "warning",
+      "message": "Column 'free_throws_made' has 5.10% null values (threshold: 5.00%)",
+      "field": "free_throws_made",
+      "row_count": null,
+      "details": {
+        "null_percentage": 0.05098,
+        "null_count": 2549
+      }
+    }
+  ],
+  "metrics": {},
+  "data_summary": {
+    "row_count": 50000,
+    "column_count": 17,
+    "columns": [
+      "player_id",
+      "player_name",
+      "team_id",
+      "games_played",
+      "minutes_played",
+      "points",
+      "rebounds",
+      "assists",
+      "steals",
+      "blocks",
+      "turnovers",
+      "field_goals_made",
+      "field_goals_attempted",
+      "three_pointers_made",
+      "three_pointers_attempted",
+      "free_throws_made",
+      "free_throws_attempted"
+    ],
+    "dtypes": {
+      "player_id": "float64",
+      "player_name": "object",
+      "team_id": "float64",
+      "games_played": "float64",
+      "minutes_played": "float64",
+      "points": "float64",
+      "rebounds": "float64",
+      "assists": "float64",
+      "steals": "float64",
+      "blocks": "float64",
+      "turnovers": "float64",
+      "field_goals_made": "float64",
+      "field_goals_attempted": "float64",
+      "three_pointers_made": "float64",
+      "three_pointers_attempted": "float64",
+      "free_throws_made": "float64",
+      "free_throws_attempted": "float64"
+    }
+  }
+}

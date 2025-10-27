@@ -292,6 +292,36 @@ features:
   conflict_resolution: false
 
 # ============================================================================
+# PROJECT CONTEXT
+# ============================================================================
+# Enable AI to understand your specific codebase for tailored recommendations
+project_context:
+  enabled: true
+  
+  # Projects to scan for context
+  scan_projects:
+    - path: "/Users/ryanranft/nba-mcp-synthesis"
+      name: "nba-mcp-synthesis"
+      include_readme: true
+      scan_depth: 2  # Directory depth for file discovery
+    
+    - path: "/Users/ryanranft/nba-simulator-aws"
+      name: "nba-simulator-aws"
+      include_readme: true
+      scan_depth: 2
+  
+  # Specific context files to include
+  context_files:
+    - "README.md"
+    - "docs/ARCHITECTURE.md"
+    - "docs/plans/detailed/INTEGRATION_PLAN_AUTOMATION_FEATURES.md"
+  
+  # Context extraction settings
+  max_context_size: 500000  # Max chars of context to include
+  include_file_tree: true
+  include_recent_commits: false  # Git history context (expensive)
+
+# ============================================================================
 # VALIDATION
 # ============================================================================
 # Schema validation is performed by scripts/config_validator.py (Tier 1)

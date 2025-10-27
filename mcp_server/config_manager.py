@@ -185,18 +185,25 @@ class ConfigManager:
 
     def _load_env_variables(self):
         """Load configuration from environment variables"""
+        from mcp_server.env_helper import get_database_config
+
         # Database
-        if os.getenv("DB_HOST"):
+        db_host = get_database_config("DB_HOST")
+        if db_host:
             self.config.setdefault("database", {})
-            self.config["database"]["host"] = os.getenv("DB_HOST")
-        if os.getenv("DB_PORT"):
-            self.config["database"]["port"] = int(os.getenv("DB_PORT"))
-        if os.getenv("DB_NAME"):
-            self.config["database"]["database"] = os.getenv("DB_NAME")
-        if os.getenv("DB_USER"):
-            self.config["database"]["user"] = os.getenv("DB_USER")
-        if os.getenv("DB_PASSWORD"):
-            self.config["database"]["password"] = os.getenv("DB_PASSWORD")
+            self.config["database"]["host"] = db_host
+        db_port = get_database_config("DB_PORT")
+        if db_port:
+            self.config["database"]["port"] = int(db_port)
+        db_name = get_database_config("DB_NAME")
+        if db_name:
+            self.config["database"]["database"] = db_name
+        db_user = get_database_config("DB_USER")
+        if db_user:
+            self.config["database"]["user"] = db_user
+        db_password = get_database_config("DB_PASSWORD")
+        if db_password:
+            self.config["database"]["password"] = db_password
 
         # Cache
         if os.getenv("REDIS_HOST"):

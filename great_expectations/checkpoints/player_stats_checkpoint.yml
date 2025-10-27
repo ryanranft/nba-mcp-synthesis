@@ -1,0 +1,108 @@
+# Player Stats Validation Checkpoint
+# Automated validation for NBA player statistics data
+# Phase 10A Week 2 - Agent 4
+
+name: player_stats_checkpoint
+config_version: 1.0
+class_name: SimpleCheckpoint
+module_name: great_expectations.checkpoint
+
+# Template name for reusable configuration
+template_name: ~
+
+# Validation configuration
+validations:
+  - batch_request:
+      datasource_name: nba_postgres
+      data_connector_name: default_inferred_data_connector_name
+      data_asset_name: player_stats
+      data_connector_query:
+        index: -1
+    expectation_suite_name: player_stats_suite
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+      - name: store_evaluation_params
+        action:
+          class_name: StoreEvaluationParametersAction
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
+          site_names: []
+
+# Runtime configuration
+runtime_configuration:
+  result_format:
+    result_format: COMPLETE
+    include_unexpected_rows: true
+    unexpected_index_column_names:
+      - player_id
+    return_unexpected_index_query: true
+
+# Evaluation parameters
+evaluation_parameters:
+  # Dynamic date for temporal checks
+  validation_date: "$validation_date"
+  # Minimum acceptable quality score
+  min_quality_score: 0.90
+  # Alert threshold for failed expectations
+  alert_threshold: 0.15
+
+# Action list for checkpoint execution
+action_list:
+  # Store validation results
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
+
+  # Update data docs site
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+      site_names:
+        - local_site
+
+  # Send notification on validation failure
+  - name: send_notification_on_validation_result
+    action:
+      class_name: SlackNotificationAction
+      slack_webhook: "${SLACK_WEBHOOK_URL}"
+      notify_on: failure
+      notify_with:
+        - local_site
+      renderer:
+        module_name: great_expectations.render.renderer.slack_renderer
+        class_name: SlackRenderer
+
+# Metadata
+meta:
+  created_by: NBA MCP Synthesis - Phase 10A Week 2 Agent 4
+  created_at: "2025-10-25"
+  description: |
+    Automated validation checkpoint for NBA player statistics.
+
+    Validates:
+    - Player data completeness (player_id, player_name required)
+    - Statistical ranges (ppg: 0-50, rpg: 0-20, apg: 0-15)
+    - Percentage validity (fg_pct, 3p_pct, ft_pct: 0-1)
+    - Data type consistency
+    - Null value constraints
+    - Statistical distributions
+
+    Triggers:
+    - Scheduled: Daily at 2 AM UTC
+    - On-demand: Via CI/CD pipeline
+    - Manual: Via ge_integration.py module
+
+    Notifications:
+    - Slack on validation failure
+    - Email on critical failures (>15% failed expectations)
+    - Data docs update always
+
+  version: "1.0"
+  tags:
+    - player_stats
+    - nba
+    - daily_validation
+    - automated

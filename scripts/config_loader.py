@@ -46,114 +46,114 @@ class ConfigLoader:
 
     # Default configuration (fallback if file missing)
     DEFAULT_CONFIG = {
-        'workflow': {
-            'mode': 'B',
-            'auto_implement': False,
-            'prediction_enhancements': False,
-            'test_book_limit': 1,
-            'default_dry_run': False
+        "workflow": {
+            "mode": "B",
+            "auto_implement": False,
+            "prediction_enhancements": False,
+            "test_book_limit": 1,
+            "default_dry_run": False,
         },
-        'cost_limits': {
-            'phase_2_analysis': 30.00,
-            'phase_3_synthesis': 20.00,
-            'phase_3_5_modifications': 15.00,
-            'phase_5_predictions': 10.00,
-            'total_workflow': 75.00,
-            'approval_threshold': 10.00
+        "cost_limits": {
+            "phase_2_analysis": 30.00,
+            "phase_3_synthesis": 20.00,
+            "phase_3_5_modifications": 15.00,
+            "phase_5_predictions": 10.00,
+            "total_workflow": 75.00,
+            "approval_threshold": 10.00,
         },
-        'models': {
-            'gemini': {
-                'model_name': 'gemini-2.0-flash-exp',
-                'temperature': 0.3,
-                'max_tokens': 250000,
-                'timeout_seconds': 180
+        "models": {
+            "gemini": {
+                "model_name": "gemini-2.0-flash-exp",
+                "temperature": 0.3,
+                "max_tokens": 250000,
+                "timeout_seconds": 180,
             },
-            'claude': {
-                'model_name': 'claude-sonnet-4',
-                'temperature': 0.3,
-                'max_tokens': 200000,
-                'timeout_seconds': 180
+            "claude": {
+                "model_name": "claude-sonnet-4",
+                "temperature": 0.3,
+                "max_tokens": 200000,
+                "timeout_seconds": 180,
             },
-            'gpt4': {
-                'model_name': 'gpt-4-turbo',
-                'temperature': 0.3,
-                'max_tokens': 128000,
-                'timeout_seconds': 180
-            }
+            "gpt4": {
+                "model_name": "gpt-4-turbo",
+                "temperature": 0.3,
+                "max_tokens": 128000,
+                "timeout_seconds": 180,
+            },
         },
-        'phases': {
-            'phase_2': {
-                'use_high_context': True,
-                'max_chars_per_book': 1000000,
-                'max_tokens_per_book': 250000,
-                'min_recommendations': 10,
-                'max_recommendations': 60,
-                'convergence_threshold': 0.85,
-                'max_iterations': 3
+        "phases": {
+            "phase_2": {
+                "use_high_context": True,
+                "max_chars_per_book": 1000000,
+                "max_tokens_per_book": 250000,
+                "min_recommendations": 10,
+                "max_recommendations": 60,
+                "convergence_threshold": 0.85,
+                "max_iterations": 3,
             },
-            'phase_3': {
-                'similarity_threshold': 0.80,
-                'min_confidence': 0.70,
-                'synthesis_models': 'claude,gpt4'
+            "phase_3": {
+                "similarity_threshold": 0.80,
+                "min_confidence": 0.70,
+                "synthesis_models": "claude,gpt4",
             },
-            'phase_4': {
-                'output_dir': 'implementation_plans',
-                'generate_tests': True,
-                'generate_sql': True,
-                'tier_1_file_count': 6,
-                'tier_2_file_count': 3
+            "phase_4": {
+                "output_dir": "implementation_plans",
+                "generate_tests": True,
+                "generate_sql": True,
+                "tier_1_file_count": 6,
+                "tier_2_file_count": 3,
             },
-            'phase_8_5': {
-                'syntax_check': True,
-                'test_discovery': True,
-                'import_check': True,
-                'sql_validation': True,
-                'run_tests': False,
-                'fail_on_error': False
-            }
+            "phase_8_5": {
+                "syntax_check": True,
+                "test_discovery": True,
+                "import_check": True,
+                "sql_validation": True,
+                "run_tests": False,
+                "fail_on_error": False,
+            },
         },
-        'safety': {
-            'rollback': {
-                'enabled': True,
-                'backup_before_phase': True,
-                'backup_retention_days': 7
+        "safety": {
+            "rollback": {
+                "enabled": True,
+                "backup_before_phase": True,
+                "backup_retention_days": 7,
             },
-            'error_recovery': {
-                'enabled': True,
-                'max_retries': 3,
-                'api_timeout_backoff': 2,
-                'rate_limit_backoff': 60,
-                'network_error_backoff': 5
+            "error_recovery": {
+                "enabled": True,
+                "max_retries": 3,
+                "api_timeout_backoff": 2,
+                "rate_limit_backoff": 60,
+                "network_error_backoff": 5,
             },
-            'cost_tracking': {
-                'enabled': True,
-                'save_reports': True,
-                'report_dir': 'cost_tracker'
-            }
+            "cost_tracking": {
+                "enabled": True,
+                "save_reports": True,
+                "report_dir": "cost_tracker",
+            },
         },
-        'logging': {
-            'level': 'INFO',
-            'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            'file_logging': True,
-            'log_dir': 'logs',
-            'separate_phase_logs': True
+        "logging": {
+            "level": "INFO",
+            "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            "file_logging": True,
+            "log_dir": "logs",
+            "separate_phase_logs": True,
         },
-        'paths': {
-            'mcp_synthesis': '/Users/ryanranft/nba-mcp-synthesis',
-            'simulator_aws': '/Users/ryanranft/nba-simulator-aws',
-            'analysis_results': 'analysis_results',
-            'implementation_plans': 'implementation_plans',
-            'books_s3_bucket': 'nba-mcp-books',
-            'books_s3_prefix': 'books/',
-            'backups_dir': 'backups'
+        "paths": {
+            "mcp_synthesis": "/Users/ryanranft/nba-mcp-synthesis",
+            "simulator_aws": "/Users/ryanranft/nba-simulator-aws",
+            "analysis_results": "analysis_results",
+            "implementation_plans": "implementation_plans",
+            "books_s3_bucket": "nba-mcp-books",
+            "books_s3_prefix": "books/",
+            "backups_dir": "backups",
         },
-        'features': {
-            'intelligent_plan_editor': False,
-            'smart_integrator': False,
-            'prediction_analyzer': False,
-            'status_tracking': False,
-            'conflict_resolution': False
-        }
+        "features": {
+            "intelligent_plan_editor": False,
+            "smart_integrator": False,
+            "prediction_analyzer": False,
+            "status_tracking": False,
+            "conflict_resolution": False,
+        },
     }
 
     def __init__(self, config_path: Optional[Path] = None):
@@ -181,11 +181,13 @@ class ConfigLoader:
             Configuration dictionary
         """
         if not self.config_path.exists():
-            logger.warning(f"Config file not found at {self.config_path}, using defaults")
+            logger.warning(
+                f"Config file not found at {self.config_path}, using defaults"
+            )
             return self.DEFAULT_CONFIG.copy()
 
         try:
-            with open(self.config_path, 'r') as f:
+            with open(self.config_path, "r") as f:
                 config = yaml.safe_load(f)
 
             if not config:
@@ -217,7 +219,11 @@ class ConfigLoader:
         result = base.copy()
 
         for key, value in override.items():
-            if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+            if (
+                key in result
+                and isinstance(result[key], dict)
+                and isinstance(value, dict)
+            ):
                 result[key] = self._deep_merge(result[key], value)
             else:
                 result[key] = value
@@ -250,13 +256,13 @@ class ConfigLoader:
                 return default
 
         # Check for environment variable override
-        env_var = '_'.join(['NBA_MCP'] + [k.upper() for k in keys])
+        env_var = "_".join(["NBA_MCP"] + [k.upper() for k in keys])
         env_value = os.getenv(env_var)
 
         if env_value is not None:
             # Try to convert to appropriate type
             if isinstance(value, bool):
-                return env_value.lower() in ('true', '1', 'yes')
+                return env_value.lower() in ("true", "1", "yes")
             elif isinstance(value, int):
                 try:
                     return int(env_value)
@@ -281,7 +287,7 @@ class ConfigLoader:
         Returns:
             Cost limit in USD
         """
-        return self.get('cost_limits', phase, default=0.0)
+        return self.get("cost_limits", phase, default=0.0)
 
     def get_model_config(self, model: str, key: str) -> Any:
         """
@@ -294,7 +300,7 @@ class ConfigLoader:
         Returns:
             Configuration value
         """
-        return self.get('models', model, key)
+        return self.get("models", model, key)
 
     def get_phase_config(self, phase: str, key: str) -> Any:
         """
@@ -307,7 +313,7 @@ class ConfigLoader:
         Returns:
             Configuration value
         """
-        return self.get('phases', phase, key)
+        return self.get("phases", phase, key)
 
     def is_feature_enabled(self, feature: str) -> bool:
         """
@@ -319,7 +325,7 @@ class ConfigLoader:
         Returns:
             True if enabled
         """
-        return self.get('features', feature, default=False)
+        return self.get("features", feature, default=False)
 
     def get_workflow_mode(self) -> str:
         """
@@ -328,7 +334,7 @@ class ConfigLoader:
         Returns:
             Workflow mode
         """
-        return self.get('workflow', 'mode', default='B')
+        return self.get("workflow", "mode", default="B")
 
     def is_dry_run_default(self) -> bool:
         """
@@ -337,7 +343,7 @@ class ConfigLoader:
         Returns:
             True if dry-run is default
         """
-        return self.get('workflow', 'default_dry_run', default=False)
+        return self.get("workflow", "default_dry_run", default=False)
 
     def get_safety_config(self, category: str, key: str) -> Any:
         """
@@ -350,7 +356,7 @@ class ConfigLoader:
         Returns:
             Configuration value
         """
-        return self.get('safety', category, key)
+        return self.get("safety", category, key)
 
     def get_path(self, path_key: str) -> Path:
         """
@@ -362,7 +368,7 @@ class ConfigLoader:
         Returns:
             Path object
         """
-        path_str = self.get('paths', path_key, default='.')
+        path_str = self.get("paths", path_key, default=".")
         return Path(path_str)
 
 
@@ -421,27 +427,38 @@ if __name__ == "__main__":
 
     # Test model config
     logger.info(f"\nGemini model: {config.get_model_config('gemini', 'model_name')}")
-    logger.info(f"Gemini max tokens: {config.get_model_config('gemini', 'max_tokens'):,}")
+    logger.info(
+        f"Gemini max tokens: {config.get_model_config('gemini', 'max_tokens'):,}"
+    )
 
     # Test phase config
-    logger.info(f"\nPhase 2 high context: {config.get_phase_config('phase_2', 'use_high_context')}")
-    logger.info(f"Phase 2 max chars: {config.get_phase_config('phase_2', 'max_chars_per_book'):,}")
+    logger.info(
+        f"\nPhase 2 high context: {config.get_phase_config('phase_2', 'use_high_context')}"
+    )
+    logger.info(
+        f"Phase 2 max chars: {config.get_phase_config('phase_2', 'max_chars_per_book'):,}"
+    )
 
     # Test feature flags
-    logger.info(f"\nIntelligent plan editor: {config.is_feature_enabled('intelligent_plan_editor')}")
+    logger.info(
+        f"\nIntelligent plan editor: {config.is_feature_enabled('intelligent_plan_editor')}"
+    )
     logger.info(f"Smart integrator: {config.is_feature_enabled('smart_integrator')}")
 
     # Test safety config
-    logger.info(f"\nRollback enabled: {config.get_safety_config('rollback', 'enabled')}")
-    logger.info(f"Max retries: {config.get_safety_config('error_recovery', 'max_retries')}")
+    logger.info(
+        f"\nRollback enabled: {config.get_safety_config('rollback', 'enabled')}"
+    )
+    logger.info(
+        f"Max retries: {config.get_safety_config('error_recovery', 'max_retries')}"
+    )
 
     # Test paths
     logger.info(f"\nProject root: {config.get_path('mcp_synthesis')}")
     logger.info(f"Implementation plans: {config.get_path('implementation_plans')}")
 
     # Test environment variable override
-    os.environ['NBA_MCP_WORKFLOW_MODE'] = 'A'
+    os.environ["NBA_MCP_WORKFLOW_MODE"] = "A"
     logger.info(f"\n(With env override) Workflow mode: {config.get_workflow_mode()}")
 
     logger.info("\n--- ConfigLoader testing complete ---")
-

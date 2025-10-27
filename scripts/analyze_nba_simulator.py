@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ModuleInfo:
     """Information about a module in nba-simulator-aws."""
+
     path: str
     name: str
     purpose: str
@@ -36,6 +37,7 @@ class ModuleInfo:
 @dataclass
 class SimulatorAnalysis:
     """Complete analysis of nba-simulator-aws structure."""
+
     project_root: str
     total_modules: int
     total_lines: int
@@ -86,14 +88,14 @@ class NBASimulatorAnalyzer:
 
         # Known integration categories
         self.categories = [
-            'data_ingestion',
-            'feature_engineering',
-            'modeling',
-            'prediction',
-            'evaluation',
-            'api',
-            'database',
-            'utilities'
+            "data_ingestion",
+            "feature_engineering",
+            "modeling",
+            "prediction",
+            "evaluation",
+            "api",
+            "database",
+            "utilities",
         ]
 
     def analyze(self) -> SimulatorAnalysis:
@@ -130,7 +132,7 @@ class NBASimulatorAnalyzer:
             modules=modules,
             integration_map=integration_map,
             gaps=gaps,
-            recommendations=recommendations
+            recommendations=recommendations,
         )
 
         logger.info(f"Analysis complete: {len(modules)} modules, {total_lines} lines")
@@ -157,11 +159,11 @@ class NBASimulatorAnalyzer:
     def _analyze_module(self, file_path: Path) -> Optional[ModuleInfo]:
         """Analyze a single Python module."""
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path, "r") as f:
                 content = f.read()
 
             # Count lines
-            lines = len(content.split('\n'))
+            lines = len(content.split("\n"))
 
             # Extract module name
             name = file_path.stem
@@ -185,7 +187,7 @@ class NBASimulatorAnalyzer:
                 dependencies=dependencies,
                 key_functions=functions[:10],  # Top 10 functions
                 lines_of_code=lines,
-                integration_points=integration_points
+                integration_points=integration_points,
             )
 
         except Exception as e:
@@ -203,21 +205,21 @@ class NBASimulatorAnalyzer:
     def _extract_imports(self, content: str) -> List[str]:
         """Extract import statements."""
         imports = []
-        for line in content.split('\n'):
+        for line in content.split("\n"):
             line = line.strip()
-            if line.startswith('import ') or line.startswith('from '):
+            if line.startswith("import ") or line.startswith("from "):
                 # Extract module name
                 parts = line.split()
                 if len(parts) >= 2:
-                    imports.append(parts[1].split('.')[0])
+                    imports.append(parts[1].split(".")[0])
         return list(set(imports))[:20]  # Limit to 20 unique imports
 
     def _extract_functions(self, content: str) -> List[str]:
         """Extract function names."""
         functions = []
-        for match in re.finditer(r'^\s*def\s+(\w+)\s*\(', content, re.MULTILINE):
+        for match in re.finditer(r"^\s*def\s+(\w+)\s*\(", content, re.MULTILINE):
             func_name = match.group(1)
-            if not func_name.startswith('_'):  # Public functions only
+            if not func_name.startswith("_"):  # Public functions only
                 functions.append(func_name)
         return functions
 
@@ -226,24 +228,23 @@ class NBASimulatorAnalyzer:
         points = []
 
         # Check for common patterns
-        if 'pandas' in content.lower():
-            points.append('data_processing')
-        if 'sklearn' in content.lower() or 'model' in content.lower():
-            points.append('machine_learning')
-        if 'predict' in content.lower():
-            points.append('prediction')
-        if 'database' in content.lower() or 'sql' in content.lower():
-            points.append('database')
-        if 'api' in module_name.lower() or 'endpoint' in content.lower():
-            points.append('api')
-        if 'feature' in content.lower():
-            points.append('feature_engineering')
+        if "pandas" in content.lower():
+            points.append("data_processing")
+        if "sklearn" in content.lower() or "model" in content.lower():
+            points.append("machine_learning")
+        if "predict" in content.lower():
+            points.append("prediction")
+        if "database" in content.lower() or "sql" in content.lower():
+            points.append("database")
+        if "api" in module_name.lower() or "endpoint" in content.lower():
+            points.append("api")
+        if "feature" in content.lower():
+            points.append("feature_engineering")
 
         return points
 
     def _build_integration_map(
-        self,
-        modules: Dict[str, ModuleInfo]
+        self, modules: Dict[str, ModuleInfo]
     ) -> Dict[str, List[str]]:
         """Build map of categories to modules."""
         integration_map = {category: [] for category in self.categories}
@@ -256,9 +257,7 @@ class NBASimulatorAnalyzer:
         return integration_map
 
     def _identify_gaps(
-        self,
-        modules: Dict[str, ModuleInfo],
-        integration_map: Dict[str, List[str]]
+        self, modules: Dict[str, ModuleInfo], integration_map: Dict[str, List[str]]
     ) -> List[Dict[str, str]]:
         """Identify gaps in current implementation."""
         gaps = []
@@ -266,24 +265,30 @@ class NBASimulatorAnalyzer:
         # Check for missing categories
         for category in self.categories:
             if not integration_map[category]:
-                gaps.append({
-                    'category': category,
-                    'severity': 'high',
-                    'description': f"No modules found for {category}"
-                })
+                gaps.append(
+                    {
+                        "category": category,
+                        "severity": "high",
+                        "description": f"No modules found for {category}",
+                    }
+                )
 
         return gaps
 
-    def _generate_recommendations(self, gaps: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    def _generate_recommendations(
+        self, gaps: List[Dict[str, str]]
+    ) -> List[Dict[str, str]]:
         """Generate integration recommendations."""
         recommendations = []
 
         for gap in gaps:
-            recommendations.append({
-                'gap': gap['category'],
-                'recommendation': f"Consider adding {gap['category']} module",
-                'priority': gap['severity']
-            })
+            recommendations.append(
+                {
+                    "gap": gap["category"],
+                    "recommendation": f"Consider adding {gap['category']} module",
+                    "priority": gap["severity"],
+                }
+            )
 
         return recommendations
 
@@ -292,58 +297,82 @@ class NBASimulatorAnalyzer:
         logger.info("Creating mock analysis...")
 
         mock_modules = {
-            'simulate_game': ModuleInfo(
-                path='scripts/simulate_game.py',
-                name='simulate_game',
-                purpose='Main game simulation logic',
-                dependencies=['pandas', 'numpy'],
-                key_functions=['run_simulation', 'calculate_stats'],
+            "simulate_game": ModuleInfo(
+                path="scripts/simulate_game.py",
+                name="simulate_game",
+                purpose="Main game simulation logic",
+                dependencies=["pandas", "numpy"],
+                key_functions=["run_simulation", "calculate_stats"],
                 lines_of_code=500,
-                integration_points=['prediction', 'machine_learning']
+                integration_points=["prediction", "machine_learning"],
             ),
-            'data_loader': ModuleInfo(
-                path='scripts/data_loader.py',
-                name='data_loader',
-                purpose='Load and preprocess NBA data',
-                dependencies=['pandas', 'sqlalchemy'],
-                key_functions=['load_data', 'clean_data'],
+            "data_loader": ModuleInfo(
+                path="scripts/data_loader.py",
+                name="data_loader",
+                purpose="Load and preprocess NBA data",
+                dependencies=["pandas", "sqlalchemy"],
+                key_functions=["load_data", "clean_data"],
                 lines_of_code=300,
-                integration_points=['data_processing', 'database']
+                integration_points=["data_processing", "database"],
             ),
-            'feature_builder': ModuleInfo(
-                path='scripts/feature_builder.py',
-                name='feature_builder',
-                purpose='Build features for ML models',
-                dependencies=['pandas', 'numpy', 'sklearn'],
-                key_functions=['create_features', 'select_features'],
+            "feature_builder": ModuleInfo(
+                path="scripts/feature_builder.py",
+                name="feature_builder",
+                purpose="Build features for ML models",
+                dependencies=["pandas", "numpy", "sklearn"],
+                key_functions=["create_features", "select_features"],
                 lines_of_code=400,
-                integration_points=['feature_engineering', 'machine_learning']
-            )
+                integration_points=["feature_engineering", "machine_learning"],
+            ),
         }
 
         integration_map = {
-            'data_processing': ['data_loader'],
-            'feature_engineering': ['feature_builder'],
-            'machine_learning': ['simulate_game', 'feature_builder'],
-            'prediction': ['simulate_game'],
-            'database': ['data_loader'],
-            'data_ingestion': [],
-            'modeling': [],
-            'evaluation': [],
-            'api': [],
-            'utilities': []
+            "data_processing": ["data_loader"],
+            "feature_engineering": ["feature_builder"],
+            "machine_learning": ["simulate_game", "feature_builder"],
+            "prediction": ["simulate_game"],
+            "database": ["data_loader"],
+            "data_ingestion": [],
+            "modeling": [],
+            "evaluation": [],
+            "api": [],
+            "utilities": [],
         }
 
         gaps = [
-            {'category': 'data_ingestion', 'severity': 'medium', 'description': 'No dedicated data ingestion module'},
-            {'category': 'evaluation', 'severity': 'high', 'description': 'No model evaluation framework'},
-            {'category': 'api', 'severity': 'low', 'description': 'No API endpoints defined'}
+            {
+                "category": "data_ingestion",
+                "severity": "medium",
+                "description": "No dedicated data ingestion module",
+            },
+            {
+                "category": "evaluation",
+                "severity": "high",
+                "description": "No model evaluation framework",
+            },
+            {
+                "category": "api",
+                "severity": "low",
+                "description": "No API endpoints defined",
+            },
         ]
 
         recommendations = [
-            {'gap': 'data_ingestion', 'recommendation': 'Add automated data ingestion pipeline', 'priority': 'medium'},
-            {'gap': 'evaluation', 'recommendation': 'Implement comprehensive evaluation metrics', 'priority': 'high'},
-            {'gap': 'api', 'recommendation': 'Create REST API for predictions', 'priority': 'low'}
+            {
+                "gap": "data_ingestion",
+                "recommendation": "Add automated data ingestion pipeline",
+                "priority": "medium",
+            },
+            {
+                "gap": "evaluation",
+                "recommendation": "Implement comprehensive evaluation metrics",
+                "priority": "high",
+            },
+            {
+                "gap": "api",
+                "recommendation": "Create REST API for predictions",
+                "priority": "low",
+            },
         ]
 
         return SimulatorAnalysis(
@@ -353,24 +382,26 @@ class NBASimulatorAnalyzer:
             modules=mock_modules,
             integration_map=integration_map,
             gaps=gaps,
-            recommendations=recommendations
+            recommendations=recommendations,
         )
 
     def save_analysis(self, analysis: SimulatorAnalysis, output_file: Path):
         """Save analysis to JSON file."""
         # Convert to dict
         data = {
-            'project_root': analysis.project_root,
-            'total_modules': analysis.total_modules,
-            'total_lines': analysis.total_lines,
-            'modules': {name: asdict(module) for name, module in analysis.modules.items()},
-            'integration_map': analysis.integration_map,
-            'gaps': analysis.gaps,
-            'recommendations': analysis.recommendations
+            "project_root": analysis.project_root,
+            "total_modules": analysis.total_modules,
+            "total_lines": analysis.total_lines,
+            "modules": {
+                name: asdict(module) for name, module in analysis.modules.items()
+            },
+            "integration_map": analysis.integration_map,
+            "gaps": analysis.gaps,
+            "recommendations": analysis.recommendations,
         }
 
         output_file.parent.mkdir(parents=True, exist_ok=True)
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(data, f, indent=2)
 
         logger.info(f"Analysis saved to {output_file}")
@@ -422,10 +453,3 @@ if __name__ == "__main__":
     print("=" * 70)
     print("Demo complete!")
     print("=" * 70)
-
-
-
-
-
-
-

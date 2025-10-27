@@ -21,8 +21,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -30,6 +29,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class DatabaseConfig:
     """Database configuration"""
+
     host: str
     port: int
     database: str
@@ -92,7 +92,7 @@ class DatabaseConnector:
                 database=self.config.database,
                 user=self.config.user,
                 password=self.config.password,
-                connect_timeout=self.config.connect_timeout
+                connect_timeout=self.config.connect_timeout,
             )
 
             # Test connection
@@ -120,7 +120,9 @@ class DatabaseConnector:
                 return False
 
         except ImportError:
-            logger.error("❌ psycopg2 not installed. Install with: pip install psycopg2-binary")
+            logger.error(
+                "❌ psycopg2 not installed. Install with: pip install psycopg2-binary"
+            )
             return False
 
         except Exception as e:
@@ -168,7 +170,7 @@ class DatabaseConnector:
         query: str,
         params: Optional[Tuple] = None,
         fetch_one: bool = False,
-        timeout: int = 30
+        timeout: int = 30,
     ) -> Optional[Any]:
         """
         Execute a SQL query with retry logic.
@@ -213,12 +215,16 @@ class DatabaseConnector:
                 retries += 1
 
                 if retries < self.config.max_retries:
-                    wait_time = 2 ** retries  # Exponential backoff
-                    logger.warning(f"⚠️  Query failed (attempt {retries}/{self.config.max_retries}): {e}")
+                    wait_time = 2**retries  # Exponential backoff
+                    logger.warning(
+                        f"⚠️  Query failed (attempt {retries}/{self.config.max_retries}): {e}"
+                    )
                     logger.warning(f"   Retrying in {wait_time}s...")
                     time.sleep(wait_time)
                 else:
-                    logger.error(f"❌ Query failed after {self.config.max_retries} attempts: {e}")
+                    logger.error(
+                        f"❌ Query failed after {self.config.max_retries} attempts: {e}"
+                    )
 
         return None
 
@@ -250,17 +256,17 @@ class DatabaseConnector:
             Dictionary with table statistics
         """
         stats = {
-            'table_name': table_name,
-            'row_count': None,
-            'size_bytes': None,
-            'size_mb': None,
-            'last_updated': None,
+            "table_name": table_name,
+            "row_count": None,
+            "size_bytes": None,
+            "size_mb": None,
+            "last_updated": None,
         }
 
         # Row count
         row_count = self.get_table_row_count(table_name)
         if row_count is not None:
-            stats['row_count'] = row_count
+            stats["row_count"] = row_count
 
         # Table size
         size_query = f"""
@@ -271,9 +277,9 @@ class DatabaseConnector:
         size_result = self.execute_query(size_query, fetch_one=True)
 
         if size_result:
-            stats['size_bytes'] = size_result[0]
-            stats['size_mb'] = round(size_result[0] / 1_000_000, 2)
-            stats['size_pretty'] = size_result[1]
+            stats["size_bytes"] = size_result[0]
+            stats["size_mb"] = round(size_result[0] / 1_000_000, 2)
+            stats["size_pretty"] = size_result[1]
 
         # Last modification time (if possible)
         try:
@@ -288,7 +294,7 @@ class DatabaseConnector:
             # This query might not work on all setups, so we'll catch errors
             last_update_result = self.execute_query(last_update_query, fetch_one=True)
             if last_update_result and last_update_result[0]:
-                stats['last_updated'] = last_update_result[0]
+                stats["last_updated"] = last_update_result[0]
         except:
             pass  # Not critical if this fails
 
@@ -306,13 +312,13 @@ class DatabaseConnector:
             Dictionary with column statistics
         """
         stats = {
-            'table': table_name,
-            'column': column_name,
-            'null_count': None,
-            'null_percentage': None,
-            'distinct_count': None,
-            'min_value': None,
-            'max_value': None,
+            "table": table_name,
+            "column": column_name,
+            "null_count": None,
+            "null_percentage": None,
+            "distinct_count": None,
+            "min_value": None,
+            "max_value": None,
         }
 
         # Check column type first
@@ -330,7 +336,7 @@ class DatabaseConnector:
             return stats
 
         data_type = type_result[0]
-        stats['data_type'] = data_type
+        stats["data_type"] = data_type
 
         # Null counts
         null_query = f"""
@@ -344,18 +350,29 @@ class DatabaseConnector:
 
         if null_result:
             total, non_null, null_count = null_result
-            stats['null_count'] = null_count
-            stats['null_percentage'] = round((null_count / total * 100) if total > 0 else 0, 2)
+            stats["null_count"] = null_count
+            stats["null_percentage"] = round(
+                (null_count / total * 100) if total > 0 else 0, 2
+            )
 
         # Distinct count
         distinct_query = f"SELECT COUNT(DISTINCT {column_name}) FROM {table_name}"
         distinct_result = self.execute_query(distinct_query, fetch_one=True)
 
         if distinct_result:
-            stats['distinct_count'] = distinct_result[0]
+            stats["distinct_count"] = distinct_result[0]
 
         # Min/Max for numeric and date columns
-        if data_type in ['integer', 'bigint', 'numeric', 'real', 'double precision', 'date', 'timestamp', 'timestamp without time zone']:
+        if data_type in [
+            "integer",
+            "bigint",
+            "numeric",
+            "real",
+            "double precision",
+            "date",
+            "timestamp",
+            "timestamp without time zone",
+        ]:
             minmax_query = f"""
                 SELECT
                     MIN({column_name})::text AS min_val,
@@ -365,12 +382,14 @@ class DatabaseConnector:
             minmax_result = self.execute_query(minmax_query, fetch_one=True)
 
             if minmax_result:
-                stats['min_value'] = minmax_result[0]
-                stats['max_value'] = minmax_result[1]
+                stats["min_value"] = minmax_result[0]
+                stats["max_value"] = minmax_result[1]
 
         return stats
 
-    def get_date_range(self, table_name: str, date_column: str) -> Optional[Dict[str, str]]:
+    def get_date_range(
+        self, table_name: str, date_column: str
+    ) -> Optional[Dict[str, str]]:
         """
         Get date range for a table.
 
@@ -393,10 +412,10 @@ class DatabaseConnector:
 
         if result:
             return {
-                'min_date': result[0],
-                'max_date': result[1],
-                'unique_dates': result[2],
-                'date_column': date_column
+                "min_date": result[0],
+                "max_date": result[1],
+                "unique_dates": result[2],
+                "date_column": date_column,
             }
 
         return None
@@ -434,11 +453,15 @@ def create_db_connector_from_env() -> Optional[DatabaseConnector]:
     from mcp_server.env_helper import get_hierarchical_env
 
     host = get_hierarchical_env("DB_HOST", "NBA_MCP_SYNTHESIS", "WORKFLOW")
-    port = int(get_hierarchical_env("DB_PORT", "NBA_MCP_SYNTHESIS", "WORKFLOW") or "5432")
+    port = int(
+        get_hierarchical_env("DB_PORT", "NBA_MCP_SYNTHESIS", "WORKFLOW") or "5432"
+    )
     database = get_hierarchical_env("DB_NAME", "NBA_MCP_SYNTHESIS", "WORKFLOW")
     user = get_hierarchical_env("DB_USER", "NBA_MCP_SYNTHESIS", "WORKFLOW")
     password = get_hierarchical_env("DB_PASSWORD", "NBA_MCP_SYNTHESIS", "WORKFLOW")
-    schema = get_hierarchical_env("DB_SCHEMA", "NBA_MCP_SYNTHESIS", "WORKFLOW") or "public"
+    schema = (
+        get_hierarchical_env("DB_SCHEMA", "NBA_MCP_SYNTHESIS", "WORKFLOW") or "public"
+    )
 
     if not all([host, database, user, password]):
         logger.warning("⚠️  Database credentials not found in environment variables")
@@ -452,7 +475,7 @@ def create_db_connector_from_env() -> Optional[DatabaseConnector]:
         user=user,
         password=password,
         schema=schema,
-        read_only=True  # Safety: read-only by default
+        read_only=True,  # Safety: read-only by default
     )
 
     connector = DatabaseConnector(config)
@@ -472,14 +495,14 @@ def main():
     """CLI for testing database connection"""
     import argparse
 
-    parser = argparse.ArgumentParser(description='Test database connection')
-    parser.add_argument('--host', help='Database host')
-    parser.add_argument('--port', type=int, default=5432, help='Database port')
-    parser.add_argument('--database', help='Database name')
-    parser.add_argument('--user', help='Database user')
-    parser.add_argument('--password', help='Database password')
-    parser.add_argument('--schema', default='public', help='Database schema')
-    parser.add_argument('--table', help='Test table statistics')
+    parser = argparse.ArgumentParser(description="Test database connection")
+    parser.add_argument("--host", help="Database host")
+    parser.add_argument("--port", type=int, default=5432, help="Database port")
+    parser.add_argument("--database", help="Database name")
+    parser.add_argument("--user", help="Database user")
+    parser.add_argument("--password", help="Database password")
+    parser.add_argument("--schema", default="public", help="Database schema")
+    parser.add_argument("--table", help="Test table statistics")
     args = parser.parse_args()
 
     # Try environment variables first
@@ -493,7 +516,7 @@ def main():
             database=args.database,
             user=args.user,
             password=args.password,
-            schema=args.schema
+            schema=args.schema,
         )
         connector = DatabaseConnector(config)
         connector.connect()
@@ -511,7 +534,7 @@ def main():
     # If table specified, get stats
     if args.table:
         print(f"\n📊 Statistics for table: {args.table}")
-        print("="*60)
+        print("=" * 60)
 
         stats = connector.get_table_stats(args.table)
         print(f"Row count: {stats.get('row_count', 'N/A'):,}")
@@ -522,5 +545,5 @@ def main():
     connector.disconnect()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

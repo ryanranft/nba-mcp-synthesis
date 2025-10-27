@@ -46,10 +46,7 @@ class ClaudeModel:
         logger.info(f"Initialized Claude model: {self.model}")
 
     async def analyze_book(
-        self,
-        book_content: str,
-        book_title: str,
-        book_metadata: Dict[str, Any]
+        self, book_content: str, book_title: str, book_metadata: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
         Analyze book content and extract recommendations.
@@ -92,7 +89,7 @@ Return ONLY the JSON array, no additional text."""
                 model=self.model,
                 max_tokens=4096,
                 temperature=0.7,
-                messages=[{"role": "user", "content": prompt}]
+                messages=[{"role": "user", "content": prompt}],
             )
 
             content = response.content[0].text
@@ -100,7 +97,8 @@ Return ONLY the JSON array, no additional text."""
             # Extract JSON recommendations
             try:
                 import re
-                json_match = re.search(r'\[.*\]', content, re.DOTALL)
+
+                json_match = re.search(r"\[.*\]", content, re.DOTALL)
                 if json_match:
                     recommendations = json.loads(json_match.group(0))
                 else:
@@ -115,7 +113,9 @@ Return ONLY the JSON array, no additional text."""
 
             processing_time = (datetime.now() - start_time).total_seconds()
 
-            logger.info(f"✅ Claude analyzed {book_title}: {len(recommendations)} recommendations")
+            logger.info(
+                f"✅ Claude analyzed {book_title}: {len(recommendations)} recommendations"
+            )
 
             return {
                 "success": True,
@@ -123,7 +123,7 @@ Return ONLY the JSON array, no additional text."""
                 "cost": cost,
                 "input_tokens": input_tokens,
                 "output_tokens": output_tokens,
-                "processing_time": processing_time
+                "processing_time": processing_time,
             }
 
         except Exception as e:
@@ -133,7 +133,7 @@ Return ONLY the JSON array, no additional text."""
                 "error": str(e),
                 "recommendations": [],
                 "cost": 0.0,
-                "input_tokens": 0
+                "input_tokens": 0,
             }
 
     async def synthesize(

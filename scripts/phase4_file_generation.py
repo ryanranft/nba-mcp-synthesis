@@ -36,6 +36,7 @@ from datetime import datetime
 
 # Add parent directory to path for imports
 import sys
+
 sys.path.insert(0, str(Path(__file__).parent))
 
 from cost_safety_manager import CostSafetyManager
@@ -64,8 +65,10 @@ class Phase4FileGenerationBasic:
 
     def __init__(
         self,
-        input_file: Path = Path("implementation_plans/consolidated_recommendations.json"),
-        output_dir: Path = Path("implementation_plans")
+        input_file: Path = Path(
+            "implementation_plans/consolidated_recommendations.json"
+        ),
+        output_dir: Path = Path("implementation_plans"),
     ):
         """
         Initialize Phase 4 file generation.
@@ -89,9 +92,10 @@ class Phase4FileGenerationBasic:
     def _sanitize_filename(self, text: str) -> str:
         """Convert text to safe filename."""
         import re
+
         # Remove special characters, convert spaces to underscores
-        safe = re.sub(r'[^\w\s-]', '', text.lower())
-        safe = re.sub(r'[-\s]+', '_', safe)
+        safe = re.sub(r"[^\w\s-]", "", text.lower())
+        safe = re.sub(r"[-\s]+", "_", safe)
         return safe[:50]  # Limit length
 
     def _generate_readme(self, rec: Dict, rec_dir: Path) -> str:
@@ -198,7 +202,11 @@ This implementation should be used when:
 
     def _generate_implementation_placeholder(self, rec: Dict) -> str:
         """Generate placeholder implementation.py file."""
-        class_name = self._sanitize_filename(rec.get('title', 'implementation')).title().replace('_', '')
+        class_name = (
+            self._sanitize_filename(rec.get("title", "implementation"))
+            .title()
+            .replace("_", "")
+        )
 
         code = f"""#!/usr/bin/env python3
 \"\"\"
@@ -407,9 +415,9 @@ python scripts/rollback_manager.py --restore [backup_id]
         Returns:
             Generation summary
         """
-        logger.info("\n" + "="*60)
+        logger.info("\n" + "=" * 60)
         logger.info("PHASE 4: FILE GENERATION")
-        logger.info("="*60 + "\n")
+        logger.info("=" * 60 + "\n")
 
         if dry_run:
             logger.info("🔍 DRY RUN MODE - Previewing file generation\n")
@@ -418,18 +426,18 @@ python scripts/rollback_manager.py --restore [backup_id]
         if not self.input_file.exists():
             logger.error(f"❌ Input file not found: {self.input_file}")
             logger.error("   Run Phase 3 (phase3_consolidation_and_synthesis.py) first")
-            return {'error': 'Input file not found'}
+            return {"error": "Input file not found"}
 
         logger.info(f"📂 Loading recommendations from: {self.input_file}")
-        with open(self.input_file, 'r') as f:
+        with open(self.input_file, "r") as f:
             data = json.load(f)
 
-        recommendations = data.get('recommendations', [])
+        recommendations = data.get("recommendations", [])
         logger.info(f"   Found {len(recommendations)} recommendations\n")
 
         if len(recommendations) == 0:
             logger.error("❌ No recommendations to process")
-            return {'error': 'No recommendations found'}
+            return {"error": "No recommendations found"}
 
         # Note: Backup is handled by orchestrator, not here
 
@@ -437,7 +445,7 @@ python scripts/rollback_manager.py --restore [backup_id]
         files_created = []
 
         for i, rec in enumerate(recommendations, 1):
-            rec_title = rec.get('title', f'rec_{i}')
+            rec_title = rec.get("title", f"rec_{i}")
             rec_dir_name = f"rec_{i:03d}_{self._sanitize_filename(rec_title)}"
             rec_dir = self.output_dir / "recommendations" / rec_dir_name
 
@@ -445,7 +453,9 @@ python scripts/rollback_manager.py --restore [backup_id]
 
             if dry_run:
                 logger.info(f"   Would create: {rec_dir}/")
-                logger.info(f"   Files: README.md, implementation.py, INTEGRATION_GUIDE.md")
+                logger.info(
+                    f"   Files: README.md, implementation.py, INTEGRATION_GUIDE.md"
+                )
                 continue
 
             # Create directory
@@ -461,32 +471,36 @@ python scripts/rollback_manager.py --restore [backup_id]
             guide_file = rec_dir / "INTEGRATION_GUIDE.md"
             guide_file.write_text(self._generate_integration_guide(rec))
 
-            files_created.append({
-                'recommendation': rec_title,
-                'directory': str(rec_dir),
-                'files': ['README.md', 'implementation.py', 'INTEGRATION_GUIDE.md']
-            })
+            files_created.append(
+                {
+                    "recommendation": rec_title,
+                    "directory": str(rec_dir),
+                    "files": ["README.md", "implementation.py", "INTEGRATION_GUIDE.md"],
+                }
+            )
 
             logger.info(f"   ✅ Created: {rec_dir}/")
 
         if dry_run:
             logger.info("\n⚠️  No files will be created (dry run)")
-            logger.info(f"\nWould create {len(recommendations)} recommendation directories")
+            logger.info(
+                f"\nWould create {len(recommendations)} recommendation directories"
+            )
             logger.info(f"Total files: {len(recommendations) * 3}")
-            return {'dry_run': True, 'recommendations': len(recommendations)}
+            return {"dry_run": True, "recommendations": len(recommendations)}
 
         # Generate summary
         summary = {
-            'phase': 'phase_4_file_generation',
-            'tier': 0,
-            'timestamp': datetime.now().isoformat(),
-            'recommendations_processed': len(recommendations),
-            'files_created': files_created,
-            'total_files': len(files_created) * 3
+            "phase": "phase_4_file_generation",
+            "tier": 0,
+            "timestamp": datetime.now().isoformat(),
+            "recommendations_processed": len(recommendations),
+            "files_created": files_created,
+            "total_files": len(files_created) * 3,
         }
 
         summary_file = self.output_dir / "PHASE4_SUMMARY.json"
-        with open(summary_file, 'w') as f:
+        with open(summary_file, "w") as f:
             json.dump(summary, f, indent=2)
 
         logger.info(f"\n✅ Phase 4 complete!")
@@ -507,32 +521,31 @@ async def main():
         "--input",
         type=Path,
         default=Path("implementation_plans/consolidated_recommendations.json"),
-        help="Input consolidated recommendations JSON"
+        help="Input consolidated recommendations JSON",
     )
     parser.add_argument(
         "--output-dir",
         type=Path,
         default=Path("implementation_plans"),
-        help="Output directory for generated files"
+        help="Output directory for generated files",
     )
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Preview file generation without creating files"
+        help="Preview file generation without creating files",
     )
 
     args = parser.parse_args()
 
     # Initialize Phase 4
     phase4 = Phase4FileGenerationBasic(
-        input_file=args.input,
-        output_dir=args.output_dir
+        input_file=args.input, output_dir=args.output_dir
     )
 
     # Generate files
     result = await phase4.generate_files(dry_run=args.dry_run)
 
-    if 'error' in result:
+    if "error" in result:
         logger.error("\n❌ Phase 4 failed")
         sys.exit(1)
     else:
@@ -543,10 +556,6 @@ async def main():
 if __name__ == "__main__":
     import asyncio
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(message)s'
-    )
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     asyncio.run(main())
-

@@ -59,3 +59,4 @@ pytest tests/test_google_sheets.py
 3. Set GOOGLE_SHEETS_CREDENTIALS_FILE path
 4. First run will open browser for OAuth authorization
 
+

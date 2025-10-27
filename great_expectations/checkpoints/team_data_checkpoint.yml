@@ -1,0 +1,128 @@
+# Team Data Validation Checkpoint
+# Automated validation for NBA team metadata
+# Phase 10A Week 2 - Agent 4
+
+name: team_data_checkpoint
+config_version: 1.0
+class_name: SimpleCheckpoint
+module_name: great_expectations.checkpoint
+
+# Template name for reusable configuration
+template_name: ~
+
+# Validation configuration
+validations:
+  - batch_request:
+      datasource_name: nba_postgres
+      data_connector_name: default_inferred_data_connector_name
+      data_asset_name: teams
+      data_connector_query:
+        index: -1
+    expectation_suite_name: team_data_suite
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+      - name: store_evaluation_params
+        action:
+          class_name: StoreEvaluationParametersAction
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
+          site_names: []
+
+# Runtime configuration
+runtime_configuration:
+  result_format:
+    result_format: COMPLETE
+    include_unexpected_rows: true
+    unexpected_index_column_names:
+      - team_id
+      - team_name
+    return_unexpected_index_query: true
+
+# Evaluation parameters
+evaluation_parameters:
+  # Dynamic parameters
+  validation_date: "$validation_date"
+  # NBA constants
+  expected_team_count: 30
+  valid_conferences:
+    - Eastern
+    - Western
+  valid_divisions:
+    - Atlantic
+    - Central
+    - Southeast
+    - Northwest
+    - Pacific
+    - Southwest
+  # Quality thresholds
+  min_quality_score: 0.95
+  alert_threshold: 0.05
+
+# Action list for checkpoint execution
+action_list:
+  # Store validation results
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
+
+  # Update data docs site
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+      site_names:
+        - local_site
+
+  # Send notification on validation result
+  - name: send_notification_on_validation_result
+    action:
+      class_name: SlackNotificationAction
+      slack_webhook: "${SLACK_WEBHOOK_URL}"
+      notify_on: failure
+      notify_with:
+        - local_site
+      renderer:
+        module_name: great_expectations.render.renderer.slack_renderer
+        class_name: SlackRenderer
+
+# Metadata
+meta:
+  created_by: NBA MCP Synthesis - Phase 10A Week 2 Agent 4
+  created_at: "2025-10-25"
+  description: |
+    Automated validation checkpoint for NBA team metadata.
+
+    Validates:
+    - Exactly 30 NBA teams
+    - Team metadata completeness (team_id, name, city, etc.)
+    - Valid conferences (Eastern, Western)
+    - Valid divisions (6 divisions)
+    - Record consistency (wins + losses = total_games)
+    - Unique team identifiers
+    - Unique city + name combinations
+    - Win percentage calculation accuracy
+
+    Triggers:
+    - Scheduled: Daily at 3 AM UTC
+    - On-demand: After roster/team updates
+    - Manual: Via ge_integration.py module
+
+    Notifications:
+    - Slack on any validation failure (team data is critical metadata)
+    - Data docs update always
+
+    Notes:
+    - Team data changes infrequently (expansions, relocations rare)
+    - High validation threshold (95%) due to static nature
+    - Any failures indicate serious data issues
+
+  version: "1.0"
+  tags:
+    - team_data
+    - nba
+    - metadata
+    - daily_validation
+    - critical
+    - automated

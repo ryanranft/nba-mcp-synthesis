@@ -19,8 +19,8 @@ from typing import List, Tuple
 
 def check_api_keys() -> Tuple[bool, str]:
     """Check if API keys are set."""
-    gemini_key = os.environ.get('GEMINI_API_KEY')
-    claude_key = os.environ.get('CLAUDE_API_KEY')
+    gemini_key = os.environ.get("GEMINI_API_KEY")
+    claude_key = os.environ.get("CLAUDE_API_KEY")
 
     if not gemini_key:
         return False, "GEMINI_API_KEY not set"
@@ -34,7 +34,7 @@ def check_disk_space() -> Tuple[bool, str]:
     """Check available disk space."""
     import shutil
 
-    stat = shutil.disk_usage('.')
+    stat = shutil.disk_usage(".")
     free_gb = stat.free / (1024**3)
 
     if free_gb < 10:
@@ -46,7 +46,7 @@ def check_disk_space() -> Tuple[bool, str]:
 def check_port(port: int = 8080) -> Tuple[bool, str]:
     """Check if port is available."""
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    result = sock.connect_ex(('localhost', port))
+    result = sock.connect_ex(("localhost", port))
     sock.close()
 
     if result == 0:
@@ -57,7 +57,7 @@ def check_port(port: int = 8080) -> Tuple[bool, str]:
 
 def check_config() -> Tuple[bool, str]:
     """Check workflow configuration."""
-    config_file = Path('config/workflow_config.yaml')
+    config_file = Path("config/workflow_config.yaml")
 
     if not config_file.exists():
         return False, "workflow_config.yaml not found"
@@ -67,11 +67,11 @@ def check_config() -> Tuple[bool, str]:
             config = yaml.safe_load(f)
 
         # Check critical settings
-        max_iter = config['phases']['phase_2']['convergence']['max_iterations']
+        max_iter = config["phases"]["phase_2"]["convergence"]["max_iterations"]
         if max_iter < 200:
             return False, f"max_iterations only {max_iter} (need 200)"
 
-        cost_limit = config['cost_limits']['total_workflow']
+        cost_limit = config["cost_limits"]["total_workflow"]
         if cost_limit < 300:
             return False, f"cost_limit only ${cost_limit} (need $300+)"
 
@@ -82,10 +82,7 @@ def check_config() -> Tuple[bool, str]:
 
 def check_scripts() -> Tuple[bool, str]:
     """Check launch scripts exist and are executable."""
-    scripts = [
-        'launch_overnight_convergence.sh',
-        'check_progress.sh'
-    ]
+    scripts = ["launch_overnight_convergence.sh", "check_progress.sh"]
 
     missing = []
     for script in scripts:
@@ -103,7 +100,7 @@ def check_scripts() -> Tuple[bool, str]:
 
 def check_baseline() -> Tuple[bool, str]:
     """Check if pre-convergence baseline exists."""
-    baseline_file = Path('analysis_results/pre_convergence_summary.json')
+    baseline_file = Path("analysis_results/pre_convergence_summary.json")
 
     if not baseline_file.exists():
         return False, "Pre-convergence baseline not created"
@@ -112,7 +109,7 @@ def check_baseline() -> Tuple[bool, str]:
         with open(baseline_file) as f:
             data = json.load(f)
 
-        books = data.get('total_books', 0)
+        books = data.get("total_books", 0)
         return True, f"Baseline captured ({books} books)"
     except Exception as e:
         return False, f"Baseline error: {e}"
@@ -120,7 +117,7 @@ def check_baseline() -> Tuple[bool, str]:
 
 def check_integration_tests() -> Tuple[bool, str]:
     """Check if integration tests pass."""
-    test_script = Path('scripts/test_tier3_integration.py')
+    test_script = Path("scripts/test_tier3_integration.py")
 
     if not test_script.exists():
         return False, "test_tier3_integration.py not found"
@@ -189,12 +186,5 @@ def main():
         return 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())
-
-
-
-
-
-
-

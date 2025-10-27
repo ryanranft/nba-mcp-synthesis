@@ -39,6 +39,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class RetryConfig:
     """Configuration for retry behavior."""
+
     retries: int
     backoff: float  # Initial backoff in seconds
     max_backoff: float = 300.0  # Max 5 minutes
@@ -65,19 +66,21 @@ class ErrorRecoveryManager:
     """
 
     RETRY_CONFIG = {
-        'api_timeout': RetryConfig(retries=3, backoff=2.0),
-        'rate_limit': RetryConfig(retries=5, backoff=60.0),
-        'json_decode': RetryConfig(retries=2, backoff=1.0),
-        'network_error': RetryConfig(retries=3, backoff=5.0),
-        'file_io_error': RetryConfig(retries=2, backoff=1.0),
-        'validation_error': RetryConfig(retries=1, backoff=2.0),
-        'database_error': RetryConfig(retries=3, backoff=2.0),
-        'auth_error': RetryConfig(retries=2, backoff=5.0),
+        "api_timeout": RetryConfig(retries=3, backoff=2.0),
+        "rate_limit": RetryConfig(retries=5, backoff=60.0),
+        "json_decode": RetryConfig(retries=2, backoff=1.0),
+        "network_error": RetryConfig(retries=3, backoff=5.0),
+        "file_io_error": RetryConfig(retries=2, backoff=1.0),
+        "validation_error": RetryConfig(retries=1, backoff=2.0),
+        "database_error": RetryConfig(retries=3, backoff=2.0),
+        "auth_error": RetryConfig(retries=2, backoff=5.0),
     }
 
     def __init__(self, error_log_path: Optional[Path] = None):
         """Initialize error recovery manager."""
-        self.error_log_path = error_log_path or Path("implementation_plans/error_log.json")
+        self.error_log_path = error_log_path or Path(
+            "implementation_plans/error_log.json"
+        )
         self.error_log_path.parent.mkdir(parents=True, exist_ok=True)
 
         self.errors = self._load_error_log()
@@ -91,14 +94,14 @@ class ErrorRecoveryManager:
             return json.loads(self.error_log_path.read_text())
         else:
             return {
-                'errors': [],
-                'created_at': datetime.now().isoformat(),
-                'last_updated': datetime.now().isoformat()
+                "errors": [],
+                "created_at": datetime.now().isoformat(),
+                "last_updated": datetime.now().isoformat(),
             }
 
     def _save_error_log(self):
         """Save error log to disk."""
-        self.errors['last_updated'] = datetime.now().isoformat()
+        self.errors["last_updated"] = datetime.now().isoformat()
         self.error_log_path.write_text(json.dumps(self.errors, indent=2))
 
     def _log_error(
@@ -107,20 +110,20 @@ class ErrorRecoveryManager:
         operation: str,
         attempt: int,
         error: Exception,
-        recovered: bool = False
+        recovered: bool = False,
     ):
         """Log error for analysis."""
         error_record = {
-            'timestamp': datetime.now().isoformat(),
-            'error_type': error_type,
-            'operation': operation,
-            'attempt': attempt,
-            'error_message': str(error),
-            'error_class': type(error).__name__,
-            'recovered': recovered
+            "timestamp": datetime.now().isoformat(),
+            "error_type": error_type,
+            "operation": operation,
+            "attempt": attempt,
+            "error_message": str(error),
+            "error_class": type(error).__name__,
+            "recovered": recovered,
         }
 
-        self.errors['errors'].append(error_record)
+        self.errors["errors"].append(error_record)
         self._save_error_log()
 
     async def execute_with_recovery(
@@ -129,7 +132,7 @@ class ErrorRecoveryManager:
         error_type: str,
         fallback: Optional[Callable] = None,
         operation_name: str = "",
-        **operation_kwargs
+        **operation_kwargs,
     ) -> Any:
         """
         Execute operation with automatic recovery.
@@ -147,10 +150,7 @@ class ErrorRecoveryManager:
         Raises:
             Exception if all retries fail and no fallback provided
         """
-        config = self.RETRY_CONFIG.get(
-            error_type,
-            RetryConfig(retries=2, backoff=2.0)
-        )
+        config = self.RETRY_CONFIG.get(error_type, RetryConfig(retries=2, backoff=2.0))
 
         operation_desc = operation_name or operation.__name__
 
@@ -168,7 +168,9 @@ class ErrorRecoveryManager:
 
                 if attempt > 0:
                     logger.info(f"✅ Recovered after {attempt} retries")
-                    self._log_error(error_type, operation_desc, attempt, None, recovered=True)
+                    self._log_error(
+                        error_type, operation_desc, attempt, None, recovered=True
+                    )
 
                 return result
 
@@ -179,13 +181,14 @@ class ErrorRecoveryManager:
                     # Calculate backoff
                     if config.exponential:
                         wait_time = min(
-                            config.backoff * (2 ** attempt),
-                            config.max_backoff
+                            config.backoff * (2**attempt), config.max_backoff
                         )
                     else:
                         wait_time = config.backoff
 
-                    logger.warning(f"⚠️  Attempt {attempt + 1}/{config.retries + 1} failed: {type(e).__name__}: {str(e)}")
+                    logger.warning(
+                        f"⚠️  Attempt {attempt + 1}/{config.retries + 1} failed: {type(e).__name__}: {str(e)}"
+                    )
                     logger.info(f"   Retrying in {wait_time:.1f}s...")
 
                     await asyncio.sleep(wait_time)
@@ -224,46 +227,51 @@ class ErrorRecoveryManager:
         error_msg = str(error).lower()
 
         # Timeout errors
-        if 'timeout' in error_name or 'timeout' in error_msg:
-            return 'api_timeout'
+        if "timeout" in error_name or "timeout" in error_msg:
+            return "api_timeout"
 
         # Rate limit errors
-        if 'rate' in error_msg or 'limit' in error_msg or '429' in error_msg:
-            return 'rate_limit'
+        if "rate" in error_msg or "limit" in error_msg or "429" in error_msg:
+            return "rate_limit"
 
         # JSON/parsing errors
-        if 'json' in error_name or 'decode' in error_name:
-            return 'json_decode'
+        if "json" in error_name or "decode" in error_name:
+            return "json_decode"
 
         # Network errors
-        if any(x in error_name for x in ['connection', 'network', 'socket']):
-            return 'network_error'
+        if any(x in error_name for x in ["connection", "network", "socket"]):
+            return "network_error"
 
         # File I/O errors
-        if 'file' in error_name or 'io' in error_name:
-            return 'file_io_error'
+        if "file" in error_name or "io" in error_name:
+            return "file_io_error"
 
         # Validation errors
-        if 'validation' in error_name or 'invalid' in error_msg:
-            return 'validation_error'
+        if "validation" in error_name or "invalid" in error_msg:
+            return "validation_error"
 
         # Database errors
-        if 'database' in error_name or 'sql' in error_name:
-            return 'database_error'
+        if "database" in error_name or "sql" in error_name:
+            return "database_error"
 
         # Auth errors
-        if 'auth' in error_name or 'permission' in error_msg or '401' in error_msg or '403' in error_msg:
-            return 'auth_error'
+        if (
+            "auth" in error_name
+            or "permission" in error_msg
+            or "401" in error_msg
+            or "403" in error_msg
+        ):
+            return "auth_error"
 
         # Default
-        return 'network_error'
+        return "network_error"
 
     async def execute_with_auto_categorization(
         self,
         operation: Callable,
         fallback: Optional[Callable] = None,
         operation_name: str = "",
-        **operation_kwargs
+        **operation_kwargs,
     ) -> Any:
         """
         Execute operation with automatic error categorization.
@@ -298,14 +306,11 @@ class ErrorRecoveryManager:
                 error_type=error_type,
                 fallback=fallback,
                 operation_name=operation_desc,
-                **operation_kwargs
+                **operation_kwargs,
             )
 
     def save_partial_results(
-        self,
-        operation: str,
-        partial_data: Any,
-        output_path: Optional[Path] = None
+        self, operation: str, partial_data: Any, output_path: Optional[Path] = None
     ):
         """
         Save partial results before failing.
@@ -319,17 +324,23 @@ class ErrorRecoveryManager:
             output_path: Where to save (defaults to implementation_plans/)
         """
         if output_path is None:
-            output_path = Path(f"implementation_plans/partial_results/{operation}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+            output_path = Path(
+                f"implementation_plans/partial_results/{operation}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            )
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Save data
-        with open(output_path, 'w') as f:
-            json.dump({
-                'timestamp': datetime.now().isoformat(),
-                'operation': operation,
-                'data': partial_data
-            }, f, indent=2)
+        with open(output_path, "w") as f:
+            json.dump(
+                {
+                    "timestamp": datetime.now().isoformat(),
+                    "operation": operation,
+                    "data": partial_data,
+                },
+                f,
+                indent=2,
+            )
 
         logger.info(f"💾 Saved partial results: {output_path}")
 
@@ -348,11 +359,11 @@ class ErrorRecoveryManager:
         error_counts = {}
         recovered_counts = {}
 
-        for error in self.errors['errors']:
-            error_type = error['error_type']
+        for error in self.errors["errors"]:
+            error_type = error["error_type"]
             error_counts[error_type] = error_counts.get(error_type, 0) + 1
 
-            if error['recovered']:
+            if error["recovered"]:
                 recovered_counts[error_type] = recovered_counts.get(error_type, 0) + 1
 
         report += "| Error Type | Total | Recovered | Recovery Rate |\n"
@@ -366,9 +377,9 @@ class ErrorRecoveryManager:
         report += f"\n## Recent Errors\n\n"
 
         # Show last 10 errors
-        recent = self.errors['errors'][-10:]
+        recent = self.errors["errors"][-10:]
         for error in reversed(recent):
-            status = "✅ Recovered" if error['recovered'] else "❌ Failed"
+            status = "✅ Recovered" if error["recovered"] else "❌ Failed"
             report += f"- **{error['timestamp']}**: {error['operation']} - {error['error_type']} ({error['error_class']}) - {status}\n"
             report += f"  - Message: {error['error_message'][:100]}\n"
 
@@ -378,8 +389,7 @@ class ErrorRecoveryManager:
 # Example usage
 if __name__ == "__main__":
     logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s'
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
     )
 
     # Initialize manager
@@ -389,6 +399,7 @@ if __name__ == "__main__":
     async def flaky_api_call():
         """Simulated flaky API call."""
         import random
+
         if random.random() < 0.7:  # 70% chance of failure
             raise TimeoutError("API timeout")
         return {"status": "success"}
@@ -401,9 +412,9 @@ if __name__ == "__main__":
     async def test():
         result = await recovery.execute_with_recovery(
             operation=flaky_api_call,
-            error_type='api_timeout',
+            error_type="api_timeout",
             fallback=cached_fallback,
-            operation_name="Test API Call"
+            operation_name="Test API Call",
         )
         print(f"\nResult: {result}")
 
@@ -411,4 +422,3 @@ if __name__ == "__main__":
         print("\n" + recovery.generate_error_report())
 
     asyncio.run(test())
-

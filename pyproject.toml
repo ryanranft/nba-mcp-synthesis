@@ -10,6 +10,9 @@ markers = [
     "isolation: marks tests that need to run in isolation",
     "integration: marks tests as integration tests",
     "timeout: sets a timeout for test execution",
+    "slow: marks tests as slow-running (>5 seconds)",
+    "security: marks tests as security-related",
+    "asyncio: marks tests as async tests",
 ]
 # Run tests with process isolation to prevent state contamination
 addopts = "-n auto"

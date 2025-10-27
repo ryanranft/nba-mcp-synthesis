@@ -29,7 +29,9 @@ class TestDockerScenarios:
         # Mock Docker environment
         with patch.dict(os.environ, {"DOCKER_CONTAINER": "true"}):
             sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
-        result = sm.load_secrets("test_project", "TEST", "test", base_path=temp_secrets_dir)
+        result = sm.load_secrets(
+            "test_project", "TEST", "test", base_path=temp_secrets_dir
+        )
 
         assert result == True
         assert sm.project == "test_project"
@@ -80,7 +82,7 @@ class TestDockerScenarios:
         sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
         sm.load_secrets("test_project", "TEST", "test", base_path=temp_secrets_dir)
 
-            # Test that secrets are accessible within container
+        # Test that secrets are accessible within container
         assert sm.get_secret("GOOGLE_API_KEY_TEST_PROJECT_TEST") == "test_key"
 
     def test_docker_health_checks(self, temp_secrets_dir):
@@ -94,7 +96,7 @@ class TestDockerScenarios:
         sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
         sm.load_secrets("test_project", "TEST", "test", base_path=temp_secrets_dir)
 
-            # Test health check
+        # Test health check
         assert sm.validate_secrets() is True
 
     def test_docker_restart_scenarios(self, temp_secrets_dir):
@@ -108,7 +110,7 @@ class TestDockerScenarios:
         sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
         sm.load_secrets("test_project", "TEST", "test", base_path=temp_secrets_dir)
 
-            # Test restart scenario
+        # Test restart scenario
         sm.clear_secrets()
         sm.load_secrets("test_project", "TEST", "test")
 
@@ -143,9 +145,7 @@ class TestDockerScenarios:
         sm.load_secrets("test_project", "TEST", "test", base_path=temp_secrets_dir)
 
         # Test rotation
-        (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text(
-            "new_test_key"
-        )
+        (secret_dir / "GOOGLE_API_KEY_TEST_PROJECT_TEST.env").write_text("new_test_key")
         sm.reload_secrets()
 
         assert sm.get_secret("GOOGLE_API_KEY_TEST_PROJECT_TEST") == "new_test_key"
@@ -167,7 +167,7 @@ class TestDockerScenarios:
         sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
         sm.load_secrets("test_project", "TEST", "test", base_path=temp_secrets_dir)
 
-            # Log information
+        # Log information
         logger.info(f"Docker container loaded {len(sm.secrets)} secrets")
         logger.info(f"Docker container created {len(sm.aliases)} aliases")
 
@@ -183,7 +183,9 @@ class TestDockerScenarios:
 
         # Mock Docker error scenarios
         sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
-        result = sm.load_secrets("test_project", "TEST", "test", base_path="/nonexistent")
+        result = sm.load_secrets(
+            "test_project", "TEST", "test", base_path="/nonexistent"
+        )
 
         assert result is False
 
@@ -217,7 +219,7 @@ class TestDockerScenarios:
         sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
         sm.load_secrets("test_project", "TEST", "test", base_path=temp_secrets_dir)
 
-            # Test security
+        # Test security
         assert sm.get_secret("GOOGLE_API_KEY_TEST_PROJECT_TEST") == "test_key"
         assert sm.get_secret("INVALID_KEY") is None
 
@@ -232,8 +234,7 @@ class TestDockerScenarios:
         sm = UnifiedSecretsManager(base_path=temp_secrets_dir)
         sm.load_secrets("test_project", "TEST", "test", base_path=temp_secrets_dir)
 
-            # Test monitoring
+        # Test monitoring
         assert sm.validate_secrets() is True
         assert len(sm.secrets) == 1
         assert len(sm.aliases) == 1
-

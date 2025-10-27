@@ -44,6 +44,8 @@ pyarrow>=18.0.0
 sympy>=1.13.0              # Symbolic mathematics
 scipy>=1.13.1              # Scientific computing
 matplotlib>=3.9.2          # Plotting (already listed below)
+statsmodels>=0.14.0        # Time series analysis, ARIMA, stationarity tests
+pmdarima>=2.0.3            # Auto ARIMA model selection
 
 # ============================================
 # Utilities
@@ -53,6 +55,23 @@ rich>=13.9.4           # Beautiful terminal output
 tqdm>=4.67.0           # Progress bars
 httpx>=0.27.2          # HTTP client
 tenacity>=9.0.0        # Retry logic
+
+# ============================================
+# Machine Learning & Experimentation
+# ============================================
+mlflow>=2.9.0              # Experiment tracking, model registry
+
+# ============================================
+# Advanced Analytics & Econometrics
+# ============================================
+linearmodels>=5.3          # Panel data econometrics (fixed/random effects)
+pydynpd>=0.2.1             # Dynamic panel data GMM (Arellano-Bond, Blundell-Bond)
+pymc>=5.0.0                # Bayesian modeling and probabilistic programming
+arviz>=0.15.0              # Exploratory analysis of Bayesian models
+dowhy>=0.11.0              # Causal inference and causal graphs
+networkx>=3.2.0            # Graph algorithms for DAGs
+lifelines>=0.28.0          # Survival analysis (Cox, Kaplan-Meier, parametric)
+scikit-survival>=0.21.0    # Machine learning survival models
 
 # ============================================
 # Data Quality & Validation

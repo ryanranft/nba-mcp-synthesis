@@ -95,10 +95,14 @@ class TestSlackIntegration:
         from mcp_server.unified_secrets_manager import load_secrets_hierarchical
 
         # Load secrets from TEST context first (preferred for testing)
-        load_secrets_hierarchical(project="nba-mcp-synthesis", sport="NBA", context="TEST")
+        load_secrets_hierarchical(
+            project="nba-mcp-synthesis", sport="NBA", context="TEST"
+        )
 
         # Check for test webhook first
-        test_webhook = get_hierarchical_env("SLACK_WEBHOOK_URL", "NBA_MCP_SYNTHESIS", "TEST")
+        test_webhook = get_hierarchical_env(
+            "SLACK_WEBHOOK_URL", "NBA_MCP_SYNTHESIS", "TEST"
+        )
 
         if not test_webhook:
             # Fall back to mock for local development without webhook
@@ -158,11 +162,21 @@ class TestDataQualityValidation:
         # Mock validation result
         mock_validation_result = {
             "success": True,
-            "summary": {"total_expectations": 3, "passed": 3, "failed": 0, "pass_rate": 1.0},
-            "rows_validated": 5
+            "summary": {
+                "total_expectations": 3,
+                "passed": 3,
+                "failed": 0,
+                "pass_rate": 1.0,
+            },
+            "rows_validated": 5,
         }
 
-        with patch.object(DataValidator, 'validate_table', new_callable=AsyncMock, return_value=mock_validation_result):
+        with patch.object(
+            DataValidator,
+            "validate_table",
+            new_callable=AsyncMock,
+            return_value=mock_validation_result,
+        ):
             # Use in-memory validation for testing
             validator = DataValidator(use_configured_context=False)
 
@@ -205,7 +219,9 @@ class TestDataQualityValidation:
             assert result.get("summary", {}).get("passed") == 3
             print("✅ Data validation works with mock data")
             print(f"   Validated {result.get('rows_validated')} rows")
-            print(f"   Pass rate: {result.get('summary', {}).get('pass_rate', 0)*100:.1f}%")
+            print(
+                f"   Pass rate: {result.get('summary', {}).get('pass_rate', 0)*100:.1f}%"
+            )
 
     @pytest.mark.skipif(
         not os.path.exists("/usr/local/bin/great_expectations")
@@ -222,11 +238,21 @@ class TestDataQualityValidation:
         # Mock validation result with detected failures
         mock_validation_result = {
             "success": True,  # Validation ran successfully
-            "summary": {"total_expectations": 2, "passed": 0, "failed": 2, "pass_rate": 0.0},
-            "rows_validated": 5
+            "summary": {
+                "total_expectations": 2,
+                "passed": 0,
+                "failed": 2,
+                "pass_rate": 0.0,
+            },
+            "rows_validated": 5,
         }
 
-        with patch.object(DataValidator, 'validate_table', new_callable=AsyncMock, return_value=mock_validation_result):
+        with patch.object(
+            DataValidator,
+            "validate_table",
+            new_callable=AsyncMock,
+            return_value=mock_validation_result,
+        ):
             # Use in-memory validation for testing
             validator = DataValidator(use_configured_context=False)
 
@@ -325,7 +351,8 @@ class TestDocumentedConnectors:
     def test_streamlit_implementation_documented(self):
         """Test: Streamlit implementation is documented"""
         doc_file = (
-            Path(__file__).parent.parent / "CONNECTORS_IMPLEMENTATION_COMPLETE.md"
+            Path(__file__).parent.parent
+            / "docs/archive/2025-10/completion/CONNECTORS_IMPLEMENTATION_COMPLETE.md"
         )
         assert doc_file.exists()
 
@@ -339,7 +366,8 @@ class TestDocumentedConnectors:
     def test_basketball_reference_implementation_documented(self):
         """Test: Basketball-Reference scraper is documented"""
         doc_file = (
-            Path(__file__).parent.parent / "CONNECTORS_IMPLEMENTATION_COMPLETE.md"
+            Path(__file__).parent.parent
+            / "docs/archive/2025-10/completion/CONNECTORS_IMPLEMENTATION_COMPLETE.md"
         )
 
         with open(doc_file, "r") as f:
@@ -352,7 +380,8 @@ class TestDocumentedConnectors:
     def test_notion_implementation_documented(self):
         """Test: Notion API implementation is documented"""
         doc_file = (
-            Path(__file__).parent.parent / "CONNECTORS_IMPLEMENTATION_COMPLETE.md"
+            Path(__file__).parent.parent
+            / "docs/archive/2025-10/completion/CONNECTORS_IMPLEMENTATION_COMPLETE.md"
         )
 
         with open(doc_file, "r") as f:
@@ -365,7 +394,8 @@ class TestDocumentedConnectors:
     def test_google_sheets_implementation_documented(self):
         """Test: Google Sheets implementation is documented"""
         doc_file = (
-            Path(__file__).parent.parent / "CONNECTORS_IMPLEMENTATION_COMPLETE.md"
+            Path(__file__).parent.parent
+            / "docs/archive/2025-10/completion/CONNECTORS_IMPLEMENTATION_COMPLETE.md"
         )
 
         with open(doc_file, "r") as f:
@@ -378,7 +408,8 @@ class TestDocumentedConnectors:
     def test_airflow_implementation_documented(self):
         """Test: Airflow setup is documented"""
         doc_file = (
-            Path(__file__).parent.parent / "CONNECTORS_IMPLEMENTATION_COMPLETE.md"
+            Path(__file__).parent.parent
+            / "docs/archive/2025-10/completion/CONNECTORS_IMPLEMENTATION_COMPLETE.md"
         )
 
         with open(doc_file, "r") as f:
@@ -430,8 +461,8 @@ class TestSystemIntegration:
         project_root = Path(__file__).parent.parent
 
         required_docs = [
-            "CONNECTORS_IMPLEMENTATION_COMPLETE.md",
-            "ALL_CONNECTORS_DEPLOYMENT_SUMMARY.md",
+            "docs/archive/2025-10/completion/CONNECTORS_IMPLEMENTATION_COMPLETE.md",
+            "docs/archive/2025-10/completion/ALL_CONNECTORS_DEPLOYMENT_SUMMARY.md",
             "notebooks/README.md",
         ]
 

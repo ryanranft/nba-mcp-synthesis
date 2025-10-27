@@ -1,6 +1,6 @@
-# 📚 Recursive Analysis: microeconometrics methods and applications 1b0z9bykeq
+# 📚 Recursive Analysis: microeconometrics-methods-and-applications-1b0z9bykeq
 
-**Analysis Date:** 2025-10-21T20:38:12.112765
+**Analysis Date:** 2025-10-23T14:54:45.047953
 **Total Iterations:** 15
 **Convergence Status:** ❌ NOT ACHIEVED
 **Convergence Threshold:** 3 consecutive "Nice-to-Have only" iterations
@@ -157,6 +157,6 @@ Consider extending max_iterations or reviewing analysis criteria.
 
 ---
 
-**Generated:** 2025-10-21T20:39:02.683375
-**Book:** microeconometrics methods and applications 1b0z9bykeq
+**Generated:** 2025-10-23T14:55:46.758584
+**Book:** microeconometrics-methods-and-applications-1b0z9bykeq
 **S3 Path:** books/microeconometrics-methods-and-applications-1b0z9bykeq.pdf

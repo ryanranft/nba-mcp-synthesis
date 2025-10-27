@@ -1,11 +1,11 @@
 {
   "book_title": "Designing Machine Learning Systems",
   "s3_path": "books/Designing Machine Learning Systems.pdf",
-  "start_time": "2025-10-21T19:59:58.104202",
+  "start_time": "2025-10-25T06:00:49.763240",
   "iterations": [
     {
       "iteration": 1,
-      "timestamp": "2025-10-21T19:59:59.270545",
+      "timestamp": "2025-10-25T06:00:52.332427",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -14,7 +14,7 @@
     },
     {
       "iteration": 2,
-      "timestamp": "2025-10-21T20:00:02.834394",
+      "timestamp": "2025-10-25T06:00:54.150115",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -23,7 +23,7 @@
     },
     {
       "iteration": 3,
-      "timestamp": "2025-10-21T20:00:03.981059",
+      "timestamp": "2025-10-25T06:00:56.004799",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -32,7 +32,7 @@
     },
     {
       "iteration": 4,
-      "timestamp": "2025-10-21T20:00:05.127857",
+      "timestamp": "2025-10-25T06:00:57.841851",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -41,7 +41,7 @@
     },
     {
       "iteration": 5,
-      "timestamp": "2025-10-21T20:00:06.242735",
+      "timestamp": "2025-10-25T06:00:59.695845",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -50,7 +50,7 @@
     },
     {
       "iteration": 6,
-      "timestamp": "2025-10-21T20:00:07.314726",
+      "timestamp": "2025-10-25T06:01:01.587191",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -59,7 +59,7 @@
     },
     {
       "iteration": 7,
-      "timestamp": "2025-10-21T20:00:08.421149",
+      "timestamp": "2025-10-25T06:01:05.952359",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -68,7 +68,7 @@
     },
     {
       "iteration": 8,
-      "timestamp": "2025-10-21T20:00:09.543133",
+      "timestamp": "2025-10-25T06:01:07.797788",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -77,7 +77,7 @@
     },
     {
       "iteration": 9,
-      "timestamp": "2025-10-21T20:00:10.661757",
+      "timestamp": "2025-10-25T06:01:09.617207",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -86,7 +86,7 @@
     },
     {
       "iteration": 10,
-      "timestamp": "2025-10-21T20:00:11.813931",
+      "timestamp": "2025-10-25T06:01:11.471305",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -95,7 +95,7 @@
     },
     {
       "iteration": 11,
-      "timestamp": "2025-10-21T20:00:12.903644",
+      "timestamp": "2025-10-25T06:01:13.320134",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -104,7 +104,7 @@
     },
     {
       "iteration": 12,
-      "timestamp": "2025-10-21T20:00:13.992373",
+      "timestamp": "2025-10-25T06:01:15.214252",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -113,7 +113,7 @@
     },
     {
       "iteration": 13,
-      "timestamp": "2025-10-21T20:00:15.135327",
+      "timestamp": "2025-10-25T06:01:21.309742",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -122,7 +122,7 @@
     },
     {
       "iteration": 14,
-      "timestamp": "2025-10-21T20:00:16.703534",
+      "timestamp": "2025-10-25T06:01:25.721608",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -131,7 +131,7 @@
     },
     {
       "iteration": 15,
-      "timestamp": "2025-10-21T20:00:17.788373",
+      "timestamp": "2025-10-25T06:01:27.530714",
       "recommendations": {
         "critical": [],
         "important": [],
@@ -149,6 +149,6 @@
   "new_recommendations": 0,
   "duplicate_recommendations": 0,
   "improved_recommendations": 0,
-  "end_time": "2025-10-21T20:00:17.788392",
+  "end_time": "2025-10-25T06:01:27.530740",
   "total_iterations": 15
 }

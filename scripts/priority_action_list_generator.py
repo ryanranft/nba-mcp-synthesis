@@ -19,23 +19,21 @@ from typing import Dict, List, Tuple
 from datetime import datetime
 import logging
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
 class PriorityActionListGenerator:
     """Generate priority action list for implementation."""
 
-    PRIORITY_WEIGHTS = {
-        'critical': 3,
-        'important': 2,
-        'nice-to-have': 1
-    }
+    PRIORITY_WEIGHTS = {"critical": 3, "important": 2, "nice-to-have": 1}
 
     RISK_LEVELS = {
-        'low': 'Low risk - straightforward implementation',
-        'medium': 'Medium risk - requires coordination',
-        'high': 'High risk - complex integration'
+        "low": "Low risk - straightforward implementation",
+        "medium": "Medium risk - requires coordination",
+        "high": "High risk - complex integration",
     }
 
     def __init__(self, recommendations: List[Dict], dependency_order: List[str]):
@@ -48,9 +46,13 @@ class PriorityActionListGenerator:
         """
         self.recommendations = recommendations
         self.dependency_order = dependency_order
-        self.rec_index = {f"rec_{i:03d}": i - 1 for i in range(1, len(recommendations) + 1)}
+        self.rec_index = {
+            f"rec_{i:03d}": i - 1 for i in range(1, len(recommendations) + 1)
+        }
 
-        logger.info(f"Initialized generator with {len(recommendations)} recommendations")
+        logger.info(
+            f"Initialized generator with {len(recommendations)} recommendations"
+        )
 
     def parse_time_estimate(self, time_str: str) -> float:
         """
@@ -68,23 +70,23 @@ class PriorityActionListGenerator:
         time_str = time_str.lower()
 
         # Extract numbers
-        numbers = re.findall(r'\d+', time_str)
+        numbers = re.findall(r"\d+", time_str)
         if not numbers:
             return 8.0
 
         # Parse based on unit
-        if 'hour' in time_str:
+        if "hour" in time_str:
             if len(numbers) == 1:
                 return float(numbers[0])
             else:
                 # Range: take average
                 return sum(float(n) for n in numbers) / len(numbers)
-        elif 'day' in time_str:
+        elif "day" in time_str:
             if len(numbers) == 1:
                 return float(numbers[0]) * 8  # 8 hours per day
             else:
                 return sum(float(n) for n in numbers) / len(numbers) * 8
-        elif 'week' in time_str:
+        elif "week" in time_str:
             if len(numbers) == 1:
                 return float(numbers[0]) * 40  # 40 hours per week
             else:
@@ -111,8 +113,8 @@ class PriorityActionListGenerator:
         # 2. Estimated time
         # 3. Keywords indicating complexity
 
-        deps_count = len(rec.get('dependencies', []))
-        time_hours = self.parse_time_estimate(rec.get('time_estimate', ''))
+        deps_count = len(rec.get("dependencies", []))
+        time_hours = self.parse_time_estimate(rec.get("time_estimate", ""))
         text = f"{rec.get('title', '')} {rec.get('description', '')} {rec.get('technical_details', '')}".lower()
 
         risk_score = 0
@@ -130,23 +132,34 @@ class PriorityActionListGenerator:
             risk_score += 1
 
         # Complexity keywords
-        complex_keywords = ['integration', 'migration', 'refactor', 'architecture', 'distributed', 'real-time', 'streaming']
+        complex_keywords = [
+            "integration",
+            "migration",
+            "refactor",
+            "architecture",
+            "distributed",
+            "real-time",
+            "streaming",
+        ]
         for keyword in complex_keywords:
             if keyword in text:
                 risk_score += 1
                 break
 
         # Database/infrastructure
-        if any(k in text for k in ['database', 'infrastructure', 'deployment', 'production']):
+        if any(
+            k in text
+            for k in ["database", "infrastructure", "deployment", "production"]
+        ):
             risk_score += 1
 
         # Determine risk level
         if risk_score >= 4:
-            return 'high'
+            return "high"
         elif risk_score >= 2:
-            return 'medium'
+            return "medium"
         else:
-            return 'low'
+            return "low"
 
     def estimate_impact(self, rec: Dict) -> Tuple[str, int]:
         """
@@ -158,23 +171,29 @@ class PriorityActionListGenerator:
         Returns:
             Tuple of (description, score)
         """
-        priority = rec.get('priority', 'important')
-        category = rec.get('category', '').lower()
+        priority = rec.get("priority", "important")
+        category = rec.get("category", "").lower()
 
-        impact_text = rec.get('expected_impact', '').lower()
+        impact_text = rec.get("expected_impact", "").lower()
 
         # Base score from priority
         score = self.PRIORITY_WEIGHTS.get(priority, 2)
 
         # Adjust based on keywords
-        high_impact_keywords = ['accuracy', 'performance', 'reliability', 'critical', 'essential']
+        high_impact_keywords = [
+            "accuracy",
+            "performance",
+            "reliability",
+            "critical",
+            "essential",
+        ]
         for keyword in high_impact_keywords:
             if keyword in impact_text:
                 score += 1
                 break
 
         # Category impact
-        high_impact_categories = ['ml', 'prediction', 'model', 'core']
+        high_impact_categories = ["ml", "prediction", "model", "core"]
         if any(cat in category for cat in high_impact_categories):
             score += 1
 
@@ -198,7 +217,7 @@ class PriorityActionListGenerator:
         logger.info("Generating priority action list...")
 
         # Group by priority
-        by_priority = {'critical': [], 'important': [], 'nice-to-have': []}
+        by_priority = {"critical": [], "important": [], "nice-to-have": []}
 
         for rec_id in self.dependency_order:
             idx = self.rec_index.get(rec_id)
@@ -206,15 +225,17 @@ class PriorityActionListGenerator:
                 continue
 
             rec = self.recommendations[idx]
-            priority = rec.get('priority', 'important')
+            priority = rec.get("priority", "important")
             by_priority[priority].append((rec_id, rec))
 
         # Calculate statistics
-        total_time = sum(self.parse_time_estimate(rec.get('time_estimate', ''))
-                        for rec in self.recommendations)
-        total_critical = len(by_priority['critical'])
-        total_important = len(by_priority['important'])
-        total_nice = len(by_priority['nice-to-have'])
+        total_time = sum(
+            self.parse_time_estimate(rec.get("time_estimate", ""))
+            for rec in self.recommendations
+        )
+        total_critical = len(by_priority["critical"])
+        total_important = len(by_priority["important"])
+        total_nice = len(by_priority["nice-to-have"])
 
         # Generate markdown
         markdown = f"""# Priority Action List
@@ -259,22 +280,26 @@ Implement nice-to-have recommendations for additional enhancements.
         # Generate detailed list
         global_counter = 1
 
-        for priority_name in ['critical', 'important', 'nice-to-have']:
+        for priority_name in ["critical", "important", "nice-to-have"]:
             priority_recs = by_priority[priority_name]
             if not priority_recs:
                 continue
 
-            priority_emoji = {'critical': '⭐', 'important': '🟡', 'nice-to-have': '🟢'}[priority_name]
-            priority_display = priority_name.replace('-', ' ').title()
+            priority_emoji = {
+                "critical": "⭐",
+                "important": "🟡",
+                "nice-to-have": "🟢",
+            }[priority_name]
+            priority_display = priority_name.replace("-", " ").title()
 
             markdown += f"### {priority_emoji} {priority_display} Priority\n\n"
 
             for rec_id, rec in priority_recs:
                 # Calculate details
-                time_hours = self.parse_time_estimate(rec.get('time_estimate', ''))
+                time_hours = self.parse_time_estimate(rec.get("time_estimate", ""))
                 risk = self.assess_risk(rec)
                 impact_desc, impact_score = self.estimate_impact(rec)
-                deps = rec.get('dependencies', [])
+                deps = rec.get("dependencies", [])
 
                 markdown += f"""---
 
@@ -302,7 +327,7 @@ Implement nice-to-have recommendations for additional enhancements.
 **Implementation Steps:**
 """
 
-                steps = rec.get('implementation_steps', [])
+                steps = rec.get("implementation_steps", [])
                 if steps:
                     for i, step in enumerate(steps, 1):
                         markdown += f"{i}. {step}\n"
@@ -361,7 +386,7 @@ Add nice-to-have features for additional enhancements.
             if idx is None:
                 continue
             rec = self.recommendations[idx]
-            if self.assess_risk(rec) == 'high':
+            if self.assess_risk(rec) == "high":
                 high_risk_count += 1
                 markdown += f"- **{rec_id}:** {rec.get('title', '')} - {self.RISK_LEVELS['high']}\n"
 
@@ -428,7 +453,7 @@ If implementation fails:
 """
 
         # Calculate risk distribution
-        risk_counts = {'low': 0, 'medium': 0, 'high': 0}
+        risk_counts = {"low": 0, "medium": 0, "high": 0}
         for rec in self.recommendations:
             risk = self.assess_risk(rec)
             risk_counts[risk] += 1
@@ -448,7 +473,7 @@ If implementation fails:
 
         # Write to file
         output_path = Path(output_file)
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             f.write(markdown)
 
         logger.info(f"✅ Saved priority action list to {output_file}")
@@ -459,15 +484,19 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Generate priority action list")
-    parser.add_argument('--synthesis', required=True, help='Path to consolidated_recommendations.json')
-    parser.add_argument('--output', default='PRIORITY_ACTION_LIST.md', help='Output markdown file')
+    parser.add_argument(
+        "--synthesis", required=True, help="Path to consolidated_recommendations.json"
+    )
+    parser.add_argument(
+        "--output", default="PRIORITY_ACTION_LIST.md", help="Output markdown file"
+    )
 
     args = parser.parse_args()
 
     # Load recommendations
-    with open(args.synthesis, 'r') as f:
+    with open(args.synthesis, "r") as f:
         data = json.load(f)
-    recommendations = data.get('recommendations', [])
+    recommendations = data.get("recommendations", [])
 
     # Load dependency order (simplified - just use sequential order if no dependency file)
     dependency_order = [f"rec_{i:03d}" for i in range(1, len(recommendations) + 1)]
@@ -489,10 +518,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-

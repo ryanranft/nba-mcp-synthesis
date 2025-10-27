@@ -1,0 +1,171 @@
+{
+  "expectation_suite_name": "player_stats_suite",
+  "data_asset_type": "Dataset",
+  "meta": {
+    "great_expectations_version": "0.18.0",
+    "description": "Expectation suite for NBA player statistics validation",
+    "created_by": "NBA MCP Synthesis - Phase 10A Week 2",
+    "created_at": "2025-10-25"
+  },
+  "expectations": [
+    {
+      "expectation_type": "expect_table_row_count_to_be_between",
+      "kwargs": {
+        "min_value": 1,
+        "max_value": 600
+      },
+      "meta": {
+        "notes": "NBA has ~450-550 active players per season"
+      }
+    },
+    {
+      "expectation_type": "expect_table_column_count_to_equal",
+      "kwargs": {
+        "value": 7
+      },
+      "meta": {
+        "notes": "Expected columns: player_id, player_name, ppg, rpg, apg, fg_pct, games_played"
+      }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {
+        "column": "player_id"
+      }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {
+        "column": "player_name"
+      }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {
+        "column": "ppg"
+      }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {
+        "column": "rpg"
+      }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {
+        "column": "apg"
+      }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {
+        "column": "fg_pct"
+      }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {
+        "column": "games_played"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_unique",
+      "kwargs": {
+        "column": "player_id"
+      },
+      "meta": {
+        "notes": "Player IDs must be unique"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "player_id"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "player_name"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "ppg",
+        "min_value": 0.0,
+        "max_value": 50.0
+      },
+      "meta": {
+        "notes": "Points per game should be 0-50 (historical max ~50)"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "rpg",
+        "min_value": 0.0,
+        "max_value": 20.0
+      },
+      "meta": {
+        "notes": "Rebounds per game should be 0-20"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "apg",
+        "min_value": 0.0,
+        "max_value": 15.0
+      },
+      "meta": {
+        "notes": "Assists per game should be 0-15"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "fg_pct",
+        "min_value": 0.0,
+        "max_value": 1.0
+      },
+      "meta": {
+        "notes": "Field goal percentage must be between 0 and 1"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "games_played",
+        "min_value": 0,
+        "max_value": 82
+      },
+      "meta": {
+        "notes": "Games played in regular season (max 82)"
+      }
+    },
+    {
+      "expectation_type": "expect_column_mean_to_be_between",
+      "kwargs": {
+        "column": "ppg",
+        "min_value": 5.0,
+        "max_value": 30.0
+      },
+      "meta": {
+        "notes": "Average PPG across all players should be reasonable"
+      }
+    },
+    {
+      "expectation_type": "expect_column_median_to_be_between",
+      "kwargs": {
+        "column": "games_played",
+        "min_value": 30,
+        "max_value": 82
+      },
+      "meta": {
+        "notes": "Median games played should indicate healthy participation"
+      }
+    }
+  ]
+}

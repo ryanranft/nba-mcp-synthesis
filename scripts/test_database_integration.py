@@ -21,17 +21,16 @@ from scripts.database_connector import create_db_connector_from_env, DatabaseCon
 from scripts.data_inventory_scanner import DataInventoryScanner
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 
 def test_database_connector():
     """Test database connector standalone"""
-    logger.info("="*80)
+    logger.info("=" * 80)
     logger.info("TEST 1: Database Connector Initialization")
-    logger.info("="*80)
+    logger.info("=" * 80)
 
     connector = create_db_connector_from_env()
 
@@ -54,11 +53,16 @@ def test_database_connector():
 
 def test_table_queries(connector):
     """Test querying individual tables"""
-    logger.info("\n" + "="*80)
+    logger.info("\n" + "=" * 80)
     logger.info("TEST 2: Table Query Tests")
-    logger.info("="*80)
+    logger.info("=" * 80)
 
-    tables = ['master_players', 'master_teams', 'master_games', 'master_player_game_stats']
+    tables = [
+        "master_players",
+        "master_teams",
+        "master_games",
+        "master_player_game_stats",
+    ]
 
     for table in tables:
         logger.info(f"\nQuerying table: {table}")
@@ -74,11 +78,13 @@ def test_table_queries(connector):
             logger.info(f"  Size (MB): {stats.get('size_mb', 'N/A')}")
 
             # Date range for game tables
-            if 'game' in table.lower():
+            if "game" in table.lower():
                 try:
-                    date_range = connector.get_date_range(table, 'game_date')
+                    date_range = connector.get_date_range(table, "game_date")
                     if date_range:
-                        logger.info(f"  Date range: {date_range['min_date']} to {date_range['max_date']}")
+                        logger.info(
+                            f"  Date range: {date_range['min_date']} to {date_range['max_date']}"
+                        )
                         logger.info(f"  Unique dates: {date_range['unique_dates']:,}")
                 except Exception as e:
                     logger.info(f"  Date range: Not available ({e})")
@@ -91,9 +97,9 @@ def test_table_queries(connector):
 
 def test_inventory_scanner_static():
     """Test inventory scanner with static metrics only"""
-    logger.info("\n" + "="*80)
+    logger.info("\n" + "=" * 80)
     logger.info("TEST 3: Inventory Scanner (Static Metrics)")
-    logger.info("="*80)
+    logger.info("=" * 80)
 
     inventory_path = Path.home() / "nba-simulator-aws" / "inventory"
 
@@ -110,7 +116,7 @@ def test_inventory_scanner_static():
 
     logger.info("\nStatic Metrics Summary:")
     logger.info("-" * 60)
-    print(inventory['summary_for_ai'])
+    print(inventory["summary_for_ai"])
     logger.info("-" * 60)
 
     logger.info("✅ Static metrics scan completed")
@@ -118,9 +124,9 @@ def test_inventory_scanner_static():
 
 def test_inventory_scanner_live():
     """Test inventory scanner with live database queries"""
-    logger.info("\n" + "="*80)
+    logger.info("\n" + "=" * 80)
     logger.info("TEST 4: Inventory Scanner (Live Database Queries)")
-    logger.info("="*80)
+    logger.info("=" * 80)
 
     inventory_path = Path.home() / "nba-simulator-aws" / "inventory"
 
@@ -133,7 +139,9 @@ def test_inventory_scanner_live():
     scanner = DataInventoryScanner(str(inventory_path), enable_live_queries=True)
 
     if not scanner.live_queries_enabled:
-        logger.warning("⚠️  Live queries not enabled - database credentials may not be configured")
+        logger.warning(
+            "⚠️  Live queries not enabled - database credentials may not be configured"
+        )
         logger.info("   This is expected if database is not accessible")
         return
 
@@ -142,22 +150,22 @@ def test_inventory_scanner_live():
 
     logger.info("\nLive Database Summary:")
     logger.info("-" * 60)
-    print(inventory['summary_for_ai'])
+    print(inventory["summary_for_ai"])
     logger.info("-" * 60)
 
     # Check data source
-    coverage = inventory.get('data_coverage', {})
-    data_source = coverage.get('data_source')
+    coverage = inventory.get("data_coverage", {})
+    data_source = coverage.get("data_source")
 
-    if data_source == 'live_database':
+    if data_source == "live_database":
         logger.info("✅ Successfully retrieved LIVE database statistics")
         logger.info(f"   - Games: {coverage.get('games', 0):,}")
         logger.info(f"   - Players: {coverage.get('players', 0):,}")
         logger.info(f"   - Teams: {coverage.get('teams', 0):,}")
         logger.info(f"   - Player-Game Stats: {coverage.get('player_game_stats', 0):,}")
 
-        if coverage.get('date_range'):
-            dr = coverage['date_range']
+        if coverage.get("date_range"):
+            dr = coverage["date_range"]
             logger.info(f"   - Date Range: {dr['min_date']} to {dr['max_date']}")
     else:
         logger.warning("⚠️  Data source is static, not live")
@@ -167,9 +175,9 @@ def test_inventory_scanner_live():
 
 def main():
     """Run all tests"""
-    logger.info("\n" + "🧪 "*40)
+    logger.info("\n" + "🧪 " * 40)
     logger.info("DATABASE INTEGRATION TEST SUITE")
-    logger.info("🧪 "*40 + "\n")
+    logger.info("🧪 " * 40 + "\n")
 
     # Test 1: Database connector
     connector = test_database_connector()
@@ -189,9 +197,9 @@ def main():
     # Test 4: Live queries
     test_inventory_scanner_live()
 
-    logger.info("\n" + "="*80)
+    logger.info("\n" + "=" * 80)
     logger.info("TEST SUITE COMPLETE")
-    logger.info("="*80 + "\n")
+    logger.info("=" * 80 + "\n")
     logger.info("✅ All tests completed successfully!")
     logger.info("\nℹ️  Note: Some tests may be skipped if database is not configured.")
     logger.info("   This is expected and does not indicate failure.")

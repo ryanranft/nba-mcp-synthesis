@@ -29,15 +29,17 @@ import hashlib
 
 # Add scripts directory to path for imports
 import sys
+
 sys.path.insert(0, str(Path(__file__).parent))
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
 
 @dataclass
 class ModelConfig:
     """Configuration for a model combination test."""
+
     name: str
     description: str
     primary_model: str  # "gemini" or "claude"
@@ -49,6 +51,7 @@ class ModelConfig:
 @dataclass
 class TestResult:
     """Results from testing a single model configuration."""
+
     config_name: str
     book_title: str
 
@@ -90,14 +93,14 @@ class ABTestingFramework:
             description="Gemini 1.5 Pro only (no consensus)",
             primary_model="gemini",
             secondary_model=None,
-            use_consensus=False
+            use_consensus=False,
         ),
         "claude_only": ModelConfig(
             name="claude_only",
             description="Claude Sonnet 4 only (no consensus)",
             primary_model="claude",
             secondary_model=None,
-            use_consensus=False
+            use_consensus=False,
         ),
         "gemini_claude_consensus": ModelConfig(
             name="gemini_claude_consensus",
@@ -105,7 +108,7 @@ class ABTestingFramework:
             primary_model="gemini",
             secondary_model="claude",
             use_consensus=True,
-            similarity_threshold=0.70
+            similarity_threshold=0.70,
         ),
         "gemini_claude_high_consensus": ModelConfig(
             name="gemini_claude_high_consensus",
@@ -113,7 +116,7 @@ class ABTestingFramework:
             primary_model="gemini",
             secondary_model="claude",
             use_consensus=True,
-            similarity_threshold=0.85
+            similarity_threshold=0.85,
         ),
     }
 
@@ -130,10 +133,7 @@ class ABTestingFramework:
         logger.info(f"Results directory: {self.results_dir}")
 
     async def run_single_test(
-        self,
-        config: ModelConfig,
-        book_path: str,
-        book_title: str
+        self, config: ModelConfig, book_path: str, book_title: str
     ) -> TestResult:
         """
         Run a single A/B test with the specified configuration.
@@ -156,7 +156,7 @@ class ABTestingFramework:
             # Create analyzer with config settings
             analyzer = HighContextBookAnalyzer(
                 model_combination=self._config_to_model_combination(config),
-                consensus_threshold=config.similarity_threshold
+                consensus_threshold=config.similarity_threshold,
             )
 
             # Run analysis
@@ -165,14 +165,20 @@ class ABTestingFramework:
             processing_time = (datetime.now() - start_time).total_seconds()
 
             # Extract metrics from analysis result
-            recommendations = analysis_result.get('recommendations', [])
-            convergence_tracker = analysis_result.get('convergence_tracker', {})
-            cost_data = analysis_result.get('cost', {})
+            recommendations = analysis_result.get("recommendations", [])
+            convergence_tracker = analysis_result.get("convergence_tracker", {})
+            cost_data = analysis_result.get("cost", {})
 
             # Count by priority
-            critical_count = sum(1 for r in recommendations if r.get('priority') == 'critical')
-            important_count = sum(1 for r in recommendations if r.get('priority') == 'important')
-            nice_to_have_count = sum(1 for r in recommendations if r.get('priority') == 'nice-to-have')
+            critical_count = sum(
+                1 for r in recommendations if r.get("priority") == "critical"
+            )
+            important_count = sum(
+                1 for r in recommendations if r.get("priority") == "important"
+            )
+            nice_to_have_count = sum(
+                1 for r in recommendations if r.get("priority") == "nice-to-have"
+            )
 
             result = TestResult(
                 config_name=config.name,
@@ -181,19 +187,23 @@ class ABTestingFramework:
                 critical_count=critical_count,
                 important_count=important_count,
                 nice_to_have_count=nice_to_have_count,
-                convergence_achieved=convergence_tracker.get('convergence_achieved', False),
-                iterations_required=convergence_tracker.get('iterations_completed', 0),
-                total_cost_usd=cost_data.get('total', 0.0),
-                gemini_cost_usd=cost_data.get('gemini', 0.0),
-                claude_cost_usd=cost_data.get('claude', 0.0),
+                convergence_achieved=convergence_tracker.get(
+                    "convergence_achieved", False
+                ),
+                iterations_required=convergence_tracker.get("iterations_completed", 0),
+                total_cost_usd=cost_data.get("total", 0.0),
+                gemini_cost_usd=cost_data.get("gemini", 0.0),
+                claude_cost_usd=cost_data.get("claude", 0.0),
                 processing_time_seconds=processing_time,
-                tokens_used=cost_data.get('tokens_used', 0),
-                cache_hits=analysis_result.get('cache_hits', 0),
-                characters_analyzed=analysis_result.get('characters_analyzed', 0),
-                pages_analyzed=analysis_result.get('pages_analyzed', 0)
+                tokens_used=cost_data.get("tokens_used", 0),
+                cache_hits=analysis_result.get("cache_hits", 0),
+                characters_analyzed=analysis_result.get("characters_analyzed", 0),
+                pages_analyzed=analysis_result.get("pages_analyzed", 0),
             )
 
-            logger.info(f"  ✅ Test complete: {result.recommendations_found} recommendations")
+            logger.info(
+                f"  ✅ Test complete: {result.recommendations_found} recommendations"
+            )
             logger.info(f"  💰 Cost: ${result.total_cost_usd:.4f}")
             logger.info(f"  ⏱️  Time: {result.processing_time_seconds:.1f}s")
 
@@ -218,7 +228,7 @@ class ABTestingFramework:
                 tokens_used=0,
                 cache_hits=0,
                 characters_analyzed=0,
-                pages_analyzed=0
+                pages_analyzed=0,
             )
 
     def _config_to_model_combination(self, config: ModelConfig) -> str:
@@ -232,19 +242,16 @@ class ABTestingFramework:
             Model combination string
         """
         if config.use_consensus and config.secondary_model:
-            return 'gemini+claude'
-        elif config.primary_model == 'gemini':
-            return 'gemini_only'
-        elif config.primary_model == 'claude':
-            return 'claude_only'
+            return "gemini+claude"
+        elif config.primary_model == "gemini":
+            return "gemini_only"
+        elif config.primary_model == "claude":
+            return "claude_only"
         else:
-            return 'gemini+claude'
+            return "gemini+claude"
 
     async def run_comparison_test(
-        self,
-        config_names: List[str],
-        book_paths: List[str],
-        book_titles: List[str]
+        self, config_names: List[str], book_paths: List[str], book_titles: List[str]
     ) -> Dict[str, List[TestResult]]:
         """
         Run A/B comparison across multiple configurations and books.
@@ -275,9 +282,7 @@ class ABTestingFramework:
         return results
 
     def generate_comparison_report(
-        self,
-        results: Dict[str, List[TestResult]],
-        output_path: Optional[Path] = None
+        self, results: Dict[str, List[TestResult]], output_path: Optional[Path] = None
     ) -> str:
         """
         Generate a comprehensive comparison report.
@@ -296,18 +301,26 @@ class ABTestingFramework:
             f"\n**Generated**: {datetime.now().isoformat()}",
             f"**Configurations Tested**: {len(results)}",
             f"**Books Analyzed**: {len(next(iter(results.values())))}",
-            "\n---\n"
+            "\n---\n",
         ]
 
         # Summary Table
         report_lines.append("## Summary Comparison\n")
-        report_lines.append("| Configuration | Avg Recommendations | Avg Cost | Avg Time | Quality Score |")
-        report_lines.append("|--------------|---------------------|----------|----------|---------------|")
+        report_lines.append(
+            "| Configuration | Avg Recommendations | Avg Cost | Avg Time | Quality Score |"
+        )
+        report_lines.append(
+            "|--------------|---------------------|----------|----------|---------------|"
+        )
 
         for config_name, test_results in results.items():
-            avg_recs = sum(r.recommendations_found for r in test_results) / len(test_results)
+            avg_recs = sum(r.recommendations_found for r in test_results) / len(
+                test_results
+            )
             avg_cost = sum(r.total_cost_usd for r in test_results) / len(test_results)
-            avg_time = sum(r.processing_time_seconds for r in test_results) / len(test_results)
+            avg_time = sum(r.processing_time_seconds for r in test_results) / len(
+                test_results
+            )
 
             # Calculate quality score (critical * 3 + important * 2 + nice * 1)
             avg_quality = sum(
@@ -327,8 +340,12 @@ class ABTestingFramework:
             report_lines.append(f"### {config_name}\n")
             report_lines.append(f"**Description**: {config.description}\n")
 
-            report_lines.append("| Book | Recs | Critical | Important | Nice | Cost | Time | Convergence |")
-            report_lines.append("|------|------|----------|-----------|------|------|------|-------------|")
+            report_lines.append(
+                "| Book | Recs | Critical | Important | Nice | Cost | Time | Convergence |"
+            )
+            report_lines.append(
+                "|------|------|----------|-----------|------|------|------|-------------|"
+            )
 
             for result in test_results:
                 convergence = "✅" if result.convergence_achieved else "❌"
@@ -351,8 +368,12 @@ class ABTestingFramework:
 
             report_lines.append(f"### {config_name}")
             report_lines.append(f"- Total Cost: ${total_cost:.4f}")
-            report_lines.append(f"- Gemini Cost: ${total_gemini:.4f} ({total_gemini/total_cost*100:.1f}%)")
-            report_lines.append(f"- Claude Cost: ${total_claude:.4f} ({total_claude/total_cost*100:.1f}%)")
+            report_lines.append(
+                f"- Gemini Cost: ${total_gemini:.4f} ({total_gemini/total_cost*100:.1f}%)"
+            )
+            report_lines.append(
+                f"- Claude Cost: ${total_claude:.4f} ({total_claude/total_cost*100:.1f}%)"
+            )
             report_lines.append("")
 
         # Recommendations
@@ -364,17 +385,18 @@ class ABTestingFramework:
             key=lambda x: sum(
                 r.critical_count * 3 + r.important_count * 2 + r.nice_to_have_count
                 for r in x[1]
-            ) / len(x[1])
+            )
+            / len(x[1]),
         )[0]
 
         best_cost_config = min(
             results.items(),
-            key=lambda x: sum(r.total_cost_usd for r in x[1]) / len(x[1])
+            key=lambda x: sum(r.total_cost_usd for r in x[1]) / len(x[1]),
         )[0]
 
         best_speed_config = min(
             results.items(),
-            key=lambda x: sum(r.processing_time_seconds for r in x[1]) / len(x[1])
+            key=lambda x: sum(r.processing_time_seconds for r in x[1]) / len(x[1]),
         )[0]
 
         report_lines.append(f"- **Best Quality**: `{best_quality_config}`")
@@ -387,16 +409,14 @@ class ABTestingFramework:
         # Save report if path provided
         if output_path:
             output_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(output_path, 'w') as f:
+            with open(output_path, "w") as f:
                 f.write(report)
             logger.info(f"📝 Report saved: {output_path}")
 
         return report
 
     def save_results_json(
-        self,
-        results: Dict[str, List[TestResult]],
-        output_path: Optional[Path] = None
+        self, results: Dict[str, List[TestResult]], output_path: Optional[Path] = None
     ):
         """
         Save raw results as JSON for further analysis.
@@ -415,7 +435,7 @@ class ABTestingFramework:
             for config_name, test_results in results.items()
         }
 
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             json.dump(json_results, f, indent=2)
 
         logger.info(f"💾 Results saved: {output_path}")
@@ -429,21 +449,18 @@ async def main():
         description="A/B Testing Framework for Model Combinations"
     )
     parser.add_argument(
-        '--test',
-        choices=['gemini-vs-claude', 'consensus-comparison', 'all'],
-        default='gemini-vs-claude',
-        help='Type of A/B test to run'
+        "--test",
+        choices=["gemini-vs-claude", "consensus-comparison", "all"],
+        default="gemini-vs-claude",
+        help="Type of A/B test to run",
     )
     parser.add_argument(
-        '--books',
-        type=int,
-        default=3,
-        help='Number of books to test (default: 3)'
+        "--books", type=int, default=3, help="Number of books to test (default: 3)"
     )
     parser.add_argument(
-        '--output',
+        "--output",
         type=Path,
-        help='Output path for report (default: ab_testing_results/report_TIMESTAMP.md)'
+        help="Output path for report (default: ab_testing_results/report_TIMESTAMP.md)",
     )
 
     args = parser.parse_args()
@@ -452,10 +469,14 @@ async def main():
     framework = ABTestingFramework()
 
     # Define test configurations based on test type
-    if args.test == 'gemini-vs-claude':
-        config_names = ['gemini_only', 'claude_only']
-    elif args.test == 'consensus-comparison':
-        config_names = ['gemini_only', 'gemini_claude_consensus', 'gemini_claude_high_consensus']
+    if args.test == "gemini-vs-claude":
+        config_names = ["gemini_only", "claude_only"]
+    elif args.test == "consensus-comparison":
+        config_names = [
+            "gemini_only",
+            "gemini_claude_consensus",
+            "gemini_claude_high_consensus",
+        ]
     else:  # 'all'
         config_names = list(framework.CONFIGS.keys())
 
@@ -464,18 +485,22 @@ async def main():
     book_paths = [f"books/book_{i}.pdf" for i in range(args.books)]
     book_titles = [f"Test Book {i+1}" for i in range(args.books)]
 
-    logger.info(f"======================================================================")
+    logger.info(
+        f"======================================================================"
+    )
     logger.info(f"A/B TESTING: {args.test}")
-    logger.info(f"======================================================================")
+    logger.info(
+        f"======================================================================"
+    )
     logger.info(f"Configurations: {', '.join(config_names)}")
     logger.info(f"Books: {args.books}")
-    logger.info(f"======================================================================")
+    logger.info(
+        f"======================================================================"
+    )
 
     # Run tests
     results = await framework.run_comparison_test(
-        config_names=config_names,
-        book_paths=book_paths,
-        book_titles=book_titles
+        config_names=config_names, book_paths=book_paths, book_titles=book_titles
     )
 
     # Generate report
@@ -488,17 +513,22 @@ async def main():
     report = framework.generate_comparison_report(results, report_path)
 
     # Save JSON results
-    json_path = report_path.with_suffix('.json')
+    json_path = report_path.with_suffix(".json")
     framework.save_results_json(results, json_path)
 
-    logger.info(f"\n======================================================================")
+    logger.info(
+        f"\n======================================================================"
+    )
     logger.info(f"A/B Testing Complete!")
-    logger.info(f"======================================================================")
+    logger.info(
+        f"======================================================================"
+    )
     logger.info(f"Report: {report_path}")
     logger.info(f"Data: {json_path}")
-    logger.info(f"======================================================================")
+    logger.info(
+        f"======================================================================"
+    )
 
 
 if __name__ == "__main__":
     asyncio.run(main())
-

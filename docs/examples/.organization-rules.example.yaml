@@ -1,0 +1,139 @@
+# Organization Rules Configuration - Example
+#
+# This file demonstrates how to customize the organization enforcement rules.
+# Copy this file to your project root as .organization-rules.yaml and modify as needed.
+#
+# Usage:
+#   python scripts/enforce_organization.py                    # Uses .organization-rules.yaml if present
+#   python scripts/enforce_organization.py --config custom.yaml  # Uses specified config file
+
+# ==============================================================================
+# CUSTOM RULES
+# ==============================================================================
+# Add new file patterns and their destination directories.
+# Patterns use glob syntax (* = wildcard).
+#
+# Example patterns:
+#   "*_CUSTOM.md" - Matches any file ending with _CUSTOM.md
+#   "backup_*.json" - Matches backup_<anything>.json
+#   "*.tmp" - Matches all .tmp files
+
+custom_rules:
+  # Example: Archive custom completion documents
+  "*_COMPLETED.md": "docs/archive/completed/"
+
+  # Example: Organize backup files
+  "backup_*.json": "backups/"
+  "backup_*.md": "backups/"
+
+  # Example: Organize temporary files
+  "*.tmp": "temp/"
+  "temp_*.py": "temp/"
+
+  # Example: Organize specific project files
+  "*_ANALYSIS.md": "docs/archive/analysis/"
+  "*_BENCHMARK.md": "docs/archive/benchmarks/"
+  "*_MIGRATION.md": "docs/archive/migrations/"
+
+# ==============================================================================
+# OVERRIDE RULES
+# ==============================================================================
+# Override existing default rules to change their destination.
+# This is useful if you want to organize files differently than the defaults.
+
+override_rules:
+  # Example: Move summaries to a different location
+  "*_SUMMARY.md": "docs/summaries/"
+
+  # Example: Keep test files in root-level tests/ instead of tests/integration/
+  "test_*.py": "tests/"
+
+  # Example: Put log files in a dated subdirectory
+  "*.log": "logs/2025-10/"
+
+# ==============================================================================
+# DISABLED PATTERNS
+# ==============================================================================
+# Remove patterns from enforcement entirely.
+# Files matching these patterns will NOT be flagged as violations.
+
+disabled_patterns:
+  # Example: Don't enforce organization of JSON result files
+  - "*_RESULTS.json"
+
+  # Example: Allow test files in root
+  - "test_*.py"
+
+  # Example: Don't enforce log file organization
+  - "*.log"
+
+# ==============================================================================
+# ADDITIONAL ALLOWED IN ROOT
+# ==============================================================================
+# Specific files that are allowed to stay in the project root directory.
+# These files will NOT be flagged as violations.
+#
+# Default allowed files (already included):
+#   - README.md
+#   - LICENSE
+#   - CHANGELOG.md
+#   - requirements.txt
+#   - pyproject.toml
+#   - setup.py
+#   - Dockerfile
+#   - .gitignore
+#   - .pre-commit-config.yaml
+#   - PROJECT_STATUS.md
+#   - PROJECT_MASTER_TRACKER.md
+#   - PRIORITY_ACTION_LIST.md
+#   - SESSION_SUMMARY.md
+
+additional_allowed_in_root:
+  # Example: Project tracking documents
+  - "IMPLEMENTATION_PROGRESS.md"
+  - "PROJECT_TRACKER.md"
+  - "ROADMAP.md"
+
+  # Example: Important reference documents
+  - "ARCHITECTURE.md"
+  - "CONTRIBUTING.md"
+  - "CODE_OF_CONDUCT.md"
+
+  # Example: Deployment/CI files
+  - "docker-compose.yml"
+  - ".gitlab-ci.yml"
+  - ".travis.yml"
+  - "Makefile"
+
+# ==============================================================================
+# USAGE EXAMPLES
+# ==============================================================================
+#
+# 1. Basic usage with config file:
+#    python scripts/enforce_organization.py
+#
+# 2. Check what would be organized:
+#    python scripts/enforce_organization.py --stats
+#
+# 3. Apply organization with verbose output:
+#    python scripts/enforce_organization.py --fix --verbose
+#
+# 4. Use custom config file:
+#    python scripts/enforce_organization.py --config my-rules.yaml
+#
+# 5. Test config without making changes:
+#    python scripts/enforce_organization.py --verbose --stats
+#
+# ==============================================================================
+# TIPS
+# ==============================================================================
+#
+# 1. Start with a small number of custom rules and test them
+# 2. Use --stats to see what files would be affected
+# 3. Use --verbose to see config loading messages
+# 4. Test with --fix on a branch before committing
+# 5. Patterns are case-sensitive on Linux/Mac, case-insensitive on Windows
+# 6. More specific patterns take precedence over general ones
+# 7. The script will create destination directories if they don't exist
+#
+# ==============================================================================

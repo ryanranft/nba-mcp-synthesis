@@ -1,0 +1,38 @@
+{
+  "pipeline_id": "player_stats_20251025_184704",
+  "dataset_name": "player_stats",
+  "start_time": "2025-10-25T18:47:04.499406",
+  "end_time": "2025-10-25T18:47:04.499979",
+  "current_stage": "completed",
+  "passed": true,
+  "duration_seconds": 0.000573,
+  "issues": [
+    {
+      "stage": "ingestion",
+      "severity": "warning",
+      "message": "Dataset has only 3 rows",
+      "field": null,
+      "row_count": 3,
+      "details": {}
+    }
+  ],
+  "metrics": {},
+  "data_summary": {
+    "row_count": 3,
+    "column_count": 5,
+    "columns": [
+      "player_id",
+      "player_name",
+      "ssn",
+      "email",
+      "points"
+    ],
+    "dtypes": {
+      "player_id": "int64",
+      "player_name": "object",
+      "ssn": "object",
+      "email": "object",
+      "points": "int64"
+    }
+  }
+}

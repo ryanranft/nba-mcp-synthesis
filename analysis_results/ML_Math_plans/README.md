@@ -1,6 +1,6 @@
 # 🚀 Implementation Plans: ML Math
 
-**Generated:** 2025-10-21T20:22:58.904497
+**Generated:** 2025-10-25T10:17:47.292462
 **Total Plans:** 13
 
 ---
@@ -22,7 +22,7 @@
 8. [Implement a Gaussian Mixture Model for Player Clustering](08_Implement_a_Gaussian_Mixture_Model_for_Player_Clustering.md)
 9. [Implement an Iterative Solver for Least Squares](09_Implement_an_Iterative_Solver_for_Least_Squares.md)
 10. [Incorporate a regularization parameter](10_Incorporate_a_regularization_parameter.md)
-11. [Model Player Activity using State-Space Models](11_Model_Player_Activity_using_State-Space_Models.md)
+11. [Model Player Activity using State-Space Models](11_Model_Player_Activity_using_State_Space_Models.md)
 12. [Model Selection for Regression](12_Model_Selection_for_Regression.md)
 13. [Use PCA for Dimensionality Reduction of Player Statistics](13_Use_PCA_for_Dimensionality_Reduction_of_Player_Statistics.md)
 

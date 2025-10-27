@@ -1,0 +1,135 @@
+{
+  "expectation_suite_name": "game_data_suite",
+  "data_asset_type": "Dataset",
+  "meta": {
+    "great_expectations_version": "0.18.0",
+    "description": "Expectation suite for NBA game data validation",
+    "created_by": "NBA MCP Synthesis - Phase 10A Week 2",
+    "created_at": "2025-10-25"
+  },
+  "expectations": [
+    {
+      "expectation_type": "expect_table_row_count_to_be_between",
+      "kwargs": {
+        "min_value": 1,
+        "max_value": 1500
+      },
+      "meta": {
+        "notes": "NBA regular season has ~1230 games, playoffs add more"
+      }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {
+        "column": "game_id"
+      }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {
+        "column": "date"
+      }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {
+        "column": "home_team"
+      }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {
+        "column": "away_team"
+      }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {
+        "column": "home_score"
+      }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {
+        "column": "away_score"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_unique",
+      "kwargs": {
+        "column": "game_id"
+      },
+      "meta": {
+        "notes": "Game IDs must be unique"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "game_id"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "date"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "home_team"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "away_team"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "home_score",
+        "min_value": 50,
+        "max_value": 200
+      },
+      "meta": {
+        "notes": "NBA scores typically range 80-130, allow 50-200 for outliers"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "away_score",
+        "min_value": 50,
+        "max_value": 200
+      },
+      "meta": {
+        "notes": "NBA scores typically range 80-130, allow 50-200 for outliers"
+      }
+    },
+    {
+      "expectation_type": "expect_column_mean_to_be_between",
+      "kwargs": {
+        "column": "home_score",
+        "min_value": 95.0,
+        "max_value": 120.0
+      },
+      "meta": {
+        "notes": "Average home score should be around 105-110"
+      }
+    },
+    {
+      "expectation_type": "expect_column_mean_to_be_between",
+      "kwargs": {
+        "column": "away_score",
+        "min_value": 95.0,
+        "max_value": 120.0
+      },
+      "meta": {
+        "notes": "Average away score should be around 105-110"
+      }
+    }
+  ]
+}

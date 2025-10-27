@@ -29,8 +29,7 @@ from datetime import datetime
 import re
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -38,6 +37,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class PriorityScore:
     """Priority score breakdown for a recommendation"""
+
     impact_score: float  # 0-10
     effort_score: float  # 0-10 (higher = less effort)
     data_score: float  # 0-10
@@ -62,29 +62,29 @@ class RecommendationPrioritizer:
 
     # Scoring weights
     WEIGHTS = {
-        'impact': 0.35,
-        'effort': 0.25,
-        'data': 0.20,
-        'feasibility': 0.15,
-        'dependencies': 0.05,
+        "impact": 0.35,
+        "effort": 0.25,
+        "data": 0.20,
+        "feasibility": 0.15,
+        "dependencies": 0.05,
     }
 
     # Priority mappings
     PRIORITY_VALUES = {
-        'CRITICAL': 10,
-        'IMPORTANT': 8,
-        'NICE_TO_HAVE': 5,
-        'OPTIONAL': 3,
+        "CRITICAL": 10,
+        "IMPORTANT": 8,
+        "NICE_TO_HAVE": 5,
+        "OPTIONAL": 3,
     }
 
     # Time estimate difficulty (hours)
     TIME_THRESHOLDS = {
-        'trivial': 2,      # <= 2 hours
-        'easy': 4,         # <= 4 hours
-        'moderate': 8,     # <= 8 hours
-        'challenging': 16, # <= 16 hours
-        'complex': 40,     # <= 40 hours
-        'epic': float('inf'),  # > 40 hours
+        "trivial": 2,  # <= 2 hours
+        "easy": 4,  # <= 4 hours
+        "moderate": 8,  # <= 8 hours
+        "challenging": 16,  # <= 16 hours
+        "complex": 40,  # <= 40 hours
+        "epic": float("inf"),  # > 40 hours
     }
 
     def __init__(self, project_inventory: Optional[Dict] = None):
@@ -102,18 +102,17 @@ class RecommendationPrioritizer:
         """Extract table.column schema from project inventory"""
         schema = {}
 
-        inventory = self.project_inventory.get('data_inventory', {})
-        tables = inventory.get('schema', {}).get('tables', {})
+        inventory = self.project_inventory.get("data_inventory", {})
+        tables = inventory.get("schema", {}).get("tables", {})
 
         for table_name, table_info in tables.items():
-            column_names = table_info.get('column_names', [])
+            column_names = table_info.get("column_names", [])
             schema[table_name] = column_names
 
         return schema
 
     def prioritize_recommendations(
-        self,
-        recommendations: List[Dict[str, Any]]
+        self, recommendations: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
         """
         Prioritize a list of recommendations.
@@ -134,31 +133,35 @@ class RecommendationPrioritizer:
                 score = self.score_recommendation(rec)
 
                 # Add score to recommendation
-                rec['priority_score'] = {
-                    'impact': score.impact_score,
-                    'effort': score.effort_score,
-                    'data': score.data_score,
-                    'feasibility': score.feasibility_score,
-                    'dependencies': score.dependency_score,
-                    'total': score.total_score,
-                    'tier': score.priority_tier,
-                    'category': score.category,
+                rec["priority_score"] = {
+                    "impact": score.impact_score,
+                    "effort": score.effort_score,
+                    "data": score.data_score,
+                    "feasibility": score.feasibility_score,
+                    "dependencies": score.dependency_score,
+                    "total": score.total_score,
+                    "tier": score.priority_tier,
+                    "category": score.category,
                 }
 
                 scored_recs.append(rec)
 
             except Exception as e:
-                logger.warning(f"⚠️  Failed to score recommendation '{rec.get('title', 'Unknown')}': {e}")
+                logger.warning(
+                    f"⚠️  Failed to score recommendation '{rec.get('title', 'Unknown')}': {e}"
+                )
                 # Add default low score
-                rec['priority_score'] = {
-                    'total': 0.0,
-                    'tier': 'LOW',
-                    'category': 'Unknown',
+                rec["priority_score"] = {
+                    "total": 0.0,
+                    "tier": "LOW",
+                    "category": "Unknown",
                 }
                 scored_recs.append(rec)
 
         # Sort by total score (descending)
-        scored_recs.sort(key=lambda r: r.get('priority_score', {}).get('total', 0), reverse=True)
+        scored_recs.sort(
+            key=lambda r: r.get("priority_score", {}).get("total", 0), reverse=True
+        )
 
         logger.info("✅ Prioritization complete")
         self._log_priority_summary(scored_recs)
@@ -177,18 +180,20 @@ class RecommendationPrioritizer:
 
         # Calculate weighted total
         total_score = (
-            impact_score * self.WEIGHTS['impact'] +
-            effort_score * self.WEIGHTS['effort'] +
-            data_score * self.WEIGHTS['data'] +
-            feasibility_score * self.WEIGHTS['feasibility'] +
-            dependency_score * self.WEIGHTS['dependencies']
+            impact_score * self.WEIGHTS["impact"]
+            + effort_score * self.WEIGHTS["effort"]
+            + data_score * self.WEIGHTS["data"]
+            + feasibility_score * self.WEIGHTS["feasibility"]
+            + dependency_score * self.WEIGHTS["dependencies"]
         )
 
         # Determine priority tier
         priority_tier = self._determine_tier(recommendation, total_score)
 
         # Determine category
-        category = self._categorize_recommendation(impact_score, effort_score, data_score)
+        category = self._categorize_recommendation(
+            impact_score, effort_score, data_score
+        )
 
         return PriorityScore(
             impact_score=impact_score,
@@ -206,22 +211,22 @@ class RecommendationPrioritizer:
         score = 0.0
 
         # Base score from priority field
-        priority = rec.get('priority', 'NICE_TO_HAVE')
+        priority = rec.get("priority", "NICE_TO_HAVE")
         score += self.PRIORITY_VALUES.get(priority, 5)
 
         # Adjust for strategic keywords
-        text = (rec.get('description', '') + ' ' + rec.get('title', '')).lower()
+        text = (rec.get("description", "") + " " + rec.get("title", "")).lower()
 
         impact_keywords = {
-            'prediction': 1.0,
-            'accuracy': 0.8,
-            'performance': 0.8,
-            'model': 0.7,
-            'optimization': 0.7,
-            'real-time': 0.9,
-            'production': 0.8,
-            'scalability': 0.7,
-            'monitoring': 0.6,
+            "prediction": 1.0,
+            "accuracy": 0.8,
+            "performance": 0.8,
+            "model": 0.7,
+            "optimization": 0.7,
+            "real-time": 0.9,
+            "production": 0.8,
+            "scalability": 0.7,
+            "monitoring": 0.6,
         }
 
         for keyword, weight in impact_keywords.items():
@@ -235,11 +240,11 @@ class RecommendationPrioritizer:
         """Score effort (0-10, higher = less effort)"""
 
         # Extract time estimate
-        time_str = rec.get('time_estimate', '8 hours')
+        time_str = rec.get("time_estimate", "8 hours")
         hours = self._parse_hours(time_str)
 
         # Map hours to difficulty
-        difficulty = 'moderate'
+        difficulty = "moderate"
         for level, threshold in self.TIME_THRESHOLDS.items():
             if hours <= threshold:
                 difficulty = level
@@ -247,18 +252,18 @@ class RecommendationPrioritizer:
 
         # Score based on difficulty (inverse - less time = higher score)
         difficulty_scores = {
-            'trivial': 10.0,
-            'easy': 9.0,
-            'moderate': 7.0,
-            'challenging': 5.0,
-            'complex': 3.0,
-            'epic': 1.0,
+            "trivial": 10.0,
+            "easy": 9.0,
+            "moderate": 7.0,
+            "challenging": 5.0,
+            "complex": 3.0,
+            "epic": 1.0,
         }
 
         score = difficulty_scores.get(difficulty, 5.0)
 
         # Adjust for number of implementation steps
-        steps = rec.get('implementation_steps', [])
+        steps = rec.get("implementation_steps", [])
         if isinstance(steps, list):
             if len(steps) > 10:
                 score -= 1.0
@@ -275,7 +280,7 @@ class RecommendationPrioritizer:
             return 7.0
 
         # Extract data references from text
-        text = rec.get('description', '') + ' ' + rec.get('technical_details', '')
+        text = rec.get("description", "") + " " + rec.get("technical_details", "")
         data_refs = self._extract_data_references(text)
 
         if not data_refs:
@@ -309,12 +314,12 @@ class RecommendationPrioritizer:
         score = 7.0  # Default: assume feasible
 
         # Check validation results if available
-        validation = rec.get('validation', {})
+        validation = rec.get("validation", {})
 
         if validation:
-            passed = validation.get('passed', True)
-            errors = validation.get('errors_count', 0)
-            warnings = validation.get('warnings_count', 0)
+            passed = validation.get("passed", True)
+            errors = validation.get("errors_count", 0)
+            warnings = validation.get("warnings_count", 0)
 
             if passed and errors == 0:
                 score = 10.0
@@ -324,9 +329,11 @@ class RecommendationPrioritizer:
                 score = 8.0 - (warnings * 0.5)
 
         # Check for blocker keywords
-        text = (rec.get('description', '') + ' ' + rec.get('technical_details', '')).lower()
+        text = (
+            rec.get("description", "") + " " + rec.get("technical_details", "")
+        ).lower()
 
-        blocker_keywords = ['experimental', 'unstable', 'deprecated', 'beta', 'alpha']
+        blocker_keywords = ["experimental", "unstable", "deprecated", "beta", "alpha"]
         for keyword in blocker_keywords:
             if keyword in text:
                 score -= 2.0
@@ -337,11 +344,16 @@ class RecommendationPrioritizer:
         """Score dependency freedom (0-10, higher = fewer dependencies)"""
 
         # Check for dependency keywords
-        text = (rec.get('description', '') + ' ' + rec.get('prerequisites', '')).lower()
+        text = (rec.get("description", "") + " " + rec.get("prerequisites", "")).lower()
 
         dependency_keywords = [
-            'requires', 'depends on', 'prerequisite', 'must first',
-            'before this', 'after', 'once you have'
+            "requires",
+            "depends on",
+            "prerequisite",
+            "must first",
+            "before this",
+            "after",
+            "once you have",
         ]
 
         dependency_count = sum(1 for kw in dependency_keywords if kw in text)
@@ -360,25 +372,22 @@ class RecommendationPrioritizer:
         """Determine priority tier based on score and original priority"""
 
         # Honor original priority if CRITICAL
-        original_priority = rec.get('priority', 'NICE_TO_HAVE')
-        if original_priority == 'CRITICAL' and total_score >= 6.0:
-            return 'CRITICAL'
+        original_priority = rec.get("priority", "NICE_TO_HAVE")
+        if original_priority == "CRITICAL" and total_score >= 6.0:
+            return "CRITICAL"
 
         # Score-based tiers
         if total_score >= 8.0:
-            return 'CRITICAL'
+            return "CRITICAL"
         elif total_score >= 6.5:
-            return 'HIGH'
+            return "HIGH"
         elif total_score >= 4.5:
-            return 'MEDIUM'
+            return "MEDIUM"
         else:
-            return 'LOW'
+            return "LOW"
 
     def _categorize_recommendation(
-        self,
-        impact: float,
-        effort: float,
-        data: float
+        self, impact: float, effort: float, data: float
     ) -> str:
         """Categorize recommendation by impact/effort matrix"""
 
@@ -407,14 +416,14 @@ class RecommendationPrioritizer:
         data_refs = {}
 
         # Pattern: table_name.column_name
-        pattern = r'\b(\w+)\.(\w+)\b'
+        pattern = r"\b(\w+)\.(\w+)\b"
 
         for match in re.finditer(pattern, text):
             table = match.group(1)
             column = match.group(2)
 
             # Filter out likely false positives
-            if table in ['self', 'this', 'that', 'cls', 'df', 'pd', 'np']:
+            if table in ["self", "this", "that", "cls", "df", "pd", "np"]:
                 continue
 
             if table not in data_refs:
@@ -429,7 +438,8 @@ class RecommendationPrioritizer:
         try:
             # Extract number from string like "8 hours" or "8-12 hours"
             import re
-            numbers = re.findall(r'\d+', time_str)
+
+            numbers = re.findall(r"\d+", time_str)
             if numbers:
                 # Take average if range
                 if len(numbers) > 1:
@@ -446,9 +456,9 @@ class RecommendationPrioritizer:
         tiers = {}
 
         for rec in recommendations:
-            score = rec.get('priority_score', {})
-            category = score.get('category', 'Unknown')
-            tier = score.get('tier', 'MEDIUM')
+            score = rec.get("priority_score", {})
+            category = score.get("category", "Unknown")
+            tier = score.get("tier", "MEDIUM")
 
             categories[category] = categories.get(category, 0) + 1
             tiers[tier] = tiers.get(tier, 0) + 1
@@ -459,14 +469,12 @@ class RecommendationPrioritizer:
             logger.info(f"    - {cat}: {count}")
 
         logger.info("  Priority Tiers:")
-        for tier in ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']:
+        for tier in ["CRITICAL", "HIGH", "MEDIUM", "LOW"]:
             count = tiers.get(tier, 0)
             logger.info(f"    - {tier}: {count}")
 
     def generate_priority_report(
-        self,
-        recommendations: List[Dict],
-        output_path: Optional[str] = None
+        self, recommendations: List[Dict], output_path: Optional[str] = None
     ) -> str:
         """Generate markdown priority report"""
 
@@ -483,72 +491,82 @@ class RecommendationPrioritizer:
         # Group by category
         categories = {}
         for rec in recommendations:
-            cat = rec.get('priority_score', {}).get('category', 'Unknown')
+            cat = rec.get("priority_score", {}).get("category", "Unknown")
             if cat not in categories:
                 categories[cat] = []
             categories[cat].append(rec)
 
         # Quick Wins section
         if "Quick Win" in categories:
-            report_lines.extend([
-                "## 🎯 Quick Wins (High Impact, Low Effort)",
-                "",
-                "These recommendations deliver significant value with minimal effort.",
-                "**Recommendation: Implement these first!**",
-                "",
-            ])
+            report_lines.extend(
+                [
+                    "## 🎯 Quick Wins (High Impact, Low Effort)",
+                    "",
+                    "These recommendations deliver significant value with minimal effort.",
+                    "**Recommendation: Implement these first!**",
+                    "",
+                ]
+            )
 
             for rec in categories["Quick Win"][:10]:  # Top 10
                 self._add_recommendation_to_report(report_lines, rec)
 
         # Strategic Projects section
         if "Strategic Project" in categories:
-            report_lines.extend([
-                "",
-                "## 🚀 Strategic Projects (High Impact, Higher Effort)",
-                "",
-                "These recommendations require more effort but deliver major value.",
-                "**Recommendation: Plan these for future sprints.**",
-                "",
-            ])
+            report_lines.extend(
+                [
+                    "",
+                    "## 🚀 Strategic Projects (High Impact, Higher Effort)",
+                    "",
+                    "These recommendations require more effort but deliver major value.",
+                    "**Recommendation: Plan these for future sprints.**",
+                    "",
+                ]
+            )
 
             for rec in categories["Strategic Project"][:10]:
                 self._add_recommendation_to_report(report_lines, rec)
 
         # Medium Priority section
         if "Medium Priority" in categories:
-            report_lines.extend([
-                "",
-                "## 📋 Medium Priority",
-                "",
-                f"**{len(categories['Medium Priority'])} recommendations**",
-                "",
-                "See full prioritized list for details.",
-                "",
-            ])
+            report_lines.extend(
+                [
+                    "",
+                    "## 📋 Medium Priority",
+                    "",
+                    f"**{len(categories['Medium Priority'])} recommendations**",
+                    "",
+                    "See full prioritized list for details.",
+                    "",
+                ]
+            )
 
         # Low Priority section
         if "Low Priority" in categories:
-            report_lines.extend([
-                "",
-                "## 📉 Low Priority",
-                "",
-                f"**{len(categories['Low Priority'])} recommendations**",
-                "",
-                "These can be deferred or skipped.",
-                "",
-            ])
+            report_lines.extend(
+                [
+                    "",
+                    "## 📉 Low Priority",
+                    "",
+                    f"**{len(categories['Low Priority'])} recommendations**",
+                    "",
+                    "These can be deferred or skipped.",
+                    "",
+                ]
+            )
 
         # Blocked section
-        blocked_cats = [c for c in categories.keys() if 'Blocked' in c]
+        blocked_cats = [c for c in categories.keys() if "Blocked" in c]
         if blocked_cats:
-            report_lines.extend([
-                "",
-                "## ⛔ Blocked Recommendations",
-                "",
-                "These recommendations have blockers that must be resolved first.",
-                "",
-            ])
+            report_lines.extend(
+                [
+                    "",
+                    "## ⛔ Blocked Recommendations",
+                    "",
+                    "These recommendations have blockers that must be resolved first.",
+                    "",
+                ]
+            )
 
             for cat in blocked_cats:
                 for rec in categories[cat][:5]:
@@ -559,7 +577,7 @@ class RecommendationPrioritizer:
         # Save to file if path provided
         if output_path:
             Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-            with open(output_path, 'w') as f:
+            with open(output_path, "w") as f:
                 f.write(report)
             logger.info(f"💾 Priority report saved: {output_path}")
 
@@ -567,24 +585,26 @@ class RecommendationPrioritizer:
 
     def _add_recommendation_to_report(self, lines: List[str], rec: Dict):
         """Add recommendation details to report"""
-        score = rec.get('priority_score', {})
+        score = rec.get("priority_score", {})
 
-        lines.extend([
-            f"### {rec.get('title', 'Untitled')}",
-            "",
-            f"**Priority Score**: {score.get('total', 0):.2f}/10 | "
-            f"**Tier**: {score.get('tier', 'MEDIUM')} | "
-            f"**Effort**: {rec.get('time_estimate', 'Unknown')}",
-            "",
-            f"{rec.get('description', 'No description')[:200]}...",
-            "",
-            "**Scores**:",
-            f"- Impact: {score.get('impact', 0):.1f}/10",
-            f"- Effort: {score.get('effort', 0):.1f}/10",
-            f"- Data: {score.get('data', 0):.1f}/10",
-            f"- Feasibility: {score.get('feasibility', 0):.1f}/10",
-            "",
-        ])
+        lines.extend(
+            [
+                f"### {rec.get('title', 'Untitled')}",
+                "",
+                f"**Priority Score**: {score.get('total', 0):.2f}/10 | "
+                f"**Tier**: {score.get('tier', 'MEDIUM')} | "
+                f"**Effort**: {rec.get('time_estimate', 'Unknown')}",
+                "",
+                f"{rec.get('description', 'No description')[:200]}...",
+                "",
+                "**Scores**:",
+                f"- Impact: {score.get('impact', 0):.1f}/10",
+                f"- Effort: {score.get('effort', 0):.1f}/10",
+                f"- Data: {score.get('data', 0):.1f}/10",
+                f"- Feasibility: {score.get('feasibility', 0):.1f}/10",
+                "",
+            ]
+        )
 
 
 def main():
@@ -592,15 +612,17 @@ def main():
     import argparse
     import sys
 
-    parser = argparse.ArgumentParser(description='Prioritize recommendations')
-    parser.add_argument('--recommendations', required=True, help='Path to recommendations JSON')
-    parser.add_argument('--inventory', help='Path to project inventory JSON')
-    parser.add_argument('--output', help='Output path for prioritized JSON')
-    parser.add_argument('--report', help='Output path for markdown report')
+    parser = argparse.ArgumentParser(description="Prioritize recommendations")
+    parser.add_argument(
+        "--recommendations", required=True, help="Path to recommendations JSON"
+    )
+    parser.add_argument("--inventory", help="Path to project inventory JSON")
+    parser.add_argument("--output", help="Output path for prioritized JSON")
+    parser.add_argument("--report", help="Output path for markdown report")
     args = parser.parse_args()
 
     # Load recommendations
-    with open(args.recommendations, 'r') as f:
+    with open(args.recommendations, "r") as f:
         data = json.load(f)
 
     # Handle different file structures
@@ -608,8 +630,8 @@ def main():
         recommendations = data
     elif isinstance(data, dict):
         # Check if it's wrapped in metadata
-        if 'recommendations' in data:
-            recommendations = data['recommendations']
+        if "recommendations" in data:
+            recommendations = data["recommendations"]
         else:
             recommendations = [data]
     else:
@@ -618,7 +640,7 @@ def main():
     # Load inventory if provided
     inventory = None
     if args.inventory and Path(args.inventory).exists():
-        with open(args.inventory, 'r') as f:
+        with open(args.inventory, "r") as f:
             inventory = json.load(f)
 
     # Prioritize
@@ -627,7 +649,7 @@ def main():
 
     # Save prioritized JSON
     if args.output:
-        with open(args.output, 'w') as f:
+        with open(args.output, "w") as f:
             json.dump(prioritized, f, indent=2)
         print(f"✅ Prioritized recommendations saved: {args.output}")
 
@@ -637,17 +659,19 @@ def main():
         print(f"✅ Priority report saved: {args.report}")
     else:
         # Print top 10
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("TOP 10 PRIORITIES")
-        print("="*80 + "\n")
+        print("=" * 80 + "\n")
 
         for i, rec in enumerate(prioritized[:10], 1):
-            score = rec.get('priority_score', {})
+            score = rec.get("priority_score", {})
             print(f"{i}. {rec.get('title', 'Untitled')}")
-            print(f"   Score: {score.get('total', 0):.2f}/10 | {score.get('category', 'Unknown')}")
+            print(
+                f"   Score: {score.get('total', 0):.2f}/10 | {score.get('category', 'Unknown')}"
+            )
             print(f"   Effort: {rec.get('time_estimate', 'Unknown')}")
             print()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

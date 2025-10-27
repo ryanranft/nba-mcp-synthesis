@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class RecommendationMatch:
     """Match between a recommendation and existing module."""
+
     recommendation_id: str
     recommendation_title: str
     matched_module: Optional[str]
@@ -41,6 +42,7 @@ class RecommendationMatch:
 @dataclass
 class IntegrationPlan:
     """Complete integration plan for all recommendations."""
+
     total_recommendations: int
     matched_to_existing: int
     new_modules_needed: int
@@ -70,7 +72,7 @@ class SmartIntegrator:
         self,
         simulator_analysis: Dict[str, any],
         recommendations: List[Dict[str, any]],
-        match_threshold: float = 0.6
+        match_threshold: float = 0.6,
     ):
         """
         Initialize smart integrator.
@@ -86,7 +88,9 @@ class SmartIntegrator:
 
         logger.info(f"SmartIntegrator initialized")
         logger.info(f"  Analyzing {len(recommendations)} recommendations")
-        logger.info(f"  Against {self.analysis.get('total_modules', 0)} existing modules")
+        logger.info(
+            f"  Against {self.analysis.get('total_modules', 0)} existing modules"
+        )
 
     def generate_integration_plan(self) -> IntegrationPlan:
         """
@@ -103,8 +107,8 @@ class SmartIntegrator:
 
         # Process each recommendation
         for i, rec in enumerate(self.recommendations):
-            rec_id = rec.get('id', f"rec_{i}")
-            rec_title = rec.get('title', rec.get('recommendation', 'Unknown'))
+            rec_id = rec.get("id", f"rec_{i}")
+            rec_title = rec.get("title", rec.get("recommendation", "Unknown"))
 
             # Find best matching module
             match = self._find_best_match(rec_id, rec_title, rec)
@@ -121,10 +125,10 @@ class SmartIntegrator:
 
         # Create summary
         summary = {
-            'match_rate': f"{matched_count}/{len(self.recommendations)} ({matched_count/len(self.recommendations)*100:.1f}%)",
-            'new_modules': new_module_count,
-            'strategies': self._count_strategies(placements),
-            'total_effort': self._estimate_total_effort(placements)
+            "match_rate": f"{matched_count}/{len(self.recommendations)} ({matched_count/len(self.recommendations)*100:.1f}%)",
+            "new_modules": new_module_count,
+            "strategies": self._count_strategies(placements),
+            "total_effort": self._estimate_total_effort(placements),
         }
 
         plan = IntegrationPlan(
@@ -133,18 +137,17 @@ class SmartIntegrator:
             new_modules_needed=new_module_count,
             placements=placements,
             implementation_order=implementation_order,
-            summary=summary
+            summary=summary,
         )
 
-        logger.info(f"Integration plan complete: {matched_count} matched, {new_module_count} new modules")
+        logger.info(
+            f"Integration plan complete: {matched_count} matched, {new_module_count} new modules"
+        )
 
         return plan
 
     def _find_best_match(
-        self,
-        rec_id: str,
-        rec_title: str,
-        rec: Dict[str, any]
+        self, rec_id: str, rec_title: str, rec: Dict[str, any]
     ) -> RecommendationMatch:
         """
         Find best matching module for a recommendation.
@@ -157,7 +160,7 @@ class SmartIntegrator:
         Returns:
             RecommendationMatch with placement decision
         """
-        modules = self.analysis.get('modules', {})
+        modules = self.analysis.get("modules", {})
 
         if not modules:
             # No modules to match against - create new
@@ -184,41 +187,34 @@ class SmartIntegrator:
             return self._create_new_module_placement(rec_id, rec_title, rec)
 
     def _calculate_module_similarity(
-        self,
-        rec_title: str,
-        rec: Dict[str, any],
-        module_info: Dict[str, any]
+        self, rec_title: str, rec: Dict[str, any], module_info: Dict[str, any]
     ) -> float:
         """Calculate similarity between recommendation and module."""
         # Compare title/name
-        module_name = module_info.get('name', '')
+        module_name = module_info.get("name", "")
         title_similarity = SequenceMatcher(
-            None,
-            rec_title.lower(),
-            module_name.lower()
+            None, rec_title.lower(), module_name.lower()
         ).ratio()
 
         # Compare purpose/description
-        rec_desc = rec.get('description', rec.get('content', ''))
-        module_purpose = module_info.get('purpose', '')
+        rec_desc = rec.get("description", rec.get("content", ""))
+        module_purpose = module_info.get("purpose", "")
 
         desc_similarity = SequenceMatcher(
-            None,
-            rec_desc.lower()[:200],
-            module_purpose.lower()[:200]
+            None, rec_desc.lower()[:200], module_purpose.lower()[:200]
         ).ratio()
 
         # Compare integration points
-        rec_category = rec.get('category', '').lower()
-        module_points = [p.lower() for p in module_info.get('integration_points', [])]
+        rec_category = rec.get("category", "").lower()
+        module_points = [p.lower() for p in module_info.get("integration_points", [])]
 
-        category_match = 1.0 if any(rec_category in point for point in module_points) else 0.0
+        category_match = (
+            1.0 if any(rec_category in point for point in module_points) else 0.0
+        )
 
         # Weighted combination
         similarity = (
-            title_similarity * 0.4 +
-            desc_similarity * 0.4 +
-            category_match * 0.2
+            title_similarity * 0.4 + desc_similarity * 0.4 + category_match * 0.2
         )
 
         return similarity
@@ -229,30 +225,27 @@ class SmartIntegrator:
         rec_title: str,
         rec: Dict[str, any],
         module_name: str,
-        match_score: float
+        match_score: float,
     ) -> RecommendationMatch:
         """Create placement to extend existing module."""
-        modules = self.analysis.get('modules', {})
+        modules = self.analysis.get("modules", {})
         module_info = modules.get(module_name, {})
-        module_path = module_info.get('path', f'scripts/{module_name}.py')
+        module_path = module_info.get("path", f"scripts/{module_name}.py")
 
         return RecommendationMatch(
             recommendation_id=rec_id,
             recommendation_title=rec_title,
             matched_module=module_name,
             match_score=match_score,
-            integration_strategy='extend',
+            integration_strategy="extend",
             target_location=module_path,
             rationale=f"Extends existing {module_name} (similarity: {match_score:.1%})",
-            dependencies=module_info.get('dependencies', []),
-            estimated_effort=self._estimate_effort(rec, module_info, 'extend')
+            dependencies=module_info.get("dependencies", []),
+            estimated_effort=self._estimate_effort(rec, module_info, "extend"),
         )
 
     def _create_new_module_placement(
-        self,
-        rec_id: str,
-        rec_title: str,
-        rec: Dict[str, any]
+        self, rec_id: str, rec_title: str, rec: Dict[str, any]
     ) -> RecommendationMatch:
         """Create placement for new module."""
         # Suggest module name based on recommendation
@@ -267,75 +260,71 @@ class SmartIntegrator:
             recommendation_title=rec_title,
             matched_module=None,
             match_score=0.0,
-            integration_strategy='new_module',
+            integration_strategy="new_module",
             target_location=target_location,
             rationale=f"No existing module found - create new {module_name}",
             dependencies=dependencies,
-            estimated_effort=self._estimate_effort(rec, None, 'new_module')
+            estimated_effort=self._estimate_effort(rec, None, "new_module"),
         )
 
     def _suggest_module_name(self, rec_title: str) -> str:
         """Suggest module name from recommendation title."""
         # Convert to snake_case
         name = rec_title.lower()
-        name = name.replace(' ', '_')
-        name = ''.join(c for c in name if c.isalnum() or c == '_')
+        name = name.replace(" ", "_")
+        name = "".join(c for c in name if c.isalnum() or c == "_")
         name = name[:50]  # Limit length
 
         return name
 
     def _identify_dependencies(self, rec: Dict[str, any]) -> List[str]:
         """Identify likely dependencies for recommendation."""
-        dependencies = ['pandas', 'numpy']  # Common dependencies
+        dependencies = ["pandas", "numpy"]  # Common dependencies
 
         # Add based on category/keywords
         rec_text = str(rec).lower()
 
-        if 'machine learning' in rec_text or 'model' in rec_text:
-            dependencies.append('sklearn')
+        if "machine learning" in rec_text or "model" in rec_text:
+            dependencies.append("sklearn")
 
-        if 'database' in rec_text or 'sql' in rec_text:
-            dependencies.append('sqlalchemy')
+        if "database" in rec_text or "sql" in rec_text:
+            dependencies.append("sqlalchemy")
 
-        if 'api' in rec_text:
-            dependencies.append('requests')
+        if "api" in rec_text:
+            dependencies.append("requests")
 
-        if 'visualization' in rec_text or 'plot' in rec_text:
-            dependencies.extend(['matplotlib', 'seaborn'])
+        if "visualization" in rec_text or "plot" in rec_text:
+            dependencies.extend(["matplotlib", "seaborn"])
 
         return list(set(dependencies))
 
     def _estimate_effort(
-        self,
-        rec: Dict[str, any],
-        module_info: Optional[Dict[str, any]],
-        strategy: str
+        self, rec: Dict[str, any], module_info: Optional[Dict[str, any]], strategy: str
     ) -> str:
         """Estimate implementation effort."""
         # Base effort by strategy
-        if strategy == 'extend' and module_info:
+        if strategy == "extend" and module_info:
             # Extending existing module
-            module_size = module_info.get('lines_of_code', 0)
+            module_size = module_info.get("lines_of_code", 0)
             if module_size > 1000:
-                return 'medium'  # Large module, careful integration
+                return "medium"  # Large module, careful integration
             else:
-                return 'low'  # Small module, easy to extend
+                return "low"  # Small module, easy to extend
 
-        elif strategy == 'new_module':
+        elif strategy == "new_module":
             # Creating new module
-            complexity = rec.get('complexity', 'medium')
-            if complexity == 'high' or 'complex' in str(rec).lower():
-                return 'high'
-            elif complexity == 'low' or 'simple' in str(rec).lower():
-                return 'low'
+            complexity = rec.get("complexity", "medium")
+            if complexity == "high" or "complex" in str(rec).lower():
+                return "high"
+            elif complexity == "low" or "simple" in str(rec).lower():
+                return "low"
             else:
-                return 'medium'
+                return "medium"
 
-        return 'medium'
+        return "medium"
 
     def _generate_implementation_order(
-        self,
-        placements: List[RecommendationMatch]
+        self, placements: List[RecommendationMatch]
     ) -> List[str]:
         """Generate optimal implementation order based on dependencies."""
         # Sort by:
@@ -343,20 +332,22 @@ class SmartIntegrator:
         # 2. Dependencies (independents first)
         # 3. Match score (better matches first)
 
-        effort_order = {'low': 0, 'medium': 1, 'high': 2}
+        effort_order = {"low": 0, "medium": 1, "high": 2}
 
         sorted_placements = sorted(
             placements,
             key=lambda p: (
                 effort_order.get(p.estimated_effort, 1),
                 len(p.dependencies),
-                -p.match_score
-            )
+                -p.match_score,
+            ),
         )
 
         return [p.recommendation_id for p in sorted_placements]
 
-    def _count_strategies(self, placements: List[RecommendationMatch]) -> Dict[str, int]:
+    def _count_strategies(
+        self, placements: List[RecommendationMatch]
+    ) -> Dict[str, int]:
         """Count how many of each strategy."""
         counts = {}
         for p in placements:
@@ -365,42 +356,38 @@ class SmartIntegrator:
 
     def _estimate_total_effort(self, placements: List[RecommendationMatch]) -> str:
         """Estimate total implementation effort."""
-        effort_points = {'low': 1, 'medium': 3, 'high': 5}
+        effort_points = {"low": 1, "medium": 3, "high": 5}
         total_points = sum(effort_points.get(p.estimated_effort, 3) for p in placements)
 
         if total_points < 10:
-            return 'low (< 1 week)'
+            return "low (< 1 week)"
         elif total_points < 30:
-            return 'medium (1-2 weeks)'
+            return "medium (1-2 weeks)"
         else:
-            return 'high (2+ weeks)'
+            return "high (2+ weeks)"
 
-    def save_integration_plan(
-        self,
-        plan: IntegrationPlan,
-        output_file: Path
-    ):
+    def save_integration_plan(self, plan: IntegrationPlan, output_file: Path):
         """Save integration plan to JSON and markdown."""
         # Save JSON
         json_data = {
-            'total_recommendations': plan.total_recommendations,
-            'matched_to_existing': plan.matched_to_existing,
-            'new_modules_needed': plan.new_modules_needed,
-            'placements': [asdict(p) for p in plan.placements],
-            'implementation_order': plan.implementation_order,
-            'summary': plan.summary
+            "total_recommendations": plan.total_recommendations,
+            "matched_to_existing": plan.matched_to_existing,
+            "new_modules_needed": plan.new_modules_needed,
+            "placements": [asdict(p) for p in plan.placements],
+            "implementation_order": plan.implementation_order,
+            "summary": plan.summary,
         }
 
-        json_file = output_file.with_suffix('.json')
-        with open(json_file, 'w') as f:
+        json_file = output_file.with_suffix(".json")
+        with open(json_file, "w") as f:
             json.dump(json_data, f, indent=2)
 
         logger.info(f"Integration plan JSON saved to {json_file}")
 
         # Save markdown
-        md_file = output_file.with_suffix('.md')
+        md_file = output_file.with_suffix(".md")
         md_content = self._generate_markdown_report(plan)
-        with open(md_file, 'w') as f:
+        with open(md_file, "w") as f:
             f.write(md_content)
 
         logger.info(f"Integration plan markdown saved to {md_file}")
@@ -426,9 +413,13 @@ class SmartIntegrator:
         lines.append("Recommendations ordered by effort and dependencies:")
         lines.append("")
         for i, rec_id in enumerate(plan.implementation_order, 1):
-            placement = next((p for p in plan.placements if p.recommendation_id == rec_id), None)
+            placement = next(
+                (p for p in plan.placements if p.recommendation_id == rec_id), None
+            )
             if placement:
-                lines.append(f"{i}. **{placement.recommendation_title}** ({placement.estimated_effort} effort)")
+                lines.append(
+                    f"{i}. **{placement.recommendation_title}** ({placement.estimated_effort} effort)"
+                )
                 lines.append(f"   - Strategy: {placement.integration_strategy}")
                 lines.append(f"   - Location: `{placement.target_location}`")
                 lines.append("")
@@ -444,7 +435,9 @@ class SmartIntegrator:
             lines.append(f"- **Target**: `{placement.target_location}`")
 
             if placement.matched_module:
-                lines.append(f"- **Matched Module**: {placement.matched_module} (score: {placement.match_score:.1%})")
+                lines.append(
+                    f"- **Matched Module**: {placement.matched_module} (score: {placement.match_score:.1%})"
+                )
 
             lines.append(f"- **Rationale**: {placement.rationale}")
             lines.append(f"- **Estimated Effort**: {placement.estimated_effort}")
@@ -454,7 +447,7 @@ class SmartIntegrator:
 
             lines.append("")
 
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
 
 if __name__ == "__main__":
@@ -474,50 +467,50 @@ if __name__ == "__main__":
     else:
         # Mock analysis
         simulator_analysis = {
-            'total_modules': 3,
-            'modules': {
-                'data_loader': {
-                    'name': 'data_loader',
-                    'purpose': 'Load and preprocess NBA data',
-                    'path': 'scripts/data_loader.py',
-                    'lines_of_code': 300,
-                    'dependencies': ['pandas', 'sqlalchemy'],
-                    'integration_points': ['data_processing']
+            "total_modules": 3,
+            "modules": {
+                "data_loader": {
+                    "name": "data_loader",
+                    "purpose": "Load and preprocess NBA data",
+                    "path": "scripts/data_loader.py",
+                    "lines_of_code": 300,
+                    "dependencies": ["pandas", "sqlalchemy"],
+                    "integration_points": ["data_processing"],
                 },
-                'feature_builder': {
-                    'name': 'feature_builder',
-                    'purpose': 'Build features for ML models',
-                    'path': 'scripts/feature_builder.py',
-                    'lines_of_code': 400,
-                    'dependencies': ['pandas', 'sklearn'],
-                    'integration_points': ['feature_engineering']
-                }
-            }
+                "feature_builder": {
+                    "name": "feature_builder",
+                    "purpose": "Build features for ML models",
+                    "path": "scripts/feature_builder.py",
+                    "lines_of_code": 400,
+                    "dependencies": ["pandas", "sklearn"],
+                    "integration_points": ["feature_engineering"],
+                },
+            },
         }
 
     # Mock recommendations
     recommendations = [
         {
-            'id': 'rec_1',
-            'title': 'Implement panel data methods',
-            'description': 'Use fixed effects models for player analysis',
-            'category': 'data_processing',
-            'priority': 'high'
+            "id": "rec_1",
+            "title": "Implement panel data methods",
+            "description": "Use fixed effects models for player analysis",
+            "category": "data_processing",
+            "priority": "high",
         },
         {
-            'id': 'rec_2',
-            'title': 'Add advanced feature engineering',
-            'description': 'Create lag features and rolling statistics',
-            'category': 'feature_engineering',
-            'priority': 'high'
+            "id": "rec_2",
+            "title": "Add advanced feature engineering",
+            "description": "Create lag features and rolling statistics",
+            "category": "feature_engineering",
+            "priority": "high",
         },
         {
-            'id': 'rec_3',
-            'title': 'Implement model monitoring',
-            'description': 'Track model drift and performance',
-            'category': 'monitoring',
-            'priority': 'medium'
-        }
+            "id": "rec_3",
+            "title": "Implement model monitoring",
+            "description": "Track model drift and performance",
+            "category": "monitoring",
+            "priority": "medium",
+        },
     ]
 
     # Initialize integrator
@@ -551,10 +544,3 @@ if __name__ == "__main__":
     print("=" * 70)
     print("Demo complete!")
     print("=" * 70)
-
-
-
-
-
-
-

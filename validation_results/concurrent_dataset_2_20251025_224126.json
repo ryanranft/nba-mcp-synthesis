@@ -1,0 +1,117 @@
+{
+  "pipeline_id": "concurrent_dataset_2_20251025_224126",
+  "dataset_name": "concurrent_dataset_2",
+  "start_time": "2025-10-25T22:41:26.056929",
+  "end_time": "2025-10-25T22:41:26.060660",
+  "current_stage": "completed",
+  "passed": true,
+  "duration_seconds": 0.003731,
+  "issues": [],
+  "metrics": {},
+  "data_summary": {
+    "row_count": 100,
+    "column_count": 10,
+    "columns": [
+      "player_id",
+      "player_name",
+      "season",
+      "games_played",
+      "ppg",
+      "rpg",
+      "apg",
+      "fg_pct",
+      "three_p_pct",
+      "ft_pct"
+    ],
+    "dtypes": {
+      "player_id": "object",
+      "player_name": "object",
+      "season": "object",
+      "games_played": "int64",
+      "ppg": "float64",
+      "rpg": "float64",
+      "apg": "float64",
+      "fg_pct": "float64",
+      "three_p_pct": "float64",
+      "ft_pct": "float64"
+    },
+    "profile": {
+      "numeric_columns": [
+        {
+          "name": "games_played",
+          "mean": 59.65,
+          "median": 58.0,
+          "std": 12.130081981952507,
+          "min": 40.0,
+          "max": 82.0
+        },
+        {
+          "name": "ppg",
+          "mean": 17.669,
+          "median": 17.45,
+          "std": 7.155921401965725,
+          "min": 5.3,
+          "max": 29.9
+        },
+        {
+          "name": "rpg",
+          "mean": 6.854000000000001,
+          "median": 7.05,
+          "std": 2.728133264910479,
+          "min": 2.1,
+          "max": 11.8
+        },
+        {
+          "name": "apg",
+          "mean": 5.481,
+          "median": 5.199999999999999,
+          "std": 2.5806856421963493,
+          "min": 1.1,
+          "max": 9.9
+        },
+        {
+          "name": "fg_pct",
+          "mean": 0.44016,
+          "median": 0.444,
+          "std": 0.053444717024021926,
+          "min": 0.35,
+          "max": 0.544
+        },
+        {
+          "name": "three_p_pct",
+          "mean": 0.35717000000000004,
+          "median": 0.3615,
+          "std": 0.057520669100223215,
+          "min": 0.255,
+          "max": 0.45
+        },
+        {
+          "name": "ft_pct",
+          "mean": 0.8199,
+          "median": 0.8205,
+          "std": 0.0743205587609879,
+          "min": 0.703,
+          "max": 0.947
+        }
+      ],
+      "categorical_columns": [
+        {
+          "name": "player_id",
+          "unique_values": 100,
+          "most_common": "player_0001"
+        },
+        {
+          "name": "player_name",
+          "unique_values": 100,
+          "most_common": "Anthony Davis"
+        },
+        {
+          "name": "season",
+          "unique_values": 1,
+          "most_common": "2024-25"
+        }
+      ],
+      "datetime_columns": []
+    }
+  }
+}

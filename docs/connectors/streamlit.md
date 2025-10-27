@@ -46,3 +46,4 @@ pytest tests/test_streamlit_connector.py
 - plotly>=5.17.0
 - pandas>=2.1.0
 
+
