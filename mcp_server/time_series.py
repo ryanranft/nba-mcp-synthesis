@@ -40,6 +40,7 @@ try:
     from statsmodels.tsa.statespace.sarimax import SARIMAX
     from statsmodels.tsa.statespace.varmax import VARMAX
     from statsmodels.tsa.seasonal import MSTL
+
     ADVANCED_TS_AVAILABLE = True
 except ImportError:
     SARIMAX = None
@@ -53,6 +54,7 @@ try:
     from statsmodels.tsa.stattools import grangercausalitytests
     from statsmodels.tsa.api import VAR
     from statsmodels.stats.stattools import jarque_bera, durbin_watson
+
     ECONOMETRIC_TS_AVAILABLE = True
 except ImportError:
     coint_johansen = None
@@ -72,6 +74,7 @@ try:
         breaks_cusumolsresid,
         breaks_hansen,
     )
+
     ECONOMETRIC_TESTS_AVAILABLE = True
 except ImportError:
     VECM = None
@@ -257,7 +260,9 @@ class GrangerCausalityResult:
     caused_variable: str  # variable being predicted
     causing_variable: str  # variable being tested for causality
     max_lag: int
-    test_results: Dict[int, Dict[str, float]]  # lag -> {statistic, p_value, df_denom, df_num}
+    test_results: Dict[
+        int, Dict[str, float]
+    ]  # lag -> {statistic, p_value, df_denom, df_num}
     min_p_value: float
     significant_at_5pct: bool
 
@@ -308,7 +313,9 @@ class TimeSeriesDiagnosticsResult:
 
     def __repr__(self) -> str:
         status = "PASS" if self.all_tests_pass else "FAIL"
-        return f"TimeSeriesDiagnosticsResult(status={status}, DW={self.durbin_watson:.3f})"
+        return (
+            f"TimeSeriesDiagnosticsResult(status={status}, DW={self.durbin_watson:.3f})"
+        )
 
 
 @dataclass
@@ -351,7 +358,9 @@ class StructuralBreakResult:
     def __repr__(self) -> str:
         if self.hansen_significant is not None:
             status = "BREAKS DETECTED" if self.hansen_significant else "STABLE"
-            return f"StructuralBreakResult({status}, Hansen_p={self.hansen_p_value:.4f})"
+            return (
+                f"StructuralBreakResult({status}, Hansen_p={self.hansen_p_value:.4f})"
+            )
         elif self.cusum_significant is not None:
             status = "BREAKS DETECTED" if self.cusum_significant else "STABLE"
             return f"StructuralBreakResult({status}, type=CUSUM)"
@@ -371,7 +380,11 @@ class BreuschGodfreyResult:
     significant_at_5pct: bool  # autocorrelation detected at 5% level
 
     def __repr__(self) -> str:
-        status = "AUTOCORRELATION DETECTED" if self.significant_at_5pct else "NO AUTOCORRELATION"
+        status = (
+            "AUTOCORRELATION DETECTED"
+            if self.significant_at_5pct
+            else "NO AUTOCORRELATION"
+        )
         return f"BreuschGodfreyResult({status}, lags={self.nlags}, p={self.lm_p_value:.4f})"
 
 
@@ -392,11 +405,15 @@ class HeteroscedasticityResult:
 
     def __repr__(self) -> str:
         if self.breusch_pagan_significant is not None:
-            status = "HETEROSCEDASTIC" if self.breusch_pagan_significant else "HOMOSCEDASTIC"
+            status = (
+                "HETEROSCEDASTIC" if self.breusch_pagan_significant else "HOMOSCEDASTIC"
+            )
             return f"HeteroscedasticityResult({status}, BP_p={self.breusch_pagan_p_value:.4f})"
         elif self.white_significant is not None:
             status = "HETEROSCEDASTIC" if self.white_significant else "HOMOSCEDASTIC"
-            return f"HeteroscedasticityResult({status}, White_p={self.white_p_value:.4f})"
+            return (
+                f"HeteroscedasticityResult({status}, White_p={self.white_p_value:.4f})"
+            )
         return f"HeteroscedasticityResult(type={self.test_type})"
 
 
@@ -457,6 +474,9 @@ class TimeSeriesAnalyzer:
                 self.mlflow_tracker = MLflowExperimentTracker(mlflow_experiment)
             except Exception as e:
                 logger.warning(f"Failed to initialize MLflow tracker: {e}")
+
+        # Alias for backward compatibility (used by advanced methods)
+        self.tracker = self.mlflow_tracker
 
         # Validate target column exists
         if target_column not in data.columns:
@@ -1158,9 +1178,7 @@ class TimeSeriesAnalyzer:
         >>> print(result.exog_coefficients)
         """
         if not ADVANCED_TS_AVAILABLE:
-            raise ImportError(
-                "SARIMAX not available. Install statsmodels>=0.12.0"
-            )
+            raise ImportError("SARIMAX not available. Install statsmodels>=0.12.0")
 
         series_clean = self.series.dropna()
 
@@ -1184,9 +1202,7 @@ class TimeSeriesAnalyzer:
                 **kwargs,
             )
         else:
-            model = SARIMAX(
-                series_clean, exog=exog_aligned, order=order, **kwargs
-            )
+            model = SARIMAX(series_clean, exog=exog_aligned, order=order, **kwargs)
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore")
@@ -1288,9 +1304,7 @@ class TimeSeriesAnalyzer:
         >>> print(f"AIC: {result.aic:.2f}")
         """
         if not ADVANCED_TS_AVAILABLE:
-            raise ImportError(
-                "VARMAX not available. Install statsmodels>=0.12.0"
-            )
+            raise ImportError("VARMAX not available. Install statsmodels>=0.12.0")
 
         # Clean data
         endog_clean = endog_data.dropna()
@@ -1335,7 +1349,12 @@ class TimeSeriesAnalyzer:
                 )
                 self.mlflow_tracker.log_params(
                     run,
-                    {"p": order[0], "q": order[1], "n_variables": n_vars, "trend": trend},
+                    {
+                        "p": order[0],
+                        "q": order[1],
+                        "n_variables": n_vars,
+                        "trend": trend,
+                    },
                 )
                 self.mlflow_tracker.log_metrics(
                     run,
@@ -1393,9 +1412,7 @@ class TimeSeriesAnalyzer:
         >>> print(f"Yearly seasonal strength: {result.seasonal_strength[365]:.3f}")
         """
         if not ADVANCED_TS_AVAILABLE or MSTL is None:
-            raise ImportError(
-                "MSTL not available. Install statsmodels>=0.13.0"
-            )
+            raise ImportError("MSTL not available. Install statsmodels>=0.13.0")
 
         series_clean = self.series.dropna()
 
@@ -1413,7 +1430,13 @@ class TimeSeriesAnalyzer:
 
         # Fit MSTL
         try:
-            mstl = MSTL(series_clean, periods=periods, windows=windows, iterate=iterate, **kwargs)
+            mstl = MSTL(
+                series_clean,
+                periods=periods,
+                windows=windows,
+                iterate=iterate,
+                **kwargs,
+            )
             decomp = mstl.fit()
         except Exception as e:
             logger.error(f"MSTL decomposition failed: {e}")
@@ -1516,7 +1539,12 @@ class TimeSeriesAnalyzer:
 
         # Fit STL
         stl = STL(
-            series_clean, period=period, seasonal=seasonal, trend=trend, robust=robust, **kwargs
+            series_clean,
+            period=period,
+            seasonal=seasonal,
+            trend=trend,
+            robust=robust,
+            **kwargs,
         )
         decomp = stl.fit()
 
@@ -1612,7 +1640,9 @@ class TimeSeriesAnalyzer:
 
         try:
             # Run Johansen test
-            result = coint_johansen(endog_clean.values, det_order=det_order, k_ar_diff=k_ar_diff)
+            result = coint_johansen(
+                endog_clean.values, det_order=det_order, k_ar_diff=k_ar_diff
+            )
 
             # Extract test statistics
             trace_stat = result.lr1  # trace statistic
@@ -1649,7 +1679,9 @@ class TimeSeriesAnalyzer:
                 {
                     "cointegration_rank": float(cointegration_rank),
                     "n_variables": float(len(variable_names)),
-                    "trace_stat_max": float(trace_stat[0]) if len(trace_stat) > 0 else 0.0,
+                    "trace_stat_max": (
+                        float(trace_stat[0]) if len(trace_stat) > 0 else 0.0
+                    ),
                 }
             )
 
@@ -1743,7 +1775,9 @@ class TimeSeriesAnalyzer:
 
         # Create bivariate DataFrame: [caused, causing]
         # grangercausalitytests expects [y, x] format
-        test_data = pd.DataFrame({caused_var_name: caused_data, causing_var_name: causing_data})
+        test_data = pd.DataFrame(
+            {caused_var_name: caused_data, causing_var_name: causing_data}
+        )
         test_data_clean = test_data.dropna()
 
         if len(test_data_clean) < maxlag + 10:
@@ -1771,7 +1805,9 @@ class TimeSeriesAnalyzer:
                 # Get F-test results (most common test)
                 # gc_results[lag] is a tuple: (test_results_dict, ...)
                 lag_result = gc_results[lag][0]  # first element is test results dict
-                f_test = lag_result["ssr_ftest"]  # F-test: (statistic, p_value, df_denom, df_num)
+                f_test = lag_result[
+                    "ssr_ftest"
+                ]  # F-test: (statistic, p_value, df_denom, df_num)
 
                 test_results[lag] = {
                     "statistic": f_test[0],
@@ -1797,7 +1833,10 @@ class TimeSeriesAnalyzer:
         # MLflow logging
         if self.tracker:
             self.tracker.log_metrics(
-                {"granger_min_p_value": float(min_p_value), "granger_significant": float(significant_at_5pct)}
+                {
+                    "granger_min_p_value": float(min_p_value),
+                    "granger_significant": float(significant_at_5pct),
+                }
             )
 
         return GrangerCausalityResult(
@@ -1871,7 +1910,9 @@ class TimeSeriesAnalyzer:
             raise TypeError("endog_data must be a pandas DataFrame")
 
         if endog_data.shape[1] < 2:
-            raise ValueError(f"VAR requires at least 2 variables, got {endog_data.shape[1]}")
+            raise ValueError(
+                f"VAR requires at least 2 variables, got {endog_data.shape[1]}"
+            )
 
         # Drop missing values
         endog_clean = endog_data.dropna()
@@ -1883,7 +1924,9 @@ class TimeSeriesAnalyzer:
             # Default heuristic: int(12 * (nobs/100)^(1/4))
             maxlags = int(12 * (n_obs / 100) ** 0.25)
             maxlags = max(1, min(maxlags, n_obs // 3))  # ensure reasonable range
-            logger.info(f"Using default maxlags={maxlags} based on {n_obs} observations")
+            logger.info(
+                f"Using default maxlags={maxlags} based on {n_obs} observations"
+            )
 
         if n_obs < maxlags + 10:
             raise ValueError(
@@ -2013,7 +2056,9 @@ class TimeSeriesAnalyzer:
 
             # 2. Jarque-Bera test for normality
             if ECONOMETRIC_TS_AVAILABLE and jarque_bera is not None:
-                jb_stat, jb_pvalue, jb_skew, jb_kurtosis = jarque_bera(residuals_clean.values)
+                jb_stat, jb_pvalue, jb_skew, jb_kurtosis = jarque_bera(
+                    residuals_clean.values
+                )
                 jarque_bera_test = {
                     "statistic": float(jb_stat),
                     "p_value": float(jb_pvalue),
@@ -2038,7 +2083,8 @@ class TimeSeriesAnalyzer:
                 "statistic": float(arch_lb[0][-1]),
                 "p_value": float(arch_lb[1][-1]),
                 "lags": lags,
-                "pass": float(arch_lb[1][-1]) > alpha,  # p > alpha means no ARCH effects
+                "pass": float(arch_lb[1][-1])
+                > alpha,  # p > alpha means no ARCH effects
             }
 
             # 4. Durbin-Watson statistic
@@ -2173,7 +2219,9 @@ class TimeSeriesAnalyzer:
             raise TypeError("endog_data must be a pandas DataFrame")
 
         if endog_data.shape[1] < 2:
-            raise ValueError(f"VECM requires at least 2 variables, got {endog_data.shape[1]}")
+            raise ValueError(
+                f"VECM requires at least 2 variables, got {endog_data.shape[1]}"
+            )
 
         if coint_rank < 0 or coint_rank >= endog_data.shape[1]:
             raise ValueError(
@@ -2202,22 +2250,56 @@ class TimeSeriesAnalyzer:
                 )
                 vecm_fitted = vecm_model.fit()
 
-            # Extract model information
-            aic_value = vecm_fitted.aic
-            bic_value = vecm_fitted.bic
-            hqic_value = vecm_fitted.hqic
-            log_likelihood = vecm_fitted.llf
+            # Extract model information (with safe accessors for different statsmodels versions)
+            try:
+                aic_value = (
+                    vecm_fitted.aic if hasattr(vecm_fitted, "aic") else float("nan")
+                )
+            except AttributeError:
+                aic_value = float("nan")
+
+            try:
+                bic_value = (
+                    vecm_fitted.bic if hasattr(vecm_fitted, "bic") else float("nan")
+                )
+            except AttributeError:
+                bic_value = float("nan")
+
+            try:
+                hqic_value = (
+                    vecm_fitted.hqic if hasattr(vecm_fitted, "hqic") else float("nan")
+                )
+            except AttributeError:
+                hqic_value = float("nan")
+
+            try:
+                log_likelihood = (
+                    vecm_fitted.llf if hasattr(vecm_fitted, "llf") else float("nan")
+                )
+            except AttributeError:
+                log_likelihood = float("nan")
 
             # Extract cointegration parameters
             alpha = vecm_fitted.alpha  # loading coefficients
             beta = vecm_fitted.beta  # cointegrating vectors
 
-            # Extract coefficient summary
-            coef_df = pd.DataFrame(
-                vecm_fitted.params,
-                columns=variable_names,
-                index=vecm_fitted.params.index if hasattr(vecm_fitted.params, "index") else None,
-            )
+            # Extract coefficient summary (with safe accessor)
+            try:
+                if hasattr(vecm_fitted, "params") and vecm_fitted.params is not None:
+                    coef_df = pd.DataFrame(
+                        vecm_fitted.params,
+                        columns=variable_names,
+                        index=(
+                            vecm_fitted.params.index
+                            if hasattr(vecm_fitted.params, "index")
+                            else None
+                        ),
+                    )
+                else:
+                    # Fallback: create empty DataFrame if params not available
+                    coef_df = pd.DataFrame()
+            except (AttributeError, ValueError):
+                coef_df = pd.DataFrame()
 
             logger.info(
                 f"VECM fitted: rank={coint_rank}, order={k_ar_diff}, "
@@ -2330,7 +2412,11 @@ class TimeSeriesAnalyzer:
                     cusum_stat = cusum_result[0]  # CUSUM statistics
                     # Check if any CUSUM statistic exceeds critical bounds
                     # Typically, significant if max|CUSUM| > 1.36 (approx 5% level)
-                    cusum_significant = bool(np.max(np.abs(cusum_stat)) > 1.36) if cusum_stat is not None else None
+                    cusum_significant = (
+                        bool(np.max(np.abs(cusum_stat)) > 1.36)
+                        if cusum_stat is not None
+                        else None
+                    )
                 else:
                     logger.warning("CUSUM test not available")
 
@@ -2542,7 +2628,9 @@ class TimeSeriesAnalyzer:
             # Breusch-Pagan test
             if test_type in ["breusch_pagan", "both"]:
                 if het_breuschpagan is not None:
-                    bp_result = het_breuschpagan(model_result.resid, model_result.model.exog)
+                    bp_result = het_breuschpagan(
+                        model_result.resid, model_result.model.exog
+                    )
                     bp_stat = float(bp_result[0])  # LM statistic
                     bp_p_value = float(bp_result[1])  # p-value
                     bp_significant = bp_p_value < 0.05
@@ -2552,7 +2640,9 @@ class TimeSeriesAnalyzer:
             # White test
             if test_type in ["white", "both"]:
                 if het_white is not None:
-                    white_result = het_white(model_result.resid, model_result.model.exog)
+                    white_result = het_white(
+                        model_result.resid, model_result.model.exog
+                    )
                     white_stat = float(white_result[0])  # LM statistic
                     white_p_value = float(white_result[1])  # p-value
                     white_significant = white_p_value < 0.05
