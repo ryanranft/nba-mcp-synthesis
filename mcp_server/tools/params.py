@@ -7569,3 +7569,329 @@ class DocumentationStatusParams(BaseModel):
     include_generation_times: bool = Field(
         default=False, description="Whether to include generation timestamps"
     )
+
+
+# ============================================================================
+# Time Series Analysis Tool Parameters (Phase 10A Agent 8 Module 1)
+# ============================================================================
+
+
+class TestStationarityParams(BaseModel):
+    """Parameters for stationarity testing (ADF/KPSS tests)
+
+    Implements rec_0173_b7f48099: Test for Unit Roots and Stationarity
+    Priority: 9.0/10, Effort: 8 hours
+    """
+
+    data: List[Union[int, float]] = Field(
+        ...,
+        min_length=10,
+        description="Time series data as list of numbers (minimum 10 points required)",
+    )
+    time_column: Optional[str] = Field(
+        default=None, description="Name of time column if data includes timestamps"
+    )
+    target_column: str = Field(
+        default="value", description="Name of the target column to analyze"
+    )
+    method: Literal["adf", "kpss"] = Field(
+        default="adf",
+        description="Stationarity test method: 'adf' (Augmented Dickey-Fuller) or 'kpss' (Kwiatkowski-Phillips-Schmidt-Shin)",
+    )
+    freq: Optional[str] = Field(
+        default=None,
+        description="Frequency of time series (e.g., 'D' for daily, 'W' for weekly, 'M' for monthly)",
+    )
+
+    @field_validator("data")
+    @classmethod
+    def validate_data_length(cls, v):
+        """Ensure sufficient data points"""
+        if len(v) < 10:
+            raise ValueError("Need at least 10 data points for stationarity test")
+        return v
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "data": [10, 12, 15, 17, 20, 22, 25, 27, 30, 32],
+                    "method": "adf",
+                    "freq": "D",
+                }
+            ]
+        }
+    )
+
+
+class DecomposeTimeSeriesParams(BaseModel):
+    """Parameters for time series decomposition into trend/seasonal/residual"""
+
+    data: List[Union[int, float]] = Field(
+        ...,
+        min_length=14,
+        description="Time series data (minimum 14 points for seasonal decomposition)",
+    )
+    target_column: str = Field(default="value", description="Name of the target column")
+    model: Literal["additive", "multiplicative"] = Field(
+        default="additive",
+        description="Decomposition model: 'additive' (Y=T+S+R) or 'multiplicative' (Y=T*S*R)",
+    )
+    period: Optional[int] = Field(
+        default=None,
+        ge=2,
+        description="Seasonal period (e.g., 7 for weekly, 12 for monthly, 82 for NBA season)",
+    )
+    method: Literal["seasonal_decompose", "stl"] = Field(
+        default="seasonal_decompose",
+        description="Decomposition method: 'seasonal_decompose' or 'stl' (Seasonal-Trend Loess)",
+    )
+    freq: Optional[str] = Field(default=None, description="Frequency of time series")
+
+    @field_validator("data")
+    @classmethod
+    def validate_sufficient_data(cls, v):
+        """Ensure enough data for decomposition"""
+        if len(v) < 14:
+            raise ValueError("Need at least 14 data points for decomposition")
+        return v
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "data": [25, 28, 22, 26, 29, 24, 27, 30, 25, 28, 32, 27, 29, 31],
+                    "model": "additive",
+                    "period": 7,
+                    "method": "seasonal_decompose",
+                }
+            ]
+        }
+    )
+
+
+class FitARIMAModelParams(BaseModel):
+    """Parameters for ARIMA model fitting
+
+    Implements Phase 10A recommendations:
+    - rec_0181_87cfa0af: Time Series Model for Team Performance
+    - rec_0265_33796e0c: Time Series Analysis for Future Game Outcomes
+    """
+
+    data: List[Union[int, float]] = Field(
+        ...,
+        min_length=20,
+        description="Time series data (minimum 20 points for reliable ARIMA estimation)",
+    )
+    target_column: str = Field(default="value", description="Name of the target column")
+    order: Optional[Tuple[int, int, int]] = Field(
+        default=None,
+        description="ARIMA order (p, d, q): p=AR order, d=differencing, q=MA order",
+    )
+    seasonal_order: Optional[Tuple[int, int, int, int]] = Field(
+        default=None, description="Seasonal ARIMA order (P, D, Q, s): s=seasonal period"
+    )
+    auto_select: bool = Field(
+        default=True,
+        description="Use auto_arima to automatically select best parameters",
+    )
+    freq: Optional[str] = Field(default=None, description="Frequency of time series")
+
+    @field_validator("data")
+    @classmethod
+    def validate_sufficient_data(cls, v):
+        """Ensure enough data for ARIMA"""
+        if len(v) < 20:
+            raise ValueError(
+                "Need at least 20 data points for reliable ARIMA estimation"
+            )
+        return v
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "data": [
+                        25,
+                        27,
+                        26,
+                        28,
+                        30,
+                        29,
+                        31,
+                        32,
+                        30,
+                        33,
+                        35,
+                        34,
+                        36,
+                        38,
+                        37,
+                        39,
+                        41,
+                        40,
+                        42,
+                        44,
+                    ],
+                    "auto_select": True,
+                },
+                {
+                    "data": [
+                        25,
+                        27,
+                        26,
+                        28,
+                        30,
+                        29,
+                        31,
+                        32,
+                        30,
+                        33,
+                        35,
+                        34,
+                        36,
+                        38,
+                        37,
+                        39,
+                        41,
+                        40,
+                        42,
+                        44,
+                    ],
+                    "order": [1, 0, 1],
+                    "auto_select": False,
+                },
+            ]
+        }
+    )
+
+
+class ForecastARIMAParams(BaseModel):
+    """Parameters for ARIMA forecasting"""
+
+    data: List[Union[int, float]] = Field(
+        ..., min_length=20, description="Historical time series data"
+    )
+    steps: int = Field(
+        default=10, ge=1, le=100, description="Number of periods to forecast (1-100)"
+    )
+    target_column: str = Field(default="value", description="Name of the target column")
+    order: Optional[Tuple[int, int, int]] = Field(
+        default=None,
+        description="ARIMA order (p, d, q). If None, auto-selects best order",
+    )
+    alpha: float = Field(
+        default=0.05,
+        gt=0.0,
+        lt=1.0,
+        description="Significance level for confidence intervals (default: 0.05 = 95% CI)",
+    )
+    freq: Optional[str] = Field(default=None, description="Frequency of time series")
+
+    @field_validator("alpha")
+    @classmethod
+    def validate_alpha(cls, v):
+        """Validate alpha is reasonable"""
+        if v <= 0 or v >= 1:
+            raise ValueError("Alpha must be between 0 and 1 (exclusive)")
+        return v
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "data": [
+                        25,
+                        27,
+                        26,
+                        28,
+                        30,
+                        29,
+                        31,
+                        32,
+                        30,
+                        33,
+                        35,
+                        34,
+                        36,
+                        38,
+                        37,
+                        39,
+                        41,
+                        40,
+                        42,
+                        44,
+                    ],
+                    "steps": 10,
+                    "alpha": 0.05,
+                }
+            ]
+        }
+    )
+
+
+class AutocorrelationAnalysisParams(BaseModel):
+    """Parameters for autocorrelation analysis (ACF/PACF/Ljung-Box)
+
+    Implements Phase 10A recommendations:
+    - rec_0616_7e53cb19: Test for Serial Correlation (Breusch-Godfrey)
+    - rec_0605_4800d3fd: Test for Serial Correlation in Time Series Models
+    """
+
+    data: List[Union[int, float]] = Field(
+        ..., min_length=20, description="Time series data for autocorrelation analysis"
+    )
+    nlags: int = Field(
+        default=40, ge=1, le=100, description="Number of lags to compute (1-100)"
+    )
+    target_column: str = Field(default="value", description="Name of the target column")
+    freq: Optional[str] = Field(default=None, description="Frequency of time series")
+
+    @field_validator("nlags")
+    @classmethod
+    def validate_nlags(cls, v, info):
+        """Ensure nlags is reasonable relative to data length"""
+        data = info.data.get("data")
+        if data and v >= len(data) / 2:
+            raise ValueError(
+                f"nlags ({v}) should be less than half the data length ({len(data)})"
+            )
+        return v
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "data": [
+                        25,
+                        27,
+                        26,
+                        28,
+                        30,
+                        29,
+                        31,
+                        32,
+                        30,
+                        33,
+                        35,
+                        34,
+                        36,
+                        38,
+                        37,
+                        39,
+                        41,
+                        40,
+                        42,
+                        44,
+                        43,
+                        45,
+                        47,
+                        46,
+                        48,
+                        50,
+                    ],
+                    "nlags": 20,
+                }
+            ]
+        }
+    )
