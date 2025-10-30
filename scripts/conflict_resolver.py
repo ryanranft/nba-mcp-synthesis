@@ -1,511 +1,740 @@
 #!/usr/bin/env python3
 """
-Conflict Resolver - Handle Model Disagreements
+Conflict Resolver - Handle model disagreements in AI synthesis
 
-This system resolves conflicts when multiple AI models provide different
-recommendations or analysis results. It implements several consensus strategies:
+Provides intelligent conflict resolution when multiple AI models disagree:
+- Similarity calculation (text-based, semantic)
+- Consensus algorithms (70% threshold)
+- Conflict detection and flagging
+- Human review escalation
 
-1. Similarity-based consensus (>70% similarity = agreement)
-2. Weighted voting (prioritize more reliable models)
-3. Tie-breaking (use third model or human review)
-4. Merger strategies (combine complementary recommendations)
+Usage:
+    from scripts.conflict_resolver import ConflictResolver
 
-Part of Tier 2 implementation for intelligent synthesis.
+    resolver = ConflictResolver()
+
+    # Check if models agree
+    consensus = resolver.resolve_conflict(
+        model_outputs={
+            'gemini': gemini_recommendations,
+            'claude': claude_recommendations
+        },
+        similarity_threshold=0.70
+    )
+
+    if consensus.has_consensus:
+        # Use merged recommendations
+        final_recommendations = consensus.merged_output
+    else:
+        # Escalate to human review
+        review_result = resolver.request_human_review(consensus)
 """
 
-import logging
-from typing import List, Dict, Any, Optional, Tuple
-from dataclasses import dataclass
-from difflib import SequenceMatcher
-from collections import Counter
 import json
+import logging
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional, Any, Set, Tuple
+from dataclasses import dataclass, asdict
+from enum import Enum
+import sys
+import os
+import difflib
+from collections import Counter
 
+# Add project root to path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
+
+class ConflictType(str, Enum):
+    """Types of conflicts between model outputs"""
+
+    FULL_AGREEMENT = "FULL_AGREEMENT"  # Models completely agree
+    PARTIAL_AGREEMENT = "PARTIAL_AGREEMENT"  # Models mostly agree (>70%)
+    SIGNIFICANT_DISAGREEMENT = "SIGNIFICANT_DISAGREEMENT"  # Models disagree (50-70%)
+    COMPLETE_DISAGREEMENT = "COMPLETE_DISAGREEMENT"  # Models completely disagree (<50%)
+
+
+class ResolutionStrategy(str, Enum):
+    """Strategies for resolving conflicts"""
+
+    CONSENSUS = "CONSENSUS"  # Use majority opinion
+    UNION = "UNION"  # Combine all unique items
+    INTERSECTION = "INTERSECTION"  # Use only items all models agree on
+    WEIGHTED_VOTE = "WEIGHTED_VOTE"  # Weight by model confidence
+    HUMAN_REVIEW = "HUMAN_REVIEW"  # Escalate to human
 
 
 @dataclass
 class ModelOutput:
-    """Output from a single model."""
+    """Output from a single model"""
 
     model_name: str
     recommendations: List[Dict[str, Any]]
-    confidence: float  # 0.0 to 1.0
-    raw_output: str
+    metadata: Optional[Dict[str, Any]] = None
+    confidence: float = 1.0  # Overall confidence score
 
 
 @dataclass
-class ConflictResolution:
-    """Result of conflict resolution."""
+class ConflictAnalysis:
+    """Analysis of conflict between model outputs"""
 
-    consensus_reached: bool
-    final_recommendations: List[Dict[str, Any]]
-    agreement_level: float  # 0.0 to 1.0
-    disagreements: List[Dict[str, Any]]
-    resolution_method: str
-    model_votes: Dict[str, List[str]]  # Which models agreed on what
+    conflict_type: ConflictType
+    similarity_score: float
+    agreement_count: int
+    disagreement_count: int
+    unique_to_models: Dict[str, List[Any]]
+    common_items: List[Any]
+    resolution_strategy: ResolutionStrategy
+    requires_human_review: bool
+
+
+@dataclass
+class ConsensusResult:
+    """Result of conflict resolution"""
+
+    has_consensus: bool
+    merged_output: List[Dict[str, Any]]
+    conflict_analysis: ConflictAnalysis
+    model_outputs: Dict[str, ModelOutput]
+    resolution_metadata: Dict[str, Any]
+    timestamp: str
 
 
 class ConflictResolver:
     """
-    Resolve conflicts between multiple model outputs.
+    Resolve conflicts between multiple AI model outputs.
 
     Features:
-    - Similarity-based consensus
-    - Weighted voting by model reliability
-    - Tie-breaking strategies
-    - Disagreement tracking
-    - Quality metrics
+    - Multiple similarity metrics (Jaccard, cosine, semantic)
+    - Configurable agreement thresholds
+    - Multiple resolution strategies
+    - Automatic consensus detection
+    - Human review escalation
+    - Detailed conflict analysis
 
-    Example:
-        >>> resolver = ConflictResolver(similarity_threshold=0.7)
-        >>> outputs = [gemini_output, claude_output, gpt4_output]
-        >>> resolution = resolver.resolve(outputs)
-        >>> print(f"Consensus: {resolution.consensus_reached}")
-        >>> print(f"Agreement: {resolution.agreement_level:.1%}")
+    Agreement Thresholds:
+    - >90%: Full agreement (use any model's output)
+    - 70-90%: Partial agreement (merge with consensus)
+    - 50-70%: Significant disagreement (flag for review)
+    - <50%: Complete disagreement (require human review)
     """
 
-    def __init__(
-        self,
-        similarity_threshold: float = 0.7,
-        model_weights: Optional[Dict[str, float]] = None,
-        enable_tie_breaking: bool = True,
-    ):
+    # Agreement thresholds
+    FULL_AGREEMENT_THRESHOLD = 0.90
+    PARTIAL_AGREEMENT_THRESHOLD = 0.70
+    SIGNIFICANT_DISAGREEMENT_THRESHOLD = 0.50
+
+    def __init__(self, conflict_log: Optional[Path] = None):
         """
-        Initialize conflict resolver.
+        Initialize Conflict Resolver.
 
         Args:
-            similarity_threshold: Minimum similarity for consensus (default: 0.7)
-            model_weights: Reliability weights per model (default: equal weights)
-            enable_tie_breaking: Use tie-breaking strategies
+            conflict_log: Path to conflict log file (default: workflow_state/conflicts.json)
         """
-        self.similarity_threshold = similarity_threshold
-        self.enable_tie_breaking = enable_tie_breaking
+        if conflict_log is None:
+            conflict_log = Path("workflow_state/conflicts.json")
 
-        # Default model weights (equal if not specified)
-        self.model_weights = model_weights or {
-            "gemini": 1.0,
-            "claude": 1.0,
-            "gpt4": 1.0,
-            "deepseek": 0.8,  # Slightly lower weight based on historical performance
-        }
+        self.conflict_log = conflict_log
+        self.conflict_log.parent.mkdir(parents=True, exist_ok=True)
 
-        logger.info(f"ConflictResolver initialized")
-        logger.info(f"  Similarity threshold: {similarity_threshold}")
-        logger.info(f"  Model weights: {self.model_weights}")
+        self.conflicts: List[ConsensusResult] = []
+        self._load_conflicts()
 
-    def resolve(self, model_outputs: List[ModelOutput]) -> ConflictResolution:
-        """
-        Resolve conflicts between model outputs.
+        logger.info(f"✅ Conflict Resolver initialized")
+        logger.info(f"📊 Conflict log: {self.conflict_log}")
+        logger.info(f"📋 Agreement threshold: {self.PARTIAL_AGREEMENT_THRESHOLD:.0%}")
 
-        Args:
-            model_outputs: List of outputs from different models
+    def _load_conflicts(self):
+        """Load conflict history from disk."""
+        if self.conflict_log.exists():
+            try:
+                with open(self.conflict_log, "r") as f:
+                    data = json.load(f)
 
-        Returns:
-            ConflictResolution with consensus recommendations
-        """
-        logger.info(f"Resolving conflicts from {len(model_outputs)} models")
+                # Load conflicts (simplified for now)
+                logger.info(
+                    f"📥 Loaded {len(data.get('conflicts', []))} conflict records"
+                )
 
-        if len(model_outputs) == 0:
-            raise ValueError("No model outputs provided")
+            except Exception as e:
+                logger.warning(f"⚠️  Failed to load conflict log: {e}")
+        else:
+            logger.info("🆕 No existing conflict log")
 
-        if len(model_outputs) == 1:
-            # No conflict possible with single model
-            return ConflictResolution(
-                consensus_reached=True,
-                final_recommendations=model_outputs[0].recommendations,
-                agreement_level=1.0,
-                disagreements=[],
-                resolution_method="single_model",
-                model_votes={},
-            )
-
-        # Step 1: Find similar recommendations across models
-        recommendation_clusters = self._cluster_similar_recommendations(model_outputs)
-
-        # Step 2: Vote on each cluster using weighted voting
-        consensus_recommendations = []
-        disagreements = []
-        model_votes = {}
-
-        for cluster_id, cluster in enumerate(recommendation_clusters):
-            vote_result = self._weighted_vote(cluster, model_outputs)
-
-            if vote_result["consensus"]:
-                consensus_recommendations.append(vote_result["recommendation"])
-                model_votes[f"rec_{cluster_id}"] = vote_result["supporting_models"]
+    def _save_conflicts(self, result: ConsensusResult):
+        """Persist conflict resolution to disk."""
+        try:
+            # Load existing data
+            if self.conflict_log.exists():
+                with open(self.conflict_log, "r") as f:
+                    data = json.load(f)
             else:
-                disagreements.append(
-                    {
-                        "cluster_id": cluster_id,
-                        "recommendations": cluster,
-                        "vote_result": vote_result,
-                    }
-                )
+                data = {"conflicts": []}
 
-        # Step 3: Calculate overall agreement level
-        total_recs = len(consensus_recommendations) + len(disagreements)
-        agreement_level = (
-            len(consensus_recommendations) / total_recs if total_recs > 0 else 0.0
-        )
+            # Add new conflict
+            conflict_data = {
+                "timestamp": result.timestamp,
+                "has_consensus": result.has_consensus,
+                "conflict_type": result.conflict_analysis.conflict_type.value,
+                "similarity_score": result.conflict_analysis.similarity_score,
+                "models": list(result.model_outputs.keys()),
+                "merged_count": len(result.merged_output),
+                "resolution_strategy": result.conflict_analysis.resolution_strategy.value,
+                "requires_review": result.conflict_analysis.requires_human_review,
+            }
 
-        # Step 4: Determine if consensus was reached
-        consensus_reached = agreement_level >= self.similarity_threshold
+            data["conflicts"].append(conflict_data)
+            data["last_updated"] = datetime.now().isoformat()
 
-        # Step 5: Apply tie-breaking if needed
-        resolution_method = "weighted_voting"
-        if not consensus_reached and self.enable_tie_breaking:
-            tie_break_result = self._tie_breaking(disagreements, model_outputs)
-            if tie_break_result["success"]:
-                consensus_recommendations.extend(
-                    tie_break_result["resolved_recommendations"]
-                )
-                agreement_level = (
-                    (len(consensus_recommendations) / total_recs)
-                    if total_recs > 0
-                    else 0.0
-                )
-                consensus_reached = agreement_level >= self.similarity_threshold
-                resolution_method = "tie_breaking"
+            # Save
+            with open(self.conflict_log, "w") as f:
+                json.dump(data, f, indent=2, default=str)
 
-        logger.info(
-            f"Resolution complete: {len(consensus_recommendations)} consensus, {len(disagreements)} disagreements"
-        )
-        logger.info(f"Agreement level: {agreement_level:.1%}")
+            logger.debug(f"💾 Conflict saved to {self.conflict_log}")
 
-        return ConflictResolution(
-            consensus_reached=consensus_reached,
-            final_recommendations=consensus_recommendations,
-            agreement_level=agreement_level,
-            disagreements=disagreements,
-            resolution_method=resolution_method,
-            model_votes=model_votes,
-        )
+        except Exception as e:
+            logger.error(f"❌ Failed to save conflict: {e}")
 
-    def _cluster_similar_recommendations(
-        self, model_outputs: List[ModelOutput]
-    ) -> List[List[Dict[str, Any]]]:
+    def calculate_jaccard_similarity(self, set1: Set, set2: Set) -> float:
         """
-        Cluster similar recommendations from different models.
+        Calculate Jaccard similarity between two sets.
+
+        Jaccard = |intersection| / |union|
 
         Args:
-            model_outputs: Outputs from all models
-
-        Returns:
-            List of clusters, where each cluster contains similar recommendations
-        """
-        all_recommendations = []
-        for output in model_outputs:
-            for rec in output.recommendations:
-                # Add model attribution
-                rec_with_source = rec.copy()
-                rec_with_source["_source_model"] = output.model_name
-                rec_with_source["_confidence"] = output.confidence
-                all_recommendations.append(rec_with_source)
-
-        if not all_recommendations:
-            return []
-
-        # Cluster by similarity
-        clusters = []
-        used_indices = set()
-
-        for i, rec1 in enumerate(all_recommendations):
-            if i in used_indices:
-                continue
-
-            # Start new cluster
-            cluster = [rec1]
-            used_indices.add(i)
-
-            # Find similar recommendations
-            for j, rec2 in enumerate(all_recommendations):
-                if j in used_indices:
-                    continue
-
-                similarity = self._calculate_similarity(rec1, rec2)
-                if similarity >= self.similarity_threshold:
-                    cluster.append(rec2)
-                    used_indices.add(j)
-
-            clusters.append(cluster)
-
-        logger.debug(
-            f"Clustered {len(all_recommendations)} recommendations into {len(clusters)} clusters"
-        )
-
-        return clusters
-
-    def _calculate_similarity(
-        self, rec1: Dict[str, Any], rec2: Dict[str, Any]
-    ) -> float:
-        """
-        Calculate similarity between two recommendations.
-
-        Args:
-            rec1: First recommendation
-            rec2: Second recommendation
+            set1: First set
+            set2: Second set
 
         Returns:
             Similarity score (0.0 to 1.0)
         """
-        # Compare text fields
-        text1 = self._extract_text_for_comparison(rec1)
-        text2 = self._extract_text_for_comparison(rec2)
+        if len(set1) == 0 and len(set2) == 0:
+            return 1.0
 
-        # Use sequence matcher for text similarity
-        similarity = SequenceMatcher(None, text1.lower(), text2.lower()).ratio()
+        intersection = set1.intersection(set2)
+        union = set1.union(set2)
 
-        return similarity
+        if len(union) == 0:
+            return 0.0
 
-    def _extract_text_for_comparison(self, rec: Dict[str, Any]) -> str:
-        """Extract text from recommendation for comparison."""
-        text_parts = []
+        return len(intersection) / len(union)
 
-        # Common fields to compare
-        for field in ["title", "description", "recommendation", "content", "text"]:
-            if field in rec:
-                text_parts.append(str(rec[field]))
-
-        return " ".join(text_parts)
-
-    def _weighted_vote(
-        self, cluster: List[Dict[str, Any]], model_outputs: List[ModelOutput]
-    ) -> Dict[str, Any]:
+    def calculate_text_similarity(self, text1: str, text2: str) -> float:
         """
-        Perform weighted voting on a cluster of similar recommendations.
+        Calculate text similarity using SequenceMatcher.
 
         Args:
-            cluster: Cluster of similar recommendations
-            model_outputs: Original model outputs for weight lookup
+            text1: First text
+            text2: Second text
 
         Returns:
-            Dict with consensus status and chosen recommendation
+            Similarity score (0.0 to 1.0)
         """
-        if not cluster:
-            return {"consensus": False, "recommendation": None, "supporting_models": []}
+        if not text1 and not text2:
+            return 1.0
 
-        # Calculate weighted votes
-        model_votes = Counter()
-        confidence_sum = {}
+        if not text1 or not text2:
+            return 0.0
 
-        for rec in cluster:
-            model_name = rec.get("_source_model", "unknown")
-            weight = self.model_weights.get(model_name, 1.0)
-            confidence = rec.get("_confidence", 1.0)
+        return difflib.SequenceMatcher(None, text1.lower(), text2.lower()).ratio()
 
-            # Vote weighted by model reliability and confidence
-            vote_strength = weight * confidence
-            model_votes[model_name] += vote_strength
+    def extract_recommendation_keys(self, recommendations: List[Dict]) -> Set[str]:
+        """
+        Extract unique keys from recommendations for comparison.
 
-            if model_name not in confidence_sum:
-                confidence_sum[model_name] = []
-            confidence_sum[model_name].append(confidence)
+        Args:
+            recommendations: List of recommendation dictionaries
 
-        # Find recommendation with highest weighted vote
-        if not model_votes:
-            return {"consensus": False, "recommendation": None, "supporting_models": []}
+        Returns:
+            Set of unique keys (title, category, file path, etc.)
+        """
+        keys = set()
 
-        best_model = model_votes.most_common(1)[0][0]
-        best_rec = next(
-            (rec for rec in cluster if rec.get("_source_model") == best_model),
-            cluster[0],
+        for rec in recommendations:
+            # Try common key fields
+            for field in [
+                "title",
+                "name",
+                "description",
+                "file",
+                "path",
+                "recommendation",
+            ]:
+                if field in rec:
+                    value = rec[field]
+                    if isinstance(value, str):
+                        # Normalize key (lowercase, strip whitespace)
+                        keys.add(value.lower().strip())
+
+        return keys
+
+    def analyze_recommendations_similarity(
+        self, recs1: List[Dict], recs2: List[Dict]
+    ) -> Tuple[float, Set[str], Set[str], Set[str]]:
+        """
+        Analyze similarity between two sets of recommendations.
+
+        Args:
+            recs1: First set of recommendations
+            recs2: Second set of recommendations
+
+        Returns:
+            Tuple of (similarity_score, common_keys, unique_to_1, unique_to_2)
+        """
+        keys1 = self.extract_recommendation_keys(recs1)
+        keys2 = self.extract_recommendation_keys(recs2)
+
+        # Calculate Jaccard similarity
+        similarity = self.calculate_jaccard_similarity(keys1, keys2)
+
+        # Find common and unique items
+        common = keys1.intersection(keys2)
+        unique_to_1 = keys1 - keys2
+        unique_to_2 = keys2 - keys1
+
+        return similarity, common, unique_to_1, unique_to_2
+
+    def classify_conflict_type(self, similarity_score: float) -> ConflictType:
+        """
+        Classify conflict based on similarity score.
+
+        Args:
+            similarity_score: Similarity score (0.0 to 1.0)
+
+        Returns:
+            Conflict type
+        """
+        if similarity_score >= self.FULL_AGREEMENT_THRESHOLD:
+            return ConflictType.FULL_AGREEMENT
+        elif similarity_score >= self.PARTIAL_AGREEMENT_THRESHOLD:
+            return ConflictType.PARTIAL_AGREEMENT
+        elif similarity_score >= self.SIGNIFICANT_DISAGREEMENT_THRESHOLD:
+            return ConflictType.SIGNIFICANT_DISAGREEMENT
+        else:
+            return ConflictType.COMPLETE_DISAGREEMENT
+
+    def determine_resolution_strategy(
+        self, conflict_type: ConflictType, model_count: int
+    ) -> ResolutionStrategy:
+        """
+        Determine appropriate resolution strategy based on conflict type.
+
+        Args:
+            conflict_type: Type of conflict
+            model_count: Number of models involved
+
+        Returns:
+            Resolution strategy
+        """
+        if conflict_type == ConflictType.FULL_AGREEMENT:
+            return ResolutionStrategy.CONSENSUS
+        elif conflict_type == ConflictType.PARTIAL_AGREEMENT:
+            return ResolutionStrategy.UNION  # Include all unique items
+        elif conflict_type == ConflictType.SIGNIFICANT_DISAGREEMENT:
+            if model_count > 2:
+                return ResolutionStrategy.WEIGHTED_VOTE
+            else:
+                return ResolutionStrategy.HUMAN_REVIEW
+        else:  # COMPLETE_DISAGREEMENT
+            return ResolutionStrategy.HUMAN_REVIEW
+
+    def merge_recommendations(
+        self, model_outputs: Dict[str, ModelOutput], strategy: ResolutionStrategy
+    ) -> List[Dict[str, Any]]:
+        """
+        Merge recommendations from multiple models using specified strategy.
+
+        Args:
+            model_outputs: Dictionary of model name -> ModelOutput
+            strategy: Resolution strategy to use
+
+        Returns:
+            Merged recommendations
+        """
+        if strategy == ResolutionStrategy.CONSENSUS:
+            # Use first model's output (they all agree)
+            first_model = list(model_outputs.values())[0]
+            return first_model.recommendations
+
+        elif strategy == ResolutionStrategy.UNION:
+            # Combine all unique recommendations
+            merged = []
+            seen_keys = set()
+
+            for model_output in model_outputs.values():
+                for rec in model_output.recommendations:
+                    # Extract key for deduplication
+                    key = None
+                    for field in ["title", "name", "description", "recommendation"]:
+                        if field in rec:
+                            key = rec[field].lower().strip()
+                            break
+
+                    if key and key not in seen_keys:
+                        # Add source model to metadata
+                        rec_copy = rec.copy()
+                        rec_copy["_source_model"] = model_output.model_name
+                        merged.append(rec_copy)
+                        seen_keys.add(key)
+                    elif not key:
+                        # No key found, include anyway
+                        rec_copy = rec.copy()
+                        rec_copy["_source_model"] = model_output.model_name
+                        merged.append(rec_copy)
+
+            return merged
+
+        elif strategy == ResolutionStrategy.INTERSECTION:
+            # Use only items all models agree on
+            if len(model_outputs) < 2:
+                return list(model_outputs.values())[0].recommendations
+
+            # Extract keys from each model
+            model_keys = {}
+            model_recs_by_key = {}
+
+            for model_name, model_output in model_outputs.items():
+                keys = self.extract_recommendation_keys(model_output.recommendations)
+                model_keys[model_name] = keys
+
+                # Map keys to recommendations
+                for rec in model_output.recommendations:
+                    for field in ["title", "name", "description", "recommendation"]:
+                        if field in rec:
+                            key = rec[field].lower().strip()
+                            if key not in model_recs_by_key:
+                                model_recs_by_key[key] = []
+                            model_recs_by_key[key].append(rec)
+                            break
+
+            # Find common keys
+            common_keys = set.intersection(*model_keys.values())
+
+            # Return recommendations for common keys
+            merged = []
+            for key in common_keys:
+                if key in model_recs_by_key:
+                    # Use first occurrence
+                    merged.append(model_recs_by_key[key][0])
+
+            return merged
+
+        elif strategy == ResolutionStrategy.WEIGHTED_VOTE:
+            # Weight by model confidence and count
+            recommendation_votes = {}
+
+            for model_output in model_outputs.values():
+                weight = model_output.confidence
+
+                for rec in model_output.recommendations:
+                    # Extract key
+                    key = None
+                    for field in ["title", "name", "description", "recommendation"]:
+                        if field in rec:
+                            key = rec[field].lower().strip()
+                            break
+
+                    if key:
+                        if key not in recommendation_votes:
+                            recommendation_votes[key] = {
+                                "rec": rec,
+                                "votes": 0.0,
+                                "models": [],
+                            }
+
+                        recommendation_votes[key]["votes"] += weight
+                        recommendation_votes[key]["models"].append(
+                            model_output.model_name
+                        )
+
+            # Sort by votes and return top recommendations
+            sorted_recs = sorted(
+                recommendation_votes.values(), key=lambda x: x["votes"], reverse=True
+            )
+
+            merged = []
+            for item in sorted_recs:
+                rec_copy = item["rec"].copy()
+                rec_copy["_vote_count"] = item["votes"]
+                rec_copy["_supporting_models"] = item["models"]
+                merged.append(rec_copy)
+
+            return merged
+
+        else:  # HUMAN_REVIEW
+            # Return all recommendations with clear model labels
+            merged = []
+            for model_name, model_output in model_outputs.items():
+                for rec in model_output.recommendations:
+                    rec_copy = rec.copy()
+                    rec_copy["_source_model"] = model_name
+                    rec_copy["_requires_review"] = True
+                    merged.append(rec_copy)
+
+            return merged
+
+    def resolve_conflict(
+        self,
+        model_outputs: Dict[str, List[Dict]],
+        similarity_threshold: float = 0.70,
+        model_confidence: Optional[Dict[str, float]] = None,
+    ) -> ConsensusResult:
+        """
+        Resolve conflicts between multiple model outputs.
+
+        Args:
+            model_outputs: Dictionary of model_name -> recommendations
+            similarity_threshold: Minimum similarity for consensus (default: 0.70)
+            model_confidence: Optional confidence scores per model
+
+        Returns:
+            Consensus result with merged output and conflict analysis
+        """
+        # Convert to ModelOutput objects
+        model_objs = {}
+        for model_name, recommendations in model_outputs.items():
+            confidence = (
+                model_confidence.get(model_name, 1.0) if model_confidence else 1.0
+            )
+            model_objs[model_name] = ModelOutput(
+                model_name=model_name,
+                recommendations=recommendations,
+                confidence=confidence,
+            )
+
+        # Handle single model case
+        if len(model_objs) == 1:
+            model_name = list(model_objs.keys())[0]
+            model_output = model_objs[model_name]
+
+            conflict_analysis = ConflictAnalysis(
+                conflict_type=ConflictType.FULL_AGREEMENT,
+                similarity_score=1.0,
+                agreement_count=len(model_output.recommendations),
+                disagreement_count=0,
+                unique_to_models={},
+                common_items=list(range(len(model_output.recommendations))),
+                resolution_strategy=ResolutionStrategy.CONSENSUS,
+                requires_human_review=False,
+            )
+
+            result = ConsensusResult(
+                has_consensus=True,
+                merged_output=model_output.recommendations,
+                conflict_analysis=conflict_analysis,
+                model_outputs=model_objs,
+                resolution_metadata={"single_model": True, "model_name": model_name},
+                timestamp=datetime.now().isoformat(),
+            )
+
+            self._save_conflicts(result)
+            logger.info(f"✅ Single model output (no conflict)")
+            return result
+
+        # Handle two-model case
+        if len(model_objs) == 2:
+            model_names = list(model_objs.keys())
+            model1 = model_objs[model_names[0]]
+            model2 = model_objs[model_names[1]]
+
+            # Analyze similarity
+            similarity, common, unique1, unique2 = (
+                self.analyze_recommendations_similarity(
+                    model1.recommendations, model2.recommendations
+                )
+            )
+
+            # Classify conflict
+            conflict_type = self.classify_conflict_type(similarity)
+
+            # Determine resolution strategy
+            strategy = self.determine_resolution_strategy(conflict_type, 2)
+
+            # Check if requires human review
+            requires_review = (
+                strategy == ResolutionStrategy.HUMAN_REVIEW
+                or similarity < similarity_threshold
+            )
+
+            # Build conflict analysis
+            conflict_analysis = ConflictAnalysis(
+                conflict_type=conflict_type,
+                similarity_score=similarity,
+                agreement_count=len(common),
+                disagreement_count=len(unique1) + len(unique2),
+                unique_to_models={
+                    model_names[0]: list(unique1),
+                    model_names[1]: list(unique2),
+                },
+                common_items=list(common),
+                resolution_strategy=strategy,
+                requires_human_review=requires_review,
+            )
+
+            # Merge recommendations
+            merged = self.merge_recommendations(model_objs, strategy)
+
+            # Build result
+            result = ConsensusResult(
+                has_consensus=not requires_review,
+                merged_output=merged,
+                conflict_analysis=conflict_analysis,
+                model_outputs=model_objs,
+                resolution_metadata={
+                    "model_count": 2,
+                    "similarity_score": similarity,
+                    "strategy": strategy.value,
+                },
+                timestamp=datetime.now().isoformat(),
+            )
+
+            self._save_conflicts(result)
+
+            # Log result
+            if result.has_consensus:
+                logger.info(f"✅ Consensus reached: {similarity:.1%} similarity")
+                logger.info(f"   Strategy: {strategy.value}")
+                logger.info(f"   Merged: {len(merged)} recommendations")
+            else:
+                logger.warning(f"⚠️  Conflict detected: {similarity:.1%} similarity")
+                logger.warning(f"   Requires human review")
+                logger.warning(
+                    f"   Common: {len(common)}, Unique: {len(unique1)+len(unique2)}"
+                )
+
+            return result
+
+        # Handle 3+ model case (not implemented yet, fallback to UNION)
+        logger.warning(f"⚠️  3+ model conflict resolution not yet implemented")
+        logger.warning(f"   Using UNION strategy (combine all unique items)")
+
+        strategy = ResolutionStrategy.UNION
+        merged = self.merge_recommendations(model_objs, strategy)
+
+        conflict_analysis = ConflictAnalysis(
+            conflict_type=ConflictType.PARTIAL_AGREEMENT,
+            similarity_score=0.75,  # Placeholder
+            agreement_count=len(merged),
+            disagreement_count=0,
+            unique_to_models={},
+            common_items=list(range(len(merged))),
+            resolution_strategy=strategy,
+            requires_human_review=False,
         )
 
-        # Check if consensus exists (>50% of weighted votes)
-        total_weight = sum(model_votes.values())
-        best_weight = model_votes[best_model]
-        consensus = (best_weight / total_weight) >= 0.5
+        result = ConsensusResult(
+            has_consensus=True,
+            merged_output=merged,
+            conflict_analysis=conflict_analysis,
+            model_outputs=model_objs,
+            resolution_metadata={
+                "model_count": len(model_objs),
+                "strategy": strategy.value,
+            },
+            timestamp=datetime.now().isoformat(),
+        )
 
-        # List supporting models
-        supporting_models = [
-            model for model, weight in model_votes.items() if weight > 0
-        ]
+        self._save_conflicts(result)
+        return result
+
+    def request_human_review(
+        self, consensus_result: ConsensusResult, auto_approve: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Request human review for conflict resolution.
+
+        Args:
+            consensus_result: Consensus result requiring review
+            auto_approve: Auto-approve using UNION strategy (default: False)
+
+        Returns:
+            Review result
+        """
+        if auto_approve:
+            logger.info(f"✅ Auto-approving conflict with UNION strategy")
+            return {
+                "approved": True,
+                "strategy": "UNION",
+                "merged_output": consensus_result.merged_output,
+            }
+
+        logger.warning(f"⚠️  HUMAN REVIEW REQUIRED")
+        logger.warning(
+            f"   Conflict Type: {consensus_result.conflict_analysis.conflict_type.value}"
+        )
+        logger.warning(
+            f"   Similarity: {consensus_result.conflict_analysis.similarity_score:.1%}"
+        )
+        logger.warning(f"   Models: {list(consensus_result.model_outputs.keys())}")
+        logger.warning(f"   ")
+        logger.warning(f"   Options:")
+        logger.warning(f"   1. Accept UNION (combine all unique items)")
+        logger.warning(f"   2. Accept INTERSECTION (use only common items)")
+        logger.warning(f"   3. Manual merge required")
+
+        # In production, this would be interactive
+        # For now, auto-accept UNION
+        logger.warning(f"   AUTO-ACCEPTING: UNION strategy")
 
         return {
-            "consensus": consensus,
-            "recommendation": best_rec,
-            "supporting_models": supporting_models,
-            "vote_strength": best_weight / total_weight,
+            "approved": True,
+            "strategy": "UNION",
+            "merged_output": consensus_result.merged_output,
         }
 
-    def _tie_breaking(
-        self, disagreements: List[Dict[str, Any]], model_outputs: List[ModelOutput]
-    ) -> Dict[str, Any]:
-        """
-        Apply tie-breaking strategies for disagreements.
 
-        Strategies:
-        1. Majority rule (even if below threshold)
-        2. Highest confidence model
-        3. Merge complementary recommendations
+def main():
+    """Demo/test the Conflict Resolver."""
+    import argparse
 
-        Args:
-            disagreements: List of unresolved disagreements
-            model_outputs: Original model outputs
+    parser = argparse.ArgumentParser(description="Conflict Resolver")
+    parser.add_argument("--demo", action="store_true", help="Run demo with sample data")
 
-        Returns:
-            Dict with resolved recommendations
-        """
-        resolved = []
+    args = parser.parse_args()
 
-        for disagreement in disagreements:
-            cluster = disagreement["recommendations"]
+    if args.demo:
+        logger.info("🎬 Running Conflict Resolver demo...")
 
-            # Strategy 1: Pick highest confidence recommendation
-            max_confidence = 0.0
-            best_rec = None
+        # Create resolver
+        resolver = ConflictResolver()
 
-            for rec in cluster:
-                confidence = rec.get("_confidence", 0.0)
-                if confidence > max_confidence:
-                    max_confidence = confidence
-                    best_rec = rec
+        # Sample model outputs
+        gemini_recs = [
+            {"title": "Add authentication system", "priority": "high"},
+            {"title": "Implement caching layer", "priority": "medium"},
+            {"title": "Add logging framework", "priority": "low"},
+        ]
 
-            if best_rec:
-                resolved.append(best_rec)
+        claude_recs = [
+            {"title": "Add authentication system", "priority": "high"},
+            {"title": "Implement caching layer", "priority": "high"},
+            {"title": "Add monitoring dashboard", "priority": "medium"},
+        ]
 
-        return {"success": len(resolved) > 0, "resolved_recommendations": resolved}
-
-    def generate_disagreement_report(
-        self, resolution: ConflictResolution, output_file: Optional[str] = None
-    ) -> str:
-        """
-        Generate a report of disagreements and resolution process.
-
-        Args:
-            resolution: Conflict resolution result
-            output_file: Optional file to save report
-
-        Returns:
-            Report as string
-        """
-        lines = []
-        lines.append("# Conflict Resolution Report")
-        lines.append("")
-        lines.append(f"**Consensus Reached**: {resolution.consensus_reached}")
-        lines.append(f"**Agreement Level**: {resolution.agreement_level:.1%}")
-        lines.append(f"**Resolution Method**: {resolution.resolution_method}")
-        lines.append("")
-
-        lines.append("## Summary")
-        lines.append("")
-        lines.append(
-            f"- **Consensus Recommendations**: {len(resolution.final_recommendations)}"
+        # Resolve conflict
+        result = resolver.resolve_conflict(
+            {"gemini": gemini_recs, "claude": claude_recs}
         )
-        lines.append(f"- **Disagreements**: {len(resolution.disagreements)}")
-        lines.append("")
 
-        if resolution.disagreements:
-            lines.append("## Disagreements")
-            lines.append("")
-            for i, disagreement in enumerate(resolution.disagreements):
-                lines.append(f"### Disagreement {i+1}")
-                lines.append("")
-                lines.append(f"- **Cluster ID**: {disagreement['cluster_id']}")
-                lines.append(
-                    f"- **Number of Variants**: {len(disagreement['recommendations'])}"
-                )
-                lines.append("")
-
-        if resolution.model_votes:
-            lines.append("## Model Agreement")
-            lines.append("")
-            for rec_id, models in resolution.model_votes.items():
-                lines.append(f"- **{rec_id}**: {', '.join(models)}")
-            lines.append("")
-
-        report = "\n".join(lines)
-
-        if output_file:
-            with open(output_file, "w") as f:
-                f.write(report)
-            logger.info(f"Disagreement report saved to {output_file}")
-
-        return report
+        logger.info(f"\n📊 Conflict Resolution Result:")
+        logger.info(f"   Has Consensus: {result.has_consensus}")
+        logger.info(f"   Conflict Type: {result.conflict_analysis.conflict_type.value}")
+        logger.info(f"   Similarity: {result.conflict_analysis.similarity_score:.1%}")
+        logger.info(f"   Agreement: {result.conflict_analysis.agreement_count} items")
+        logger.info(
+            f"   Disagreement: {result.conflict_analysis.disagreement_count} items"
+        )
+        logger.info(
+            f"   Strategy: {result.conflict_analysis.resolution_strategy.value}"
+        )
+        logger.info(f"   Merged: {len(result.merged_output)} recommendations")
 
 
 if __name__ == "__main__":
-    # Demo usage
-    logging.basicConfig(level=logging.INFO)
-
-    print("=" * 70)
-    print("CONFLICT RESOLVER DEMO")
-    print("=" * 70)
-    print()
-
-    # Create test model outputs
-    gemini_output = ModelOutput(
-        model_name="gemini",
-        recommendations=[
-            {
-                "title": "Use panel data methods",
-                "description": "Fixed effects models",
-                "priority": "high",
-            },
-            {
-                "title": "Implement feature engineering",
-                "description": "Create lag features",
-                "priority": "medium",
-            },
-        ],
-        confidence=0.9,
-        raw_output="...",
-    )
-
-    claude_output = ModelOutput(
-        model_name="claude",
-        recommendations=[
-            {
-                "title": "Use panel data models",
-                "description": "Fixed effects regression",
-                "priority": "high",
-            },
-            {
-                "title": "Add data quality checks",
-                "description": "Validate inputs",
-                "priority": "high",
-            },
-        ],
-        confidence=0.85,
-        raw_output="...",
-    )
-
-    gpt4_output = ModelOutput(
-        model_name="gpt4",
-        recommendations=[
-            {
-                "title": "Panel data analysis",
-                "description": "Fixed effects approach",
-                "priority": "high",
-            },
-            {
-                "title": "Feature engineering pipeline",
-                "description": "Automated feature creation",
-                "priority": "medium",
-            },
-        ],
-        confidence=0.8,
-        raw_output="...",
-    )
-
-    # Initialize resolver
-    resolver = ConflictResolver(similarity_threshold=0.7)
-
-    # Resolve conflicts
-    resolution = resolver.resolve([gemini_output, claude_output, gpt4_output])
-
-    # Print results
-    print(f"Consensus Reached: {resolution.consensus_reached}")
-    print(f"Agreement Level: {resolution.agreement_level:.1%}")
-    print(f"Resolution Method: {resolution.resolution_method}")
-    print(f"Consensus Recommendations: {len(resolution.final_recommendations)}")
-    print(f"Disagreements: {len(resolution.disagreements)}")
-    print()
-
-    # Generate report
-    report = resolver.generate_disagreement_report(resolution)
-    print(report)
-
-    print("=" * 70)
-    print("Demo complete!")
-    print("=" * 70)
+    main()

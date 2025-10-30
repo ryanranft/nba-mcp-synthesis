@@ -535,6 +535,11 @@ Located in `docs/tracking/`:
 - **MATH_TOOLS_GUIDE.md** - Math/stats/NBA metrics guide
 - **SPRINT_5_FINAL_SUMMARY.md** - Sprint 5 practical guide
 
+### 📊 Examples & Demonstrations
+- **examples/phase2_nba_analytics_demo.ipynb** - Comprehensive demo of all 23 Phase 2 econometric methods
+- **examples/README.md** - Examples documentation and usage guide
+- **PHASE2_DAY6_SUMMARY.md** - Complete Phase 2 implementation summary
+
 ### 📖 Reference
 - **.env.example** - Environment variable template
 - **tests/** - Connection and integration tests (100% pass rate for ML)

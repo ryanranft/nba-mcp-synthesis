@@ -1,522 +1,846 @@
 #!/usr/bin/env python3
 """
-Phase 3.5: AI Plan Modifications
+Phase 3.5: AI-Driven Plan Modification
 
-This phase runs after consolidation & synthesis (Phase 3) to:
-1. Analyze synthesis results for improvement opportunities
-2. Autonomously ADD new plans from AI recommendations
-3. MODIFY existing plans based on new insights
-4. DELETE obsolete plans that are superseded
-5. MERGE duplicate or overlapping plans
+Analyzes implementation plans and automatically suggests/applies modifications
+based on Phase 3 synthesis outputs and project context.
 
-All operations have confidence thresholds and optional approval prompts.
+Features:
+- Detects obsolete sections that are no longer needed
+- Identifies duplicate sections that should be merged
+- Proposes new sections based on synthesis recommendations
+- Modifies existing sections to incorporate new insights
+- Requires approval for high-impact changes
+- Tracks costs and provides rollback support
 
-Part of Tier 2 implementation - the AI intelligence layer.
+Usage:
+    # Analyze plan and suggest modifications (dry-run)
+    python scripts/phase3_5_ai_plan_modification.py plan.md --dry-run
+
+    # Apply modifications with auto-approval for low-impact changes
+    python scripts/phase3_5_ai_plan_modification.py plan.md --auto-approve-low-impact
+
+    # Apply modifications with manual approval for all changes
+    python scripts/phase3_5_ai_plan_modification.py plan.md
+
+    # Use specific synthesis output
+    python scripts/phase3_5_ai_plan_modification.py plan.md --synthesis implementation_plans/consolidated_recommendations.json
+
+    # Apply only specific modification types
+    python scripts/phase3_5_ai_plan_modification.py plan.md --only add,modify
 """
 
-import asyncio
-import logging
 import json
+import logging
+import argparse
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple, Optional
 from datetime import datetime
-
-# Import our Tier 2 systems
+from dataclasses import dataclass, field
 import sys
 
+# Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-from intelligent_plan_editor import IntelligentPlanEditor
-from conflict_resolver import ConflictResolver
-from smart_integrator import SmartIntegrator
+from intelligent_plan_editor import IntelligentPlanEditor, PlanSection
 from phase_status_manager import PhaseStatusManager
+from cost_safety_manager import CostSafetyManager
+from conflict_resolver import ConflictResolver
 
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
-class Phase35AIPlanModification:
+@dataclass
+class PlanModificationProposal:
+    """Proposal for modifying a plan."""
+
+    operation: str  # ADD, MODIFY, DELETE, MERGE
+    section_id: Optional[str] = None  # For MODIFY, DELETE, MERGE
+    section_id_2: Optional[str] = None  # For MERGE (second section)
+    title: Optional[str] = None  # For ADD
+    content: Optional[str] = None  # For ADD, MODIFY
+    rationale: str = ""
+    confidence: float = 0.0  # 0.0-1.0
+    impact: str = "low"  # low, medium, high
+    source_recommendations: List[Dict] = field(default_factory=list)
+    metadata: Dict = field(default_factory=dict)
+
+    def requires_approval(self, auto_approve_threshold: float = 0.8) -> bool:
+        """Determine if this modification requires manual approval."""
+        # High-impact always requires approval
+        if self.impact == "high":
+            return True
+
+        # Medium-impact requires approval if confidence is low
+        if self.impact == "medium" and self.confidence < auto_approve_threshold:
+            return True
+
+        # Low-impact only requires approval if confidence is very low
+        if self.impact == "low" and self.confidence < 0.6:
+            return True
+
+        return False
+
+
+class Phase3_5_AIModification:
     """
-    Phase 3.5: AI-powered plan modifications.
+    AI-driven plan modification system.
 
-    Capabilities:
-    - Analyze synthesis output for gaps
-    - Detect duplicate/obsolete plans
-    - Propose new plans from recommendations
-    - Modify existing plans with improvements
-    - Request approval for high-impact changes
-
-    Example:
-        >>> phase = Phase35AIPlanModification()
-        >>> result = await phase.run_ai_modifications()
-        >>> print(f"Plans added: {result['plans_added']}")
-        >>> print(f"Plans modified: {result['plans_modified']}")
+    Analyzes implementation plans and suggests/applies modifications
+    based on synthesis recommendations and project context.
     """
 
     def __init__(
         self,
-        auto_approve_threshold: float = 0.85,
-        enable_auto_add: bool = True,
-        enable_auto_modify: bool = True,
-        enable_auto_delete: bool = False,  # More conservative
-        enable_auto_merge: bool = True,
+        plan_path: Path,
+        synthesis_path: Optional[Path] = None,
+        auto_approve_low_impact: bool = False,
+        dry_run: bool = False,
     ):
         """
-        Initialize Phase 3.5.
+        Initialize Phase 3.5 AI modification system.
 
         Args:
-            auto_approve_threshold: Confidence threshold for auto-approval
-            enable_auto_add: Allow automatic plan addition
-            enable_auto_modify: Allow automatic plan modification
-            enable_auto_delete: Allow automatic plan deletion
-            enable_auto_merge: Allow automatic plan merging
+            plan_path: Path to implementation plan to modify
+            synthesis_path: Path to synthesis recommendations (default: implementation_plans/consolidated_recommendations.json)
+            auto_approve_low_impact: Auto-approve low-impact changes without prompting
+            dry_run: Preview modifications without applying them
         """
-        self.auto_approve_threshold = auto_approve_threshold
-        self.enable_auto_add = enable_auto_add
-        self.enable_auto_modify = enable_auto_modify
-        self.enable_auto_delete = enable_auto_delete
-        self.enable_auto_merge = enable_auto_merge
-
-        # Initialize subsystems
-        self.plan_editor = IntelligentPlanEditor(
-            require_approval_threshold=auto_approve_threshold
+        self.plan_path = Path(plan_path)
+        self.synthesis_path = synthesis_path or Path(
+            "implementation_plans/consolidated_recommendations.json"
         )
+        self.auto_approve_low_impact = auto_approve_low_impact
+        self.dry_run = dry_run
+
+        # Initialize managers
+        self.editor = IntelligentPlanEditor(str(self.plan_path))
         self.status_mgr = PhaseStatusManager()
+        self.cost_mgr = CostSafetyManager()
+        self.conflict_resolver = ConflictResolver()
 
-        logger.info("Phase 3.5: AI Plan Modification initialized")
-        logger.info(f"  Auto-approve threshold: {auto_approve_threshold:.1%}")
-        logger.info(f"  Auto-add: {enable_auto_add}")
-        logger.info(f"  Auto-modify: {enable_auto_modify}")
-        logger.info(f"  Auto-delete: {enable_auto_delete}")
-        logger.info(f"  Auto-merge: {enable_auto_merge}")
+        # Track proposals
+        self.proposals: List[PlanModificationProposal] = []
+        self.applied_modifications: List[Dict] = []
+        self.rejected_modifications: List[Dict] = []
 
-    async def run_ai_modifications(
-        self, synthesis_file: Optional[Path] = None, dry_run: bool = False
-    ) -> Dict[str, any]:
-        """
-        Run AI-powered plan modifications.
+        logger.info("🤖 Phase 3.5: AI-Driven Plan Modification")
+        logger.info(f"   Plan: {self.plan_path}")
+        logger.info(f"   Synthesis: {self.synthesis_path}")
+        logger.info(f"   Mode: {'DRY RUN' if dry_run else 'APPLY'}")
+        logger.info(f"   Auto-approve low-impact: {auto_approve_low_impact}")
 
-        Args:
-            synthesis_file: Path to synthesis output from Phase 3
-            dry_run: Preview modifications without applying
-
-        Returns:
-            Dict with modification results
-        """
-        logger.info("\n" + "=" * 70)
-        logger.info("PHASE 3.5: AI PLAN MODIFICATIONS")
-        logger.info("=" * 70 + "\n")
-
-        start_time = datetime.now()
-
-        # Mark phase as started
-        if not dry_run:
-            self.status_mgr.start_phase("phase_3_5", "Phase 3.5: AI Plan Modifications")
+    def load_synthesis_recommendations(self) -> List[Dict]:
+        """Load recommendations from Phase 3 synthesis."""
+        if not self.synthesis_path.exists():
+            logger.warning(f"⚠️  Synthesis file not found: {self.synthesis_path}")
+            logger.warning("   Run Phase 3 consolidation first")
+            return []
 
         try:
-            # Step 1: Load synthesis results
-            synthesis_data = await self._load_synthesis(synthesis_file)
+            with open(self.synthesis_path, "r") as f:
+                data = json.load(f)
+
+            recommendations = data.get("recommendations", [])
             logger.info(
-                f"Loaded synthesis with {len(synthesis_data.get('recommendations', []))} recommendations"
+                f"✅ Loaded {len(recommendations)} recommendations from synthesis"
             )
-
-            # Step 2: Analyze current plans
-            current_plans = self._analyze_current_plans()
-            logger.info(f"Found {len(current_plans)} existing plans")
-
-            # Step 3: Detect gaps (recommendations not in plans)
-            gaps = self._detect_gaps(synthesis_data, current_plans)
-            logger.info(f"Detected {len(gaps)} gaps")
-
-            # Step 4: Detect duplicates
-            duplicates = self._detect_duplicates(current_plans)
-            logger.info(f"Detected {len(duplicates)} duplicate groups")
-
-            # Step 5: Detect obsolete plans
-            obsolete = self._detect_obsolete(current_plans, synthesis_data)
-            logger.info(f"Detected {len(obsolete)} potentially obsolete plans")
-
-            # Step 6: Propose modifications
-            proposed_modifications = self._propose_modifications(
-                gaps, duplicates, obsolete
-            )
-
-            logger.info("\nProposed Modifications:")
-            logger.info(f"  ADD: {len(proposed_modifications['add'])}")
-            logger.info(f"  MODIFY: {len(proposed_modifications['modify'])}")
-            logger.info(f"  DELETE: {len(proposed_modifications['delete'])}")
-            logger.info(f"  MERGE: {len(proposed_modifications['merge'])}")
-
-            if dry_run:
-                logger.info("\n🔍 DRY RUN MODE - No changes applied")
-                return {
-                    "dry_run": True,
-                    "proposed": proposed_modifications,
-                    "plans_added": 0,
-                    "plans_modified": 0,
-                    "plans_deleted": 0,
-                    "plans_merged": 0,
-                }
-
-            # Step 7: Apply modifications
-            results = await self._apply_modifications(proposed_modifications)
-
-            # Step 8: Mark phase complete
-            duration = (datetime.now() - start_time).total_seconds()
-            self.status_mgr.complete_phase("phase_3_5", duration)
-
-            # Step 9: Trigger reruns for affected phases
-            if results["plans_added"] > 0 or results["plans_modified"] > 0:
-                self.status_mgr.mark_needs_rerun(
-                    "phase_4",
-                    reason="Phase 3.5 modified implementation plans",
-                    ai_modified=True,
-                )
-
-            logger.info("\n✅ Phase 3.5 complete")
-            logger.info(f"  Added: {results['plans_added']} plans")
-            logger.info(f"  Modified: {results['plans_modified']} plans")
-            logger.info(f"  Deleted: {results['plans_deleted']} plans")
-            logger.info(f"  Merged: {results['plans_merged']} plans")
-
-            return results
+            return recommendations
 
         except Exception as e:
-            logger.error(f"\n❌ Phase 3.5 failed: {e}")
-            if not dry_run:
-                self.status_mgr.fail_phase("phase_3_5", str(e))
-            raise
+            logger.error(f"❌ Error loading synthesis: {e}")
+            return []
 
-    async def _load_synthesis(self, synthesis_file: Optional[Path]) -> Dict[str, any]:
-        """Load synthesis results from Phase 3."""
-        if synthesis_file is None:
-            synthesis_file = Path(
-                "implementation_plans/consolidated_recommendations.json"
-            )
+    def analyze_plan_for_obsolete_sections(
+        self, sections: List[PlanSection]
+    ) -> List[PlanModificationProposal]:
+        """
+        Analyze plan to detect potentially obsolete sections.
 
-        if not synthesis_file.exists():
-            logger.warning(f"Synthesis file not found: {synthesis_file}")
-            # Return mock data for testing
-            return {
-                "recommendations": [
-                    {
-                        "id": "rec_test_1",
-                        "title": "Test Recommendation 1",
-                        "priority": "high",
-                    }
-                ]
-            }
+        Heuristics for obsolete detection:
+        - Sections marked as "TODO" or "PLACEHOLDER" in title
+        - Sections with "deprecated" or "obsolete" in content
+        - Empty sections (no content beyond title)
+        - Sections referencing old technologies or approaches
+        """
+        proposals = []
 
-        with open(synthesis_file) as f:
-            return json.load(f)
-
-    def _analyze_current_plans(self) -> List[Dict[str, any]]:
-        """Load and analyze current implementation plans."""
-        plans = []
-        plans_dir = Path("implementation_plans")
-
-        for plan_file in plans_dir.glob("*.json"):
-            # Skip non-plan files
-            if (
-                plan_file.name.startswith("PHASE")
-                or plan_file.name.startswith("phase_")
-                or plan_file.name.startswith("nba_")
-                or plan_file.name == "plan_operations.json"
-            ):
-                continue
-
-            try:
-                with open(plan_file) as f:
-                    plan_data = json.load(f)
-                    plan_data["_file"] = plan_file.name
-                    plans.append(plan_data)
-            except Exception as e:
-                logger.warning(f"Error loading plan {plan_file}: {e}")
-
-        return plans
-
-    def _detect_gaps(
-        self, synthesis_data: Dict[str, any], current_plans: List[Dict[str, any]]
-    ) -> List[Dict[str, any]]:
-        """Detect recommendations not covered by existing plans."""
-        gaps = []
-
-        recommendations = synthesis_data.get("consensus_recommendations", [])
-        plan_titles = [p.get("title", "").lower() for p in current_plans]
-
-        for rec in recommendations:
-            rec_title = rec.get("title", "").lower()
-
-            # Check if recommendation already has a plan
-            has_plan = any(
-                rec_title in plan_title or plan_title in rec_title
-                for plan_title in plan_titles
-            )
-
-            if not has_plan:
-                gaps.append(
-                    {
-                        "recommendation": rec,
-                        "confidence": 0.8,  # Moderate confidence for gap filling
-                        "reason": "No existing plan covers this recommendation",
-                    }
-                )
-
-        return gaps
-
-    def _detect_duplicates(
-        self, current_plans: List[Dict[str, any]]
-    ) -> List[List[str]]:
-        """Detect duplicate or very similar plans."""
-        from difflib import SequenceMatcher
-
-        duplicates = []
-        used_indices = set()
-
-        for i, plan1 in enumerate(current_plans):
-            if i in used_indices:
-                continue
-
-            group = [plan1["_file"].replace(".json", "")]
-
-            for j, plan2 in enumerate(current_plans[i + 1 :], start=i + 1):
-                if j in used_indices:
-                    continue
-
-                # Compare titles
-                similarity = SequenceMatcher(
-                    None, plan1.get("title", "").lower(), plan2.get("title", "").lower()
-                ).ratio()
-
-                if similarity > 0.85:  # Very similar
-                    group.append(plan2["_file"].replace(".json", ""))
-                    used_indices.add(j)
-
-            if len(group) > 1:
-                duplicates.append(group)
-
-        return duplicates
-
-    def _detect_obsolete(
-        self, current_plans: List[Dict[str, any]], synthesis_data: Dict[str, any]
-    ) -> List[Dict[str, any]]:
-        """Detect plans that may be obsolete."""
-        obsolete = []
-
-        # Check for old plans not mentioned in synthesis
-        synthesis_topics = [
-            r.get("title", "").lower()
-            for r in synthesis_data.get("recommendations", [])
+        obsolete_keywords = [
+            "todo",
+            "placeholder",
+            "deprecated",
+            "obsolete",
+            "to be removed",
+            "legacy",
+            "old approach",
         ]
 
-        for plan in current_plans:
-            plan_title = plan.get("title", "").lower()
-
-            # Check if plan topic is mentioned in synthesis
-            mentioned = any(
-                topic in plan_title or plan_title in topic for topic in synthesis_topics
-            )
-
-            if not mentioned and plan.get("priority") == "low":
-                obsolete.append(
-                    {
-                        "plan_id": plan["_file"].replace(".json", ""),
-                        "title": plan.get("title"),
-                        "confidence": 0.6,  # Low confidence for deletion
-                        "reason": "Not mentioned in latest synthesis and low priority",
-                    }
-                )
-
-        return obsolete
-
-    def _propose_modifications(
-        self,
-        gaps: List[Dict[str, any]],
-        duplicates: List[List[str]],
-        obsolete: List[Dict[str, any]],
-    ) -> Dict[str, List[Dict[str, any]]]:
-        """Propose specific modifications based on analysis."""
-        proposals = {"add": [], "modify": [], "delete": [], "merge": []}
-
-        # Propose ADD for gaps
-        if self.enable_auto_add:
-            for gap in gaps:
-                rec = gap["recommendation"]
-                proposals["add"].append(
-                    {
-                        "plan_data": {
-                            "id": rec.get(
-                                "id", f"plan_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-                            ),
-                            "title": rec.get("title"),
-                            "description": rec.get("description", ""),
-                            "priority": rec.get("priority", "medium"),
-                            "source": "ai_synthesis",
-                        },
-                        "reason": gap["reason"],
-                        "confidence": gap["confidence"],
-                    }
-                )
-
-        # Propose MERGE for duplicates
-        if self.enable_auto_merge:
-            for dup_group in duplicates:
-                if len(dup_group) >= 2:
-                    proposals["merge"].append(
-                        {
-                            "plan_ids": dup_group,
-                            "merged_plan_id": f"merged_{dup_group[0]}",
-                            "reason": f"Merging {len(dup_group)} duplicate plans",
-                            "confidence": 0.75,
-                        }
+        for section in sections:
+            # Check title for obsolete keywords
+            title_lower = section.title.lower()
+            if any(kw in title_lower for kw in ["todo", "placeholder"]):
+                proposals.append(
+                    PlanModificationProposal(
+                        operation="DELETE",
+                        section_id=section.id,
+                        rationale=f"Section appears to be a placeholder: '{section.title}'",
+                        confidence=0.7,
+                        impact="low",
+                        metadata={"reason": "placeholder_detection"},
                     )
+                )
+                continue
 
-        # Propose DELETE for obsolete
-        if self.enable_auto_delete:
-            for obs in obsolete:
-                proposals["delete"].append(
-                    {
-                        "plan_id": obs["plan_id"],
-                        "reason": obs["reason"],
-                        "confidence": obs["confidence"],
-                    }
+            # Check for deprecated/obsolete in content
+            content_lower = section.content.lower()
+            if any(
+                kw in content_lower
+                for kw in ["deprecated", "obsolete", "to be removed"]
+            ):
+                proposals.append(
+                    PlanModificationProposal(
+                        operation="DELETE",
+                        section_id=section.id,
+                        rationale=f"Section marked as deprecated/obsolete in content",
+                        confidence=0.85,
+                        impact="medium",
+                        metadata={"reason": "explicit_deprecation"},
+                    )
+                )
+                continue
+
+            # Check for empty sections
+            if len(section.content.strip()) == 0:
+                proposals.append(
+                    PlanModificationProposal(
+                        operation="DELETE",
+                        section_id=section.id,
+                        rationale=f"Empty section with no content",
+                        confidence=0.9,
+                        impact="low",
+                        metadata={"reason": "empty_section"},
+                    )
                 )
 
         return proposals
 
-    async def _apply_modifications(
-        self, proposals: Dict[str, List[Dict[str, any]]]
-    ) -> Dict[str, int]:
-        """Apply proposed modifications."""
-        results = {
-            "plans_added": 0,
-            "plans_modified": 0,
-            "plans_deleted": 0,
-            "plans_merged": 0,
-            "approvals_needed": [],
-        }
+    def analyze_plan_for_duplicates(
+        self, sections: List[PlanSection], threshold: float = 0.8
+    ) -> List[PlanModificationProposal]:
+        """
+        Analyze plan to detect duplicate sections that should be merged.
 
-        # Apply ADD operations
-        for add_proposal in proposals["add"]:
-            result = self.plan_editor.add_plan(
-                plan_data=add_proposal["plan_data"],
-                reason=add_proposal["reason"],
-                confidence=add_proposal["confidence"],
-                require_approval=False,
+        Uses the IntelligentPlanEditor's find_duplicate_sections method.
+        """
+        proposals = []
+
+        duplicates = self.editor.find_duplicate_sections(similarity_threshold=threshold)
+
+        for sec1, sec2, similarity in duplicates:
+            proposals.append(
+                PlanModificationProposal(
+                    operation="MERGE",
+                    section_id=sec1.id,
+                    section_id_2=sec2.id,
+                    rationale=f"Sections are {similarity:.0%} similar and should be merged: '{sec1.title}' and '{sec2.title}'",
+                    confidence=similarity,
+                    impact="medium" if similarity > 0.9 else "low",
+                    metadata={
+                        "similarity": similarity,
+                        "merge_strategy": "smart" if similarity > 0.85 else "union",
+                    },
+                )
             )
 
-            if result["success"]:
-                results["plans_added"] += 1
-            elif "approval_prompt" in result:
-                results["approvals_needed"].append(result)
+        return proposals
 
-        # Apply MODIFY operations
-        for modify_proposal in proposals["modify"]:
-            result = self.plan_editor.modify_plan(
-                plan_id=modify_proposal["plan_id"],
-                modifications=modify_proposal["modifications"],
-                reason=modify_proposal["reason"],
-                confidence=modify_proposal["confidence"],
-                require_approval=False,
+    def analyze_synthesis_for_new_sections(
+        self, recommendations: List[Dict], existing_sections: List[PlanSection]
+    ) -> List[PlanModificationProposal]:
+        """
+        Analyze synthesis recommendations to propose new plan sections.
+
+        Maps recommendations to potential new sections based on:
+        - Priority (critical recommendations → high-priority sections)
+        - Category (similar recommendations grouped together)
+        - Gaps in existing plan (recommendations not covered by current sections)
+        """
+        proposals = []
+
+        # Group recommendations by category/theme
+        critical_recs = [r for r in recommendations if r.get("priority") == "critical"]
+        important_recs = [
+            r for r in recommendations if r.get("priority") == "important"
+        ]
+
+        # Check if recommendations are already covered by existing sections
+        existing_titles = {s.title.lower() for s in existing_sections}
+        existing_content = " ".join(s.content.lower() for s in existing_sections)
+
+        # Propose sections for critical recommendations not yet covered
+        for rec in critical_recs[:5]:  # Limit to top 5 critical
+            rec_title = rec.get("title", "")
+            rec_desc = rec.get("description", "")
+
+            # Skip if already covered (title match or keywords in content)
+            if rec_title.lower() in existing_titles:
+                continue
+
+            # Check if keywords appear in existing content
+            rec_keywords = set(rec_title.lower().split())
+            if (
+                len(rec_keywords.intersection(existing_content.split()))
+                > len(rec_keywords) * 0.7
+            ):
+                continue
+
+            # Propose new section
+            proposals.append(
+                PlanModificationProposal(
+                    operation="ADD",
+                    title=f"Implementation: {rec_title}",
+                    content=f"{rec_desc}\n\n**Source:** {rec.get('source_book', 'Unknown')}\n**Priority:** Critical",
+                    rationale=f"Critical recommendation from synthesis not covered in current plan",
+                    confidence=0.75,
+                    impact="high",
+                    source_recommendations=[rec],
+                    metadata={
+                        "position": "end",
+                        "level": 2,
+                        "source_book": rec.get("source_book"),
+                    },
+                )
             )
 
-            if result["success"]:
-                results["plans_modified"] += 1
-            elif "approval_prompt" in result:
-                results["approvals_needed"].append(result)
+        # Propose sections for important recommendations (lower confidence)
+        for rec in important_recs[:3]:  # Limit to top 3 important
+            rec_title = rec.get("title", "")
+            rec_desc = rec.get("description", "")
 
-        # Apply DELETE operations
-        for delete_proposal in proposals["delete"]:
-            result = self.plan_editor.delete_plan(
-                plan_id=delete_proposal["plan_id"],
-                reason=delete_proposal["reason"],
-                confidence=delete_proposal["confidence"],
-                require_approval=True,  # Always require approval for deletion
+            if rec_title.lower() in existing_titles:
+                continue
+
+            proposals.append(
+                PlanModificationProposal(
+                    operation="ADD",
+                    title=f"Enhancement: {rec_title}",
+                    content=f"{rec_desc}\n\n**Source:** {rec.get('source_book', 'Unknown')}\n**Priority:** Important",
+                    rationale=f"Important recommendation from synthesis",
+                    confidence=0.65,
+                    impact="medium",
+                    source_recommendations=[rec],
+                    metadata={
+                        "position": "end",
+                        "level": 2,
+                        "source_book": rec.get("source_book"),
+                    },
+                )
             )
 
-            if result["success"]:
-                results["plans_deleted"] += 1
-            elif "approval_prompt" in result:
-                results["approvals_needed"].append(result)
+        return proposals
 
-        # Apply MERGE operations
-        for merge_proposal in proposals["merge"]:
-            # Create merged plan data
-            merged_data = {
-                "id": merge_proposal["merged_plan_id"],
-                "title": f"Merged: {', '.join(merge_proposal['plan_ids'][:2])}{'...' if len(merge_proposal['plan_ids']) > 2 else ''}",
-                "description": "Merged plan from duplicates",
+    def analyze_synthesis_for_section_enhancements(
+        self, recommendations: List[Dict], existing_sections: List[PlanSection]
+    ) -> List[PlanModificationProposal]:
+        """
+        Analyze synthesis to propose enhancements to existing sections.
+
+        Finds recommendations that relate to existing sections and proposes
+        adding relevant information to those sections.
+        """
+        proposals = []
+
+        for section in existing_sections:
+            section_keywords = set(section.title.lower().split())
+
+            # Find recommendations that match this section's keywords
+            related_recs = []
+            for rec in recommendations:
+                rec_keywords = set(rec.get("title", "").lower().split())
+
+                # Check keyword overlap
+                overlap = len(section_keywords.intersection(rec_keywords))
+                if overlap >= 2 or (overlap == 1 and len(section_keywords) <= 3):
+                    related_recs.append(rec)
+
+            # If we found related recommendations, propose enhancement
+            if related_recs:
+                enhancement_content = "\n\n**Related Insights:**\n"
+                for rec in related_recs[:3]:  # Limit to top 3
+                    enhancement_content += (
+                        f"- {rec.get('title')}: {rec.get('description', '')[:100]}...\n"
+                    )
+
+                proposals.append(
+                    PlanModificationProposal(
+                        operation="MODIFY",
+                        section_id=section.id,
+                        content=enhancement_content,
+                        rationale=f"Adding insights from {len(related_recs)} related recommendations",
+                        confidence=0.7,
+                        impact="low",
+                        source_recommendations=related_recs[:3],
+                        metadata={"modification_type": "append"},
+                    )
+                )
+
+        return proposals
+
+    def generate_proposals(
+        self, operation_types: Optional[List[str]] = None
+    ) -> List[PlanModificationProposal]:
+        """
+        Generate all modification proposals.
+
+        Args:
+            operation_types: List of operations to include (ADD, MODIFY, DELETE, MERGE)
+                           If None, includes all types
+
+        Returns:
+            List of modification proposals
+        """
+        logger.info("\n" + "=" * 60)
+        logger.info("ANALYZING PLAN FOR MODIFICATIONS")
+        logger.info("=" * 60 + "\n")
+
+        operation_types = operation_types or ["ADD", "MODIFY", "DELETE", "MERGE"]
+        operation_types = [op.upper() for op in operation_types]
+
+        # Load plan structure
+        sections = self.editor.parse_plan_structure()
+        logger.info(f"✅ Parsed plan: {len(sections)} sections")
+
+        # Load synthesis recommendations
+        recommendations = self.load_synthesis_recommendations()
+
+        proposals = []
+
+        # Detect obsolete sections
+        if "DELETE" in operation_types:
+            logger.info("\n🔍 Analyzing for obsolete sections...")
+            obsolete_proposals = self.analyze_plan_for_obsolete_sections(sections)
+            proposals.extend(obsolete_proposals)
+            logger.info(f"   Found {len(obsolete_proposals)} obsolete section(s)")
+
+        # Detect duplicates
+        if "MERGE" in operation_types:
+            logger.info("\n🔍 Analyzing for duplicate sections...")
+            duplicate_proposals = self.analyze_plan_for_duplicates(sections)
+            proposals.extend(duplicate_proposals)
+            logger.info(f"   Found {len(duplicate_proposals)} duplicate pair(s)")
+
+        # Propose new sections from synthesis
+        if "ADD" in operation_types and recommendations:
+            logger.info("\n🔍 Analyzing synthesis for new sections...")
+            new_section_proposals = self.analyze_synthesis_for_new_sections(
+                recommendations, sections
+            )
+            proposals.extend(new_section_proposals)
+            logger.info(f"   Proposed {len(new_section_proposals)} new section(s)")
+
+        # Propose enhancements to existing sections
+        if "MODIFY" in operation_types and recommendations:
+            logger.info("\n🔍 Analyzing synthesis for section enhancements...")
+            enhancement_proposals = self.analyze_synthesis_for_section_enhancements(
+                recommendations, sections
+            )
+            proposals.extend(enhancement_proposals)
+            logger.info(f"   Proposed {len(enhancement_proposals)} enhancement(s)")
+
+        self.proposals = proposals
+        logger.info(f"\n✅ Generated {len(proposals)} total proposal(s)")
+
+        return proposals
+
+    def display_proposal(self, proposal: PlanModificationProposal, index: int):
+        """Display a single proposal in a readable format."""
+        print(f"\n{'=' * 60}")
+        print(f"PROPOSAL #{index + 1}: {proposal.operation}")
+        print(f"{'=' * 60}")
+        print(f"Confidence: {proposal.confidence:.0%}")
+        print(f"Impact: {proposal.impact.upper()}")
+        print(f"Rationale: {proposal.rationale}")
+
+        if proposal.operation == "DELETE":
+            print(f"Section to delete: {proposal.section_id}")
+
+        elif proposal.operation == "MERGE":
+            print(f"Merge: {proposal.section_id}")
+            print(f"  With: {proposal.section_id_2}")
+            print(f"Strategy: {proposal.metadata.get('merge_strategy', 'smart')}")
+
+        elif proposal.operation == "ADD":
+            print(f"New section title: {proposal.title}")
+            print(f"Content preview: {proposal.content[:150]}...")
+
+        elif proposal.operation == "MODIFY":
+            print(f"Section to modify: {proposal.section_id}")
+            print(
+                f"Modification type: {proposal.metadata.get('modification_type', 'append')}"
+            )
+            print(f"Content to add: {proposal.content[:150]}...")
+
+        print(f"{'=' * 60}")
+
+    def request_approval(self, proposal: PlanModificationProposal, index: int) -> bool:
+        """
+        Request manual approval for a proposal.
+
+        Returns:
+            True if approved, False if rejected
+        """
+        self.display_proposal(proposal, index)
+
+        print("\nOptions:")
+        print("  [y] Approve this modification")
+        print("  [n] Reject this modification")
+        print("  [s] Skip (don't apply, but don't reject)")
+        print("  [a] Approve all remaining proposals")
+        print("  [q] Quit (reject all remaining proposals)")
+
+        while True:
+            choice = input("\nYour choice: ").lower().strip()
+
+            if choice == "y":
+                return True
+            elif choice == "n":
+                return False
+            elif choice == "s":
+                return False  # Same as reject for now
+            elif choice == "a":
+                # Set flag to auto-approve all remaining
+                self.auto_approve_low_impact = True
+                return True
+            elif choice == "q":
+                logger.info("❌ User quit - rejecting all remaining proposals")
+                raise KeyboardInterrupt("User requested quit")
+            else:
+                print("Invalid choice. Please enter y, n, s, a, or q.")
+
+    def apply_proposal(self, proposal: PlanModificationProposal) -> bool:
+        """
+        Apply a single modification proposal.
+
+        Returns:
+            True if successfully applied, False otherwise
+        """
+        try:
+            if proposal.operation == "DELETE":
+                self.editor.delete_obsolete_plan(
+                    section_id=proposal.section_id,
+                    rationale=proposal.rationale,
+                    source="ai",
+                    confidence=proposal.confidence,
+                    cascade=False,
+                    archive=True,
+                )
+
+            elif proposal.operation == "MERGE":
+                self.editor.merge_duplicate_plans(
+                    section_id_1=proposal.section_id,
+                    section_id_2=proposal.section_id_2,
+                    merge_strategy=proposal.metadata.get("merge_strategy", "smart"),
+                    keep_section="first",
+                    rationale=proposal.rationale,
+                    source="ai",
+                    confidence=proposal.confidence,
+                )
+
+            elif proposal.operation == "ADD":
+                self.editor.add_new_plan(
+                    title=proposal.title,
+                    content=proposal.content,
+                    position=proposal.metadata.get("position", "end"),
+                    level=proposal.metadata.get("level", 2),
+                    rationale=proposal.rationale,
+                    source="ai",
+                    confidence=proposal.confidence,
+                )
+
+            elif proposal.operation == "MODIFY":
+                mod_type = proposal.metadata.get("modification_type", "append")
+
+                if mod_type == "append":
+                    self.editor.modify_existing_plan(
+                        section_id=proposal.section_id,
+                        append_content=proposal.content,
+                        rationale=proposal.rationale,
+                        source="ai",
+                        confidence=proposal.confidence,
+                    )
+                else:
+                    self.editor.modify_existing_plan(
+                        section_id=proposal.section_id,
+                        new_content=proposal.content,
+                        rationale=proposal.rationale,
+                        source="ai",
+                        confidence=proposal.confidence,
+                    )
+
+            return True
+
+        except Exception as e:
+            logger.error(f"❌ Error applying {proposal.operation}: {e}")
+            return False
+
+    def execute_modifications(
+        self, proposals: Optional[List[PlanModificationProposal]] = None
+    ) -> Dict:
+        """
+        Execute all approved modifications.
+
+        Args:
+            proposals: List of proposals to execute (uses self.proposals if None)
+
+        Returns:
+            Summary dictionary with applied/rejected counts
+        """
+        proposals = proposals or self.proposals
+
+        if not proposals:
+            logger.info("ℹ️  No proposals to execute")
+            return {"applied": 0, "rejected": 0, "skipped": 0}
+
+        logger.info("\n" + "=" * 60)
+        logger.info("EXECUTING MODIFICATIONS")
+        logger.info("=" * 60 + "\n")
+
+        if self.dry_run:
+            logger.info("🔍 DRY RUN - Previewing modifications without applying\n")
+            for i, proposal in enumerate(proposals):
+                self.display_proposal(proposal, i)
+
+            return {
+                "applied": 0,
+                "rejected": 0,
+                "skipped": len(proposals),
+                "dry_run": True,
             }
 
-            result = self.plan_editor.merge_plans(
-                plan_ids=merge_proposal["plan_ids"],
-                merged_plan_data=merged_data,
-                reason=merge_proposal["reason"],
-                confidence=merge_proposal["confidence"],
-                require_approval=False,
+        # Track phase status
+        self.status_mgr.start_phase(
+            "phase_3_5_modifications",
+            metadata={
+                "plan_path": str(self.plan_path),
+                "total_proposals": len(proposals),
+            },
+        )
+
+        applied_count = 0
+        rejected_count = 0
+
+        try:
+            for i, proposal in enumerate(proposals):
+                # Determine if approval is needed
+                needs_approval = proposal.requires_approval(auto_approve_threshold=0.8)
+
+                # Auto-approve if configured and low-impact
+                if self.auto_approve_low_impact and not needs_approval:
+                    logger.info(
+                        f"✅ Auto-approving {proposal.operation} (confidence: {proposal.confidence:.0%}, impact: {proposal.impact})"
+                    )
+                    approved = True
+
+                # Request manual approval
+                elif needs_approval or not self.auto_approve_low_impact:
+                    approved = self.request_approval(proposal, i)
+
+                else:
+                    approved = True
+
+                # Apply if approved
+                if approved:
+                    logger.info(f"⏳ Applying {proposal.operation}...")
+
+                    # Check cost limit (estimate $0.01 per modification)
+                    if not self.cost_mgr.check_cost_limit(
+                        "phase_3_5_modifications", 0.01
+                    ):
+                        logger.error("❌ Cost limit exceeded - stopping modifications")
+                        rejected_count += len(proposals) - i
+                        break
+
+                    success = self.apply_proposal(proposal)
+
+                    if success:
+                        logger.info(f"✅ Successfully applied {proposal.operation}")
+                        applied_count += 1
+                        self.applied_modifications.append(
+                            {
+                                "operation": proposal.operation,
+                                "timestamp": datetime.now().isoformat(),
+                                "rationale": proposal.rationale,
+                            }
+                        )
+
+                        # Record minimal cost
+                        self.cost_mgr.record_cost(
+                            "phase_3_5_modifications",
+                            0.01,
+                            model="heuristic_analysis",
+                            operation=proposal.operation,
+                        )
+                    else:
+                        logger.error(f"❌ Failed to apply {proposal.operation}")
+                        rejected_count += 1
+                        self.rejected_modifications.append(
+                            {
+                                "operation": proposal.operation,
+                                "reason": "application_failed",
+                            }
+                        )
+                else:
+                    logger.info(f"⏭️  Rejected {proposal.operation}")
+                    rejected_count += 1
+                    self.rejected_modifications.append(
+                        {"operation": proposal.operation, "reason": "user_rejected"}
+                    )
+
+            # Complete phase successfully
+            self.status_mgr.complete_phase(
+                "phase_3_5_modifications",
+                metadata={"applied": applied_count, "rejected": rejected_count},
             )
 
-            if result["success"]:
-                results["plans_merged"] += 1
-            elif "approval_prompt" in result:
-                results["approvals_needed"].append(result)
-
-        # Log approval requests
-        if results["approvals_needed"]:
-            logger.warning(
-                f"\n⚠️  {len(results['approvals_needed'])} operations require manual approval"
+        except KeyboardInterrupt:
+            logger.info("\n⚠️  User interrupted - marking phase as needs rerun")
+            self.status_mgr.mark_needs_rerun(
+                "phase_3_5_modifications", "User interrupted"
             )
-            for approval in results["approvals_needed"]:
-                logger.warning(f"   - {approval.get('approval_prompt')}")
+            rejected_count += len(proposals) - applied_count
 
-        return results
+        except Exception as e:
+            logger.error(f"\n❌ Error during execution: {e}")
+            self.status_mgr.fail_phase("phase_3_5_modifications", str(e))
+            rejected_count += len(proposals) - applied_count
+
+        logger.info(f"\n{'=' * 60}")
+        logger.info(f"SUMMARY: {applied_count} applied, {rejected_count} rejected")
+        logger.info(f"{'=' * 60}\n")
+
+        return {"applied": applied_count, "rejected": rejected_count, "skipped": 0}
+
+    def generate_report(self, summary: Dict) -> str:
+        """Generate a summary report of modifications."""
+        report = []
+        report.append("=" * 60)
+        report.append("PHASE 3.5: AI PLAN MODIFICATION REPORT")
+        report.append("=" * 60)
+        report.append("")
+        report.append(f"Plan: {self.plan_path}")
+        report.append(f"Timestamp: {datetime.now().isoformat()}")
+        report.append(f"Mode: {'DRY RUN' if self.dry_run else 'APPLIED'}")
+        report.append("")
+        report.append("SUMMARY:")
+        report.append(f"  Total proposals: {len(self.proposals)}")
+        report.append(f"  Applied: {summary['applied']}")
+        report.append(f"  Rejected: {summary['rejected']}")
+        report.append(f"  Skipped: {summary.get('skipped', 0)}")
+        report.append("")
+
+        if self.applied_modifications:
+            report.append("APPLIED MODIFICATIONS:")
+            for mod in self.applied_modifications:
+                report.append(f"  - {mod['operation']}: {mod['rationale']}")
+            report.append("")
+
+        if self.rejected_modifications:
+            report.append("REJECTED MODIFICATIONS:")
+            for mod in self.rejected_modifications:
+                report.append(f"  - {mod['operation']}: {mod.get('reason', 'unknown')}")
+            report.append("")
+
+        # Cost summary
+        total_cost = self.cost_mgr.get_phase_cost("phase_3_5_modifications")
+        report.append(f"COST: ${total_cost:.2f}")
+        report.append("")
+        report.append("=" * 60)
+
+        return "\n".join(report)
 
 
-async def main():
-    """Main entry point for Phase 3.5."""
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Phase 3.5: AI Plan Modifications")
-    parser.add_argument(
-        "--synthesis-file", type=Path, help="Path to Phase 3 synthesis output"
+def main():
+    """Main entry point."""
+    parser = argparse.ArgumentParser(
+        description="Phase 3.5: AI-Driven Plan Modification",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
+
     parser.add_argument(
-        "--dry-run", action="store_true", help="Preview modifications without applying"
+        "plan_path", type=str, help="Path to implementation plan to modify"
     )
+
     parser.add_argument(
-        "--auto-approve-threshold",
-        type=float,
-        default=0.85,
-        help="Confidence threshold for auto-approval (default: 0.85)",
+        "--synthesis",
+        type=str,
+        default="implementation_plans/consolidated_recommendations.json",
+        help="Path to synthesis recommendations (default: implementation_plans/consolidated_recommendations.json)",
+    )
+
+    parser.add_argument(
+        "--auto-approve-low-impact",
+        action="store_true",
+        help="Auto-approve low-impact modifications without prompting",
+    )
+
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview modifications without applying them",
+    )
+
+    parser.add_argument(
+        "--only",
+        type=str,
+        help="Only apply specific operation types (comma-separated: add,modify,delete,merge)",
     )
 
     args = parser.parse_args()
 
-    # Configure logging
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+    # Parse operation types
+    operation_types = None
+    if args.only:
+        operation_types = [op.strip().upper() for op in args.only.split(",")]
+        valid_ops = ["ADD", "MODIFY", "DELETE", "MERGE"]
+        for op in operation_types:
+            if op not in valid_ops:
+                logger.error(
+                    f"Invalid operation type: {op}. Valid: {', '.join(valid_ops)}"
+                )
+                return 1
 
-    # Run Phase 3.5
-    phase = Phase35AIPlanModification(
-        auto_approve_threshold=args.auto_approve_threshold
+    # Initialize modifier
+    modifier = Phase3_5_AIModification(
+        plan_path=Path(args.plan_path),
+        synthesis_path=Path(args.synthesis) if args.synthesis else None,
+        auto_approve_low_impact=args.auto_approve_low_impact,
+        dry_run=args.dry_run,
     )
 
-    result = await phase.run_ai_modifications(
-        synthesis_file=args.synthesis_file, dry_run=args.dry_run
-    )
+    # Generate proposals
+    proposals = modifier.generate_proposals(operation_types=operation_types)
 
-    # Print summary
-    print("\n" + "=" * 70)
-    print("PHASE 3.5 SUMMARY")
-    print("=" * 70)
-    print(f"Plans Added: {result['plans_added']}")
-    print(f"Plans Modified: {result['plans_modified']}")
-    print(f"Plans Deleted: {result['plans_deleted']}")
-    print(f"Plans Merged: {result['plans_merged']}")
+    if not proposals:
+        logger.info("✅ No modifications needed - plan is up to date")
+        return 0
 
-    if "approvals_needed" in result:
-        print(f"Approvals Needed: {len(result['approvals_needed'])}")
+    # Execute modifications
+    summary = modifier.execute_modifications(proposals)
 
-    print("=" * 70)
+    # Generate report
+    report = modifier.generate_report(summary)
+    print("\n" + report)
+
+    # Save report to file
+    report_path = Path(f"phase3_5_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md")
+    report_path.write_text(report)
+    logger.info(f"\n📄 Report saved to: {report_path}")
+
+    return 0
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    sys.exit(main())

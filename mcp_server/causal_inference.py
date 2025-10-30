@@ -1308,13 +1308,8 @@ class CausalInferenceAnalyzer:
         result = PSMResult(
             ate=att,
             att=att,
-            std_error=std_error,
-            t_statistic=att / std_error if std_error > 0 else np.nan,
-            p_value=(
-                2 * (1 - stats.norm.cdf(np.abs(att / std_error)))
-                if std_error > 0
-                else np.nan
-            ),
+            atc=0.0,  # Not computed for kernel matching
+            std_error=std_error if not np.isnan(std_error) else 0.0,
             confidence_interval=(
                 (
                     att - 1.96 * std_error,
@@ -1323,12 +1318,11 @@ class CausalInferenceAnalyzer:
                 if std_error > 0
                 else (np.nan, np.nan)
             ),
-            n_treated=np.sum(treated_idx),
-            n_control=np.sum(control_idx),
             n_matched=np.sum(control_idx),  # All controls used with weights
-            propensity_scores=propensity_scores,
+            n_unmatched=0,  # All controls are weighted
             balance_statistics=balance,
-            common_support_range=(propensity_scores.min(), propensity_scores.max()),
+            propensity_scores=propensity_scores,
+            common_support=np.ones(len(propensity_scores), dtype=bool),  # All used
         )
 
         logger.info(f"Kernel matching complete: ATT={att:.4f}")
@@ -1417,23 +1411,21 @@ class CausalInferenceAnalyzer:
         result = PSMResult(
             ate=att,
             att=att,
-            std_error=std_error,
-            t_statistic=att / std_error if std_error > 0 else np.nan,
-            p_value=(
-                2 * (1 - stats.norm.cdf(np.abs(att / std_error)))
-                if std_error > 0
-                else np.nan
-            ),
+            atc=0.0,  # Not computed for radius matching
+            std_error=std_error if not np.isnan(std_error) else 0.0,
             confidence_interval=(
-                att - 1.96 * std_error,
-                att + 1.96 * std_error,
+                (
+                    att - 1.96 * std_error,
+                    att + 1.96 * std_error,
+                )
+                if std_error > 0
+                else (np.nan, np.nan)
             ),
-            n_treated=np.sum(treated_idx),
-            n_control=np.sum(control_idx),
             n_matched=n_matched_total,
+            n_unmatched=np.sum(treated_idx) - len(matched_effects),
+            balance_statistics=pd.DataFrame(),  # Empty dataframe
             propensity_scores=propensity_scores,
-            balance_statistics=None,  # Could compute if needed
-            common_support_range=(propensity_scores.min(), propensity_scores.max()),
+            common_support=np.ones(len(propensity_scores), dtype=bool),
         )
 
         logger.info(
@@ -1529,23 +1521,21 @@ class CausalInferenceAnalyzer:
         result = PSMResult(
             ate=ate,
             att=ate,  # DR estimates ATE
-            std_error=std_error,
-            t_statistic=ate / std_error if std_error > 0 else np.nan,
-            p_value=(
-                2 * (1 - stats.norm.cdf(np.abs(ate / std_error)))
-                if std_error > 0
-                else np.nan
-            ),
+            atc=ate,  # DR estimates ATE (same for all)
+            std_error=std_error if not np.isnan(std_error) else 0.0,
             confidence_interval=(
-                ate - 1.96 * std_error,
-                ate + 1.96 * std_error,
+                (
+                    ate - 1.96 * std_error,
+                    ate + 1.96 * std_error,
+                )
+                if std_error > 0
+                else (np.nan, np.nan)
             ),
-            n_treated=np.sum(treated_mask),
-            n_control=np.sum(control_mask),
             n_matched=len(outcome),  # All units used
+            n_unmatched=0,  # All units used
+            balance_statistics=pd.DataFrame(),  # Empty dataframe
             propensity_scores=propensity_scores,
-            balance_statistics=None,
-            common_support_range=(propensity_scores.min(), propensity_scores.max()),
+            common_support=np.ones(len(propensity_scores), dtype=bool),
         )
 
         logger.info(f"Doubly robust estimation complete: ATE={ate:.4f}")

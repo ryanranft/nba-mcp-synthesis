@@ -722,7 +722,13 @@ class EconometricSuite:
         if self.target is None:
             raise ValueError("target column must be specified for time series analysis")
 
-        analyzer = TimeSeriesAnalyzer(data=self.data, target_column=self.target)
+        # Pass time_col to analyzer so it can set DatetimeIndex if needed
+        time_column_param = (
+            self.time_col if hasattr(self, "time_col") and self.time_col else None
+        )
+        analyzer = TimeSeriesAnalyzer(
+            data=self.data, target_column=self.target, time_column=time_column_param
+        )
 
         if method == "arima":
             # Set default order if not provided
@@ -900,7 +906,9 @@ class EconometricSuite:
             # Structural break detection
             model_result = kwargs.get("model_result")
             if model_result is None:
-                raise ValueError("model_result parameter required for structural break tests")
+                raise ValueError(
+                    "model_result parameter required for structural break tests"
+                )
 
             result = analyzer.detect_structural_breaks(**kwargs)
             return self._create_suite_result(
@@ -914,7 +922,9 @@ class EconometricSuite:
             # Breusch-Godfrey autocorrelation test
             model_result = kwargs.get("model_result")
             if model_result is None:
-                raise ValueError("model_result parameter required for Breusch-Godfrey test")
+                raise ValueError(
+                    "model_result parameter required for Breusch-Godfrey test"
+                )
 
             result = analyzer.breusch_godfrey_test(**kwargs)
             return self._create_suite_result(
@@ -928,7 +938,9 @@ class EconometricSuite:
             # Heteroscedasticity tests
             model_result = kwargs.get("model_result")
             if model_result is None:
-                raise ValueError("model_result parameter required for heteroscedasticity tests")
+                raise ValueError(
+                    "model_result parameter required for heteroscedasticity tests"
+                )
 
             result = analyzer.heteroscedasticity_tests(**kwargs)
             return self._create_suite_result(
@@ -1046,7 +1058,9 @@ class EconometricSuite:
         # Phase 2 Day 6: Dynamic Panel GMM Methods
         elif method in ["first_diff", "fd", "first_difference"]:
             # First-difference OLS
-            formula_str = kwargs.get("formula", formula)
+            formula_str = kwargs.pop(
+                "formula", formula
+            )  # Use pop to remove from kwargs
             result = analyzer.first_difference(formula=formula_str, **kwargs)
             return self._create_suite_result(
                 method_category=MethodCategory.PANEL_DATA,
@@ -1058,7 +1072,7 @@ class EconometricSuite:
 
         elif method in ["diff_gmm", "arellano_bond", "ab_gmm", "difference_gmm"]:
             # Arellano-Bond Difference GMM
-            formula_str = kwargs.get("formula")
+            formula_str = kwargs.pop("formula", None)  # Use pop to remove from kwargs
             if formula_str is None:
                 raise ValueError("formula parameter required for Difference GMM")
 
@@ -1074,7 +1088,7 @@ class EconometricSuite:
 
         elif method in ["sys_gmm", "system_gmm", "bb_gmm", "blundell_bond"]:
             # Blundell-Bond System GMM
-            formula_str = kwargs.get("formula")
+            formula_str = kwargs.pop("formula", None)  # Use pop to remove from kwargs
             if formula_str is None:
                 raise ValueError("formula parameter required for System GMM")
 

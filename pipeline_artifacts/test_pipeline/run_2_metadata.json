@@ -1,15 +1,15 @@
 {
   "run_id": "run_2",
   "pipeline_name": "test_pipeline",
-  "start_time": "2025-10-26T03:41:36.989047",
-  "end_time": "2025-10-26T03:41:36.989157",
+  "start_time": "2025-10-27T01:25:30.665313",
+  "end_time": "2025-10-27T01:25:30.665323",
   "status": "success",
   "config": {},
   "stages": [
     {
       "stage": "data_validation",
       "status": "success",
-      "duration_seconds": 6.6e-05,
+      "duration_seconds": 2e-06,
       "metrics": {
         "processing_time": 1.5,
         "rows_processed": 100

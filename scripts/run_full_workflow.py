@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Master Workflow Orchestrator (Tier 0)
+Master Workflow Orchestrator (Tier 0/1/2)
 
-Runs complete Phases 0-4 workflow with safety features.
+Runs complete Phases 0-4 workflow with advanced features.
 
 Tier 0 Features:
 - Phase 2: Recursive book analysis (1 book)
@@ -11,15 +11,29 @@ Tier 0 Features:
 - Phase 8.5: Pre-integration validation
 - Safety: Cost limits, rollback, error recovery
 
+Tier 1 Features:
+- Parallel book analysis (4-8x faster)
+- Caching for $0 re-runs
+
+Tier 2 Features:
+- Phase 3.5: AI Plan Modifications
+- Smart plan editing with approval workflow
+
 Usage:
-    # Run with 1 book (test)
+    # Tier 0: Basic workflow with 1 book
     python scripts/run_full_workflow.py --book "Machine Learning Systems"
+
+    # Tier 1: Parallel execution
+    python scripts/run_full_workflow.py --parallel --max-workers 8
+
+    # Tier 2: AI modifications enabled
+    python scripts/run_full_workflow.py --book "Machine Learning Systems"
+
+    # Tier 2: Skip AI modifications
+    python scripts/run_full_workflow.py --book "Machine Learning Systems" --skip-ai-modifications
 
     # Dry-run mode
     python scripts/run_full_workflow.py --book "Machine Learning Systems" --dry-run
-
-    # Skip validation (faster)
-    python scripts/run_full_workflow.py --book "Machine Learning Systems" --skip-validation
 """
 
 import asyncio
@@ -36,17 +50,20 @@ from cost_safety_manager import CostSafetyManager
 from rollback_manager import RollbackManager
 from error_recovery import ErrorRecoveryManager
 from phase_status_manager import PhaseStatusManager
-from phase3_5_ai_plan_modification import Phase35AIPlanModification
+from phase3_5_ai_plan_modification import Phase3_5_AIModification
 
 logger = logging.getLogger(__name__)
 
 
 class Tier0WorkflowOrchestrator:
     """
-    Tier 0 workflow orchestrator.
+    Multi-tier workflow orchestrator (Tier 0/1/2).
 
-    Runs phases 2-4 with full safety features.
-    Tests end-to-end workflow with single book.
+    Tier 0: Runs phases 2-4 with safety features
+    Tier 1: Adds parallel execution and caching
+    Tier 2: Adds AI plan modifications (Phase 3.5)
+
+    Tests end-to-end workflow with configurable features.
     """
 
     def __init__(self):
@@ -56,7 +73,7 @@ class Tier0WorkflowOrchestrator:
         self.recovery_mgr = ErrorRecoveryManager()
         self.status_mgr = PhaseStatusManager()
 
-        logger.info("🚀 Tier 0 Workflow Orchestrator")
+        logger.info("🚀 Multi-Tier Workflow Orchestrator (Tier 0/1/2)")
         logger.info(f"   Budget: ${self.cost_mgr.COST_LIMITS['total_workflow']:.2f}")
         logger.info(f"   Current spending: ${self.cost_mgr.get_total_cost():.2f}")
         logger.info(f"   Remaining: ${self.cost_mgr.get_remaining_budget():.2f}\n")
@@ -260,32 +277,32 @@ class Tier0WorkflowOrchestrator:
         # Run AI modifications
         try:
             start_time = datetime.now()
-            phase3_5 = Phase35AIPlanModification(
-                auto_approve_threshold=0.85,
-                enable_auto_add=True,
-                enable_auto_modify=True,
-                enable_auto_delete=False,  # Conservative
-                enable_auto_merge=True,
+            phase3_5 = Phase3_5_AIModification(
+                plan_path=Path("high-context-book-analyzer.plan.md"),
+                synthesis_path=None,  # Will use default Phase 3 output
+                dry_run=dry_run,
+                auto_approve_low_impact=True,
             )
 
-            result = await phase3_5.run_ai_modifications(
-                synthesis_file=None, dry_run=dry_run  # Will use default Phase 3 output
-            )
+            # Generate proposals
+            proposals = phase3_5.generate_proposals()
+
+            # Execute modifications
+            result = phase3_5.execute_modifications(proposals)
 
             if not dry_run:
                 duration = (datetime.now() - start_time).total_seconds()
                 self.status_mgr.complete_phase("phase_3_5", duration)
 
             logger.info("\n✅ Phase 3.5 complete")
-            logger.info(f"   Plans added: {result['plans_added']}")
-            logger.info(f"   Plans modified: {result['plans_modified']}")
-            logger.info(f"   Plans deleted: {result['plans_deleted']}")
-            logger.info(f"   Plans merged: {result['plans_merged']}")
+            logger.info(f"   Total proposals: {result.get('total_proposals', 0)}")
+            logger.info(f"   Approved: {result.get('approved', 0)}")
+            logger.info(f"   Executed: {result.get('executed', 0)}")
+            logger.info(f"   Failed: {result.get('failed', 0)}")
+            logger.info(f"   Skipped: {result.get('skipped', 0)}")
 
-            if "approvals_needed" in result and result["approvals_needed"]:
-                logger.warning(
-                    f"\n⚠️  {len(result['approvals_needed'])} operations need approval"
-                )
+            if result.get("failed", 0) > 0:
+                logger.warning(f"\n⚠️  {result['failed']} operations failed")
 
             return True
 
@@ -521,13 +538,21 @@ class Tier0WorkflowOrchestrator:
             "📊 Phase status report: implementation_plans/PHASE_STATUS_REPORT.md\n"
         )
 
-        logger.info("✅ Tier 0 workflow successful!")
+        logger.info(f"✅ {tier} workflow successful!")
         logger.info("\nNext steps:")
         logger.info("1. Review generated files in implementation_plans/")
         logger.info("2. Check PHASE3_SUMMARY.md and PHASE4_SUMMARY.json")
         logger.info("3. Review VALIDATION_REPORT.md")
         logger.info("4. Review PHASE_STATUS_REPORT.md")
-        logger.info("5. Ready for Tier 1 implementation!\n")
+
+        if tier == "TIER 0":
+            logger.info("5. Ready for Tier 1 implementation (add --parallel)!\n")
+        elif tier == "TIER 1":
+            logger.info(
+                "5. Ready for Tier 2 implementation (enable AI modifications)!\n"
+            )
+        elif tier == "TIER 2":
+            logger.info("5. All tiers complete - production ready!\n")
 
         return True
 
@@ -535,24 +560,27 @@ class Tier0WorkflowOrchestrator:
 async def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description="Tier 0 Workflow Orchestrator",
+        description="Multi-Tier Workflow Orchestrator (Tier 0/1/2)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Analyze single book (partial match)
+  # Tier 0: Analyze single book
   python scripts/run_full_workflow.py --book "Machine Learning Systems"
 
-  # Analyze multiple books (comma-separated)
-  python scripts/run_full_workflow.py --book "Sports Analytics,Basketball Beyond Paper"
+  # Tier 1: Parallel execution (4-8x faster)
+  python scripts/run_full_workflow.py --parallel --max-workers 8
 
-  # Analyze all books (no --book flag)
-  python scripts/run_full_workflow.py --parallel
+  # Tier 2: With AI modifications enabled (default)
+  python scripts/run_full_workflow.py --book "Machine Learning Systems"
+
+  # Tier 2: Skip AI modifications
+  python scripts/run_full_workflow.py --book "Machine Learning Systems" --skip-ai-modifications
 
   # Dry-run mode
   python scripts/run_full_workflow.py --book "Machine Learning Systems" --dry-run
 
-  # Skip validation (faster)
-  python scripts/run_full_workflow.py --book "Machine Learning Systems" --skip-validation
+  # Force fresh analysis (no caching)
+  python scripts/run_full_workflow.py --book "Machine Learning Systems" --force-fresh
 """,
     )
 

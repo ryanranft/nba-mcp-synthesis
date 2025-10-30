@@ -424,13 +424,84 @@ pre-commit install
 pre-commit install --hook-type commit-msg
 ```
 
-### detect-secrets Taking Too Long
+### detect-secrets Taking Too Long or Hanging
+
+**Symptoms:**
+- detect-secrets scan runs for more than 5-10 minutes
+- Multiple Python multiprocessing workers consuming high CPU
+- System becomes slow or unresponsive
+- Fan running at high speed
+
+**Common Causes:**
+1. Using `--all-files` flag on large repositories
+2. Scanning very large files (logs, data files, binaries)
+3. Complex regex patterns causing performance degradation
+4. Multiprocessing workers getting stuck or deadlocked
+
+**Immediate Fix - Kill Stuck Process:**
 
 ```bash
-# Update baseline to exclude large files
-detect-secrets scan --baseline .secrets.baseline \
-  --exclude-files 'large_file.txt'
+# Find the parent detect-secrets process
+ps aux | grep detect-secrets
+
+# Kill it (replace PID with actual process ID)
+kill <PID>
+
+# If that doesn't work, force kill
+kill -9 <PID>
+
+# Kill all detect-secrets processes (nuclear option)
+pkill -9 -f detect-secrets
 ```
+
+**Prevention - Use Timeout Wrapper:**
+
+```bash
+# Use the timeout wrapper script (recommended)
+./scripts/detect_secrets_with_timeout.sh -- scan --baseline .secrets.baseline
+
+# Custom timeout (10 minutes)
+./scripts/detect_secrets_with_timeout.sh --timeout 600 -- scan --baseline .secrets.baseline
+
+# The wrapper automatically:
+# - Kills scans after timeout (default: 5 minutes)
+# - Logs progress to /tmp/detect-secrets-scan.log
+# - Warns about --all-files usage
+# - Provides helpful error messages
+```
+
+**Long-term Solutions:**
+
+```bash
+# 1. Update baseline to exclude large files
+detect-secrets scan --baseline .secrets.baseline \
+  --exclude-files 'large_file.txt|logs/.*|data/.*'
+
+# 2. Add max file size limit (100KB)
+detect-secrets scan --baseline .secrets.baseline \
+  --max-file-size 100000
+
+# 3. Scan specific directories only
+detect-secrets scan mcp_server/ scripts/ --baseline .secrets.baseline
+
+# 4. Update .gitignore to exclude files from pre-commit scans
+echo "large_data_file.csv" >> .gitignore
+```
+
+**When to Use --all-files:**
+
+⚠️ **WARNING:** The `--all-files` flag scans EVERY file in the repository, not just staged changes!
+
+✅ **Use --all-files when:**
+- Initial baseline creation: `detect-secrets scan > .secrets.baseline`
+- Security audit of entire codebase (with timeout protection)
+- Small repositories (< 100 files)
+
+❌ **DO NOT use --all-files when:**
+- Running pre-commit hooks (scans only staged files automatically)
+- Large repositories (> 500 files or > 50MB)
+- Piping git diffs: `git show <commit> | detect-secrets scan` (removes need for --all-files)
+- In CI/CD on every commit (too slow)
 
 ### False Positives
 

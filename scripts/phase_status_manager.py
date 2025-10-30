@@ -1,598 +1,732 @@
 #!/usr/bin/env python3
 """
-Phase Status Manager - Track Phase States and Reruns
+Phase Status Manager - Track and manage workflow phase states
 
-This system tracks the status of each phase in the workflow, including:
-- Current state (not_started, in_progress, completed, failed, needs_rerun)
-- Last execution timestamp
-- Dependencies and prerequisites
-- Whether a rerun is needed due to AI modifications
+Provides centralized tracking of phase execution status with support for:
+- State transitions (PENDING → IN_PROGRESS → COMPLETE/FAILED)
+- Rerun detection and marking
+- Status persistence and recovery
+- Comprehensive status reporting
 
-Part of Tier 2 implementation for intelligent plan management.
+States:
+- PENDING: Phase not yet started
+- IN_PROGRESS: Phase currently executing
+- COMPLETE: Phase completed successfully
+- FAILED: Phase failed with errors
+- NEEDS_RERUN: Phase complete but requires rerun due to upstream changes
+
+Usage:
+    from scripts.phase_status_manager import PhaseStatusManager
+
+    status_mgr = PhaseStatusManager()
+
+    # Start phase
+    status_mgr.start_phase("phase_2_analysis")
+
+    # Complete phase
+    status_mgr.complete_phase("phase_2_analysis", {"books_analyzed": 45})
+
+    # Mark for rerun
+    status_mgr.mark_needs_rerun("phase_3_synthesis", "New books added")
+
+    # Generate report
+    status_mgr.generate_report()
 """
 
 import json
 import logging
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Optional, Set
+from pathlib import Path
+from typing import Dict, List, Optional, Any
 from enum import Enum
 from dataclasses import dataclass, asdict
+import sys
+import os
 
+# Add project root to path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
 class PhaseState(str, Enum):
-    """Possible states for a phase."""
+    """Phase execution states"""
 
-    NOT_STARTED = "not_started"
-    IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    NEEDS_RERUN = "needs_rerun"
-    SKIPPED = "skipped"
+    PENDING = "PENDING"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETE = "COMPLETE"
+    FAILED = "FAILED"
+    NEEDS_RERUN = "NEEDS_RERUN"
 
 
 @dataclass
 class PhaseStatus:
-    """Status information for a single phase."""
+    """Status information for a single phase"""
 
     phase_id: str
-    phase_name: str
     state: PhaseState
     started_at: Optional[str] = None
     completed_at: Optional[str] = None
-    failed_at: Optional[str] = None
-    last_run_duration_seconds: Optional[float] = None
+    duration_seconds: Optional[float] = None
     error_message: Optional[str] = None
-    prerequisites: List[str] = None  # List of phase IDs that must complete first
-    needs_rerun_reason: Optional[str] = None
-    ai_modified: bool = False  # Did AI modify this phase's outputs?
-    ai_modification_timestamp: Optional[str] = None
-    run_count: int = 0
-    success_count: int = 0
-    failure_count: int = 0
-
-    def __post_init__(self):
-        if self.prerequisites is None:
-            self.prerequisites = []
-
-    def to_dict(self) -> Dict:
-        """Convert to dictionary for JSON serialization."""
-        d = asdict(self)
-        d["state"] = self.state.value
-        return d
-
-    @classmethod
-    def from_dict(cls, data: Dict) -> "PhaseStatus":
-        """Create from dictionary."""
-        data = data.copy()
-        data["state"] = PhaseState(data["state"])
-        return cls(**data)
+    rerun_reason: Optional[str] = None
+    skip_reason: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
+    dependencies_met: bool = True
+    last_updated: Optional[str] = None
 
 
 class PhaseStatusManager:
     """
-    Manager for tracking phase status across workflow runs.
+    Centralized phase status tracking and management.
 
     Features:
-    - Track state of all phases
-    - Mark phases as needing rerun when AI modifies outputs
-    - Check prerequisites before allowing phase execution
-    - Generate comprehensive status reports
-    - Handle parallel phase execution
+    - State machine for phase transitions
+    - Dependency tracking
+    - Rerun detection
+    - Status persistence
+    - Comprehensive reporting
 
-    Example:
-        >>> manager = PhaseStatusManager()
-        >>> manager.start_phase("phase_0", "Phase 0: Setup")
-        >>> manager.complete_phase("phase_0")
-        >>> manager.mark_needs_rerun("phase_3", "AI modified synthesis output")
+    State Transitions:
+    PENDING → IN_PROGRESS → COMPLETE
+    PENDING → IN_PROGRESS → FAILED
+    COMPLETE → NEEDS_RERUN (when upstream changes)
+    NEEDS_RERUN → IN_PROGRESS (when rerun starts)
     """
+
+    # Define all workflow phases
+    ALL_PHASES = [
+        "phase_0_foundation",
+        "phase_1_data_inventory",
+        "phase_2_analysis",
+        "phase_3_synthesis",
+        "phase_3.5_modifications",
+        "phase_4_file_generation",
+        "phase_5_predictions",
+        "phase_6_validation",
+        "phase_7_integration_prep",
+        "phase_8_smart_integration",
+        "phase_8.5_validation",
+        "phase_9_integration",
+        "phase_10a_mcp_improvements",
+        "phase_10b_simulator_improvements",
+        "phase_11_documentation",
+        "phase_12_deployment",
+    ]
+
+    # Phase dependencies (phase -> list of dependencies)
+    DEPENDENCIES = {
+        "phase_1_data_inventory": ["phase_0_foundation"],
+        "phase_2_analysis": ["phase_0_foundation"],
+        "phase_3_synthesis": ["phase_2_analysis"],
+        "phase_3.5_modifications": ["phase_3_synthesis"],
+        "phase_4_file_generation": ["phase_3_synthesis", "phase_3.5_modifications"],
+        "phase_5_predictions": ["phase_2_analysis"],
+        "phase_6_validation": ["phase_4_file_generation"],
+        "phase_7_integration_prep": ["phase_4_file_generation"],
+        "phase_8_smart_integration": ["phase_7_integration_prep"],
+        "phase_8.5_validation": ["phase_8_smart_integration"],
+        "phase_9_integration": ["phase_8.5_validation"],
+        "phase_10a_mcp_improvements": ["phase_9_integration"],
+        "phase_10b_simulator_improvements": ["phase_9_integration"],
+        "phase_11_documentation": ["phase_9_integration"],
+        "phase_12_deployment": ["phase_11_documentation"],
+    }
 
     def __init__(self, status_file: Optional[Path] = None):
         """
-        Initialize phase status manager.
+        Initialize Phase Status Manager.
 
         Args:
-            status_file: Path to status JSON file. Defaults to implementation_plans/phase_status.json
+            status_file: Path to status JSON file (default: workflow_state/phase_status.json)
         """
         if status_file is None:
-            status_file = Path("implementation_plans/phase_status.json")
+            status_file = Path("workflow_state/phase_status.json")
 
         self.status_file = status_file
         self.status_file.parent.mkdir(parents=True, exist_ok=True)
 
-        self.phases: Dict[str, PhaseStatus] = {}
-        self._load_status()
+        # Load existing status or initialize
+        self.phases: Dict[str, PhaseStatus] = self._load_status()
 
-        logger.info(
-            f"PhaseStatusManager initialized with {len(self.phases)} tracked phases"
-        )
+        logger.info(f"✅ Phase Status Manager initialized")
+        logger.info(f"📊 Status file: {self.status_file}")
+        logger.info(f"📋 Tracking {len(self.phases)} phases")
 
-    def _load_status(self):
-        """Load status from JSON file."""
+    def _load_status(self) -> Dict[str, PhaseStatus]:
+        """Load phase status from disk or initialize if not exists."""
         if self.status_file.exists():
             try:
                 with open(self.status_file, "r") as f:
                     data = json.load(f)
 
-                self.phases = {
-                    phase_id: PhaseStatus.from_dict(phase_data)
-                    for phase_id, phase_data in data.items()
-                }
+                phases = {}
+                for phase_id, phase_data in data.get("phases", {}).items():
+                    phases[phase_id] = PhaseStatus(
+                        phase_id=phase_data["phase_id"],
+                        state=PhaseState(phase_data["state"]),
+                        started_at=phase_data.get("started_at"),
+                        completed_at=phase_data.get("completed_at"),
+                        duration_seconds=phase_data.get("duration_seconds"),
+                        error_message=phase_data.get("error_message"),
+                        rerun_reason=phase_data.get("rerun_reason"),
+                        metadata=phase_data.get("metadata"),
+                        dependencies_met=phase_data.get("dependencies_met", True),
+                        last_updated=phase_data.get("last_updated"),
+                    )
 
-                logger.info(f"Loaded status for {len(self.phases)} phases")
+                logger.info(f"📥 Loaded status for {len(phases)} phases from disk")
+                return phases
+
             except Exception as e:
-                logger.error(f"Error loading phase status: {e}")
-                self.phases = {}
+                logger.warning(f"⚠️  Failed to load status file: {e}")
+                logger.info("🔄 Initializing fresh status")
+                return self._initialize_fresh_status()
         else:
-            logger.info("No existing phase status file, starting fresh")
-            self._initialize_default_phases()
+            logger.info("🆕 No existing status file, initializing fresh")
+            return self._initialize_fresh_status()
 
-    def _initialize_default_phases(self):
-        """Initialize default phase structure."""
-        default_phases = [
-            ("phase_0", "Phase 0: Cache & Discovery", []),
-            ("phase_1", "Phase 1: Book Downloads", ["phase_0"]),
-            ("phase_2", "Phase 2: Book Analysis", ["phase_1"]),
-            ("phase_3", "Phase 3: Consolidation & Synthesis", ["phase_2"]),
-            ("phase_3_5", "Phase 3.5: AI Plan Modifications", ["phase_3"]),
-            ("phase_4", "Phase 4: File Generation", ["phase_3_5"]),
-            ("phase_5", "Phase 5: Dry-Run Validation", ["phase_4"]),
-            ("phase_6", "Phase 6: Conflict Resolution", ["phase_5"]),
-            ("phase_7", "Phase 7: Manual Review", ["phase_6"]),
-            ("phase_8", "Phase 8: Implementation", ["phase_7"]),
-            ("phase_8_5", "Phase 8.5: Pre-Integration Validation", ["phase_8"]),
-            ("phase_9", "Phase 9: Integration", ["phase_8_5"]),
-            ("phase_10a", "Phase 10A: MCP Enhancements", ["phase_9"]),
-            ("phase_10b", "Phase 10B: Simulator Improvements", ["phase_9"]),
-            ("phase_11a", "Phase 11A: MCP Testing", ["phase_10a"]),
-            ("phase_11b", "Phase 11B: Simulator Testing", ["phase_10b"]),
-            ("phase_12a", "Phase 12A: MCP Deployment", ["phase_11a"]),
-            ("phase_12b", "Phase 12B: Simulator Deployment", ["phase_11b"]),
-        ]
-
-        for phase_id, phase_name, prerequisites in default_phases:
-            self.phases[phase_id] = PhaseStatus(
+    def _initialize_fresh_status(self) -> Dict[str, PhaseStatus]:
+        """Initialize fresh status for all phases."""
+        phases = {}
+        for phase_id in self.ALL_PHASES:
+            phases[phase_id] = PhaseStatus(
                 phase_id=phase_id,
-                phase_name=phase_name,
-                state=PhaseState.NOT_STARTED,
-                prerequisites=prerequisites,
+                state=PhaseState.PENDING,
+                last_updated=datetime.now().isoformat(),
             )
-
-        self._save_status()
-        logger.info(f"Initialized {len(default_phases)} default phases")
+        return phases
 
     def _save_status(self):
-        """Save status to JSON file."""
+        """Persist current status to disk."""
         try:
             data = {
-                phase_id: phase.to_dict() for phase_id, phase in self.phases.items()
+                "last_updated": datetime.now().isoformat(),
+                "phases": {
+                    phase_id: asdict(status) for phase_id, status in self.phases.items()
+                },
             }
 
             with open(self.status_file, "w") as f:
-                json.dump(data, f, indent=2)
+                json.dump(data, f, indent=2, default=str)
 
-            logger.debug(f"Saved status for {len(self.phases)} phases")
+            logger.debug(f"💾 Status saved to {self.status_file}")
+
         except Exception as e:
-            logger.error(f"Error saving phase status: {e}")
+            logger.error(f"❌ Failed to save status: {e}")
 
-    def start_phase(
-        self,
-        phase_id: str,
-        phase_name: Optional[str] = None,
-        skip_prereq_check: bool = False,
-    ):
+    def start_phase(self, phase_id: str, metadata: Optional[Dict] = None):
         """
-        Mark a phase as started.
+        Mark phase as started.
 
         Args:
-            phase_id: Unique identifier for the phase
-            phase_name: Human-readable name (optional, creates new phase if not exists)
-            skip_prereq_check: Skip prerequisite validation (use for validation/testing phases)
-
-        Raises:
-            ValueError: If prerequisites not met
+            phase_id: Phase identifier
+            metadata: Optional metadata to store
         """
-        # Create phase if doesn't exist
         if phase_id not in self.phases:
-            if phase_name is None:
-                phase_name = phase_id.replace("_", " ").title()
-
-            self.phases[phase_id] = PhaseStatus(
-                phase_id=phase_id, phase_name=phase_name, state=PhaseState.NOT_STARTED
-            )
-
-        phase = self.phases[phase_id]
-
-        # Check prerequisites (unless explicitly skipped)
-        if not skip_prereq_check:
-            unmet_prereqs = self._check_prerequisites(phase_id)
-            if unmet_prereqs:
-                raise ValueError(
-                    f"Cannot start {phase_id}: Unmet prerequisites: {', '.join(unmet_prereqs)}"
-                )
-
-        # Update status
-        phase.state = PhaseState.IN_PROGRESS
-        phase.started_at = datetime.now().isoformat()
-        phase.run_count += 1
-
-        self._save_status()
-        logger.info(f"✅ Started {phase_id}: {phase.phase_name}")
-
-    def skip_phase(self, phase_id: str, reason: str = "Skipped by user"):
-        """
-        Mark a phase as skipped.
-
-        Args:
-            phase_id: Phase to skip
-            reason: Why the phase was skipped
-        """
-        # Create phase if doesn't exist
-        if phase_id not in self.phases:
+            logger.warning(f"⚠️  Unknown phase: {phase_id}")
             self.phases[phase_id] = PhaseStatus(
                 phase_id=phase_id,
-                phase_name=phase_id.replace("_", " ").title(),
-                state=PhaseState.SKIPPED,
+                state=PhaseState.PENDING,
+                last_updated=datetime.now().isoformat(),
             )
-        else:
-            self.phases[phase_id].state = PhaseState.SKIPPED
 
-        self.phases[phase_id].rerun_reason = reason
+        status = self.phases[phase_id]
+
+        # Check dependencies
+        dependencies_met = self._check_dependencies(phase_id)
+
+        if not dependencies_met:
+            logger.warning(f"⚠️  Dependencies not met for {phase_id}")
+            unmet = self._get_unmet_dependencies(phase_id)
+            logger.warning(f"   Unmet: {', '.join(unmet)}")
+
+        # Update status
+        status.state = PhaseState.IN_PROGRESS
+        status.started_at = datetime.now().isoformat()
+        status.completed_at = None
+        status.duration_seconds = None
+        status.error_message = None
+        status.dependencies_met = dependencies_met
+        status.last_updated = datetime.now().isoformat()
+
+        if metadata:
+            status.metadata = metadata
+
         self._save_status()
-        logger.info(f"⏭️  Skipped {phase_id}: {reason}")
 
-    def complete_phase(self, phase_id: str, duration_seconds: Optional[float] = None):
+        logger.info(f"🚀 Phase started: {phase_id}")
+        if not dependencies_met:
+            logger.warning(f"⚠️  Starting with unmet dependencies")
+
+    def complete_phase(self, phase_id: str, metadata: Optional[Dict] = None):
         """
-        Mark a phase as completed.
+        Mark phase as completed successfully.
 
         Args:
-            phase_id: Unique identifier for the phase
-            duration_seconds: How long the phase took (optional)
+            phase_id: Phase identifier
+            metadata: Optional metadata to store (results, metrics, etc.)
         """
         if phase_id not in self.phases:
-            raise ValueError(f"Phase {phase_id} not found")
+            logger.error(f"❌ Cannot complete unknown phase: {phase_id}")
+            return
 
-        phase = self.phases[phase_id]
-        phase.state = PhaseState.COMPLETED
-        phase.completed_at = datetime.now().isoformat()
-        phase.success_count += 1
-        phase.error_message = None
+        status = self.phases[phase_id]
 
-        if duration_seconds is not None:
-            phase.last_run_duration_seconds = duration_seconds
-        elif phase.started_at:
-            # Calculate duration
-            started = datetime.fromisoformat(phase.started_at)
-            completed = datetime.fromisoformat(phase.completed_at)
-            phase.last_run_duration_seconds = (completed - started).total_seconds()
+        # Calculate duration
+        if status.started_at:
+            started = datetime.fromisoformat(status.started_at)
+            duration = (datetime.now() - started).total_seconds()
+            status.duration_seconds = duration
+
+        # Update status
+        status.state = PhaseState.COMPLETE
+        status.completed_at = datetime.now().isoformat()
+        status.error_message = None
+        status.last_updated = datetime.now().isoformat()
+
+        if metadata:
+            if status.metadata:
+                status.metadata.update(metadata)
+            else:
+                status.metadata = metadata
 
         self._save_status()
-        logger.info(
-            f"✅ Completed {phase_id}: {phase.phase_name} (duration: {phase.last_run_duration_seconds:.1f}s)"
+
+        # Check if any downstream phases need rerun
+        self._propagate_completion(phase_id)
+
+        duration_str = (
+            f"{status.duration_seconds:.1f}s" if status.duration_seconds else "unknown"
         )
+        logger.info(f"✅ Phase completed: {phase_id} ({duration_str})")
 
-    def fail_phase(self, phase_id: str, error_message: str):
+    def fail_phase(
+        self, phase_id: str, error_message: str, metadata: Optional[Dict] = None
+    ):
         """
-        Mark a phase as failed.
+        Mark phase as failed.
 
         Args:
-            phase_id: Unique identifier for the phase
-            error_message: Description of the failure
+            phase_id: Phase identifier
+            error_message: Error description
+            metadata: Optional metadata to store
         """
         if phase_id not in self.phases:
-            raise ValueError(f"Phase {phase_id} not found")
+            logger.error(f"❌ Cannot fail unknown phase: {phase_id}")
+            return
 
-        phase = self.phases[phase_id]
-        phase.state = PhaseState.FAILED
-        phase.failed_at = datetime.now().isoformat()
-        phase.failure_count += 1
-        phase.error_message = error_message
+        status = self.phases[phase_id]
+
+        # Calculate duration
+        if status.started_at:
+            started = datetime.fromisoformat(status.started_at)
+            duration = (datetime.now() - started).total_seconds()
+            status.duration_seconds = duration
+
+        # Update status
+        status.state = PhaseState.FAILED
+        status.completed_at = datetime.now().isoformat()
+        status.error_message = error_message
+        status.last_updated = datetime.now().isoformat()
+
+        if metadata:
+            if status.metadata:
+                status.metadata.update(metadata)
+            else:
+                status.metadata = metadata
 
         self._save_status()
-        logger.error(f"❌ Failed {phase_id}: {phase.phase_name} - {error_message}")
 
-    def mark_needs_rerun(self, phase_id: str, reason: str, ai_modified: bool = True):
+        logger.error(f"❌ Phase failed: {phase_id}")
+        logger.error(f"   Error: {error_message}")
+
+    def skip_phase(self, phase_id: str, reason: str, metadata: Optional[Dict] = None):
         """
-        Mark a phase as needing rerun.
+        Skip a phase (mark it as not applicable for this run).
 
         Args:
-            phase_id: Unique identifier for the phase
-            reason: Why the rerun is needed
-            ai_modified: Whether this was triggered by AI modification
+            phase_id: Phase identifier
+            reason: Reason for skipping
+            metadata: Optional metadata to store
         """
         if phase_id not in self.phases:
-            raise ValueError(f"Phase {phase_id} not found")
+            logger.error(f"❌ Cannot skip unknown phase: {phase_id}")
+            return
 
-        phase = self.phases[phase_id]
-        phase.state = PhaseState.NEEDS_RERUN
-        phase.needs_rerun_reason = reason
+        status = self.phases[phase_id]
 
-        if ai_modified:
-            phase.ai_modified = True
-            phase.ai_modification_timestamp = datetime.now().isoformat()
+        # Update status to PENDING with skip metadata
+        status.state = PhaseState.PENDING
+        status.skip_reason = reason
+        status.last_updated = datetime.now().isoformat()
 
-        # Also mark dependent phases
-        dependent_phases = self._find_dependent_phases(phase_id)
-        for dep_phase_id in dependent_phases:
-            dep_phase = self.phases[dep_phase_id]
-            if dep_phase.state == PhaseState.COMPLETED:
-                dep_phase.state = PhaseState.NEEDS_RERUN
-                dep_phase.needs_rerun_reason = f"Upstream phase {phase_id} was modified"
+        if metadata:
+            if status.metadata:
+                status.metadata.update(metadata)
+                status.metadata["skipped"] = True
+            else:
+                status.metadata = {"skipped": True, **metadata}
+        else:
+            if status.metadata:
+                status.metadata["skipped"] = True
+            else:
+                status.metadata = {"skipped": True}
 
         self._save_status()
-        logger.warning(f"⚠️  Marked {phase_id} for rerun: {reason}")
-        if dependent_phases:
-            logger.warning(
-                f"   Also marked dependent phases: {', '.join(dependent_phases)}"
-            )
 
-    def _check_prerequisites(self, phase_id: str) -> List[str]:
+        logger.info(f"⏭️  Phase skipped: {phase_id}")
+        logger.info(f"   Reason: {reason}")
+
+    def mark_needs_rerun(self, phase_id: str, reason: str):
         """
-        Check if all prerequisites for a phase are met.
+        Mark phase as needing rerun due to upstream changes.
 
         Args:
-            phase_id: Phase to check
-
-        Returns:
-            List of unmet prerequisite phase IDs
+            phase_id: Phase identifier
+            reason: Reason for rerun
         """
         if phase_id not in self.phases:
-            return []
+            logger.error(f"❌ Cannot mark unknown phase for rerun: {phase_id}")
+            return
 
-        phase = self.phases[phase_id]
+        status = self.phases[phase_id]
+
+        # Only mark COMPLETE phases for rerun
+        if status.state != PhaseState.COMPLETE:
+            logger.warning(f"⚠️  Cannot mark non-complete phase for rerun: {phase_id}")
+            return
+
+        status.state = PhaseState.NEEDS_RERUN
+        status.rerun_reason = reason
+        status.last_updated = datetime.now().isoformat()
+
+        self._save_status()
+
+        logger.info(f"🔄 Phase marked for rerun: {phase_id}")
+        logger.info(f"   Reason: {reason}")
+
+        # Propagate to downstream phases
+        self._propagate_rerun(phase_id)
+
+    def _check_dependencies(self, phase_id: str) -> bool:
+        """Check if all dependencies for phase are met."""
+        dependencies = self.DEPENDENCIES.get(phase_id, [])
+
+        for dep in dependencies:
+            if dep not in self.phases:
+                return False
+
+            dep_status = self.phases[dep]
+            if dep_status.state not in [PhaseState.COMPLETE]:
+                return False
+
+        return True
+
+    def _get_unmet_dependencies(self, phase_id: str) -> List[str]:
+        """Get list of unmet dependencies for phase."""
+        dependencies = self.DEPENDENCIES.get(phase_id, [])
         unmet = []
 
-        for prereq_id in phase.prerequisites:
-            if prereq_id not in self.phases:
-                unmet.append(f"{prereq_id}(not_found)")
-                continue
-
-            prereq = self.phases[prereq_id]
-            # Prerequisites are met if phase is COMPLETED or SKIPPED
-            if prereq.state not in (PhaseState.COMPLETED, PhaseState.SKIPPED):
-                unmet.append(f"{prereq_id}({prereq.state.value})")
+        for dep in dependencies:
+            if dep not in self.phases:
+                unmet.append(dep)
+            elif self.phases[dep].state != PhaseState.COMPLETE:
+                unmet.append(dep)
 
         return unmet
 
-    def _find_dependent_phases(self, phase_id: str) -> List[str]:
+    def _propagate_completion(self, phase_id: str):
         """
-        Find all phases that depend on the given phase.
-
-        Args:
-            phase_id: Phase to check
-
-        Returns:
-            List of dependent phase IDs
+        When a phase completes, check if any previously NEEDS_RERUN
+        downstream phases can now be marked as dependencies met.
         """
-        dependent = []
+        # This is mostly informational - we don't auto-transition
+        # Just log that downstream phases might be ready
+        pass
 
-        for other_id, other_phase in self.phases.items():
-            if phase_id in other_phase.prerequisites:
-                dependent.append(other_id)
+    def _propagate_rerun(self, phase_id: str):
+        """
+        When a phase is marked for rerun, propagate to all downstream phases.
+        """
+        # Find all phases that depend on this one
+        downstream = []
+        for phase, deps in self.DEPENDENCIES.items():
+            if phase_id in deps:
+                downstream.append(phase)
 
-        return dependent
+        # Recursively mark downstream phases for rerun
+        for downstream_phase in downstream:
+            if downstream_phase in self.phases:
+                status = self.phases[downstream_phase]
 
-    def get_phases_needing_rerun(self) -> List[str]:
-        """Get list of phase IDs that need rerun."""
+                # Only mark COMPLETE phases (don't disturb IN_PROGRESS or FAILED)
+                if status.state == PhaseState.COMPLETE:
+                    reason = f"Upstream phase requires rerun: {phase_id}"
+                    self.mark_needs_rerun(downstream_phase, reason)
+
+    def get_status(self, phase_id: str) -> Optional[PhaseStatus]:
+        """Get status for a specific phase."""
+        return self.phases.get(phase_id)
+
+    def get_all_status(self) -> Dict[str, PhaseStatus]:
+        """Get status for all phases."""
+        return self.phases.copy()
+
+    def get_phase_summary(self) -> Dict[str, int]:
+        """Get summary counts by state."""
+        summary = {
+            "PENDING": 0,
+            "IN_PROGRESS": 0,
+            "COMPLETE": 0,
+            "FAILED": 0,
+            "NEEDS_RERUN": 0,
+        }
+
+        for status in self.phases.values():
+            summary[status.state.value] += 1
+
+        return summary
+
+    def get_phases_by_state(self, state: PhaseState) -> List[str]:
+        """Get list of phase IDs in a given state."""
         return [
             phase_id
-            for phase_id, phase in self.phases.items()
-            if phase.state == PhaseState.NEEDS_RERUN
+            for phase_id, status in self.phases.items()
+            if status.state == state
         ]
 
-    def get_runnable_phases(self) -> List[str]:
-        """Get list of phase IDs that can be run now (prerequisites met)."""
-        runnable = []
+    def reset_phase(self, phase_id: str):
+        """Reset phase to PENDING state."""
+        if phase_id not in self.phases:
+            logger.error(f"❌ Cannot reset unknown phase: {phase_id}")
+            return
 
-        for phase_id, phase in self.phases.items():
-            # Skip if already completed (unless needs rerun)
-            if phase.state == PhaseState.COMPLETED:
-                continue
+        status = self.phases[phase_id]
+        status.state = PhaseState.PENDING
+        status.started_at = None
+        status.completed_at = None
+        status.duration_seconds = None
+        status.error_message = None
+        status.rerun_reason = None
+        status.last_updated = datetime.now().isoformat()
 
-            # Skip if in progress
-            if phase.state == PhaseState.IN_PROGRESS:
-                continue
+        self._save_status()
 
-            # Check prerequisites
-            if not self._check_prerequisites(phase_id):
-                runnable.append(phase_id)
+        logger.info(f"🔄 Phase reset: {phase_id}")
 
-        return runnable
+    def reset_all_phases(self):
+        """Reset all phases to PENDING state."""
+        for phase_id in self.phases.keys():
+            self.reset_phase(phase_id)
 
-    def generate_status_report(self, report_file: Optional[Path] = None) -> str:
+        logger.info("🔄 All phases reset to PENDING")
+
+    def generate_report(self, output_file: Optional[Path] = None) -> str:
         """
         Generate comprehensive status report.
 
         Args:
-            report_file: Path to save report. Defaults to PHASE_STATUS_REPORT.md
+            output_file: Optional file to write report to
 
         Returns:
             Report content as string
         """
-        if report_file is None:
-            report_file = Path("implementation_plans/PHASE_STATUS_REPORT.md")
+        if output_file is None:
+            output_file = Path("PHASE_STATUS_REPORT.md")
 
-        lines = []
-        lines.append("# Phase Status Report")
-        lines.append("")
-        lines.append(f"**Generated**: {datetime.now().isoformat()}")
-        lines.append(f"**Total Phases**: {len(self.phases)}")
-        lines.append("")
+        report_lines = []
 
-        # Summary statistics
-        state_counts = {}
-        for phase in self.phases.values():
-            state_counts[phase.state] = state_counts.get(phase.state, 0) + 1
+        # Header
+        report_lines.append("# Workflow Phase Status Report")
+        report_lines.append("")
+        report_lines.append(
+            f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        report_lines.append("")
+        report_lines.append("---")
+        report_lines.append("")
 
-        lines.append("## Summary")
-        lines.append("")
-        lines.append("| State | Count |")
-        lines.append("|-------|-------|")
-        for state in PhaseState:
-            count = state_counts.get(state, 0)
-            emoji = self._get_state_emoji(state)
-            lines.append(
-                f"| {emoji} {state.value.replace('_', ' ').title()} | {count} |"
-            )
-        lines.append("")
+        # Summary
+        summary = self.get_phase_summary()
+        report_lines.append("## Summary")
+        report_lines.append("")
+        report_lines.append(f"- **Total Phases:** {len(self.phases)}")
+        report_lines.append(f"- **Pending:** {summary['PENDING']}")
+        report_lines.append(f"- **In Progress:** {summary['IN_PROGRESS']}")
+        report_lines.append(f"- **Complete:** {summary['COMPLETE']}")
+        report_lines.append(f"- **Failed:** {summary['FAILED']}")
+        report_lines.append(f"- **Needs Rerun:** {summary['NEEDS_RERUN']}")
+        report_lines.append("")
 
-        # Phases needing attention
-        needs_rerun = self.get_phases_needing_rerun()
-        if needs_rerun:
-            lines.append("## ⚠️  Phases Needing Rerun")
-            lines.append("")
-            for phase_id in needs_rerun:
-                phase = self.phases[phase_id]
-                lines.append(f"- **{phase.phase_name}** ({phase_id})")
-                lines.append(f"  - Reason: {phase.needs_rerun_reason}")
-                if phase.ai_modified:
-                    lines.append(f"  - AI Modified: {phase.ai_modification_timestamp}")
-            lines.append("")
+        # Progress bar
+        total = len(self.phases)
+        complete = summary["COMPLETE"]
+        progress_pct = (complete / total * 100) if total > 0 else 0
+        progress_bar = "█" * int(progress_pct / 5) + "░" * (20 - int(progress_pct / 5))
+        report_lines.append(f"**Progress:** [{progress_bar}] {progress_pct:.1f}%")
+        report_lines.append("")
+        report_lines.append("---")
+        report_lines.append("")
 
-        # Runnable phases
-        runnable = self.get_runnable_phases()
-        if runnable:
-            lines.append("## ✅ Ready to Run")
-            lines.append("")
-            for phase_id in runnable:
-                phase = self.phases[phase_id]
-                lines.append(f"- **{phase.phase_name}** ({phase_id})")
-            lines.append("")
+        # Detailed status by category
+        for state in [
+            PhaseState.IN_PROGRESS,
+            PhaseState.FAILED,
+            PhaseState.NEEDS_RERUN,
+            PhaseState.COMPLETE,
+            PhaseState.PENDING,
+        ]:
+            phases_in_state = self.get_phases_by_state(state)
 
-        # Detailed phase status
-        lines.append("## Detailed Phase Status")
-        lines.append("")
+            if not phases_in_state:
+                continue
 
-        for phase_id in sorted(self.phases.keys()):
-            phase = self.phases[phase_id]
-            emoji = self._get_state_emoji(phase.state)
+            # State emoji and title
+            emoji = {
+                PhaseState.PENDING: "⏳",
+                PhaseState.IN_PROGRESS: "🔄",
+                PhaseState.COMPLETE: "✅",
+                PhaseState.FAILED: "❌",
+                PhaseState.NEEDS_RERUN: "🔁",
+            }.get(state, "📋")
 
-            lines.append(f"### {emoji} {phase.phase_name} ({phase_id})")
-            lines.append("")
-            lines.append(f"- **State**: {phase.state.value.replace('_', ' ').title()}")
-            lines.append(
-                f"- **Run Count**: {phase.run_count} (✅ {phase.success_count}, ❌ {phase.failure_count})"
-            )
+            report_lines.append(f"## {emoji} {state.value} ({len(phases_in_state)})")
+            report_lines.append("")
 
-            if phase.prerequisites:
-                prereq_names = [
-                    self.phases[p].phase_name
-                    for p in phase.prerequisites
-                    if p in self.phases
-                ]
-                lines.append(f"- **Prerequisites**: {', '.join(prereq_names)}")
+            for phase_id in phases_in_state:
+                status = self.phases[phase_id]
+                report_lines.append(f"### {phase_id}")
+                report_lines.append("")
 
-            if phase.started_at:
-                lines.append(f"- **Started**: {phase.started_at}")
+                if status.started_at:
+                    report_lines.append(f"- **Started:** {status.started_at}")
 
-            if phase.completed_at:
-                lines.append(f"- **Completed**: {phase.completed_at}")
-                if phase.last_run_duration_seconds:
-                    lines.append(
-                        f"- **Duration**: {phase.last_run_duration_seconds:.1f}s"
-                    )
+                if status.completed_at:
+                    report_lines.append(f"- **Completed:** {status.completed_at}")
 
-            if phase.failed_at:
-                lines.append(f"- **Failed**: {phase.failed_at}")
+                if status.duration_seconds:
+                    mins = int(status.duration_seconds // 60)
+                    secs = int(status.duration_seconds % 60)
+                    report_lines.append(f"- **Duration:** {mins}m {secs}s")
 
-            if phase.error_message:
-                lines.append(f"- **Error**: {phase.error_message}")
+                if status.error_message:
+                    report_lines.append(f"- **Error:** {status.error_message}")
 
-            if phase.needs_rerun_reason:
-                lines.append(f"- **Rerun Reason**: {phase.needs_rerun_reason}")
+                if status.rerun_reason:
+                    report_lines.append(f"- **Rerun Reason:** {status.rerun_reason}")
 
-            if phase.ai_modified:
-                lines.append(
-                    f"- **AI Modified**: ✓ ({phase.ai_modification_timestamp})"
-                )
+                if not status.dependencies_met:
+                    unmet = self._get_unmet_dependencies(phase_id)
+                    report_lines.append(f"- **Unmet Dependencies:** {', '.join(unmet)}")
 
-            lines.append("")
+                if status.metadata:
+                    report_lines.append(f"- **Metadata:**")
+                    for key, value in status.metadata.items():
+                        report_lines.append(f"  - `{key}`: {value}")
 
-        report_content = "\n".join(lines)
+                report_lines.append("")
 
-        # Save to file
-        report_file.parent.mkdir(parents=True, exist_ok=True)
-        with open(report_file, "w") as f:
-            f.write(report_content)
+        report_lines.append("---")
+        report_lines.append("")
+        report_lines.append("## Phase Dependencies")
+        report_lines.append("")
 
-        logger.info(f"Generated phase status report: {report_file}")
+        for phase_id in self.ALL_PHASES:
+            deps = self.DEPENDENCIES.get(phase_id, [])
+            if deps:
+                report_lines.append(f"- **{phase_id}** → depends on: {', '.join(deps)}")
+
+        report_lines.append("")
+        report_lines.append("---")
+        report_lines.append("")
+        report_lines.append(f"*Report generated by Phase Status Manager v1.0*")
+
+        # Join and save
+        report_content = "\n".join(report_lines)
+
+        try:
+            with open(output_file, "w") as f:
+                f.write(report_content)
+
+            logger.info(f"📊 Status report generated: {output_file}")
+        except Exception as e:
+            logger.error(f"❌ Failed to write report: {e}")
 
         return report_content
 
-    def _get_state_emoji(self, state: PhaseState) -> str:
-        """Get emoji for phase state."""
-        emoji_map = {
-            PhaseState.NOT_STARTED: "⚪",
-            PhaseState.IN_PROGRESS: "🔵",
-            PhaseState.COMPLETED: "✅",
-            PhaseState.FAILED: "❌",
-            PhaseState.NEEDS_RERUN: "⚠️",
-            PhaseState.SKIPPED: "⏭️",
-        }
-        return emoji_map.get(state, "❓")
 
-    def reset_phase(self, phase_id: str):
-        """Reset a phase to NOT_STARTED state."""
-        if phase_id not in self.phases:
-            raise ValueError(f"Phase {phase_id} not found")
+def main():
+    """Demo/test the Phase Status Manager."""
+    import argparse
 
-        phase = self.phases[phase_id]
-        phase.state = PhaseState.NOT_STARTED
-        phase.needs_rerun_reason = None
-        phase.ai_modified = False
-        phase.error_message = None
+    parser = argparse.ArgumentParser(description="Phase Status Manager")
+    parser.add_argument(
+        "--reset", action="store_true", help="Reset all phases to PENDING"
+    )
+    parser.add_argument("--report", action="store_true", help="Generate status report")
+    parser.add_argument("--start", type=str, help="Start a phase")
+    parser.add_argument("--complete", type=str, help="Complete a phase")
+    parser.add_argument("--fail", type=str, help="Fail a phase")
+    parser.add_argument("--error", type=str, help="Error message for failure")
+    parser.add_argument("--rerun", type=str, help="Mark phase for rerun")
+    parser.add_argument("--reason", type=str, help="Reason for rerun")
+    parser.add_argument("--status", type=str, help="Get status for specific phase")
 
-        self._save_status()
-        logger.info(f"Reset {phase_id} to NOT_STARTED")
-
-
-if __name__ == "__main__":
-    # Demo usage
-    logging.basicConfig(level=logging.INFO)
-
-    print("=" * 70)
-    print("PHASE STATUS MANAGER DEMO")
-    print("=" * 70)
-    print()
+    args = parser.parse_args()
 
     # Initialize manager
     manager = PhaseStatusManager()
 
-    # Simulate phase execution
-    print("Simulating phase execution...")
-    print()
+    if args.reset:
+        logger.info("🔄 Resetting all phases...")
+        manager.reset_all_phases()
+        logger.info("✅ All phases reset to PENDING")
 
-    # Phase 0
-    manager.start_phase("phase_0")
-    manager.complete_phase("phase_0", duration_seconds=10.5)
+    elif args.start:
+        logger.info(f"🚀 Starting phase: {args.start}")
+        manager.start_phase(args.start)
 
-    # Phase 1
-    manager.start_phase("phase_1")
-    manager.complete_phase("phase_1", duration_seconds=30.2)
+    elif args.complete:
+        logger.info(f"✅ Completing phase: {args.complete}")
+        manager.complete_phase(args.complete)
 
-    # Phase 2
-    manager.start_phase("phase_2")
-    manager.complete_phase("phase_2", duration_seconds=120.5)
+    elif args.fail:
+        error_msg = args.error or "Unknown error"
+        logger.info(f"❌ Failing phase: {args.fail}")
+        manager.fail_phase(args.fail, error_msg)
 
-    # Phase 3
-    manager.start_phase("phase_3")
-    manager.complete_phase("phase_3", duration_seconds=45.0)
+    elif args.rerun:
+        reason = args.reason or "Manual rerun requested"
+        logger.info(f"🔁 Marking phase for rerun: {args.rerun}")
+        manager.mark_needs_rerun(args.rerun, reason)
 
-    # AI modifies Phase 3 output
-    print("Simulating AI modification...")
-    manager.mark_needs_rerun(
-        "phase_3", "AI improved synthesis with new recommendations"
-    )
-    print()
+    elif args.status:
+        status = manager.get_status(args.status)
+        if status:
+            logger.info(f"\n📊 Status for {args.status}:")
+            logger.info(f"   State: {status.state.value}")
+            logger.info(f"   Started: {status.started_at or 'N/A'}")
+            logger.info(f"   Completed: {status.completed_at or 'N/A'}")
+            logger.info(f"   Duration: {status.duration_seconds or 'N/A'}s")
+            if status.error_message:
+                logger.info(f"   Error: {status.error_message}")
+            if status.rerun_reason:
+                logger.info(f"   Rerun Reason: {status.rerun_reason}")
+        else:
+            logger.error(f"❌ Unknown phase: {args.status}")
 
-    # Generate report
-    print("Generating status report...")
-    report = manager.generate_status_report()
-    print()
-    print(report)
+    if args.report or not any(
+        [args.reset, args.start, args.complete, args.fail, args.rerun, args.status]
+    ):
+        # Generate report by default or if --report specified
+        logger.info("📊 Generating status report...")
+        report = manager.generate_report()
+        logger.info(f"\n{report}")
 
-    print("=" * 70)
-    print("Demo complete! Check implementation_plans/PHASE_STATUS_REPORT.md")
-    print("=" * 70)
+
+if __name__ == "__main__":
+    main()

@@ -887,13 +887,17 @@ class SurvivalAnalyzer:
 
                     if distribution == "gamma":
                         # Gamma frailty: cluster mean of log-hazards
-                        cluster_frailty = np.mean(np.log(cluster_hazards.clip(lower=1e-10)))
+                        cluster_frailty = np.mean(
+                            np.log(cluster_hazards.clip(lower=1e-10))
+                        )
                     elif distribution == "gaussian":
                         # Gaussian: cluster mean hazard
                         cluster_frailty = np.mean(cluster_hazards)
                     else:  # inverse_gaussian
                         # Inverse gaussian: reciprocal mean
-                        cluster_frailty = np.mean(1.0 / cluster_hazards.clip(lower=1e-10))
+                        cluster_frailty = np.mean(
+                            1.0 / cluster_hazards.clip(lower=1e-10)
+                        )
 
                     cluster_frailties.append(cluster_frailty)
 
@@ -1356,7 +1360,9 @@ class SurvivalAnalyzer:
         # Prepare formulas
         if cure_formula is None:
             if self.covariates:
-                cure_formula = f"~ {' + '.join(self.covariates[:3])}"  # Limit covariates
+                cure_formula = (
+                    f"~ {' + '.join(self.covariates[:3])}"  # Limit covariates
+                )
             else:
                 cure_formula = "~ 1"  # Intercept only
 
@@ -1364,7 +1370,11 @@ class SurvivalAnalyzer:
             survival_formula = cure_formula  # Use same formula
 
         # Initialize and fit mixture cure model
-        mcf = MixtureCureFitter()
+        # MixtureCureFitter requires a base_fitter (default to WeibullFitter)
+        from lifelines import WeibullFitter
+
+        base_fitter = WeibullFitter()
+        mcf = MixtureCureFitter(base_fitter=base_fitter)
 
         try:
             # Fit the model
@@ -1385,7 +1395,11 @@ class SurvivalAnalyzer:
 
             # Extract parameters
             # Cure model params (logistic regression coefficients)
-            cure_params = mcf.params_.loc["cure_model"] if "cure_model" in mcf.params_.index else mcf.params_
+            cure_params = (
+                mcf.params_.loc["cure_model"]
+                if "cure_model" in mcf.params_.index
+                else mcf.params_
+            )
 
             # Survival model params
             survival_params = (
@@ -1431,7 +1445,9 @@ class SurvivalAnalyzer:
                 {
                     "cure_probability": cure_probability,
                     "cure_model_aic": aic if aic else 0,
-                    "cure_model_log_likelihood": log_likelihood if log_likelihood else 0,
+                    "cure_model_log_likelihood": (
+                        log_likelihood if log_likelihood else 0
+                    ),
                 }
             )
 
@@ -1642,7 +1658,9 @@ class SurvivalAnalyzer:
                 {
                     "recurrent_mean_events": mean_recurrences,
                     "recurrent_aic": aic if aic else 0,
-                    "recurrent_n_subjects": len(event_counts) if len(event_counts) > 0 else 0,
+                    "recurrent_n_subjects": (
+                        len(event_counts) if len(event_counts) > 0 else 0
+                    ),
                 }
             )
 
