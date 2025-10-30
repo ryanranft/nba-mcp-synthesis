@@ -3,7 +3,7 @@ Standardized Response Types for MCP Server
 Based on best practices from Graphiti MCP implementation
 """
 
-from typing import TypedDict, Literal, Any, Optional, Dict, List
+from typing import TypedDict, Literal, Any, Optional, Dict, List, Tuple
 from datetime import datetime
 import uuid
 
@@ -864,3 +864,107 @@ class FormulaRecommendationResult(BaseModel):
     criteria: Optional[List[str]] = None
     context: Optional[str] = None
     error: Optional[str] = None
+
+
+# =============================================================================
+# Time Series Analysis Results (Phase 10A Agent 8 Module 1)
+# =============================================================================
+
+
+class StationarityTestResult(BaseModel):
+    """Response for stationarity testing (ADF/KPSS tests)"""
+
+    test_statistic: float = Field(description="Test statistic value")
+    p_value: float = Field(description="P-value for hypothesis test")
+    critical_values: Dict[str, float] = Field(
+        description="Critical values at different significance levels"
+    )
+    is_stationary: bool = Field(description="Whether series is stationary")
+    test_type: str = Field(description="Type of test performed (adf or kpss)")
+    lags_used: Optional[int] = Field(default=None, description="Number of lags used")
+    observations: Optional[int] = Field(
+        default=None, description="Number of observations"
+    )
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(
+        description="Recommended next steps for analysis"
+    )
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class DecompositionResult(BaseModel):
+    """Response for time series decomposition"""
+
+    trend: List[Optional[float]] = Field(description="Trend component values")
+    seasonal: List[Optional[float]] = Field(description="Seasonal component values")
+    residual: List[Optional[float]] = Field(description="Residual component values")
+    model: str = Field(description="Decomposition model (additive/multiplicative)")
+    period: Optional[int] = Field(default=None, description="Seasonal period")
+    trend_direction: str = Field(
+        description="Trend direction (increasing/decreasing/stable)"
+    )
+    trend_slope: float = Field(description="Slope of trend component")
+    trend_strength: float = Field(description="R-squared of trend fit (0-1)")
+    seasonal_strength: float = Field(description="Strength of seasonality (0-1)")
+    interpretation: str = Field(description="Human-readable interpretation")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class ARIMAModelResult(BaseModel):
+    """Response for ARIMA model fitting"""
+
+    order: Tuple[int, int, int] = Field(description="ARIMA order (p, d, q)")
+    seasonal_order: Optional[Tuple[int, int, int, int]] = Field(
+        default=None, description="Seasonal ARIMA order (P, D, Q, s)"
+    )
+    aic: float = Field(description="Akaike Information Criterion (lower is better)")
+    bic: float = Field(description="Bayesian Information Criterion (lower is better)")
+    fitted_values: List[float] = Field(description="In-sample fitted values")
+    residuals: List[float] = Field(description="Model residuals")
+    model_type: str = Field(description="Model type (ARIMA or SARIMA)")
+    success_message: str = Field(description="Success message with model details")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class ForecastResult(BaseModel):
+    """Response for ARIMA forecasting"""
+
+    forecast: List[float] = Field(description="Point forecasts")
+    lower_bound: List[float] = Field(description="Lower confidence interval bound")
+    upper_bound: List[float] = Field(description="Upper confidence interval bound")
+    confidence_level: float = Field(description="Confidence level (e.g., 0.95)")
+    model_order: Tuple[int, int, int] = Field(
+        description="ARIMA order used for forecasting"
+    )
+    steps: int = Field(description="Number of periods forecasted")
+    success_message: str = Field(description="Success message with forecast details")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class AutocorrelationResult(BaseModel):
+    """Response for autocorrelation analysis"""
+
+    acf_values: List[float] = Field(description="Autocorrelation function values")
+    pacf_values: List[float] = Field(
+        description="Partial autocorrelation function values"
+    )
+    ljung_box_pvalue: float = Field(description="Ljung-Box test p-value")
+    has_autocorrelation: bool = Field(
+        description="Whether significant autocorrelation detected"
+    )
+    significant_lags_acf: List[int] = Field(
+        description="Lags with significant autocorrelation"
+    )
+    significant_lags_pacf: List[int] = Field(
+        description="Lags with significant partial autocorrelation"
+    )
+    arima_suggestions: Dict[str, Any] = Field(
+        description="Suggested ARIMA parameters based on ACF/PACF"
+    )
+    interpretation: str = Field(description="Human-readable interpretation")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")

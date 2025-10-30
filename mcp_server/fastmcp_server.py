@@ -281,6 +281,12 @@ from .tools.params import (
     UsageReportingParams,
     UsageAlertParams,
     UsageDashboardParams,
+    # Phase 10A Agent 8 Module 1: Time Series Analysis Parameters
+    TestStationarityParams,
+    DecomposeTimeSeriesParams,
+    FitARIMAModelParams,
+    ForecastARIMAParams,
+    AutocorrelationAnalysisParams,
 )
 
 # Import response models
@@ -350,6 +356,12 @@ from .responses import (
     FormulaSourceResult,
     FormulaEvolutionResult,
     FormulaRecommendationResult,
+    # Phase 10A Agent 8 Module 1: Time Series Analysis Results
+    StationarityTestResult,
+    DecompositionResult,
+    ARIMAModelResult,
+    ForecastResult,
+    AutocorrelationResult,
 )
 
 # Initialize settings
@@ -13010,6 +13022,329 @@ async def get_documentation_status(
     except Exception as e:
         await ctx.error(f"Documentation status retrieval failed: {str(e)}")
         raise
+
+
+
+
+# =============================================================================
+# Time Series Analysis Tools (Phase 10A Agent 8 Module 1)
+# =============================================================================
+
+
+@mcp.tool()
+async def test_stationarity(
+    params: TestStationarityParams, ctx: Context
+) -> StationarityTestResult:
+    """
+    Test for unit roots and stationarity in time series data.
+
+    Performs Augmented Dickey-Fuller (ADF) or Kwiatkowski-Phillips-Schmidt-Shin (KPSS)
+    tests to determine if a time series is stationary.
+
+    Args:
+        params: Test parameters (data, method, frequency)
+        ctx: FastMCP context
+
+    Returns:
+        StationarityTestResult with test statistics, p-values, and recommendations
+    """
+    await ctx.info(f"Testing stationarity using {params.method.upper()} test...")
+
+    try:
+        from .tools.time_series_tools import TimeSeriesTools
+
+        tools = TimeSeriesTools()
+        result_dict = await tools.test_stationarity(
+            data=params.data,
+            time_column=params.time_column,
+            target_column=params.target_column,
+            method=params.method,
+            freq=params.freq,
+        )
+
+        if result_dict.get("success"):
+            is_stationary = result_dict.get("is_stationary", False)
+            await ctx.info(
+                f"✓ Stationarity test complete: {'STATIONARY' if is_stationary else 'NON-STATIONARY'}"
+            )
+            return StationarityTestResult(**result_dict)
+        else:
+            await ctx.error(f"Stationarity test failed: {result_dict.get('error')}")
+            return StationarityTestResult(
+                test_statistic=0.0,
+                p_value=1.0,
+                critical_values={},
+                is_stationary=False,
+                test_type=params.method,
+                interpretation="Test failed",
+                recommendations=[],
+                success=False,
+                error=result_dict.get("error", "Unknown error"),
+            )
+
+    except Exception as e:
+        await ctx.error(f"Stationarity test failed: {str(e)}")
+        return StationarityTestResult(
+            test_statistic=0.0,
+            p_value=1.0,
+            critical_values={},
+            is_stationary=False,
+            test_type=params.method,
+            interpretation="Test failed",
+            recommendations=[],
+            success=False,
+            error=str(e),
+        )
+
+
+@mcp.tool()
+async def decompose_time_series(
+    params: DecomposeTimeSeriesParams, ctx: Context
+) -> DecompositionResult:
+    """
+    Decompose time series into trend, seasonal, and residual components.
+
+    Args:
+        params: Decomposition parameters (data, model, period, method)
+        ctx: FastMCP context
+
+    Returns:
+        DecompositionResult with trend, seasonal, and residual components
+    """
+    await ctx.info(f"Decomposing time series using {params.method} method...")
+
+    try:
+        from .tools.time_series_tools import TimeSeriesTools
+
+        tools = TimeSeriesTools()
+        result_dict = await tools.decompose_time_series(
+            data=params.data,
+            target_column=params.target_column,
+            model=params.model,
+            period=params.period,
+            method=params.method,
+            freq=params.freq,
+        )
+
+        if result_dict.get("success"):
+            await ctx.info("✓ Time series decomposition complete")
+            return DecompositionResult(**result_dict)
+        else:
+            await ctx.error(f"Decomposition failed: {result_dict.get('error')}")
+            return DecompositionResult(
+                trend=[],
+                seasonal=[],
+                residual=[],
+                model=params.model,
+                trend_direction="unknown",
+                trend_slope=0.0,
+                trend_strength=0.0,
+                seasonal_strength=0.0,
+                interpretation="Decomposition failed",
+                success=False,
+                error=result_dict.get("error", "Unknown error"),
+            )
+
+    except Exception as e:
+        await ctx.error(f"Decomposition failed: {str(e)}")
+        return DecompositionResult(
+            trend=[],
+            seasonal=[],
+            residual=[],
+            model=params.model,
+            trend_direction="unknown",
+            trend_slope=0.0,
+            trend_strength=0.0,
+            seasonal_strength=0.0,
+            interpretation="Decomposition failed",
+            success=False,
+            error=str(e),
+        )
+
+
+@mcp.tool()
+async def fit_arima_model(
+    params: FitARIMAModelParams, ctx: Context
+) -> ARIMAModelResult:
+    """
+    Fit ARIMA/SARIMA model for time series forecasting.
+
+    Args:
+        params: Model parameters (data, order, seasonal_order, auto_select)
+        ctx: FastMCP context
+
+    Returns:
+        ARIMAModelResult with model statistics and diagnostics
+    """
+    await ctx.info("Fitting ARIMA model...")
+
+    try:
+        from .tools.time_series_tools import TimeSeriesTools
+
+        tools = TimeSeriesTools()
+        result_dict = await tools.fit_arima_model(
+            data=params.data,
+            target_column=params.target_column,
+            order=params.order,
+            seasonal_order=params.seasonal_order,
+            auto_select=params.auto_select,
+            freq=params.freq,
+        )
+
+        if result_dict.get("success"):
+            model_type = result_dict.get("model_type", "ARIMA")
+            await ctx.info(f"✓ {model_type} model fitted successfully")
+            return ARIMAModelResult(**result_dict)
+        else:
+            await ctx.error(f"ARIMA fitting failed: {result_dict.get('error')}")
+            return ARIMAModelResult(
+                order=(1, 0, 1),
+                aic=0.0,
+                bic=0.0,
+                fitted_values=[],
+                residuals=[],
+                model_type="ARIMA",
+                success_message="Model fitting failed",
+                success=False,
+                error=result_dict.get("error", "Unknown error"),
+            )
+
+    except Exception as e:
+        await ctx.error(f"ARIMA fitting failed: {str(e)}")
+        return ARIMAModelResult(
+            order=(1, 0, 1),
+            aic=0.0,
+            bic=0.0,
+            fitted_values=[],
+            residuals=[],
+            model_type="ARIMA",
+            success_message="Model fitting failed",
+            success=False,
+            error=str(e),
+        )
+
+
+@mcp.tool()
+async def forecast_arima(params: ForecastARIMAParams, ctx: Context) -> ForecastResult:
+    """
+    Generate ARIMA forecasts with confidence intervals.
+
+    Args:
+        params: Forecast parameters (data, steps, order, alpha)
+        ctx: FastMCP context
+
+    Returns:
+        ForecastResult with forecasts and confidence intervals
+    """
+    await ctx.info(f"Generating {params.steps}-step forecast...")
+
+    try:
+        from .tools.time_series_tools import TimeSeriesTools
+
+        tools = TimeSeriesTools()
+        result_dict = await tools.forecast_arima(
+            data=params.data,
+            steps=params.steps,
+            target_column=params.target_column,
+            order=params.order,
+            alpha=params.alpha,
+            freq=params.freq,
+        )
+
+        if result_dict.get("success"):
+            await ctx.info(f"✓ {params.steps}-step forecast generated")
+            return ForecastResult(**result_dict)
+        else:
+            await ctx.error(f"Forecasting failed: {result_dict.get('error')}")
+            return ForecastResult(
+                forecast=[],
+                lower_bound=[],
+                upper_bound=[],
+                confidence_level=1 - params.alpha,
+                model_order=(1, 0, 1),
+                steps=params.steps,
+                success_message="Forecasting failed",
+                success=False,
+                error=result_dict.get("error", "Unknown error"),
+            )
+
+    except Exception as e:
+        await ctx.error(f"Forecasting failed: {str(e)}")
+        return ForecastResult(
+            forecast=[],
+            lower_bound=[],
+            upper_bound=[],
+            confidence_level=1 - params.alpha,
+            model_order=(1, 0, 1),
+            steps=params.steps,
+            success_message="Forecasting failed",
+            success=False,
+            error=str(e),
+        )
+
+
+@mcp.tool()
+async def autocorrelation_analysis(
+    params: AutocorrelationAnalysisParams, ctx: Context
+) -> AutocorrelationResult:
+    """
+    Analyze autocorrelation structure for model selection.
+
+    Args:
+        params: Analysis parameters (data, nlags)
+        ctx: FastMCP context
+
+    Returns:
+        AutocorrelationResult with ACF, PACF, and ARIMA suggestions
+    """
+    await ctx.info(f"Analyzing autocorrelation ({params.nlags} lags)...")
+
+    try:
+        from .tools.time_series_tools import TimeSeriesTools
+
+        tools = TimeSeriesTools()
+        result_dict = await tools.autocorrelation_analysis(
+            data=params.data,
+            nlags=params.nlags,
+            target_column=params.target_column,
+            freq=params.freq,
+        )
+
+        if result_dict.get("success"):
+            has_autocorr = result_dict.get("has_autocorrelation", False)
+            await ctx.info(
+                f"✓ Autocorrelation analysis complete: {'Significant autocorrelation detected' if has_autocorr else 'No significant autocorrelation'}"
+            )
+            return AutocorrelationResult(**result_dict)
+        else:
+            await ctx.error(f"Autocorrelation analysis failed: {result_dict.get('error')}")
+            return AutocorrelationResult(
+                acf_values=[],
+                pacf_values=[],
+                ljung_box_pvalue=1.0,
+                has_autocorrelation=False,
+                significant_lags_acf=[],
+                significant_lags_pacf=[],
+                arima_suggestions={},
+                interpretation="Analysis failed",
+                success=False,
+                error=result_dict.get("error", "Unknown error"),
+            )
+
+    except Exception as e:
+        await ctx.error(f"Autocorrelation analysis failed: {str(e)}")
+        return AutocorrelationResult(
+            acf_values=[],
+            pacf_values=[],
+            ljung_box_pvalue=1.0,
+            has_autocorrelation=False,
+            significant_lags_acf=[],
+            significant_lags_pacf=[],
+            arima_suggestions={},
+            interpretation="Analysis failed",
+            success=False,
+            error=str(e),
+        )
 
 
 # =============================================================================
