@@ -968,3 +968,154 @@ class AutocorrelationResult(BaseModel):
     interpretation: str = Field(description="Human-readable interpretation")
     success: bool = Field(default=True, description="Success status")
     error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+# =============================================================================
+# Panel Data Analysis Results (Phase 10A Agent 8 Module 2)
+# =============================================================================
+
+
+class PanelDiagnosticsResult(BaseModel):
+    """Response for panel data structure diagnostics."""
+
+    is_balanced: bool = Field(description="Whether panel is balanced")
+    n_entities: int = Field(description="Number of entities (players/teams)")
+    n_timeperiods: int = Field(description="Number of time periods")
+    n_obs: int = Field(description="Total number of observations")
+    min_periods: int = Field(description="Minimum periods per entity")
+    max_periods: int = Field(description="Maximum periods per entity")
+    mean_periods: float = Field(description="Average periods per entity")
+    balance_ratio: float = Field(
+        description="Ratio of actual to potential observations"
+    )
+    recommendations: List[str] = Field(description="Analysis recommendations")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class PooledOLSResult(BaseModel):
+    """Response for pooled OLS regression."""
+
+    coefficients: Dict[str, float] = Field(description="Coefficient estimates")
+    std_errors: Dict[str, float] = Field(description="Standard errors")
+    t_stats: Dict[str, float] = Field(description="t-statistics")
+    p_values: Dict[str, float] = Field(description="p-values")
+    r_squared: float = Field(description="R-squared value")
+    f_statistic: Optional[float] = Field(
+        default=None, description="F-statistic for overall significance"
+    )
+    f_pvalue: Optional[float] = Field(
+        default=None, description="P-value for F-statistic"
+    )
+    n_obs: int = Field(description="Number of observations")
+    n_entities: int = Field(description="Number of entities")
+    n_timeperiods: int = Field(description="Number of time periods")
+    model_type: str = Field(default="pooled_ols", description="Model type")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class FixedEffectsResult(BaseModel):
+    """Response for fixed effects regression."""
+
+    coefficients: Dict[str, float] = Field(description="Coefficient estimates")
+    std_errors: Dict[str, float] = Field(description="Standard errors")
+    t_stats: Dict[str, float] = Field(description="t-statistics")
+    p_values: Dict[str, float] = Field(description="p-values")
+    r_squared: float = Field(description="Overall R-squared")
+    r_squared_within: Optional[float] = Field(
+        default=None, description="Within R-squared"
+    )
+    r_squared_between: Optional[float] = Field(
+        default=None, description="Between R-squared"
+    )
+    f_statistic: Optional[float] = Field(default=None, description="F-statistic")
+    f_pvalue: Optional[float] = Field(
+        default=None, description="P-value for F-statistic"
+    )
+    n_obs: int = Field(description="Number of observations")
+    n_entities: int = Field(description="Number of entities")
+    n_timeperiods: int = Field(description="Number of time periods")
+    entity_effects_included: bool = Field(description="Whether entity effects included")
+    time_effects_included: bool = Field(description="Whether time effects included")
+    model_type: str = Field(default="fixed_effects", description="Model type")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class RandomEffectsResult(BaseModel):
+    """Response for random effects regression."""
+
+    coefficients: Dict[str, float] = Field(description="Coefficient estimates")
+    std_errors: Dict[str, float] = Field(description="Standard errors")
+    t_stats: Dict[str, float] = Field(description="t-statistics")
+    p_values: Dict[str, float] = Field(description="p-values")
+    r_squared: float = Field(description="Overall R-squared")
+    r_squared_within: Optional[float] = Field(
+        default=None, description="Within R-squared"
+    )
+    r_squared_between: Optional[float] = Field(
+        default=None, description="Between R-squared"
+    )
+    r_squared_overall: Optional[float] = Field(
+        default=None, description="Overall R-squared (GLS)"
+    )
+    f_statistic: Optional[float] = Field(default=None, description="F-statistic")
+    f_pvalue: Optional[float] = Field(
+        default=None, description="P-value for F-statistic"
+    )
+    n_obs: int = Field(description="Number of observations")
+    n_entities: int = Field(description="Number of entities")
+    n_timeperiods: int = Field(description="Number of time periods")
+    model_type: str = Field(default="random_effects", description="Model type")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class HausmanTestResult(BaseModel):
+    """Response for Hausman specification test."""
+
+    statistic: float = Field(description="Hausman test statistic (chi-squared)")
+    p_value: float = Field(description="P-value for test")
+    reject_re: bool = Field(
+        description="Whether to reject random effects (use FE instead)"
+    )
+    fe_coefficients: Dict[str, float] = Field(description="Fixed effects estimates")
+    re_coefficients: Dict[str, float] = Field(description="Random effects estimates")
+    coefficient_differences: Dict[str, float] = Field(
+        description="Differences between FE and RE"
+    )
+    recommendation: str = Field(description="Which model to use")
+    interpretation: str = Field(description="Human-readable interpretation")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class FirstDifferenceResult(BaseModel):
+    """Response for first difference regression."""
+
+    coefficients: Dict[str, float] = Field(description="Coefficient estimates")
+    std_errors: Dict[str, float] = Field(description="Standard errors")
+    t_stats: Dict[str, float] = Field(description="t-statistics")
+    p_values: Dict[str, float] = Field(description="p-values")
+    r_squared: float = Field(description="R-squared value")
+    f_statistic: Optional[float] = Field(default=None, description="F-statistic")
+    f_pvalue: Optional[float] = Field(
+        default=None, description="P-value for F-statistic"
+    )
+    n_obs: int = Field(description="Number of observations (after differencing)")
+    n_entities: int = Field(description="Number of entities")
+    n_timeperiods: int = Field(
+        description="Number of time periods (after differencing)"
+    )
+    model_type: str = Field(default="first_difference", description="Model type")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")

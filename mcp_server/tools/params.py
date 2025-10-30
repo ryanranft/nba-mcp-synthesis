@@ -7895,3 +7895,211 @@ class AutocorrelationAnalysisParams(BaseModel):
             ]
         }
     )
+
+
+# =============================================================================
+# Panel Data Analysis Parameters (Phase 10A Agent 8 Module 2)
+# =============================================================================
+
+
+class PanelDiagnosticsParams(BaseModel):
+    """Parameters for panel data diagnostics.
+
+    Implements rec_0625_1b208ec4: Panel Data Models with Fixed and Random Effects
+    Priority: 9.0/10, Effort: 40 hours
+    """
+
+    data: List[Dict[str, Any]] = Field(
+        ...,
+        min_length=10,
+        description="Panel data as list of dictionaries (minimum 10 observations required)",
+    )
+    entity_column: str = Field(
+        default="entity_id",
+        description="Column name identifying entities (e.g., player_id, team_id)",
+    )
+    time_column: str = Field(
+        default="time_period",
+        description="Column name identifying time periods (e.g., season, game_number)",
+    )
+    target_column: str = Field(
+        default="value", description="Column name containing dependent variable"
+    )
+
+    @field_validator("data")
+    @classmethod
+    def validate_data_length(cls, v):
+        if len(v) < 10:
+            raise ValueError("Need at least 10 observations for panel diagnostics")
+        return v
+
+
+class PooledOLSParams(BaseModel):
+    """Parameters for pooled OLS regression.
+
+    Implements rec_0625_1b208ec4: Panel Data Models with Fixed and Random Effects
+    Priority: 9.0/10, Effort: 40 hours
+    """
+
+    data: List[Dict[str, Any]] = Field(
+        ...,
+        min_length=20,
+        description="Panel data as list of dictionaries (minimum 20 observations required)",
+    )
+    formula: str = Field(
+        ..., min_length=3, description="Model formula (e.g., 'value ~ x1 + x2')"
+    )
+    entity_column: str = Field(
+        default="entity_id", description="Column name identifying entities"
+    )
+    time_column: str = Field(
+        default="time_period", description="Column name identifying time periods"
+    )
+    target_column: str = Field(
+        default="value", description="Column name containing dependent variable"
+    )
+
+    @field_validator("data")
+    @classmethod
+    def validate_data_length(cls, v):
+        if len(v) < 20:
+            raise ValueError("Need at least 20 observations for pooled OLS")
+        return v
+
+
+class FixedEffectsParams(BaseModel):
+    """Parameters for fixed effects regression.
+
+    Implements rec_0625_1b208ec4: Panel Data Models with Fixed and Random Effects
+    Priority: 9.0/10, Effort: 40 hours
+    """
+
+    data: List[Dict[str, Any]] = Field(
+        ...,
+        min_length=20,
+        description="Panel data as list of dictionaries (minimum 20 observations required)",
+    )
+    formula: str = Field(
+        ..., min_length=3, description="Model formula (e.g., 'value ~ x1 + x2')"
+    )
+    entity_column: str = Field(
+        default="entity_id", description="Column name identifying entities"
+    )
+    time_column: str = Field(
+        default="time_period", description="Column name identifying time periods"
+    )
+    target_column: str = Field(
+        default="value", description="Column name containing dependent variable"
+    )
+    entity_effects: bool = Field(
+        default=True, description="Include entity-specific fixed effects"
+    )
+    time_effects: bool = Field(
+        default=False, description="Include time-specific fixed effects"
+    )
+
+    @field_validator("data")
+    @classmethod
+    def validate_data_length(cls, v):
+        if len(v) < 20:
+            raise ValueError("Need at least 20 observations for fixed effects")
+        return v
+
+
+class RandomEffectsParams(BaseModel):
+    """Parameters for random effects regression.
+
+    Implements rec_0625_1b208ec4: Panel Data Models with Fixed and Random Effects
+    Priority: 9.0/10, Effort: 40 hours
+    """
+
+    data: List[Dict[str, Any]] = Field(
+        ...,
+        min_length=30,
+        description="Panel data as list of dictionaries (minimum 30 observations required)",
+    )
+    formula: str = Field(
+        ..., min_length=3, description="Model formula (e.g., 'value ~ x1 + x2')"
+    )
+    entity_column: str = Field(
+        default="entity_id", description="Column name identifying entities"
+    )
+    time_column: str = Field(
+        default="time_period", description="Column name identifying time periods"
+    )
+    target_column: str = Field(
+        default="value", description="Column name containing dependent variable"
+    )
+
+    @field_validator("data")
+    @classmethod
+    def validate_data_length(cls, v):
+        if len(v) < 30:
+            raise ValueError("Need at least 30 observations for random effects")
+        return v
+
+
+class HausmanTestParams(BaseModel):
+    """Parameters for Hausman specification test (FE vs RE).
+
+    Implements rec_0625_1b208ec4: Panel Data Models with Fixed and Random Effects
+    Priority: 9.0/10, Effort: 40 hours
+    """
+
+    data: List[Dict[str, Any]] = Field(
+        ...,
+        min_length=30,
+        description="Panel data as list of dictionaries (minimum 30 observations required)",
+    )
+    formula: str = Field(
+        ..., min_length=3, description="Model formula (e.g., 'value ~ x1 + x2')"
+    )
+    entity_column: str = Field(
+        default="entity_id", description="Column name identifying entities"
+    )
+    time_column: str = Field(
+        default="time_period", description="Column name identifying time periods"
+    )
+    target_column: str = Field(
+        default="value", description="Column name containing dependent variable"
+    )
+
+    @field_validator("data")
+    @classmethod
+    def validate_data_length(cls, v):
+        if len(v) < 30:
+            raise ValueError("Need at least 30 observations for Hausman test")
+        return v
+
+
+class FirstDifferenceParams(BaseModel):
+    """Parameters for first difference regression.
+
+    Implements rec_0625_1b208ec4: Panel Data Models with Fixed and Random Effects
+    Priority: 9.0/10, Effort: 40 hours
+    """
+
+    data: List[Dict[str, Any]] = Field(
+        ...,
+        min_length=30,
+        description="Panel data as list of dictionaries (minimum 30 observations required)",
+    )
+    formula: str = Field(
+        ..., min_length=3, description="Model formula (e.g., 'value ~ x1 + x2')"
+    )
+    entity_column: str = Field(
+        default="entity_id", description="Column name identifying entities"
+    )
+    time_column: str = Field(
+        default="time_period", description="Column name identifying time periods"
+    )
+    target_column: str = Field(
+        default="value", description="Column name containing dependent variable"
+    )
+
+    @field_validator("data")
+    @classmethod
+    def validate_data_length(cls, v):
+        if len(v) < 30:
+            raise ValueError("Need at least 30 observations for first difference model")
+        return v

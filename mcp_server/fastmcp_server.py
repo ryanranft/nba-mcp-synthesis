@@ -287,6 +287,13 @@ from .tools.params import (
     FitARIMAModelParams,
     ForecastARIMAParams,
     AutocorrelationAnalysisParams,
+    # Phase 10A Agent 8 Module 2: Panel Data Analysis Parameters
+    PanelDiagnosticsParams,
+    PooledOLSParams,
+    FixedEffectsParams,
+    RandomEffectsParams,
+    HausmanTestParams,
+    FirstDifferenceParams,
 )
 
 # Import response models
@@ -362,6 +369,13 @@ from .responses import (
     ARIMAModelResult,
     ForecastResult,
     AutocorrelationResult,
+    # Phase 10A Agent 8 Module 2: Panel Data Analysis Results
+    PanelDiagnosticsResult,
+    PooledOLSResult,
+    FixedEffectsResult,
+    RandomEffectsResult,
+    HausmanTestResult,
+    FirstDifferenceResult,
 )
 
 # Initialize settings
@@ -13024,8 +13038,6 @@ async def get_documentation_status(
         raise
 
 
-
-
 # =============================================================================
 # Time Series Analysis Tools (Phase 10A Agent 8 Module 1)
 # =============================================================================
@@ -13317,7 +13329,9 @@ async def autocorrelation_analysis(
             )
             return AutocorrelationResult(**result_dict)
         else:
-            await ctx.error(f"Autocorrelation analysis failed: {result_dict.get('error')}")
+            await ctx.error(
+                f"Autocorrelation analysis failed: {result_dict.get('error')}"
+            )
             return AutocorrelationResult(
                 acf_values=[],
                 pacf_values=[],
@@ -13342,6 +13356,429 @@ async def autocorrelation_analysis(
             significant_lags_pacf=[],
             arima_suggestions={},
             interpretation="Analysis failed",
+            success=False,
+            error=str(e),
+        )
+
+
+# =============================================================================
+# Panel Data Analysis Tools (Phase 10A Agent 8 Module 2)
+# =============================================================================
+
+
+@mcp.tool()
+async def panel_diagnostics(
+    params: PanelDiagnosticsParams, ctx: Context
+) -> PanelDiagnosticsResult:
+    """
+    Check panel data structure and balance.
+
+    Analyzes panel data to determine if it's balanced and provides
+    summary statistics about panel dimensions.
+
+    Args:
+        params: Panel diagnostics parameters
+        ctx: FastMCP context
+
+    Returns:
+        PanelDiagnosticsResult with balance info and recommendations
+    """
+    await ctx.info("Analyzing panel data structure...")
+
+    try:
+        from .tools.panel_data_tools import PanelDataTools
+
+        tools = PanelDataTools()
+        result_dict = await tools.panel_diagnostics(
+            data=params.data,
+            entity_column=params.entity_column,
+            time_column=params.time_column,
+            target_column=params.target_column,
+        )
+
+        if result_dict.get("success"):
+            is_balanced = result_dict.get("is_balanced", False)
+            n_entities = result_dict.get("n_entities", 0)
+            n_obs = result_dict.get("n_obs", 0)
+            await ctx.info(
+                f"✓ Panel diagnostics complete: {n_entities} entities, {n_obs} observations, {'BALANCED' if is_balanced else 'UNBALANCED'}"
+            )
+            return PanelDiagnosticsResult(**result_dict)
+        else:
+            await ctx.error(f"Panel diagnostics failed: {result_dict.get('error')}")
+            return PanelDiagnosticsResult(
+                is_balanced=False,
+                n_entities=0,
+                n_timeperiods=0,
+                n_obs=0,
+                min_periods=0,
+                max_periods=0,
+                mean_periods=0.0,
+                balance_ratio=0.0,
+                recommendations=[],
+                success=False,
+                error=result_dict.get("error", "Unknown error"),
+            )
+
+    except Exception as e:
+        await ctx.error(f"Panel diagnostics failed: {str(e)}")
+        return PanelDiagnosticsResult(
+            is_balanced=False,
+            n_entities=0,
+            n_timeperiods=0,
+            n_obs=0,
+            min_periods=0,
+            max_periods=0,
+            mean_periods=0.0,
+            balance_ratio=0.0,
+            recommendations=[],
+            success=False,
+            error=str(e),
+        )
+
+
+@mcp.tool()
+async def pooled_ols_model(params: PooledOLSParams, ctx: Context) -> PooledOLSResult:
+    """
+    Estimate pooled OLS model (ignores panel structure).
+
+    Args:
+        params: Pooled OLS parameters
+        ctx: FastMCP context
+
+    Returns:
+        PooledOLSResult with coefficient estimates
+    """
+    await ctx.info("Estimating pooled OLS model...")
+
+    try:
+        from .tools.panel_data_tools import PanelDataTools
+
+        tools = PanelDataTools()
+        result_dict = await tools.pooled_ols_model(
+            data=params.data,
+            formula=params.formula,
+            entity_column=params.entity_column,
+            time_column=params.time_column,
+            target_column=params.target_column,
+        )
+
+        if result_dict.get("success"):
+            r2 = result_dict.get("r_squared", 0.0)
+            await ctx.info(f"✓ Pooled OLS complete: R² = {r2:.4f}")
+            return PooledOLSResult(**result_dict)
+        else:
+            await ctx.error(f"Pooled OLS failed: {result_dict.get('error')}")
+            return PooledOLSResult(
+                coefficients={},
+                std_errors={},
+                t_stats={},
+                p_values={},
+                r_squared=0.0,
+                n_obs=0,
+                n_entities=0,
+                n_timeperiods=0,
+                interpretation="Model estimation failed",
+                recommendations=[],
+                success=False,
+                error=result_dict.get("error", "Unknown error"),
+            )
+
+    except Exception as e:
+        await ctx.error(f"Pooled OLS failed: {str(e)}")
+        return PooledOLSResult(
+            coefficients={},
+            std_errors={},
+            t_stats={},
+            p_values={},
+            r_squared=0.0,
+            n_obs=0,
+            n_entities=0,
+            n_timeperiods=0,
+            interpretation="Model estimation failed",
+            recommendations=[],
+            success=False,
+            error=str(e),
+        )
+
+
+@mcp.tool()
+async def fixed_effects_model(
+    params: FixedEffectsParams, ctx: Context
+) -> FixedEffectsResult:
+    """
+    Estimate fixed effects (within) model.
+
+    Args:
+        params: Fixed effects parameters
+        ctx: FastMCP context
+
+    Returns:
+        FixedEffectsResult with coefficient estimates
+    """
+    effects_str = []
+    if params.entity_effects:
+        effects_str.append("entity")
+    if params.time_effects:
+        effects_str.append("time")
+    effects_desc = " and ".join(effects_str) if effects_str else "no"
+
+    await ctx.info(f"Estimating fixed effects model with {effects_desc} effects...")
+
+    try:
+        from .tools.panel_data_tools import PanelDataTools
+
+        tools = PanelDataTools()
+        result_dict = await tools.fixed_effects_model(
+            data=params.data,
+            formula=params.formula,
+            entity_column=params.entity_column,
+            time_column=params.time_column,
+            target_column=params.target_column,
+            entity_effects=params.entity_effects,
+            time_effects=params.time_effects,
+        )
+
+        if result_dict.get("success"):
+            r2_within = result_dict.get(
+                "r_squared_within", result_dict.get("r_squared", 0.0)
+            )
+            await ctx.info(f"✓ Fixed effects complete: Within R² = {r2_within:.4f}")
+            return FixedEffectsResult(**result_dict)
+        else:
+            await ctx.error(f"Fixed effects failed: {result_dict.get('error')}")
+            return FixedEffectsResult(
+                coefficients={},
+                std_errors={},
+                t_stats={},
+                p_values={},
+                r_squared=0.0,
+                n_obs=0,
+                n_entities=0,
+                n_timeperiods=0,
+                entity_effects_included=params.entity_effects,
+                time_effects_included=params.time_effects,
+                interpretation="Model estimation failed",
+                recommendations=[],
+                success=False,
+                error=result_dict.get("error", "Unknown error"),
+            )
+
+    except Exception as e:
+        await ctx.error(f"Fixed effects failed: {str(e)}")
+        return FixedEffectsResult(
+            coefficients={},
+            std_errors={},
+            t_stats={},
+            p_values={},
+            r_squared=0.0,
+            n_obs=0,
+            n_entities=0,
+            n_timeperiods=0,
+            entity_effects_included=params.entity_effects,
+            time_effects_included=params.time_effects,
+            interpretation="Model estimation failed",
+            recommendations=[],
+            success=False,
+            error=str(e),
+        )
+
+
+@mcp.tool()
+async def random_effects_model(
+    params: RandomEffectsParams, ctx: Context
+) -> RandomEffectsResult:
+    """
+    Estimate random effects (GLS) model.
+
+    Args:
+        params: Random effects parameters
+        ctx: FastMCP context
+
+    Returns:
+        RandomEffectsResult with coefficient estimates
+    """
+    await ctx.info("Estimating random effects model...")
+
+    try:
+        from .tools.panel_data_tools import PanelDataTools
+
+        tools = PanelDataTools()
+        result_dict = await tools.random_effects_model(
+            data=params.data,
+            formula=params.formula,
+            entity_column=params.entity_column,
+            time_column=params.time_column,
+            target_column=params.target_column,
+        )
+
+        if result_dict.get("success"):
+            r2_overall = result_dict.get(
+                "r_squared_overall", result_dict.get("r_squared", 0.0)
+            )
+            await ctx.info(f"✓ Random effects complete: Overall R² = {r2_overall:.4f}")
+            return RandomEffectsResult(**result_dict)
+        else:
+            await ctx.error(f"Random effects failed: {result_dict.get('error')}")
+            return RandomEffectsResult(
+                coefficients={},
+                std_errors={},
+                t_stats={},
+                p_values={},
+                r_squared=0.0,
+                n_obs=0,
+                n_entities=0,
+                n_timeperiods=0,
+                interpretation="Model estimation failed",
+                recommendations=[],
+                success=False,
+                error=result_dict.get("error", "Unknown error"),
+            )
+
+    except Exception as e:
+        await ctx.error(f"Random effects failed: {str(e)}")
+        return RandomEffectsResult(
+            coefficients={},
+            std_errors={},
+            t_stats={},
+            p_values={},
+            r_squared=0.0,
+            n_obs=0,
+            n_entities=0,
+            n_timeperiods=0,
+            interpretation="Model estimation failed",
+            recommendations=[],
+            success=False,
+            error=str(e),
+        )
+
+
+@mcp.tool()
+async def hausman_test(params: HausmanTestParams, ctx: Context) -> HausmanTestResult:
+    """
+    Hausman test for fixed vs random effects specification.
+
+    Args:
+        params: Hausman test parameters
+        ctx: FastMCP context
+
+    Returns:
+        HausmanTestResult with test statistics and recommendation
+    """
+    await ctx.info("Running Hausman specification test...")
+
+    try:
+        from .tools.panel_data_tools import PanelDataTools
+
+        tools = PanelDataTools()
+        result_dict = await tools.hausman_test(
+            data=params.data,
+            formula=params.formula,
+            entity_column=params.entity_column,
+            time_column=params.time_column,
+            target_column=params.target_column,
+        )
+
+        if result_dict.get("success"):
+            p_value = result_dict.get("p_value", 1.0)
+            recommendation = result_dict.get("recommendation", "Unknown")
+            await ctx.info(
+                f"✓ Hausman test complete: p = {p_value:.4f}, Recommendation: {recommendation}"
+            )
+            return HausmanTestResult(**result_dict)
+        else:
+            await ctx.error(f"Hausman test failed: {result_dict.get('error')}")
+            return HausmanTestResult(
+                statistic=0.0,
+                p_value=1.0,
+                reject_re=False,
+                fe_coefficients={},
+                re_coefficients={},
+                coefficient_differences={},
+                recommendation="Test failed",
+                interpretation="Hausman test failed",
+                success=False,
+                error=result_dict.get("error", "Unknown error"),
+            )
+
+    except Exception as e:
+        await ctx.error(f"Hausman test failed: {str(e)}")
+        return HausmanTestResult(
+            statistic=0.0,
+            p_value=1.0,
+            reject_re=False,
+            fe_coefficients={},
+            re_coefficients={},
+            coefficient_differences={},
+            recommendation="Test failed",
+            interpretation="Hausman test failed",
+            success=False,
+            error=str(e),
+        )
+
+
+@mcp.tool()
+async def first_difference_model(
+    params: FirstDifferenceParams, ctx: Context
+) -> FirstDifferenceResult:
+    """
+    Estimate first difference model for panel data.
+
+    Args:
+        params: First difference parameters
+        ctx: FastMCP context
+
+    Returns:
+        FirstDifferenceResult with coefficient estimates
+    """
+    await ctx.info("Estimating first difference model...")
+
+    try:
+        from .tools.panel_data_tools import PanelDataTools
+
+        tools = PanelDataTools()
+        result_dict = await tools.first_difference_model(
+            data=params.data,
+            formula=params.formula,
+            entity_column=params.entity_column,
+            time_column=params.time_column,
+            target_column=params.target_column,
+        )
+
+        if result_dict.get("success"):
+            r2 = result_dict.get("r_squared", 0.0)
+            await ctx.info(f"✓ First difference complete: R² = {r2:.4f}")
+            return FirstDifferenceResult(**result_dict)
+        else:
+            await ctx.error(f"First difference failed: {result_dict.get('error')}")
+            return FirstDifferenceResult(
+                coefficients={},
+                std_errors={},
+                t_stats={},
+                p_values={},
+                r_squared=0.0,
+                n_obs=0,
+                n_entities=0,
+                n_timeperiods=0,
+                interpretation="Model estimation failed",
+                recommendations=[],
+                success=False,
+                error=result_dict.get("error", "Unknown error"),
+            )
+
+    except Exception as e:
+        await ctx.error(f"First difference failed: {str(e)}")
+        return FirstDifferenceResult(
+            coefficients={},
+            std_errors={},
+            t_stats={},
+            p_values={},
+            r_squared=0.0,
+            n_obs=0,
+            n_entities=0,
+            n_timeperiods=0,
+            interpretation="Model estimation failed",
+            recommendations=[],
             success=False,
             error=str(e),
         )
