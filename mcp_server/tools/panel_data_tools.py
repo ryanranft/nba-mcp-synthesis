@@ -657,10 +657,12 @@ class PanelDataTools:
             re_result = analyzer.random_effects(formula)
 
             # Run Hausman test
-            test_result = analyzer.hausman_test(fe_result, re_result)
+            test_result = analyzer.hausman_test(
+                formula=formula, fe_result=fe_result, re_result=re_result
+            )
 
             # Extract results
-            statistic = test_result["statistic"]
+            statistic = test_result["h_statistic"]
             p_value = test_result["p_value"]
             reject_re = p_value < 0.05
 
