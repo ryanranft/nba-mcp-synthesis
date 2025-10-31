@@ -47,7 +47,7 @@ class AdvancedTimeSeriesTools:
         estimate_parameters: bool = True,
         smoother: bool = True,
         forecast_steps: int = 0,
-        confidence_level: float = 0.95
+        confidence_level: float = 0.95,
     ) -> Dict[str, Any]:
         """
         Apply Kalman filter for state-space estimation.
@@ -93,7 +93,9 @@ class AdvancedTimeSeriesTools:
             )
         """
         try:
-            self.logger.info(f"Applying Kalman filter: state_dim={state_dim}, vars={observation_vars}")
+            self.logger.info(
+                f"Applying Kalman filter: state_dim={state_dim}, vars={observation_vars}"
+            )
 
             # Validate inputs
             if data.empty:
@@ -120,7 +122,9 @@ class AdvancedTimeSeriesTools:
             else:
                 F = np.array(transition_matrix)
                 if F.shape != (state_dim, state_dim):
-                    raise ValueError(f"transition_matrix must be {state_dim}x{state_dim}")
+                    raise ValueError(
+                        f"transition_matrix must be {state_dim}x{state_dim}"
+                    )
 
             if observation_matrix is None:
                 # Default: observe all states
@@ -128,7 +132,9 @@ class AdvancedTimeSeriesTools:
             else:
                 H = np.array(observation_matrix)
                 if H.shape[1] != state_dim:
-                    raise ValueError(f"observation_matrix must have {state_dim} columns")
+                    raise ValueError(
+                        f"observation_matrix must have {state_dim} columns"
+                    )
 
             if initial_state is None:
                 x0 = np.zeros(state_dim)
@@ -150,11 +156,13 @@ class AdvancedTimeSeriesTools:
                 self.logger.info("Estimating Kalman filter parameters via MLE")
                 # Use scipy.optimize or statsmodels for MLE
                 # For now, use simple EM algorithm
-                F, H, Q, R = self._estimate_kalman_parameters(y, state_dim, F, H, Q, R, x0)
+                F, H, Q, R = self._estimate_kalman_parameters(
+                    y, state_dim, F, H, Q, R, x0
+                )
 
             # Forward pass: Kalman filter
-            filtered_states, filtered_covs, innovations, innovation_covs = self._kalman_filter_forward(
-                y, F, H, Q, R, x0
+            filtered_states, filtered_covs, innovations, innovation_covs = (
+                self._kalman_filter_forward(y, F, H, Q, R, x0)
             )
 
             # Compute log-likelihood
@@ -179,52 +187,68 @@ class AdvancedTimeSeriesTools:
                 )
 
             # Diagnostics
-            diagnostics = self._compute_kalman_diagnostics(innovations, innovation_covs, y, H, filtered_states)
+            diagnostics = self._compute_kalman_diagnostics(
+                innovations, innovation_covs, y, H, filtered_states
+            )
 
             # Build result
             result = {
-                'filtered_states': pd.DataFrame(
+                "filtered_states": pd.DataFrame(
                     filtered_states,
                     index=data.index,
-                    columns=[f'state_{i+1}' for i in range(state_dim)]
-                ).to_dict('records'),
-                'state_covariances': [cov.tolist() for cov in filtered_covs],
-                'innovations': pd.DataFrame(
-                    innovations,
-                    index=data.index,
-                    columns=observation_vars
-                ).to_dict('records'),
-                'log_likelihood': float(log_likelihood),
-                'aic': float(-2 * log_likelihood + 2 * (state_dim**2 + obs_dim*state_dim)),
-                'bic': float(-2 * log_likelihood + np.log(n_obs) * (state_dim**2 + obs_dim*state_dim)),
-                'parameters': {
-                    'transition_matrix': F.tolist(),
-                    'observation_matrix': H.tolist(),
-                    'process_noise_cov': Q.tolist(),
-                    'measurement_noise_cov': R.tolist()
+                    columns=[f"state_{i+1}" for i in range(state_dim)],
+                ).to_dict("records"),
+                "state_covariances": [cov.tolist() for cov in filtered_covs],
+                "innovations": pd.DataFrame(
+                    innovations, index=data.index, columns=observation_vars
+                ).to_dict("records"),
+                "log_likelihood": float(log_likelihood),
+                "aic": float(
+                    -2 * log_likelihood + 2 * (state_dim**2 + obs_dim * state_dim)
+                ),
+                "bic": float(
+                    -2 * log_likelihood
+                    + np.log(n_obs) * (state_dim**2 + obs_dim * state_dim)
+                ),
+                "parameters": {
+                    "transition_matrix": F.tolist(),
+                    "observation_matrix": H.tolist(),
+                    "process_noise_cov": Q.tolist(),
+                    "measurement_noise_cov": R.tolist(),
                 },
-                'diagnostics': diagnostics
+                "diagnostics": diagnostics,
             }
 
             if smoother and smoothed_states is not None:
-                result['smoothed_states'] = pd.DataFrame(
+                result["smoothed_states"] = pd.DataFrame(
                     smoothed_states,
                     index=data.index,
-                    columns=[f'state_{i+1}' for i in range(state_dim)]
-                ).to_dict('records')
-                result['smoothed_covariances'] = [cov.tolist() for cov in smoothed_covs]
+                    columns=[f"state_{i+1}" for i in range(state_dim)],
+                ).to_dict("records")
+                result["smoothed_covariances"] = [cov.tolist() for cov in smoothed_covs]
 
             if forecasts is not None:
                 z_score = 1.96 if confidence_level == 0.95 else 2.576
-                forecast_df = pd.DataFrame({
-                    'forecast': (H @ forecasts.T).flatten(),
-                    'std_error': [np.sqrt(np.diag(H @ cov @ H.T + R))[0] for cov in forecast_covs]
-                })
-                forecast_df['lower'] = forecast_df['forecast'] - z_score * forecast_df['std_error']
-                forecast_df['upper'] = forecast_df['forecast'] + z_score * forecast_df['std_error']
-                result['forecasts'] = forecast_df.to_dict('records')
+                forecast_df = pd.DataFrame(
+                    {
+                        "forecast": (H @ forecasts.T).flatten(),
+                        "std_error": [
+                            np.sqrt(np.diag(H @ cov @ H.T + R))[0]
+                            for cov in forecast_covs
+                        ],
+                    }
+                )
+                forecast_df["lower"] = (
+                    forecast_df["forecast"] - z_score * forecast_df["std_error"]
+                )
+                forecast_df["upper"] = (
+                    forecast_df["forecast"] + z_score * forecast_df["std_error"]
+                )
+                result["forecasts"] = forecast_df.to_dict("records")
 
-            self.logger.info(f"Kalman filter complete: log_likelihood={log_likelihood:.2f}")
+            self.logger.info(
+                f"Kalman filter complete: log_likelihood={log_likelihood:.2f}"
+            )
             return result
 
         except Exception as e:
@@ -238,9 +262,9 @@ class AdvancedTimeSeriesTools:
         n_factors: int,
         factor_order: int = 1,
         standardize: bool = True,
-        method: str = 'ml',
+        method: str = "ml",
         max_iter: int = 1000,
-        tolerance: float = 1e-4
+        tolerance: float = 1e-4,
     ) -> Dict[str, Any]:
         """
         Estimate dynamic factor model to extract latent factors.
@@ -279,7 +303,9 @@ class AdvancedTimeSeriesTools:
             )
         """
         try:
-            self.logger.info(f"Estimating dynamic factor model: n_factors={n_factors}, vars={len(variables)}")
+            self.logger.info(
+                f"Estimating dynamic factor model: n_factors={n_factors}, vars={len(variables)}"
+            )
 
             # Validate inputs
             if data.empty:
@@ -299,7 +325,11 @@ class AdvancedTimeSeriesTools:
             # Handle missing data
             if X.isnull().any().any():
                 self.logger.warning("Missing data detected, using interpolation")
-                X = X.interpolate(method='linear').fillna(method='bfill').fillna(method='ffill')
+                X = (
+                    X.interpolate(method="linear")
+                    .fillna(method="bfill")
+                    .fillna(method="ffill")
+                )
 
             # Standardize if requested
             X_means = X.mean()
@@ -310,22 +340,26 @@ class AdvancedTimeSeriesTools:
             X_np = X.values
 
             # Estimate model based on method
-            if method == 'pc':
+            if method == "pc":
                 # Principal components method
-                factors, loadings, idio_vars = self._dfm_principal_components(X_np, n_factors)
-            elif method == 'ml':
+                factors, loadings, idio_vars = self._dfm_principal_components(
+                    X_np, n_factors
+                )
+            elif method == "ml":
                 # Maximum likelihood via EM algorithm
                 factors, loadings, idio_vars = self._dfm_ml_em(
                     X_np, n_factors, max_iter, tolerance
                 )
-            elif method == '2step':
+            elif method == "2step":
                 # Two-step: PC extraction + Kalman smoothing
                 factors, loadings, idio_vars = self._dfm_two_step(X_np, n_factors)
             else:
                 raise ValueError(f"Unknown method: {method}")
 
             # Estimate factor VAR dynamics
-            factor_ar_coefs, factor_cov = self._estimate_factor_var(factors, factor_order)
+            factor_ar_coefs, factor_cov = self._estimate_factor_var(
+                factors, factor_order
+            )
 
             # Compute variance explained
             X_fitted = factors @ loadings.T
@@ -336,39 +370,40 @@ class AdvancedTimeSeriesTools:
             # Compute fit statistics
             residuals = X_np - X_fitted
             log_likelihood = self._dfm_log_likelihood(residuals, idio_vars)
-            n_params = n_vars * n_factors + n_factors + n_vars + n_factors**2 * factor_order
+            n_params = (
+                n_vars * n_factors + n_factors + n_vars + n_factors**2 * factor_order
+            )
             aic = -2 * log_likelihood + 2 * n_params
             bic = -2 * log_likelihood + np.log(n_obs) * n_params
 
             # Build result
             result = {
-                'factors': pd.DataFrame(
+                "factors": pd.DataFrame(
                     factors,
                     index=data.index,
-                    columns=[f'factor_{i+1}' for i in range(n_factors)]
-                ).to_dict('records'),
-                'loadings': pd.DataFrame(
+                    columns=[f"factor_{i+1}" for i in range(n_factors)],
+                ).to_dict("records"),
+                "loadings": pd.DataFrame(
                     loadings,
                     index=variables,
-                    columns=[f'factor_{i+1}' for i in range(n_factors)]
-                ).to_dict('index'),
-                'factor_covariance': factor_cov.tolist(),
-                'idiosyncratic_variances': dict(zip(variables, idio_vars)),
-                'variance_explained': {
-                    f'factor_{i+1}': float(var_explained[i])
-                    for i in range(n_factors)
+                    columns=[f"factor_{i+1}" for i in range(n_factors)],
+                ).to_dict("index"),
+                "factor_covariance": factor_cov.tolist(),
+                "idiosyncratic_variances": dict(zip(variables, idio_vars)),
+                "variance_explained": {
+                    f"factor_{i+1}": float(var_explained[i]) for i in range(n_factors)
                 },
-                'total_variance_explained': float(var_explained.sum()),
-                'factor_ar_coefficients': [coef.tolist() for coef in factor_ar_coefs],
-                'fit_statistics': {
-                    'log_likelihood': float(log_likelihood),
-                    'aic': float(aic),
-                    'bic': float(bic),
-                    'n_observations': n_obs,
-                    'n_parameters': n_params
+                "total_variance_explained": float(var_explained.sum()),
+                "factor_ar_coefficients": [coef.tolist() for coef in factor_ar_coefs],
+                "fit_statistics": {
+                    "log_likelihood": float(log_likelihood),
+                    "aic": float(aic),
+                    "bic": float(bic),
+                    "n_observations": n_obs,
+                    "n_parameters": n_params,
                 },
-                'method': method,
-                'standardized': standardize
+                "method": method,
+                "standardized": standardize,
             }
 
             self.logger.info(f"DFM complete: var_explained={var_explained.sum():.2%}")
@@ -389,7 +424,7 @@ class AdvancedTimeSeriesTools:
         switching_ar: bool = False,
         ar_order: int = 0,
         max_iter: int = 1000,
-        tolerance: float = 1e-4
+        tolerance: float = 1e-4,
     ) -> Dict[str, Any]:
         """
         Estimate Markov-switching regression model for regime changes.
@@ -430,7 +465,9 @@ class AdvancedTimeSeriesTools:
             )
         """
         try:
-            self.logger.info(f"Estimating Markov-switching model: n_regimes={n_regimes}, var={dependent_var}")
+            self.logger.info(
+                f"Estimating Markov-switching model: n_regimes={n_regimes}, var={dependent_var}"
+            )
 
             # Validate inputs
             if data.empty:
@@ -464,7 +501,13 @@ class AdvancedTimeSeriesTools:
 
             # Initialize parameters
             params = self._initialize_markov_params(
-                y, X, n_regimes, switching_variance, switching_mean, switching_ar, ar_order
+                y,
+                X,
+                n_regimes,
+                switching_variance,
+                switching_mean,
+                switching_ar,
+                ar_order,
             )
 
             # EM algorithm
@@ -473,12 +516,21 @@ class AdvancedTimeSeriesTools:
                 filtered_probs, predicted_probs, joint_probs = self._markov_filter(
                     y, X, params, n_regimes
                 )
-                smoothed_probs = self._markov_smoother(filtered_probs, joint_probs, params['transition_matrix'])
+                smoothed_probs = self._markov_smoother(
+                    filtered_probs, joint_probs, params["transition_matrix"]
+                )
 
                 # M-step: Update parameters
                 new_params = self._markov_m_step(
-                    y, X, smoothed_probs, joint_probs, n_regimes,
-                    switching_variance, switching_mean, switching_ar, ar_order
+                    y,
+                    X,
+                    smoothed_probs,
+                    joint_probs,
+                    n_regimes,
+                    switching_variance,
+                    switching_mean,
+                    switching_ar,
+                    ar_order,
                 )
 
                 # Check convergence
@@ -493,75 +545,92 @@ class AdvancedTimeSeriesTools:
             regime_sequence = self._markov_viterbi(y, X, params, n_regimes)
 
             # Compute expected durations
-            P = params['transition_matrix']
+            P = params["transition_matrix"]
             expected_durations = {
-                f'regime_{i+1}': float(1 / (1 - P[i, i]))
-                for i in range(n_regimes)
+                f"regime_{i+1}": float(1 / (1 - P[i, i])) for i in range(n_regimes)
             }
 
             # Regime statistics
             regime_stats = {}
             for i in range(n_regimes):
                 regime_mask = regime_sequence == i
-                regime_stats[f'regime_{i+1}'] = {
-                    'observations': int(regime_mask.sum()),
-                    'proportion': float(regime_mask.mean()),
-                    'mean': float(y[regime_mask].mean()),
-                    'std': float(y[regime_mask].std()),
-                    'min': float(y[regime_mask].min()),
-                    'max': float(y[regime_mask].max())
+                regime_stats[f"regime_{i+1}"] = {
+                    "observations": int(regime_mask.sum()),
+                    "proportion": float(regime_mask.mean()),
+                    "mean": float(y[regime_mask].mean()),
+                    "std": float(y[regime_mask].std()),
+                    "min": float(y[regime_mask].min()),
+                    "max": float(y[regime_mask].max()),
                 }
 
             # Compute log-likelihood and fit statistics
-            log_likelihood = self._markov_log_likelihood(y, X, smoothed_probs, params, n_regimes)
-            n_params = self._count_markov_params(n_regimes, X, switching_variance, switching_mean, ar_order)
+            log_likelihood = self._markov_log_likelihood(
+                y, X, smoothed_probs, params, n_regimes
+            )
+            n_params = self._count_markov_params(
+                n_regimes, X, switching_variance, switching_mean, ar_order
+            )
             aic = -2 * log_likelihood + 2 * n_params
             bic = -2 * log_likelihood + np.log(n_obs) * n_params
 
             # Build result
             result = {
-                'regime_probabilities': pd.DataFrame(
+                "regime_probabilities": pd.DataFrame(
                     smoothed_probs,
                     index=data.index[valid_idx],
-                    columns=[f'regime_{i+1}' for i in range(n_regimes)]
-                ).to_dict('records'),
-                'regime_sequence': pd.Series(
-                    [f'regime_{i+1}' for i in regime_sequence],
-                    index=data.index[valid_idx]
+                    columns=[f"regime_{i+1}" for i in range(n_regimes)],
+                ).to_dict("records"),
+                "regime_sequence": pd.Series(
+                    [f"regime_{i+1}" for i in regime_sequence],
+                    index=data.index[valid_idx],
                 ).to_dict(),
-                'transition_matrix': pd.DataFrame(
-                    params['transition_matrix'],
-                    index=[f'from_regime_{i+1}' for i in range(n_regimes)],
-                    columns=[f'to_regime_{i+1}' for i in range(n_regimes)]
-                ).to_dict('index'),
-                'expected_durations': expected_durations,
-                'regime_parameters': {
-                    f'regime_{i+1}': {
-                        'mean': float(params['means'][i]) if switching_mean else float(params['means'][0]),
-                        'variance': float(params['variances'][i]) if switching_variance else float(params['variances'][0]),
-                        'ar_coefficients': params['ar_coeffs'][i].tolist() if switching_ar and ar_order > 0 else []
+                "transition_matrix": pd.DataFrame(
+                    params["transition_matrix"],
+                    index=[f"from_regime_{i+1}" for i in range(n_regimes)],
+                    columns=[f"to_regime_{i+1}" for i in range(n_regimes)],
+                ).to_dict("index"),
+                "expected_durations": expected_durations,
+                "regime_parameters": {
+                    f"regime_{i+1}": {
+                        "mean": (
+                            float(params["means"][i])
+                            if switching_mean
+                            else float(params["means"][0])
+                        ),
+                        "variance": (
+                            float(params["variances"][i])
+                            if switching_variance
+                            else float(params["variances"][0])
+                        ),
+                        "ar_coefficients": (
+                            params["ar_coeffs"][i].tolist()
+                            if switching_ar and ar_order > 0
+                            else []
+                        ),
                     }
                     for i in range(n_regimes)
                 },
-                'regime_statistics': regime_stats,
-                'fit_statistics': {
-                    'log_likelihood': float(log_likelihood),
-                    'aic': float(aic),
-                    'bic': float(bic),
-                    'n_observations': n_obs,
-                    'n_parameters': n_params,
-                    'iterations': iteration + 1
+                "regime_statistics": regime_stats,
+                "fit_statistics": {
+                    "log_likelihood": float(log_likelihood),
+                    "aic": float(aic),
+                    "bic": float(bic),
+                    "n_observations": n_obs,
+                    "n_parameters": n_params,
+                    "iterations": iteration + 1,
                 },
-                'specification': {
-                    'n_regimes': n_regimes,
-                    'switching_variance': switching_variance,
-                    'switching_mean': switching_mean,
-                    'switching_ar': switching_ar,
-                    'ar_order': ar_order
-                }
+                "specification": {
+                    "n_regimes": n_regimes,
+                    "switching_variance": switching_variance,
+                    "switching_mean": switching_mean,
+                    "switching_ar": switching_ar,
+                    "ar_order": ar_order,
+                },
             }
 
-            self.logger.info(f"Markov-switching model complete: {n_regimes} regimes, log_lik={log_likelihood:.2f}")
+            self.logger.info(
+                f"Markov-switching model complete: {n_regimes} regimes, log_lik={log_likelihood:.2f}"
+            )
             return result
 
         except Exception as e:
@@ -579,7 +648,7 @@ class AdvancedTimeSeriesTools:
         stochastic_trend: bool = True,
         stochastic_seasonal: bool = True,
         stochastic_cycle: bool = True,
-        regression_vars: Optional[List[str]] = None
+        regression_vars: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Decompose time series into unobserved structural components.
@@ -623,7 +692,9 @@ class AdvancedTimeSeriesTools:
             )
         """
         try:
-            self.logger.info(f"Estimating structural time series: var={variable}, components={components}")
+            self.logger.info(
+                f"Estimating structural time series: var={variable}, components={components}"
+            )
 
             # Validate inputs
             if data.empty:
@@ -632,7 +703,7 @@ class AdvancedTimeSeriesTools:
             if variable not in data.columns:
                 raise ValueError(f"Variable '{variable}' not found")
 
-            valid_components = ['level', 'trend', 'seasonal', 'cycle', 'irregular']
+            valid_components = ["level", "trend", "seasonal", "cycle", "irregular"]
             invalid = set(components) - set(valid_components)
             if invalid:
                 raise ValueError(f"Invalid components: {invalid}")
@@ -644,41 +715,57 @@ class AdvancedTimeSeriesTools:
             # Handle missing data
             if np.isnan(y).any():
                 self.logger.warning("Missing data detected, using interpolation")
-                y = pd.Series(y).interpolate(method='linear').fillna(method='bfill').fillna(method='ffill').values
+                y = (
+                    pd.Series(y)
+                    .interpolate(method="linear")
+                    .fillna(method="bfill")
+                    .fillna(method="ffill")
+                    .values
+                )
 
             # Build state-space representation
             state_dim = 0
             component_indices = {}
 
             # Level component
-            if 'level' in components:
-                component_indices['level'] = (state_dim, state_dim + 1)
+            if "level" in components:
+                component_indices["level"] = (state_dim, state_dim + 1)
                 state_dim += 1
 
             # Trend component
-            if 'trend' in components:
-                component_indices['trend'] = (state_dim, state_dim + 1)
+            if "trend" in components:
+                component_indices["trend"] = (state_dim, state_dim + 1)
                 state_dim += 1
 
             # Seasonal component
-            if 'seasonal' in components:
+            if "seasonal" in components:
                 if seasonal_period is None:
                     raise ValueError("seasonal_period required for seasonal component")
-                component_indices['seasonal'] = (state_dim, state_dim + seasonal_period - 1)
+                component_indices["seasonal"] = (
+                    state_dim,
+                    state_dim + seasonal_period - 1,
+                )
                 state_dim += seasonal_period - 1
 
             # Cycle component
-            if 'cycle' in components:
+            if "cycle" in components:
                 if cycle_period is None:
-                    self.logger.warning("cycle_period not specified, using default of 40")
+                    self.logger.warning(
+                        "cycle_period not specified, using default of 40"
+                    )
                     cycle_period = 40
-                component_indices['cycle'] = (state_dim, state_dim + 2)
+                component_indices["cycle"] = (state_dim, state_dim + 2)
                 state_dim += 2
 
             # Construct state-space matrices
             F, H, Q, R = self._build_structural_matrices(
-                components, seasonal_period, cycle_period,
-                stochastic_level, stochastic_trend, stochastic_seasonal, stochastic_cycle
+                components,
+                seasonal_period,
+                cycle_period,
+                stochastic_level,
+                stochastic_trend,
+                stochastic_seasonal,
+                stochastic_cycle,
             )
 
             # Add regression component if specified
@@ -695,11 +782,19 @@ class AdvancedTimeSeriesTools:
             P0 = np.eye(state_dim) * 100  # Diffuse prior
 
             # MLE optimization
-            F_opt, H_opt, Q_opt, R_opt = self._optimize_structural_model(y, F, H, Q, R, x0, P0, X)
+            F_opt, H_opt, Q_opt, R_opt = self._optimize_structural_model(
+                y, F, H, Q, R, x0, P0, X
+            )
 
             # Extract components via Kalman smoother
-            states, state_covs, innovations, innovation_covs = self._kalman_filter_forward(y.reshape(-1, 1), F_opt, H_opt, Q_opt, R_opt, x0, P0)
-            smoothed_states, smoothed_covs = self._kalman_smoother_backward(states, state_covs, F_opt, Q_opt)
+            states, state_covs, innovations, innovation_covs = (
+                self._kalman_filter_forward(
+                    y.reshape(-1, 1), F_opt, H_opt, Q_opt, R_opt, x0, P0
+                )
+            )
+            smoothed_states, smoothed_covs = self._kalman_smoother_backward(
+                states, state_covs, F_opt, Q_opt
+            )
 
             # Extract individual components
             extracted_components = {}
@@ -707,7 +802,9 @@ class AdvancedTimeSeriesTools:
                 extracted_components[comp_name] = smoothed_states[:, start_idx:end_idx]
 
             # Compute fitted values and residuals
-            fitted = np.sum([comp.sum(axis=1) for comp in extracted_components.values()], axis=0)
+            fitted = np.sum(
+                [comp.sum(axis=1) for comp in extracted_components.values()], axis=0
+            )
             residuals = y - fitted
 
             # Component variances
@@ -723,48 +820,48 @@ class AdvancedTimeSeriesTools:
             bic = -2 * log_likelihood + np.log(n_obs) * n_params
 
             diagnostics = {
-                'log_likelihood': float(log_likelihood),
-                'aic': float(aic),
-                'bic': float(bic),
-                'residual_std': float(np.std(residuals)),
-                'r_squared': float(1 - np.var(residuals) / np.var(y))
+                "log_likelihood": float(log_likelihood),
+                "aic": float(aic),
+                "bic": float(bic),
+                "residual_std": float(np.std(residuals)),
+                "r_squared": float(1 - np.var(residuals) / np.var(y)),
             }
 
             # Build result
             result = {
-                'components': {},
-                'component_variances': component_variances,
-                'fitted_values': pd.Series(fitted, index=data.index).to_dict(),
-                'residuals': pd.Series(residuals, index=data.index).to_dict(),
-                'diagnostics': diagnostics,
-                'specification': {
-                    'components': components,
-                    'seasonal_period': seasonal_period,
-                    'cycle_period': cycle_period,
-                    'stochastic_components': {
-                        'level': stochastic_level,
-                        'trend': stochastic_trend,
-                        'seasonal': stochastic_seasonal,
-                        'cycle': stochastic_cycle
-                    }
-                }
+                "components": {},
+                "component_variances": component_variances,
+                "fitted_values": pd.Series(fitted, index=data.index).to_dict(),
+                "residuals": pd.Series(residuals, index=data.index).to_dict(),
+                "diagnostics": diagnostics,
+                "specification": {
+                    "components": components,
+                    "seasonal_period": seasonal_period,
+                    "cycle_period": cycle_period,
+                    "stochastic_components": {
+                        "level": stochastic_level,
+                        "trend": stochastic_trend,
+                        "seasonal": stochastic_seasonal,
+                        "cycle": stochastic_cycle,
+                    },
+                },
             }
 
             # Add extracted components to result
             for comp_name, comp_values in extracted_components.items():
                 if comp_values.shape[1] == 1:
-                    result['components'][comp_name] = pd.Series(
-                        comp_values.flatten(),
-                        index=data.index
+                    result["components"][comp_name] = pd.Series(
+                        comp_values.flatten(), index=data.index
                     ).to_dict()
                 else:
                     # For multi-dimensional components (seasonal, cycle)
-                    result['components'][comp_name] = pd.Series(
-                        comp_values.sum(axis=1),
-                        index=data.index
+                    result["components"][comp_name] = pd.Series(
+                        comp_values.sum(axis=1), index=data.index
                     ).to_dict()
 
-            self.logger.info(f"Structural decomposition complete: R²={diagnostics['r_squared']:.3f}")
+            self.logger.info(
+                f"Structural decomposition complete: R²={diagnostics['r_squared']:.3f}"
+            )
             return result
 
         except Exception as e:
@@ -773,14 +870,18 @@ class AdvancedTimeSeriesTools:
 
     # ========== Helper Methods ==========
 
-    def _estimate_kalman_parameters(self, y, state_dim, F0, H0, Q0, R0, x0, max_iter=50):
+    def _estimate_kalman_parameters(
+        self, y, state_dim, F0, H0, Q0, R0, x0, max_iter=50
+    ):
         """Estimate Kalman filter parameters via EM algorithm."""
         F, H, Q, R = F0.copy(), H0.copy(), Q0.copy(), R0.copy()
 
         for _ in range(max_iter):
             # E-step: Run Kalman filter and smoother
             states, covs, _, _ = self._kalman_filter_forward(y, F, H, Q, R, x0)
-            smoothed_states, smoothed_covs = self._kalman_smoother_backward(states, covs, F, Q)
+            smoothed_states, smoothed_covs = self._kalman_smoother_backward(
+                states, covs, F, Q
+            )
 
             # M-step: Update parameters
             # (Simplified - full EM would compute sufficient statistics)
@@ -853,8 +954,12 @@ class AdvancedTimeSeriesTools:
             P_pred = F @ filtered_covs[t] @ F.T + Q
             J = filtered_covs[t] @ F.T @ np.linalg.inv(P_pred)
 
-            smoothed_states[t] = filtered_states[t] + J @ (smoothed_states[t + 1] - F @ filtered_states[t])
-            smoothed_covs[t] = filtered_covs[t] + J @ (smoothed_covs[t + 1] - P_pred) @ J.T
+            smoothed_states[t] = filtered_states[t] + J @ (
+                smoothed_states[t + 1] - F @ filtered_states[t]
+            )
+            smoothed_covs[t] = (
+                filtered_covs[t] + J @ (smoothed_covs[t + 1] - P_pred) @ J.T
+            )
 
         return smoothed_states, smoothed_covs
 
@@ -889,11 +994,11 @@ class AdvancedTimeSeriesTools:
         std_innovations = np.array(std_innovations)
 
         return {
-            'innovation_mean': float(innovations.mean()),
-            'innovation_std': float(innovations.std()),
-            'standardized_innovation_mean': float(std_innovations.mean()),
-            'standardized_innovation_std': float(std_innovations.std()),
-            'ljung_box_p_value': 0.5  # Placeholder
+            "innovation_mean": float(innovations.mean()),
+            "innovation_std": float(innovations.std()),
+            "standardized_innovation_mean": float(std_innovations.mean()),
+            "standardized_innovation_std": float(std_innovations.std()),
+            "ljung_box_p_value": 0.5,  # Placeholder
         }
 
     def _dfm_principal_components(self, X, n_factors):
@@ -952,7 +1057,7 @@ class AdvancedTimeSeriesTools:
 
         # Build lagged matrices
         Y = factors[p:]
-        X = np.hstack([factors[p-i-1:-i-1] for i in range(p)])
+        X = np.hstack([factors[p - i - 1 : -i - 1] for i in range(p)])
 
         # OLS estimation
         coeffs = np.linalg.lstsq(X, Y, rcond=None)[0]
@@ -960,7 +1065,7 @@ class AdvancedTimeSeriesTools:
         cov = np.cov(residuals.T)
 
         # Reshape coefficients
-        ar_coefs = [coeffs[i*n_factors:(i+1)*n_factors] for i in range(p)]
+        ar_coefs = [coeffs[i * n_factors : (i + 1) * n_factors] for i in range(p)]
 
         return ar_coefs, cov
 
@@ -971,18 +1076,29 @@ class AdvancedTimeSeriesTools:
 
         for i in range(n_vars):
             log_lik += -0.5 * n_obs * (np.log(2 * np.pi) + np.log(idio_vars[i]))
-            log_lik += -0.5 * np.sum(residuals[:, i]**2 / idio_vars[i])
+            log_lik += -0.5 * np.sum(residuals[:, i] ** 2 / idio_vars[i])
 
         return log_lik
 
-    def _initialize_markov_params(self, y, X, n_regimes, switching_variance, switching_mean, switching_ar, ar_order):
+    def _initialize_markov_params(
+        self,
+        y,
+        X,
+        n_regimes,
+        switching_variance,
+        switching_mean,
+        switching_ar,
+        ar_order,
+    ):
         """Initialize parameters for Markov-switching model."""
         # Split data into regimes via k-means
         from sklearn.cluster import KMeans
 
         if ar_order > 0:
             # Use lagged values for clustering
-            y_lagged = np.column_stack([y[ar_order-i:-i] for i in range(ar_order, 0, -1)])
+            y_lagged = np.column_stack(
+                [y[ar_order - i : -i] for i in range(ar_order, 0, -1)]
+            )
             y_current = y[ar_order:]
             kmeans = KMeans(n_clusters=n_regimes, random_state=42).fit(y_lagged)
             labels = kmeans.labels_
@@ -999,7 +1115,9 @@ class AdvancedTimeSeriesTools:
 
         # Initialize variances
         if switching_variance:
-            variances = np.array([y_current[labels == i].var() for i in range(n_regimes)])
+            variances = np.array(
+                [y_current[labels == i].var() for i in range(n_regimes)]
+            )
         else:
             variances = np.array([y_current.var()])
 
@@ -1019,10 +1137,10 @@ class AdvancedTimeSeriesTools:
                 ar_coeffs.append(np.zeros(ar_order))
 
         return {
-            'means': means,
-            'variances': variances,
-            'ar_coeffs': ar_coeffs if ar_coeffs else None,
-            'transition_matrix': transition_matrix
+            "means": means,
+            "variances": variances,
+            "ar_coeffs": ar_coeffs if ar_coeffs else None,
+            "transition_matrix": transition_matrix,
         }
 
     def _markov_filter(self, y, X, params, n_regimes):
@@ -1037,7 +1155,7 @@ class AdvancedTimeSeriesTools:
 
         for t in range(1, n_obs):
             # Prediction step
-            predicted_probs[t] = params['transition_matrix'].T @ filtered_probs[t - 1]
+            predicted_probs[t] = params["transition_matrix"].T @ filtered_probs[t - 1]
 
             # Update step (simplified)
             likelihoods = np.ones(n_regimes)
@@ -1061,25 +1179,43 @@ class AdvancedTimeSeriesTools:
 
         return smoothed_probs
 
-    def _markov_m_step(self, y, X, smoothed_probs, joint_probs, n_regimes, switching_variance, switching_mean, switching_ar, ar_order):
+    def _markov_m_step(
+        self,
+        y,
+        X,
+        smoothed_probs,
+        joint_probs,
+        n_regimes,
+        switching_variance,
+        switching_mean,
+        switching_ar,
+        ar_order,
+    ):
         """M-step for Markov-switching model."""
         # Update means
         if switching_mean:
-            means = np.array([
-                np.sum(smoothed_probs[:, i] * y) / smoothed_probs[:, i].sum()
-                for i in range(n_regimes)
-            ])
+            means = np.array(
+                [
+                    np.sum(smoothed_probs[:, i] * y) / smoothed_probs[:, i].sum()
+                    for i in range(n_regimes)
+                ]
+            )
         else:
             means = np.array([np.sum(smoothed_probs * y) / smoothed_probs.sum()])
 
         # Update variances
         if switching_variance:
-            variances = np.array([
-                np.sum(smoothed_probs[:, i] * (y - means[i])**2) / smoothed_probs[:, i].sum()
-                for i in range(n_regimes)
-            ])
+            variances = np.array(
+                [
+                    np.sum(smoothed_probs[:, i] * (y - means[i]) ** 2)
+                    / smoothed_probs[:, i].sum()
+                    for i in range(n_regimes)
+                ]
+            )
         else:
-            variance = np.sum(smoothed_probs * (y - means[0])**2) / smoothed_probs.sum()
+            variance = (
+                np.sum(smoothed_probs * (y - means[0]) ** 2) / smoothed_probs.sum()
+            )
             variances = np.array([variance])
 
         # Update transition matrix
@@ -1088,21 +1224,25 @@ class AdvancedTimeSeriesTools:
             for j in range(n_regimes):
                 numerator = joint_probs[:, i, j].sum()
                 denominator = smoothed_probs[:-1, i].sum()
-                transition_matrix[i, j] = numerator / denominator if denominator > 0 else 1.0 / n_regimes
+                transition_matrix[i, j] = (
+                    numerator / denominator if denominator > 0 else 1.0 / n_regimes
+                )
 
         return {
-            'means': means,
-            'variances': variances,
-            'ar_coeffs': None,
-            'transition_matrix': transition_matrix
+            "means": means,
+            "variances": variances,
+            "ar_coeffs": None,
+            "transition_matrix": transition_matrix,
         }
 
     def _markov_param_diff(self, params1, params2):
         """Compute parameter difference for convergence check."""
         diff = 0.0
-        diff += np.sum((params1['means'] - params2['means'])**2)
-        diff += np.sum((params1['variances'] - params2['variances'])**2)
-        diff += np.sum((params1['transition_matrix'] - params2['transition_matrix'])**2)
+        diff += np.sum((params1["means"] - params2["means"]) ** 2)
+        diff += np.sum((params1["variances"] - params2["variances"]) ** 2)
+        diff += np.sum(
+            (params1["transition_matrix"] - params2["transition_matrix"]) ** 2
+        )
         return np.sqrt(diff)
 
     def _markov_viterbi(self, y, X, params, n_regimes):
@@ -1122,15 +1262,27 @@ class AdvancedTimeSeriesTools:
         for t in range(len(y)):
             regime_liks = np.zeros(n_regimes)
             for i in range(n_regimes):
-                mean = params['means'][i] if len(params['means']) > 1 else params['means'][0]
-                var = params['variances'][i] if len(params['variances']) > 1 else params['variances'][0]
-                regime_liks[i] = -0.5 * (np.log(2 * np.pi * var) + (y[t] - mean)**2 / var)
+                mean = (
+                    params["means"][i]
+                    if len(params["means"]) > 1
+                    else params["means"][0]
+                )
+                var = (
+                    params["variances"][i]
+                    if len(params["variances"]) > 1
+                    else params["variances"][0]
+                )
+                regime_liks[i] = -0.5 * (
+                    np.log(2 * np.pi * var) + (y[t] - mean) ** 2 / var
+                )
 
             log_lik += np.log(np.sum(np.exp(regime_liks) * smoothed_probs[t]))
 
         return log_lik
 
-    def _count_markov_params(self, n_regimes, X, switching_variance, switching_mean, ar_order):
+    def _count_markov_params(
+        self, n_regimes, X, switching_variance, switching_mean, ar_order
+    ):
         """Count number of parameters in Markov-switching model."""
         n_params = n_regimes * (n_regimes - 1)  # Transition matrix
 
@@ -1149,18 +1301,27 @@ class AdvancedTimeSeriesTools:
 
         return n_params
 
-    def _build_structural_matrices(self, components, seasonal_period, cycle_period, stochastic_level, stochastic_trend, stochastic_seasonal, stochastic_cycle):
+    def _build_structural_matrices(
+        self,
+        components,
+        seasonal_period,
+        cycle_period,
+        stochastic_level,
+        stochastic_trend,
+        stochastic_seasonal,
+        stochastic_cycle,
+    ):
         """Build state-space matrices for structural time series model."""
         state_dim = 0
 
         # Count state dimensions
-        if 'level' in components:
+        if "level" in components:
             state_dim += 1
-        if 'trend' in components:
+        if "trend" in components:
             state_dim += 1
-        if 'seasonal' in components:
+        if "seasonal" in components:
             state_dim += seasonal_period - 1
-        if 'cycle' in components:
+        if "cycle" in components:
             state_dim += 2
 
         # Initialize matrices
@@ -1173,15 +1334,15 @@ class AdvancedTimeSeriesTools:
         idx = 0
 
         # Level
-        if 'level' in components:
+        if "level" in components:
             H[0, idx] = 1
             if stochastic_level:
                 Q[idx, idx] = 0.1
             idx += 1
 
         # Trend
-        if 'trend' in components:
-            if 'level' in components:
+        if "trend" in components:
+            if "level" in components:
                 F[idx - 1, idx] = 1  # Level += trend
             H[0, idx] = 1
             if stochastic_trend:
@@ -1189,7 +1350,7 @@ class AdvancedTimeSeriesTools:
             idx += 1
 
         # Seasonal
-        if 'seasonal' in components:
+        if "seasonal" in components:
             for i in range(seasonal_period - 1):
                 H[0, idx] = 1 if i == 0 else 0
                 if i < seasonal_period - 2:
@@ -1199,16 +1360,18 @@ class AdvancedTimeSeriesTools:
                 idx += 1
 
         # Cycle
-        if 'cycle' in components:
+        if "cycle" in components:
             rho = 0.9
             lambda_c = 2 * np.pi / cycle_period
-            F[idx:idx+2, idx:idx+2] = rho * np.array([
-                [np.cos(lambda_c), np.sin(lambda_c)],
-                [-np.sin(lambda_c), np.cos(lambda_c)]
-            ])
+            F[idx : idx + 2, idx : idx + 2] = rho * np.array(
+                [
+                    [np.cos(lambda_c), np.sin(lambda_c)],
+                    [-np.sin(lambda_c), np.cos(lambda_c)],
+                ]
+            )
             H[0, idx] = 1
             if stochastic_cycle:
-                Q[idx:idx+2, idx:idx+2] = np.eye(2) * 0.01
+                Q[idx : idx + 2, idx : idx + 2] = np.eye(2) * 0.01
             idx += 2
 
         return F, H, Q, R

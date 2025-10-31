@@ -8207,12 +8207,8 @@ class MCMCDiagnosticsParams(BaseModel):
     samples: List[List[float]] = Field(
         ..., min_length=1000, description="MCMC samples from all chains"
     )
-    parameter_names: List[str] = Field(
-        ..., min_length=1, description="Parameter names"
-    )
-    n_chains: int = Field(
-        default=4, ge=2, le=8, description="Number of chains"
-    )
+    parameter_names: List[str] = Field(..., min_length=1, description="Parameter names")
+    n_chains: int = Field(default=4, ge=2, le=8, description="Number of chains")
     diagnostics: List[Literal["rhat", "neff", "geweke", "autocorr"]] = Field(
         default=["rhat", "neff"], description="Diagnostics to compute"
     )
@@ -8231,7 +8227,10 @@ class PosteriorPredictiveCheckParams(BaseModel):
         ..., description="Model specification for generating predictions"
     )
     n_replications: int = Field(
-        default=1000, ge=100, le=10000, description="Number of posterior predictive replications"
+        default=1000,
+        ge=100,
+        le=10000,
+        description="Number of posterior predictive replications",
     )
     test_statistics: List[str] = Field(
         default=["mean", "std", "min", "max"], description="Test statistics to compute"
@@ -8266,9 +8265,7 @@ class InstrumentalVariablesParams(BaseModel):
     data: List[Dict[str, Any]] = Field(
         ..., min_length=30, description="Data as list of dictionaries"
     )
-    formula: str = Field(
-        ..., min_length=5, description="Structural equation formula"
-    )
+    formula: str = Field(..., min_length=5, description="Structural equation formula")
     instruments: List[str] = Field(
         ..., min_length=1, description="List of instrument variable names"
     )
@@ -8286,17 +8283,13 @@ class RegressionDiscontinuityParams(BaseModel):
     data: List[Dict[str, Any]] = Field(
         ..., min_length=50, description="Data with running variable"
     )
-    outcome_var: str = Field(
-        ..., description="Outcome variable name"
-    )
-    running_var: str = Field(
-        ..., description="Running/forcing variable name"
-    )
-    cutoff: float = Field(
-        ..., description="Treatment assignment cutoff"
-    )
+    outcome_var: str = Field(..., description="Outcome variable name")
+    running_var: str = Field(..., description="Running/forcing variable name")
+    cutoff: float = Field(..., description="Treatment assignment cutoff")
     bandwidth: Optional[float] = Field(
-        default=None, ge=0.001, description="Bandwidth for local estimation (auto if None)"
+        default=None,
+        ge=0.001,
+        description="Bandwidth for local estimation (auto if None)",
     )
     polynomial_order: int = Field(
         default=1, ge=1, le=4, description="Polynomial order for local regression"
@@ -8312,18 +8305,10 @@ class DifferenceInDifferencesParams(BaseModel):
     data: List[Dict[str, Any]] = Field(
         ..., min_length=40, description="Panel data with treatment and control groups"
     )
-    outcome_var: str = Field(
-        ..., description="Outcome variable name"
-    )
-    treatment_var: str = Field(
-        ..., description="Treatment indicator variable"
-    )
-    time_var: str = Field(
-        ..., description="Time period variable"
-    )
-    group_var: str = Field(
-        ..., description="Group identifier variable"
-    )
+    outcome_var: str = Field(..., description="Outcome variable name")
+    treatment_var: str = Field(..., description="Treatment indicator variable")
+    time_var: str = Field(..., description="Time period variable")
+    group_var: str = Field(..., description="Group identifier variable")
     covariates: Optional[List[str]] = Field(
         default=None, description="Control variables"
     )
@@ -8338,18 +8323,10 @@ class SyntheticControlParams(BaseModel):
     data: List[Dict[str, Any]] = Field(
         ..., min_length=50, description="Panel data for treated and control units"
     )
-    outcome_var: str = Field(
-        ..., description="Outcome variable name"
-    )
-    unit_var: str = Field(
-        ..., description="Unit identifier variable"
-    )
-    time_var: str = Field(
-        ..., description="Time period variable"
-    )
-    treated_unit: Union[str, int] = Field(
-        ..., description="ID of treated unit"
-    )
+    outcome_var: str = Field(..., description="Outcome variable name")
+    unit_var: str = Field(..., description="Unit identifier variable")
+    time_var: str = Field(..., description="Time period variable")
+    treated_unit: Union[str, int] = Field(..., description="ID of treated unit")
     treatment_time: Union[str, int] = Field(
         ..., description="Time of treatment intervention"
     )
@@ -8364,12 +8341,8 @@ class PropensityScoreMatchingParams(BaseModel):
     data: List[Dict[str, Any]] = Field(
         ..., min_length=50, description="Data with treatment and control observations"
     )
-    treatment_var: str = Field(
-        ..., description="Treatment indicator variable (binary)"
-    )
-    outcome_var: str = Field(
-        ..., description="Outcome variable name"
-    )
+    treatment_var: str = Field(..., description="Treatment indicator variable (binary)")
+    outcome_var: str = Field(..., description="Outcome variable name")
     covariates: List[str] = Field(
         ..., min_length=1, description="Variables for propensity score model"
     )
@@ -8390,20 +8363,17 @@ class MediationAnalysisParams(BaseModel):
     data: List[Dict[str, Any]] = Field(
         ..., min_length=30, description="Data with treatment, mediator, and outcome"
     )
-    treatment_var: str = Field(
-        ..., description="Treatment variable name"
-    )
-    mediator_var: str = Field(
-        ..., description="Mediator variable name"
-    )
-    outcome_var: str = Field(
-        ..., description="Outcome variable name"
-    )
+    treatment_var: str = Field(..., description="Treatment variable name")
+    mediator_var: str = Field(..., description="Mediator variable name")
+    outcome_var: str = Field(..., description="Outcome variable name")
     covariates: Optional[List[str]] = Field(
         default=None, description="Confounding variables"
     )
     n_bootstrap: int = Field(
-        default=1000, ge=100, le=10000, description="Bootstrap replications for inference"
+        default=1000,
+        ge=100,
+        le=10000,
+        description="Bootstrap replications for inference",
     )
 
 
@@ -8415,12 +8385,8 @@ class MediationAnalysisParams(BaseModel):
 class KaplanMeierParams(BaseModel):
     """Parameters for Kaplan-Meier survival estimation."""
 
-    data: List[Dict[str, Any]] = Field(
-        ..., min_length=20, description="Survival data"
-    )
-    duration_var: str = Field(
-        ..., description="Duration/time variable name"
-    )
+    data: List[Dict[str, Any]] = Field(..., min_length=20, description="Survival data")
+    duration_var: str = Field(..., description="Duration/time variable name")
     event_var: str = Field(
         ..., description="Event indicator variable (1=event, 0=censored)"
     )
@@ -8438,38 +8404,24 @@ class CoxProportionalHazardsParams(BaseModel):
     data: List[Dict[str, Any]] = Field(
         ..., min_length=30, description="Survival data with covariates"
     )
-    duration_var: str = Field(
-        ..., description="Duration/time variable name"
-    )
-    event_var: str = Field(
-        ..., description="Event indicator variable"
-    )
+    duration_var: str = Field(..., description="Duration/time variable name")
+    event_var: str = Field(..., description="Event indicator variable")
     covariates: List[str] = Field(
         ..., min_length=1, description="Covariate variable names"
     )
     strata: Optional[List[str]] = Field(
         default=None, description="Stratification variables"
     )
-    robust: bool = Field(
-        default=True, description="Use robust standard errors"
-    )
+    robust: bool = Field(default=True, description="Use robust standard errors")
 
 
 class ParametricSurvivalParams(BaseModel):
     """Parameters for parametric survival models."""
 
-    data: List[Dict[str, Any]] = Field(
-        ..., min_length=30, description="Survival data"
-    )
-    duration_var: str = Field(
-        ..., description="Duration variable name"
-    )
-    event_var: str = Field(
-        ..., description="Event indicator variable"
-    )
-    covariates: List[str] = Field(
-        ..., min_length=1, description="Covariate variables"
-    )
+    data: List[Dict[str, Any]] = Field(..., min_length=30, description="Survival data")
+    duration_var: str = Field(..., description="Duration variable name")
+    event_var: str = Field(..., description="Event indicator variable")
+    covariates: List[str] = Field(..., min_length=1, description="Covariate variables")
     distribution: Literal["weibull", "exponential", "lognormal", "loglogistic"] = Field(
         default="weibull", description="Assumed survival time distribution"
     )
@@ -8481,9 +8433,7 @@ class CompetingRisksParams(BaseModel):
     data: List[Dict[str, Any]] = Field(
         ..., min_length=30, description="Data with multiple event types"
     )
-    duration_var: str = Field(
-        ..., description="Duration variable name"
-    )
+    duration_var: str = Field(..., description="Duration variable name")
     event_type_var: str = Field(
         ..., description="Event type variable (0=censored, 1,2,...=event types)"
     )
@@ -8501,15 +8451,9 @@ class RecurrentEventsParams(BaseModel):
     data: List[Dict[str, Any]] = Field(
         ..., min_length=30, description="Data with repeated events per subject"
     )
-    subject_var: str = Field(
-        ..., description="Subject/ID variable name"
-    )
-    time_var: str = Field(
-        ..., description="Event time variable"
-    )
-    event_var: str = Field(
-        ..., description="Event indicator"
-    )
+    subject_var: str = Field(..., description="Subject/ID variable name")
+    time_var: str = Field(..., description="Event time variable")
+    event_var: str = Field(..., description="Event indicator")
     covariates: Optional[List[str]] = Field(
         default=None, description="Covariate variables"
     )
@@ -8524,18 +8468,10 @@ class TimeVaryingCovariatesParams(BaseModel):
     data: List[Dict[str, Any]] = Field(
         ..., min_length=30, description="Data in counting process format"
     )
-    start_var: str = Field(
-        ..., description="Interval start time variable"
-    )
-    stop_var: str = Field(
-        ..., description="Interval stop time variable"
-    )
-    event_var: str = Field(
-        ..., description="Event indicator at stop time"
-    )
-    subject_var: str = Field(
-        ..., description="Subject identifier variable"
-    )
+    start_var: str = Field(..., description="Interval start time variable")
+    stop_var: str = Field(..., description="Interval stop time variable")
+    event_var: str = Field(..., description="Event indicator at stop time")
+    subject_var: str = Field(..., description="Subject identifier variable")
     covariates: List[str] = Field(
         ..., min_length=1, description="Time-varying covariate names"
     )
@@ -8561,9 +8497,7 @@ class KalmanFilterParams(BaseModel):
     estimate_parameters: bool = Field(
         default=True, description="Estimate state-space matrices via MLE"
     )
-    smoother: bool = Field(
-        default=True, description="Apply Kalman smoother"
-    )
+    smoother: bool = Field(default=True, description="Apply Kalman smoother")
     forecast_steps: int = Field(
         default=0, ge=0, le=100, description="Number of forecast steps"
     )
@@ -8578,9 +8512,7 @@ class DynamicFactorModelParams(BaseModel):
     variables: List[str] = Field(
         ..., min_length=2, description="Variables for factor extraction"
     )
-    n_factors: int = Field(
-        ..., ge=1, le=10, description="Number of latent factors"
-    )
+    n_factors: int = Field(..., ge=1, le=10, description="Number of latent factors")
     factor_order: int = Field(
         default=1, ge=0, le=4, description="AR order for factor dynamics"
     )
@@ -8595,9 +8527,7 @@ class MarkovSwitchingModelParams(BaseModel):
     data: List[Dict[str, Any]] = Field(
         ..., min_length=50, description="Time series data"
     )
-    dependent_var: str = Field(
-        ..., description="Dependent variable name"
-    )
+    dependent_var: str = Field(..., description="Dependent variable name")
     independent_vars: Optional[List[str]] = Field(
         default=None, description="Independent variable names"
     )
@@ -8618,11 +8548,9 @@ class StructuralTimeSeriesParams(BaseModel):
     data: List[Dict[str, Any]] = Field(
         ..., min_length=30, description="Time series data"
     )
-    variable: str = Field(
-        ..., description="Variable to decompose"
-    )
-    components: List[Literal["level", "trend", "seasonal", "cycle", "irregular"]] = Field(
-        ..., min_length=1, description="Structural components to include"
+    variable: str = Field(..., description="Variable to decompose")
+    components: List[Literal["level", "trend", "seasonal", "cycle", "irregular"]] = (
+        Field(..., min_length=1, description="Structural components to include")
     )
     seasonal_period: Optional[int] = Field(
         default=None, ge=2, le=365, description="Period for seasonal component"
@@ -8643,21 +8571,13 @@ class StructuralTimeSeriesParams(BaseModel):
 class AutoDetectEconometricMethodParams(BaseModel):
     """Parameters for automatic econometric method detection."""
 
-    data: List[Dict[str, Any]] = Field(
-        ..., min_length=20, description="Input dataset"
-    )
-    dependent_var: str = Field(
-        ..., description="Dependent variable name"
-    )
+    data: List[Dict[str, Any]] = Field(..., min_length=20, description="Input dataset")
+    dependent_var: str = Field(..., description="Dependent variable name")
     independent_vars: Optional[List[str]] = Field(
         default=None, description="Independent variable names"
     )
-    panel_id: Optional[str] = Field(
-        default=None, description="Panel/group identifier"
-    )
-    time_var: Optional[str] = Field(
-        default=None, description="Time variable"
-    )
+    panel_id: Optional[str] = Field(default=None, description="Panel/group identifier")
+    time_var: Optional[str] = Field(default=None, description="Time variable")
     research_question: Optional[str] = Field(
         default=None, max_length=500, description="Research question description"
     )
@@ -8666,27 +8586,17 @@ class AutoDetectEconometricMethodParams(BaseModel):
 class AutoAnalyzeEconometricDataParams(BaseModel):
     """Parameters for comprehensive automated econometric analysis."""
 
-    data: List[Dict[str, Any]] = Field(
-        ..., min_length=20, description="Input dataset"
-    )
-    dependent_var: str = Field(
-        ..., description="Dependent variable name"
-    )
+    data: List[Dict[str, Any]] = Field(..., min_length=20, description="Input dataset")
+    dependent_var: str = Field(..., description="Dependent variable name")
     independent_vars: Optional[List[str]] = Field(
         default=None, description="Independent variable names"
     )
-    panel_id: Optional[str] = Field(
-        default=None, description="Panel identifier"
-    )
-    time_var: Optional[str] = Field(
-        default=None, description="Time variable"
-    )
+    panel_id: Optional[str] = Field(default=None, description="Panel identifier")
+    time_var: Optional[str] = Field(default=None, description="Time variable")
     methods: Optional[List[str]] = Field(
         default=None, description="Specific methods to run (auto-detect if None)"
     )
-    include_robustness: bool = Field(
-        default=True, description="Run robustness checks"
-    )
+    include_robustness: bool = Field(default=True, description="Run robustness checks")
 
 
 class CompareEconometricMethodsParams(BaseModel):
@@ -8712,9 +8622,7 @@ class EconometricModelAveragingParams(BaseModel):
     data: List[Dict[str, Any]] = Field(
         ..., min_length=20, description="Original data for validation"
     )
-    dependent_var: str = Field(
-        ..., description="Dependent variable name"
-    )
+    dependent_var: str = Field(..., description="Dependent variable name")
     averaging_method: Literal["aic", "bic", "mse", "equal"] = Field(
         default="aic", description="Weighting scheme for averaging"
     )
