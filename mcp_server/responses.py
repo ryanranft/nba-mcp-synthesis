@@ -1119,3 +1119,503 @@ class FirstDifferenceResult(BaseModel):
     recommendations: List[str] = Field(description="Recommended next steps")
     success: bool = Field(default=True, description="Success status")
     error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+# ============================================================================
+# Phase 10A - Agent 8: Advanced Econometrics Result Classes
+# Module 3: Bayesian Analysis (7 results)
+# Module 4A: Causal Inference (6 results)
+# Module 4B: Survival Analysis (6 results)
+# Module 4C: Advanced Time Series (4 results)
+# Module 4D: Econometric Suite (4 results)
+# Total: 27 new result classes
+# ============================================================================
+
+
+# ============================================================================
+# Module 3: Bayesian Analysis Result Classes
+# ============================================================================
+
+
+class BayesianLinearRegressionResult(BaseModel):
+    """Response for Bayesian linear regression."""
+
+    posterior_mean: Dict[str, float] = Field(description="Posterior mean coefficients")
+    posterior_std: Dict[str, float] = Field(description="Posterior standard deviations")
+    credible_intervals: Dict[str, Dict[str, float]] = Field(description="Credible intervals (lower, upper)")
+    convergence_diagnostics: Dict[str, Any] = Field(description="MCMC convergence diagnostics")
+    model_fit: Dict[str, float] = Field(description="Model fit statistics (marginal likelihood, DIC, etc.)")
+    n_samples: int = Field(description="Number of posterior samples drawn")
+    prior_specification: Dict[str, Any] = Field(description="Prior distribution specifications used")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class BayesianHierarchicalModelResult(BaseModel):
+    """Response for Bayesian hierarchical/multilevel model."""
+
+    fixed_effects: Dict[str, float] = Field(description="Fixed effect posterior means")
+    fixed_effects_std: Dict[str, float] = Field(description="Fixed effect posterior std devs")
+    random_effects: Dict[str, Dict[str, float]] = Field(description="Random effects by group")
+    group_variances: Dict[str, float] = Field(description="Between-group variance components")
+    residual_variance: float = Field(description="Within-group residual variance")
+    credible_intervals: Dict[str, Dict[str, float]] = Field(description="Credible intervals")
+    convergence_diagnostics: Dict[str, Any] = Field(description="Rhat, n_eff diagnostics")
+    n_samples: int = Field(description="Number of MCMC samples")
+    n_chains: int = Field(description="Number of parallel chains")
+    n_groups: int = Field(description="Number of groups/clusters")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class BayesianModelComparisonResult(BaseModel):
+    """Response for Bayesian model comparison."""
+
+    model_weights: Dict[str, float] = Field(description="Model posterior probabilities")
+    comparison_table: List[Dict[str, Any]] = Field(description="Model comparison statistics")
+    best_model: str = Field(description="Model with highest posterior probability")
+    waic_scores: Optional[Dict[str, float]] = Field(default=None, description="WAIC scores by model")
+    loo_scores: Optional[Dict[str, float]] = Field(default=None, description="LOO-CV scores by model")
+    bayes_factors: Optional[Dict[str, float]] = Field(default=None, description="Bayes factors relative to best model")
+    n_models: int = Field(description="Number of models compared")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class BayesianCredibleIntervalsResult(BaseModel):
+    """Response for Bayesian credible intervals computation."""
+
+    credible_intervals: Dict[str, Dict[str, float]] = Field(description="Intervals by parameter (lower, upper)")
+    interval_type: str = Field(description="Type of interval (hdi or equal_tailed)")
+    credible_level: float = Field(description="Credibility level (e.g., 0.95)")
+    posterior_means: Dict[str, float] = Field(description="Posterior mean for each parameter")
+    posterior_medians: Dict[str, float] = Field(description="Posterior median for each parameter")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class MCMCDiagnosticsResult(BaseModel):
+    """Response for MCMC convergence diagnostics."""
+
+    rhat_values: Dict[str, float] = Field(description="Gelman-Rubin statistics by parameter")
+    n_eff_values: Dict[str, float] = Field(description="Effective sample sizes by parameter")
+    autocorrelation: Optional[Dict[str, List[float]]] = Field(default=None, description="Autocorrelation by parameter")
+    geweke_scores: Optional[Dict[str, float]] = Field(default=None, description="Geweke convergence test scores")
+    all_converged: bool = Field(description="Whether all parameters converged (Rhat < 1.1)")
+    convergence_summary: str = Field(description="Summary of convergence status")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class PosteriorPredictiveCheckResult(BaseModel):
+    """Response for posterior predictive checks."""
+
+    observed_statistics: Dict[str, float] = Field(description="Test statistics from observed data")
+    replicated_statistics: Dict[str, List[float]] = Field(description="Test statistics from posterior predictive replications")
+    p_values: Dict[str, float] = Field(description="Bayesian p-values for each test statistic")
+    test_passed: Dict[str, bool] = Field(description="Whether each test indicates good fit")
+    overall_fit_assessment: str = Field(description="Overall model fit assessment")
+    n_replications: int = Field(description="Number of posterior predictive replications")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class BayesianUpdatingResult(BaseModel):
+    """Response for sequential Bayesian updating."""
+
+    updated_posterior: Dict[str, Any] = Field(description="Updated posterior distribution parameters")
+    posterior_mean: Dict[str, float] = Field(description="Updated posterior means")
+    posterior_std: Dict[str, float] = Field(description="Updated posterior standard deviations")
+    prior_mean: Dict[str, float] = Field(description="Prior means before update")
+    information_gain: Dict[str, float] = Field(description="KL divergence from prior to posterior")
+    n_samples: int = Field(description="Number of posterior samples")
+    n_data_points: int = Field(description="Number of new data points used")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+# ============================================================================
+# Module 4A: Causal Inference Result Classes
+# ============================================================================
+
+
+class InstrumentalVariablesResult(BaseModel):
+    """Response for instrumental variables estimation."""
+
+    coefficients: Dict[str, float] = Field(description="Second-stage coefficient estimates")
+    std_errors: Dict[str, float] = Field(description="Standard errors")
+    t_stats: Dict[str, float] = Field(description="t-statistics")
+    p_values: Dict[str, float] = Field(description="p-values")
+    first_stage_fstat: float = Field(description="First-stage F-statistic")
+    weak_instruments: bool = Field(description="Whether instruments appear weak (F < 10)")
+    overid_test_stat: Optional[float] = Field(default=None, description="Overidentification test statistic")
+    overid_pvalue: Optional[float] = Field(default=None, description="Overidentification test p-value")
+    endogeneity_test_stat: Optional[float] = Field(default=None, description="Durbin-Wu-Hausman endogeneity test statistic")
+    endogeneity_pvalue: Optional[float] = Field(default=None, description="Endogeneity test p-value")
+    n_instruments: int = Field(description="Number of instruments used")
+    method: str = Field(description="Estimation method (2sls, liml, gmm)")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class RegressionDiscontinuityResult(BaseModel):
+    """Response for regression discontinuity design."""
+
+    treatment_effect: float = Field(description="Estimated treatment effect at cutoff")
+    std_error: float = Field(description="Standard error of treatment effect")
+    t_stat: float = Field(description="t-statistic")
+    p_value: float = Field(description="p-value")
+    confidence_interval: Tuple[float, float] = Field(description="Confidence interval (lower, upper)")
+    bandwidth: float = Field(description="Bandwidth used for local estimation")
+    n_obs_left: int = Field(description="Observations below cutoff")
+    n_obs_right: int = Field(description="Observations above cutoff")
+    polynomial_order: int = Field(description="Polynomial order used")
+    continuity_tests: Dict[str, float] = Field(description="Tests for continuity of covariates at cutoff")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class DifferenceInDifferencesResult(BaseModel):
+    """Response for difference-in-differences estimation."""
+
+    treatment_effect: float = Field(description="Estimated average treatment effect on treated (ATT)")
+    std_error: float = Field(description="Standard error (clustered if applicable)")
+    t_stat: float = Field(description="t-statistic")
+    p_value: float = Field(description="p-value")
+    confidence_interval: Tuple[float, float] = Field(description="Confidence interval")
+    pre_treatment_trend: Optional[float] = Field(default=None, description="Pre-treatment trend coefficient")
+    parallel_trends_test_pvalue: Optional[float] = Field(default=None, description="Parallel trends test p-value")
+    parallel_trends_satisfied: bool = Field(description="Whether parallel trends assumption appears satisfied")
+    n_treated: int = Field(description="Number of treated units")
+    n_control: int = Field(description="Number of control units")
+    n_pre_periods: int = Field(description="Number of pre-treatment periods")
+    n_post_periods: int = Field(description="Number of post-treatment periods")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class SyntheticControlResult(BaseModel):
+    """Response for synthetic control method."""
+
+    treatment_effect: float = Field(description="Average treatment effect on treated unit")
+    time_varying_effects: Dict[str, float] = Field(description="Treatment effect by time period")
+    synthetic_weights: Dict[str, float] = Field(description="Weights on donor units")
+    pre_treatment_rmse: float = Field(description="RMSE in pre-treatment fit")
+    placebo_pvalue: Optional[float] = Field(default=None, description="P-value from placebo tests")
+    n_donors: int = Field(description="Number of donor units used")
+    n_pre_periods: int = Field(description="Number of pre-treatment periods")
+    n_post_periods: int = Field(description="Number of post-treatment periods")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class PropensityScoreMatchingResult(BaseModel):
+    """Response for propensity score matching."""
+
+    treatment_effect: float = Field(description="Average treatment effect on treated (ATT)")
+    std_error: float = Field(description="Standard error")
+    t_stat: float = Field(description="t-statistic")
+    p_value: float = Field(description="p-value")
+    confidence_interval: Tuple[float, float] = Field(description="Confidence interval")
+    n_matched: int = Field(description="Number of successfully matched treated units")
+    n_unmatched: int = Field(description="Number of unmatched treated units")
+    balance_statistics: Dict[str, Dict[str, float]] = Field(description="Standardized mean differences before/after matching")
+    common_support_violated: bool = Field(description="Whether common support assumption violated")
+    matching_method: str = Field(description="Matching method used")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class MediationAnalysisResult(BaseModel):
+    """Response for causal mediation analysis."""
+
+    direct_effect: float = Field(description="Average direct effect (ADE)")
+    indirect_effect: float = Field(description="Average causal mediation effect (ACME)")
+    total_effect: float = Field(description="Total effect")
+    proportion_mediated: float = Field(description="Proportion of effect mediated")
+    direct_effect_ci: Tuple[float, float] = Field(description="Direct effect confidence interval")
+    indirect_effect_ci: Tuple[float, float] = Field(description="Indirect effect confidence interval")
+    n_bootstrap: int = Field(description="Number of bootstrap replications")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+# ============================================================================
+# Module 4B: Survival Analysis Result Classes
+# ============================================================================
+
+
+class KaplanMeierResult(BaseModel):
+    """Response for Kaplan-Meier survival estimation."""
+
+    survival_function: Dict[str, float] = Field(description="Survival probabilities by time")
+    median_survival: Optional[float] = Field(default=None, description="Median survival time")
+    confidence_intervals: Dict[str, Tuple[float, float]] = Field(description="CI for survival function")
+    n_events: int = Field(description="Number of events observed")
+    n_censored: int = Field(description="Number of censored observations")
+    n_at_risk: Dict[str, int] = Field(description="Number at risk by time")
+    log_rank_test_stat: Optional[float] = Field(default=None, description="Log-rank test statistic (if groups compared)")
+    log_rank_pvalue: Optional[float] = Field(default=None, description="Log-rank test p-value")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class CoxProportionalHazardsResult(BaseModel):
+    """Response for Cox proportional hazards regression."""
+
+    hazard_ratios: Dict[str, float] = Field(description="Hazard ratios (exp(coefficients))")
+    coefficients: Dict[str, float] = Field(description="Log hazard ratios")
+    std_errors: Dict[str, float] = Field(description="Standard errors")
+    z_stats: Dict[str, float] = Field(description="z-statistics")
+    p_values: Dict[str, float] = Field(description="p-values")
+    confidence_intervals: Dict[str, Tuple[float, float]] = Field(description="Confidence intervals for hazard ratios")
+    concordance_index: float = Field(description="Concordance index (C-index)")
+    log_likelihood: float = Field(description="Partial log-likelihood")
+    aic: float = Field(description="Akaike Information Criterion")
+    proportional_hazards_test_pvalue: Optional[float] = Field(default=None, description="Test for proportional hazards assumption")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class ParametricSurvivalResult(BaseModel):
+    """Response for parametric survival models."""
+
+    coefficients: Dict[str, float] = Field(description="Regression coefficients")
+    std_errors: Dict[str, float] = Field(description="Standard errors")
+    z_stats: Dict[str, float] = Field(description="z-statistics")
+    p_values: Dict[str, float] = Field(description="p-values")
+    shape_parameter: Optional[float] = Field(default=None, description="Shape parameter (e.g., Weibull)")
+    scale_parameter: Optional[float] = Field(default=None, description="Scale parameter")
+    distribution: str = Field(description="Assumed distribution (weibull, exponential, etc.)")
+    log_likelihood: float = Field(description="Log-likelihood")
+    aic: float = Field(description="AIC")
+    bic: float = Field(description="BIC")
+    median_survival: Optional[float] = Field(default=None, description="Median survival time")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class CompetingRisksResult(BaseModel):
+    """Response for competing risks analysis."""
+
+    cumulative_incidence: Dict[str, Dict[str, float]] = Field(description="CIF by event type and time")
+    subdistribution_hazards: Dict[str, float] = Field(description="Subdistribution hazard ratios")
+    std_errors: Dict[str, float] = Field(description="Standard errors")
+    z_stats: Dict[str, float] = Field(description="z-statistics")
+    p_values: Dict[str, float] = Field(description="p-values")
+    event_of_interest: int = Field(description="Event type analyzed")
+    n_events_by_type: Dict[str, int] = Field(description="Number of events by type")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class RecurrentEventsResult(BaseModel):
+    """Response for recurrent events analysis."""
+
+    coefficients: Dict[str, float] = Field(description="Regression coefficients")
+    hazard_ratios: Dict[str, float] = Field(description="Hazard ratios")
+    std_errors: Dict[str, float] = Field(description="Standard errors (robust)")
+    z_stats: Dict[str, float] = Field(description="z-statistics")
+    p_values: Dict[str, float] = Field(description="p-values")
+    model_type: str = Field(description="Recurrent event model (pwp, ag, wlw)")
+    total_events: int = Field(description="Total number of events")
+    subjects_with_events: int = Field(description="Number of subjects with at least one event")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class TimeVaryingCovariatesResult(BaseModel):
+    """Response for survival models with time-varying covariates."""
+
+    hazard_ratios: Dict[str, float] = Field(description="Hazard ratios for time-varying covariates")
+    coefficients: Dict[str, float] = Field(description="Log hazard ratios")
+    std_errors: Dict[str, float] = Field(description="Standard errors")
+    z_stats: Dict[str, float] = Field(description="z-statistics")
+    p_values: Dict[str, float] = Field(description="p-values")
+    time_varying_vars: List[str] = Field(description="List of time-varying covariate names")
+    n_intervals: int = Field(description="Number of time intervals in counting process format")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+# ============================================================================
+# Module 4C: Advanced Time Series Result Classes
+# ============================================================================
+
+
+class KalmanFilterResult(BaseModel):
+    """Response for Kalman filter state-space estimation."""
+
+    filtered_states: List[Dict[str, float]] = Field(description="Filtered state estimates by time")
+    smoothed_states: Optional[List[Dict[str, float]]] = Field(default=None, description="Smoothed state estimates (if smoother applied)")
+    state_covariances: List[List[List[float]]] = Field(description="State covariance matrices by time")
+    innovations: List[Dict[str, float]] = Field(description="One-step-ahead prediction errors")
+    log_likelihood: float = Field(description="Model log-likelihood")
+    aic: float = Field(description="AIC")
+    bic: float = Field(description="BIC")
+    parameters: Dict[str, Any] = Field(description="Estimated state-space matrices")
+    forecasts: Optional[List[Dict[str, float]]] = Field(default=None, description="Out-of-sample forecasts")
+    diagnostics: Dict[str, Any] = Field(description="Innovation statistics and diagnostics")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class DynamicFactorModelResult(BaseModel):
+    """Response for dynamic factor model."""
+
+    factors: List[Dict[str, float]] = Field(description="Extracted latent factors by time")
+    loadings: Dict[str, Dict[str, float]] = Field(description="Factor loadings by variable")
+    factor_covariance: List[List[float]] = Field(description="Factor innovation covariance matrix")
+    idiosyncratic_variances: Dict[str, float] = Field(description="Variable-specific error variances")
+    variance_explained: Dict[str, float] = Field(description="Variance explained by each factor")
+    total_variance_explained: float = Field(description="Total variance explained by all factors")
+    factor_ar_coefficients: List[List[List[float]]] = Field(description="AR coefficient matrices for factor dynamics")
+    method: str = Field(description="Estimation method (ml, pc, 2step)")
+    fit_statistics: Dict[str, float] = Field(description="Log-likelihood, AIC, BIC")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class MarkovSwitchingModelResult(BaseModel):
+    """Response for Markov-switching regression model."""
+
+    regime_probabilities: List[Dict[str, float]] = Field(description="Smoothed regime probabilities by time")
+    regime_sequence: Dict[str, str] = Field(description="Most likely regime at each time (Viterbi path)")
+    transition_matrix: Dict[str, Dict[str, float]] = Field(description="Regime transition probability matrix")
+    expected_durations: Dict[str, float] = Field(description="Expected duration in each regime")
+    regime_parameters: Dict[str, Dict[str, Any]] = Field(description="Parameters for each regime (mean, variance, etc.)")
+    regime_statistics: Dict[str, Dict[str, Any]] = Field(description="Summary statistics by regime")
+    fit_statistics: Dict[str, float] = Field(description="Log-likelihood, AIC, BIC")
+    specification: Dict[str, Any] = Field(description="Model specification")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class StructuralTimeSeriesResult(BaseModel):
+    """Response for structural time series decomposition."""
+
+    components: Dict[str, Dict[str, float]] = Field(description="Extracted components (level, trend, seasonal, cycle) by time")
+    component_variances: Dict[str, float] = Field(description="Variance of each component's innovations")
+    fitted_values: Dict[str, float] = Field(description="Model-fitted values by time")
+    residuals: Dict[str, float] = Field(description="Irregular component (residuals) by time")
+    diagnostics: Dict[str, float] = Field(description="Model fit diagnostics (R², AIC, BIC)")
+    specification: Dict[str, Any] = Field(description="Model specification (components, periods, stochastic flags)")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+# ============================================================================
+# Module 4D: Econometric Suite Result Classes
+# ============================================================================
+
+
+class AutoDetectEconometricMethodResult(BaseModel):
+    """Response for automatic econometric method detection."""
+
+    recommended_method: str = Field(description="Primary recommended method")
+    alternative_methods: List[str] = Field(description="Alternative methods to consider")
+    method_rationale: str = Field(description="Explanation for recommendation")
+    confidence_score: float = Field(description="Confidence in recommendation (0-1)")
+    data_diagnostics: Dict[str, Any] = Field(description="Detected data characteristics")
+    implementation_guidance: Dict[str, Any] = Field(description="How to use the recommended method")
+    prerequisite_checks: List[Dict[str, str]] = Field(description="Required validation steps")
+    method_comparison: Dict[str, str] = Field(description="Explanation of method suitability")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class AutoAnalyzeEconometricDataResult(BaseModel):
+    """Response for comprehensive automated econometric analysis."""
+
+    primary_results: Dict[str, Any] = Field(description="Results from primary method")
+    alternative_results: Dict[str, Dict[str, Any]] = Field(description="Results from alternative methods")
+    robustness_checks: Dict[str, Any] = Field(description="Robustness test results")
+    meta_analysis: Dict[str, Any] = Field(description="Cross-method synthesis")
+    diagnostics: Dict[str, Any] = Field(description="Comprehensive diagnostic suite")
+    recommendations: List[str] = Field(description="Interpretation and next steps")
+    summary: Dict[str, Any] = Field(description="Overall summary statistics")
+    interpretation: str = Field(description="Human-readable interpretation")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class CompareEconometricMethodsResult(BaseModel):
+    """Response for comparing results across econometric methods."""
+
+    coefficient_comparison: Dict[str, Any] = Field(description="Side-by-side coefficient estimates")
+    fit_comparison: Dict[str, Any] = Field(description="Model fit statistics comparison")
+    diagnostic_comparison: Dict[str, Any] = Field(description="Diagnostic test comparison")
+    consensus_estimates: Dict[str, float] = Field(description="Weighted/averaged coefficient estimates")
+    disagreement_analysis: Dict[str, Any] = Field(description="Where methods diverge significantly")
+    recommendation: str = Field(description="Which method(s) to trust most")
+    summary: Dict[str, Any] = Field(description="Comparison summary")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+
+
+class EconometricModelAveragingResult(BaseModel):
+    """Response for econometric model averaging."""
+
+    averaged_coefficients: Dict[str, float] = Field(description="Model-averaged coefficient estimates")
+    averaged_standard_errors: Dict[str, float] = Field(description="Model-averaged standard errors")
+    confidence_intervals: Dict[str, Dict[str, float]] = Field(description="Adjusted confidence intervals")
+    model_weights: Dict[str, float] = Field(description="Weight assigned to each model")
+    averaged_predictions: Dict[str, float] = Field(description="Combined predictions by observation")
+    model_inclusion_probabilities: Dict[str, float] = Field(description="Probability each variable matters")
+    performance_metrics: Dict[str, float] = Field(description="MSE, RMSE, MAE, R²")
+    individual_model_performance: Dict[str, Dict[str, float]] = Field(description="Performance by model")
+    summary: Dict[str, Any] = Field(description="Model averaging summary")
+    interpretation: str = Field(description="Human-readable interpretation")
+    recommendations: List[str] = Field(description="Recommended next steps")
+    success: bool = Field(default=True, description="Success status")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
