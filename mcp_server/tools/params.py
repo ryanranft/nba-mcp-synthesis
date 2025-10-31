@@ -8103,3 +8103,624 @@ class FirstDifferenceParams(BaseModel):
         if len(v) < 30:
             raise ValueError("Need at least 30 observations for first difference model")
         return v
+
+
+# ============================================================================
+# Phase 10A - Agent 8: Advanced Econometrics Parameter Schemas
+# Module 3: Bayesian Analysis Tools (7 tools)
+# Module 4A: Causal Inference Tools (6 tools)
+# Module 4B: Survival Analysis Tools (6 tools)
+# Module 4C: Advanced Time Series Tools (4 tools)
+# Module 4D: Econometric Suite Tools (4 tools)
+# Total: 27 new parameter schemas
+# ============================================================================
+
+
+# ============================================================================
+# Module 3: Bayesian Analysis Parameters
+# ============================================================================
+
+
+class BayesianLinearRegressionParams(BaseModel):
+    """Parameters for Bayesian linear regression with conjugate priors."""
+
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=10, description="Data as list of dictionaries"
+    )
+    formula: str = Field(
+        ..., min_length=3, description="Model formula (e.g., 'y ~ x1 + x2')"
+    )
+    prior_mean: Optional[List[float]] = Field(
+        default=None, description="Prior mean for coefficients (optional)"
+    )
+    prior_variance: Optional[float] = Field(
+        default=1.0, ge=0.001, description="Prior variance scaling parameter"
+    )
+    n_samples: int = Field(
+        default=5000, ge=1000, le=50000, description="Number of posterior samples"
+    )
+    credible_interval: float = Field(
+        default=0.95, ge=0.5, le=0.99, description="Credible interval level"
+    )
+
+
+class BayesianHierarchicalModelParams(BaseModel):
+    """Parameters for Bayesian hierarchical/multilevel model."""
+
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=30, description="Hierarchical data as list of dictionaries"
+    )
+    formula: str = Field(
+        ..., min_length=5, description="Model formula with random effects syntax"
+    )
+    group_column: str = Field(
+        ..., description="Column name identifying groups/clusters"
+    )
+    n_samples: int = Field(
+        default=5000, ge=1000, le=50000, description="Number of MCMC samples"
+    )
+    n_chains: int = Field(
+        default=4, ge=1, le=8, description="Number of parallel MCMC chains"
+    )
+    warmup: int = Field(
+        default=1000, ge=100, le=10000, description="Number of warmup iterations"
+    )
+
+
+class BayesianModelComparisonParams(BaseModel):
+    """Parameters for Bayesian model comparison and selection."""
+
+    models: List[Dict[str, Any]] = Field(
+        ..., min_length=2, description="List of model specifications to compare"
+    )
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=20, description="Data for model comparison"
+    )
+    comparison_method: Literal["waic", "loo", "dic", "bayes_factor"] = Field(
+        default="waic", description="Method for model comparison"
+    )
+    n_samples: int = Field(
+        default=5000, ge=1000, le=50000, description="Posterior samples per model"
+    )
+
+
+class BayesianCredibleIntervalsParams(BaseModel):
+    """Parameters for computing Bayesian credible intervals."""
+
+    posterior_samples: List[List[float]] = Field(
+        ..., min_length=1000, description="Posterior samples for each parameter"
+    )
+    parameter_names: List[str] = Field(
+        ..., min_length=1, description="Names of parameters"
+    )
+    credible_level: float = Field(
+        default=0.95, ge=0.5, le=0.99, description="Credible interval level"
+    )
+    interval_type: Literal["hdi", "equal_tailed"] = Field(
+        default="hdi", description="Type of credible interval"
+    )
+
+
+class MCMCDiagnosticsParams(BaseModel):
+    """Parameters for MCMC convergence diagnostics."""
+
+    samples: List[List[float]] = Field(
+        ..., min_length=1000, description="MCMC samples from all chains"
+    )
+    parameter_names: List[str] = Field(
+        ..., min_length=1, description="Parameter names"
+    )
+    n_chains: int = Field(
+        default=4, ge=2, le=8, description="Number of chains"
+    )
+    diagnostics: List[Literal["rhat", "neff", "geweke", "autocorr"]] = Field(
+        default=["rhat", "neff"], description="Diagnostics to compute"
+    )
+
+
+class PosteriorPredictiveCheckParams(BaseModel):
+    """Parameters for posterior predictive checks."""
+
+    observed_data: List[float] = Field(
+        ..., min_length=10, description="Observed data values"
+    )
+    posterior_samples: List[List[float]] = Field(
+        ..., min_length=1000, description="Posterior samples for parameters"
+    )
+    model_function: str = Field(
+        ..., description="Model specification for generating predictions"
+    )
+    n_replications: int = Field(
+        default=1000, ge=100, le=10000, description="Number of posterior predictive replications"
+    )
+    test_statistics: List[str] = Field(
+        default=["mean", "std", "min", "max"], description="Test statistics to compute"
+    )
+
+
+class BayesianUpdatingParams(BaseModel):
+    """Parameters for sequential Bayesian updating."""
+
+    prior_distribution: Dict[str, Any] = Field(
+        ..., description="Prior distribution specification"
+    )
+    new_data: List[Dict[str, Any]] = Field(
+        ..., min_length=1, description="New data for updating"
+    )
+    parameter_names: List[str] = Field(
+        ..., min_length=1, description="Parameters to update"
+    )
+    n_samples: int = Field(
+        default=5000, ge=1000, le=50000, description="Number of posterior samples"
+    )
+
+
+# ============================================================================
+# Module 4A: Causal Inference Parameters
+# ============================================================================
+
+
+class InstrumentalVariablesParams(BaseModel):
+    """Parameters for instrumental variables (IV/2SLS) estimation."""
+
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=30, description="Data as list of dictionaries"
+    )
+    formula: str = Field(
+        ..., min_length=5, description="Structural equation formula"
+    )
+    instruments: List[str] = Field(
+        ..., min_length=1, description="List of instrument variable names"
+    )
+    endogenous_vars: List[str] = Field(
+        ..., min_length=1, description="List of endogenous variable names"
+    )
+    method: Literal["2sls", "liml", "gmm"] = Field(
+        default="2sls", description="Estimation method"
+    )
+
+
+class RegressionDiscontinuityParams(BaseModel):
+    """Parameters for regression discontinuity design (RDD)."""
+
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=50, description="Data with running variable"
+    )
+    outcome_var: str = Field(
+        ..., description="Outcome variable name"
+    )
+    running_var: str = Field(
+        ..., description="Running/forcing variable name"
+    )
+    cutoff: float = Field(
+        ..., description="Treatment assignment cutoff"
+    )
+    bandwidth: Optional[float] = Field(
+        default=None, ge=0.001, description="Bandwidth for local estimation (auto if None)"
+    )
+    polynomial_order: int = Field(
+        default=1, ge=1, le=4, description="Polynomial order for local regression"
+    )
+    kernel: Literal["triangular", "rectangular", "epanechnikov"] = Field(
+        default="triangular", description="Kernel function"
+    )
+
+
+class DifferenceInDifferencesParams(BaseModel):
+    """Parameters for difference-in-differences estimation."""
+
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=40, description="Panel data with treatment and control groups"
+    )
+    outcome_var: str = Field(
+        ..., description="Outcome variable name"
+    )
+    treatment_var: str = Field(
+        ..., description="Treatment indicator variable"
+    )
+    time_var: str = Field(
+        ..., description="Time period variable"
+    )
+    group_var: str = Field(
+        ..., description="Group identifier variable"
+    )
+    covariates: Optional[List[str]] = Field(
+        default=None, description="Control variables"
+    )
+    cluster_var: Optional[str] = Field(
+        default=None, description="Variable for clustered standard errors"
+    )
+
+
+class SyntheticControlParams(BaseModel):
+    """Parameters for synthetic control method."""
+
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=50, description="Panel data for treated and control units"
+    )
+    outcome_var: str = Field(
+        ..., description="Outcome variable name"
+    )
+    unit_var: str = Field(
+        ..., description="Unit identifier variable"
+    )
+    time_var: str = Field(
+        ..., description="Time period variable"
+    )
+    treated_unit: Union[str, int] = Field(
+        ..., description="ID of treated unit"
+    )
+    treatment_time: Union[str, int] = Field(
+        ..., description="Time of treatment intervention"
+    )
+    predictors: Optional[List[str]] = Field(
+        default=None, description="Predictor variables for matching"
+    )
+
+
+class PropensityScoreMatchingParams(BaseModel):
+    """Parameters for propensity score matching."""
+
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=50, description="Data with treatment and control observations"
+    )
+    treatment_var: str = Field(
+        ..., description="Treatment indicator variable (binary)"
+    )
+    outcome_var: str = Field(
+        ..., description="Outcome variable name"
+    )
+    covariates: List[str] = Field(
+        ..., min_length=1, description="Variables for propensity score model"
+    )
+    matching_method: Literal["nearest", "caliper", "radius", "kernel"] = Field(
+        default="nearest", description="Matching algorithm"
+    )
+    n_neighbors: int = Field(
+        default=1, ge=1, le=10, description="Number of matches per treated unit"
+    )
+    caliper: Optional[float] = Field(
+        default=None, ge=0.001, le=0.5, description="Maximum propensity score distance"
+    )
+
+
+class MediationAnalysisParams(BaseModel):
+    """Parameters for causal mediation analysis."""
+
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=30, description="Data with treatment, mediator, and outcome"
+    )
+    treatment_var: str = Field(
+        ..., description="Treatment variable name"
+    )
+    mediator_var: str = Field(
+        ..., description="Mediator variable name"
+    )
+    outcome_var: str = Field(
+        ..., description="Outcome variable name"
+    )
+    covariates: Optional[List[str]] = Field(
+        default=None, description="Confounding variables"
+    )
+    n_bootstrap: int = Field(
+        default=1000, ge=100, le=10000, description="Bootstrap replications for inference"
+    )
+
+
+# ============================================================================
+# Module 4B: Survival Analysis Parameters
+# ============================================================================
+
+
+class KaplanMeierParams(BaseModel):
+    """Parameters for Kaplan-Meier survival estimation."""
+
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=20, description="Survival data"
+    )
+    duration_var: str = Field(
+        ..., description="Duration/time variable name"
+    )
+    event_var: str = Field(
+        ..., description="Event indicator variable (1=event, 0=censored)"
+    )
+    group_var: Optional[str] = Field(
+        default=None, description="Grouping variable for stratified analysis"
+    )
+    confidence_level: float = Field(
+        default=0.95, ge=0.5, le=0.99, description="Confidence level"
+    )
+
+
+class CoxProportionalHazardsParams(BaseModel):
+    """Parameters for Cox proportional hazards regression."""
+
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=30, description="Survival data with covariates"
+    )
+    duration_var: str = Field(
+        ..., description="Duration/time variable name"
+    )
+    event_var: str = Field(
+        ..., description="Event indicator variable"
+    )
+    covariates: List[str] = Field(
+        ..., min_length=1, description="Covariate variable names"
+    )
+    strata: Optional[List[str]] = Field(
+        default=None, description="Stratification variables"
+    )
+    robust: bool = Field(
+        default=True, description="Use robust standard errors"
+    )
+
+
+class ParametricSurvivalParams(BaseModel):
+    """Parameters for parametric survival models."""
+
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=30, description="Survival data"
+    )
+    duration_var: str = Field(
+        ..., description="Duration variable name"
+    )
+    event_var: str = Field(
+        ..., description="Event indicator variable"
+    )
+    covariates: List[str] = Field(
+        ..., min_length=1, description="Covariate variables"
+    )
+    distribution: Literal["weibull", "exponential", "lognormal", "loglogistic"] = Field(
+        default="weibull", description="Assumed survival time distribution"
+    )
+
+
+class CompetingRisksParams(BaseModel):
+    """Parameters for competing risks analysis."""
+
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=30, description="Data with multiple event types"
+    )
+    duration_var: str = Field(
+        ..., description="Duration variable name"
+    )
+    event_type_var: str = Field(
+        ..., description="Event type variable (0=censored, 1,2,...=event types)"
+    )
+    covariates: Optional[List[str]] = Field(
+        default=None, description="Covariate variables"
+    )
+    event_of_interest: int = Field(
+        default=1, ge=1, description="Event type to focus on"
+    )
+
+
+class RecurrentEventsParams(BaseModel):
+    """Parameters for recurrent events analysis."""
+
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=30, description="Data with repeated events per subject"
+    )
+    subject_var: str = Field(
+        ..., description="Subject/ID variable name"
+    )
+    time_var: str = Field(
+        ..., description="Event time variable"
+    )
+    event_var: str = Field(
+        ..., description="Event indicator"
+    )
+    covariates: Optional[List[str]] = Field(
+        default=None, description="Covariate variables"
+    )
+    model_type: Literal["pwp", "ag", "wlw"] = Field(
+        default="pwp", description="Recurrent event model type"
+    )
+
+
+class TimeVaryingCovariatesParams(BaseModel):
+    """Parameters for survival models with time-varying covariates."""
+
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=30, description="Data in counting process format"
+    )
+    start_var: str = Field(
+        ..., description="Interval start time variable"
+    )
+    stop_var: str = Field(
+        ..., description="Interval stop time variable"
+    )
+    event_var: str = Field(
+        ..., description="Event indicator at stop time"
+    )
+    subject_var: str = Field(
+        ..., description="Subject identifier variable"
+    )
+    covariates: List[str] = Field(
+        ..., min_length=1, description="Time-varying covariate names"
+    )
+
+
+# ============================================================================
+# Module 4C: Advanced Time Series Parameters
+# ============================================================================
+
+
+class KalmanFilterParams(BaseModel):
+    """Parameters for Kalman filter state-space estimation."""
+
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=20, description="Time series data"
+    )
+    state_dim: int = Field(
+        ..., ge=1, le=10, description="Dimension of latent state vector"
+    )
+    observation_vars: List[str] = Field(
+        ..., min_length=1, description="Observable variable names"
+    )
+    estimate_parameters: bool = Field(
+        default=True, description="Estimate state-space matrices via MLE"
+    )
+    smoother: bool = Field(
+        default=True, description="Apply Kalman smoother"
+    )
+    forecast_steps: int = Field(
+        default=0, ge=0, le=100, description="Number of forecast steps"
+    )
+
+
+class DynamicFactorModelParams(BaseModel):
+    """Parameters for dynamic factor model estimation."""
+
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=30, description="Multivariate time series data"
+    )
+    variables: List[str] = Field(
+        ..., min_length=2, description="Variables for factor extraction"
+    )
+    n_factors: int = Field(
+        ..., ge=1, le=10, description="Number of latent factors"
+    )
+    factor_order: int = Field(
+        default=1, ge=0, le=4, description="AR order for factor dynamics"
+    )
+    method: Literal["ml", "pc", "2step"] = Field(
+        default="ml", description="Estimation method"
+    )
+
+
+class MarkovSwitchingModelParams(BaseModel):
+    """Parameters for Markov-switching regression model."""
+
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=50, description="Time series data"
+    )
+    dependent_var: str = Field(
+        ..., description="Dependent variable name"
+    )
+    independent_vars: Optional[List[str]] = Field(
+        default=None, description="Independent variable names"
+    )
+    n_regimes: int = Field(
+        default=2, ge=2, le=5, description="Number of regimes/states"
+    )
+    switching_variance: bool = Field(
+        default=True, description="Allow variance to switch across regimes"
+    )
+    switching_mean: bool = Field(
+        default=True, description="Allow mean to switch across regimes"
+    )
+
+
+class StructuralTimeSeriesParams(BaseModel):
+    """Parameters for structural time series decomposition."""
+
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=30, description="Time series data"
+    )
+    variable: str = Field(
+        ..., description="Variable to decompose"
+    )
+    components: List[Literal["level", "trend", "seasonal", "cycle", "irregular"]] = Field(
+        ..., min_length=1, description="Structural components to include"
+    )
+    seasonal_period: Optional[int] = Field(
+        default=None, ge=2, le=365, description="Period for seasonal component"
+    )
+    stochastic_level: bool = Field(
+        default=True, description="Stochastic level component"
+    )
+    stochastic_seasonal: bool = Field(
+        default=True, description="Stochastic seasonal component"
+    )
+
+
+# ============================================================================
+# Module 4D: Econometric Suite Parameters
+# ============================================================================
+
+
+class AutoDetectEconometricMethodParams(BaseModel):
+    """Parameters for automatic econometric method detection."""
+
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=20, description="Input dataset"
+    )
+    dependent_var: str = Field(
+        ..., description="Dependent variable name"
+    )
+    independent_vars: Optional[List[str]] = Field(
+        default=None, description="Independent variable names"
+    )
+    panel_id: Optional[str] = Field(
+        default=None, description="Panel/group identifier"
+    )
+    time_var: Optional[str] = Field(
+        default=None, description="Time variable"
+    )
+    research_question: Optional[str] = Field(
+        default=None, max_length=500, description="Research question description"
+    )
+
+
+class AutoAnalyzeEconometricDataParams(BaseModel):
+    """Parameters for comprehensive automated econometric analysis."""
+
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=20, description="Input dataset"
+    )
+    dependent_var: str = Field(
+        ..., description="Dependent variable name"
+    )
+    independent_vars: Optional[List[str]] = Field(
+        default=None, description="Independent variable names"
+    )
+    panel_id: Optional[str] = Field(
+        default=None, description="Panel identifier"
+    )
+    time_var: Optional[str] = Field(
+        default=None, description="Time variable"
+    )
+    methods: Optional[List[str]] = Field(
+        default=None, description="Specific methods to run (auto-detect if None)"
+    )
+    include_robustness: bool = Field(
+        default=True, description="Run robustness checks"
+    )
+
+
+class CompareEconometricMethodsParams(BaseModel):
+    """Parameters for comparing results across econometric methods."""
+
+    results: Dict[str, Dict[str, Any]] = Field(
+        ..., min_length=2, description="Dictionary of method names to results"
+    )
+    comparison_dimensions: Optional[List[str]] = Field(
+        default=None, description="Aspects to compare"
+    )
+    weight_by_fit: bool = Field(
+        default=True, description="Weight estimates by model fit"
+    )
+
+
+class EconometricModelAveragingParams(BaseModel):
+    """Parameters for econometric model averaging."""
+
+    results: Dict[str, Dict[str, Any]] = Field(
+        ..., min_length=2, description="Dictionary of method names to results"
+    )
+    data: List[Dict[str, Any]] = Field(
+        ..., min_length=20, description="Original data for validation"
+    )
+    dependent_var: str = Field(
+        ..., description="Dependent variable name"
+    )
+    averaging_method: Literal["aic", "bic", "mse", "equal"] = Field(
+        default="aic", description="Weighting scheme for averaging"
+    )
+    bootstrap_ci: bool = Field(
+        default=True, description="Use bootstrap for confidence intervals"
+    )
+    n_bootstrap: int = Field(
+        default=1000, ge=100, le=10000, description="Bootstrap replications"
+    )
