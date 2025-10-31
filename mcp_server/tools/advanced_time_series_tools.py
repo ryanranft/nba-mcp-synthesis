@@ -217,6 +217,13 @@ class AdvancedTimeSeriesTools:
                     "measurement_noise_cov": R.tolist(),
                 },
                 "diagnostics": diagnostics,
+                "interpretation": f"Kalman filter applied with {state_dim} latent states and {obs_dim} observed variables. Log-likelihood: {log_likelihood:.2f}, AIC: {-2 * log_likelihood + 2 * (state_dim**2 + obs_dim * state_dim):.2f}",
+                "recommendations": [
+                    "Check innovation diagnostics for model adequacy",
+                    "Consider state-space model selection using AIC/BIC",
+                    "Examine smoothed states for trend identification",
+                ],
+                "success": True,
             }
 
             if smoother and smoothed_states is not None:

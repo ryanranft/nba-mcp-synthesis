@@ -222,7 +222,7 @@ class SurvivalTools:
             )
 
             # Estimate KM
-            result = analyzer.kaplan_meier(group_col=group_column)
+            result = analyzer.kaplan_meier(groups=group_column)
 
             # Build response
             if group_column:

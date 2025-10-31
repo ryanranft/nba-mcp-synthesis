@@ -113,7 +113,12 @@ class CausalTools:
                 return {"success": False, "error": f"Missing columns: {missing}"}
 
             # Initialize analyzer
-            analyzer = CausalInferenceAnalyzer(df)
+            analyzer = CausalInferenceAnalyzer(
+                data=df,
+                treatment_col=treatment,
+                outcome_col=outcome,
+                covariates=controls or [],
+            )
 
             # Estimate IV model
             result = analyzer.instrumental_variables(
@@ -227,8 +232,13 @@ class CausalTools:
             if missing:
                 return {"success": False, "error": f"Missing columns: {missing}"}
 
+            # Create treatment indicator for RDD
+            df["_rdd_treatment"] = (df[running_variable] >= cutoff).astype(int)
+
             # Initialize analyzer
-            analyzer = CausalInferenceAnalyzer(df)
+            analyzer = CausalInferenceAnalyzer(
+                data=df, treatment_col="_rdd_treatment", outcome_col=outcome
+            )
 
             # Estimate RDD
             result = analyzer.regression_discontinuity(
@@ -346,7 +356,12 @@ class CausalTools:
                 }
 
             # Initialize analyzer
-            analyzer = CausalInferenceAnalyzer(df)
+            analyzer = CausalInferenceAnalyzer(
+                data=df,
+                treatment_col=treatment,
+                outcome_col=outcome,
+                covariates=covariates,
+            )
 
             # Estimate PSM
             result = analyzer.propensity_score_matching(
@@ -462,8 +477,19 @@ class CausalTools:
                     "error": f"Treated unit '{treated_unit}' not found",
                 }
 
+            # Create treatment indicator for synthetic control
+            df["_synth_treatment"] = (
+                (df[unit_column] == treated_unit) & (df[time_column] >= treatment_time)
+            ).astype(int)
+
             # Initialize analyzer
-            analyzer = CausalInferenceAnalyzer(df)
+            analyzer = CausalInferenceAnalyzer(
+                data=df,
+                treatment_col="_synth_treatment",
+                outcome_col=outcome,
+                entity_col=unit_column,
+                time_col=time_column,
+            )
 
             # Estimate synthetic control
             result = analyzer.synthetic_control(
@@ -564,7 +590,12 @@ class CausalTools:
                 return {"success": False, "error": f"Missing columns: {missing}"}
 
             # Initialize analyzer
-            analyzer = CausalInferenceAnalyzer(df)
+            analyzer = CausalInferenceAnalyzer(
+                data=df,
+                treatment_col=treatment,
+                outcome_col=outcome,
+                covariates=covariates,
+            )
 
             # Estimate DR
             result = analyzer.doubly_robust_estimation(
@@ -655,7 +686,12 @@ class CausalTools:
                 return {"success": False, "error": f"Missing columns: {missing}"}
 
             # Initialize analyzer
-            analyzer = CausalInferenceAnalyzer(df)
+            analyzer = CausalInferenceAnalyzer(
+                data=df,
+                treatment_col=treatment,
+                outcome_col=outcome,
+                covariates=covariates,
+            )
 
             # Run sensitivity analysis
             result = analyzer.sensitivity_analysis(

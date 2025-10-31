@@ -161,6 +161,13 @@ class EconometricSuiteTools:
                     )
                     for method in [recommended_method] + alternatives[:2]
                 },
+                "interpretation": f"Recommended econometric method: {recommended_method}. {rationale}",
+                "recommendations": [
+                    f"Apply {recommended_method} method for analysis",
+                    "Validate model assumptions before interpretation",
+                    "Consider robustness checks with alternative methods",
+                ],
+                "success": True,
             }
 
             self.logger.info(f"Recommended method: {recommended_method}")
