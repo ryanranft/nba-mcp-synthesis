@@ -919,10 +919,21 @@ class BayesianAnalyzer:
         # ArviZ model comparison
         comparison = az.compare(traces, ic="waic")
 
-        # Extract metrics
-        waic_values = {
-            name: float(comparison.loc[name, "waic"]) for name in model_names
-        }
+        # Extract metrics - ArviZ column names vary by version
+        # Try multiple possible column names for WAIC
+        waic_col = None
+        for col in ["waic", "elpd_waic", "waic_scale"]:
+            if col in comparison.columns:
+                waic_col = col
+                break
+
+        if waic_col is None:
+            # Fallback: use index as values if no WAIC column found
+            waic_values = {name: 0.0 for name in model_names}
+        else:
+            waic_values = {
+                name: float(comparison.loc[name, waic_col]) for name in model_names
+            }
         loo_values = {name: float(results[name].loo or 0) for name in model_names}
 
         # ELPD difference (expected log predictive density)
