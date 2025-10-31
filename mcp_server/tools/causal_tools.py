@@ -365,39 +365,61 @@ class CausalTools:
 
             # Estimate PSM
             result = analyzer.propensity_score_matching(
-                outcome=outcome,
-                treatment=treatment,
-                covariates=covariates,
                 method=method,
                 caliper=caliper,
             )
 
-            # Compute balance statistics
-            balance_stats = analyzer._compute_balance_statistics(
-                df, treatment, covariates, result.matched_data
-            )
+            # Balance statistics are already in the result
+            # Calculate balance improvement from the balance_statistics DataFrame
+            balance_df = result.balance_statistics
+            if not balance_df.empty and 'std_diff_before' in balance_df.columns and 'std_diff_after' in balance_df.columns:
+                avg_before = balance_df['std_diff_before'].abs().mean()
+                avg_after = balance_df['std_diff_after'].abs().mean()
+                balance_improvement = (avg_before - avg_after) / avg_before if avg_before > 0 else 0
+            else:
+                balance_improvement = 0.0
 
             interpretation = (
                 f"PSM {method} matching: ATE = {result.ate:.3f}, ATT = {result.att:.3f}. "
                 f"Matched {result.n_matched} pairs. "
-                f"Average covariate balance improved by {balance_stats['improvement']:.1%}."
+                f"Average covariate balance improved by {balance_improvement:.1%}."
             )
+
+            # Calculate t-stat and p-value
+            t_stat = result.att / result.std_error if result.std_error > 0 else 0
+            from scipy import stats
+            p_value = 2 * (1 - stats.t.cdf(abs(t_stat), df=result.n_matched - 1))
+
+            # Convert balance statistics DataFrame to dict format
+            balance_stats_dict = {}
+            if not balance_df.empty:
+                for idx, row in balance_df.iterrows():
+                    balance_stats_dict[str(idx)] = {
+                        "before": float(row.get('std_diff_before', 0)),
+                        "after": float(row.get('std_diff_after', 0))
+                    }
+
+            # Check if common support is violated
+            common_support_violated = bool((result.common_support == 0).any())
 
             return {
                 "success": True,
-                "ate": float(result.ate),
-                "att": float(result.att),
-                "standard_error": float(result.std_error),
-                "confidence_interval": {
-                    "lower": float(result.ci_lower),
-                    "upper": float(result.ci_upper),
-                },
+                "treatment_effect": float(result.att),  # Use ATT as treatment effect
+                "std_error": float(result.std_error),
+                "t_stat": float(t_stat),
+                "p_value": float(p_value),
+                "confidence_interval": result.confidence_interval,
                 "n_matched": int(result.n_matched),
-                "n_treated": int((df[treatment] == 1).sum()),
-                "n_control": int((df[treatment] == 0).sum()),
-                "method": method,
-                "balance_statistics": balance_stats,
+                "n_unmatched": int(result.n_unmatched),
+                "balance_statistics": balance_stats_dict,
+                "common_support_violated": common_support_violated,
+                "matching_method": method,
                 "interpretation": interpretation,
+                "recommendations": [
+                    "Check balance statistics to ensure adequate covariate balance",
+                    "Inspect common support to verify sufficient overlap",
+                    "Consider sensitivity analysis for unobserved confounding",
+                ],
             }
 
         except Exception as e:

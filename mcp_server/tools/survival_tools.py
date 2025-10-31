@@ -224,46 +224,83 @@ class SurvivalTools:
             # Estimate KM
             result = analyzer.kaplan_meier(groups=group_column)
 
-            # Build response
+            # Count events and censored
+            n_events = int(df[event_column].sum())
+            n_censored = int((df[event_column] == 0).sum())
+
+            # Build response - unified structure
             if group_column:
-                # Multiple survival curves
-                groups = {}
-                median_survival = {}
+                # For grouped data, use the first group as primary but include all in interpretation
+                first_group = list(result.keys())[0]
+                first_km = result[first_group]
 
-                for group_name, km_result in result.items():
-                    groups[group_name] = {
-                        "timeline": km_result.timeline.tolist(),
-                        "survival_prob": km_result.survival_prob.tolist(),
-                    }
-                    median_survival[group_name] = float(km_result.median_survival)
+                # Build survival function dict
+                survival_function_dict = {}
+                for t, s in zip(first_km.timeline, first_km.survival_function.iloc[:, 0].values):
+                    survival_function_dict[str(float(t))] = float(s)
 
+                # Build confidence intervals dict
+                ci_df = first_km.confidence_interval
+                confidence_intervals_dict = {}
+                for t in first_km.timeline:
+                    ci_row = ci_df.loc[t] if t in ci_df.index else ci_df.iloc[0]
+                    confidence_intervals_dict[str(float(t))] = (float(ci_row.iloc[0]), float(ci_row.iloc[1]))
+
+                # Build at-risk dict from event table
+                n_at_risk_dict = {}
+                for idx, row in first_km.event_table.iterrows():
+                    n_at_risk_dict[str(float(idx))] = int(row['at_risk'])
+
+                median_survival_val = float(first_km.median_survival_time) if not pd.isna(first_km.median_survival_time) else None
+
+                # Build multi-group interpretation
+                median_by_group = {g: float(km.median_survival_time) for g, km in result.items() if not pd.isna(km.median_survival_time)}
                 interpretation = (
-                    f"Kaplan-Meier curves estimated for {len(groups)} groups. "
-                    f"Median survival ranges from {min(median_survival.values()):.1f} "
-                    f"to {max(median_survival.values()):.1f}."
+                    f"Kaplan-Meier curves estimated for {len(result)} groups. "
+                    f"Median survival ranges from {min(median_by_group.values()):.1f} "
+                    f"to {max(median_by_group.values()):.1f}."
                 )
-
-                return {
-                    "success": True,
-                    "groups": groups,
-                    "median_survival": median_survival,
-                    "n_groups": len(groups),
-                    "interpretation": interpretation,
-                }
             else:
                 # Single survival curve
+                # Build survival function dict
+                survival_function_dict = {}
+                for t, s in zip(result.timeline, result.survival_function.iloc[:, 0].values):
+                    survival_function_dict[str(float(t))] = float(s)
+
+                # Build confidence intervals dict
+                ci_df = result.confidence_interval
+                confidence_intervals_dict = {}
+                for t in result.timeline:
+                    ci_row = ci_df.loc[t] if t in ci_df.index else ci_df.iloc[0]
+                    confidence_intervals_dict[str(float(t))] = (float(ci_row.iloc[0]), float(ci_row.iloc[1]))
+
+                # Build at-risk dict from event table
+                n_at_risk_dict = {}
+                for idx, row in result.event_table.iterrows():
+                    n_at_risk_dict[str(float(idx))] = int(row['at_risk'])
+
+                median_survival_val = float(result.median_survival_time) if not pd.isna(result.median_survival_time) else None
+
                 interpretation = (
                     f"Kaplan-Meier survival curve estimated. "
-                    f"Median survival: {result.median_survival:.2f}."
+                    f"Median survival: {median_survival_val if median_survival_val is not None else 'not reached'}."
                 )
 
-                return {
-                    "success": True,
-                    "timeline": result.timeline.tolist(),
-                    "survival_prob": result.survival_prob.tolist(),
-                    "median_survival": float(result.median_survival),
-                    "interpretation": interpretation,
-                }
+            return {
+                "success": True,
+                "survival_function": survival_function_dict,
+                "median_survival": median_survival_val,
+                "confidence_intervals": confidence_intervals_dict,
+                "n_events": n_events,
+                "n_censored": n_censored,
+                "n_at_risk": n_at_risk_dict,
+                "interpretation": interpretation,
+                "recommendations": [
+                    "Inspect survival curves for group differences",
+                    "Consider log-rank test for statistical comparison",
+                    "Check proportional hazards assumption if planning Cox regression",
+                ],
+            }
 
         except Exception as e:
             self.logger.error(f"Kaplan-Meier failed: {str(e)}")
