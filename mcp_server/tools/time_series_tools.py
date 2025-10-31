@@ -163,25 +163,24 @@ class TimeSeriesTools:
                     "Check stationarity again after transformation",
                 ]
 
-            return success_response(
-                {
-                    "test_statistic": float(result.test_statistic),
-                    "p_value": float(result.p_value),
-                    "critical_values": {
-                        k: float(v) for k, v in result.critical_values.items()
-                    },
-                    "is_stationary": result.is_stationary,
-                    "test_type": result.test_type,
-                    "lags_used": result.lags_used,
-                    "observations": result.observations,
-                    "interpretation": interpretation,
-                    "recommendations": recommendations,
-                }
-            )
+            return {
+                "success": True,
+                "test_statistic": float(result.test_statistic),
+                "p_value": float(result.p_value),
+                "critical_values": {
+                    k: float(v) for k, v in result.critical_values.items()
+                },
+                "is_stationary": result.is_stationary,
+                "test_type": result.test_type,
+                "lags_used": result.lags_used,
+                "observations": result.observations,
+                "interpretation": interpretation,
+                "recommendations": recommendations,
+            }
 
         except Exception as e:
             logger.error(f"Stationarity test failed: {str(e)}")
-            return error_response(f"Stationarity test failed: {str(e)}")
+            return {"success": False, "error": f"Stationarity test failed: {str(e)}"}
 
     async def decompose_time_series(
         self,
@@ -256,26 +255,25 @@ class TimeSeriesTools:
                 0, 1 - (residual_var / (seasonal_var + residual_var + 1e-10))
             )
 
-            return success_response(
-                {
-                    "trend": result.trend.dropna().tolist(),
-                    "seasonal": result.seasonal.dropna().tolist(),
-                    "residual": result.residual.dropna().tolist(),
-                    "model": result.model,
-                    "period": result.period,
-                    "trend_direction": trend_info["direction"],
-                    "trend_slope": trend_info["slope"],
-                    "trend_strength": trend_info["r_squared"],
-                    "seasonal_strength": round(seasonal_strength, 4),
-                    "interpretation": self._interpret_decomposition(
-                        trend_info, seasonal_strength
-                    ),
-                }
-            )
+            return {
+                "success": True,
+                "trend": result.trend.dropna().tolist(),
+                "seasonal": result.seasonal.dropna().tolist(),
+                "residual": result.residual.dropna().tolist(),
+                "model": result.model,
+                "period": result.period,
+                "trend_direction": trend_info["direction"],
+                "trend_slope": trend_info["slope"],
+                "trend_strength": trend_info["r_squared"],
+                "seasonal_strength": round(seasonal_strength, 4),
+                "interpretation": self._interpret_decomposition(
+                    trend_info, seasonal_strength
+                ),
+            }
 
         except Exception as e:
             logger.error(f"Decomposition failed: {str(e)}")
-            return error_response(f"Decomposition failed: {str(e)}")
+            return {"success": False, "error": f"Decomposition failed: {str(e)}"}
 
     async def fit_arima_model(
         self,
@@ -350,28 +348,26 @@ class TimeSeriesTools:
             fitted_model = model_result.model
             residuals = fitted_model.resid if hasattr(fitted_model, "resid") else []
 
-            return success_response(
-                {
-                    "order": model_result.order,
-                    "seasonal_order": model_result.seasonal_order,
-                    "aic": float(model_result.aic),
-                    "bic": float(model_result.bic),
-                    "fitted_values": (
-                        fitted_model.fittedvalues.tolist()
-                        if hasattr(fitted_model, "fittedvalues")
-                        else []
-                    ),
-                    "residuals": (
-                        residuals.tolist() if hasattr(residuals, "tolist") else []
-                    ),
-                    "model_type": "ARIMA" if not seasonal_order else "SARIMA",
-                    "success_message": f"Successfully fitted {'SARIMA' if seasonal_order else 'ARIMA'}{model_result.order} model",
-                }
-            )
+            return {
+                "success": True,
+                "order": model_result.order,
+                "seasonal_order": model_result.seasonal_order,
+                "aic": float(model_result.aic),
+                "bic": float(model_result.bic),
+                "fitted_values": (
+                    fitted_model.fittedvalues.tolist()
+                    if hasattr(fitted_model, "fittedvalues")
+                    else []
+                ),
+                "residuals": (
+                    residuals.tolist() if hasattr(residuals, "tolist") else []
+                ),
+                "model_type": "ARIMA" if not seasonal_order else "SARIMA",
+            }
 
         except Exception as e:
             logger.error(f"ARIMA modeling failed: {str(e)}")
-            return error_response(f"ARIMA modeling failed: {str(e)}")
+            return {"success": False, "error": f"ARIMA modeling failed: {str(e)}"}
 
     async def forecast_arima(
         self,
@@ -426,25 +422,19 @@ class TimeSeriesTools:
             # Generate forecast
             forecast_result = analyzer.forecast(model_result, steps=steps, alpha=alpha)
 
-            return success_response(
-                {
-                    "forecast": forecast_result.forecast.tolist(),
-                    "lower_bound": forecast_result.confidence_interval[
-                        "lower"
-                    ].tolist(),
-                    "upper_bound": forecast_result.confidence_interval[
-                        "upper"
-                    ].tolist(),
-                    "confidence_level": 1 - alpha,
-                    "model_order": model_result.order,
-                    "steps": steps,
-                    "success_message": f"Generated {steps}-step forecast with {int((1-alpha)*100)}% confidence intervals",
-                }
-            )
+            return {
+                "success": True,
+                "forecast": forecast_result.forecast.tolist(),
+                "lower_bound": forecast_result.confidence_interval["lower"].tolist(),
+                "upper_bound": forecast_result.confidence_interval["upper"].tolist(),
+                "confidence_level": 1 - alpha,
+                "model_order": model_result.order,
+                "steps": steps,
+            }
 
         except Exception as e:
             logger.error(f"Forecasting failed: {str(e)}")
-            return error_response(f"Forecasting failed: {str(e)}")
+            return {"success": False, "error": f"Forecasting failed: {str(e)}"}
 
     async def autocorrelation_analysis(
         self,
@@ -516,28 +506,30 @@ class TimeSeriesTools:
             p_suggestion = min(sig_pacf_lags[:3]) if sig_pacf_lags else 1
             q_suggestion = min(sig_acf_lags[:3]) if sig_acf_lags else 1
 
-            return success_response(
-                {
-                    "acf_values": acf_result.acf_values.tolist(),
-                    "pacf_values": pacf_result.acf_values.tolist(),
-                    "ljung_box_pvalue": float(min(lb_result["lb_pvalue"])),
-                    "has_autocorrelation": lb_result["has_autocorrelation"],
-                    "significant_lags_acf": sig_acf_lags,
-                    "significant_lags_pacf": sig_pacf_lags,
-                    "arima_suggestions": {
-                        "p": p_suggestion,
-                        "q": q_suggestion,
-                        "rationale": "Based on significant PACF/ACF lags",
-                    },
-                    "interpretation": self._interpret_autocorrelation(
-                        lb_result["has_autocorrelation"], sig_acf_lags, sig_pacf_lags
-                    ),
-                }
-            )
+            return {
+                "success": True,
+                "acf_values": acf_result.acf_values.tolist(),
+                "pacf_values": pacf_result.acf_values.tolist(),
+                "ljung_box_pvalue": float(min(lb_result["lb_pvalue"])),
+                "has_autocorrelation": lb_result["has_autocorrelation"],
+                "significant_lags_acf": sig_acf_lags,
+                "significant_lags_pacf": sig_pacf_lags,
+                "arima_suggestions": {
+                    "p": p_suggestion,
+                    "q": q_suggestion,
+                    "rationale": "Based on significant PACF/ACF lags",
+                },
+                "interpretation": self._interpret_autocorrelation(
+                    lb_result["has_autocorrelation"], sig_acf_lags, sig_pacf_lags
+                ),
+            }
 
         except Exception as e:
             logger.error(f"Autocorrelation analysis failed: {str(e)}")
-            return error_response(f"Autocorrelation analysis failed: {str(e)}")
+            return {
+                "success": False,
+                "error": f"Autocorrelation analysis failed: {str(e)}",
+            }
 
     # Helper methods
 
