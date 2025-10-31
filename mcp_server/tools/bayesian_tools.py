@@ -138,9 +138,7 @@ class BayesianTools:
 
             # Initialize analyzer
             analyzer = BayesianAnalyzer(
-                data=df,
-                target_col=target,
-                group_col=group_column
+                data=df, target_col=target, group_col=group_column
             )
 
             # Fit hierarchical model
@@ -149,7 +147,7 @@ class BayesianTools:
                 groups=[group_column],
                 draws=draws,
                 tune=tune,
-                chains=chains
+                chains=chains,
             )
 
             # Extract group effects
@@ -183,12 +181,10 @@ class BayesianTools:
             return {
                 "success": True,
                 "posterior_mean": {
-                    param: float(row["mean"])
-                    for param, row in group_effects.iterrows()
+                    param: float(row["mean"]) for param, row in group_effects.iterrows()
                 },
                 "posterior_std": {
-                    param: float(row["sd"])
-                    for param, row in group_effects.iterrows()
+                    param: float(row["sd"]) for param, row in group_effects.iterrows()
                 },
                 "credible_intervals": {
                     param: {
@@ -281,10 +277,7 @@ class BayesianTools:
             target = target.strip()
 
             # Initialize analyzer
-            analyzer = BayesianAnalyzer(
-                data=df,
-                target_col=target
-            )
+            analyzer = BayesianAnalyzer(data=df, target_col=target)
 
             # Build and sample model
             result = analyzer.sample_posterior(
@@ -292,7 +285,7 @@ class BayesianTools:
                 draws=draws,
                 tune=tune,
                 chains=chains,
-                prior_params=prior_params
+                prior_params=prior_params,
             )
 
             # Get posterior summary
@@ -315,12 +308,10 @@ class BayesianTools:
             return {
                 "success": True,
                 "posterior_mean": {
-                    param: float(row["mean"])
-                    for param, row in summary.iterrows()
+                    param: float(row["mean"]) for param, row in summary.iterrows()
                 },
                 "posterior_std": {
-                    param: float(row["sd"])
-                    for param, row in summary.iterrows()
+                    param: float(row["sd"]) for param, row in summary.iterrows()
                 },
                 "rhat": {k: float(v) for k, v in rhat_dict.items()},
                 "ess": {k: float(v) for k, v in ess_dict.items()},
@@ -519,13 +510,15 @@ class BayesianTools:
             # Create comparison table
             comparison = []
             for name in fitted_models.keys():
-                comparison.append({
-                    "model": name,
-                    "waic": round(waic_scores[name], 2),
-                    "loo": round(loo_scores[name], 2),
-                    "best_waic": name == best_waic_model,
-                    "best_loo": name == best_loo_model,
-                })
+                comparison.append(
+                    {
+                        "model": name,
+                        "waic": round(waic_scores[name], 2),
+                        "loo": round(loo_scores[name], 2),
+                        "best_waic": name == best_waic_model,
+                        "best_loo": name == best_loo_model,
+                    }
+                )
 
             interpretation = (
                 f"Compared {len(models)} Bayesian models. "
@@ -691,16 +684,13 @@ class BayesianTools:
                 return {"success": False, "error": f"Missing columns: {missing}"}
 
             analyzer = BayesianAnalyzer(
-                data=df,
-                target_col=points_column,
-                group_col=player_id_column
+                data=df, target_col=points_column, group_col=player_id_column
             )
 
             # Fit player scoring model
             formula = f"{points_column} ~ {' + '.join(predictors)}"
             result = analyzer.player_scoring_model(
-                player_col=player_id_column,
-                predictors=predictors
+                player_col=player_id_column, predictors=predictors
             )
 
             summary = analyzer.posterior_summary(result)
@@ -812,16 +802,12 @@ class BayesianTools:
                 return {"success": False, "error": f"Missing columns: {missing}"}
 
             analyzer = BayesianAnalyzer(
-                data=df,
-                target_col=won_column,
-                group_col=team_id_column
+                data=df, target_col=won_column, group_col=team_id_column
             )
 
             # Fit win probability model
             result = analyzer.win_probability_model(
-                team_col=team_id_column,
-                outcome_col=won_column,
-                predictors=predictors
+                team_col=team_id_column, outcome_col=won_column, predictors=predictors
             )
 
             summary = analyzer.posterior_summary(result)
@@ -864,3 +850,8 @@ class BayesianTools:
                 "success": False,
                 "error": f"Bayesian win probability model failed: {str(e)}",
             }
+
+
+def create_bayesian_tools() -> BayesianTools:
+    """Factory function to create Bayesian tools instance."""
+    return BayesianTools()

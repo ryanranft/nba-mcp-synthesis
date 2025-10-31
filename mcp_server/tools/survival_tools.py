@@ -108,15 +108,11 @@ class SurvivalTools:
 
             # Initialize analyzer
             analyzer = SurvivalAnalyzer(
-                data=df,
-                duration_col=duration_column,
-                event_col=event_column
+                data=df, duration_col=duration_column, event_col=event_column
             )
 
             # Fit Cox model
-            result = analyzer.cox_proportional_hazards(
-                covariates=covariates
-            )
+            result = analyzer.cox_proportional_hazards(covariates=covariates)
 
             # Extract results
             hazard_ratios = {}
@@ -222,15 +218,11 @@ class SurvivalTools:
 
             # Initialize analyzer
             analyzer = SurvivalAnalyzer(
-                data=df,
-                duration_col=duration_column,
-                event_col=event_column
+                data=df, duration_col=duration_column, event_col=event_column
             )
 
             # Estimate KM
-            result = analyzer.kaplan_meier(
-                group_col=group_column
-            )
+            result = analyzer.kaplan_meier(group_col=group_column)
 
             # Build response
             if group_column:
@@ -338,9 +330,7 @@ class SurvivalTools:
 
             # Initialize analyzer
             analyzer = SurvivalAnalyzer(
-                data=df,
-                duration_col=duration_column,
-                event_col=event_column
+                data=df, duration_col=duration_column, event_col=event_column
             )
 
             # Run logrank test
@@ -437,15 +427,12 @@ class SurvivalTools:
 
             # Initialize analyzer
             analyzer = SurvivalAnalyzer(
-                data=df,
-                duration_col=duration_column,
-                event_col=event_column
+                data=df, duration_col=duration_column, event_col=event_column
             )
 
             # Fit parametric model
             result = analyzer.parametric_survival(
-                distribution=distribution,
-                covariates=covariates or []
+                distribution=distribution, covariates=covariates or []
             )
 
             interpretation = (
@@ -527,7 +514,7 @@ class SurvivalTools:
             analyzer = SurvivalAnalyzer(
                 data=df,
                 duration_col=duration_column,
-                event_col=event_type_column  # Now multi-valued
+                event_col=event_type_column,  # Now multi-valued
             )
 
             # Fit competing risks model
@@ -622,17 +609,21 @@ class SurvivalTools:
             required = [duration_column, event_column] + covariates
             missing_train = [c for c in required if c not in df_train.columns]
             if missing_train:
-                return {"success": False, "error": f"Missing training columns: {missing_train}"}
+                return {
+                    "success": False,
+                    "error": f"Missing training columns: {missing_train}",
+                }
 
             missing_new = [c for c in covariates if c not in df_new.columns]
             if missing_new:
-                return {"success": False, "error": f"Missing new data columns: {missing_new}"}
+                return {
+                    "success": False,
+                    "error": f"Missing new data columns: {missing_new}",
+                }
 
             # Fit model on training data
             analyzer = SurvivalAnalyzer(
-                data=df_train,
-                duration_col=duration_column,
-                event_col=event_column
+                data=df_train, duration_col=duration_column, event_col=event_column
             )
 
             # Fit Cox model
@@ -640,9 +631,7 @@ class SurvivalTools:
 
             # Predict for new data
             predictions = analyzer.predict_survival(
-                model_result=model,
-                new_data=df_new,
-                times=times
+                model_result=model, new_data=df_new, times=times
             )
 
             # Extract predictions
@@ -650,10 +639,12 @@ class SurvivalTools:
             median_survival = []
 
             for i, pred in enumerate(predictions):
-                pred_list.append({
-                    "timeline": pred.timeline.tolist(),
-                    "survival_prob": pred.survival_prob.tolist(),
-                })
+                pred_list.append(
+                    {
+                        "timeline": pred.timeline.tolist(),
+                        "survival_prob": pred.survival_prob.tolist(),
+                    }
+                )
                 median_survival.append(float(pred.median_survival))
 
             interpretation = (
@@ -672,3 +663,8 @@ class SurvivalTools:
         except Exception as e:
             self.logger.error(f"Survival prediction failed: {str(e)}")
             return {"success": False, "error": f"Survival prediction failed: {str(e)}"}
+
+
+def create_survival_tools() -> SurvivalTools:
+    """Factory function to create survival analysis tools instance."""
+    return SurvivalTools()

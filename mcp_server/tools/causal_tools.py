@@ -120,7 +120,7 @@ class CausalTools:
                 outcome=outcome,
                 treatment=treatment,
                 instruments=instruments,
-                controls=controls or []
+                controls=controls or [],
             )
 
             # Extract key results
@@ -133,7 +133,7 @@ class CausalTools:
             weak_test = {
                 "f_statistic": float(result.first_stage_f),
                 "passes": result.first_stage_f > 10,  # Rule of thumb
-                "interpretation": "Strong" if result.first_stage_f > 10 else "Weak"
+                "interpretation": "Strong" if result.first_stage_f > 10 else "Weak",
             }
 
             interpretation = (
@@ -236,14 +236,14 @@ class CausalTools:
                 running_var=running_variable,
                 cutoff=cutoff,
                 bandwidth=bandwidth,
-                kernel=kernel
+                kernel=kernel,
             )
 
             # Count treated and control
             df_rdd = df.copy()
-            df_rdd['treated'] = df_rdd[running_variable] >= cutoff
-            n_treated = df_rdd['treated'].sum()
-            n_control = (~df_rdd['treated']).sum()
+            df_rdd["treated"] = df_rdd[running_variable] >= cutoff
+            n_treated = df_rdd["treated"].sum()
+            n_control = (~df_rdd["treated"]).sum()
 
             interpretation = (
                 f"RDD estimate: {result.treatment_effect:.3f} at cutoff={cutoff}. "
@@ -342,7 +342,7 @@ class CausalTools:
             if not set(unique_vals).issubset({0, 1}):
                 return {
                     "success": False,
-                    "error": f"Treatment must be binary (0/1), got {unique_vals}"
+                    "error": f"Treatment must be binary (0/1), got {unique_vals}",
                 }
 
             # Initialize analyzer
@@ -354,7 +354,7 @@ class CausalTools:
                 treatment=treatment,
                 covariates=covariates,
                 method=method,
-                caliper=caliper
+                caliper=caliper,
             )
 
             # Compute balance statistics
@@ -459,7 +459,7 @@ class CausalTools:
             if treated_unit not in df[unit_column].values:
                 return {
                     "success": False,
-                    "error": f"Treated unit '{treated_unit}' not found"
+                    "error": f"Treated unit '{treated_unit}' not found",
                 }
 
             # Initialize analyzer
@@ -471,7 +471,7 @@ class CausalTools:
                 treatment_time=treatment_time,
                 outcome=outcome,
                 time_col=time_column,
-                unit_col=unit_column
+                unit_col=unit_column,
             )
 
             # Get synthetic weights
@@ -568,9 +568,7 @@ class CausalTools:
 
             # Estimate DR
             result = analyzer.doubly_robust_estimation(
-                outcome=outcome,
-                treatment=treatment,
-                covariates=covariates
+                outcome=outcome, treatment=treatment, covariates=covariates
             )
 
             interpretation = (
@@ -664,7 +662,7 @@ class CausalTools:
                 outcome=outcome,
                 treatment=treatment,
                 covariates=covariates,
-                method=method
+                method=method,
             )
 
             # Assess robustness
@@ -700,3 +698,8 @@ class CausalTools:
         except Exception as e:
             self.logger.error(f"Sensitivity analysis failed: {str(e)}")
             return {"success": False, "error": f"Sensitivity analysis failed: {str(e)}"}
+
+
+def create_causal_tools() -> CausalTools:
+    """Factory function to create causal inference tools instance."""
+    return CausalTools()
