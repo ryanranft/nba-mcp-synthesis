@@ -565,25 +565,31 @@ def test_median_survival_comparison():
 
 def test_validation_missing_columns():
     """Test validation with missing columns."""
+    from mcp_server.exceptions import InvalidDataError
+
     data = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
 
-    with pytest.raises(ValueError, match="Missing required columns"):
+    with pytest.raises(InvalidDataError, match="Missing required columns"):
         SurvivalAnalyzer(data=data, duration_col="duration", event_col="event")
 
 
 def test_validation_negative_duration():
     """Test validation with negative duration."""
+    from mcp_server.exceptions import InvalidDataError
+
     data = pd.DataFrame({"duration": [-1, 2, 3], "event": [1, 0, 1]})
 
-    with pytest.raises(ValueError, match="Duration must be positive"):
+    with pytest.raises(InvalidDataError, match="Duration must be positive"):
         SurvivalAnalyzer(data=data, duration_col="duration", event_col="event")
 
 
 def test_validation_non_binary_event():
     """Test validation with non-binary event."""
+    from mcp_server.exceptions import InvalidDataError
+
     data = pd.DataFrame({"duration": [1, 2, 3], "event": [0, 1, 2]})  # Should be 0 or 1
 
-    with pytest.raises(ValueError, match="Event indicator must be 0 or 1"):
+    with pytest.raises(InvalidDataError, match="Event indicator must be 0 or 1"):
         SurvivalAnalyzer(data=data, duration_col="duration", event_col="event")
 
 

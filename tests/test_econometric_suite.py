@@ -839,14 +839,18 @@ def test_survival_analysis_competing_risks_missing_params(competing_risks_data):
     )
 
     # Missing event_types
+    from mcp_server.exceptions import MissingParameterError
+
     with pytest.raises(
-        ValueError, match="event_type_col and event_types parameters required"
+        MissingParameterError,
+        match="event_type_col and event_types parameters required",
     ):
         suite.survival_analysis(method="competing_risks", event_type_col="event_type")
 
     # Missing event_type_col
     with pytest.raises(
-        ValueError, match="event_type_col and event_types parameters required"
+        MissingParameterError,
+        match="event_type_col and event_types parameters required",
     ):
         suite.survival_analysis(method="competing_risks", event_types=[1, 2])
 

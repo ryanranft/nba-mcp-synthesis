@@ -313,7 +313,9 @@ def test_invalid_column_names():
         }
     )
 
-    with pytest.raises(ValueError, match="Column 'invalid' not found"):
+    from mcp_server.exceptions import InvalidDataError
+
+    with pytest.raises(InvalidDataError, match="Column 'invalid' not found"):
         PanelDataAnalyzer(data, entity_col="invalid", time_col="time", target_col="y")
 
 
