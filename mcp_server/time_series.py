@@ -35,6 +35,16 @@ from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.stats.diagnostic import acorr_ljungbox
 import scipy.stats as stats
 
+# Custom exceptions
+from mcp_server.exceptions import (
+    InsufficientDataError,
+    InvalidDataError,
+    InvalidParameterError,
+    ModelFitError,
+    validate_data_shape,
+    validate_parameter,
+)
+
 # Advanced time series models (Phase 2 Day 2)
 try:
     from statsmodels.tsa.statespace.sarimax import SARIMAX
@@ -462,6 +472,15 @@ class TimeSeriesAnalyzer:
             ValueError: If target_column not in data
             ValueError: If time series has missing values
         """
+        # Validate data type and shape
+        if not isinstance(data, pd.DataFrame):
+            raise InvalidDataError(
+                "Data must be a pandas DataFrame",
+                value=type(data).__name__
+            )
+
+        validate_data_shape(data, min_rows=30)  # Minimum for time series analysis
+
         self.data = data.copy()
         self.target_column = target_column
         self.time_column = time_column
@@ -480,7 +499,11 @@ class TimeSeriesAnalyzer:
 
         # Validate target column exists
         if target_column not in data.columns:
-            raise ValueError(f"Target column '{target_column}' not found in data")
+            raise InvalidDataError(
+                f"Target column '{target_column}' not found in data",
+                value=target_column,
+                available_columns=list(data.columns)
+            )
 
         # Set up time index
         if time_column:
@@ -826,20 +849,57 @@ class TimeSeriesAnalyzer:
         Returns:
             ARIMAModelResult with fitted model
         """
+        # Validate ARIMA order
+        if not isinstance(order, tuple) or len(order) != 3:
+            raise InvalidParameterError(
+                "ARIMA order must be a tuple of 3 integers (p, d, q)",
+                parameter="order",
+                value=order
+            )
+
+        p, d, q = order
+        if any(x < 0 for x in [p, d, q]):
+            raise InvalidParameterError(
+                "ARIMA order values must be non-negative",
+                parameter="order",
+                value=order
+            )
+
+        if p + d + q == 0:
+            raise InvalidParameterError(
+                "At least one ARIMA parameter must be > 0",
+                parameter="order",
+                value=order
+            )
+
         series_clean = self.series.dropna()
+
+        if len(series_clean) < 30:
+            raise InsufficientDataError(
+                "Need at least 30 observations for ARIMA",
+                required=30,
+                actual=len(series_clean)
+            )
 
         # Fit ARIMA model
         # Note: statsmodels requires seasonal_order to be either a tuple or explicitly omitted
-        if seasonal_order is not None:
-            model = ARIMA(
-                series_clean, order=order, seasonal_order=seasonal_order, **kwargs
-            )
-        else:
-            model = ARIMA(series_clean, order=order, **kwargs)
+        try:
+            if seasonal_order is not None:
+                model = ARIMA(
+                    series_clean, order=order, seasonal_order=seasonal_order, **kwargs
+                )
+            else:
+                model = ARIMA(series_clean, order=order, **kwargs)
 
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore")
-            fitted_model = model.fit()
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore")
+                fitted_model = model.fit()
+        except (ValueError, np.linalg.LinAlgError) as e:
+            raise ModelFitError(
+                f"ARIMA model fitting failed with order={order}",
+                model_type="ARIMA",
+                reason=str(e)
+            ) from e
 
         result = ARIMAModelResult(
             model=fitted_model,

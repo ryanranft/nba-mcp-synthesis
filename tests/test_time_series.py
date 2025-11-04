@@ -22,6 +22,7 @@ from mcp_server.time_series import (
     ForecastResult,
     ARIMAModelResult,
 )
+from mcp_server.exceptions import InvalidDataError
 
 
 # ==============================================================================
@@ -507,8 +508,8 @@ def test_analyzer_validation_errors():
     dates = pd.date_range("2023-01-01", periods=100, freq="D")
     df = pd.DataFrame({"value": np.random.normal(0, 1, 100)}, index=dates)
 
-    # Invalid target column
-    with pytest.raises(ValueError, match="Target column.*not found"):
+    # Invalid target column - should raise InvalidDataError
+    with pytest.raises(InvalidDataError, match="Target column.*not found"):
         TimeSeriesAnalyzer(df, target_column="invalid_column")
 
     # Invalid time column
