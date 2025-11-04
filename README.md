@@ -477,6 +477,100 @@ This tests MCP server communication directly.
 - **Claude 3.7 Sonnet** - Synthesis, verification, explanation
 - **Ollama** (Optional) - Local verification model
 
+## 🎓 Learning Path: Interactive Tutorials
+
+**NEW!** Complete tutorial series covering 27+ econometric methods with real NBA applications.
+
+### Tutorial Notebooks
+
+Located in `examples/`, these Jupyter notebooks provide hands-on learning from beginner to expert level:
+
+| Notebook | Level | Topics Covered | Time |
+|----------|-------|---------------|------|
+| **[01 - NBA 101 Getting Started](examples/01_nba_101_getting_started.ipynb)** | Beginner | Data loading, EDA, basic stats (correlation, regression, t-tests) | 30 min |
+| **[02 - Player Valuation & Performance](examples/02_player_valuation_performance.ipynb)** | Intermediate | Time series (ARIMA), panel data, causal inference (PSM), player comparison | 45 min |
+| **[03 - Team Strategy & Game Outcomes](examples/03_team_strategy_game_outcomes.ipynb)** | Advanced | Game theory (Nash equilibrium), win probability (logistic), DiD, network analysis | 60 min |
+| **[04 - Contract Analytics & Salary Cap](examples/04_contract_analytics_salary_cap.ipynb)** | Advanced | Contract valuation, salary cap optimization, trade evaluation, RDD | 60 min |
+| **[05 - Live Game Analytics Dashboard](examples/05_live_game_analytics_dashboard.ipynb)** | Expert | Real-time win probability, player tracking (particle filters), in-game decisions | 60 min |
+
+### Supporting Documentation
+
+- **[Best Practices Guide](examples/BEST_PRACTICES.md)** - Comprehensive guide to using the framework effectively
+  - Method selection decision tree
+  - Data preparation guidelines
+  - Model validation checklist
+  - Performance optimization tips
+  - Common pitfalls and solutions
+
+- **[Quick Reference Card](examples/QUICK_REFERENCE.md)** - One-page cheat sheet
+  - All 27+ methods with code examples
+  - Parameter quick reference
+  - Error messages and solutions
+  - Performance guidelines
+
+### What You'll Learn
+
+**Econometric Methods (23 methods)**:
+- Basic Analysis: OLS, Logistic Regression, T-Tests
+- Time Series: ARIMA, BVAR, BSTS, Kalman Filters
+- Panel Data: Fixed Effects, Random Effects, Hierarchical Bayesian
+- Causal Inference: PSM, DiD, RDD, Instrumental Variables
+
+**Advanced Methods (4 Bayesian methods)**:
+- Bayesian VAR with Minnesota Prior (IRF, FEVD)
+- Bayesian Structural Time Series (component decomposition)
+- Hierarchical Bayesian TS (shrinkage, partial pooling)
+- Particle Filters (real-time state estimation)
+
+**Real-World Applications**:
+- Player performance forecasting
+- Contract valuation and salary cap optimization
+- Win probability modeling
+- Trade scenario evaluation
+- Draft value analysis (regression discontinuity)
+- Live game analytics dashboard
+
+### Quick Start with Tutorials
+
+```bash
+# Navigate to examples directory
+cd examples/
+
+# Start with beginner notebook
+jupyter notebook 01_nba_101_getting_started.ipynb
+
+# Or run all notebooks in order
+jupyter notebook
+```
+
+**Requirements**: All notebooks use synthetic data by default (no database required). To use real NBA data, connect to MCP server.
+
+### Tutorial Features
+
+- ✅ **Progressive Learning**: Builds from basic to advanced concepts
+- ✅ **Real NBA Scenarios**: Contract negotiations, draft picks, live games
+- ✅ **Code + Explanation**: Every analysis explained with interpretation
+- ✅ **Practice Exercises**: Test your understanding
+- ✅ **Production-Ready**: All code works with real data
+- ✅ **<5 min Runtime**: Fast execution on any laptop
+
+### Performance Benchmarks
+
+From actual testing (see `BAYESIAN_METHODS_PERFORMANCE_REPORT.md`):
+
+| Method | Execution Time | Memory | Use Case |
+|--------|---------------|--------|----------|
+| Particle Filter (Game) | 0.03s | <100 MB | ⚡ Real-time win probability |
+| Particle Filter (Player) | 0.08s | <100 MB | ⚡ Live player tracking |
+| ARIMA | ~5s | ~200 MB | Forecasting (10 games) |
+| BSTS | ~40s | ~300 MB | Career trajectory analysis |
+| BVAR | ~60s | ~500 MB | Multi-stat forecasting + IRF |
+| Hierarchical TS | ~120s | ~800 MB | Team-wide player comparison |
+
+**Conclusion**: All methods production-ready, particle filters real-time capable! ✅
+
+---
+
 ## Architecture
 
 ```

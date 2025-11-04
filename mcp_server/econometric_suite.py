@@ -33,6 +33,18 @@ from typing import Any, Dict, List, Optional, Union
 import numpy as np
 import pandas as pd
 
+# Custom exceptions
+from mcp_server.exceptions import (
+    DataError,
+    InsufficientDataError,
+    InvalidDataError,
+    InvalidParameterError,
+    MissingParameterError,
+    ModelFitError,
+    validate_data_shape,
+    validate_parameter,
+)
+
 # MLflow integration
 try:
     import mlflow
@@ -474,6 +486,18 @@ class EconometricSuite:
             outcome_col: Column with outcome variable
             mlflow_experiment: MLflow experiment name for tracking
         """
+        # Validate inputs
+        if not isinstance(data, pd.DataFrame):
+            raise InvalidDataError(
+                "Data must be a pandas DataFrame", value=type(data).__name__
+            )
+
+        if data.empty:
+            raise InsufficientDataError("DataFrame is empty", required=1, actual=0)
+
+        validate_data_shape(data, min_rows=2)
+
+        # Store attributes
         self.data = data
         self.target = target
         self.entity_col = entity_col
@@ -574,6 +598,122 @@ class EconometricSuite:
     # ==========================================================================
     # Module Access Methods
     # ==========================================================================
+
+    def regression(
+        self,
+        target: Optional[str] = None,
+        predictors: Optional[list[str]] = None,
+        formula: Optional[str] = None,
+    ) -> SuiteResult:
+        """
+        Run basic OLS regression.
+
+        Args:
+            target: Target/outcome variable (uses self.target if None)
+            predictors: List of predictor variables (all numeric columns if None)
+            formula: Optional R-style formula (e.g., "y ~ x1 + x2")
+
+        Returns:
+            SuiteResult with regression results
+
+        Examples:
+            >>> # Simple regression
+            >>> result = suite.regression(target='points', predictors=['minutes'])
+            >>>
+            >>> # Multiple regression
+            >>> result = suite.regression(
+            ...     target='points',
+            ...     predictors=['minutes', 'rebounds', 'assists']
+            ... )
+        """
+        import statsmodels.api as sm
+        from statsmodels.formula.api import ols
+
+        # Determine target
+        target = target or self.target
+        if not target:
+            raise ValueError("Target variable must be specified")
+
+        # Build formula or use provided one
+        if formula:
+            model = ols(formula, data=self.data).fit()
+            result_target = target
+        else:
+            # Determine predictors
+            if predictors is None:
+                # Use all numeric columns except target
+                predictors = [
+                    col
+                    for col in self.data.columns
+                    if col != target
+                    and pd.api.types.is_numeric_dtype(self.data[col])
+                    and not pd.api.types.is_datetime64_any_dtype(self.data[col])
+                    and not pd.api.types.is_object_dtype(
+                        self.data[col]
+                    )  # Exclude object columns
+                    and not pd.api.types.is_string_dtype(
+                        self.data[col]
+                    )  # Exclude string columns
+                ]
+
+            if not predictors:
+                raise ValueError("No valid predictors found")
+
+            # Prepare data - ensure only numeric data
+            X = self.data[predictors].copy()
+            y = self.data[target].copy()
+
+            # Convert to numeric, coercing errors
+            for col in predictors:
+                if X[col].dtype == "object":
+                    X[col] = pd.to_numeric(X[col], errors="coerce")
+
+            # Remove NaN values
+            combined = pd.concat([y, X], axis=1).dropna()
+            y = combined[target]
+            X = combined[predictors]
+
+            # Add constant
+            X = sm.add_constant(X)
+
+            # Fit model
+            model = sm.OLS(y, X).fit()
+            result_target = target
+
+        # Extract results
+        result = {
+            "coefficients": model.params.to_dict(),
+            "pvalues": model.pvalues.to_dict(),
+            "rsquared": model.rsquared,
+            "rsquared_adj": model.rsquared_adj,
+            "fvalue": model.fvalue,
+            "f_pvalue": model.f_pvalue,
+            "aic": model.aic,
+            "bic": model.bic,
+            "nobs": int(model.nobs),
+        }
+
+        # Build parameters dict
+        params = {
+            "target": result_target,
+        }
+        if predictors:
+            params["predictors"] = predictors
+        if formula:
+            params["formula"] = formula
+
+        return self._create_suite_result(
+            method_category="regression",
+            method_used="ols",
+            result=result,
+            model=model,
+            aic=model.aic,
+            bic=model.bic,
+            r_squared=model.rsquared,
+            n_obs=int(model.nobs),
+            n_params=len(model.params),
+            parameters=params,
+        )
 
     def time_series_analysis(self, method: str = "arima", **kwargs) -> SuiteResult:
         """
@@ -719,16 +859,62 @@ class EconometricSuite:
         """
         from mcp_server.time_series import TimeSeriesAnalyzer
 
+        # Validate inputs
         if self.target is None:
-            raise ValueError("target column must be specified for time series analysis")
+            raise MissingParameterError(
+                "target column must be specified for time series analysis",
+                parameter="target",
+                context="time_series_analysis",
+            )
 
-        # Pass time_col to analyzer so it can set DatetimeIndex if needed
-        time_column_param = (
-            self.time_col if hasattr(self, "time_col") and self.time_col else None
-        )
-        analyzer = TimeSeriesAnalyzer(
-            data=self.data, target_column=self.target, time_column=time_column_param
-        )
+        if self.target not in self.data.columns:
+            raise InvalidDataError(
+                f"Target column '{self.target}' not found in data", column=self.target
+            )
+
+        # Validate method
+        valid_methods = [
+            "arima",
+            "auto_arima",
+            "arimax",
+            "var",
+            "varmax",
+            "stl",
+            "mstl",
+            "granger",
+            "granger_causality",
+            "johansen",
+            "cointegration",
+            "vecm",
+            "structural_breaks",
+            "breaks",
+            "diagnostics",
+            "ts_diagnostics",
+            "breusch_godfrey",
+            "bg_test",
+            "bg",
+            "heteroscedasticity",
+            "het_test",
+        ]
+        validate_parameter("method", method, valid_values=valid_methods)
+
+        # Validate sufficient data for time series
+        validate_data_shape(self.data, min_rows=30)
+
+        try:
+            # Pass time_col to analyzer so it can set DatetimeIndex if needed
+            time_column_param = (
+                self.time_col if hasattr(self, "time_col") and self.time_col else None
+            )
+            analyzer = TimeSeriesAnalyzer(
+                data=self.data, target_column=self.target, time_column=time_column_param
+            )
+        except Exception as e:
+            raise ModelFitError(
+                "Failed to create TimeSeriesAnalyzer",
+                model_type="time_series",
+                reason=str(e),
+            ) from e
 
         if method == "arima":
             # Set default order if not provided
@@ -1018,20 +1204,80 @@ class EconometricSuite:
         """
         from mcp_server.panel_data import PanelDataAnalyzer
 
+        # Validate method parameter
+        valid_methods = [
+            "fixed_effects",
+            "fe",
+            "random_effects",
+            "re",
+            "pooled_ols",
+            "pooled",
+            "first_diff",
+            "fd",
+            "first_difference",
+            "diff_gmm",
+            "arellano_bond",
+            "ab_gmm",
+            "difference_gmm",
+            "sys_gmm",
+            "system_gmm",
+            "bb_gmm",
+            "blundell_bond",
+            "gmm_diagnostics",
+            "gmm_tests",
+        ]
+        validate_parameter("method", method, valid_values=valid_methods)
+
+        # Validate required columns
         if self.entity_col is None or self.time_col is None:
-            raise ValueError(
-                "entity_col and time_col must be specified for panel analysis"
+            missing = []
+            if self.entity_col is None:
+                missing.append("entity_col")
+            if self.time_col is None:
+                missing.append("time_col")
+            raise MissingParameterError(
+                "entity_col and time_col must be specified for panel analysis",
+                parameter=" and ".join(missing),
+                context="panel_analysis",
             )
 
         if self.target is None:
-            raise ValueError("target column must be specified for panel analysis")
+            raise MissingParameterError(
+                "target column must be specified for panel analysis",
+                parameter="target",
+                context="panel_analysis",
+            )
 
-        analyzer = PanelDataAnalyzer(
-            data=self.data,
-            entity_col=self.entity_col,
-            time_col=self.time_col,
-            target_col=self.target,
-        )
+        # Validate columns exist in data
+        if self.entity_col not in self.data.columns:
+            raise InvalidDataError(
+                f"Entity column '{self.entity_col}' not found in data",
+                column=self.entity_col,
+            )
+        if self.time_col not in self.data.columns:
+            raise InvalidDataError(
+                f"Time column '{self.time_col}' not found in data", column=self.time_col
+            )
+        if self.target not in self.data.columns:
+            raise InvalidDataError(
+                f"Target column '{self.target}' not found in data", column=self.target
+            )
+
+        # Validate minimum data for panel analysis (need multiple entities and time periods)
+        validate_data_shape(self.data, min_rows=10)
+
+        # Create analyzer with error handling
+        try:
+            analyzer = PanelDataAnalyzer(
+                data=self.data,
+                entity_col=self.entity_col,
+                time_col=self.time_col,
+                target_col=self.target,
+            )
+        except Exception as e:
+            raise ModelFitError(
+                "Failed to create PanelDataAnalyzer", model_type="panel", reason=str(e)
+            ) from e
 
         # Build formula: target ~ 1 (intercept only, entity/time effects handled by method)
         formula = f"{self.target} ~ 1"
@@ -1074,7 +1320,11 @@ class EconometricSuite:
             # Arellano-Bond Difference GMM
             formula_str = kwargs.pop("formula", None)  # Use pop to remove from kwargs
             if formula_str is None:
-                raise ValueError("formula parameter required for Difference GMM")
+                raise MissingParameterError(
+                    "formula parameter required for Difference GMM",
+                    parameter="formula",
+                    context="panel_analysis(method=diff_gmm)",
+                )
 
             result = analyzer.difference_gmm(formula=formula_str, **kwargs)
             return self._create_suite_result(
@@ -1090,7 +1340,11 @@ class EconometricSuite:
             # Blundell-Bond System GMM
             formula_str = kwargs.pop("formula", None)  # Use pop to remove from kwargs
             if formula_str is None:
-                raise ValueError("formula parameter required for System GMM")
+                raise MissingParameterError(
+                    "formula parameter required for System GMM",
+                    parameter="formula",
+                    context="panel_analysis(method=system_gmm)",
+                )
 
             result = analyzer.system_gmm(formula=formula_str, **kwargs)
             return self._create_suite_result(
@@ -1106,9 +1360,11 @@ class EconometricSuite:
             # GMM diagnostic tests
             gmm_result = kwargs.get("gmm_result")
             if gmm_result is None:
-                raise ValueError(
+                raise MissingParameterError(
                     "gmm_result parameter required for GMM diagnostics. "
-                    "Pass result from diff_gmm or system_gmm."
+                    "Pass result from diff_gmm or system_gmm.",
+                    parameter="gmm_result",
+                    context="panel_analysis(method=gmm_diagnostics)",
                 )
 
             result = analyzer.gmm_diagnostics(gmm_result=gmm_result)
@@ -1120,7 +1376,10 @@ class EconometricSuite:
             )
 
         else:
-            raise ValueError(f"Unknown panel method: {method}")
+            # This should never happen due to validate_parameter, but keep for safety
+            raise InvalidParameterError(
+                f"Unknown panel method: {method}", parameter="method", value=method
+            )
 
     def causal_analysis(
         self,
@@ -1196,11 +1455,36 @@ class EconometricSuite:
         """
         from mcp_server.causal_inference import CausalInferenceAnalyzer
 
+        # Validate method
+        valid_methods = [
+            "psm",
+            "iv",
+            "instrumental_variables",
+            "rdd",
+            "regression_discontinuity",
+            "synthetic",
+            "synthetic_control",
+            "kernel",
+            "kernel_matching",
+            "radius",
+            "radius_matching",
+            "doubly_robust",
+            "doubly_robust_estimation",
+        ]
+        validate_parameter("method", method, valid_values=valid_methods)
+
+        # Validate sufficient data
+        validate_data_shape(self.data, min_rows=20)
+
         # Synthetic Control handles treatment differently (no treatment_col needed)
         if method == "synthetic" or method == "synthetic_control":
             outcome = outcome_col or self.outcome_col
             if outcome is None:
-                raise ValueError("outcome_col must be specified")
+                raise MissingParameterError(
+                    "outcome_col must be specified for synthetic control",
+                    parameter="outcome_col",
+                    context="causal_analysis",
+                )
 
             treated_unit = kwargs.get("treated_unit")
             outcome_periods = kwargs.get("outcome_periods")
@@ -1245,18 +1529,40 @@ class EconometricSuite:
         outcome = outcome_col or self.outcome_col
 
         if treatment is None or outcome is None:
-            raise ValueError("treatment_col and outcome_col must be specified")
+            raise MissingParameterError(
+                "treatment_col and outcome_col must be specified for causal analysis",
+                parameter="treatment_col, outcome_col",
+                context="causal_analysis",
+            )
+
+        # Validate columns exist
+        if treatment not in self.data.columns:
+            raise InvalidDataError(
+                f"Treatment column '{treatment}' not found in data", column=treatment
+            )
+        if outcome not in self.data.columns:
+            raise InvalidDataError(
+                f"Outcome column '{outcome}' not found in data", column=outcome
+            )
 
         # For IV, exclude instruments from covariates
         instruments = kwargs.get("instruments", [])
         if isinstance(instruments, str):
             instruments = [instruments]
 
+        # Filter out datetime columns and non-numeric columns
+        exclude_cols = [
+            treatment,
+            outcome,
+            self.entity_col,
+            self.time_col,
+        ] + instruments
         covariates = [
             col
             for col in self.data.columns
-            if col
-            not in [treatment, outcome, self.entity_col, self.time_col] + instruments
+            if col not in exclude_cols
+            and not pd.api.types.is_datetime64_any_dtype(self.data[col])
+            and pd.api.types.is_numeric_dtype(self.data[col])
         ]
 
         analyzer = CausalInferenceAnalyzer(
@@ -1453,24 +1759,79 @@ class EconometricSuite:
         """
         from mcp_server.survival_analysis import SurvivalAnalyzer
 
+        # Validate method parameter
+        valid_methods = [
+            "cox",
+            "kaplan_meier",
+            "km",
+            "parametric",
+            "competing_risks",
+            "frailty",
+            "complete_frailty",
+            "fine_gray",
+            "fine_gray_competing_risks",
+            "cure",
+            "cure_model",
+            "recurrent_events",
+            "pwp",
+            "ag",
+            "wlw",
+        ]
+        validate_parameter("method", method, valid_values=valid_methods)
+
         duration = duration_col or self.duration_col
         event = event_col or self.event_col
 
+        # Validate required parameters
         if duration is None or event is None:
-            raise ValueError("duration_col and event_col must be specified")
+            missing = []
+            if duration is None:
+                missing.append("duration_col")
+            if event is None:
+                missing.append("event_col")
+            raise MissingParameterError(
+                "duration_col and event_col must be specified for survival analysis",
+                parameter=" and ".join(missing),
+                context="survival_analysis",
+            )
 
+        # Validate columns exist in data
+        if duration not in self.data.columns:
+            raise InvalidDataError(
+                f"Duration column '{duration}' not found in data", column=duration
+            )
+        if event not in self.data.columns:
+            raise InvalidDataError(
+                f"Event column '{event}' not found in data", column=event
+            )
+
+        # Validate minimum data for survival analysis
+        validate_data_shape(self.data, min_rows=10)
+
+        # Filter out datetime columns and non-numeric columns
+        exclude_cols = [duration, event, self.entity_col, self.time_col]
         covariates = [
             col
             for col in self.data.columns
-            if col not in [duration, event, self.entity_col, self.time_col]
+            if col not in exclude_cols
+            and not pd.api.types.is_datetime64_any_dtype(self.data[col])
+            and pd.api.types.is_numeric_dtype(self.data[col])
         ]
 
-        analyzer = SurvivalAnalyzer(
-            data=self.data,
-            duration_col=duration,
-            event_col=event,
-            covariates=covariates[:10],  # Limit covariates
-        )
+        # Create analyzer with error handling
+        try:
+            analyzer = SurvivalAnalyzer(
+                data=self.data,
+                duration_col=duration,
+                event_col=event,
+                covariates=covariates[:10],  # Limit covariates
+            )
+        except Exception as e:
+            raise ModelFitError(
+                "Failed to create SurvivalAnalyzer",
+                model_type="survival",
+                reason=str(e),
+            ) from e
 
         if method == "cox":
             result = analyzer.cox_proportional_hazards(**kwargs)
@@ -1534,8 +1895,15 @@ class EconometricSuite:
             event_types = kwargs.get("event_types")
 
             if event_type_col is None or event_types is None:
-                raise ValueError(
-                    "event_type_col and event_types parameters required for competing_risks method"
+                missing = []
+                if event_type_col is None:
+                    missing.append("event_type_col")
+                if event_types is None:
+                    missing.append("event_types")
+                raise MissingParameterError(
+                    "event_type_col and event_types parameters required for competing_risks method",
+                    parameter=" and ".join(missing),
+                    context="survival_analysis(method=competing_risks)",
                 )
 
             result = analyzer.competing_risks(
@@ -1575,8 +1943,15 @@ class EconometricSuite:
             event_of_interest = kwargs.get("event_of_interest")
 
             if event_type_col is None or event_of_interest is None:
-                raise ValueError(
-                    "event_type_col and event_of_interest required for Fine-Gray model"
+                missing = []
+                if event_type_col is None:
+                    missing.append("event_type_col")
+                if event_of_interest is None:
+                    missing.append("event_of_interest")
+                raise MissingParameterError(
+                    "event_type_col and event_of_interest required for Fine-Gray model",
+                    parameter=" and ".join(missing),
+                    context="survival_analysis(method=fine_gray)",
                 )
 
             result = analyzer.fine_gray_model(
@@ -1678,6 +2053,324 @@ class EconometricSuite:
         else:
             raise ValueError(f"Unknown Bayesian method: {method}")
 
+    def bayesian_time_series_analysis(
+        self, method: str = "bvar", **kwargs
+    ) -> SuiteResult:
+        """
+        Access Bayesian time series methods.
+
+        Methods include:
+        - BVAR: Bayesian Vector Autoregression with Minnesota prior
+        - BSTS: Bayesian Structural Time Series (coming soon)
+        - Hierarchical TS: Multi-level time series (coming soon)
+
+        Args:
+            method: Bayesian TS method:
+                - 'bvar' or 'bayesian_var': Bayesian VAR with Minnesota prior
+                - 'bsts' or 'structural': Bayesian Structural Time Series (Week 2)
+                - 'hierarchical_ts': Hierarchical Bayesian Time Series (Week 3)
+            **kwargs: Method-specific parameters
+
+        BVAR Parameters:
+            var_names: List[str] - Variable names for VAR
+            lags: int - Number of lags (default=1)
+            draws: int - MCMC draws (default=2000)
+            tune: int - MCMC tuning steps (default=1000)
+            chains: int - Number of chains (default=4)
+            lambda1: float - Overall tightness (default=0.2)
+            lambda2: float - Cross-variable shrinkage (default=0.5)
+            lambda3: float - Lag decay (default=1.0)
+
+        Returns:
+            SuiteResult with Bayesian time series results
+
+        Examples:
+            >>> # Bayesian VAR
+            >>> result = suite.bayesian_time_series_analysis(
+            ...     method='bvar',
+            ...     var_names=['points', 'assists', 'rebounds'],
+            ...     lags=2,
+            ...     draws=1000
+            ... )
+            >>> print(f"WAIC: {result.result.waic:.2f}")
+            >>>
+            >>> # Access forecasts
+            >>> forecasts = analyzer.forecast(result.result, steps=10)
+        """
+        from mcp_server.bayesian_time_series import (
+            BVARAnalyzer,
+            PYMC_AVAILABLE,
+            check_pymc_available,
+        )
+
+        # Validate method parameter
+        valid_methods = [
+            "bvar",
+            "bayesian_var",
+            "bsts",
+            "structural",
+            "hierarchical_ts",
+        ]
+        validate_parameter("method", method, valid_values=valid_methods)
+
+        # Validate minimum data for Bayesian analysis
+        validate_data_shape(self.data, min_rows=30)
+
+        # Check PyMC availability
+        check_pymc_available()
+
+        if method == "bvar" or method == "bayesian_var":
+            # Bayesian Vector Autoregression
+            var_names = kwargs.pop("var_names", None)
+            if var_names is None:
+                # Try to infer from data columns
+                if isinstance(self.data, pd.DataFrame):
+                    var_names = self.data.columns.tolist()[:3]  # Use first 3 columns
+                    logger.info(f"Auto-selected variables: {var_names}")
+                else:
+                    raise MissingParameterError(
+                        "var_names must be specified for BVAR",
+                        parameter="var_names",
+                        context="bayesian_time_series_analysis(method=bvar)",
+                    )
+
+            # Validate var_names columns exist
+            for var in var_names:
+                if var not in self.data.columns:
+                    raise InvalidDataError(
+                        f"Variable '{var}' not found in data", column=var
+                    )
+
+            lags = kwargs.pop("lags", 1)
+
+            # Initialize analyzer with error handling
+            try:
+                analyzer = BVARAnalyzer(
+                    data=self.data, var_names=var_names, lags=lags, minnesota_prior=True
+                )
+            except Exception as e:
+                raise ModelFitError(
+                    "Failed to create BVARAnalyzer",
+                    model_type="bayesian_var",
+                    reason=str(e),
+                ) from e
+
+            # Fit model with error handling
+            try:
+                result = analyzer.fit(**kwargs)
+            except Exception as e:
+                raise ModelFitError(
+                    "Failed to fit Bayesian VAR model",
+                    model_type="bayesian_var",
+                    reason=str(e),
+                ) from e
+
+            return self._create_suite_result(
+                method_category=MethodCategory.BAYESIAN,
+                method_used="Bayesian VAR (Minnesota Prior)",
+                result=result,
+                model=result.model,
+                aic=result.waic,  # Use WAIC as AIC analog
+                n_obs=analyzer.n_obs,
+                n_params=len(result.summary) if result.summary is not None else 0,
+            )
+
+        elif method == "bsts" or method == "structural":
+            # Bayesian Structural Time Series (Week 2 - Coming Soon)
+            raise NotImplementedError(
+                "Bayesian Structural Time Series (BSTS) coming in Week 2. "
+                "Stay tuned!"
+            )
+
+        elif method == "hierarchical_ts":
+            # Hierarchical Bayesian Time Series (Week 3 - Coming Soon)
+            raise NotImplementedError(
+                "Hierarchical Bayesian Time Series coming in Week 3. " "Stay tuned!"
+            )
+
+        else:
+            # This should never happen due to validate_parameter, but keep for safety
+            raise InvalidParameterError(
+                f"Unknown Bayesian time series method: {method}",
+                parameter="method",
+                value=method,
+                valid_values=valid_methods,
+            )
+
+    def particle_filter_analysis(
+        self, method: str = "player_performance", **kwargs
+    ) -> SuiteResult:
+        """
+        Access particle filter methods for real-time tracking.
+
+        Particle filters (Sequential Monte Carlo) are ideal for:
+        - Real-time player performance tracking
+        - Live game win probability updates
+        - Non-linear state estimation
+        - Bayesian filtering with arbitrary distributions
+
+        Methods include:
+        - player_performance: Track player skill and form over time
+        - live_game: Real-time win probability tracking
+        - custom: Generic particle filter with custom dynamics
+
+        Args:
+            method: Particle filter method:
+                - 'player_performance': Track player skill/form (default)
+                - 'live_game': Live win probability tracking
+                - 'custom': Generic particle filter
+            **kwargs: Method-specific parameters
+
+        Player Performance Parameters:
+            target_col: str - Target variable (e.g., 'points')
+            covariate_cols: List[str] - Covariates (e.g., ['minutes', 'opponent_strength'])
+            n_particles: int - Number of particles (default=1000)
+            skill_drift: float - Expected skill change per game (default=0)
+            skill_volatility: float - Skill noise (default=0.05)
+            form_persistence: float - Form AR(1) coefficient (default=0.7)
+            form_volatility: float - Form noise (default=0.2)
+
+        Live Game Parameters:
+            score_updates: List[Tuple[float, int, int]] - (time, home_score, away_score)
+            home_team_rating: float - Home team net rating
+            away_team_rating: float - Away team net rating
+            n_particles: int - Number of particles (default=2000)
+
+        Returns:
+            SuiteResult with particle filter results
+
+        Examples:
+            >>> # Track player performance
+            >>> result = suite.particle_filter_analysis(
+            ...     method='player_performance',
+            ...     target_col='points',
+            ...     covariate_cols=['minutes', 'home_game'],
+            ...     n_particles=1000
+            ... )
+            >>> print(result.result.form_states)
+            >>>
+            >>> # Live game tracking
+            >>> score_updates = [(12, 25, 22), (24, 48, 45), (36, 70, 68), (48, 95, 92)]
+            >>> result = suite.particle_filter_analysis(
+            ...     method='live_game',
+            ...     score_updates=score_updates,
+            ...     home_team_rating=5.0,
+            ...     away_team_rating=3.0
+            ... )
+            >>> print(f"Final win prob: {result.result.final_win_prob:.1%}")
+        """
+        from mcp_server.particle_filters import (
+            PlayerPerformanceParticleFilter,
+            LiveGameProbabilityFilter,
+            ParticleFilter,
+            create_player_filter,
+            create_game_filter,
+        )
+
+        if method == "player_performance":
+            # Player performance tracking
+            target_col = kwargs.pop("target_col", "points")
+            covariate_cols = kwargs.pop("covariate_cols", None)
+            coefficients = kwargs.pop("coefficients", None)
+
+            # Use auto-tuned filter if data available
+            if hasattr(self, "data") and self.data is not None:
+                pf = create_player_filter(self.data, **kwargs)
+                result = pf.filter_player_season(
+                    data=self.data,
+                    target_col=target_col,
+                    covariate_cols=covariate_cols,
+                    coefficients=coefficients,
+                )
+            else:
+                raise ValueError(
+                    "player_performance method requires data to be set in EconometricSuite"
+                )
+
+            return self._create_suite_result(
+                method_category=MethodCategory.TIME_SERIES,
+                method_used="Particle Filter: Player Performance",
+                result=result,
+                model=None,
+                n_obs=len(result.states),
+                n_params=2,  # skill, form
+            )
+
+        elif method == "live_game":
+            # Live game win probability tracking
+            score_updates = kwargs.pop("score_updates", None)
+            if score_updates is None:
+                raise ValueError("score_updates required for live_game method")
+
+            home_team_rating = kwargs.pop("home_team_rating", 0.0)
+            away_team_rating = kwargs.pop("away_team_rating", 0.0)
+            initial_diff = kwargs.pop("initial_diff", 0.0)
+
+            pf = create_game_filter(
+                home_team_rating=home_team_rating,
+                away_team_rating=away_team_rating,
+                **kwargs,
+            )
+
+            result = pf.track_game(
+                score_updates=score_updates, initial_diff=initial_diff
+            )
+
+            return self._create_suite_result(
+                method_category=MethodCategory.TIME_SERIES,
+                method_used="Particle Filter: Live Game Probability",
+                result=result,
+                model=None,
+                n_obs=len(result.time_points),
+                n_params=1,  # score_diff
+            )
+
+        elif method == "custom":
+            # Generic particle filter
+            n_particles = kwargs.pop("n_particles", 1000)
+            state_dim = kwargs.pop("state_dim", 1)
+            transition_fn = kwargs.pop("transition_fn", None)
+            observation_fn = kwargs.pop("observation_fn", None)
+
+            if transition_fn is None or observation_fn is None:
+                raise ValueError(
+                    "custom method requires transition_fn and observation_fn"
+                )
+
+            pf = ParticleFilter(
+                n_particles=n_particles,
+                state_dim=state_dim,
+                transition_fn=transition_fn,
+                observation_fn=observation_fn,
+                **kwargs,
+            )
+
+            # Require observations and initial_state
+            observations = kwargs.pop("observations", None)
+            initial_state = kwargs.pop("initial_state", None)
+
+            if observations is None or initial_state is None:
+                raise ValueError(
+                    "custom method requires observations and initial_state"
+                )
+
+            result = pf.filter(observations, initial_state, **kwargs)
+
+            return self._create_suite_result(
+                method_category=MethodCategory.TIME_SERIES,
+                method_used="Particle Filter: Custom",
+                result=result,
+                model=None,
+                n_obs=len(observations),
+                n_params=state_dim,
+            )
+
+        else:
+            raise ValueError(
+                f"Unknown particle filter method: {method}. "
+                f"Available: 'player_performance', 'live_game', 'custom'"
+            )
+
     def advanced_time_series_analysis(
         self, method: str = "kalman", **kwargs
     ) -> SuiteResult:
@@ -1718,10 +2411,42 @@ class EconometricSuite:
         """
         from mcp_server.advanced_time_series import AdvancedTimeSeriesAnalyzer
 
-        if self.target is None:
-            raise ValueError("target column must be specified")
+        # Validate method parameter
+        valid_methods = [
+            "kalman",
+            "markov_switching",
+            "markov",
+            "dynamic_factor",
+            "structural",
+        ]
+        validate_parameter("method", method, valid_values=valid_methods)
 
-        analyzer = AdvancedTimeSeriesAnalyzer(self.data[self.target])
+        # Validate target
+        if self.target is None:
+            raise MissingParameterError(
+                "target column must be specified for advanced time series analysis",
+                parameter="target",
+                context="advanced_time_series_analysis",
+            )
+
+        # Validate target exists in data
+        if self.target not in self.data.columns:
+            raise InvalidDataError(
+                f"Target column '{self.target}' not found in data", column=self.target
+            )
+
+        # Validate minimum data for advanced time series
+        validate_data_shape(self.data, min_rows=30)
+
+        # Create analyzer with error handling
+        try:
+            analyzer = AdvancedTimeSeriesAnalyzer(self.data[self.target])
+        except Exception as e:
+            raise ModelFitError(
+                "Failed to create AdvancedTimeSeriesAnalyzer",
+                model_type="advanced_time_series",
+                reason=str(e),
+            ) from e
 
         if method == "kalman":
             result = analyzer.kalman_filter(**kwargs)
@@ -1807,7 +2532,13 @@ class EconometricSuite:
             )
 
         else:
-            raise ValueError(f"Unknown advanced time series method: {method}")
+            # This should never happen due to validate_parameter, but keep for safety
+            raise InvalidParameterError(
+                f"Unknown advanced time series method: {method}",
+                parameter="method",
+                value=method,
+                valid_values=valid_methods,
+            )
 
     # ==========================================================================
     # Model Comparison and Averaging
@@ -1899,13 +2630,16 @@ class EconometricSuite:
         **kwargs,
     ) -> SuiteResult:
         """Create SuiteResult object with common fields."""
+        # Allow n_obs override from kwargs, otherwise use len(self.data)
+        if "n_obs" not in kwargs:
+            kwargs["n_obs"] = len(self.data)
+
         suite_result = SuiteResult(
             data_structure=self.characteristics.structure,
             method_category=method_category,
             method_used=method_used,
             result=result,
             model=model,
-            n_obs=len(self.data),
             **kwargs,
         )
 

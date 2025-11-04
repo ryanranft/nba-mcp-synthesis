@@ -639,9 +639,36 @@ class CausalInferenceAnalyzer:
         # Common support
         ps_treated = propensity_scores[treatment == 1]
         ps_control = propensity_scores[treatment == 0]
-        common_support = (
-            propensity_scores >= max(ps_treated.min(), ps_control.min())
-        ) & (propensity_scores <= min(ps_treated.max(), ps_control.max()))
+
+        # Only apply common support if we have enough data and good overlap
+        # Use 5th/95th percentiles for maximum robustness
+        if len(ps_treated) > 20 and len(ps_control) > 20:
+            lower_bound = max(
+                np.percentile(ps_treated, 5), np.percentile(ps_control, 5)
+            )
+            upper_bound = min(
+                np.percentile(ps_treated, 95), np.percentile(ps_control, 95)
+            )
+
+            # Check if common support would eliminate too many observations
+            tentative_support = (propensity_scores >= lower_bound) & (
+                propensity_scores <= upper_bound
+            )
+            treated_in_support = np.sum(tentative_support & (treatment == 1))
+            control_in_support = np.sum(tentative_support & (treatment == 0))
+
+            # Only apply if we retain at least 50% of each group
+            if (
+                treated_in_support >= len(ps_treated) * 0.5
+                and control_in_support >= len(ps_control) * 0.5
+            ):
+                common_support = tentative_support
+            else:
+                # Common support too restrictive, use all data
+                common_support = np.ones(len(propensity_scores), dtype=bool)
+        else:
+            # With small samples, use all data (no common support restriction)
+            common_support = np.ones(len(propensity_scores), dtype=bool)
 
         # Restrict to common support
         propensity_scores_cs = propensity_scores[common_support]
@@ -652,6 +679,18 @@ class CausalInferenceAnalyzer:
         # Perform matching
         treated_idx = np.where(treatment_cs == 1)[0]
         control_idx = np.where(treatment_cs == 0)[0]
+
+        # Validate we have both treated and control units after common support
+        if len(treated_idx) == 0:
+            raise ValueError(
+                "No treated units in common support region. "
+                "Check data quality or relax common support restrictions."
+            )
+        if len(control_idx) == 0:
+            raise ValueError(
+                "No control units in common support region. "
+                "Check data quality or relax common support restrictions."
+            )
 
         if method == "nearest":
             # Nearest neighbor matching
