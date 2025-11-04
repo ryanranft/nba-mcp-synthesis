@@ -41,6 +41,14 @@ import pandas as pd
 import scipy.stats as stats
 from scipy.optimize import minimize
 
+# Custom exceptions
+from mcp_server.exceptions import (
+    InvalidDataError,
+    InvalidParameterError,
+    InsufficientDataError,
+    MissingParameterError,
+)
+
 # Survival analysis libraries
 try:
     from lifelines import (
@@ -301,15 +309,26 @@ class SurvivalAnalyzer:
         required_cols = [self.duration_col, self.event_col]
         missing = [col for col in required_cols if col not in self.data.columns]
         if missing:
-            raise ValueError(f"Missing required columns: {missing}")
+            raise InvalidDataError(
+                f"Missing required columns: {missing}",
+                value=missing,
+                available_columns=list(self.data.columns)
+            )
 
         # Check duration is positive
         if (self.data[self.duration_col] <= 0).any():
-            raise ValueError("Duration must be positive")
+            raise InvalidDataError(
+                "Duration must be positive for survival analysis",
+                value="duration <= 0 found"
+            )
 
         # Check event is binary
         if not self.data[self.event_col].isin([0, 1]).all():
-            raise ValueError("Event indicator must be 0 or 1")
+            unique_values = list(self.data[self.event_col].unique())
+            raise InvalidDataError(
+                "Event indicator must be 0 or 1",
+                value=unique_values
+            )
 
     def cox_proportional_hazards(
         self,
@@ -546,7 +565,13 @@ class SurvivalAnalyzer:
             model = model.value
 
         if model not in model_map:
-            raise ValueError(f"Unknown parametric model: {model}")
+            valid_models = list(model_map.keys())
+            raise InvalidParameterError(
+                f"Unknown parametric survival model: {model}",
+                parameter="model",
+                value=model,
+                valid_values=valid_models
+            )
 
         fitter = model_map[model]()
 
@@ -832,9 +857,12 @@ class SurvivalAnalyzer:
         ... )
         """
         if distribution not in ["gamma", "gaussian", "inverse_gaussian"]:
-            raise ValueError(
-                f"Unknown distribution: {distribution}. "
-                "Must be 'gamma', 'gaussian', or 'inverse_gaussian'"
+            valid_distributions = ["gamma", "gaussian", "inverse_gaussian"]
+            raise InvalidParameterError(
+                f"Unknown frailty distribution: {distribution}",
+                parameter="distribution",
+                value=distribution,
+                valid_values=valid_distributions
             )
 
         # Fit Cox model with penalizer as approximation to frailty
@@ -1190,7 +1218,11 @@ class SurvivalAnalyzer:
 
         # Validate event_type_col exists
         if event_type_col not in self.data.columns:
-            raise ValueError(f"event_type_col '{event_type_col}' not found in data")
+            raise InvalidDataError(
+                f"Event type column '{event_type_col}' not found in data",
+                value=event_type_col,
+                available_columns=list(self.data.columns)
+            )
 
         # Create binary indicator for event of interest
         event_binary = (self.data[event_type_col] == event_of_interest).astype(int)
@@ -1525,12 +1557,20 @@ class SurvivalAnalyzer:
             )
 
         if model_type not in ["pwp", "ag", "wlw"]:
-            raise ValueError(
-                f"Unknown model_type: {model_type}. Must be 'pwp', 'ag', or 'wlw'"
+            valid_types = ["pwp", "ag", "wlw"]
+            raise InvalidParameterError(
+                f"Unknown recurrent events model type: {model_type}",
+                parameter="model_type",
+                value=model_type,
+                valid_values=valid_types
             )
 
         if id_col not in self.data.columns:
-            raise ValueError(f"id_col '{id_col}' not found in data")
+            raise InvalidDataError(
+                f"ID column '{id_col}' not found in data",
+                value=id_col,
+                available_columns=list(self.data.columns)
+            )
 
         # Prepare formula
         if formula is None and self.covariates:
@@ -1551,7 +1591,10 @@ class SurvivalAnalyzer:
             if model_type == "pwp":
                 # Prentice-Williams-Peterson: Stratified by event number
                 if event_count_col is None or event_count_col not in self.data.columns:
-                    raise ValueError("event_count_col required for PWP model")
+                    raise MissingParameterError(
+                        "Event count column required for PWP (Prentice-Williams-Peterson) model",
+                        parameter="event_count_col"
+                    )
 
                 # Fit stratified Cox model
                 cph.fit(
