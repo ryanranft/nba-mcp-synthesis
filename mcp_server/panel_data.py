@@ -31,6 +31,13 @@ from linearmodels.panel.results import PanelResults
 import statsmodels.api as sm
 from scipy import stats
 
+# Custom exceptions
+from mcp_server.exceptions import (
+    InvalidDataError,
+    InvalidParameterError,
+    ModelFitError,
+)
+
 # Dynamic panel GMM (Phase 2 Day 6)
 try:
     from pydynpd import regression as pydynpd_reg
@@ -406,12 +413,16 @@ class PanelDataAnalyzer:
             target_col: Column containing dependent variable
 
         Raises:
-            ValueError: If columns not in data or panel structure invalid
+            InvalidDataError: If columns not in data or panel structure invalid
         """
         # Validate columns
         for col in [entity_col, time_col, target_col]:
             if col not in data.columns:
-                raise ValueError(f"Column '{col}' not found in data")
+                raise InvalidDataError(
+                    f"Column '{col}' not found in data",
+                    value=col,
+                    available_columns=list(data.columns)
+                )
 
         self.data = data.copy()
         self.entity_col = entity_col
@@ -733,7 +744,7 @@ class PanelDataAnalyzer:
             FirstDifferenceResult
 
         Raises:
-            ValueError: If formula is invalid
+            InvalidParameterError: If formula is invalid
 
         Examples:
             >>> # Analyze change in player points
@@ -812,7 +823,8 @@ class PanelDataAnalyzer:
 
         Raises:
             ImportError: If pydynpd not available
-            ValueError: If formula invalid or data structure incompatible
+            InvalidParameterError: If formula invalid
+            ModelFitError: If GMM estimation fails
 
         Examples:
             >>> # Player scoring persistence
@@ -852,7 +864,11 @@ class PanelDataAnalyzer:
         # Parse formula (simplified - assumes format like 'y ~ x1 + x2 + lag(y, 1)')
         parts = formula.replace(" ", "").split("~")
         if len(parts) != 2:
-            raise ValueError("Formula must be of form 'y ~ x1 + x2'")
+            raise InvalidParameterError(
+                "Formula must be of form 'y ~ x1 + x2'",
+                parameter="formula",
+                value=formula
+            )
 
         dependent_var = parts[0]
         independent_vars = parts[1].split("+")
@@ -919,7 +935,11 @@ class PanelDataAnalyzer:
 
         except Exception as e:
             logger.error(f"Difference GMM estimation failed: {str(e)}")
-            raise ValueError(f"GMM estimation failed: {str(e)}")
+            raise ModelFitError(
+                "Difference GMM estimation failed",
+                model_type="Difference GMM",
+                reason=str(e)
+            ) from e
 
     def system_gmm(
         self,
@@ -946,7 +966,8 @@ class PanelDataAnalyzer:
 
         Raises:
             ImportError: If pydynpd not available
-            ValueError: If formula invalid
+            InvalidParameterError: If formula invalid
+            ModelFitError: If GMM estimation fails
 
         Examples:
             >>> # Highly persistent player performance
@@ -982,7 +1003,11 @@ class PanelDataAnalyzer:
         # Parse formula (same as difference_gmm)
         parts = formula.replace(" ", "").split("~")
         if len(parts) != 2:
-            raise ValueError("Formula must be of form 'y ~ x1 + x2'")
+            raise InvalidParameterError(
+                "Formula must be of form 'y ~ x1 + x2'",
+                parameter="formula",
+                value=formula
+            )
 
         dependent_var = parts[0]
         independent_vars = parts[1].split("+")
@@ -1053,7 +1078,11 @@ class PanelDataAnalyzer:
 
         except Exception as e:
             logger.error(f"System GMM estimation failed: {str(e)}")
-            raise ValueError(f"System GMM estimation failed: {str(e)}")
+            raise ModelFitError(
+                "System GMM estimation failed",
+                model_type="System GMM",
+                reason=str(e)
+            ) from e
 
     def gmm_diagnostics(
         self, gmm_result: Union[DifferenceGMMResult, SystemGMMResult]
