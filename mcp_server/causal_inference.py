@@ -43,6 +43,14 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
 
+# Custom exceptions
+from mcp_server.exceptions import (
+    InvalidDataError,
+    InvalidParameterError,
+    InsufficientDataError,
+    MissingParameterError,
+)
+
 # Specialized causal inference libraries
 try:
     from linearmodels.iv import IV2SLS
@@ -268,7 +276,11 @@ class CausalInferenceAnalyzer:
         required_cols = [self.treatment_col, self.outcome_col]
         missing = [col for col in required_cols if col not in self.data.columns]
         if missing:
-            raise ValueError(f"Missing required columns: {missing}")
+            raise InvalidDataError(
+                f"Missing required columns: {missing}",
+                value=missing,
+                available_columns=list(self.data.columns)
+            )
 
         if self.data[self.outcome_col].isna().any():
             warnings.warn("Outcome variable contains missing values")
@@ -624,7 +636,10 @@ class CausalInferenceAnalyzer:
         )
         """
         if not self.covariates:
-            raise ValueError("Covariates required for propensity score estimation")
+            raise MissingParameterError(
+                "Covariates required for propensity score estimation",
+                parameter="covariates"
+            )
 
         # Prepare data
         X = self.data[self.covariates].values
@@ -682,14 +697,18 @@ class CausalInferenceAnalyzer:
 
         # Validate we have both treated and control units after common support
         if len(treated_idx) == 0:
-            raise ValueError(
+            raise InsufficientDataError(
                 "No treated units in common support region. "
-                "Check data quality or relax common support restrictions."
+                "Check data quality or relax common support restrictions.",
+                required=1,
+                actual=0
             )
         if len(control_idx) == 0:
-            raise ValueError(
+            raise InsufficientDataError(
                 "No control units in common support region. "
-                "Check data quality or relax common support restrictions."
+                "Check data quality or relax common support restrictions.",
+                required=1,
+                actual=0
             )
 
         if method == "nearest":
@@ -838,7 +857,15 @@ class CausalInferenceAnalyzer:
         )
         """
         if self.entity_col is None or self.time_col is None:
-            raise ValueError("entity_col and time_col required for synthetic control")
+            missing = []
+            if self.entity_col is None:
+                missing.append("entity_col")
+            if self.time_col is None:
+                missing.append("time_col")
+            raise MissingParameterError(
+                f"Missing required parameters for synthetic control: {missing}",
+                parameter=", ".join(missing)
+            )
 
         # Prepare panel data
         panel = self.data.pivot_table(
@@ -1077,7 +1104,13 @@ class CausalInferenceAnalyzer:
             )
 
         else:
-            raise ValueError(f"Unknown sensitivity method: {method}")
+            valid_methods = ["rosenbaum_bounds", "e_value", "confounding_function"]
+            raise InvalidParameterError(
+                f"Unknown sensitivity analysis method: {method}",
+                parameter="method",
+                value=method,
+                valid_values=valid_methods
+            )
 
         logger.info(f"Sensitivity analysis complete: {result}")
         return result
@@ -1123,7 +1156,13 @@ class CausalInferenceAnalyzer:
         elif kernel == "epanechnikov":
             return np.maximum(0.75 * (1 - u**2), 0)
         else:
-            raise ValueError(f"Unknown kernel: {kernel}")
+            valid_kernels = ["triangular", "uniform", "epanechnikov"]
+            raise InvalidParameterError(
+                f"Unknown kernel: {kernel}",
+                parameter="kernel",
+                value=kernel,
+                valid_values=valid_kernels
+            )
 
     def _mccrary_test(
         self, X: np.ndarray, cutoff: float, bandwidth: float
@@ -1271,7 +1310,10 @@ class CausalInferenceAnalyzer:
         result = analyzer.kernel_matching(kernel='gaussian')
         """
         if not self.covariates:
-            raise ValueError("Covariates required for propensity score estimation")
+            raise MissingParameterError(
+                "Covariates required for propensity score estimation",
+                parameter="covariates"
+            )
 
         # Estimate propensity scores
         X = self.data[self.covariates].values
@@ -1290,7 +1332,13 @@ class CausalInferenceAnalyzer:
         control_idx = treatment == 0
 
         if not np.any(treated_idx) or not np.any(control_idx):
-            raise ValueError("Need both treated and control units")
+            n_treated = np.sum(treated_idx)
+            n_control = np.sum(control_idx)
+            raise InsufficientDataError(
+                "Need both treated and control units for kernel matching",
+                required=1,
+                actual=f"treated={n_treated}, control={n_control}"
+            )
 
         ps_treated = propensity_scores[treated_idx]
         ps_control = propensity_scores[control_idx]
@@ -1395,7 +1443,10 @@ class CausalInferenceAnalyzer:
         result = analyzer.radius_matching(radius=0.03)
         """
         if not self.covariates:
-            raise ValueError("Covariates required for propensity score estimation")
+            raise MissingParameterError(
+                "Covariates required for propensity score estimation",
+                parameter="covariates"
+            )
 
         # Estimate propensity scores
         X = self.data[self.covariates].values
@@ -1434,8 +1485,10 @@ class CausalInferenceAnalyzer:
                 n_matched_total += np.sum(within_radius)
 
         if len(matched_effects) == 0:
-            raise ValueError(
-                f"No matches found with radius={radius}. Try increasing radius."
+            raise InsufficientDataError(
+                f"No matches found with radius={radius}. Try increasing radius.",
+                required=1,
+                actual=0
             )
 
         att = np.mean(matched_effects)
@@ -1504,7 +1557,10 @@ class CausalInferenceAnalyzer:
         Y(0) = (1-T)*Y/(1-PS) + T*m0(X)*PS/(1-PS)
         """
         if not self.covariates:
-            raise ValueError("Covariates required for doubly robust estimation")
+            raise MissingParameterError(
+                "Covariates required for doubly robust estimation",
+                parameter="covariates"
+            )
 
         X = self.data[self.covariates].values
         treatment = self.data[self.treatment_col].values
