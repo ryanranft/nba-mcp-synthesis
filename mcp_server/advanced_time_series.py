@@ -37,6 +37,12 @@ import numpy as np
 import pandas as pd
 import scipy.stats as stats
 
+# Custom exceptions
+from mcp_server.exceptions import (
+    InvalidDataError,
+    InvalidParameterError,
+)
+
 # State space and advanced time series
 try:
     from statsmodels.tsa.statespace.sarimax import SARIMAX
@@ -338,7 +344,13 @@ class AdvancedTimeSeriesAnalyzer:
         elif model == "regression" and exog is not None:
             mod = SARIMAX(self.data, exog=exog, order=(0, 0, 0), **model_kwargs)
         else:
-            raise ValueError(f"Unknown model: {model}")
+            valid_models = ["local_level", "local_linear_trend", "seasonal", "regression"]
+            raise InvalidParameterError(
+                f"Unknown state space model: {model}",
+                parameter="model",
+                value=model,
+                valid_values=valid_models
+            )
 
         # Fit model
         fitted = mod.fit(disp=False)
@@ -398,7 +410,13 @@ class AdvancedTimeSeriesAnalyzer:
                 self.data, level="local linear trend", **model_kwargs
             )
         else:
-            raise ValueError(f"Model {model} not supported for smoother")
+            valid_models = ["local_level", "local_linear_trend"]
+            raise InvalidParameterError(
+                f"Model {model} not supported for Kalman smoother",
+                parameter="model",
+                value=model,
+                valid_values=valid_models
+            )
 
         fitted = mod.fit(disp=False)
 
@@ -455,7 +473,13 @@ class AdvancedTimeSeriesAnalyzer:
             # Not implemented in full - would need SARIMAX with exog
             raise NotImplementedError("Regression forecasting not fully implemented")
         else:
-            raise ValueError(f"Unknown model: {model}")
+            valid_models = ["local_level", "local_linear_trend", "regression"]
+            raise InvalidParameterError(
+                f"Unknown state space model for forecasting: {model}",
+                parameter="model",
+                value=model,
+                valid_values=valid_models
+            )
 
         fitted = mod.fit(disp=False)
 
@@ -517,7 +541,10 @@ class AdvancedTimeSeriesAnalyzer:
         """
         if data is None:
             if not isinstance(self.data, pd.DataFrame):
-                raise ValueError("data must be DataFrame for dynamic factor model")
+                raise InvalidDataError(
+                    "Data must be a DataFrame for dynamic factor model",
+                    value=type(self.data).__name__
+                )
             data = self.data
 
         # Fit dynamic factor model
@@ -622,7 +649,13 @@ class AdvancedTimeSeriesAnalyzer:
                 **model_kwargs,
             )
         else:
-            raise ValueError(f"regime_type {regime_type} not supported or exog missing")
+            valid_regime_types = ["mean_shift", "variance_shift", "regression"]
+            raise InvalidParameterError(
+                f"Regime type '{regime_type}' not supported or exogenous variables missing for regression",
+                parameter="regime_type",
+                value=regime_type,
+                valid_values=valid_regime_types
+            )
 
         # Fit model
         fitted = mod.fit(disp=False)
@@ -848,7 +881,13 @@ class AdvancedTimeSeriesAnalyzer:
 
             return imputed
         else:
-            raise ValueError(f"Unknown imputation method: {method}")
+            valid_methods = ["kalman"]
+            raise InvalidParameterError(
+                f"Unknown imputation method: {method}",
+                parameter="method",
+                value=method,
+                valid_values=valid_methods
+            )
 
     def __repr__(self) -> str:
         return (
