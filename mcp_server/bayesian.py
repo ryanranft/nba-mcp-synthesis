@@ -39,6 +39,12 @@ from enum import Enum
 import numpy as np
 import pandas as pd
 
+# Custom exceptions
+from mcp_server.exceptions import (
+    InvalidParameterError,
+    ModelFitError,
+)
+
 # PyMC and ArviZ for Bayesian inference
 try:
     import pymc as pm
@@ -406,7 +412,11 @@ class BayesianAnalyzer:
             BayesianModelResult with trace and diagnostics
         """
         if self.model is None:
-            raise ValueError("Must build model first with build_simple_model()")
+            raise ModelFitError(
+                "Must build model first before sampling",
+                model_type="Bayesian",
+                reason="No model has been built. Call build_simple_model() or build_hierarchical_model() first."
+            )
 
         logger.info(f"Sampling posterior: {draws} draws, {tune} tune, {chains} chains")
 
@@ -513,7 +523,11 @@ class BayesianAnalyzer:
             VIResult with approximation
         """
         if self.model is None:
-            raise ValueError("Must build model first")
+            raise ModelFitError(
+                "Must build model first before inference",
+                model_type="Bayesian",
+                reason="No model has been built. Call build_simple_model() or build_hierarchical_model() first."
+            )
 
         logger.info(f"Running variational inference: {method}, {n_iter} iterations")
 
@@ -766,7 +780,13 @@ class BayesianAnalyzer:
                 vals = hdi_vals[parameter].values.flatten()
                 lower, upper = float(vals[0]), float(vals[1])
             else:
-                raise ValueError(f"Parameter '{parameter}' not found in trace")
+                available_params = list(trace.posterior.keys()) if hasattr(trace, 'posterior') else []
+                raise InvalidParameterError(
+                    f"Parameter '{parameter}' not found in posterior trace",
+                    parameter="parameter",
+                    value=parameter,
+                    valid_values=available_params
+                )
         elif method == "quantile":
             alpha = 1 - prob
             if parameter in trace.posterior:
@@ -774,9 +794,21 @@ class BayesianAnalyzer:
                 lower = float(np.quantile(samples, alpha / 2))
                 upper = float(np.quantile(samples, 1 - alpha / 2))
             else:
-                raise ValueError(f"Parameter '{parameter}' not found in trace")
+                available_params = list(trace.posterior.keys()) if hasattr(trace, 'posterior') else []
+                raise InvalidParameterError(
+                    f"Parameter '{parameter}' not found in posterior trace",
+                    parameter="parameter",
+                    value=parameter,
+                    valid_values=available_params
+                )
         else:
-            raise ValueError(f"Unknown method: {method}")
+            valid_methods = ["hdi", "quantile"]
+            raise InvalidParameterError(
+                f"Unknown credible interval method: {method}",
+                parameter="method",
+                value=method,
+                valid_values=valid_methods
+            )
 
         return CredibleInterval(
             parameter=parameter,
@@ -820,7 +852,12 @@ class BayesianAnalyzer:
                 -1, predicted_samples.shape[-1]
             )
         else:
-            raise ValueError("No 'y_obs' in posterior predictive")
+            available_vars = list(ppc.posterior_predictive.keys()) if hasattr(ppc, 'posterior_predictive') else []
+            raise ModelFitError(
+                "No 'y_obs' variable found in posterior predictive samples",
+                model_type="Bayesian",
+                reason=f"Available variables: {available_vars}"
+            )
 
         observed = self.data[self.target].values
 
@@ -845,7 +882,13 @@ class BayesianAnalyzer:
             obs_stat = observed.min()
             pred_stats = predicted_samples.min(axis=1)
         else:
-            raise ValueError(f"Unknown test statistic: {test_statistic}")
+            valid_statistics = ["mean", "std", "max", "min"]
+            raise InvalidParameterError(
+                f"Unknown test statistic: {test_statistic}",
+                parameter="test_statistic",
+                value=test_statistic,
+                valid_values=valid_statistics
+            )
 
         p_value = float((pred_stats >= obs_stat).mean())
 
@@ -1217,7 +1260,13 @@ def plot_posterior(
     elif kind == "kde":
         return az.plot_posterior(result.trace, var_names=var_names, kind="kde")
     else:
-        raise ValueError(f"Unknown plot kind: {kind}")
+        valid_kinds = ["trace", "hist", "kde"]
+        raise InvalidParameterError(
+            f"Unknown plot kind: {kind}",
+            parameter="kind",
+            value=kind,
+            valid_values=valid_kinds
+        )
 
 
 def plot_ppc(ppc_result: PPCResult) -> Any:
