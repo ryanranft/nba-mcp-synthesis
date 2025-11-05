@@ -1,0 +1,35 @@
+{
+  "results": [
+    {
+      "method": "Cox PH",
+      "time": 0.035,
+      "status": "OK"
+    },
+    {
+      "method": "Kaplan-Meier",
+      "time": 0.003,
+      "status": "OK"
+    },
+    {
+      "method": "Competing Risks",
+      "time": 0.009,
+      "status": "OK"
+    },
+    {
+      "method": "Cointegration",
+      "time": 0,
+      "status": "FAIL: 'TimeSeriesAnalyzer' object has no attribute 'coin"
+    },
+    {
+      "method": "Kernel Matching",
+      "time": 0,
+      "status": "FAIL: Matching method 'kernel' not yet implemented"
+    },
+    {
+      "method": "Doubly Robust",
+      "time": 0,
+      "status": "FAIL: 'CausalInferenceAnalyzer' object has no attribute "
+    }
+  ],
+  "timestamp": "20251104_182322"
+}
