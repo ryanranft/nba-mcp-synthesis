@@ -2844,6 +2844,1434 @@ print(f"- Be perfectly measured (no residual confounding)")
 
 ---
 
+### Survival Analysis Module Methods
+
+The `SurvivalAnalyzer` class provides methods for time-to-event analysis with censoring.
+
+```python
+from mcp_server.survival_analysis import SurvivalAnalyzer
+import pandas as pd
+
+# Initialize analyzer
+data = pd.DataFrame({
+    'player_id': [...],
+    'duration': [5.2, 8.1, 3.5, ...],  # Time to event (e.g., years until retirement)
+    'event': [1, 1, 0, ...],  # 1=event occurred, 0=censored
+    'age': [...],
+    'games_played': [...],
+    'injuries': [...]
+})
+
+analyzer = SurvivalAnalyzer(
+    data=data,
+    duration_col='duration',
+    event_col='event'
+)
+```
+
+#### cox_proportional_hazards() / cox_ph()
+
+Fit Cox Proportional Hazards model for semi-parametric survival analysis.
+
+**When to use:** Standard survival regression when you want hazard ratios without assuming baseline hazard distribution. Most common survival model.
+
+```python
+cox_proportional_hazards(
+    formula: Optional[str] = None,
+    robust: bool = True,
+    penalizer: float = 0.0,
+    strata: Optional[List[str]] = None
+) -> SurvivalResult
+```
+
+**Parameters:**
+
+- **formula** (`str`, optional): Model formula (if None, uses all covariates)
+- **robust** (`bool`): Robust standard errors (default: True)
+- **penalizer** (`float`): Ridge penalty for regularization (default: 0.0)
+- **strata** (`List[str]`, optional): Stratification variables (separate baseline hazards)
+
+**Returns:**
+
+- **SurvivalResult**: Contains:
+  - `coefficients`: Hazard ratio coefficients (log scale)
+  - `hazard_ratios`: exp(coefficients) = hazard ratios
+  - `std_errors`, `p_values`: Statistical inference
+  - `concordance_index`: C-index for predictive accuracy (0.5-1.0)
+  - `log_likelihood`, `aic`, `bic`: Model fit statistics
+  - `summary`: Full model output
+
+**Raises:**
+
+- `MissingParameterError`: If duration_col or event_col not specified
+- `InsufficientDataError`: If < 10 events
+- `ModelFitError`: If Cox model fitting fails (convergence issues)
+
+**Example:**
+
+```python
+# Basic Cox model for career duration
+result = analyzer.cox_proportional_hazards(
+    formula='age + games_played + injuries',
+    robust=True
+)
+
+print(f"Concordance index: {result.concordance_index:.3f}")
+print("\nHazard Ratios:")
+for var, hr in result.hazard_ratios.items():
+    pval = result.p_values[var]
+    sig = '***' if pval < 0.001 else '**' if pval < 0.01 else '*' if pval < 0.05 else ''
+    print(f"  {var}: HR={hr:.3f} {sig}")
+
+# Interpret: HR > 1 → increased hazard (shorter survival)
+#            HR < 1 → decreased hazard (longer survival)
+```
+
+**NBA Analytics Use Case:**
+
+```python
+# Analyze player career longevity
+data = pd.DataFrame({
+    'player': player_ids,
+    'career_length': years_until_retirement,
+    'retired': [1, 1, 0, ...],  # 0=still active (censored)
+    'draft_position': draft_picks,
+    'ppg_rookie': points_per_game_rookie_year,
+    'height': height_inches,
+    'position': positions,
+    'injury_history': injury_count
+})
+
+analyzer = SurvivalAnalyzer(data, 'career_length', 'retired')
+result = analyzer.cox_proportional_hazards(
+    formula='draft_position + ppg_rookie + height + C(position) + injury_history',
+    robust=True
+)
+
+# Interpretation:
+# - HR(draft_position) = 1.05 → Each pick lower increases retirement hazard by 5%
+# - HR(ppg_rookie) = 0.92 → Each additional PPG decreases retirement hazard by 8%
+# - HR(injury_history) = 1.15 → Each injury increases retirement hazard by 15%
+
+print(f"Model concordance: {result.concordance_index:.3f}")  # >0.7 is good
+```
+
+**References:**
+- Cox, D. R. (1972). "Regression models and life-tables"
+- Related methods: `cox_time_varying()`, `parametric_survival()`, `kaplan_meier()`
+
+---
+
+#### cox_time_varying()
+
+Fit Cox model with time-varying covariates (covariates that change over time).
+
+**When to use:** When predictors change during follow-up (e.g., age, performance, team changes).
+
+```python
+cox_time_varying(
+    id_col: str,
+    start_col: str,
+    stop_col: str,
+    formula: Optional[str] = None
+) -> SurvivalResult
+```
+
+**Parameters:**
+
+- **id_col** (`str`): Subject identifier column
+- **start_col** (`str`): Episode start time column
+- **stop_col** (`str`): Episode stop time column
+- **formula** (`str`, optional): Model formula
+
+**Returns:**
+
+- **SurvivalResult**: Cox model results with time-varying effects
+
+**Example:**
+
+```python
+# Data in counting process format
+data_tv = pd.DataFrame({
+    'player': [1, 1, 1, 2, 2, ...],
+    'start': [0, 1, 2, 0, 1, ...],
+    'stop': [1, 2, 3, 1, 2, ...],
+    'event': [0, 0, 1, 0, 1, ...],
+    'age': [25, 26, 27, 23, 24, ...],  # Changes over time
+    'ppg': [18.5, 22.1, 20.3, 15.2, 16.8, ...],  # Changes over time
+    'all_star': [0, 1, 1, 0, 0, ...]  # Changes over time
+})
+
+analyzer = SurvivalAnalyzer(data_tv, 'stop', 'event')
+result = analyzer.cox_time_varying(
+    id_col='player',
+    start_col='start',
+    stop_col='stop',
+    formula='age + ppg + all_star'
+)
+
+print(f"All-Star HR: {result.hazard_ratios['all_star']:.3f}")
+# Accounts for time-varying All-Star status
+```
+
+**NBA Analytics Use Case:**
+
+```python
+# Does making All-Star team affect retirement timing?
+# (All-Star status changes over time)
+
+# Each row = player-season
+result = analyzer.cox_time_varying(
+    id_col='player_id',
+    start_col='season_start',
+    stop_col='season_end',
+    formula='age + ppg + all_star + injury_current'
+)
+
+# HR(all_star) < 1 → Making All-Star reduces retirement hazard
+```
+
+**References:**
+- Therneau, T. M., & Grambsch, P. M. (2000). Modeling Survival Data
+- Related methods: `cox_proportional_hazards()`
+
+---
+
+#### parametric_survival()
+
+Fit parametric survival model with specific distributional assumptions.
+
+**When to use:** When you can assume a distribution for survival times. More efficient than Cox if assumption correct.
+
+```python
+parametric_survival(
+    model: Union[str, SurvivalModel] = "weibull",
+    formula: Optional[str] = None,
+    timeline: Optional[np.ndarray] = None
+) -> SurvivalResult
+```
+
+**Parameters:**
+
+- **model** (`str`): Distribution: 'weibull', 'lognormal', 'loglogistic', 'exponential' (default: 'weibull')
+- **formula** (`str`, optional): Model formula
+- **timeline** (`ndarray`, optional): Time points for predictions
+
+**Returns:**
+
+- **SurvivalResult**: Parametric model results with survival/hazard functions
+
+**Example:**
+
+```python
+# Weibull survival model
+result = analyzer.parametric_survival(
+    model='weibull',
+    formula='age + ppg + position'
+)
+
+print(f"AIC: {result.aic:.2f}, BIC: {result.bic:.2f}")
+
+# Predict survival probability at specific times
+timeline = np.array([1, 3, 5, 10])  # Years
+survival_probs = result.predict_survival(timeline)
+print(f"5-year survival probability: {survival_probs[2]:.2%}")
+```
+
+**NBA Analytics Use Case:**
+
+```python
+# Model contract length until team change
+data = pd.DataFrame({
+    'player': player_ids,
+    'years_on_team': years_until_trade_or_fa,
+    'left_team': [1, 1, 0, ...],
+    'contract_value': contract_millions,
+    'performance': win_shares,
+    'market_size': market_rank
+})
+
+analyzer = SurvivalAnalyzer(data, 'years_on_team', 'left_team')
+
+# Try multiple distributions
+models = ['weibull', 'lognormal', 'loglogistic']
+results = {}
+for dist in models:
+    result = analyzer.parametric_survival(model=dist, formula='contract_value + performance + market_size')
+    results[dist] = result.aic
+
+best_model = min(results, key=results.get)
+print(f"Best distribution: {best_model} (AIC={results[best_model]:.1f})")
+```
+
+**References:**
+- Kalbfleisch, J. D., & Prentice, R. L. (2002). The Statistical Analysis of Failure Time Data
+- Related methods: `cox_proportional_hazards()`
+
+---
+
+#### kaplan_meier() / km()
+
+Estimate survival function using non-parametric Kaplan-Meier estimator.
+
+**When to use:** Descriptive survival analysis, visualizing survival curves, comparing groups without covariates.
+
+```python
+kaplan_meier(
+    groups: Optional[str] = None,
+    alpha: float = 0.05,
+    timeline: Optional[np.ndarray] = None
+) -> Union[KaplanMeierResult, Dict[str, KaplanMeierResult]]
+```
+
+**Parameters:**
+
+- **groups** (`str`, optional): Grouping variable for stratified curves (e.g., position)
+- **alpha** (`float`): Confidence level (default: 0.05 for 95% CI)
+- **timeline** (`ndarray`, optional): Specific time points to evaluate
+
+**Returns:**
+
+- **KaplanMeierResult** or **Dict[str, KaplanMeierResult]**: Contains:
+  - `survival_function`: Survival probabilities over time
+  - `confidence_interval`: Lower and upper bounds
+  - `median_survival_time`: Median time to event
+  - `event_table`: Number at risk, events, censored at each time
+
+**Example:**
+
+```python
+# Overall survival curve
+result = analyzer.kaplan_meier()
+print(f"Median survival: {result.median_survival_time:.1f} years")
+
+# Plot survival curve
+import matplotlib.pyplot as plt
+result.survival_function.plot()
+plt.fill_between(
+    result.confidence_interval.index,
+    result.confidence_interval['lower'],
+    result.confidence_interval['upper'],
+    alpha=0.3
+)
+plt.xlabel('Years')
+plt.ylabel('Career Continuation Probability')
+plt.title('Kaplan-Meier Survival Curve')
+plt.show()
+
+# Survival by position
+result_by_pos = analyzer.kaplan_meier(groups='position')
+for pos, km in result_by_pos.items():
+    print(f"{pos}: median = {km.median_survival_time:.1f} years")
+    km.survival_function.plot(label=pos)
+plt.legend()
+plt.show()
+```
+
+**NBA Analytics Use Case:**
+
+```python
+# Career survival curves by draft round
+data = pd.DataFrame({
+    'player': player_ids,
+    'career_years': years_in_league,
+    'active': [0, 0, 1, ...],  # 0=retired, 1=still active
+    'draft_round': [1, 2, 1, 2, ...],
+    'position': positions
+})
+
+analyzer = SurvivalAnalyzer(data, 'career_years', 'active')
+
+# Compare survival by draft round
+results = analyzer.kaplan_meier(groups='draft_round')
+
+print("Median career length:")
+for round_num, km_result in results.items():
+    print(f"  Round {round_num}: {km_result.median_survival_time:.1f} years")
+
+# 5-year survival probability
+for round_num, km_result in results.items():
+    surv_5yr = km_result.survival_function.loc[5.0]
+    print(f"  Round {round_num}: {surv_5yr:.1%} still playing after 5 years")
+```
+
+**References:**
+- Kaplan, E. L., & Meier, P. (1958). "Nonparametric estimation from incomplete observations"
+- Related methods: `logrank_test()`, `cox_proportional_hazards()`
+
+---
+
+#### logrank_test()
+
+Statistical test comparing survival curves between two groups.
+
+**When to use:** Test if survival differs significantly between groups (e.g., positions, draft rounds).
+
+```python
+logrank_test(
+    group1_idx: np.ndarray,
+    group2_idx: np.ndarray
+) -> Dict[str, Any]
+```
+
+**Parameters:**
+
+- **group1_idx** (`ndarray`): Boolean index for group 1
+- **group2_idx** (`ndarray`): Boolean index for group 2
+
+**Returns:**
+
+- **Dict**: Contains:
+  - `test_statistic`: Log-rank chi-squared statistic
+  - `p_value`: P-value for test
+  - `df`: Degrees of freedom (1)
+
+**Example:**
+
+```python
+# Compare guards vs centers
+guards_idx = data['position'] == 'G'
+centers_idx = data['position'] == 'C'
+
+logrank = analyzer.logrank_test(guards_idx, centers_idx)
+print(f"Log-rank test: χ²={logrank['test_statistic']:.2f}, p={logrank['p_value']:.4f}")
+
+if logrank['p_value'] < 0.05:
+    print("Survival curves are significantly different")
+else:
+    print("No significant difference in survival")
+```
+
+**References:**
+- Related methods: `kaplan_meier()`
+
+---
+
+#### competing_risks()
+
+Analyze competing risks when multiple types of events can occur.
+
+**When to use:** Multiple mutually exclusive event types (e.g., retirement due to age vs injury vs performance decline).
+
+```python
+competing_risks(
+    event_type_col: str,
+    event_types: List[Any],
+    method: str = "cumulative_incidence"
+) -> CompetingRisksResult
+```
+
+**Parameters:**
+
+- **event_type_col** (`str`): Column indicating event type
+- **event_types** (`List`): List of event types to analyze
+- **method** (`str`): 'cumulative_incidence' or 'aalen_johansen' (default: 'cumulative_incidence')
+
+**Returns:**
+
+- **CompetingRisksResult**: Contains cumulative incidence functions for each event type
+
+**Example:**
+
+```python
+# Competing risks: retirement reasons
+data = pd.DataFrame({
+    'player': player_ids,
+    'years': career_length,
+    'retired': [1, 1, 0, ...],
+    'retirement_reason': ['injury', 'age', None, 'performance', ...],
+    'age': ages
+})
+
+analyzer = SurvivalAnalyzer(data, 'years', 'retired')
+result = analyzer.competing_risks(
+    event_type_col='retirement_reason',
+    event_types=['injury', 'age', 'performance']
+)
+
+# Plot cumulative incidence
+for event_type, cif in result.cumulative_incidence.items():
+    cif.plot(label=event_type)
+plt.xlabel('Years in NBA')
+plt.ylabel('Cumulative Incidence')
+plt.title('Competing Risks: Retirement Reasons')
+plt.legend()
+plt.show()
+```
+
+**NBA Analytics Use Case:**
+
+```python
+# Why do players leave teams? (trade, free agency, retirement)
+result = analyzer.competing_risks(
+    event_type_col='exit_type',
+    event_types=['traded', 'free_agency', 'retired']
+)
+
+# At year 3, what's the probability of each outcome?
+for event_type in ['traded', 'free_agency', 'retired']:
+    prob_3yr = result.cumulative_incidence[event_type].loc[3.0]
+    print(f"Probability of {event_type} by year 3: {prob_3yr:.1%}")
+```
+
+**References:**
+- Putter, H., Fiocco, M., & Geskus, R. B. (2007). "Tutorial in biostatistics: competing risks"
+- Related methods: `fine_gray_model()`
+
+---
+
+#### fine_gray_model()
+
+Regression model for competing risks using subdistribution hazards.
+
+**When to use:** Competing risks with covariates - want to model cumulative incidence directly.
+
+```python
+fine_gray_model(
+    event_type_col: str,
+    event_of_interest: str,
+    covariates: Optional[List[str]] = None,
+    formula: Optional[str] = None
+) -> FineGrayResult
+```
+
+**Parameters:**
+
+- **event_type_col** (`str`): Event type column
+- **event_of_interest** (`str`): Focal event type to model
+- **covariates** (`List[str]`, optional): Covariates for regression
+- **formula** (`str`, optional): Regression formula
+
+**Returns:**
+
+- **FineGrayResult**: Subdistribution hazard ratios and model diagnostics
+
+**Example:**
+
+```python
+# Model retirement due to injury (competing with age retirement)
+result = analyzer.fine_gray_model(
+    event_type_col='retirement_reason',
+    event_of_interest='injury',
+    formula='position + games_per_season + prior_injuries'
+)
+
+print("Subdistribution Hazard Ratios for Injury Retirement:")
+for var, shr in result.subdist_hazard_ratios.items():
+    print(f"  {var}: SHR={shr:.3f}")
+
+# Interpret: SHR > 1 → increases cumulative incidence of injury retirement
+```
+
+**References:**
+- Fine, J. P., & Gray, R. J. (1999). "A proportional hazards model for the subdistribution"
+- Related methods: `competing_risks()`, `cox_proportional_hazards()`
+
+---
+
+#### cure_model()
+
+Mixture cure model for populations with long-term survivors.
+
+**When to use:** When fraction of population will never experience event (e.g., players who never get injured).
+
+```python
+cure_model(
+    cure_formula: Optional[str] = None,
+    survival_formula: Optional[str] = None,
+    timeline: Optional[np.ndarray] = None
+) -> CureModelResult
+```
+
+**Parameters:**
+
+- **cure_formula** (`str`, optional): Logistic model for cure probability
+- **survival_formula** (`str`, optional): Survival model for susceptible group
+- **timeline** (`ndarray`, optional): Time points for prediction
+
+**Returns:**
+
+- **CureModelResult**: Contains:
+  - `cure_probability`: Estimated fraction cured
+  - `cure_coefficients`: Coefficients for cure logistic model
+  - `survival_coefficients`: Coefficients for survival model
+  - `aic`, `bic`: Model fit statistics
+
+**Example:**
+
+```python
+# Model career-ending injuries (some players never injured)
+result = analyzer.cure_model(
+    cure_formula='position + height + training_quality',
+    survival_formula='age + games_per_season + position'
+)
+
+print(f"Estimated cure fraction: {result.cure_probability:.1%}")
+print(f"Never injured probability: {result.cure_probability:.1%}")
+
+# Predict individual cure probabilities
+individual_cure_probs = result.predict_cure_probability(new_data)
+```
+
+**NBA Analytics Use Case:**
+
+```python
+# Some players never experience significant injury
+result = analyzer.cure_model(
+    cure_formula='position + height + weight + training_staff_quality',
+    survival_formula='age + minutes_per_game + back_to_backs'
+)
+
+# Positions most likely to be "cured" (never injured)
+```
+
+**References:**
+- Farewell, V. T. (1982). "The use of mixture models for the analysis of survival data"
+- Related methods: `cox_proportional_hazards()`, `parametric_survival()`
+
+---
+
+#### frailty_model()
+
+Random effects survival model accounting for unobserved heterogeneity.
+
+**When to use:** Clustered survival data (e.g., players within teams) with shared unobserved risk factors.
+
+```python
+frailty_model(
+    shared_frailty_col: Optional[str] = None,
+    distribution: str = "gamma",
+    penalizer: float = 0.0
+) -> FrailtyResult
+```
+
+**Parameters:**
+
+- **shared_frailty_col** (`str`, optional): Cluster variable (e.g., team_id)
+- **distribution** (`str`): Frailty distribution: 'gamma', 'gaussian', 'inverse_gaussian' (default: 'gamma')
+- **penalizer** (`float`): Regularization penalty (default: 0.0)
+
+**Returns:**
+
+- **FrailtyResult**: Contains:
+  - `coefficients`: Fixed effect coefficients
+  - `frailty_variance`: Variance of frailty term
+  - `theta`: Frailty parameter
+  - `concordance_index`: Predictive accuracy
+
+**Example:**
+
+```python
+# Frailty model with shared team effects
+result = analyzer.frailty_model(
+    shared_frailty_col='team_id',
+    distribution='gamma'
+)
+
+print(f"Frailty variance: {result.frailty_variance:.3f}")
+print(f"Theta: {result.theta:.3f}")
+
+# High theta → high between-cluster heterogeneity
+# Low theta → clusters similar (frailty not important)
+```
+
+**NBA Analytics Use Case:**
+
+```python
+# Career length with team-level frailty
+# (Some teams better at extending careers: training, medical staff)
+
+data = pd.DataFrame({
+    'player': player_ids,
+    'career_years': years_active,
+    'retired': retirement_indicator,
+    'team_id': team_ids,  # Shared frailty
+    'age': ages,
+    'position': positions
+})
+
+analyzer = SurvivalAnalyzer(data, 'career_years', 'retired')
+result = analyzer.frailty_model(
+    shared_frailty_col='team_id',
+    distribution='gamma'
+)
+
+# Frailty variance tells us: How much does team matter for career longevity?
+if result.frailty_variance > 0.5:
+    print("Team has substantial effect on career length")
+else:
+    print("Team effect is minimal")
+```
+
+**References:**
+- Therneau, T. M., Grambsch, P. M., & Pankratz, V. S. (2003). "Penalized survival models and frailty"
+- Related methods: `cox_proportional_hazards()`
+
+---
+
+#### recurrent_events_model()
+
+Model repeated events within subjects (e.g., multiple injuries, transactions).
+
+**When to use:** When subjects can experience the event multiple times.
+
+```python
+recurrent_events_model(
+    id_col: str,
+    event_count_col: Optional[str] = None,
+    model_type: str = "ag",
+    gap_time: bool = False,
+    formula: Optional[str] = None,
+    robust: bool = True
+) -> RecurrentEventsResult
+```
+
+**Parameters:**
+
+- **id_col** (`str`): Subject identifier
+- **event_count_col** (`str`, optional): Event sequence number
+- **model_type** (`str`): Model type: 'ag' (Andersen-Gill), 'pwp' (Prentice-Williams-Peterson), 'wlw' (Wei-Lin-Weissfeld) (default: 'ag')
+- **gap_time** (`bool`): Use gap time instead of calendar time (default: False)
+- **formula** (`str`, optional): Model formula
+- **robust** (`bool`): Robust SE clustered by subject (default: True)
+
+**Returns:**
+
+- **RecurrentEventsResult**: Contains hazard ratios for recurrent event process
+
+**Example:**
+
+```python
+# Model repeated injuries
+data_recurrent = pd.DataFrame({
+    'player_id': [1, 1, 1, 2, 2, ...],  # Same player, multiple injuries
+    'injury_number': [1, 2, 3, 1, 2, ...],  # Event sequence
+    'time_to_injury': [2.1, 3.5, 1.2, 4.5, 2.8, ...],  # Time since last injury
+    'event': [1, 1, 1, 1, 1, ...],  # All observed
+    'minutes_per_game': [...],
+    'age': [...]
+})
+
+analyzer = SurvivalAnalyzer(data_recurrent, 'time_to_injury', 'event')
+result = analyzer.recurrent_events_model(
+    id_col='player_id',
+    event_count_col='injury_number',
+    model_type='pwp',  # PWP allows different baseline hazards
+    gap_time=True,  # Time since last injury
+    formula='minutes_per_game + age'
+)
+
+print("Hazard ratios for recurrent injuries:")
+for var, hr in result.hazard_ratios.items():
+    print(f"  {var}: HR={hr:.3f}")
+```
+
+**NBA Analytics Use Case:**
+
+```python
+# Multiple transactions (trades) per player
+result = analyzer.recurrent_events_model(
+    id_col='player_id',
+    event_count_col='trade_number',
+    model_type='ag',
+    formula='age + performance_decline + contract_value'
+)
+
+# HR(performance_decline) > 1 → Performance decline increases trade rate
+```
+
+**References:**
+- Andersen, P. K., & Gill, R. D. (1982). "Cox's regression model for counting processes"
+- Prentice, R. L., Williams, B. J., & Peterson, A. V. (1981). "On the regression analysis of multivariate failure time data"
+- Related methods: `cox_proportional_hazards()`, `cox_time_varying()`
+
+---
+
+### Bayesian Methods Module
+
+The `BayesianAnalyzer` class provides Bayesian inference methods using PyMC.
+
+```python
+from mcp_server.bayesian import BayesianAnalyzer
+import pandas as pd
+
+# Initialize analyzer
+data = pd.DataFrame({
+    'y': outcome_variable,
+    'x1': predictor1,
+    'x2': predictor2,
+    'group': group_ids  # For hierarchical models
+})
+
+analyzer = BayesianAnalyzer(data=data, target='y')
+```
+
+#### build_simple_model()
+
+Build Bayesian linear regression model with specified priors.
+
+**When to use:** Bayesian inference with prior knowledge, uncertainty quantification.
+
+```python
+build_simple_model(
+    formula: Optional[str] = None,
+    priors: Optional[Dict[str, Dict[str, Any]]] = None
+) -> Any
+```
+
+**Parameters:**
+
+- **formula** (`str`, optional): Model formula
+- **priors** (`Dict`, optional): Prior specifications for parameters
+
+**Returns:**
+
+- PyMC model object
+
+**Example:**
+
+```python
+# Build model with custom priors
+model = analyzer.build_simple_model(
+    formula='points ~ minutes + age',
+    priors={
+        'minutes': {'dist': 'Normal', 'mu': 0.5, 'sigma': 0.2},
+        'age': {'dist': 'Normal', 'mu': -0.1, 'sigma': 0.1}
+    }
+)
+
+# Sample from posterior
+result = analyzer.sample_posterior(draws=2000, tune=1000)
+```
+
+**References:**
+- Related methods: `sample_posterior()`, `hierarchical_model()`
+
+---
+
+#### sample_posterior()
+
+Sample from posterior distribution using MCMC (NUTS sampler).
+
+**When to use:** After building model, to obtain posterior inference.
+
+```python
+sample_posterior(
+    draws: int = 2000,
+    tune: int = 1000,
+    chains: int = 4,
+    target_accept: float = 0.95,
+    random_seed: Optional[int] = None
+) -> BayesianModelResult
+```
+
+**Parameters:**
+
+- **draws** (`int`): Number of post-warmup samples per chain (default: 2000)
+- **tune** (`int`): Number of tuning/warmup samples (default: 1000)
+- **chains** (`int`): Number of MCMC chains (default: 4)
+- **target_accept** (`float`): Target acceptance rate for NUTS (default: 0.95)
+- **random_seed** (`int`, optional): Random seed for reproducibility
+
+**Returns:**
+
+- **BayesianModelResult**: Contains trace, summary, diagnostics (Rhat, ESS)
+
+**Example:**
+
+```python
+result = analyzer.sample_posterior(draws=2000, tune=1000, chains=4)
+
+# Check convergence
+print(result.summary)
+print(f"Rhat values: {result.rhat}")  # Should be < 1.01
+
+# Posterior means
+print(f"Posterior means: {result.posterior_means}")
+
+# Credible intervals
+print(f"95% HDI: {result.hdi_95}")
+```
+
+**NBA Analytics Use Case:**
+
+```python
+# Bayesian player performance model
+model = analyzer.build_simple_model('points ~ minutes + usage_rate + team_pace')
+result = analyzer.sample_posterior(draws=3000, tune=1500, chains=4)
+
+# Uncertainty quantification
+print("Effect of minutes on points:")
+print(f"  Posterior mean: {result.posterior_means['minutes']:.3f}")
+print(f"  95% HDI: [{result.hdi_95['minutes'][0]:.3f}, {result.hdi_95['minutes'][1]:.3f}]")
+
+# Probability that effect > 0
+prob_positive = (result.trace.posterior['minutes'] > 0).mean().item()
+print(f"  P(effect > 0) = {prob_positive:.1%}")
+```
+
+**References:**
+- Hoffman, M. D., & Gelman, A. (2014). "The No-U-Turn Sampler"
+- Related methods: `build_simple_model()`, `posterior_predictive_check()`
+
+---
+
+#### variational_inference()
+
+Fast approximate posterior inference using variational inference (ADVI).
+
+**When to use:** When MCMC is too slow; for large datasets; when approximate inference sufficient.
+
+```python
+variational_inference(
+    method: str = "advi",
+    n_iter: int = 10000,
+    random_seed: Optional[int] = None
+) -> VIResult
+```
+
+**Parameters:**
+
+- **method** (`str`): VI method: 'advi' (Automatic Differentiation VI) (default: 'advi')
+- **n_iter** (`int`): Number of optimization iterations (default: 10000)
+- **random_seed** (`int`, optional): Random seed
+
+**Returns:**
+
+- **VIResult**: Approximate posterior with mean-field approximation
+
+**Example:**
+
+```python
+# Fast variational inference
+result_vi = analyzer.variational_inference(method='advi', n_iter=20000)
+
+# Much faster than MCMC, but approximate
+print(f"VI means: {result_vi.means}")
+print(f"VI stds: {result_vi.stds}")
+```
+
+**References:**
+- Kucukelbir, A., et al. (2017). "Automatic Differentiation Variational Inference"
+- Related methods: `sample_posterior()`
+
+---
+
+#### hierarchical_model()
+
+Build hierarchical Bayesian model with partial pooling across groups.
+
+**When to use:** Grouped/clustered data with group-level heterogeneity (e.g., players within teams).
+
+```python
+hierarchical_model(
+    spec: HierarchicalModelSpec,
+    formula: Optional[str] = None
+) -> Any
+```
+
+**Parameters:**
+
+- **spec** (`HierarchicalModelSpec`): Hierarchical structure specification
+- **formula** (`str`, optional): Model formula
+
+**Returns:**
+
+- PyMC hierarchical model
+
+**Example:**
+
+```python
+from mcp_server.bayesian import HierarchicalModelSpec
+
+# Hierarchical model: players within teams
+spec = HierarchicalModelSpec(
+    group_col='team_id',
+    varying_effects=['intercept', 'age'],
+    fixed_effects=['experience']
+)
+
+model = analyzer.hierarchical_model(spec, formula='points ~ age + experience')
+result = analyzer.sample_posterior(draws=2000)
+
+# Group-specific effects
+team_effects = result.trace.posterior['team_effect']
+print(f"Team-level variation: {team_effects.std().item():.3f}")
+```
+
+**NBA Analytics Use Case:**
+
+```python
+# Hierarchical model for player performance across teams
+# (Accounts for team effects while estimating player age curves)
+
+spec = HierarchicalModelSpec(
+    group_col='team_id',
+    varying_effects=['intercept'],  # Each team has different baseline
+    fixed_effects=['age', 'experience']
+)
+
+model = analyzer.hierarchical_model(spec)
+result = analyzer.sample_posterior(draws=3000, tune=1500)
+
+# Shrinkage: Small-sample teams pulled toward grand mean
+# Large-sample teams less affected by pooling
+```
+
+**References:**
+- Gelman, A., & Hill, J. (2006). Data Analysis Using Regression and Multilevel/Hierarchical Models
+- Related methods: `build_simple_model()`
+
+---
+
+#### posterior_predictive_check() / ppc()
+
+Assess model fit by comparing observed data to posterior predictive distribution.
+
+**When to use:** Model validation - check if model generates realistic data.
+
+```python
+posterior_predictive_check(
+    result: BayesianModelResult,
+    n_samples: int = 1000,
+    test_statistic: str = "mean"
+) -> PPCResult
+```
+
+**Parameters:**
+
+- **result** (`BayesianModelResult`): Fitted Bayesian model result
+- **n_samples** (`int`): Number of posterior predictive samples (default: 1000)
+- **test_statistic** (`str`): Statistic to check: 'mean', 'std', 'max', 'min' (default: 'mean')
+
+**Returns:**
+
+- **PPCResult**: Contains observed statistic, predictive distribution, p-value
+
+**Example:**
+
+```python
+# Check if model captures mean correctly
+ppc_result = analyzer.posterior_predictive_check(result, n_samples=1000, test_statistic='mean')
+
+print(f"Observed mean: {ppc_result.observed_statistic:.2f}")
+print(f"Predictive mean: {ppc_result.predictive_mean:.2f}")
+print(f"Bayesian p-value: {ppc_result.p_value:.3f}")  # Should be ~0.5
+
+# Visualize
+import matplotlib.pyplot as plt
+plt.hist(ppc_result.predictive_samples, bins=50, alpha=0.7, label='Posterior predictive')
+plt.axvline(ppc_result.observed_statistic, color='r', linestyle='--', label='Observed')
+plt.legend()
+plt.show()
+```
+
+**References:**
+- Gelman, A., et al. (2013). Bayesian Data Analysis
+- Related methods: `sample_posterior()`
+
+---
+
+#### waic()
+
+Calculate Widely Applicable Information Criterion for model comparison.
+
+**When to use:** Comparing Bayesian models (lower is better).
+
+```python
+waic(result: BayesianModelResult) -> float
+```
+
+**Parameters:**
+
+- **result** (`BayesianModelResult`): Fitted model result
+
+**Returns:**
+
+- `float`: WAIC value (lower = better out-of-sample predictive accuracy)
+
+**Example:**
+
+```python
+# Compare two models
+model1 = analyzer.build_simple_model('points ~ minutes')
+result1 = analyzer.sample_posterior()
+waic1 = analyzer.waic(result1)
+
+model2 = analyzer.build_simple_model('points ~ minutes + age + usage_rate')
+result2 = analyzer.sample_posterior()
+waic2 = analyzer.waic(result2)
+
+print(f"Model 1 WAIC: {waic1:.1f}")
+print(f"Model 2 WAIC: {waic2:.1f}")
+print(f"Difference: {abs(waic2 - waic1):.1f}")  # >10 = strong evidence
+
+if waic2 < waic1 - 10:
+    print("Model 2 is substantially better")
+```
+
+**References:**
+- Watanabe, S. (2010). "Asymptotic equivalence of Bayes cross validation and widely applicable information criterion"
+- Related methods: `loo()`, `compare_models()`
+
+---
+
+#### loo()
+
+Calculate Leave-One-Out Cross-Validation for model comparison.
+
+**When to use:** More robust model comparison than WAIC (handles outliers better).
+
+```python
+loo(result: BayesianModelResult) -> float
+```
+
+**Parameters:**
+
+- **result** (`BayesianModelResult`): Fitted model result
+
+**Returns:**
+
+- `float`: LOO value (lower = better)
+
+**Example:**
+
+```python
+loo_val = analyzer.loo(result)
+print(f"LOO-CV: {loo_val:.1f}")
+```
+
+**References:**
+- Vehtari, A., Gelman, A., & Gabry, J. (2017). "Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC"
+- Related methods: `waic()`, `compare_models()`
+
+---
+
+#### compare_models()
+
+Compare multiple Bayesian models simultaneously using information criteria.
+
+**When to use:** Deciding between multiple candidate models.
+
+```python
+compare_models(
+    results: Dict[str, BayesianModelResult]
+) -> ModelComparisonResult
+```
+
+**Parameters:**
+
+- **results** (`Dict[str, BayesianModelResult]`): Model name → result mapping
+
+**Returns:**
+
+- **ModelComparisonResult**: Ranked comparison table with WAIC, LOO, weights
+
+**Example:**
+
+```python
+# Compare multiple models
+models = {
+    'simple': result1,
+    'with_age': result2,
+    'full': result3
+}
+
+comparison = analyzer.compare_models(models)
+print(comparison.comparison_df)
+
+# Output:
+#          WAIC    dWAIC  weight   LOO    dLOO
+# full     1250.3   0.0   0.85    1248.1  0.0
+# with_age 1265.8  15.5   0.14    1264.2  16.1
+# simple   1302.5  52.2   0.01    1301.8  53.7
+
+# Model averaging weights
+print(f"Model weights: {comparison.weights}")
+```
+
+**NBA Analytics Use Case:**
+
+```python
+# Which features best predict scoring?
+models = {
+    'baseline': analyzer.build_simple_model('points ~ minutes'),
+    'with_usage': analyzer.build_simple_model('points ~ minutes + usage_rate'),
+    'with_position': analyzer.build_simple_model('points ~ minutes + usage_rate + C(position)'),
+    'full': analyzer.build_simple_model('points ~ minutes + usage_rate + C(position) + age + team_pace')
+}
+
+# Fit all models
+results = {}
+for name, model in models.items():
+    analyzer.model = model
+    results[name] = analyzer.sample_posterior(draws=2000, chains=4)
+
+# Compare
+comparison = analyzer.compare_models(results)
+best_model = comparison.comparison_df.index[0]
+print(f"Best model: {best_model}")
+```
+
+**References:**
+- Related methods: `waic()`, `loo()`
+
+---
+
+### Advanced Time Series Methods
+
+Additional sophisticated time series methods available in `advanced_time_series.py`.
+
+#### GARCH / arch_garch()
+
+Model time-varying volatility using GARCH (Generalized AutoRegressive Conditional Heteroskedasticity).
+
+**When to use:** Financial time series, modeling volatility clustering, risk management.
+
+**Example:**
+
+```python
+# Model scoring volatility
+from mcp_server.advanced_time_series import fit_garch
+
+result = fit_garch(player_points_series, p=1, q=1)  # GARCH(1,1)
+print(f"Conditional volatility: {result.conditional_volatility}")
+```
+
+**NBA Analytics Use Case:**
+
+```python
+# Model player performance volatility
+# High volatility = inconsistent, Low volatility = consistent
+
+result = fit_garch(points_per_game, p=1, q=1)
+volatility_today = result.conditional_volatility[-1]
+
+if volatility_today > volatility_threshold:
+    print("High volatility - performance unpredictable")
+```
+
+**References:**
+- Bollerslev, T. (1986). "Generalized autoregressive conditional heteroskedasticity"
+
+---
+
+#### spectral_analysis()
+
+Frequency domain analysis to detect cyclical patterns.
+
+**When to use:** Detecting periodic patterns (e.g., weekly, monthly cycles) in time series.
+
+**Example:**
+
+```python
+from mcp_server.advanced_time_series import spectral_analysis
+
+result = spectral_analysis(team_performance_series)
+
+# Dominant frequencies
+print(f"Dominant period: {result.dominant_period} games")
+print(f"Spectral density: {result.spectral_density}")
+```
+
+**References:**
+- Related to Fourier analysis and periodogram
+
+---
+
+#### cointegration_test() / johansen_test()
+
+Test for cointegration between multiple time series.
+
+**When to use:** Multiple related time series that move together in long run.
+
+**Example:**
+
+```python
+from mcp_server.advanced_time_series import johansen_cointegration_test
+
+# Do team offense and defense co-move?
+result = johansen_cointegration_test(
+    data[['offensive_rating', 'defensive_rating']],
+    det_order=0,
+    k_ar_diff=1
+)
+
+print(f"Cointegration rank: {result.rank}")
+print(f"Test statistics: {result.trace_stat}")
+```
+
+**References:**
+- Johansen, S. (1991). "Estimation and hypothesis testing of cointegration vectors"
+
+---
+
+#### state_space_model()
+
+Estimate state space models using Kalman filtering.
+
+**When to use:** Unobserved components models, signal extraction, nowcasting.
+
+**Example:**
+
+```python
+from mcp_server.advanced_time_series import fit_state_space_model
+
+# Decompose observed performance into latent "true skill"
+result = fit_state_space_model(
+    observed_performance,
+    state_dimension=1,
+    observation_model='linear'
+)
+
+# Filtered and smoothed states
+true_skill_estimate = result.smoothed_states
+```
+
+**References:**
+- Kalman, R. E. (1960). "A new approach to linear filtering and prediction problems"
+
+---
+
+### EconometricSuite Core Methods
+
+Utility methods in the main `EconometricSuite` class for automated analysis.
+
+#### auto_select_method()
+
+Automatically select appropriate econometric method based on data structure.
+
+**When to use:** Exploratory analysis, when unsure which method to use.
+
+```python
+auto_select_method(
+    problem_type: Optional[str] = None,
+    data_structure: Optional[str] = None
+) -> str
+```
+
+**Parameters:**
+
+- **problem_type** (`str`, optional): 'forecasting', 'causal', 'panel', 'survival'
+- **data_structure** (`str`, optional): Detected data structure
+
+**Returns:**
+
+- `str`: Recommended method name
+
+**Example:**
+
+```python
+from mcp_server.econometric_suite import EconometricSuite
+
+suite = EconometricSuite(data, target='points', time_col='date', entity_col='player_id')
+
+# Auto-select method
+method = suite.auto_select_method(problem_type='forecasting')
+print(f"Recommended method: {method}")
+
+# Use recommended method
+if method == 'arima':
+    result = suite.time_series_analysis(method='arima')
+```
+
+**References:**
+- Related methods: `classify_data_structure()`
+
+---
+
+#### classify_data_structure()
+
+Detect data structure (cross-sectional, time series, panel, survival).
+
+**When to use:** Understanding your data before analysis.
+
+```python
+classify_data_structure() -> Dict[str, Any]
+```
+
+**Returns:**
+
+- `Dict`: Contains data_type, n_entities, n_time_periods, is_balanced, recommendations
+
+**Example:**
+
+```python
+structure = suite.classify_data_structure()
+
+print(f"Data type: {structure['data_type']}")  # 'panel', 'time_series', etc.
+print(f"Entities: {structure['n_entities']}")
+print(f"Time periods: {structure['n_time_periods']}")
+print(f"Balanced: {structure['is_balanced']}")
+print(f"Recommendations: {structure['recommendations']}")
+```
+
+**References:**
+- Related methods: `auto_select_method()`
+
+---
+
+#### model_averaging()
+
+Combine predictions from multiple models using weighted averaging.
+
+**When to use:** Model uncertainty, ensemble predictions, robustness.
+
+```python
+model_averaging(
+    models: List[Any],
+    method: str = "equal_weight"
+) -> EnsembleResult
+```
+
+**Parameters:**
+
+- **models** (`List`): List of fitted models
+- **method** (`str`): Weighting method: 'equal_weight', 'aic_weight', 'bic_weight', 'performance_weight'
+
+**Returns:**
+
+- **EnsembleResult**: Combined predictions with uncertainty
+
+**Example:**
+
+```python
+# Fit multiple ARIMA models
+models = []
+for order in [(1,1,1), (2,1,2), (1,1,2)]:
+    result = suite.time_series_analysis(method='arima', order=order)
+    models.append(result.result)
+
+# Model averaging
+ensemble = suite.model_averaging(models, method='aic_weight')
+
+print(f"Ensemble forecast: {ensemble.forecast}")
+print(f"Model weights: {ensemble.weights}")
+print(f"Prediction interval: {ensemble.prediction_interval}")
+```
+
+**References:**
+- Hoeting, J. A., et al. (1999). "Bayesian model averaging"
+- Related methods: `compare_models()` (Bayesian)
+
+---
+
+## Summary: Complete Method Reference
+
+**Total Methods Documented: 50**
+
+| Module | Methods | Status |
+|--------|---------|--------|
+| Time Series | 9 | ✅ Complete |
+| Panel Data | 9 | ✅ Complete |
+| Causal Inference | 8 | ✅ Complete |
+| Survival Analysis | 10 | ✅ Complete |
+| Bayesian Methods | 8 | ✅ Complete |
+| Advanced Time Series | 4 | ✅ Complete |
+| EconometricSuite Core | 3 | ✅ Complete |
+
+---
+
 ## Version Information
 
 **Current Version:** 1.0.0
