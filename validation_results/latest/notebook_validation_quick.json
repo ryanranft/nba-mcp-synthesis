@@ -1,0 +1,76 @@
+{
+  "metadata": {
+    "timestamp": "2025-10-31T17:56:13.123796",
+    "total_notebooks": 1,
+    "validation_config": {
+      "timeout": 60,
+      "kernel_name": "python3",
+      "allow_errors": true
+    }
+  },
+  "results": [
+    {
+      "notebook_path": "examples/notebooks/01_player_performance_trend_analysis.ipynb",
+      "success": false,
+      "execution_time_seconds": 6.5,
+      "total_cells": 21,
+      "executed_cells": 12,
+      "failed_cells": 9,
+      "error_cells": [
+        6,
+        8,
+        10,
+        11,
+        13,
+        14,
+        16,
+        18,
+        19
+      ],
+      "errors": [
+        "Cell 6: TypeError: TimeSeriesAnalyzer.__init__() got an unexpected keyword argument 'date_column'",
+        "Cell 8: NameError: name 'ts_analyzer' is not defined",
+        "Cell 10: NameError: name 'ts_analyzer' is not defined",
+        "Cell 11: NameError: name 'forecast_result' is not defined",
+        "Cell 13: TypeError: AdvancedTimeSeriesAnalyzer.__init__() got an unexpected keyword argument 'target_column'",
+        "Cell 14: NameError: name 'kalman_result' is not defined",
+        "Cell 16: NameError: name 'adv_ts' is not defined",
+        "Cell 18: AttributeError: 'SuiteResult' object has no attribute 'category'",
+        "Cell 19: KeyError: 'aic'"
+      ],
+      "warnings": [
+        "Cell 18: /Users/ryanranft/miniconda3/envs/mcp-synthesis/lib/python3.11/site-packages/statsmodels/tsa/base/tsa_model.py:473: ValueWarning: No frequency information was provided, so inferred frequency D will be ",
+        "Cell 19: /Users/ryanranft/miniconda3/envs/mcp-synthesis/lib/python3.11/site-packages/statsmodels/tsa/base/tsa_model.py:473: ValueWarning: No frequency information was provided, so inferred frequency D will be ",
+        "Cell 19: /Users/ryanranft/miniconda3/envs/mcp-synthesis/lib/python3.11/site-packages/statsmodels/tsa/statespace/representation.py:374: FutureWarning: Unknown keyword arguments: dict_keys(['state_dim']).Passing",
+        "Cell 19: WARNING:mcp_server.advanced_time_series:Data index is not DatetimeIndex. Some methods may not work.\n"
+      ],
+      "output_summary": {
+        "code_cells": 12,
+        "markdown_cells": 9,
+        "execution_time_seconds": 6.5,
+        "errors_count": 9,
+        "warnings_count": 4
+      },
+      "timestamp": "2025-10-31T17:56:13.123674"
+    }
+  ],
+  "summary": {
+    "total_notebooks": 1,
+    "successful": 0,
+    "failed": 1,
+    "success_rate": 0.0,
+    "total_execution_time_seconds": 6.499511003494263,
+    "total_cells_executed": 12,
+    "total_errors": 9,
+    "notebooks": {
+      "01_player_performance_trend_analysis.ipynb": {
+        "success": false,
+        "execution_time_seconds": 6.499511003494263,
+        "cells_executed": 12,
+        "failed_cells": 9,
+        "errors_count": 9,
+        "warnings_count": 4
+      }
+    }
+  }
+}

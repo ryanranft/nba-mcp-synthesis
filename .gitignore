@@ -42,6 +42,11 @@ Thumbs.db
 mlruns/
 mlartifacts/
 
+# Test directories with MLflow artifacts (false positive secrets)
+test_arima_comparison/
+test_exp/
+test_output/
+
 # Outputs
 outputs/
 results/
@@ -58,6 +63,7 @@ cache/
 /*_report.json
 /*_COMPLETE.md
 /*_STATUS.md
+!PROJECT_STATUS.md
 /*_REPORT.md
 /*_VERIFICATION*.md
 /*_SUCCESS.md
@@ -67,6 +73,11 @@ cache/
 *.pem
 credentials.json
 secrets.yaml
+
+# Config templates and instruction files (contain placeholder/example secrets)
+*_TEMPLATE.json
+INSTRUCTIONS_FOR_*.txt
+config/*_TEMPLATE.*
 
 # API Keys and credentials (double check)
 .env*
@@ -147,13 +158,22 @@ test_results_*.json
 test_results_*.html
 test_results_*.csv
 benchmark_results/
-benchmark_results.json
-benchmark_results_*.json
-benchmark_results_*.txt
-benchmark_results_*.log
-benchmark_results_dir/
 performance_*.log
-performance_*.json
+
+# Benchmark results - keep latest, ignore archives
+benchmarks/archive/
+validation_results/archive/
+pipeline_artifacts/archive/
+
+# Keep recent benchmarks and validation results
+!benchmarks/latest/
+!validation_results/latest/
+!pipeline_artifacts/latest/
+
+# Temporary benchmark/test files in root
+benchmark_*.json
+validation_*.json
+*_test_*.json
 
 # Generated documentation
 *_GENERATED.md
@@ -465,9 +485,16 @@ session_*
 docs/temp/
 docs/tmp/
 docs/generated/
+
+# Archive old dated directories (keep organized archives)
 docs/archive/2025-*/
 docs/completion/
-docs/sessions/
+
+# Keep organized docs (sessions, agents, guides, reports, plans)
+# but ignore temporary/working files within them
+docs/*/temp/
+docs/*/tmp/
+docs/*/.DS_Store
 
 # Project specific
 workflow_state/
