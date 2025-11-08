@@ -279,7 +279,7 @@ class CausalInferenceAnalyzer:
             raise InvalidDataError(
                 f"Missing required columns: {missing}",
                 value=missing,
-                available_columns=list(self.data.columns)
+                available_columns=list(self.data.columns),
             )
 
         if self.data[self.outcome_col].isna().any():
@@ -347,6 +347,21 @@ class CausalInferenceAnalyzer:
             else:
                 formula = (
                     f"{self.outcome_col} ~ [{self.treatment_col} ~ {instruments_str}]"
+                )
+        else:
+            # Check if user-provided formula has IV syntax [endogenous ~ instruments]
+            # If not, inject it to ensure IV estimation rather than OLS
+            if "[" not in formula and "]" not in formula:
+                # Parse the formula to extract parts
+                # Formula format: "outcome ~ treatment + covariates"
+                instruments_str = " + ".join(instruments)
+
+                # Insert IV syntax around treatment variable
+                # Replace treatment with [treatment ~ instruments]
+                formula = formula.replace(
+                    self.treatment_col,
+                    f"[{self.treatment_col} ~ {instruments_str}]",
+                    1,  # Only replace first occurrence
                 )
 
         # Build IV model
@@ -638,7 +653,7 @@ class CausalInferenceAnalyzer:
         if not self.covariates:
             raise MissingParameterError(
                 "Covariates required for propensity score estimation",
-                parameter="covariates"
+                parameter="covariates",
             )
 
         # Prepare data
@@ -701,14 +716,14 @@ class CausalInferenceAnalyzer:
                 "No treated units in common support region. "
                 "Check data quality or relax common support restrictions.",
                 required=1,
-                actual=0
+                actual=0,
             )
         if len(control_idx) == 0:
             raise InsufficientDataError(
                 "No control units in common support region. "
                 "Check data quality or relax common support restrictions.",
                 required=1,
-                actual=0
+                actual=0,
             )
 
         if method == "nearest":
@@ -864,7 +879,7 @@ class CausalInferenceAnalyzer:
                 missing.append("time_col")
             raise MissingParameterError(
                 f"Missing required parameters for synthetic control: {missing}",
-                parameter=", ".join(missing)
+                parameter=", ".join(missing),
             )
 
         # Prepare panel data
@@ -1109,7 +1124,7 @@ class CausalInferenceAnalyzer:
                 f"Unknown sensitivity analysis method: {method}",
                 parameter="method",
                 value=method,
-                valid_values=valid_methods
+                valid_values=valid_methods,
             )
 
         logger.info(f"Sensitivity analysis complete: {result}")
@@ -1161,7 +1176,7 @@ class CausalInferenceAnalyzer:
                 f"Unknown kernel: {kernel}",
                 parameter="kernel",
                 value=kernel,
-                valid_values=valid_kernels
+                valid_values=valid_kernels,
             )
 
     def _mccrary_test(
@@ -1312,7 +1327,7 @@ class CausalInferenceAnalyzer:
         if not self.covariates:
             raise MissingParameterError(
                 "Covariates required for propensity score estimation",
-                parameter="covariates"
+                parameter="covariates",
             )
 
         # Estimate propensity scores
@@ -1337,7 +1352,7 @@ class CausalInferenceAnalyzer:
             raise InsufficientDataError(
                 "Need both treated and control units for kernel matching",
                 required=1,
-                actual=f"treated={n_treated}, control={n_control}"
+                actual=f"treated={n_treated}, control={n_control}",
             )
 
         ps_treated = propensity_scores[treated_idx]
@@ -1445,7 +1460,7 @@ class CausalInferenceAnalyzer:
         if not self.covariates:
             raise MissingParameterError(
                 "Covariates required for propensity score estimation",
-                parameter="covariates"
+                parameter="covariates",
             )
 
         # Estimate propensity scores
@@ -1488,7 +1503,7 @@ class CausalInferenceAnalyzer:
             raise InsufficientDataError(
                 f"No matches found with radius={radius}. Try increasing radius.",
                 required=1,
-                actual=0
+                actual=0,
             )
 
         att = np.mean(matched_effects)
@@ -1559,7 +1574,7 @@ class CausalInferenceAnalyzer:
         if not self.covariates:
             raise MissingParameterError(
                 "Covariates required for doubly robust estimation",
-                parameter="covariates"
+                parameter="covariates",
             )
 
         X = self.data[self.covariates].values

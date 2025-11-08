@@ -288,6 +288,9 @@ class UnifiedSecretsManager:
                     "NBA",
                     "SPORTSDATA",
                     "TIMEZONE",
+                    "TWILIO",
+                    "SMTP",
+                    "EMAIL",
                 ]
                 for part in parts
             )
@@ -340,6 +343,9 @@ class UnifiedSecretsManager:
                 "NBA",
                 "SPORTSDATA",
                 "TIMEZONE",
+                "TWILIO",
+                "SMTP",
+                "EMAIL",
             ]
             for part in parts
         )
@@ -384,16 +390,43 @@ class UnifiedSecretsManager:
         project = project or self.project or "nba-mcp-synthesis"
         context = context or self.context or "WORKFLOW"
 
+        # Map context to environment variable suffix (same as _get_hierarchy_levels)
+        context_suffix_map = {
+            "production": "WORKFLOW",
+            "workflow": "WORKFLOW",
+            "development": "DEVELOPMENT",
+            "test": "TEST",
+        }
+        context_suffix = context_suffix_map.get(context.lower(), context.upper())
+
         # Map common short names to full names
         short_name_mappings = {
-            "GOOGLE_API_KEY": f'GOOGLE_API_KEY_{project.upper().replace("-", "_")}_{context.upper()}',
-            "ANTHROPIC_API_KEY": f'ANTHROPIC_API_KEY_{project.upper().replace("-", "_")}_{context.upper()}',
-            "OPENAI_API_KEY": f'OPENAI_API_KEY_{project.upper().replace("-", "_")}_{context.upper()}',
-            "DEEPSEEK_API_KEY": f'DEEPSEEK_API_KEY_{project.upper().replace("-", "_")}_{context.upper()}',
-            "DB_PASSWORD": f'DB_PASSWORD_{project.upper().replace("-", "_")}_{context.upper()}',
-            "DB_HOST": f'DB_HOST_{project.upper().replace("-", "_")}_{context.upper()}',
-            "SLACK_WEBHOOK_URL": f"SLACK_WEBHOOK_URL_BIG_CAT_BETS_GLOBAL_{context.upper()}",
-            "LINEAR_API_KEY": f"LINEAR_API_KEY_BIG_CAT_BETS_GLOBAL_{context.upper()}",
+            "GOOGLE_API_KEY": f'GOOGLE_API_KEY_{project.upper().replace("-", "_")}_{context_suffix}',
+            "ANTHROPIC_API_KEY": f'ANTHROPIC_API_KEY_{project.upper().replace("-", "_")}_{context_suffix}',
+            "OPENAI_API_KEY": f'OPENAI_API_KEY_{project.upper().replace("-", "_")}_{context_suffix}',
+            "DEEPSEEK_API_KEY": f'DEEPSEEK_API_KEY_{project.upper().replace("-", "_")}_{context_suffix}',
+            "DB_PASSWORD": f'DB_PASSWORD_{project.upper().replace("-", "_")}_{context_suffix}',
+            "DB_HOST": f'DB_HOST_{project.upper().replace("-", "_")}_{context_suffix}',
+            "DB_PORT": f'DB_PORT_{project.upper().replace("-", "_")}_{context_suffix}',
+            "DB_NAME": f'DB_NAME_{project.upper().replace("-", "_")}_{context_suffix}',
+            "DB_USER": f'DB_USER_{project.upper().replace("-", "_")}_{context_suffix}',
+            "RDS_HOST": f'RDS_HOST_{project.upper().replace("-", "_")}_{context_suffix}',
+            "RDS_PORT": f'RDS_PORT_{project.upper().replace("-", "_")}_{context_suffix}',
+            "RDS_DATABASE": f'RDS_DATABASE_{project.upper().replace("-", "_")}_{context_suffix}',
+            "RDS_USERNAME": f'RDS_USERNAME_{project.upper().replace("-", "_")}_{context_suffix}',
+            "RDS_PASSWORD": f'RDS_PASSWORD_{project.upper().replace("-", "_")}_{context_suffix}',
+            "SLACK_WEBHOOK_URL": f"SLACK_WEBHOOK_URL_BIG_CAT_BETS_GLOBAL_{context_suffix}",
+            "LINEAR_API_KEY": f"LINEAR_API_KEY_BIG_CAT_BETS_GLOBAL_{context_suffix}",
+            "TWILIO_ACCOUNT_SID": f'TWILIO_ACCOUNT_SID_{project.upper().replace("-", "_")}_{context_suffix}',
+            "TWILIO_AUTH_TOKEN": f'TWILIO_AUTH_TOKEN_{project.upper().replace("-", "_")}_{context_suffix}',
+            "TWILIO_FROM_NUMBER": f'TWILIO_FROM_NUMBER_{project.upper().replace("-", "_")}_{context_suffix}',
+            "TWILIO_TO_NUMBERS": f'TWILIO_TO_NUMBERS_{project.upper().replace("-", "_")}_{context_suffix}',
+            "SMTP_HOST": f'SMTP_HOST_{project.upper().replace("-", "_")}_{context_suffix}',
+            "SMTP_PORT": f'SMTP_PORT_{project.upper().replace("-", "_")}_{context_suffix}',
+            "SMTP_USER": f'SMTP_USER_{project.upper().replace("-", "_")}_{context_suffix}',
+            "SMTP_PASSWORD": f'SMTP_PASSWORD_{project.upper().replace("-", "_")}_{context_suffix}',
+            "EMAIL_FROM": f'EMAIL_FROM_{project.upper().replace("-", "_")}_{context_suffix}',
+            "EMAIL_TO": f'EMAIL_TO_{project.upper().replace("-", "_")}_{context_suffix}',
         }
 
         for short_name, full_name in short_name_mappings.items():
@@ -799,18 +832,46 @@ def get_health_status() -> Dict[str, Any]:
 
 # Convenience functions for backward compatibility
 def get_database_config() -> Dict[str, Any]:
-    """Get database configuration (backward compatibility)"""
+    """Get database configuration with proper context awareness.
+
+    Checks credentials in priority order:
+    1. RDS_* (current hierarchical naming)
+    2. RDS_*_NBA_MCP_SYNTHESIS_DEVELOPMENT (development context)
+    3. RDS_*_NBA_MCP_SYNTHESIS_WORKFLOW (production context)
+    4. DB_* (legacy fallback for backward compatibility)
+    """
     return {
-        "host": get_secret("DB_HOST")
-        or get_secret("DB_HOST_NBA_MCP_SYNTHESIS_WORKFLOW"),
-        "port": get_secret("DB_PORT")
-        or get_secret("DB_PORT_NBA_MCP_SYNTHESIS_WORKFLOW"),
-        "database": get_secret("DB_NAME")
-        or get_secret("DB_NAME_NBA_MCP_SYNTHESIS_WORKFLOW"),
-        "user": get_secret("DB_USER")
-        or get_secret("DB_USER_NBA_MCP_SYNTHESIS_WORKFLOW"),
-        "password": get_secret("DB_PASSWORD")
-        or get_secret("DB_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW"),
+        "host": (
+            get_secret("RDS_HOST")
+            or get_secret("RDS_HOST_NBA_MCP_SYNTHESIS_DEVELOPMENT")
+            or get_secret("RDS_HOST_NBA_MCP_SYNTHESIS_WORKFLOW")
+            or get_secret("DB_HOST")
+        ),
+        "port": (
+            get_secret("RDS_PORT")
+            or get_secret("RDS_PORT_NBA_MCP_SYNTHESIS_DEVELOPMENT")
+            or get_secret("RDS_PORT_NBA_MCP_SYNTHESIS_WORKFLOW")
+            or get_secret("DB_PORT")
+            or "5432"
+        ),
+        "database": (
+            get_secret("RDS_DATABASE")
+            or get_secret("RDS_DATABASE_NBA_MCP_SYNTHESIS_DEVELOPMENT")
+            or get_secret("RDS_DATABASE_NBA_MCP_SYNTHESIS_WORKFLOW")
+            or get_secret("DB_NAME")
+        ),
+        "user": (
+            get_secret("RDS_USERNAME")
+            or get_secret("RDS_USERNAME_NBA_MCP_SYNTHESIS_DEVELOPMENT")
+            or get_secret("RDS_USERNAME_NBA_MCP_SYNTHESIS_WORKFLOW")
+            or get_secret("DB_USER")
+        ),
+        "password": (
+            get_secret("RDS_PASSWORD")
+            or get_secret("RDS_PASSWORD_NBA_MCP_SYNTHESIS_DEVELOPMENT")
+            or get_secret("RDS_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW")
+            or get_secret("DB_PASSWORD")
+        ),
     }
 
 

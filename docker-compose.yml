@@ -59,6 +59,58 @@ services:
       - redis-data:/data
     restart: unless-stopped
 
+  # PostgreSQL database for local development
+  postgres:
+    image: postgres:16-alpine
+    container_name: nba-mcp-postgres
+    environment:
+      POSTGRES_DB: espn_nba_mcp_synthesis
+      POSTGRES_USER: ryanranft
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nba_mcp_local_dev}
+      PGDATA: /var/lib/postgresql/data/pgdata
+      # Performance tuning for 96GB RAM system
+      POSTGRES_SHARED_BUFFERS: 2GB
+      POSTGRES_EFFECTIVE_CACHE_SIZE: 6GB
+      POSTGRES_MAINTENANCE_WORK_MEM: 512MB
+      POSTGRES_MAX_CONNECTIONS: 100
+      POSTGRES_WORK_MEM: 50MB
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./sql/init:/docker-entrypoint-initdb.d:ro
+      - ./backups:/backups
+    ports:
+      - "5432:5432"
+    networks:
+      - mcp-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ryanranft -d espn_nba_mcp_synthesis"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    command:
+      - "postgres"
+      - "-c"
+      - "shared_buffers=2GB"
+      - "-c"
+      - "effective_cache_size=6GB"
+      - "-c"
+      - "maintenance_work_mem=512MB"
+      - "-c"
+      - "max_connections=100"
+      - "-c"
+      - "work_mem=50MB"
+      - "-c"
+      - "random_page_cost=1.1"
+      - "-c"
+      - "effective_io_concurrency=200"
+
 secrets:
   google_api_key:
     file: ${SECRETS_PATH:-.env.nba-simulator-aws.test}/GOOGLE_API_KEY_NBA_SIMULATOR_AWS_TEST.env
@@ -75,3 +127,5 @@ networks:
 volumes:
   redis-data:
     name: nba-mcp-redis-data
+  postgres-data:
+    name: nba-mcp-postgres-data

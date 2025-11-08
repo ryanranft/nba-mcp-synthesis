@@ -1,0 +1,480 @@
+{
+  "validation_timestamp": "2025-11-06T22:19:03.615920",
+  "games_validated": 1,
+  "results": [
+    {
+      "game_id": "401654758",
+      "home_team_id": "7",
+      "away_team_id": "13",
+      "player_comparisons": [
+        {
+          "player_id": 6583,
+          "matches": {
+            "fgm": 12,
+            "fga": 23,
+            "fg3m": 0,
+            "fg3a": 4,
+            "ftm": 8,
+            "fta": 9,
+            "oreb": 3,
+            "dreb": 11,
+            "reb": 14,
+            "ast": 5,
+            "stl": 0,
+            "blk": 4,
+            "tov": 2,
+            "pf": 3,
+            "pts": 32
+          },
+          "discrepancies": {}
+        },
+        {
+          "player_id": 4066648,
+          "matches": {
+            "fgm": 2,
+            "fga": 4,
+            "fg3m": 1,
+            "fg3a": 2,
+            "ftm": 2,
+            "fta": 2,
+            "oreb": 0,
+            "dreb": 3,
+            "reb": 3,
+            "ast": 1,
+            "stl": 0,
+            "blk": 0,
+            "tov": 1,
+            "pf": 1,
+            "pts": 7
+          },
+          "discrepancies": {}
+        },
+        {
+          "player_id": 1966,
+          "matches": {
+            "fgm": 10,
+            "fga": 16,
+            "fg3m": 3,
+            "fg3a": 5,
+            "ftm": 4,
+            "fta": 5,
+            "oreb": 2,
+            "dreb": 4,
+            "reb": 6,
+            "ast": 8,
+            "stl": 1,
+            "blk": 1,
+            "tov": 7,
+            "pf": 1,
+            "pts": 27
+          },
+          "discrepancies": {}
+        },
+        {
+          "player_id": 3136776,
+          "matches": {
+            "fgm": 6,
+            "fga": 20,
+            "fg3m": 1,
+            "fg3a": 9,
+            "ftm": 0,
+            "fta": 0,
+            "oreb": 0,
+            "dreb": 3,
+            "reb": 3,
+            "ast": 3,
+            "stl": 2,
+            "blk": 0,
+            "tov": 1,
+            "pf": 3,
+            "pts": 13
+          },
+          "discrepancies": {}
+        },
+        {
+          "player_id": 4066457,
+          "matches": {
+            "fgm": 5,
+            "fga": 9,
+            "fg3m": 2,
+            "fg3a": 6,
+            "ftm": 1,
+            "fta": 1,
+            "oreb": 0,
+            "dreb": 4,
+            "reb": 4,
+            "ast": 3,
+            "stl": 0,
+            "blk": 1,
+            "tov": 0,
+            "pf": 1,
+            "pts": 13
+          },
+          "discrepancies": {}
+        },
+        {
+          "player_id": 2990962,
+          "matches": {
+            "fgm": 4,
+            "fga": 7,
+            "fg3m": 1,
+            "fg3a": 3,
+            "ftm": 2,
+            "fta": 2,
+            "oreb": 0,
+            "dreb": 4,
+            "reb": 4,
+            "ast": 0,
+            "stl": 0,
+            "blk": 1,
+            "tov": 0,
+            "pf": 0,
+            "pts": 11
+          },
+          "discrepancies": {}
+        },
+        {
+          "player_id": 4397077,
+          "matches": {
+            "fgm": 0,
+            "fga": 0,
+            "fg3m": 0,
+            "fg3a": 0,
+            "ftm": 0,
+            "fta": 0,
+            "oreb": 0,
+            "dreb": 3,
+            "reb": 3,
+            "ast": 0,
+            "stl": 0,
+            "blk": 0,
+            "tov": 0,
+            "pf": 2,
+            "pts": 0
+          },
+          "discrepancies": {}
+        },
+        {
+          "player_id": 2580782,
+          "matches": {
+            "fgm": 0,
+            "fga": 0,
+            "fg3m": 0,
+            "fg3a": 0,
+            "ftm": 0,
+            "fta": 0,
+            "oreb": 0,
+            "dreb": 2,
+            "reb": 2,
+            "ast": 1,
+            "stl": 0,
+            "blk": 0,
+            "tov": 0,
+            "pf": 1,
+            "pts": 0
+          },
+          "discrepancies": {}
+        },
+        {
+          "player_id": 3137259,
+          "matches": {
+            "fgm": 0,
+            "fga": 0,
+            "fg3m": 0,
+            "fg3a": 0,
+            "ftm": 0,
+            "fta": 0,
+            "oreb": 1,
+            "dreb": 0,
+            "reb": 1,
+            "ast": 1,
+            "stl": 0,
+            "blk": 0,
+            "tov": 1,
+            "pf": 3,
+            "pts": 0
+          },
+          "discrepancies": {}
+        },
+        {
+          "player_id": 4278077,
+          "error": "Player not found in computed data"
+        },
+        {
+          "player_id": 4684286,
+          "error": "Player not found in computed data"
+        },
+        {
+          "player_id": 4432582,
+          "error": "Player not found in computed data"
+        },
+        {
+          "player_id": 3064290,
+          "matches": {
+            "fgm": 5,
+            "fga": 11,
+            "fg3m": 0,
+            "ftm": 2,
+            "fta": 2,
+            "oreb": 6,
+            "dreb": 5,
+            "reb": 11,
+            "ast": 7,
+            "stl": 0,
+            "blk": 0,
+            "tov": 1,
+            "pf": 2,
+            "pts": 12
+          },
+          "discrepancies": {
+            "fg3a": {
+              "computed": 2,
+              "hoopr": 3.0,
+              "diff": -1.0
+            }
+          }
+        },
+        {
+          "player_id": 4278104,
+          "matches": {
+            "fgm": 8,
+            "fga": 15,
+            "fg3m": 3,
+            "fg3a": 7,
+            "ftm": 0,
+            "fta": 0,
+            "oreb": 1,
+            "dreb": 7,
+            "reb": 8,
+            "ast": 0,
+            "stl": 1,
+            "blk": 2,
+            "tov": 0,
+            "pf": 1,
+            "pts": 19
+          },
+          "discrepancies": {}
+        },
+        {
+          "player_id": 3112335,
+          "matches": {
+            "fgm": 15,
+            "fga": 23,
+            "fg3m": 1,
+            "fg3a": 3,
+            "ftm": 1,
+            "fta": 2,
+            "oreb": 3,
+            "dreb": 9,
+            "reb": 12,
+            "ast": 7,
+            "stl": 2,
+            "blk": 0,
+            "tov": 0,
+            "pf": 3,
+            "pts": 32
+          },
+          "discrepancies": {}
+        },
+        {
+          "player_id": 3936299,
+          "matches": {
+            "fgm": 9,
+            "fga": 24,
+            "fg3m": 4,
+            "fg3a": 9,
+            "ftm": 0,
+            "fta": 0,
+            "oreb": 1,
+            "dreb": 5,
+            "reb": 6,
+            "ast": 10,
+            "stl": 0,
+            "blk": 1,
+            "tov": 0,
+            "pf": 1,
+            "pts": 22
+          },
+          "discrepancies": {}
+        },
+        {
+          "player_id": 2581018,
+          "matches": {
+            "fgm": 4,
+            "fga": 11,
+            "fg3m": 4,
+            "fg3a": 10,
+            "ftm": 0,
+            "fta": 0,
+            "oreb": 0,
+            "dreb": 2,
+            "reb": 2,
+            "ast": 1,
+            "stl": 3,
+            "blk": 0,
+            "tov": 0,
+            "pf": 3,
+            "pts": 12
+          },
+          "discrepancies": {}
+        },
+        {
+          "player_id": 4576087,
+          "matches": {
+            "fgm": 3,
+            "fga": 6,
+            "fg3m": 2,
+            "fg3a": 4,
+            "ftm": 0,
+            "fta": 0,
+            "oreb": 1,
+            "dreb": 0,
+            "reb": 1,
+            "ast": 0,
+            "stl": 0,
+            "blk": 0,
+            "tov": 2,
+            "pf": 3,
+            "pts": 8
+          },
+          "discrepancies": {}
+        },
+        {
+          "player_id": 2284101,
+          "matches": {
+            "fgm": 0,
+            "fga": 2,
+            "fg3m": 0,
+            "fg3a": 2,
+            "ftm": 0,
+            "fta": 0,
+            "oreb": 1,
+            "dreb": 0,
+            "reb": 1,
+            "ast": 0,
+            "stl": 0,
+            "blk": 0,
+            "tov": 0,
+            "pf": 0,
+            "pts": 0
+          },
+          "discrepancies": {}
+        },
+        {
+          "player_id": 3442,
+          "matches": {
+            "fgm": 1,
+            "fga": 1,
+            "fg3m": 0,
+            "fg3a": 0,
+            "ftm": 2,
+            "fta": 2,
+            "oreb": 0,
+            "dreb": 2,
+            "reb": 2,
+            "ast": 0,
+            "stl": 1,
+            "blk": 1,
+            "tov": 0,
+            "pf": 3,
+            "pts": 4
+          },
+          "discrepancies": {}
+        },
+        {
+          "player_id": 6443,
+          "matches": {
+            "fgm": 1,
+            "fga": 4,
+            "fg3m": 1,
+            "fg3a": 2,
+            "ftm": 0,
+            "fta": 0,
+            "oreb": 0,
+            "dreb": 1,
+            "reb": 1,
+            "ast": 2,
+            "stl": 0,
+            "blk": 0,
+            "tov": 1,
+            "pf": 2,
+            "pts": 3
+          },
+          "discrepancies": {}
+        },
+        {
+          "player_id": 4431767,
+          "matches": {
+            "fgm": 1,
+            "fga": 5,
+            "fg3m": 0,
+            "fg3a": 2,
+            "ftm": 0,
+            "fta": 0,
+            "oreb": 2,
+            "dreb": 3,
+            "reb": 5,
+            "ast": 0,
+            "stl": 0,
+            "blk": 0,
+            "tov": 0,
+            "pf": 2,
+            "pts": 2
+          },
+          "discrepancies": {}
+        },
+        {
+          "player_id": 4431690,
+          "error": "Player not found in computed data"
+        },
+        {
+          "player_id": 4395620,
+          "error": "Player not found in computed data"
+        },
+        {
+          "player_id": 4398390,
+          "error": "Player not found in computed data"
+        },
+        {
+          "player_id": 4432181,
+          "error": "Player not found in computed data"
+        }
+      ],
+      "team_comparisons": [
+        {
+          "team_id": 13,
+          "error": "Team not found in computed data"
+        },
+        {
+          "team_id": 7,
+          "error": "Team not found in computed data"
+        }
+      ],
+      "summary": {
+        "total_stats_compared": 285,
+        "total_matches": 284,
+        "total_discrepancies": 1,
+        "match_rate_pct": 99.65
+      },
+      "timestamp": "2025-11-06T22:19:03.614466",
+      "internal_consistency": {
+        "team_player_totals": {
+          "passed": true,
+          "errors": []
+        },
+        "final_score": {
+          "passed": true,
+          "errors": []
+        },
+        "percentages": {
+          "passed": true,
+          "errors": []
+        },
+        "no_negatives": {
+          "passed": true,
+          "errors": []
+        }
+      }
+    }
+  ]
+}

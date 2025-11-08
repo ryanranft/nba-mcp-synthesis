@@ -59,6 +59,8 @@ tenacity>=9.0.0        # Retry logic
 # ============================================
 # Machine Learning & Experimentation
 # ============================================
+scikit-learn>=1.3.0         # ML algorithms, isotonic regression, calibration
+xgboost>=2.0.0              # Gradient boosting for ensemble models
 mlflow>=2.9.0              # Experiment tracking, model registry
 
 # ============================================
@@ -118,6 +120,11 @@ google-auth-oauthlib>=1.2.1
 # Slack Integration (Optional)
 # ============================================
 slack-sdk>=3.33.3
+
+# ============================================
+# SMS/Text Notifications (Optional)
+# ============================================
+twilio==9.8.5
 
 # ============================================
 # Development & Testing

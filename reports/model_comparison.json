@@ -1,0 +1,79 @@
+{
+  "winner": {
+    "model": "Baseline",
+    "features": 101,
+    "description": "101 features (no player features)",
+    "accuracy": 0.6275395033860045,
+    "auc": 0.6394929813534465,
+    "brier": 0.2299769199407031,
+    "ensemble_weights": {
+      "logistic": 0.8,
+      "random_forest": 0.2,
+      "xgboost": 0.0
+    }
+  },
+  "all_models": [
+    {
+      "Rank": 1,
+      "Model": "Baseline",
+      "Features": 101,
+      "Description": "101 features (no player features)",
+      "Ensemble": "Weighted",
+      "Accuracy": 0.6275395033860045,
+      "AUC": 0.6394929813534465,
+      "Brier": 0.2299769199407031,
+      "Log Loss": 0.6519257699414517,
+      "LR Weight": 0.8,
+      "RF Weight": 0.2,
+      "XGB Weight": 0.0
+    },
+    {
+      "Rank": 2,
+      "Model": "Full_Stacking",
+      "Features": 130,
+      "Description": "130 features (all features, stacking)",
+      "Ensemble": "Stacking",
+      "Accuracy": 0.6139954853273137,
+      "AUC": 0.6404986381730567,
+      "Brier": 0.22848073069515706,
+      "Log Loss": 0.6479006995793608,
+      "LR Weight": 0.0,
+      "RF Weight": 0.0,
+      "XGB Weight": 0.0
+    },
+    {
+      "Rank": 3,
+      "Model": "Selected",
+      "Features": 111,
+      "Description": "111 features (top 10 player features)",
+      "Ensemble": "Weighted",
+      "Accuracy": 0.6072234762979684,
+      "AUC": 0.6318457992876597,
+      "Brier": 0.2306659575316727,
+      "Log Loss": 0.6526878058715725,
+      "LR Weight": 0.7000000000000001,
+      "RF Weight": 0.30000000000000004,
+      "XGB Weight": 0.0
+    },
+    {
+      "Rank": 4,
+      "Model": "Full_Weighted",
+      "Features": 130,
+      "Description": "130 features (all features, weighted)",
+      "Ensemble": "Weighted",
+      "Accuracy": 0.6049661399548533,
+      "AUC": 0.6305049235281793,
+      "Brier": 0.23151169581089404,
+      "Log Loss": 0.6542244841298098,
+      "LR Weight": 0.7000000000000001,
+      "RF Weight": 0.30000000000000004,
+      "XGB Weight": 0.0
+    }
+  ],
+  "key_findings": {
+    "player_features_impact": "NEGATIVE - Adding player features decreased accuracy",
+    "baseline_vs_full_improvement": "+2.26 percentage points",
+    "stacking_vs_weighted": "+0.90 percentage points",
+    "xgboost_usage": "ZERO - XGBoost received 0% weight in all configurations"
+  }
+}

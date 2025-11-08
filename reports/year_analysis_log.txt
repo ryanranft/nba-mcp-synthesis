@@ -1,0 +1,105 @@
+Analyzing 23 years: 2002-2024
+Sample size: 5 games per year
+
+Analyzing year 2002...
+  Sampled 5 games
+  Validating game 1/5: 220421008  Validating game 2/5: 220607013  Validating game 3/5: 220226004  Validating game 4/5: 221122011  Validating game 5/5: 221108021
+
+Analyzing year 2003...
+  Sampled 5 games
+  Validating game 1/5: 230306022  Validating game 2/5: 230501015  Validating game 3/5: 230504008  Validating game 4/5: 230416003  Validating game 5/5: 230408004
+
+Analyzing year 2004...
+  Sampled 5 games
+  Validating game 1/5: 240406011  Validating game 2/5: 240421008  Validating game 3/5: 240131019  Validating game 4/5: 240414012  Validating game 5/5: 240313021
+
+Analyzing year 2005...
+  Sampled 5 games
+  Validating game 1/5: 250414020  Validating game 2/5: 250210025  Validating game 3/5: 251123003  Validating game 4/5: 251227008  Validating game 5/5: 250418021
+
+Analyzing year 2006...
+  Sampled 5 games
+  Validating game 1/5: 260320008  Validating game 2/5: 260304007  Validating game 3/5: 260419022  Validating game 4/5: 260419008  Validating game 5/5: 260506021
+
+Analyzing year 2007...
+  Sampled 5 games
+  Validating game 1/5: 271217006  Validating game 2/5: 270129007  Validating game 3/5: 270526026  Validating game 4/5: 270124026  Validating game 5/5: 270315007
+
+Analyzing year 2008...
+  Sampled 5 games
+  Validating game 1/5: 280411008  Validating game 2/5: 280427021  Validating game 3/5: 280426001  Validating game 4/5: 281209004  Validating game 5/5: 281203027
+
+Analyzing year 2009...
+  Sampled 5 games
+  Validating game 1/5: 290222028  Validating game 2/5: 290410009  Validating game 3/5: 290313001  Validating game 4/5: 291110023  Validating game 5/5: 291109012
+
+Analyzing year 2010...
+  Sampled 5 games
+  Validating game 1/5: 301120024  Validating game 2/5: 300511005  Validating game 3/5: 301113003  Validating game 4/5: 300504013  Validating game 5/5: 300202019
+
+Analyzing year 2011...
+  Sampled 5 games
+  Validating game 1/5: 310107015  Validating game 2/5: 310502004  Validating game 3/5: 310416004  Validating game 4/5: 311228030  Validating game 5/5: 310226029
+
+Analyzing year 2012...
+  Sampled 5 games
+  Validating game 1/5: 320214008  Validating game 2/5: 320424001  Validating game 3/5: 320203002  Validating game 4/5: 320412030  Validating game 5/5: 320116012
+
+Analyzing year 2013...
+  Sampled 5 games
+  Validating game 1/5: 400278541  Validating game 2/5: 400278939  Validating game 3/5: 400278187  Validating game 4/5: 400489290  Validating game 5/5: 400278916
+
+Analyzing year 2014...
+  Sampled 5 games
+  Validating game 1/5: 400490096  Validating game 2/5: 400578735  Validating game 3/5: 400553055  Validating game 4/5: 400489880  Validating game 5/5: 400490051
+
+Analyzing year 2015...
+  Sampled 5 games
+  Validating game 1/5: 400578973  Validating game 2/5: 400579484  Validating game 3/5: 400828121  Validating game 4/5: 400828274  Validating game 5/5: 400579514
+
+Analyzing year 2016...
+  Sampled 5 games
+  Validating game 1/5: 400874343  Validating game 2/5: 400899734  Validating game 3/5: 400828833  Validating game 4/5: 400829072  Validating game 5/5: 400899943
+
+Analyzing year 2017...
+  Sampled 5 games
+  Validating game 1/5: 400900266  Validating game 2/5: 400900590  Validating game 3/5: 400950410  Validating game 4/5: 400900519  Validating game 5/5: 400952493
+
+Analyzing year 2018...
+  Sampled 5 games
+  Validating game 1/5: 400975306  Validating game 2/5: 400975354  Validating game 3/5: 401070877  Validating game 4/5: 401071196  Validating game 5/5: 401031639
+
+Analyzing year 2019...
+  Sampled 5 games
+  Validating game 1/5: 401126834  Validating game 2/5: 401071536  Validating game 3/5: 401071714  Validating game 4/5: 401126837  Validating game 5/5: 401129113
+
+Analyzing year 2020...
+  Sampled 5 games
+  Validating game 1/5: 401161562  Validating game 2/5: 401161203  Validating game 3/5: 401267223  Validating game 4/5: 401161238  Validating game 5/5: 401247145
+
+Analyzing year 2021...
+  Sampled 5 games
+  Validating game 1/5: 401360157  Validating game 2/5: 401307401  Validating game 3/5: 401307861  Validating game 4/5: 401307672  Validating game 5/5: 401267355
+
+Analyzing year 2022...
+  Sampled 5 games
+  Validating game 1/5: 401430236  Validating game 2/5: 401360523  Validating game 3/5: 401434050  Validating game 4/5: 401430222  Validating game 5/5: 401468233
+
+Analyzing year 2023...
+  Sampled 5 games
+  Validating game 1/5: 401469371  Validating game 2/5: 401545231  Validating game 3/5: 401469240  Validating game 4/5: 401584947  Validating game 5/5: 401584917
+
+Analyzing year 2024...
+  Sampled 5 games
+  Validating game 1/5: 401654761  Validating game 2/5: 401658224  Validating game 3/5: 401704771  Validating game 4/5: 401585445  Validating game 5/5: 401655101
+
+================================================================================
+ANALYSIS COMPLETE
+================================================================================
+Results saved to: reports/year_over_year_data_quality.json
+
+Tier Summary:
+  Tier A (Excellent): 2 years - [2002, 2004]
+  Tier B (Good):      9 years - [2003, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012]
+  Tier C (Fair):      12 years - [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024]
+  Tier D (Poor):      0 years - []

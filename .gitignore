@@ -331,6 +331,9 @@ api_keys.json
 # Hierarchical secrets base path (outside project)
 /Users/*/Desktop/++/big_cat_bets_assets/
 
+# Notification config (contains email addresses)
+notification_config.json
+
 # Individual secret file patterns (hierarchical naming convention)
 *_API_KEY_*.env
 *_SECRET_KEY_*.env
@@ -338,6 +341,9 @@ api_keys.json
 *_TOKEN_*.env
 *_WEBHOOK_URL_*.env
 *_ACCESS_KEY_*.env
+*_SMTP_*_NBA_MCP_SYNTHESIS_*.env
+*_EMAIL_*_NBA_MCP_SYNTHESIS_*.env
+*_TWILIO_*_NBA_MCP_SYNTHESIS_*.env
 
 # detect-secrets baseline (track this for CI/CD)
 !.secrets.baseline

@@ -390,6 +390,7 @@ class BayesianAnalyzer:
 
     def sample_posterior(
         self,
+        formula: Optional[str] = None,
         draws: int = 2000,
         tune: int = 1000,
         chains: int = 4,
@@ -401,6 +402,8 @@ class BayesianAnalyzer:
         Sample from posterior using MCMC (NUTS sampler).
 
         Args:
+            formula: Optional formula string (e.g., "y ~ x1 + x2"). If provided and
+                    no model exists, automatically builds a simple linear model.
             draws: Number of samples per chain
             tune: Number of tuning steps
             chains: Number of MCMC chains
@@ -411,12 +414,17 @@ class BayesianAnalyzer:
         Returns:
             BayesianModelResult with trace and diagnostics
         """
+        # Auto-build model if formula provided and no model exists
         if self.model is None:
-            raise ModelFitError(
-                "Must build model first before sampling",
-                model_type="Bayesian",
-                reason="No model has been built. Call build_simple_model() or build_hierarchical_model() first."
-            )
+            if formula is not None:
+                logger.info(f"Auto-building simple model from formula: {formula}")
+                self.build_simple_model(formula=formula)
+            else:
+                raise ModelFitError(
+                    "Must build model first before sampling",
+                    model_type="Bayesian",
+                    reason="No model has been built. Either call build_simple_model() or build_hierarchical_model() first, or provide a formula parameter.",
+                )
 
         logger.info(f"Sampling posterior: {draws} draws, {tune} tune, {chains} chains")
 
@@ -526,7 +534,7 @@ class BayesianAnalyzer:
             raise ModelFitError(
                 "Must build model first before inference",
                 model_type="Bayesian",
-                reason="No model has been built. Call build_simple_model() or build_hierarchical_model() first."
+                reason="No model has been built. Call build_simple_model() or build_hierarchical_model() first.",
             )
 
         logger.info(f"Running variational inference: {method}, {n_iter} iterations")
@@ -780,12 +788,14 @@ class BayesianAnalyzer:
                 vals = hdi_vals[parameter].values.flatten()
                 lower, upper = float(vals[0]), float(vals[1])
             else:
-                available_params = list(trace.posterior.keys()) if hasattr(trace, 'posterior') else []
+                available_params = (
+                    list(trace.posterior.keys()) if hasattr(trace, "posterior") else []
+                )
                 raise InvalidParameterError(
                     f"Parameter '{parameter}' not found in posterior trace",
                     parameter="parameter",
                     value=parameter,
-                    valid_values=available_params
+                    valid_values=available_params,
                 )
         elif method == "quantile":
             alpha = 1 - prob
@@ -794,12 +804,14 @@ class BayesianAnalyzer:
                 lower = float(np.quantile(samples, alpha / 2))
                 upper = float(np.quantile(samples, 1 - alpha / 2))
             else:
-                available_params = list(trace.posterior.keys()) if hasattr(trace, 'posterior') else []
+                available_params = (
+                    list(trace.posterior.keys()) if hasattr(trace, "posterior") else []
+                )
                 raise InvalidParameterError(
                     f"Parameter '{parameter}' not found in posterior trace",
                     parameter="parameter",
                     value=parameter,
-                    valid_values=available_params
+                    valid_values=available_params,
                 )
         else:
             valid_methods = ["hdi", "quantile"]
@@ -807,7 +819,7 @@ class BayesianAnalyzer:
                 f"Unknown credible interval method: {method}",
                 parameter="method",
                 value=method,
-                valid_values=valid_methods
+                valid_values=valid_methods,
             )
 
         return CredibleInterval(
@@ -852,11 +864,15 @@ class BayesianAnalyzer:
                 -1, predicted_samples.shape[-1]
             )
         else:
-            available_vars = list(ppc.posterior_predictive.keys()) if hasattr(ppc, 'posterior_predictive') else []
+            available_vars = (
+                list(ppc.posterior_predictive.keys())
+                if hasattr(ppc, "posterior_predictive")
+                else []
+            )
             raise ModelFitError(
                 "No 'y_obs' variable found in posterior predictive samples",
                 model_type="Bayesian",
-                reason=f"Available variables: {available_vars}"
+                reason=f"Available variables: {available_vars}",
             )
 
         observed = self.data[self.target].values
@@ -887,7 +903,7 @@ class BayesianAnalyzer:
                 f"Unknown test statistic: {test_statistic}",
                 parameter="test_statistic",
                 value=test_statistic,
-                valid_values=valid_statistics
+                valid_values=valid_statistics,
             )
 
         p_value = float((pred_stats >= obs_stat).mean())
@@ -1265,7 +1281,7 @@ def plot_posterior(
             f"Unknown plot kind: {kind}",
             parameter="kind",
             value=kind,
-            valid_values=valid_kinds
+            valid_values=valid_kinds,
         )
 
 

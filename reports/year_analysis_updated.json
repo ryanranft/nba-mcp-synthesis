@@ -1,0 +1,483 @@
+{
+  "analysis_timestamp": "2025-11-06T19:40:30.401497",
+  "years_analyzed": 5,
+  "sample_size_per_year": 5,
+  "tier_summary": {
+    "tier_a_years": [
+      2020,
+      2021,
+      2022,
+      2023
+    ],
+    "tier_b_years": [
+      2024
+    ],
+    "tier_c_years": [],
+    "tier_d_years": []
+  },
+  "by_year": {
+    "2020": {
+      "year": 2020,
+      "games_sampled": 5,
+      "games_validated": 5,
+      "internal_consistency_rate": 100.0,
+      "mean_match_rate": 97.04,
+      "min_match_rate": 94.74,
+      "max_match_rate": 98.41,
+      "games_above_95": 4,
+      "games_above_90": 5,
+      "games_below_85": 0,
+      "common_discrepancies": {
+        "pts": {
+          "frequency": 5,
+          "mean_diff": -1.0
+        }
+      },
+      "game_results": [
+        {
+          "game_id": "401161447",
+          "game_date": "2020-02-12",
+          "num_events": 463,
+          "internal_consistent": true,
+          "hoopr_match_rate": 96.83,
+          "stats_compared": 63,
+          "discrepancies": {
+            "pts": {
+              "count": 2,
+              "mean_diff": -1.0
+            }
+          }
+        },
+        {
+          "game_id": "401161202",
+          "game_date": "2020-01-09",
+          "num_events": 479,
+          "internal_consistent": true,
+          "hoopr_match_rate": 96.97,
+          "stats_compared": 66,
+          "discrepancies": {
+            "pts": {
+              "count": 2,
+              "mean_diff": -1.0
+            }
+          }
+        },
+        {
+          "game_id": "401161179",
+          "game_date": "2020-01-06",
+          "num_events": 471,
+          "internal_consistent": true,
+          "hoopr_match_rate": 98.41,
+          "stats_compared": 63,
+          "discrepancies": {
+            "pts": {
+              "count": 1,
+              "mean_diff": -1.0
+            }
+          }
+        },
+        {
+          "game_id": "401224759",
+          "game_date": "2020-08-09",
+          "num_events": 596,
+          "internal_consistent": true,
+          "hoopr_match_rate": 94.74,
+          "stats_compared": 57,
+          "discrepancies": {
+            "pts": {
+              "count": 3,
+              "mean_diff": -1.0
+            }
+          }
+        },
+        {
+          "game_id": "401246237",
+          "game_date": "2020-09-25",
+          "num_events": 453,
+          "internal_consistent": true,
+          "hoopr_match_rate": 98.25,
+          "stats_compared": 57,
+          "discrepancies": {
+            "pts": {
+              "count": 1,
+              "mean_diff": -1.0
+            }
+          }
+        }
+      ],
+      "quality_score": 96,
+      "tier": "A"
+    },
+    "2021": {
+      "year": 2021,
+      "games_sampled": 5,
+      "games_validated": 5,
+      "internal_consistency_rate": 100.0,
+      "mean_match_rate": 96.348,
+      "min_match_rate": 93.33,
+      "max_match_rate": 98.25,
+      "games_above_95": 4,
+      "games_above_90": 5,
+      "games_below_85": 0,
+      "common_discrepancies": {
+        "pts": {
+          "frequency": 5,
+          "mean_diff": -1.4166666666666665
+        }
+      },
+      "game_results": [
+        {
+          "game_id": "401267709",
+          "game_date": "2021-03-04",
+          "num_events": 460,
+          "internal_consistent": true,
+          "hoopr_match_rate": 98.25,
+          "stats_compared": 57,
+          "discrepancies": {
+            "pts": {
+              "count": 1,
+              "mean_diff": -1.0
+            }
+          }
+        },
+        {
+          "game_id": "401307867",
+          "game_date": "2021-05-15",
+          "num_events": 420,
+          "internal_consistent": true,
+          "hoopr_match_rate": 98.25,
+          "stats_compared": 57,
+          "discrepancies": {
+            "pts": {
+              "count": 1,
+              "mean_diff": -1.0
+            }
+          }
+        },
+        {
+          "game_id": "401360168",
+          "game_date": "2021-12-05",
+          "num_events": 488,
+          "internal_consistent": true,
+          "hoopr_match_rate": 95.24,
+          "stats_compared": 63,
+          "discrepancies": {
+            "pts": {
+              "count": 3,
+              "mean_diff": -1.3333333333333333
+            }
+          }
+        },
+        {
+          "game_id": "401359860",
+          "game_date": "2021-10-24",
+          "num_events": 520,
+          "internal_consistent": true,
+          "hoopr_match_rate": 93.33,
+          "stats_compared": 60,
+          "discrepancies": {
+            "pts": {
+              "count": 4,
+              "mean_diff": -1.25
+            }
+          }
+        },
+        {
+          "game_id": "401267645",
+          "game_date": "2021-02-24",
+          "num_events": 449,
+          "internal_consistent": true,
+          "hoopr_match_rate": 96.67,
+          "stats_compared": 60,
+          "discrepancies": {
+            "pts": {
+              "count": 2,
+              "mean_diff": -2.5
+            }
+          }
+        }
+      ],
+      "quality_score": 96,
+      "tier": "A"
+    },
+    "2022": {
+      "year": 2022,
+      "games_sampled": 5,
+      "games_validated": 5,
+      "internal_consistency_rate": 100.0,
+      "mean_match_rate": 95.332,
+      "min_match_rate": 93.94,
+      "max_match_rate": 98.33,
+      "games_above_95": 2,
+      "games_above_90": 5,
+      "games_below_85": 0,
+      "common_discrepancies": {
+        "pts": {
+          "frequency": 5,
+          "mean_diff": -1.1333333333333333
+        }
+      },
+      "game_results": [
+        {
+          "game_id": "401430239",
+          "game_date": "2022-04-26",
+          "num_events": 462,
+          "internal_consistent": true,
+          "hoopr_match_rate": 95.83,
+          "stats_compared": 72,
+          "discrepancies": {
+            "pts": {
+              "count": 3,
+              "mean_diff": -1.6666666666666667
+            }
+          }
+        },
+        {
+          "game_id": "401361035",
+          "game_date": "2022-04-10",
+          "num_events": 466,
+          "internal_consistent": true,
+          "hoopr_match_rate": 94.12,
+          "stats_compared": 51,
+          "discrepancies": {
+            "pts": {
+              "count": 3,
+              "mean_diff": -1.0
+            }
+          }
+        },
+        {
+          "game_id": "401468636",
+          "game_date": "2022-12-24",
+          "num_events": 466,
+          "internal_consistent": true,
+          "hoopr_match_rate": 94.44,
+          "stats_compared": 72,
+          "discrepancies": {
+            "pts": {
+              "count": 4,
+              "mean_diff": -1.0
+            }
+          }
+        },
+        {
+          "game_id": "401361047",
+          "game_date": "2022-04-10",
+          "num_events": 453,
+          "internal_consistent": true,
+          "hoopr_match_rate": 98.33,
+          "stats_compared": 60,
+          "discrepancies": {
+            "pts": {
+              "count": 1,
+              "mean_diff": -1.0
+            }
+          }
+        },
+        {
+          "game_id": "401360568",
+          "game_date": "2022-01-30",
+          "num_events": 460,
+          "internal_consistent": true,
+          "hoopr_match_rate": 93.94,
+          "stats_compared": 66,
+          "discrepancies": {
+            "pts": {
+              "count": 4,
+              "mean_diff": -1.0
+            }
+          }
+        }
+      ],
+      "quality_score": 96,
+      "tier": "A"
+    },
+    "2023": {
+      "year": 2023,
+      "games_sampled": 5,
+      "games_validated": 5,
+      "internal_consistency_rate": 100.0,
+      "mean_match_rate": 97.322,
+      "min_match_rate": 94.12,
+      "max_match_rate": 100.0,
+      "games_above_95": 4,
+      "games_above_90": 5,
+      "games_below_85": 0,
+      "common_discrepancies": {
+        "pts": {
+          "frequency": 4,
+          "mean_diff": -1.3333333333333333
+        }
+      },
+      "game_results": [
+        {
+          "game_id": "401541235",
+          "game_date": "2023-04-29",
+          "num_events": 559,
+          "internal_consistent": true,
+          "hoopr_match_rate": 96.83,
+          "stats_compared": 63,
+          "discrepancies": {
+            "pts": {
+              "count": 2,
+              "mean_diff": -1.5
+            }
+          }
+        },
+        {
+          "game_id": "401544334",
+          "game_date": "2023-04-30",
+          "num_events": 460,
+          "internal_consistent": true,
+          "hoopr_match_rate": 97.33,
+          "stats_compared": 75,
+          "discrepancies": {
+            "pts": {
+              "count": 2,
+              "mean_diff": -1.5
+            }
+          }
+        },
+        {
+          "game_id": "401584754",
+          "game_date": "2023-11-02",
+          "num_events": 459,
+          "internal_consistent": true,
+          "hoopr_match_rate": 98.33,
+          "stats_compared": 60,
+          "discrepancies": {
+            "pts": {
+              "count": 1,
+              "mean_diff": -1.0
+            }
+          }
+        },
+        {
+          "game_id": "401469340",
+          "game_date": "2023-04-05",
+          "num_events": 462,
+          "internal_consistent": true,
+          "hoopr_match_rate": 100.0,
+          "stats_compared": 81,
+          "discrepancies": {}
+        },
+        {
+          "game_id": "401541188",
+          "game_date": "2023-04-23",
+          "num_events": 486,
+          "internal_consistent": true,
+          "hoopr_match_rate": 94.12,
+          "stats_compared": 51,
+          "discrepancies": {
+            "pts": {
+              "count": 3,
+              "mean_diff": -1.3333333333333333
+            }
+          }
+        }
+      ],
+      "quality_score": 96,
+      "tier": "A"
+    },
+    "2024": {
+      "year": 2024,
+      "games_sampled": 5,
+      "games_validated": 5,
+      "internal_consistency_rate": 100.0,
+      "mean_match_rate": 96.87,
+      "min_match_rate": 95.06,
+      "max_match_rate": 98.72,
+      "games_above_95": 5,
+      "games_above_90": 5,
+      "games_below_85": 0,
+      "common_discrepancies": {
+        "pts": {
+          "frequency": 5,
+          "mean_diff": -1.3333333333333335
+        },
+        "fga": {
+          "frequency": 1,
+          "mean_diff": -1.0
+        }
+      },
+      "game_results": [
+        {
+          "game_id": "401585632",
+          "game_date": "2024-03-21",
+          "num_events": 429,
+          "internal_consistent": true,
+          "hoopr_match_rate": 95.06,
+          "stats_compared": 81,
+          "discrepancies": {
+            "pts": {
+              "count": 3,
+              "mean_diff": -1.6666666666666667
+            },
+            "fga": {
+              "count": 1,
+              "mean_diff": -1.0
+            }
+          }
+        },
+        {
+          "game_id": "401654762",
+          "game_date": "2024-04-22",
+          "num_events": 455,
+          "internal_consistent": true,
+          "hoopr_match_rate": 96.49,
+          "stats_compared": 57,
+          "discrepancies": {
+            "pts": {
+              "count": 2,
+              "mean_diff": -1.0
+            }
+          }
+        },
+        {
+          "game_id": "401585384",
+          "game_date": "2024-02-11",
+          "num_events": 451,
+          "internal_consistent": true,
+          "hoopr_match_rate": 95.83,
+          "stats_compared": 72,
+          "discrepancies": {
+            "pts": {
+              "count": 3,
+              "mean_diff": -1.0
+            }
+          }
+        },
+        {
+          "game_id": "401657184",
+          "game_date": "2024-05-11",
+          "num_events": 451,
+          "internal_consistent": true,
+          "hoopr_match_rate": 98.72,
+          "stats_compared": 78,
+          "discrepancies": {
+            "pts": {
+              "count": 1,
+              "mean_diff": -1.0
+            }
+          }
+        },
+        {
+          "game_id": "401654758",
+          "game_date": "2024-04-21",
+          "num_events": 420,
+          "internal_consistent": true,
+          "hoopr_match_rate": 98.25,
+          "stats_compared": 57,
+          "discrepancies": {
+            "pts": {
+              "count": 1,
+              "mean_diff": -2.0
+            }
+          }
+        }
+      ],
+      "quality_score": 94,
+      "tier": "B"
+    }
+  }
+}
