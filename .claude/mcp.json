@@ -1,0 +1,38 @@
+{
+  "mcpServers": {
+    "nba-mcp-server": {
+      "command": "python3",
+      "args": [
+        "-m",
+        "mcp_server.fastmcp_server"
+      ],
+      "cwd": "/home/user/nba-mcp-synthesis",
+      "env": {
+        "PYTHONPATH": "/home/user/nba-mcp-synthesis",
+        "NBA_MCP_DEBUG": "false",
+        "NBA_MCP_LOG_LEVEL": "INFO"
+      }
+    },
+    "nba-ddl-server": {
+      "command": "python3",
+      "args": [
+        "-m",
+        "mcp_server.ddl_server"
+      ],
+      "cwd": "/home/user/nba-mcp-synthesis",
+      "env": {
+        "PYTHONPATH": "/home/user/nba-mcp-synthesis",
+        "NBA_MCP_DEBUG": "false",
+        "NBA_MCP_LOG_LEVEL": "INFO"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/user/nba-mcp-synthesis"
+      ]
+    }
+  }
+}
