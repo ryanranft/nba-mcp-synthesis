@@ -106,36 +106,70 @@ class MCPServerProcess:
 mcp_servers = {}
 
 
+def load_mcp_config() -> dict:
+    """Load MCP configuration from .claude/mcp.json and adapt paths for current system"""
+    config_paths = [
+        Path(__file__).parent / ".claude" / "mcp.json",
+        Path(__file__).parent / ".mcp.json",
+        Path.home() / ".claude.json"
+    ]
+
+    for config_path in config_paths:
+        if config_path.exists():
+            logger.info(f"Loading MCP config from: {config_path}")
+            with open(config_path) as f:
+                config = json.load(f)
+
+            # Adapt paths from Linux to current system (Mac)
+            adapted_servers = {}
+            for server_name, server_config in config.get("mcpServers", {}).items():
+                adapted_config = server_config.copy()
+
+                # Replace /home/user/ with user's home directory
+                if "cwd" in adapted_config:
+                    adapted_config["cwd"] = adapted_config["cwd"].replace(
+                        "/home/user/", str(Path.home()) + "/"
+                    )
+
+                if "env" in adapted_config:
+                    for key, value in adapted_config["env"].items():
+                        if isinstance(value, str) and "/home/user/" in value:
+                            adapted_config["env"][key] = value.replace(
+                                "/home/user/", str(Path.home()) + "/"
+                            )
+
+                # Replace args paths
+                if "args" in adapted_config:
+                    adapted_config["args"] = [
+                        arg.replace("/home/user/", str(Path.home()) + "/")
+                        for arg in adapted_config["args"]
+                    ]
+
+                adapted_servers[server_name] = adapted_config
+
+            return adapted_servers
+
+    logger.warning("No MCP config file found, using defaults")
+    return {}
+
+
 async def get_or_create_server(server_name: str) -> MCPServerProcess:
     """Get or create an MCP server instance"""
     if server_name in mcp_servers:
         return mcp_servers[server_name]
 
-    # Configuration for different servers
-    # TODO: Load from config file instead of hardcoding
-    configs = {
-        "nba-mcp-server": {
-            "command": "python3",
-            "args": ["-m", "mcp_server.fastmcp_server"],
-            "cwd": str(Path.home() / "nba-mcp-synthesis"),
-            "env": {
-                "PYTHONPATH": str(Path.home() / "nba-mcp-synthesis"),
-                "NBA_MCP_DEBUG": "false",
-                "NBA_MCP_LOG_LEVEL": "INFO"
-            }
-        },
-        "filesystem": {
-            "command": "npx",
-            "args": ["-y", "@modelcontextprotocol/server-filesystem", str(Path.home() / "nba-mcp-synthesis")],
-            "cwd": str(Path.home() / "nba-mcp-synthesis"),
-            "env": {}
-        }
-    }
+    # Load configuration from file
+    configs = load_mcp_config()
 
     if server_name not in configs:
-        raise ValueError(f"Unknown server: {server_name}")
+        raise ValueError(f"Unknown server: {server_name}. Available: {list(configs.keys())}")
 
     config = configs[server_name]
+
+    # Add default env dict if not present
+    if "env" not in config:
+        config["env"] = {}
+
     server = MCPServerProcess(**config)
     await server.start()
     mcp_servers[server_name] = server
@@ -211,7 +245,25 @@ async def health():
     """Health check endpoint"""
     return {
         "status": "healthy",
-        "servers": list(mcp_servers.keys())
+        "running_servers": list(mcp_servers.keys())
+    }
+
+
+@app.get("/servers")
+async def list_servers():
+    """List all available MCP servers from config"""
+    configs = load_mcp_config()
+    return {
+        "available_servers": list(configs.keys()),
+        "running_servers": list(mcp_servers.keys()),
+        "configs": {
+            name: {
+                "command": config["command"],
+                "cwd": config.get("cwd", ""),
+                "args_count": len(config.get("args", []))
+            }
+            for name, config in configs.items()
+        }
     }
 
 
