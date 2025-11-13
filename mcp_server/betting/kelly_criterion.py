@@ -80,19 +80,20 @@ except ImportError:
 @dataclass
 class KellyResult:
     """Result of Kelly Criterion calculation"""
-    kelly_fraction: float           # Recommended fraction of bankroll (0 to 1)
-    bet_amount: float               # Dollar amount to bet
-    edge: float                     # Your edge over market (decimal)
-    calibrated_prob: float          # Calibrated win probability
-    simulation_prob: float          # Original simulation probability
-    market_fair_prob: float         # Market probability after vig removal
-    uncertainty: float              # Standard deviation of probability
-    confidence: float               # Confidence score (1 - uncertainty)
-    kelly_full: float               # Full Kelly before adjustments
-    uncertainty_penalty: float      # Multiplier applied for uncertainty
-    fractional_multiplier: float    # Fractional Kelly multiplier
-    should_bet: bool                # Whether to place bet
-    reason: str                     # Explanation of decision
+
+    kelly_fraction: float  # Recommended fraction of bankroll (0 to 1)
+    bet_amount: float  # Dollar amount to bet
+    edge: float  # Your edge over market (decimal)
+    calibrated_prob: float  # Calibrated win probability
+    simulation_prob: float  # Original simulation probability
+    market_fair_prob: float  # Market probability after vig removal
+    uncertainty: float  # Standard deviation of probability
+    confidence: float  # Confidence score (1 - uncertainty)
+    kelly_full: float  # Full Kelly before adjustments
+    uncertainty_penalty: float  # Multiplier applied for uncertainty
+    fractional_multiplier: float  # Fractional Kelly multiplier
+    should_bet: bool  # Whether to place bet
+    reason: str  # Explanation of decision
 
 
 class CalibratedKelly:
@@ -151,22 +152,28 @@ class CalibratedKelly:
             KellyResult with all decision info
         """
         # Step 1: Calibrate simulation probability
-        if hasattr(self.calibrator, 'calibrated_probability'):
+        if hasattr(self.calibrator, "calibrated_probability"):
             # Bayesian calibrator - get median
-            calibrated_prob = self.calibrator.calibrated_probability(sim_prob, quantile=0.50)
+            calibrated_prob = self.calibrator.calibrated_probability(
+                sim_prob, quantile=0.50
+            )
             uncertainty = self.calibrator.calibration_uncertainty(sim_prob)
-        elif hasattr(self.calibrator, 'calibrate'):
+        elif hasattr(self.calibrator, "calibrate"):
             # Isotonic calibrator - point estimate
             calibrated_prob = self.calibrator.calibrate(sim_prob)
             uncertainty = 0.05  # Conservative default
         else:
-            warnings.warn("Calibrator not recognized. Using raw simulation probability.")
+            warnings.warn(
+                "Calibrator not recognized. Using raw simulation probability."
+            )
             calibrated_prob = sim_prob
             uncertainty = 0.10
 
         # Step 2: Remove vig from market odds
         if away_odds is not None:
-            market_fair_prob, _ = OddsUtilities.remove_vig_multiplicative(odds, away_odds)
+            market_fair_prob, _ = OddsUtilities.remove_vig_multiplicative(
+                odds, away_odds
+            )
         else:
             market_fair_prob = 1 / odds
 
@@ -188,7 +195,7 @@ class CalibratedKelly:
                 uncertainty_penalty=0.0,
                 fractional_multiplier=0.0,
                 should_bet=False,
-                reason=f"Insufficient edge: {edge:.1%} < {self.min_edge:.1%} minimum"
+                reason=f"Insufficient edge: {edge:.1%} < {self.min_edge:.1%} minimum",
             )
 
         # Step 5: Calculate base Kelly fraction
@@ -211,7 +218,7 @@ class CalibratedKelly:
                 uncertainty_penalty=0.0,
                 fractional_multiplier=0.0,
                 should_bet=False,
-                reason="Kelly formula returned negative or zero"
+                reason="Kelly formula returned negative or zero",
             )
 
         # Step 6: Apply uncertainty penalty
@@ -223,7 +230,11 @@ class CalibratedKelly:
         # Step 7: Apply fractional Kelly
         if adaptive_fraction:
             # Adaptive: increase fraction based on calibration quality
-            calibration_quality = self.calibrator.calibration_quality() if hasattr(self.calibrator, 'calibration_quality') else 0.15
+            calibration_quality = (
+                self.calibrator.calibration_quality()
+                if hasattr(self.calibrator, "calibration_quality")
+                else 0.15
+            )
             fractional_multiplier = self._adaptive_fraction(calibration_quality)
         else:
             fractional_multiplier = fractional
@@ -238,9 +249,9 @@ class CalibratedKelly:
 
         # Step 10: Determine if should bet
         should_bet = (
-            edge >= self.min_edge and
-            kelly_final > 0.01 and  # At least 1% of bankroll
-            uncertainty < self.max_uncertainty
+            edge >= self.min_edge
+            and kelly_final > 0.01  # At least 1% of bankroll
+            and uncertainty < self.max_uncertainty
         )
 
         return KellyResult(
@@ -256,7 +267,7 @@ class CalibratedKelly:
             uncertainty_penalty=uncertainty_penalty,
             fractional_multiplier=fractional_multiplier,
             should_bet=should_bet,
-            reason=self._get_reason(should_bet, edge, uncertainty, kelly_final)
+            reason=self._get_reason(should_bet, edge, uncertainty, kelly_final),
         )
 
     def _adaptive_fraction(self, brier_score: float) -> float:
@@ -285,7 +296,9 @@ class CalibratedKelly:
         else:
             return 0.10  # Tenth Kelly - poor, bet very small
 
-    def _get_reason(self, should_bet: bool, edge: float, uncertainty: float, kelly: float) -> str:
+    def _get_reason(
+        self, should_bet: bool, edge: float, uncertainty: float, kelly: float
+    ) -> str:
         """Generate human-readable reason for decision"""
         if not should_bet:
             if edge < self.min_edge:
@@ -317,11 +330,7 @@ class AdaptiveKelly:
         self.peak_bankroll = None
 
     def calculate_with_drawdown_protection(
-        self,
-        sim_prob: float,
-        odds: float,
-        current_bankroll: float,
-        **kwargs
+        self, sim_prob: float, odds: float, current_bankroll: float, **kwargs
     ) -> KellyResult:
         """
         Calculate Kelly with drawdown protection
@@ -345,7 +354,9 @@ class AdaptiveKelly:
             self.peak_bankroll = max(self.peak_bankroll, current_bankroll)
 
         # Calculate current drawdown
-        self.current_drawdown = (self.peak_bankroll - current_bankroll) / self.peak_bankroll
+        self.current_drawdown = (
+            self.peak_bankroll - current_bankroll
+        ) / self.peak_bankroll
 
         # Calculate base Kelly
         result = self.base_kelly.calculate(sim_prob, odds, current_bankroll, **kwargs)
@@ -361,7 +372,9 @@ class AdaptiveKelly:
             # 20-30% drawdown: halve bet size
             result.kelly_fraction *= 0.50
             result.bet_amount *= 0.50
-            result.reason += f" (reduced 50% due to {self.current_drawdown:.1%} drawdown)"
+            result.reason += (
+                f" (reduced 50% due to {self.current_drawdown:.1%} drawdown)"
+            )
 
         return result
 
@@ -395,10 +408,10 @@ class AdaptiveKelly:
         individual_kellys = []
         for bet in bets:
             result = self.base_kelly.calculate(
-                sim_prob=bet['sim_prob'],
-                odds=bet['odds'],
+                sim_prob=bet["sim_prob"],
+                odds=bet["odds"],
                 bankroll=bankroll,
-                away_odds=bet.get('away_odds'),
+                away_odds=bet.get("away_odds"),
             )
             individual_kellys.append(result)
 
@@ -475,8 +488,12 @@ if __name__ == "__main__":
     print(f"   Simulation: {sim_prob:.0%}")
     print(f"   Naive Kelly: {naive_kelly:.1%} of bankroll")
     print(f"   Reality: Only {true_prob:.0%} win rate")
-    print(f"   Result: You lose {naive_kelly:.1%} of bankroll {1-true_prob:.0%} of the time!")
-    print(f"   Expected ROI: {((true_prob * (odds - 1)) - ((1-true_prob) * 1)) * naive_kelly:.1%} (NEGATIVE!)")
+    print(
+        f"   Result: You lose {naive_kelly:.1%} of bankroll {1-true_prob:.0%} of the time!"
+    )
+    print(
+        f"   Expected ROI: {((true_prob * (odds - 1)) - ((1-true_prob) * 1)) * naive_kelly:.1%} (NEGATIVE!)"
+    )
 
     print("\n" + "-" * 70)
 
@@ -488,7 +505,9 @@ if __name__ == "__main__":
     safe_kelly = fractional_kelly(calibrated_kelly, 0.25)  # Quarter Kelly
     print(f"   Calibrated Kelly: {calibrated_kelly:.1%}")
     print(f"   Fractional Kelly (25%): {safe_kelly:.1%} of bankroll")
-    print(f"   Expected ROI: {((true_prob * (odds - 1)) - ((1-true_prob) * 1)) * calibrated_kelly:.1%} (POSITIVE!)")
+    print(
+        f"   Expected ROI: {((true_prob * (odds - 1)) - ((1-true_prob) * 1)) * calibrated_kelly:.1%} (POSITIVE!)"
+    )
 
     print("\n" + "=" * 70)
     print("Key Takeaway: Always calibrate your probabilities first!".center(70))

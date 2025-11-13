@@ -20,9 +20,12 @@ from datetime import datetime
 from typing import Dict, List, Tuple
 
 # Add project root to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from mcp_server.unified_secrets_manager import load_secrets_hierarchical, get_database_config
+from mcp_server.unified_secrets_manager import (
+    load_secrets_hierarchical,
+    get_database_config,
+)
 
 try:
     import psycopg2
@@ -34,28 +37,38 @@ except ImportError:
 
 # Expected tables in the database
 EXPECTED_TABLES = [
-    'games',
-    'hoopr_play_by_play',
-    'hoopr_player_box',
-    'hoopr_team_box',
-    'computed_player_box',
-    'computed_team_box',
-    'arbitrage_opportunities',
-    'betting_recommendations'
+    "games",
+    "hoopr_play_by_play",
+    "hoopr_player_box",
+    "hoopr_team_box",
+    "computed_player_box",
+    "computed_team_box",
+    "arbitrage_opportunities",
+    "betting_recommendations",
 ]
 
 
-def load_credentials(context: str = 'development') -> Dict[str, str]:
+def load_credentials(context: str = "development") -> Dict[str, str]:
     """Load database credentials from hierarchical secrets system."""
     print(f"🔐 Loading {context} credentials from hierarchical secrets...")
-    load_secrets_hierarchical('nba-mcp-synthesis', 'NBA', context)
+    load_secrets_hierarchical("nba-mcp-synthesis", "NBA", context)
     config = get_database_config()
 
-    if not all([config['host'], config['port'], config['database'], config['user'], config['password']]):
+    if not all(
+        [
+            config["host"],
+            config["port"],
+            config["database"],
+            config["user"],
+            config["password"],
+        ]
+    ):
         print("❌ Missing required database credentials")
         sys.exit(1)
 
-    print(f"✅ Credentials loaded: {config['user']}@{config['host']}:{config['port']}/{config['database']}")
+    print(
+        f"✅ Credentials loaded: {config['user']}@{config['host']}:{config['port']}/{config['database']}"
+    )
     return config
 
 
@@ -64,11 +77,11 @@ def connect_to_database(config: Dict[str, str]) -> psycopg2.extensions.connectio
     print(f"\n🔌 Connecting to database...")
     try:
         conn = psycopg2.connect(
-            host=config['host'],
-            port=int(config['port']),
-            database=config['database'],
-            user=config['user'],
-            password=config['password']
+            host=config["host"],
+            port=int(config["port"]),
+            database=config["database"],
+            user=config["user"],
+            password=config["password"],
         )
         print(f"✅ Connected to {config['database']} at {config['host']}")
         return conn
@@ -81,21 +94,27 @@ def connect_to_database(config: Dict[str, str]) -> psycopg2.extensions.connectio
         sys.exit(1)
 
 
-def check_tables_exist(conn: psycopg2.extensions.connection) -> Tuple[List[str], List[str]]:
+def check_tables_exist(
+    conn: psycopg2.extensions.connection,
+) -> Tuple[List[str], List[str]]:
     """Check which expected tables exist in the database."""
     print("\n📋 Checking table existence...")
     cursor = conn.cursor()
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT table_name
         FROM information_schema.tables
         WHERE table_schema = 'public'
           AND table_type = 'BASE TABLE'
         ORDER BY table_name
-    """)
+    """
+    )
 
     existing_tables = [row[0] for row in cursor.fetchall()]
-    missing_tables = [table for table in EXPECTED_TABLES if table not in existing_tables]
+    missing_tables = [
+        table for table in EXPECTED_TABLES if table not in existing_tables
+    ]
 
     for table in EXPECTED_TABLES:
         if table in existing_tables:
@@ -107,7 +126,9 @@ def check_tables_exist(conn: psycopg2.extensions.connection) -> Tuple[List[str],
     return existing_tables, missing_tables
 
 
-def get_table_statistics(conn: psycopg2.extensions.connection, tables: List[str]) -> None:
+def get_table_statistics(
+    conn: psycopg2.extensions.connection, tables: List[str]
+) -> None:
     """Get row counts and size for each table."""
     print("\n📊 Table Statistics:")
     cursor = conn.cursor()
@@ -121,9 +142,11 @@ def get_table_statistics(conn: psycopg2.extensions.connection, tables: List[str]
             total_rows += count
 
             # Get table size
-            cursor.execute(f"""
+            cursor.execute(
+                f"""
                 SELECT pg_size_pretty(pg_total_relation_size('{table}'))
-            """)
+            """
+            )
             size = cursor.fetchone()[0]
 
             print(f"   {table:30} {count:>15,} rows    {size:>10}")
@@ -146,18 +169,22 @@ def check_database_health(conn: psycopg2.extensions.connection) -> None:
     print(f"   PostgreSQL Version: {version.split(',')[0]}")
 
     # Check database size
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT pg_size_pretty(pg_database_size(current_database()))
-    """)
+    """
+    )
     db_size = cursor.fetchone()[0]
     print(f"   Database Size: {db_size}")
 
     # Check active connections
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT COUNT(*)
         FROM pg_stat_activity
         WHERE datname = current_database()
-    """)
+    """
+    )
     active_connections = cursor.fetchone()[0]
     print(f"   Active Connections: {active_connections}")
 
@@ -169,7 +196,7 @@ def reset_database(conn: psycopg2.extensions.connection, sql_dir: str) -> None:
     print("\n⚠️  RESETTING DATABASE - This will DELETE ALL DATA!")
 
     confirm = input("Type 'YES' to confirm: ")
-    if confirm != 'YES':
+    if confirm != "YES":
         print("❌ Reset cancelled")
         return
 
@@ -189,14 +216,14 @@ def reset_database(conn: psycopg2.extensions.connection, sql_dir: str) -> None:
 
     # Re-run SQL init scripts
     print("\n📜 Running SQL initialization scripts...")
-    sql_files = sorted([f for f in os.listdir(sql_dir) if f.endswith('.sql')])
+    sql_files = sorted([f for f in os.listdir(sql_dir) if f.endswith(".sql")])
 
     for sql_file in sql_files:
         file_path = os.path.join(sql_dir, sql_file)
         print(f"   Running {sql_file}...")
 
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path, "r") as f:
                 sql = f.read()
                 cursor.execute(sql)
                 conn.commit()
@@ -210,12 +237,24 @@ def reset_database(conn: psycopg2.extensions.connection, sql_dir: str) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Initialize and validate local NBA MCP database')
-    parser.add_argument('--validate', action='store_true', help='Validate database tables exist')
-    parser.add_argument('--stats', action='store_true', help='Show table statistics')
-    parser.add_argument('--reset', action='store_true', help='Reset database (WARNING: deletes all data)')
-    parser.add_argument('--context', default='development', choices=['development', 'production'],
-                        help='Database context (default: development)')
+    parser = argparse.ArgumentParser(
+        description="Initialize and validate local NBA MCP database"
+    )
+    parser.add_argument(
+        "--validate", action="store_true", help="Validate database tables exist"
+    )
+    parser.add_argument("--stats", action="store_true", help="Show table statistics")
+    parser.add_argument(
+        "--reset",
+        action="store_true",
+        help="Reset database (WARNING: deletes all data)",
+    )
+    parser.add_argument(
+        "--context",
+        default="development",
+        choices=["development", "production"],
+        help="Database context (default: development)",
+    )
 
     args = parser.parse_args()
 
@@ -247,7 +286,9 @@ def main():
                 if not args.reset:
                     print("\n💡 To create missing tables:")
                     print("   1. Start PostgreSQL: docker-compose up -d postgres")
-                    print("   2. Wait for init scripts to run (check logs: docker-compose logs postgres)")
+                    print(
+                        "   2. Wait for init scripts to run (check logs: docker-compose logs postgres)"
+                    )
                     print("   3. Or run: python scripts/init_local_database.py --reset")
             else:
                 print("\n✅ All expected tables exist!")
@@ -260,7 +301,7 @@ def main():
 
         # Reset database
         if args.reset:
-            sql_dir = os.path.join(os.path.dirname(__file__), '..', 'sql', 'init')
+            sql_dir = os.path.join(os.path.dirname(__file__), "..", "sql", "init")
             if not os.path.exists(sql_dir):
                 print(f"❌ SQL init directory not found: {sql_dir}")
                 sys.exit(1)
@@ -281,5 +322,5 @@ def main():
         conn.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -99,7 +99,7 @@ class BettingDecisionEngine:
 
     def __init__(
         self,
-        calibrator_type: str = 'bayesian',
+        calibrator_type: str = "bayesian",
         max_kelly: float = 0.50,
         min_edge: float = 0.03,
         max_uncertainty: float = 0.20,
@@ -108,15 +108,17 @@ class BettingDecisionEngine:
         drawdown_protection: bool = True,
     ):
         # Initialize calibrator
-        if calibrator_type == 'bayesian':
+        if calibrator_type == "bayesian":
             try:
                 self.calibrator = BayesianCalibrator()
                 self.calibrator_fitted = False
             except ImportError:
-                warnings.warn("PyMC not available. Falling back to isotonic calibrator.")
+                warnings.warn(
+                    "PyMC not available. Falling back to isotonic calibrator."
+                )
                 self.calibrator = SimulationCalibrator()
                 self.calibrator_fitted = False
-        elif calibrator_type == 'isotonic':
+        elif calibrator_type == "isotonic":
             self.calibrator = SimulationCalibrator()
             self.calibrator_fitted = False
         else:
@@ -235,7 +237,11 @@ class BettingDecisionEngine:
             self.peak_bankroll = max(self.peak_bankroll, bankroll)
 
         # Calculate drawdown
-        current_drawdown = (self.peak_bankroll - bankroll) / self.peak_bankroll if self.peak_bankroll > 0 else 0
+        current_drawdown = (
+            (self.peak_bankroll - bankroll) / self.peak_bankroll
+            if self.peak_bankroll > 0
+            else 0
+        )
 
         # Step 1: Calculate Kelly with or without drawdown protection
         if self.drawdown_protection:
@@ -261,12 +267,18 @@ class BettingDecisionEngine:
             )
 
         # Step 2: Additional safety checks
-        calibration_quality = self.calibrator.calibration_quality() if hasattr(self.calibrator, 'calibration_quality') else 0.10
+        calibration_quality = (
+            self.calibrator.calibration_quality()
+            if hasattr(self.calibrator, "calibration_quality")
+            else 0.10
+        )
 
         # Check calibration quality
         if calibration_quality > 0.15:
             kelly_result.should_bet = False
-            kelly_result.reason = f"Poor calibration (Brier: {calibration_quality:.3f} > 0.15)"
+            kelly_result.reason = (
+                f"Poor calibration (Brier: {calibration_quality:.3f} > 0.15)"
+            )
             kelly_result.bet_amount = 0.0
             kelly_result.kelly_fraction = 0.0
 
@@ -286,40 +298,34 @@ class BettingDecisionEngine:
         # Step 4: Build complete decision dict
         decision = {
             # Core decision
-            'should_bet': kelly_result.should_bet,
-            'bet_amount': kelly_result.bet_amount,
-            'kelly_fraction': kelly_result.kelly_fraction,
-            'reason': kelly_result.reason,
-
+            "should_bet": kelly_result.should_bet,
+            "bet_amount": kelly_result.bet_amount,
+            "kelly_fraction": kelly_result.kelly_fraction,
+            "reason": kelly_result.reason,
             # Probabilities & Edge
-            'simulation_prob': kelly_result.simulation_prob,
-            'calibrated_prob': kelly_result.calibrated_prob,
-            'market_fair_prob': kelly_result.market_fair_prob,
-            'edge': kelly_result.edge,
-
+            "simulation_prob": kelly_result.simulation_prob,
+            "calibrated_prob": kelly_result.calibrated_prob,
+            "market_fair_prob": kelly_result.market_fair_prob,
+            "edge": kelly_result.edge,
             # Uncertainty
-            'uncertainty': kelly_result.uncertainty,
-            'confidence': kelly_result.confidence,
-
+            "uncertainty": kelly_result.uncertainty,
+            "confidence": kelly_result.confidence,
             # Kelly details
-            'kelly_full': kelly_result.kelly_full,
-            'uncertainty_penalty': kelly_result.uncertainty_penalty,
-            'fractional_multiplier': kelly_result.fractional_multiplier,
-
+            "kelly_full": kelly_result.kelly_full,
+            "uncertainty_penalty": kelly_result.uncertainty_penalty,
+            "fractional_multiplier": kelly_result.fractional_multiplier,
             # Risk Management
-            'calibration_brier': calibration_quality,
-            'current_drawdown': current_drawdown,
-            'peak_bankroll': self.peak_bankroll,
-
+            "calibration_brier": calibration_quality,
+            "current_drawdown": current_drawdown,
+            "peak_bankroll": self.peak_bankroll,
             # Market Analysis
-            'recent_clv': recent_clv,
-            'is_sharp': is_sharp,
-
+            "recent_clv": recent_clv,
+            "is_sharp": is_sharp,
             # Metadata
-            'date': date,
-            'game_id': game_id,
-            'odds': odds,
-            'bankroll': bankroll,
+            "date": date,
+            "game_id": game_id,
+            "odds": odds,
+            "bankroll": bankroll,
         }
 
         # Step 5: Store decision
@@ -357,7 +363,7 @@ class BettingDecisionEngine:
         # Find the decision for this game
         decision = None
         for d in reversed(self.decision_history):
-            if d['game_id'] == game_id:
+            if d["game_id"] == game_id:
                 decision = d
                 break
 
@@ -367,35 +373,35 @@ class BettingDecisionEngine:
 
         # Update calibration database
         self.calibrator.add_observation(
-            date=decision['date'],
+            date=decision["date"],
             game_id=game_id,
-            sim_prob=decision['simulation_prob'],
+            sim_prob=decision["simulation_prob"],
             outcome=outcome,
-            vegas_implied=decision['market_fair_prob'],
+            vegas_implied=decision["market_fair_prob"],
         )
 
         # Update CLV tracker if closing odds provided
-        if closing_odds is not None and decision['should_bet']:
+        if closing_odds is not None and decision["should_bet"]:
             self.clv_tracker.add_bet(
-                date=decision['date'],
+                date=decision["date"],
                 game_id=game_id,
-                bet_odds=decision['odds'],
+                bet_odds=decision["odds"],
                 closing_odds=closing_odds,
                 outcome=outcome,
-                bet_amount=decision['bet_amount'],
+                bet_amount=decision["bet_amount"],
             )
 
         # Update decision history with outcome
-        decision['outcome'] = outcome
-        decision['closing_odds'] = closing_odds
+        decision["outcome"] = outcome
+        decision["closing_odds"] = closing_odds
 
         # Calculate profit
-        if decision['should_bet'] and outcome == 1:
-            decision['profit'] = decision['bet_amount'] * (decision['odds'] - 1)
-        elif decision['should_bet'] and outcome == 0:
-            decision['profit'] = -decision['bet_amount']
+        if decision["should_bet"] and outcome == 1:
+            decision["profit"] = decision["bet_amount"] * (decision["odds"] - 1)
+        elif decision["should_bet"] and outcome == 0:
+            decision["profit"] = -decision["bet_amount"]
         else:
-            decision['profit'] = 0.0
+            decision["profit"] = 0.0
 
     def performance_summary(self) -> Dict[str, Any]:
         """
@@ -413,46 +419,59 @@ class BettingDecisionEngine:
                 - ... and more
         """
         # Filter decisions where bets were placed
-        bets = [d for d in self.decision_history if d['should_bet']]
-        bets_with_outcomes = [d for d in bets if 'outcome' in d]
+        bets = [d for d in self.decision_history if d["should_bet"]]
+        bets_with_outcomes = [d for d in bets if "outcome" in d]
 
         if not bets_with_outcomes:
-            return {'error': 'No completed bets to analyze'}
+            return {"error": "No completed bets to analyze"}
 
         # Calculate metrics
         total_bets = len(bets_with_outcomes)
-        wins = sum(1 for d in bets_with_outcomes if d['outcome'] == 1)
+        wins = sum(1 for d in bets_with_outcomes if d["outcome"] == 1)
         win_rate = wins / total_bets
 
-        total_wagered = sum(d['bet_amount'] for d in bets_with_outcomes)
-        total_profit = sum(d.get('profit', 0) for d in bets_with_outcomes)
+        total_wagered = sum(d["bet_amount"] for d in bets_with_outcomes)
+        total_profit = sum(d.get("profit", 0) for d in bets_with_outcomes)
         roi = total_profit / total_wagered if total_wagered > 0 else 0
 
-        avg_edge = np.mean([d['edge'] for d in bets_with_outcomes])
-        avg_confidence = np.mean([d['confidence'] for d in bets_with_outcomes])
+        avg_edge = np.mean([d["edge"] for d in bets_with_outcomes])
+        avg_confidence = np.mean([d["confidence"] for d in bets_with_outcomes])
 
         # CLV stats
-        clv_stats = self.clv_tracker.summary_statistics() if self.clv_tracker.bets else {}
+        clv_stats = (
+            self.clv_tracker.summary_statistics() if self.clv_tracker.bets else {}
+        )
 
         # Calibration quality
-        current_brier = self.calibrator.calibration_quality() if hasattr(self.calibrator, 'calibration_quality') else np.nan
+        current_brier = (
+            self.calibrator.calibration_quality()
+            if hasattr(self.calibrator, "calibration_quality")
+            else np.nan
+        )
 
         return {
-            'total_bets': total_bets,
-            'wins': wins,
-            'losses': total_bets - wins,
-            'win_rate': win_rate,
-            'total_wagered': total_wagered,
-            'total_profit': total_profit,
-            'roi': roi,
-            'average_edge': avg_edge,
-            'average_confidence': avg_confidence,
-            'calibration_brier': current_brier,
-            'current_drawdown': (self.peak_bankroll - self.decision_history[-1]['bankroll']) / self.peak_bankroll if self.decision_history else 0,
-            'clv_stats': clv_stats,
+            "total_bets": total_bets,
+            "wins": wins,
+            "losses": total_bets - wins,
+            "win_rate": win_rate,
+            "total_wagered": total_wagered,
+            "total_profit": total_profit,
+            "roi": roi,
+            "average_edge": avg_edge,
+            "average_confidence": avg_confidence,
+            "calibration_brier": current_brier,
+            "current_drawdown": (
+                (self.peak_bankroll - self.decision_history[-1]["bankroll"])
+                / self.peak_bankroll
+                if self.decision_history
+                else 0
+            ),
+            "clv_stats": clv_stats,
         }
 
-    def get_large_bet_criteria(self, sim_prob: float, odds: float, away_odds: float) -> Dict[str, Any]:
+    def get_large_bet_criteria(
+        self, sim_prob: float, odds: float, away_odds: float
+    ) -> Dict[str, Any]:
         """
         Check if conditions are met for a large bet (30-40% of bankroll)
 
@@ -467,7 +486,7 @@ class BettingDecisionEngine:
             Dict with criteria check results
         """
         # Calibrate probability
-        if hasattr(self.calibrator, 'calibrated_probability'):
+        if hasattr(self.calibrator, "calibrated_probability"):
             calibrated_prob = self.calibrator.calibrated_probability(sim_prob)
             uncertainty = self.calibrator.calibration_uncertainty(sim_prob)
         else:
@@ -479,47 +498,53 @@ class BettingDecisionEngine:
         edge = calibrated_prob - market_fair
 
         # Get calibration quality
-        brier = self.calibrator.calibration_quality() if hasattr(self.calibrator, 'calibration_quality') else 0.15
+        brier = (
+            self.calibrator.calibration_quality()
+            if hasattr(self.calibrator, "calibration_quality")
+            else 0.15
+        )
 
         # Get CLV
-        avg_clv = self.clv_tracker.average_clv() if len(self.clv_tracker.bets) >= 50 else 0.0
+        avg_clv = (
+            self.clv_tracker.average_clv() if len(self.clv_tracker.bets) >= 50 else 0.0
+        )
 
         # Check criteria
         criteria = {
-            'calibrated_prob': {
-                'value': calibrated_prob,
-                'threshold': 0.88,
-                'met': calibrated_prob > 0.88,
+            "calibrated_prob": {
+                "value": calibrated_prob,
+                "threshold": 0.88,
+                "met": calibrated_prob > 0.88,
             },
-            'edge': {
-                'value': edge,
-                'threshold': 0.20,
-                'met': edge > 0.20,
+            "edge": {
+                "value": edge,
+                "threshold": 0.20,
+                "met": edge > 0.20,
             },
-            'uncertainty': {
-                'value': uncertainty,
-                'threshold': 0.02,
-                'met': uncertainty < 0.02,
+            "uncertainty": {
+                "value": uncertainty,
+                "threshold": 0.02,
+                "met": uncertainty < 0.02,
             },
-            'calibration_brier': {
-                'value': brier,
-                'threshold': 0.06,
-                'met': brier < 0.06,
+            "calibration_brier": {
+                "value": brier,
+                "threshold": 0.06,
+                "met": brier < 0.06,
             },
-            'clv': {
-                'value': avg_clv,
-                'threshold': 0.05,
-                'met': avg_clv > 0.05,
+            "clv": {
+                "value": avg_clv,
+                "threshold": 0.05,
+                "met": avg_clv > 0.05,
             },
         }
 
-        all_met = all(c['met'] for c in criteria.values())
+        all_met = all(c["met"] for c in criteria.values())
 
         return {
-            'safe_for_large_bet': all_met,
-            'recommended_max': 0.40 if all_met else 0.25,
-            'criteria': criteria,
-            'reason': (
+            "safe_for_large_bet": all_met,
+            "recommended_max": 0.40 if all_met else 0.25,
+            "criteria": criteria,
+            "reason": (
                 "All criteria met - safe to bet 40%"
                 if all_met
                 else f"Missing: {', '.join(k for k, v in criteria.items() if not v['met'])}"
@@ -534,7 +559,9 @@ if __name__ == "__main__":
 
     # Initialize engine
     engine = BettingDecisionEngine(
-        calibrator_type='bayesian' if False else 'isotonic',  # Use isotonic for faster demo
+        calibrator_type=(
+            "bayesian" if False else "isotonic"
+        ),  # Use isotonic for faster demo
         fractional_kelly=0.25,
         adaptive_fractions=True,
     )
@@ -569,7 +596,7 @@ if __name__ == "__main__":
     print(f"Uncertainty: {decision['uncertainty']:.1%}")
     print(f"")
     print(f"Should Bet: {decision['should_bet']}")
-    if decision['should_bet']:
+    if decision["should_bet"]:
         print(f"Bet Amount: ${decision['bet_amount']:.2f}")
         print(f"Kelly Fraction: {decision['kelly_fraction']:.1%}")
     print(f"Reason: {decision['reason']}")

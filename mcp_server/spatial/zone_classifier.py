@@ -65,8 +65,9 @@ class ZoneClassifier:
         espn_y: float,
         home_team_id: int,
         offensive_team_id: int,
+        period: int = 1,
         made: bool = False,
-        points: int = 0
+        points: int = 0,
     ) -> ClassifiedShot:
         """
         Classify a shot into NBA zone using ESPN coordinates.
@@ -76,6 +77,7 @@ class ZoneClassifier:
             espn_y: ESPN Y coordinate (feet from center court)
             home_team_id: ID of home team
             offensive_team_id: ID of shooting team
+            period: Period/quarter number (1-4 regular, 5+ OT)
             made: Whether shot was made
             points: Points scored (0, 2, or 3)
 
@@ -84,16 +86,11 @@ class ZoneClassifier:
         """
         # Transform ESPN coordinates to court coordinates
         court_x, court_y = self._transform_espn_to_court(
-            espn_x, espn_y, home_team_id, offensive_team_id
+            espn_x, espn_y, home_team_id, offensive_team_id, period
         )
 
         # Create ShotLocation object (triggers automatic classification)
-        shot_loc = ShotLocation(
-            x=court_x,
-            y=court_y,
-            made=made,
-            points=points
-        )
+        shot_loc = ShotLocation(x=court_x, y=court_y, made=made, points=points)
 
         # Convert angle from radians to degrees
         angle_degrees = math.degrees(shot_loc.angle)
@@ -105,7 +102,7 @@ class ZoneClassifier:
             espn_x=espn_x,
             espn_y=espn_y,
             court_x=court_x,
-            court_y=court_y
+            court_y=court_y,
         )
 
     def _transform_espn_to_court(
@@ -113,35 +110,58 @@ class ZoneClassifier:
         espn_x: float,
         espn_y: float,
         home_team_id: int,
-        offensive_team_id: int
+        offensive_team_id: int,
+        period: int,
     ) -> Tuple[float, float]:
         """
         Transform ESPN coordinates to court coordinates.
 
         ESPN System:
         - Center court (0,0)
-        - Home shoots at +41.75, Away shoots at -41.75
+        - Home basket: (+41.75, 0) - camera right
+        - Away basket: (-41.75, 0) - camera left
+        - Coordinates are BROADCAST-RELATIVE (do not adjust for halftime switch)
 
         Court System:
         - Baseline corner (0,0)
         - Basket at (25, 5.25)
+
+        NBA Rule:
+        - Q1/Q2 (first half): Teams at original baskets
+        - Q3/Q4 (second half): Teams switch baskets at halftime
+        - OT odd periods: Same as first half
+        - OT even periods: Switched baskets
 
         Args:
             espn_x: ESPN X coordinate
             espn_y: ESPN Y coordinate
             home_team_id: Home team ID
             offensive_team_id: Shooting team ID
+            period: Period/quarter number (1-4 regular, 5+ OT)
 
         Returns:
             (court_x, court_y) tuple
         """
-        # Determine which basket the team is shooting at
-        if int(offensive_team_id) == int(home_team_id):
-            # Home team shoots at home basket (+41.75, 0)
-            basket_x = self.HOME_BASKET_X
+        # Determine which basket the team is shooting at THIS PERIOD
+        is_home_team = int(offensive_team_id) == int(home_team_id)
+        is_first_half = period <= 2  # Q1/Q2 are first half
+
+        # First half (Q1/Q2): Original baskets
+        # Second half (Q3/Q4): Switched baskets
+        # OT: Odd periods (5,7,9...) = first half baskets, Even (6,8,10...) = switched
+        if period <= 4:
+            # Regular quarters
+            if is_home_team:
+                basket_x = self.HOME_BASKET_X if is_first_half else self.AWAY_BASKET_X
+            else:
+                basket_x = self.AWAY_BASKET_X if is_first_half else self.HOME_BASKET_X
         else:
-            # Away team shoots at away basket (-41.75, 0)
-            basket_x = self.AWAY_BASKET_X
+            # Overtime - use odd/even logic
+            is_odd_ot = period % 2 == 1
+            if is_home_team:
+                basket_x = self.HOME_BASKET_X if is_odd_ot else self.AWAY_BASKET_X
+            else:
+                basket_x = self.AWAY_BASKET_X if is_odd_ot else self.HOME_BASKET_X
 
         # Calculate position relative to basket
         rel_x = espn_x - basket_x
@@ -185,7 +205,7 @@ class ZoneClassifier:
             "three_above_break_left": "Above Break Three (Left)",
             "three_above_break_center": "Above Break Three (Center)",
             "three_above_break_right": "Above Break Three (Right)",
-            "backcourt": "Backcourt"
+            "backcourt": "Backcourt",
         }
         return descriptions.get(zone_name, zone_name)
 
@@ -196,8 +216,9 @@ def classify_shot_espn(
     espn_y: float,
     home_team_id: int,
     offensive_team_id: int,
+    period: int = 1,
     made: bool = False,
-    points: int = 0
+    points: int = 0,
 ) -> ClassifiedShot:
     """
     Quick classification function for ESPN coordinates.
@@ -207,6 +228,7 @@ def classify_shot_espn(
         espn_y: ESPN Y coordinate
         home_team_id: Home team ID
         offensive_team_id: Shooting team ID
+        period: Period/quarter number (1-4 regular, 5+ OT)
         made: Whether shot was made
         points: Points scored
 
@@ -215,5 +237,5 @@ def classify_shot_espn(
     """
     classifier = ZoneClassifier()
     return classifier.classify_shot(
-        espn_x, espn_y, home_team_id, offensive_team_id, made, points
+        espn_x, espn_y, home_team_id, offensive_team_id, period, made, points
     )

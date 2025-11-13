@@ -13,6 +13,7 @@ from .possession_tracker import PossessionTracker, calculate_true_possessions
 @dataclass
 class PlayerBoxScore:
     """Complete box score for a single player."""
+
     player_id: int
     team_id: int
     minutes: int  # Will need to be calculated from substitution events
@@ -48,6 +49,7 @@ class PlayerBoxScore:
 @dataclass
 class TeamBoxScore:
     """Complete box score for a team."""
+
     team_id: int
 
     # Shooting
@@ -89,6 +91,7 @@ class TeamBoxScore:
 @dataclass
 class GameBoxScore:
     """Complete box score for entire game."""
+
     game_id: str
     home_team_id: int
     away_team_id: int
@@ -122,7 +125,7 @@ class BoxScoreAggregator:
         events: List[Dict],
         home_team_id: int,
         away_team_id: int,
-        player_team_mapping: Dict[int, int]  # Map player_id -> team_id
+        player_team_mapping: Dict[int, int],  # Map player_id -> team_id
     ) -> GameBoxScore:
         """
         Generate complete box scores from play-by-play events.
@@ -175,13 +178,13 @@ class BoxScoreAggregator:
 
             # Calculate percentages
             player_box_score.fg_pct = (
-                stats['fgm'] / stats['fga'] if stats['fga'] > 0 else 0.0
+                stats["fgm"] / stats["fga"] if stats["fga"] > 0 else 0.0
             )
             player_box_score.fg3_pct = (
-                stats['fg3m'] / stats['fg3a'] if stats['fg3a'] > 0 else 0.0
+                stats["fg3m"] / stats["fg3a"] if stats["fg3a"] > 0 else 0.0
             )
             player_box_score.ft_pct = (
-                stats['ftm'] / stats['fta'] if stats['fta'] > 0 else 0.0
+                stats["ftm"] / stats["fta"] if stats["fta"] > 0 else 0.0
             )
 
             if team_id == home_team_id:
@@ -191,21 +194,21 @@ class BoxScoreAggregator:
 
         # Aggregate team stats
         home_team_stats = self._aggregate_team_stats(
-            home_team_id,
-            home_players,
-            home_possessions
+            home_team_id, home_players, home_possessions
         )
         away_team_stats = self._aggregate_team_stats(
-            away_team_id,
-            away_players,
-            away_possessions
+            away_team_id, away_players, away_possessions
         )
 
         # Add opponent defensive rating
         if home_possessions > 0:
-            home_team_stats.defensive_rating = (away_team_stats.pts / home_possessions) * 100
+            home_team_stats.defensive_rating = (
+                away_team_stats.pts / home_possessions
+            ) * 100
         if away_possessions > 0:
-            away_team_stats.defensive_rating = (home_team_stats.pts / away_possessions) * 100
+            away_team_stats.defensive_rating = (
+                home_team_stats.pts / away_possessions
+            ) * 100
 
         # Get final scores from last event
         final_event = parsed_events[-1] if parsed_events else None
@@ -228,10 +231,7 @@ class BoxScoreAggregator:
         )
 
     def _aggregate_team_stats(
-        self,
-        team_id: int,
-        players: List[PlayerBoxScore],
-        true_possessions: int
+        self, team_id: int, players: List[PlayerBoxScore], true_possessions: int
     ) -> TeamBoxScore:
         """Aggregate player stats into team totals."""
         team = TeamBoxScore(team_id=team_id, true_possessions=true_possessions)

@@ -57,17 +57,19 @@ from enum import Enum
 
 class OddsFormat(Enum):
     """Supported odds formats"""
-    AMERICAN = "american"      # e.g., -110, +150
-    DECIMAL = "decimal"         # e.g., 1.91, 2.50
-    FRACTIONAL = "fractional"   # e.g., 10/11, 3/2
-    IMPLIED = "implied"         # e.g., 0.524 (52.4%)
+
+    AMERICAN = "american"  # e.g., -110, +150
+    DECIMAL = "decimal"  # e.g., 1.91, 2.50
+    FRACTIONAL = "fractional"  # e.g., 10/11, 3/2
+    IMPLIED = "implied"  # e.g., 0.524 (52.4%)
 
 
 class VigRemovalMethod(Enum):
     """Methods for removing vig from odds"""
+
     MULTIPLICATIVE = "multiplicative"  # Most accurate (assumes proportional margin)
-    ADDITIVE = "additive"              # Simple subtraction
-    POWER = "power"                    # Power method (for extreme vig)
+    ADDITIVE = "additive"  # Simple subtraction
+    POWER = "power"  # Power method (for extreme vig)
 
 
 class OddsUtilities:
@@ -246,8 +248,8 @@ class OddsUtilities:
         p_away_raw = 1 / away_odds
 
         # Power transformation
-        p_home_power = p_home_raw ** k
-        p_away_power = p_away_raw ** k
+        p_home_power = p_home_raw**k
+        p_away_power = p_away_raw**k
 
         # Normalize
         total = p_home_power + p_away_power
@@ -311,11 +313,17 @@ class OddsUtilities:
         if away_odds is not None:
             # Remove vig for more accurate edge
             if vig_method == VigRemovalMethod.MULTIPLICATIVE:
-                market_fair_prob, _ = OddsUtilities.remove_vig_multiplicative(market_odds, away_odds)
+                market_fair_prob, _ = OddsUtilities.remove_vig_multiplicative(
+                    market_odds, away_odds
+                )
             elif vig_method == VigRemovalMethod.ADDITIVE:
-                market_fair_prob, _ = OddsUtilities.remove_vig_additive(market_odds, away_odds)
+                market_fair_prob, _ = OddsUtilities.remove_vig_additive(
+                    market_odds, away_odds
+                )
             elif vig_method == VigRemovalMethod.POWER:
-                market_fair_prob, _ = OddsUtilities.remove_vig_power(market_odds, away_odds)
+                market_fair_prob, _ = OddsUtilities.remove_vig_power(
+                    market_odds, away_odds
+                )
             else:
                 market_fair_prob = 1 / market_odds
         else:
@@ -523,7 +531,9 @@ if __name__ == "__main__":
     home_odds = 1.91
     away_odds = 1.91
 
-    p_home_fair, p_away_fair = OddsUtilities.remove_vig_multiplicative(home_odds, away_odds)
+    p_home_fair, p_away_fair = OddsUtilities.remove_vig_multiplicative(
+        home_odds, away_odds
+    )
     vig_pct = OddsUtilities.calculate_vig_percentage(home_odds, away_odds)
 
     print(f"Market Odds: Home {home_odds}, Away {away_odds}")

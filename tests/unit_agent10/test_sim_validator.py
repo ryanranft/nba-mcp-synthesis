@@ -12,7 +12,7 @@ from mcp_server.simulations.validation.sim_validator import (
     PlayerStats,
     TeamRoster,
     GameParameters,
-    BoxScore
+    BoxScore,
 )
 
 
@@ -67,7 +67,7 @@ class TestPlayerStats:
             steals=2.0,
             blocks=1.0,
             turnovers=3.0,
-            minutes=35.0
+            minutes=35.0,
         )
         assert player.player_id == "player_1"
         assert player.points == 25.5
@@ -86,7 +86,7 @@ class TestPlayerStats:
             minutes=30.0,
             field_goal_pct=0.52,
             three_point_pct=0.38,
-            free_throw_pct=0.85
+            free_throw_pct=0.85,
         )
         assert player.field_goal_pct == 0.52
         assert player.three_point_pct == 0.38
@@ -100,13 +100,10 @@ class TestTeamRoster:
         """Test creating team roster"""
         players = [
             PlayerStats("p1", 20.0, 5.0, 8.0, 1.0, 1.0, 2.0, 30.0),
-            PlayerStats("p2", 15.0, 3.0, 6.0, 2.0, 0.0, 1.0, 25.0)
+            PlayerStats("p2", 15.0, 3.0, 6.0, 2.0, 0.0, 1.0, 25.0),
         ]
         roster = TeamRoster(
-            team_id="team_1",
-            team_name="Test Team",
-            players=players,
-            season="2023-24"
+            team_id="team_1", team_name="Test Team", players=players, season="2023-24"
         )
         assert roster.team_id == "team_1"
         assert roster.get_total_players() == 2
@@ -115,7 +112,7 @@ class TestTeamRoster:
         """Test retrieving player by ID"""
         players = [
             PlayerStats("p1", 20.0, 5.0, 8.0, 1.0, 1.0, 2.0, 30.0),
-            PlayerStats("p2", 15.0, 3.0, 6.0, 2.0, 0.0, 1.0, 25.0)
+            PlayerStats("p2", 15.0, 3.0, 6.0, 2.0, 0.0, 1.0, 25.0),
         ]
         roster = TeamRoster("team_1", "Test Team", players, "2023-24")
 
@@ -140,7 +137,7 @@ class TestGameParameters:
             home_team_id="team_1",
             away_team_id="team_2",
             season="2023-24",
-            game_date=datetime.now()
+            game_date=datetime.now(),
         )
         assert params.home_team_id == "team_1"
         assert params.away_team_id == "team_2"
@@ -153,7 +150,7 @@ class TestGameParameters:
             home_team_id="team_1",
             away_team_id="team_2",
             season="2023-24",
-            game_date=datetime.now()
+            game_date=datetime.now(),
         )
         result = params.validate_basic()
         assert result.is_valid is True
@@ -165,7 +162,7 @@ class TestGameParameters:
             home_team_id="team_1",
             away_team_id="team_1",
             season="2023-24",
-            game_date=datetime.now()
+            game_date=datetime.now(),
         )
         result = params.validate_basic()
         assert result.is_valid is False
@@ -178,7 +175,7 @@ class TestGameParameters:
             away_team_id="team_2",
             season="2023-24",
             game_date=datetime.now(),
-            overtime_periods=-1
+            overtime_periods=-1,
         )
         result = params.validate_basic()
         assert result.is_valid is False
@@ -191,7 +188,7 @@ class TestGameParameters:
             away_team_id="team_2",
             season="2023-24",
             game_date=datetime.now(),
-            overtime_periods=15
+            overtime_periods=15,
         )
         result = params.validate_basic()
         assert len(result.warnings) > 0
@@ -220,7 +217,7 @@ class TestSimulationValidator:
             minutes=35.0,
             field_goal_pct=0.52,
             three_point_pct=0.38,
-            free_throw_pct=0.85
+            free_throw_pct=0.85,
         )
 
     @pytest.fixture
@@ -228,16 +225,18 @@ class TestSimulationValidator:
         """Create valid team roster"""
         players = [valid_player]
         for i in range(2, 13):  # 12 players total
-            players.append(PlayerStats(
-                player_id=f"player_{i}",
-                points=10.0,
-                assists=3.0,
-                rebounds=5.0,
-                steals=1.0,
-                blocks=0.5,
-                turnovers=2.0,
-                minutes=20.0
-            ))
+            players.append(
+                PlayerStats(
+                    player_id=f"player_{i}",
+                    points=10.0,
+                    assists=3.0,
+                    rebounds=5.0,
+                    steals=1.0,
+                    blocks=0.5,
+                    turnovers=2.0,
+                    minutes=20.0,
+                )
+            )
         return TeamRoster("team_1", "Test Team", players, "2023-24")
 
     def test_validator_initialization(self, validator):
@@ -270,8 +269,15 @@ class TestSimulationValidator:
     def test_validate_player_stats_invalid_fg_pct(self, validator):
         """Test validation fails for invalid FG%"""
         player = PlayerStats(
-            "p1", 20.0, 5.0, 8.0, 1.0, 1.0, 2.0, 30.0,
-            field_goal_pct=1.5  # Invalid > 1.0
+            "p1",
+            20.0,
+            5.0,
+            8.0,
+            1.0,
+            1.0,
+            2.0,
+            30.0,
+            field_goal_pct=1.5,  # Invalid > 1.0
         )
         result = validator._validate_player_stats(player)
         assert result.is_valid is False
@@ -286,9 +292,10 @@ class TestSimulationValidator:
     def test_validate_roster_too_few_players(self, validator):
         """Test validation fails for too few players"""
         roster = TeamRoster(
-            "team_1", "Test Team",
+            "team_1",
+            "Test Team",
             [PlayerStats("p1", 20.0, 5.0, 8.0, 1.0, 1.0, 2.0, 30.0)],
-            "2023-24"
+            "2023-24",
         )
         result = validator.validate_roster(roster)
         assert result.is_valid is False
@@ -302,7 +309,7 @@ class TestSimulationValidator:
             PlayerStats("p2", 10.0, 2.0, 5.0, 1.0, 0.0, 2.0, 20.0),
             PlayerStats("p3", 12.0, 4.0, 7.0, 1.0, 1.0, 1.0, 22.0),
             PlayerStats("p4", 18.0, 6.0, 6.0, 2.0, 0.0, 3.0, 28.0),
-            PlayerStats("p5", 14.0, 3.0, 5.0, 1.0, 1.0, 2.0, 24.0)
+            PlayerStats("p5", 14.0, 3.0, 5.0, 1.0, 1.0, 2.0, 24.0),
         ]
         roster = TeamRoster("team_1", "Test Team", players, "2023-24")
         result = validator.validate_roster(roster)
@@ -312,8 +319,7 @@ class TestSimulationValidator:
     def test_validate_game_parameters_valid(self, validator):
         """Test validating valid game parameters"""
         params = GameParameters(
-            "team_1", "team_2", "2023-24",
-            datetime.now() - timedelta(days=1)
+            "team_1", "team_2", "2023-24", datetime.now() - timedelta(days=1)
         )
         result = validator.validate_game_parameters(params)
         assert result.is_valid is True
@@ -321,8 +327,7 @@ class TestSimulationValidator:
     def test_validate_game_parameters_future_date(self, validator):
         """Test warning for future game date"""
         params = GameParameters(
-            "team_1", "team_2", "2023-24",
-            datetime.now() + timedelta(days=30)
+            "team_1", "team_2", "2023-24", datetime.now() + timedelta(days=30)
         )
         result = validator.validate_game_parameters(params)
         assert len(result.warnings) > 0
@@ -335,14 +340,14 @@ class TestSimulationValidator:
             "p2": PlayerStats("p2", 20.0, 5.0, 7.0, 1.0, 0.0, 2.0, 30.0),
             "p3": PlayerStats("p3", 15.0, 3.0, 5.0, 1.0, 1.0, 1.0, 25.0),
             "p4": PlayerStats("p4", 18.0, 4.0, 6.0, 2.0, 0.0, 2.0, 28.0),
-            "p5": PlayerStats("p5", 12.0, 2.0, 4.0, 0.0, 1.0, 1.0, 20.0)
+            "p5": PlayerStats("p5", 12.0, 2.0, 4.0, 0.0, 1.0, 1.0, 20.0),
         }
         away_stats = {
             "p6": PlayerStats("p6", 22.0, 7.0, 9.0, 1.0, 1.0, 2.0, 33.0),
             "p7": PlayerStats("p7", 18.0, 4.0, 6.0, 2.0, 0.0, 1.0, 28.0),
             "p8": PlayerStats("p8", 16.0, 3.0, 5.0, 1.0, 1.0, 2.0, 26.0),
             "p9": PlayerStats("p9", 14.0, 5.0, 4.0, 1.0, 0.0, 3.0, 24.0),
-            "p10": PlayerStats("p10", 12.0, 2.0, 3.0, 1.0, 0.0, 1.0, 20.0)
+            "p10": PlayerStats("p10", 12.0, 2.0, 3.0, 1.0, 0.0, 1.0, 20.0),
         }
 
         box_score = BoxScore(
@@ -350,7 +355,7 @@ class TestSimulationValidator:
             away_score=82,
             home_stats=home_stats,
             away_stats=away_stats,
-            quarters=[(22, 20), (23, 21), (24, 20), (21, 21)]
+            quarters=[(22, 20), (23, 21), (24, 20), (21, 21)],
         )
 
         result = validator.validate_box_score(box_score)
@@ -363,7 +368,12 @@ class TestSimulationValidator:
             away_score=95,
             home_stats={},
             away_stats={},
-            quarters=[(25, 20), (25, 22), (25, 24), (20, 24)]  # Sum to 95/90, not 100/95
+            quarters=[
+                (25, 20),
+                (25, 22),
+                (25, 24),
+                (20, 24),
+            ],  # Sum to 95/90, not 100/95
         )
 
         result = validator.validate_box_score(box_score)
@@ -377,8 +387,8 @@ class TestSimulationValidator:
         validator.validate_roster(valid_roster)
 
         stats = validator.get_statistics()
-        assert stats['total_validations'] == 2
-        assert stats['strict_mode'] is False
+        assert stats["total_validations"] == 2
+        assert stats["strict_mode"] is False
 
     def test_validator_reset_statistics(self, validator, valid_roster):
         """Test resetting validator statistics"""
@@ -386,6 +396,6 @@ class TestSimulationValidator:
         validator.reset_statistics()
 
         stats = validator.get_statistics()
-        assert stats['total_validations'] == 0
-        assert stats['total_errors'] == 0
-        assert stats['total_warnings'] == 0
+        assert stats["total_validations"] == 0
+        assert stats["total_errors"] == 0
+        assert stats["total_warnings"] == 0

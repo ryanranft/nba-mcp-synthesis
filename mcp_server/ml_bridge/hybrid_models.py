@@ -31,6 +31,7 @@ try:
     from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
     from sklearn.linear_model import Ridge, Lasso, ElasticNet
     from sklearn.model_selection import cross_val_score
+
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False
@@ -40,6 +41,7 @@ except ImportError:
 
 try:
     import lightgbm as lgb
+
     LIGHTGBM_AVAILABLE = True
 except ImportError:
     LIGHTGBM_AVAILABLE = False
@@ -48,6 +50,7 @@ except ImportError:
 
 class ModelStage(Enum):
     """Stages in hybrid modeling"""
+
     ECONOMETRIC = "econometric"  # First stage econometric
     ML_CORRECTION = "ml_correction"  # Second stage ML
     ENSEMBLE = "ensemble"  # Combined prediction
@@ -108,12 +111,26 @@ class PredictionResult:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'predictions': self.predictions.tolist() if isinstance(self.predictions, np.ndarray) else self.predictions,
-            'econometric_predictions': self.econometric_predictions.tolist() if self.econometric_predictions is not None else None,
-            'ml_predictions': self.ml_predictions.tolist() if self.ml_predictions is not None else None,
-            'model_stage': self.model_stage.value,
-            'has_uncertainty': self.std_errors is not None,
-            'n_predictions': len(self.predictions) if hasattr(self.predictions, '__len__') else 1
+            "predictions": (
+                self.predictions.tolist()
+                if isinstance(self.predictions, np.ndarray)
+                else self.predictions
+            ),
+            "econometric_predictions": (
+                self.econometric_predictions.tolist()
+                if self.econometric_predictions is not None
+                else None
+            ),
+            "ml_predictions": (
+                self.ml_predictions.tolist()
+                if self.ml_predictions is not None
+                else None
+            ),
+            "model_stage": self.model_stage.value,
+            "has_uncertainty": self.std_errors is not None,
+            "n_predictions": (
+                len(self.predictions) if hasattr(self.predictions, "__len__") else 1
+            ),
         }
 
 
@@ -144,7 +161,9 @@ class TwoStageModel:
         self.is_fitted = False
         self.feature_names: Optional[List[str]] = None
 
-        logger.info(f"TwoStageModel initialized: {self.config.econometric_method} + {self.config.ml_algorithm}")
+        logger.info(
+            f"TwoStageModel initialized: {self.config.econometric_method} + {self.config.ml_algorithm}"
+        )
 
     def _create_ml_model(self) -> Any:
         """Create ML model based on config"""
@@ -152,14 +171,14 @@ class TwoStageModel:
             return RandomForestRegressor(
                 n_estimators=self.config.n_estimators,
                 max_depth=self.config.max_depth,
-                random_state=42
+                random_state=42,
             )
         elif self.config.ml_algorithm == "gradient_boosting":
             return GradientBoostingRegressor(
                 n_estimators=self.config.n_estimators,
                 max_depth=self.config.max_depth,
                 learning_rate=self.config.learning_rate,
-                random_state=42
+                random_state=42,
             )
         elif self.config.ml_algorithm == "lightgbm" and LIGHTGBM_AVAILABLE:
             return lgb.LGBMRegressor(
@@ -167,22 +186,21 @@ class TwoStageModel:
                 max_depth=self.config.max_depth,
                 learning_rate=self.config.learning_rate,
                 random_state=42,
-                verbose=-1
+                verbose=-1,
             )
         else:
-            logger.warning(f"Unknown ML algorithm {self.config.ml_algorithm}, using RandomForest")
+            logger.warning(
+                f"Unknown ML algorithm {self.config.ml_algorithm}, using RandomForest"
+            )
             return RandomForestRegressor(
                 n_estimators=self.config.n_estimators,
                 max_depth=self.config.max_depth,
-                random_state=42
+                random_state=42,
             )
 
     def fit(
-        self,
-        X: np.ndarray,
-        y: np.ndarray,
-        feature_names: Optional[List[str]] = None
-    ) -> 'TwoStageModel':
+        self, X: np.ndarray, y: np.ndarray, feature_names: Optional[List[str]] = None
+    ) -> "TwoStageModel":
         """
         Fit two-stage model.
 
@@ -225,9 +243,7 @@ class TwoStageModel:
         return self
 
     def predict(
-        self,
-        X: np.ndarray,
-        return_components: bool = False
+        self, X: np.ndarray, return_components: bool = False
     ) -> Union[np.ndarray, PredictionResult]:
         """
         Predict using two-stage model.
@@ -264,14 +280,14 @@ class TwoStageModel:
                 econometric_predictions=econometric_preds,
                 ml_predictions=ml_preds,
                 feature_importance=feature_importance,
-                model_stage=ModelStage.ENSEMBLE
+                model_stage=ModelStage.ENSEMBLE,
             )
         else:
             return final_preds
 
     def _get_feature_importance(self) -> Dict[str, float]:
         """Get feature importance from ML model"""
-        if hasattr(self.ml_model, 'feature_importances_'):
+        if hasattr(self.ml_model, "feature_importances_"):
             importances = self.ml_model.feature_importances_
 
             if self.feature_names and len(self.feature_names) == len(importances):
@@ -289,7 +305,7 @@ class TwoStageModel:
 
     def get_econometric_coefficients(self) -> np.ndarray:
         """Get coefficients from econometric stage"""
-        if hasattr(self.econometric_model, 'coef_'):
+        if hasattr(self.econometric_model, "coef_"):
             return self.econometric_model.coef_
         else:
             return np.array([])
@@ -311,10 +327,7 @@ class ResidualLearningModel:
     """
 
     def __init__(
-        self,
-        base_model: Any,
-        residual_model: Any,
-        learn_residuals: bool = True
+        self, base_model: Any, residual_model: Any, learn_residuals: bool = True
     ):
         """
         Initialize residual learning model.
@@ -329,7 +342,7 @@ class ResidualLearningModel:
         self.learn_residuals = learn_residuals
         self.is_fitted = False
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> 'ResidualLearningModel':
+    def fit(self, X: np.ndarray, y: np.ndarray) -> "ResidualLearningModel":
         """Fit residual learning model"""
         # Fit base model
         self.base_model.fit(X, y)
@@ -378,7 +391,7 @@ class StackedEnsemble:
         self,
         base_models: List[Tuple[str, Any]],
         meta_learner: Optional[Any] = None,
-        use_base_features: bool = True
+        use_base_features: bool = True,
     ):
         """
         Initialize stacked ensemble.
@@ -398,7 +411,7 @@ class StackedEnsemble:
 
         logger.info(f"StackedEnsemble with {len(base_models)} base models")
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> 'StackedEnsemble':
+    def fit(self, X: np.ndarray, y: np.ndarray) -> "StackedEnsemble":
         """Fit stacked ensemble"""
         # Fit base models
         base_predictions = []
@@ -475,11 +488,7 @@ class ConstrainedML:
     - Causal structure from econometric theory
     """
 
-    def __init__(
-        self,
-        base_model: Any,
-        constraints: Optional[Dict[str, Any]] = None
-    ):
+    def __init__(self, base_model: Any, constraints: Optional[Dict[str, Any]] = None):
         """
         Initialize constrained ML model.
 
@@ -491,10 +500,10 @@ class ConstrainedML:
         self.constraints = constraints or {}
         self.is_fitted = False
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> 'ConstrainedML':
+    def fit(self, X: np.ndarray, y: np.ndarray) -> "ConstrainedML":
         """Fit with constraints"""
         # Apply constraints if supported
-        if hasattr(self.base_model, 'monotone_constraints'):
+        if hasattr(self.base_model, "monotone_constraints"):
             # GradientBoosting supports monotone constraints
             self.base_model.fit(X, y)
         else:
@@ -520,9 +529,7 @@ class ConstrainedML:
 
 
 def create_hybrid_model(
-    model_type: str = "two_stage",
-    config: Optional[HybridModelConfig] = None,
-    **kwargs
+    model_type: str = "two_stage", config: Optional[HybridModelConfig] = None, **kwargs
 ) -> Any:
     """
     Factory function to create hybrid models.
@@ -548,21 +555,29 @@ def create_hybrid_model(
         return TwoStageModel(config)
 
     elif model_type == "residual":
-        base_model = kwargs.get('base_model', Ridge(alpha=1.0))
-        residual_model = kwargs.get('residual_model', RandomForestRegressor(n_estimators=100))
+        base_model = kwargs.get("base_model", Ridge(alpha=1.0))
+        residual_model = kwargs.get(
+            "residual_model", RandomForestRegressor(n_estimators=100)
+        )
         return ResidualLearningModel(base_model, residual_model)
 
     elif model_type == "stacked":
-        base_models = kwargs.get('base_models', [
-            ('ridge', Ridge(alpha=1.0)),
-            ('random_forest', RandomForestRegressor(n_estimators=100, max_depth=10))
-        ])
-        meta_learner = kwargs.get('meta_learner', Ridge(alpha=1.0))
+        base_models = kwargs.get(
+            "base_models",
+            [
+                ("ridge", Ridge(alpha=1.0)),
+                (
+                    "random_forest",
+                    RandomForestRegressor(n_estimators=100, max_depth=10),
+                ),
+            ],
+        )
+        meta_learner = kwargs.get("meta_learner", Ridge(alpha=1.0))
         return StackedEnsemble(base_models, meta_learner)
 
     elif model_type == "constrained":
-        base_model = kwargs.get('base_model', GradientBoostingRegressor())
-        constraints = kwargs.get('constraints', {})
+        base_model = kwargs.get("base_model", GradientBoostingRegressor())
+        constraints = kwargs.get("constraints", {})
         return ConstrainedML(base_model, constraints)
 
     else:
@@ -572,19 +587,19 @@ def create_hybrid_model(
 def check_ml_available() -> Dict[str, bool]:
     """Check which ML libraries are available"""
     return {
-        'sklearn': SKLEARN_AVAILABLE,
-        'lightgbm': LIGHTGBM_AVAILABLE,
-        'full_functionality': SKLEARN_AVAILABLE
+        "sklearn": SKLEARN_AVAILABLE,
+        "lightgbm": LIGHTGBM_AVAILABLE,
+        "full_functionality": SKLEARN_AVAILABLE,
     }
 
 
 __all__ = [
-    'HybridModelConfig',
-    'PredictionResult',
-    'TwoStageModel',
-    'ResidualLearningModel',
-    'StackedEnsemble',
-    'ConstrainedML',
-    'create_hybrid_model',
-    'check_ml_available',
+    "HybridModelConfig",
+    "PredictionResult",
+    "TwoStageModel",
+    "ResidualLearningModel",
+    "StackedEnsemble",
+    "ConstrainedML",
+    "create_hybrid_model",
+    "check_ml_available",
 ]

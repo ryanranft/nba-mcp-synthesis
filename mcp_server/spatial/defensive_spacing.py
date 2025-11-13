@@ -109,14 +109,16 @@ class DefensivePosition:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'defender_id': self.defender_id,
-            'offensive_player_id': self.offensive_player_id,
-            'timestamp': self.timestamp,
-            'distance': self.distance,
-            'closeout_angle': self.closeout_angle,
-            'assignment_type': self.assignment_type.value,
-            'is_shot_attempt': self.is_shot_attempt,
-            'contest_quality': self.contest_quality.value if self.contest_quality else None,
+            "defender_id": self.defender_id,
+            "offensive_player_id": self.offensive_player_id,
+            "timestamp": self.timestamp,
+            "distance": self.distance,
+            "closeout_angle": self.closeout_angle,
+            "assignment_type": self.assignment_type.value,
+            "is_shot_attempt": self.is_shot_attempt,
+            "contest_quality": (
+                self.contest_quality.value if self.contest_quality else None
+            ),
         }
 
 
@@ -173,28 +175,28 @@ class DefensiveMetrics:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'player_or_team_id': self.player_or_team_id,
-            'time_period': self.time_period,
-            'total_contests': self.total_contests,
-            'avg_contest_distance': self.avg_contest_distance,
-            'contest_rate': self.contest_rate(),
-            'tight_contest_rate': self.tight_contest_rate(),
-            'open_shot_rate': self.open_shot_rate(),
-            'contest_quality': {
-                'wide_open': self.wide_open_allowed,
-                'open': self.open_allowed,
-                'contested': self.contested,
-                'tightly_contested': self.tightly_contested,
+            "player_or_team_id": self.player_or_team_id,
+            "time_period": self.time_period,
+            "total_contests": self.total_contests,
+            "avg_contest_distance": self.avg_contest_distance,
+            "contest_rate": self.contest_rate(),
+            "tight_contest_rate": self.tight_contest_rate(),
+            "open_shot_rate": self.open_shot_rate(),
+            "contest_quality": {
+                "wide_open": self.wide_open_allowed,
+                "open": self.open_allowed,
+                "contested": self.contested,
+                "tightly_contested": self.tightly_contested,
             },
-            'closeout_metrics': {
-                'avg_time': self.avg_closeout_time,
-                'successful': self.successful_closeouts,
-                'failed': self.failed_closeouts,
+            "closeout_metrics": {
+                "avg_time": self.avg_closeout_time,
+                "successful": self.successful_closeouts,
+                "failed": self.failed_closeouts,
             },
-            'help_defense': {
-                'rotations': self.help_rotations,
-                'effective_rotations': self.effective_help_rotations,
-            }
+            "help_defense": {
+                "rotations": self.help_rotations,
+                "effective_rotations": self.effective_help_rotations,
+            },
         }
 
 
@@ -223,15 +225,15 @@ class DefensiveSpacing:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'timestamp': self.timestamp,
-            'team': self.team,
-            'avg_coverage_distance': self.avg_defender_distance_to_assignment,
-            'coverage_tightness': self.coverage_tightness,
-            'largest_gap': self.largest_gap,
-            'num_gaps': len(self.gap_locations),
-            'paint_occupancy': self.paint_occupancy,
-            'rim_protection_distance': self.rim_protection_distance,
-            'three_point_coverage': self.three_point_coverage,
+            "timestamp": self.timestamp,
+            "team": self.team,
+            "avg_coverage_distance": self.avg_defender_distance_to_assignment,
+            "coverage_tightness": self.coverage_tightness,
+            "largest_gap": self.largest_gap,
+            "num_gaps": len(self.gap_locations),
+            "paint_occupancy": self.paint_occupancy,
+            "rim_protection_distance": self.rim_protection_distance,
+            "three_point_coverage": self.three_point_coverage,
         }
 
 
@@ -269,7 +271,9 @@ class CoverageAnalyzer:
         # Index by offensive player
         if position.offensive_player_id not in self.positions_by_offensive_player:
             self.positions_by_offensive_player[position.offensive_player_id] = []
-        self.positions_by_offensive_player[position.offensive_player_id].append(position)
+        self.positions_by_offensive_player[position.offensive_player_id].append(
+            position
+        )
 
     def add_defensive_positions(self, positions: List[DefensivePosition]):
         """Add multiple defensive positions"""
@@ -277,9 +281,7 @@ class CoverageAnalyzer:
             self.add_defensive_position(pos)
 
     def calculate_defender_metrics(
-        self,
-        defender_id: str,
-        time_period: Optional[Tuple[float, float]] = None
+        self, defender_id: str, time_period: Optional[Tuple[float, float]] = None
     ) -> DefensiveMetrics:
         """
         Calculate defensive metrics for a specific defender.
@@ -296,8 +298,7 @@ class CoverageAnalyzer:
         # Filter by time period
         if time_period:
             positions = [
-                p for p in positions
-                if time_period[0] <= p.timestamp <= time_period[1]
+                p for p in positions if time_period[0] <= p.timestamp <= time_period[1]
             ]
 
         if not positions:
@@ -311,7 +312,7 @@ class CoverageAnalyzer:
                 wide_open_allowed=0,
                 open_allowed=0,
                 contested=0,
-                tightly_contested=0
+                tightly_contested=0,
             )
 
         # Contest analysis
@@ -323,10 +324,24 @@ class CoverageAnalyzer:
             avg_contest_distance = float(np.mean(contest_distances))
 
             # Count by quality
-            wide_open = sum(1 for p in shot_attempts if p.contest_quality == ContestQuality.WIDE_OPEN)
-            open_shots = sum(1 for p in shot_attempts if p.contest_quality == ContestQuality.OPEN)
-            contested = sum(1 for p in shot_attempts if p.contest_quality == ContestQuality.CONTESTED)
-            tightly_contested = sum(1 for p in shot_attempts if p.contest_quality == ContestQuality.TIGHTLY_CONTESTED)
+            wide_open = sum(
+                1
+                for p in shot_attempts
+                if p.contest_quality == ContestQuality.WIDE_OPEN
+            )
+            open_shots = sum(
+                1 for p in shot_attempts if p.contest_quality == ContestQuality.OPEN
+            )
+            contested = sum(
+                1
+                for p in shot_attempts
+                if p.contest_quality == ContestQuality.CONTESTED
+            )
+            tightly_contested = sum(
+                1
+                for p in shot_attempts
+                if p.contest_quality == ContestQuality.TIGHTLY_CONTESTED
+            )
 
             good_contests = contested + tightly_contested
             tight_contests = tightly_contested
@@ -346,7 +361,8 @@ class CoverageAnalyzer:
 
         return DefensiveMetrics(
             player_or_team_id=defender_id,
-            time_period=time_period or (positions[0].timestamp, positions[-1].timestamp),
+            time_period=time_period
+            or (positions[0].timestamp, positions[-1].timestamp),
             total_contests=total_contests,
             tight_contests=tight_contests,
             good_contests=good_contests,
@@ -356,14 +372,14 @@ class CoverageAnalyzer:
             contested=contested,
             tightly_contested=tightly_contested,
             avg_coverage_distance=avg_coverage_distance,
-            max_coverage_gap=max_coverage_gap
+            max_coverage_gap=max_coverage_gap,
         )
 
     def calculate_team_spacing(
         self,
         positions: List[DefensivePosition],
         team: str,
-        offensive_positions: Optional[List[Tuple[float, float]]] = None
+        offensive_positions: Optional[List[Tuple[float, float]]] = None,
     ) -> DefensiveSpacing:
         """
         Calculate defensive spacing metrics for a team.
@@ -392,20 +408,21 @@ class CoverageAnalyzer:
         # Find coverage gaps
         if offensive_positions:
             gap_locations = self._find_coverage_gaps(positions, offensive_positions)
-            largest_gap = max([self._gap_size(pos, positions) for pos in offensive_positions])
+            largest_gap = max(
+                [self._gap_size(pos, positions) for pos in offensive_positions]
+            )
         else:
             gap_locations = []
             largest_gap = 0.0
 
         # Paint protection
         paint_occupancy = sum(
-            1 for p in positions
-            if abs(p.defender_x - 25) < 8 and p.defender_y < 19
+            1 for p in positions if abs(p.defender_x - 25) < 8 and p.defender_y < 19
         )
 
         # Rim protection (distance to basket at (25, 5.25))
         rim_distances = [
-            math.sqrt((p.defender_x - 25)**2 + (p.defender_y - 5.25)**2)
+            math.sqrt((p.defender_x - 25) ** 2 + (p.defender_y - 5.25) ** 2)
             for p in positions
         ]
         rim_protection_distance = float(min(rim_distances)) if rim_distances else 100.0
@@ -413,7 +430,8 @@ class CoverageAnalyzer:
         # Three-point line coverage (simplified)
         # Count defenders within 6 feet of three-point arc
         three_point_defenders = sum(
-            1 for p in positions
+            1
+            for p in positions
             if self._distance_to_three_point_line(p.defender_x, p.defender_y) < 6.0
         )
         three_point_coverage = three_point_defenders / max(len(positions), 1)
@@ -427,25 +445,25 @@ class CoverageAnalyzer:
             gap_locations=gap_locations,
             paint_occupancy=paint_occupancy,
             rim_protection_distance=rim_protection_distance,
-            three_point_coverage=three_point_coverage
+            three_point_coverage=three_point_coverage,
         )
 
     def _find_coverage_gaps(
         self,
         defensive_positions: List[DefensivePosition],
         offensive_positions: List[Tuple[float, float]],
-        gap_threshold: float = 8.0
+        gap_threshold: float = 8.0,
     ) -> List[Tuple[float, float]]:
         """Find locations where offensive players are poorly covered"""
         gaps = []
 
         for off_pos in offensive_positions:
             # Find nearest defender
-            min_distance = float('inf')
+            min_distance = float("inf")
             for def_pos in defensive_positions:
                 dist = math.sqrt(
-                    (def_pos.defender_x - off_pos[0])**2 +
-                    (def_pos.defender_y - off_pos[1])**2
+                    (def_pos.defender_x - off_pos[0]) ** 2
+                    + (def_pos.defender_y - off_pos[1]) ** 2
                 )
                 min_distance = min(min_distance, dist)
 
@@ -457,15 +475,15 @@ class CoverageAnalyzer:
     def _gap_size(
         self,
         offensive_position: Tuple[float, float],
-        defensive_positions: List[DefensivePosition]
+        defensive_positions: List[DefensivePosition],
     ) -> float:
         """Calculate gap size (distance to nearest defender)"""
-        min_distance = float('inf')
+        min_distance = float("inf")
 
         for def_pos in defensive_positions:
             dist = math.sqrt(
-                (def_pos.defender_x - offensive_position[0])**2 +
-                (def_pos.defender_y - offensive_position[1])**2
+                (def_pos.defender_x - offensive_position[0]) ** 2
+                + (def_pos.defender_y - offensive_position[1]) ** 2
             )
             min_distance = min(min_distance, dist)
 
@@ -475,7 +493,7 @@ class CoverageAnalyzer:
         """Calculate distance from point to nearest part of three-point line"""
         # Simplified: distance to arc at 23.75 feet from basket
         basket_x, basket_y = 25.0, 5.25
-        distance_to_basket = math.sqrt((x - basket_x)**2 + (y - basket_y)**2)
+        distance_to_basket = math.sqrt((x - basket_x) ** 2 + (y - basket_y) ** 2)
         return abs(distance_to_basket - 23.75)
 
     def identify_help_defenders(
@@ -483,7 +501,7 @@ class CoverageAnalyzer:
         positions: List[DefensivePosition],
         ball_handler_x: float,
         ball_handler_y: float,
-        help_distance_threshold: float = 10.0
+        help_distance_threshold: float = 10.0,
     ) -> List[str]:
         """
         Identify defenders in help position.
@@ -501,12 +519,12 @@ class CoverageAnalyzer:
 
         # Find primary defender (closest to ball handler)
         primary_defender = None
-        min_distance = float('inf')
+        min_distance = float("inf")
 
         for pos in positions:
             dist = math.sqrt(
-                (pos.defender_x - ball_handler_x)**2 +
-                (pos.defender_y - ball_handler_y)**2
+                (pos.defender_x - ball_handler_x) ** 2
+                + (pos.defender_y - ball_handler_y) ** 2
             )
             if dist < min_distance:
                 min_distance = dist
@@ -518,8 +536,8 @@ class CoverageAnalyzer:
                 continue
 
             dist_to_ball = math.sqrt(
-                (pos.defender_x - ball_handler_x)**2 +
-                (pos.defender_y - ball_handler_y)**2
+                (pos.defender_x - ball_handler_x) ** 2
+                + (pos.defender_y - ball_handler_y) ** 2
             )
 
             if dist_to_ball <= help_distance_threshold:
@@ -528,9 +546,7 @@ class CoverageAnalyzer:
         return help_defenders
 
     def calculate_closeout_effectiveness(
-        self,
-        defender_id: str,
-        time_window: float = 2.0
+        self, defender_id: str, time_window: float = 2.0
     ) -> Dict[str, Any]:
         """
         Calculate closeout effectiveness for a defender.
@@ -546,9 +562,9 @@ class CoverageAnalyzer:
 
         if len(positions) < 2:
             return {
-                'total_closeouts': 0,
-                'avg_closeout_speed': 0.0,
-                'success_rate': 0.0
+                "total_closeouts": 0,
+                "avg_closeout_speed": 0.0,
+                "success_rate": 0.0,
             }
 
         closeouts = []
@@ -568,40 +584,44 @@ class CoverageAnalyzer:
                     closeout_speed = distance_change / time_diff
                     successful = curr_pos.distance <= 4.0  # Good closeout position
 
-                    closeouts.append({
-                        'speed': closeout_speed,
-                        'successful': successful,
-                        'final_distance': curr_pos.distance
-                    })
+                    closeouts.append(
+                        {
+                            "speed": closeout_speed,
+                            "successful": successful,
+                            "final_distance": curr_pos.distance,
+                        }
+                    )
 
         if not closeouts:
             return {
-                'total_closeouts': 0,
-                'avg_closeout_speed': 0.0,
-                'success_rate': 0.0
+                "total_closeouts": 0,
+                "avg_closeout_speed": 0.0,
+                "success_rate": 0.0,
             }
 
         total_closeouts = len(closeouts)
-        avg_speed = np.mean([c['speed'] for c in closeouts])
-        successful = sum(1 for c in closeouts if c['successful'])
+        avg_speed = np.mean([c["speed"] for c in closeouts])
+        successful = sum(1 for c in closeouts if c["successful"])
         success_rate = successful / total_closeouts
 
         return {
-            'total_closeouts': total_closeouts,
-            'avg_closeout_speed': float(avg_speed),
-            'success_rate': success_rate,
-            'avg_final_distance': float(np.mean([c['final_distance'] for c in closeouts]))
+            "total_closeouts": total_closeouts,
+            "avg_closeout_speed": float(avg_speed),
+            "success_rate": success_rate,
+            "avg_final_distance": float(
+                np.mean([c["final_distance"] for c in closeouts])
+            ),
         }
 
     def get_statistics(self) -> Dict[str, Any]:
         """Get analyzer statistics"""
         return {
-            'total_defensive_positions': len(self.defensive_positions),
-            'unique_defenders': len(self.positions_by_defender),
-            'unique_offensive_players': len(self.positions_by_offensive_player),
-            'shot_attempts_tracked': sum(
+            "total_defensive_positions": len(self.defensive_positions),
+            "unique_defenders": len(self.positions_by_defender),
+            "unique_offensive_players": len(self.positions_by_offensive_player),
+            "shot_attempts_tracked": sum(
                 1 for p in self.defensive_positions if p.is_shot_attempt
-            )
+            ),
         }
 
     def clear(self):

@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class FeatureSet:
     """Container for engineered features"""
+
     features: pd.DataFrame
     feature_names: List[str]
     metadata: Dict[str, Any] = field(default_factory=dict)
@@ -60,10 +61,7 @@ class TimeBasedFeatureGenerator:
         self.features_generated = 0
 
     def create_rolling_features(
-        self,
-        data: pd.DataFrame,
-        columns: List[str],
-        agg_funcs: List[str] = None
+        self, data: pd.DataFrame, columns: List[str], agg_funcs: List[str] = None
     ) -> pd.DataFrame:
         """
         Create rolling window features.
@@ -77,7 +75,7 @@ class TimeBasedFeatureGenerator:
             DataFrame with rolling features
         """
         if agg_funcs is None:
-            agg_funcs = ['mean', 'std']
+            agg_funcs = ["mean", "std"]
 
         features = pd.DataFrame(index=data.index)
 
@@ -89,22 +87,28 @@ class TimeBasedFeatureGenerator:
             for window in self.windows:
                 for func in agg_funcs:
                     feature_name = f"{col}_roll_{window}_{func}"
-                    if func == 'mean':
-                        features[feature_name] = data[col].rolling(window=window, min_periods=1).mean()
-                    elif func == 'std':
-                        features[feature_name] = data[col].rolling(window=window, min_periods=1).std()
-                    elif func == 'min':
-                        features[feature_name] = data[col].rolling(window=window, min_periods=1).min()
-                    elif func == 'max':
-                        features[feature_name] = data[col].rolling(window=window, min_periods=1).max()
+                    if func == "mean":
+                        features[feature_name] = (
+                            data[col].rolling(window=window, min_periods=1).mean()
+                        )
+                    elif func == "std":
+                        features[feature_name] = (
+                            data[col].rolling(window=window, min_periods=1).std()
+                        )
+                    elif func == "min":
+                        features[feature_name] = (
+                            data[col].rolling(window=window, min_periods=1).min()
+                        )
+                    elif func == "max":
+                        features[feature_name] = (
+                            data[col].rolling(window=window, min_periods=1).max()
+                        )
 
         self.features_generated += len(features.columns)
         return features
 
     def create_momentum_features(
-        self,
-        data: pd.DataFrame,
-        win_column: str = 'win'
+        self, data: pd.DataFrame, win_column: str = "win"
     ) -> pd.DataFrame:
         """
         Create momentum-based features.
@@ -123,7 +127,7 @@ class TimeBasedFeatureGenerator:
             return features
 
         # Win streak (consecutive wins)
-        features['win_streak'] = (
+        features["win_streak"] = (
             data[win_column]
             .groupby((data[win_column] != data[win_column].shift()).cumsum())
             .cumsum()
@@ -131,10 +135,8 @@ class TimeBasedFeatureGenerator:
 
         # Recent win percentage
         for window in self.windows:
-            features[f'win_pct_last_{window}'] = (
-                data[win_column]
-                .rolling(window=window, min_periods=1)
-                .mean()
+            features[f"win_pct_last_{window}"] = (
+                data[win_column].rolling(window=window, min_periods=1).mean()
             )
 
         self.features_generated += len(features.columns)
@@ -153,10 +155,7 @@ class InteractionFeatureGenerator:
         self.features_generated = 0
 
     def create_ratio_features(
-        self,
-        data: pd.DataFrame,
-        numerator_cols: List[str],
-        denominator_cols: List[str]
+        self, data: pd.DataFrame, numerator_cols: List[str], denominator_cols: List[str]
     ) -> pd.DataFrame:
         """
         Create ratio features between columns.
@@ -182,9 +181,7 @@ class InteractionFeatureGenerator:
         return features
 
     def create_difference_features(
-        self,
-        data: pd.DataFrame,
-        col_pairs: List[Tuple[str, str]]
+        self, data: pd.DataFrame, col_pairs: List[Tuple[str, str]]
     ) -> pd.DataFrame:
         """
         Create difference features between column pairs.
@@ -207,9 +204,7 @@ class InteractionFeatureGenerator:
         return features
 
     def create_product_features(
-        self,
-        data: pd.DataFrame,
-        col_pairs: List[Tuple[str, str]]
+        self, data: pd.DataFrame, col_pairs: List[Tuple[str, str]]
     ) -> pd.DataFrame:
         """
         Create product features between column pairs.
@@ -248,9 +243,7 @@ class DomainFeatureGenerator:
         self.features_generated = 0
 
     def create_home_advantage_features(
-        self,
-        data: pd.DataFrame,
-        is_home_col: str = 'is_home'
+        self, data: pd.DataFrame, is_home_col: str = "is_home"
     ) -> pd.DataFrame:
         """
         Create home court advantage features.
@@ -265,22 +258,24 @@ class DomainFeatureGenerator:
         features = pd.DataFrame(index=data.index)
 
         if is_home_col in data.columns:
-            features['is_home'] = data[is_home_col].astype(int)
+            features["is_home"] = data[is_home_col].astype(int)
             # Home win percentage
-            features['home_win_pct'] = (
-                data.groupby('team_id')[is_home_col]
-                .expanding()
-                .mean()
-                .reset_index(level=0, drop=True)
-            ) if 'team_id' in data.columns else data[is_home_col]
+            features["home_win_pct"] = (
+                (
+                    data.groupby("team_id")[is_home_col]
+                    .expanding()
+                    .mean()
+                    .reset_index(level=0, drop=True)
+                )
+                if "team_id" in data.columns
+                else data[is_home_col]
+            )
 
         self.features_generated += len(features.columns)
         return features
 
     def create_rest_features(
-        self,
-        data: pd.DataFrame,
-        date_col: str = 'game_date'
+        self, data: pd.DataFrame, date_col: str = "game_date"
     ) -> pd.DataFrame:
         """
         Create rest days features.
@@ -298,9 +293,9 @@ class DomainFeatureGenerator:
             # Convert to datetime if needed
             dates = pd.to_datetime(data[date_col])
             # Days since last game
-            features['days_rest'] = dates.diff().dt.days.fillna(3)
+            features["days_rest"] = dates.diff().dt.days.fillna(3)
             # Back-to-back indicator
-            features['is_back_to_back'] = (features['days_rest'] <= 1).astype(int)
+            features["is_back_to_back"] = (features["days_rest"] <= 1).astype(int)
 
         self.features_generated += len(features.columns)
         return features
@@ -316,7 +311,7 @@ class FeatureScaler:
     - RobustScaler (median and IQR)
     """
 
-    def __init__(self, method: str = 'standard'):
+    def __init__(self, method: str = "standard"):
         """
         Initialize feature scaler.
 
@@ -329,11 +324,11 @@ class FeatureScaler:
 
     def _initialize_scaler(self):
         """Initialize the appropriate scaler"""
-        if self.method == 'standard':
+        if self.method == "standard":
             self.scaler = StandardScaler()
-        elif self.method == 'minmax':
+        elif self.method == "minmax":
             self.scaler = MinMaxScaler()
-        elif self.method == 'robust':
+        elif self.method == "robust":
             self.scaler = RobustScaler()
         else:
             raise ValueError(f"Unknown scaling method: {self.method}")
@@ -375,7 +370,7 @@ class FeatureSelector:
     - K-best selection
     """
 
-    def __init__(self, method: str = 'mutual_info', k: int = 10):
+    def __init__(self, method: str = "mutual_info", k: int = 10):
         """
         Initialize feature selector.
 
@@ -392,7 +387,7 @@ class FeatureSelector:
         self,
         X: Union[np.ndarray, pd.DataFrame],
         y: np.ndarray,
-        feature_names: Optional[List[str]] = None
+        feature_names: Optional[List[str]] = None,
     ) -> Tuple[np.ndarray, List[str]]:
         """
         Fit selector and select features.
@@ -405,8 +400,10 @@ class FeatureSelector:
         Returns:
             (selected_features, selected_feature_names)
         """
-        if self.method == 'mutual_info':
-            self.selector = SelectKBest(mutual_info_regression, k=min(self.k, X.shape[1]))
+        if self.method == "mutual_info":
+            self.selector = SelectKBest(
+                mutual_info_regression, k=min(self.k, X.shape[1])
+            )
         else:
             self.selector = SelectKBest(k=min(self.k, X.shape[1]))
 
@@ -419,7 +416,9 @@ class FeatureSelector:
                 name for name, selected in zip(feature_names, mask) if selected
             ]
         else:
-            self.selected_features = [f"feature_{i}" for i in range(X_selected.shape[1])]
+            self.selected_features = [
+                f"feature_{i}" for i in range(X_selected.shape[1])
+            ]
 
         return X_selected, self.selected_features
 

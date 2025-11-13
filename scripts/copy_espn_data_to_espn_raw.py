@@ -28,18 +28,21 @@ from psycopg2.extras import execute_batch
 # Add project to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from mcp_server.unified_secrets_manager import load_secrets_hierarchical, get_database_config
+from mcp_server.unified_secrets_manager import (
+    load_secrets_hierarchical,
+    get_database_config,
+)
 
 
 # Table mappings: (source_schema, source_table, target_table, batch_size)
 TABLE_MAPPINGS = [
-    ('espn', 'espn_games', 'schedule_espn_nba', 5000),
-    ('espn', 'espn_team_stats', 'team_box_espn_nba', 10000),
-    ('espn', 'espn_plays', 'play_by_play_espn_nba', 10000),
-    ('espn', 'espn_schedules', 'schedules_metadata_espn_nba', 1000),
-    ('master', 'nba_games', 'schedule_curated_espn_nba', 5000),
-    ('master', 'nba_plays', 'play_by_play_curated_espn_nba', 10000),
-    ('master', 'espn_file_validation', 'file_validation_espn_nba', 5000),
+    ("espn", "espn_games", "schedule_espn_nba", 5000),
+    ("espn", "espn_team_stats", "team_box_espn_nba", 10000),
+    ("espn", "espn_plays", "play_by_play_espn_nba", 10000),
+    ("espn", "espn_schedules", "schedules_metadata_espn_nba", 1000),
+    ("master", "nba_games", "schedule_curated_espn_nba", 5000),
+    ("master", "nba_plays", "play_by_play_curated_espn_nba", 10000),
+    ("master", "espn_file_validation", "file_validation_espn_nba", 5000),
 ]
 
 
@@ -47,13 +50,13 @@ def print_header(title):
     """Print formatted section header."""
     print(f"\n{'=' * 80}")
     print(f"{title}")
-    print('=' * 80)
+    print("=" * 80)
 
 
 def print_section(title):
     """Print formatted subsection."""
     print(f"\n{title}")
-    print('-' * 80)
+    print("-" * 80)
 
 
 def create_espn_raw_schema(target_conn):
@@ -70,7 +73,8 @@ def get_table_ddl(source_conn, schema, table):
     """Get CREATE TABLE statement for existing table."""
     with source_conn.cursor() as cur:
         # Get column definitions
-        cur.execute(f"""
+        cur.execute(
+            f"""
             SELECT
                 column_name,
                 data_type,
@@ -81,7 +85,8 @@ def get_table_ddl(source_conn, schema, table):
             FROM information_schema.columns
             WHERE table_schema = '{schema}' AND table_name = '{table}'
             ORDER BY ordinal_position;
-        """)
+        """
+        )
 
         columns = cur.fetchall()
 
@@ -89,30 +94,37 @@ def get_table_ddl(source_conn, schema, table):
         create_sql = "CREATE TABLE IF NOT EXISTS {schema_name}.{table_name} (\n"
         col_defs = []
 
-        for col_name, data_type, char_len, is_nullable, col_default, udt_name in columns:
+        for (
+            col_name,
+            data_type,
+            char_len,
+            is_nullable,
+            col_default,
+            udt_name,
+        ) in columns:
             col_def = f"  {col_name}"
 
             # Handle data types
-            if data_type in ('character varying', 'varchar'):
+            if data_type in ("character varying", "varchar"):
                 col_def += f" VARCHAR({char_len})" if char_len else " VARCHAR"
-            elif data_type == 'character':
+            elif data_type == "character":
                 col_def += f" CHAR({char_len if char_len else 1})"
-            elif data_type == 'ARRAY':
+            elif data_type == "ARRAY":
                 col_def += f" {udt_name}"
-            elif data_type == 'USER-DEFINED':
+            elif data_type == "USER-DEFINED":
                 col_def += f" {udt_name}"
-            elif data_type == 'timestamp without time zone':
+            elif data_type == "timestamp without time zone":
                 col_def += " TIMESTAMP"
-            elif data_type == 'timestamp with time zone':
+            elif data_type == "timestamp with time zone":
                 col_def += " TIMESTAMPTZ"
             else:
                 col_def += f" {data_type.upper()}"
 
             # Add constraints
-            if is_nullable == 'NO':
+            if is_nullable == "NO":
                 col_def += " NOT NULL"
 
-            if col_default and 'nextval' not in col_default:
+            if col_default and "nextval" not in col_default:
                 col_def += f" DEFAULT {col_default}"
 
             col_defs.append(col_def)
@@ -123,7 +135,9 @@ def get_table_ddl(source_conn, schema, table):
         return create_sql
 
 
-def copy_table_data(source_conn, target_conn, source_schema, source_table, target_table, batch_size):
+def copy_table_data(
+    source_conn, target_conn, source_schema, source_table, target_table, batch_size
+):
     """Copy all data from source table to target table."""
     print_section(f"Copying {source_schema}.{source_table} → espn_raw.{target_table}")
 
@@ -143,24 +157,28 @@ def copy_table_data(source_conn, target_conn, source_schema, source_table, targe
         # Create table with same schema
         print(f"  Creating table espn_raw.{target_table}...")
         create_sql = get_table_ddl(source_conn, source_schema, source_table)
-        create_sql = create_sql.format(schema_name='espn_raw', table_name=target_table)
+        create_sql = create_sql.format(schema_name="espn_raw", table_name=target_table)
         target_cur.execute(create_sql)
         target_conn.commit()
         print(f"  ✅ Table created")
 
         # Get column names
-        source_cur.execute(f"""
+        source_cur.execute(
+            f"""
             SELECT column_name
             FROM information_schema.columns
             WHERE table_schema = '{source_schema}' AND table_name = '{source_table}'
             ORDER BY ordinal_position;
-        """)
+        """
+        )
         columns = [row[0] for row in source_cur.fetchall()]
-        col_list = ', '.join(columns)
+        col_list = ", ".join(columns)
 
         # Clear target table if it exists
         print(f"  Truncating target table...")
-        target_cur.execute(f"TRUNCATE TABLE espn_raw.{target_table} RESTART IDENTITY CASCADE;")
+        target_cur.execute(
+            f"TRUNCATE TABLE espn_raw.{target_table} RESTART IDENTITY CASCADE;"
+        )
         target_conn.commit()
 
         # Copy data in batches
@@ -172,19 +190,21 @@ def copy_table_data(source_conn, target_conn, source_schema, source_table, targe
 
         while offset < row_count:
             # Fetch batch from source
-            source_cur.execute(f"""
+            source_cur.execute(
+                f"""
                 SELECT {col_list}
                 FROM {source_schema}.{source_table}
                 ORDER BY ctid
                 LIMIT {batch_size} OFFSET {offset};
-            """)
+            """
+            )
             rows = source_cur.fetchall()
 
             if not rows:
                 break
 
             # Insert batch into target
-            placeholders = ','.join(['%s'] * len(columns))
+            placeholders = ",".join(["%s"] * len(columns))
             insert_sql = f"INSERT INTO espn_raw.{target_table} ({col_list}) VALUES ({placeholders})"
 
             execute_batch(target_cur, insert_sql, rows, page_size=1000)
@@ -195,7 +215,10 @@ def copy_table_data(source_conn, target_conn, source_schema, source_table, targe
 
             # Progress update
             progress = (total_inserted / row_count) * 100
-            print(f"    Progress: {total_inserted:,}/{row_count:,} ({progress:.1f}%)", end='\r')
+            print(
+                f"    Progress: {total_inserted:,}/{row_count:,} ({progress:.1f}%)",
+                end="\r",
+            )
 
         print()  # New line after progress
 
@@ -234,9 +257,9 @@ def main():
     # Connect to source database (nba_simulator)
     print_section("Connecting to Source Database (nba_simulator)")
     try:
-        load_secrets_hierarchical('nba-mcp-synthesis', 'NBA', 'development')
+        load_secrets_hierarchical("nba-mcp-synthesis", "NBA", "development")
         source_config = get_database_config()
-        source_config['database'] = 'nba_simulator'
+        source_config["database"] = "nba_simulator"
 
         print(f"  Database: {source_config['database']}")
         print(f"  Host: {source_config['host']}")
@@ -251,7 +274,7 @@ def main():
     # Connect to target database (nba_mcp_synthesis)
     print_section("Connecting to Target Database (nba_mcp_synthesis)")
     try:
-        load_secrets_hierarchical('nba-mcp-synthesis', 'NBA', 'development')
+        load_secrets_hierarchical("nba-mcp-synthesis", "NBA", "development")
         target_config = get_database_config()
 
         print(f"  Database: {target_config['database']}")
@@ -276,9 +299,12 @@ def main():
 
     for source_schema, source_table, target_table, batch_size in TABLE_MAPPINGS:
         success = copy_table_data(
-            source_conn, target_conn,
-            source_schema, source_table,
-            target_table, batch_size
+            source_conn,
+            target_conn,
+            source_schema,
+            source_table,
+            target_table,
+            batch_size,
         )
 
         if success:
@@ -325,5 +351,5 @@ def main():
     sys.exit(exit_code)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

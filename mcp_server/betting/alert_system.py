@@ -78,14 +78,16 @@ import warnings
 
 class AlertLevel(str, Enum):
     """Alert severity levels"""
+
     CRITICAL = "critical"  # 🔴 Immediate action required
-    WARNING = "warning"    # 🟡 Monitor closely
-    INFO = "info"          # 🔵 Notable event
-    HEALTHY = "healthy"    # 🟢 System normal
+    WARNING = "warning"  # 🟡 Monitor closely
+    INFO = "info"  # 🔵 Notable event
+    HEALTHY = "healthy"  # 🟢 System normal
 
 
 class AlertCategory(str, Enum):
     """Alert category types"""
+
     PERFORMANCE = "performance"
     RISK = "risk"
     CALIBRATION = "calibration"
@@ -111,6 +113,7 @@ class Alert:
         resolved: Whether alert has been resolved
         resolved_at: When alert was resolved
     """
+
     alert_id: str
     timestamp: datetime
     level: AlertLevel
@@ -126,11 +129,11 @@ class Alert:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         d = asdict(self)
-        d['level'] = self.level.value
-        d['category'] = self.category.value
-        d['timestamp'] = self.timestamp.isoformat()
+        d["level"] = self.level.value
+        d["category"] = self.category.value
+        d["timestamp"] = self.timestamp.isoformat()
         if self.resolved_at:
-            d['resolved_at'] = self.resolved_at.isoformat()
+            d["resolved_at"] = self.resolved_at.isoformat()
         return d
 
     def __str__(self) -> str:
@@ -139,10 +142,12 @@ class Alert:
             AlertLevel.CRITICAL: "🔴",
             AlertLevel.WARNING: "🟡",
             AlertLevel.INFO: "🔵",
-            AlertLevel.HEALTHY: "🟢"
+            AlertLevel.HEALTHY: "🟢",
         }
         icon = icons.get(self.level, "⚪")
-        return f"{icon} [{self.level.value.upper()}] {self.category.value}: {self.message}"
+        return (
+            f"{icon} [{self.level.value.upper()}] {self.category.value}: {self.message}"
+        )
 
 
 class AlertDatabase:
@@ -173,7 +178,8 @@ class AlertDatabase:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS alerts (
                 alert_id TEXT PRIMARY KEY,
                 timestamp TEXT NOT NULL,
@@ -188,18 +194,23 @@ class AlertDatabase:
                 resolved_at TEXT,
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
-        """)
+        """
+        )
 
         # Index for querying by timestamp and level
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_alerts_timestamp
             ON alerts(timestamp DESC)
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_alerts_level
             ON alerts(level)
-        """)
+        """
+        )
 
         conn.commit()
         conn.close()
@@ -214,24 +225,27 @@ class AlertDatabase:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT OR REPLACE INTO alerts (
                 alert_id, timestamp, level, category, metric,
                 value, threshold, message, metadata, resolved, resolved_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            alert.alert_id,
-            alert.timestamp.isoformat(),
-            alert.level.value,
-            alert.category.value,
-            alert.metric,
-            alert.value,
-            alert.threshold,
-            alert.message,
-            json.dumps(alert.metadata) if alert.metadata else None,
-            1 if alert.resolved else 0,
-            alert.resolved_at.isoformat() if alert.resolved_at else None
-        ))
+        """,
+            (
+                alert.alert_id,
+                alert.timestamp.isoformat(),
+                alert.level.value,
+                alert.category.value,
+                alert.metric,
+                alert.value,
+                alert.threshold,
+                alert.message,
+                json.dumps(alert.metadata) if alert.metadata else None,
+                1 if alert.resolved else 0,
+                alert.resolved_at.isoformat() if alert.resolved_at else None,
+            ),
+        )
 
         conn.commit()
         conn.close()
@@ -249,11 +263,14 @@ class AlertDatabase:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT alert_id, timestamp, level, category, metric,
                    value, threshold, message, metadata, resolved, resolved_at
             FROM alerts WHERE alert_id = ?
-        """, (alert_id,))
+        """,
+            (alert_id,),
+        )
 
         row = cursor.fetchone()
         conn.close()
@@ -272,14 +289,14 @@ class AlertDatabase:
             message=row[7],
             metadata=json.loads(row[8]) if row[8] else None,
             resolved=bool(row[9]),
-            resolved_at=datetime.fromisoformat(row[10]) if row[10] else None
+            resolved_at=datetime.fromisoformat(row[10]) if row[10] else None,
         )
 
     def get_recent_alerts(
         self,
         hours: int = 24,
         level: Optional[AlertLevel] = None,
-        category: Optional[AlertCategory] = None
+        category: Optional[AlertCategory] = None,
     ) -> List[Alert]:
         """
         Get recent alerts
@@ -330,7 +347,7 @@ class AlertDatabase:
                 message=row[7],
                 metadata=json.loads(row[8]) if row[8] else None,
                 resolved=bool(row[9]),
-                resolved_at=datetime.fromisoformat(row[10]) if row[10] else None
+                resolved_at=datetime.fromisoformat(row[10]) if row[10] else None,
             )
             for row in rows
         ]
@@ -345,11 +362,14 @@ class AlertDatabase:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE alerts
             SET resolved = 1, resolved_at = ?
             WHERE alert_id = ?
-        """, (datetime.now().isoformat(), alert_id))
+        """,
+            (datetime.now().isoformat(), alert_id),
+        )
 
         conn.commit()
         conn.close()
@@ -365,21 +385,21 @@ class AlertSystem:
 
     # Default thresholds
     DEFAULT_THRESHOLDS = {
-        'roi': {'critical': -0.10, 'warning': 0.0, 'healthy': 0.05},
-        'win_rate': {'critical': 0.45, 'warning': 0.50, 'healthy': 0.55},
-        'sharpe_ratio': {'critical': 0.5, 'warning': 1.0, 'healthy': 1.5},
-        'brier_score': {'critical': 0.20, 'warning': 0.15, 'healthy': 0.10},
-        'log_loss': {'critical': 0.70, 'warning': 0.60, 'healthy': 0.50},
-        'max_drawdown': {'critical': 0.30, 'warning': 0.20, 'healthy': 0.15},
-        'clv': {'critical': -0.05, 'warning': 0.0, 'healthy': 0.02},
-        'losing_streak': {'critical': 10, 'warning': 5, 'healthy': 3}
+        "roi": {"critical": -0.10, "warning": 0.0, "healthy": 0.05},
+        "win_rate": {"critical": 0.45, "warning": 0.50, "healthy": 0.55},
+        "sharpe_ratio": {"critical": 0.5, "warning": 1.0, "healthy": 1.5},
+        "brier_score": {"critical": 0.20, "warning": 0.15, "healthy": 0.10},
+        "log_loss": {"critical": 0.70, "warning": 0.60, "healthy": 0.50},
+        "max_drawdown": {"critical": 0.30, "warning": 0.20, "healthy": 0.15},
+        "clv": {"critical": -0.05, "warning": 0.0, "healthy": 0.02},
+        "losing_streak": {"critical": 10, "warning": 5, "healthy": 3},
     }
 
     def __init__(
         self,
         db_path: str = "data/alerts.db",
         thresholds: Optional[Dict[str, Dict[str, float]]] = None,
-        notification_config: Optional[Dict[str, Any]] = None
+        notification_config: Optional[Dict[str, Any]] = None,
     ):
         """
         Initialize alert system
@@ -395,7 +415,7 @@ class AlertSystem:
 
     def _generate_alert_id(self, category: str, metric: str) -> str:
         """Generate unique alert ID"""
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         return f"{category}_{metric}_{timestamp}"
 
     def _get_alert_level(self, metric: str, value: float) -> AlertLevel:
@@ -415,18 +435,18 @@ class AlertSystem:
         thresholds = self.thresholds[metric]
 
         # Handle metrics where lower is better
-        if metric in ['brier_score', 'log_loss', 'max_drawdown', 'losing_streak']:
-            if value >= thresholds['critical']:
+        if metric in ["brier_score", "log_loss", "max_drawdown", "losing_streak"]:
+            if value >= thresholds["critical"]:
                 return AlertLevel.CRITICAL
-            elif value >= thresholds['warning']:
+            elif value >= thresholds["warning"]:
                 return AlertLevel.WARNING
             else:
                 return AlertLevel.HEALTHY
         else:
             # Higher is better
-            if value <= thresholds['critical']:
+            if value <= thresholds["critical"]:
                 return AlertLevel.CRITICAL
-            elif value <= thresholds['warning']:
+            elif value <= thresholds["warning"]:
                 return AlertLevel.WARNING
             else:
                 return AlertLevel.HEALTHY
@@ -444,20 +464,28 @@ class AlertSystem:
         alerts = []
 
         # Only check if we have enough data
-        if stats.get('total_bets', 0) < 10:
+        if stats.get("total_bets", 0) < 10:
             return alerts
 
         # Metrics to check
         metrics_to_check = {
-            'roi': (stats.get('roi', 0), 'ROI', AlertCategory.PERFORMANCE),
-            'win_rate': (stats.get('win_rate', 0), 'Win Rate', AlertCategory.PERFORMANCE),
-            'sharpe_ratio': (stats.get('sharpe_ratio', 0), 'Sharpe Ratio', AlertCategory.RISK),
-            'max_drawdown': (
-                abs(stats.get('max_drawdown', 0)) / stats.get('bankroll', 1),
-                'Max Drawdown',
-                AlertCategory.RISK
+            "roi": (stats.get("roi", 0), "ROI", AlertCategory.PERFORMANCE),
+            "win_rate": (
+                stats.get("win_rate", 0),
+                "Win Rate",
+                AlertCategory.PERFORMANCE,
             ),
-            'clv': (stats.get('avg_clv', 0), 'CLV', AlertCategory.PERFORMANCE)
+            "sharpe_ratio": (
+                stats.get("sharpe_ratio", 0),
+                "Sharpe Ratio",
+                AlertCategory.RISK,
+            ),
+            "max_drawdown": (
+                abs(stats.get("max_drawdown", 0)) / stats.get("bankroll", 1),
+                "Max Drawdown",
+                AlertCategory.RISK,
+            ),
+            "clv": (stats.get("avg_clv", 0), "CLV", AlertCategory.PERFORMANCE),
         }
 
         for metric_key, (value, metric_name, category) in metrics_to_check.items():
@@ -468,12 +496,14 @@ class AlertSystem:
                 threshold = self.thresholds[metric_key][level.value]
 
                 # Create alert message
-                if metric_key in ['roi', 'win_rate', 'clv']:
+                if metric_key in ["roi", "win_rate", "clv"]:
                     message = f"{metric_name} is {value*100:.1f}% (threshold: {threshold*100:.1f}%)"
-                elif metric_key == 'max_drawdown':
+                elif metric_key == "max_drawdown":
                     message = f"{metric_name} is {value*100:.1f}% (threshold: {threshold*100:.1f}%)"
                 else:
-                    message = f"{metric_name} is {value:.2f} (threshold: {threshold:.2f})"
+                    message = (
+                        f"{metric_name} is {value:.2f} (threshold: {threshold:.2f})"
+                    )
 
                 alert = Alert(
                     alert_id=self._generate_alert_id(category.value, metric_key),
@@ -484,7 +514,7 @@ class AlertSystem:
                     value=value,
                     threshold=threshold,
                     message=message,
-                    metadata={'stats': stats}
+                    metadata={"stats": stats},
                 )
 
                 self.db.save_alert(alert)
@@ -496,7 +526,7 @@ class AlertSystem:
         self,
         brier_score: float,
         log_loss: Optional[float] = None,
-        num_predictions: int = 0
+        num_predictions: int = 0,
     ) -> List[Alert]:
         """
         Check calibration quality and generate alerts
@@ -516,21 +546,21 @@ class AlertSystem:
             return alerts
 
         # Check Brier score
-        level = self._get_alert_level('brier_score', brier_score)
+        level = self._get_alert_level("brier_score", brier_score)
 
         if level in [AlertLevel.CRITICAL, AlertLevel.WARNING]:
-            threshold = self.thresholds['brier_score'][level.value]
+            threshold = self.thresholds["brier_score"][level.value]
 
             alert = Alert(
-                alert_id=self._generate_alert_id('calibration', 'brier_score'),
+                alert_id=self._generate_alert_id("calibration", "brier_score"),
                 timestamp=datetime.now(),
                 level=level,
                 category=AlertCategory.CALIBRATION,
-                metric='brier_score',
+                metric="brier_score",
                 value=brier_score,
                 threshold=threshold,
                 message=f"Brier score is {brier_score:.4f} (threshold: {threshold:.4f})",
-                metadata={'num_predictions': num_predictions}
+                metadata={"num_predictions": num_predictions},
             )
 
             self.db.save_alert(alert)
@@ -538,21 +568,21 @@ class AlertSystem:
 
         # Check log loss if provided
         if log_loss is not None:
-            level = self._get_alert_level('log_loss', log_loss)
+            level = self._get_alert_level("log_loss", log_loss)
 
             if level in [AlertLevel.CRITICAL, AlertLevel.WARNING]:
-                threshold = self.thresholds['log_loss'][level.value]
+                threshold = self.thresholds["log_loss"][level.value]
 
                 alert = Alert(
-                    alert_id=self._generate_alert_id('calibration', 'log_loss'),
+                    alert_id=self._generate_alert_id("calibration", "log_loss"),
                     timestamp=datetime.now(),
                     level=level,
                     category=AlertCategory.CALIBRATION,
-                    metric='log_loss',
+                    metric="log_loss",
                     value=log_loss,
                     threshold=threshold,
                     message=f"Log loss is {log_loss:.4f} (threshold: {threshold:.4f})",
-                    metadata={'num_predictions': num_predictions}
+                    metadata={"num_predictions": num_predictions},
                 )
 
                 self.db.save_alert(alert)
@@ -576,21 +606,21 @@ class AlertSystem:
             return alerts
 
         losing_streak = abs(current_streak)
-        level = self._get_alert_level('losing_streak', losing_streak)
+        level = self._get_alert_level("losing_streak", losing_streak)
 
         if level in [AlertLevel.CRITICAL, AlertLevel.WARNING]:
-            threshold = self.thresholds['losing_streak'][level.value]
+            threshold = self.thresholds["losing_streak"][level.value]
 
             alert = Alert(
-                alert_id=self._generate_alert_id('risk', 'losing_streak'),
+                alert_id=self._generate_alert_id("risk", "losing_streak"),
                 timestamp=datetime.now(),
                 level=level,
                 category=AlertCategory.RISK,
-                metric='losing_streak',
+                metric="losing_streak",
                 value=losing_streak,
                 threshold=threshold,
                 message=f"Losing streak of {losing_streak} bets (threshold: {threshold})",
-                metadata={'current_streak': current_streak}
+                metadata={"current_streak": current_streak},
             )
 
             self.db.save_alert(alert)
@@ -615,15 +645,15 @@ class AlertSystem:
         info = [a for a in all_alerts if a.level == AlertLevel.INFO]
 
         return {
-            'total_alerts': len(all_alerts),
-            'critical': len(critical),
-            'warnings': len(warnings),
-            'info': len(info),
-            'critical_alerts': critical,
-            'warning_alerts': warnings,
-            'info_alerts': info,
-            'has_critical': len(critical) > 0,
-            'has_warnings': len(warnings) > 0
+            "total_alerts": len(all_alerts),
+            "critical": len(critical),
+            "warnings": len(warnings),
+            "info": len(info),
+            "critical_alerts": critical,
+            "warning_alerts": warnings,
+            "info_alerts": info,
+            "has_critical": len(critical) > 0,
+            "has_warnings": len(warnings) > 0,
         }
 
     def send_notifications(self, alerts: List[Alert]) -> Dict[str, Any]:
@@ -657,9 +687,9 @@ class AlertSystem:
                 results = notifier.send_alert_batch(alerts)
 
             return {
-                'sent': sum(1 for r in results.values() if r.success),
-                'failed': sum(1 for r in results.values() if not r.success),
-                'results': results
+                "sent": sum(1 for r in results.values() if r.success),
+                "failed": sum(1 for r in results.values() if not r.success),
+                "results": results,
             }
 
         except ImportError:

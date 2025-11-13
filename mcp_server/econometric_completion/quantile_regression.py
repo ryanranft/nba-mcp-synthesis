@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 # Try to import statsmodels (optional)
 try:
     from statsmodels.regression.quantile_regression import QuantReg
+
     STATSMODELS_AVAILABLE = True
 except ImportError:
     STATSMODELS_AVAILABLE = False
@@ -64,17 +65,17 @@ class QuantileRegressionResult:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         result = {
-            'quantile': self.quantile,
-            'coefficients': self.coefficients.tolist(),
-            'pseudo_r2': self.pseudo_r2,
-            'n_obs': self.n_obs
+            "quantile": self.quantile,
+            "coefficients": self.coefficients.tolist(),
+            "pseudo_r2": self.pseudo_r2,
+            "n_obs": self.n_obs,
         }
 
         if self.feature_names:
-            result['coef_dict'] = dict(zip(self.feature_names, self.coefficients))
+            result["coef_dict"] = dict(zip(self.feature_names, self.coefficients))
 
         if self.std_errors is not None:
-            result['std_errors'] = self.std_errors.tolist()
+            result["std_errors"] = self.std_errors.tolist()
 
         return result
 
@@ -86,7 +87,7 @@ class QuantileRegressionResult:
             f"Number of observations: {self.n_obs}",
             f"Pseudo R²: {self.pseudo_r2:.4f}",
             "",
-            "Coefficients:"
+            "Coefficients:",
         ]
 
         for i, coef in enumerate(self.coefficients):
@@ -111,7 +112,9 @@ class QuantileProcessResult:
     # Coefficient paths across quantiles
     coefficient_paths: Optional[Dict[str, List[float]]] = None
 
-    def get_coefficient_path(self, feature_name: str) -> Tuple[List[float], List[float]]:
+    def get_coefficient_path(
+        self, feature_name: str
+    ) -> Tuple[List[float], List[float]]:
         """
         Get coefficient path for a feature across quantiles.
 
@@ -132,10 +135,7 @@ class QuantileProcessResult:
 
         return self.quantiles, coefficients
 
-    def test_coefficient_equality(
-        self,
-        feature_name: str
-    ) -> Dict[str, Any]:
+    def test_coefficient_equality(self, feature_name: str) -> Dict[str, Any]:
         """
         Test if coefficient is constant across quantiles.
 
@@ -153,11 +153,11 @@ class QuantileProcessResult:
         is_constant = cv < 0.1
 
         return {
-            'feature': feature_name,
-            'is_constant': is_constant,
-            'coefficient_variance': coef_variance,
-            'coefficient_mean': coef_mean,
-            'coefficient_of_variation': cv
+            "feature": feature_name,
+            "is_constant": is_constant,
+            "coefficient_variance": coef_variance,
+            "coefficient_mean": coef_mean,
+            "coefficient_of_variation": cv,
         }
 
 
@@ -197,18 +197,17 @@ class QuantileRegression:
         Returns:
             Check function value
         """
-        return np.sum(np.where(
-            residuals >= 0,
-            self.quantile * residuals,
-            (self.quantile - 1) * residuals
-        ))
+        return np.sum(
+            np.where(
+                residuals >= 0,
+                self.quantile * residuals,
+                (self.quantile - 1) * residuals,
+            )
+        )
 
     def fit(
-        self,
-        X: np.ndarray,
-        y: np.ndarray,
-        feature_names: Optional[List[str]] = None
-    ) -> 'QuantileRegression':
+        self, X: np.ndarray, y: np.ndarray, feature_names: Optional[List[str]] = None
+    ) -> "QuantileRegression":
         """
         Fit quantile regression.
 
@@ -240,11 +239,7 @@ class QuantileRegression:
         self.is_fitted = True
         return self
 
-    def _manual_fit(
-        self,
-        X: np.ndarray,
-        y: np.ndarray
-    ) -> np.ndarray:
+    def _manual_fit(self, X: np.ndarray, y: np.ndarray) -> np.ndarray:
         """
         Manual quantile regression using scipy.optimize.
 
@@ -255,6 +250,7 @@ class QuantileRegression:
         Returns:
             Coefficients
         """
+
         # Objective function
         def objective(beta):
             residuals = y - X @ beta
@@ -264,12 +260,7 @@ class QuantileRegression:
         beta_init = np.linalg.lstsq(X, y, rcond=None)[0]
 
         # Optimize
-        result = minimize(
-            objective,
-            beta_init,
-            method='SLSQP',
-            options={'disp': False}
-        )
+        result = minimize(objective, beta_init, method="SLSQP", options={"disp": False})
 
         return result.x
 
@@ -289,9 +280,7 @@ class QuantileRegression:
         return X @ self.coefficients_
 
     def get_result(
-        self,
-        X: Optional[np.ndarray] = None,
-        y: Optional[np.ndarray] = None
+        self, X: Optional[np.ndarray] = None, y: Optional[np.ndarray] = None
     ) -> QuantileRegressionResult:
         """
         Get detailed result object.
@@ -307,7 +296,11 @@ class QuantileRegression:
             raise ValueError("Model not fitted")
 
         fitted_values = self.predict(X) if X is not None else np.array([])
-        residuals = y - fitted_values if y is not None and len(fitted_values) > 0 else np.array([])
+        residuals = (
+            y - fitted_values
+            if y is not None and len(fitted_values) > 0
+            else np.array([])
+        )
 
         # Pseudo R²
         if len(residuals) > 0 and y is not None:
@@ -318,7 +311,7 @@ class QuantileRegression:
             pseudo_r2 = 0.0
 
         # Standard errors (if statsmodels available)
-        if STATSMODELS_AVAILABLE and hasattr(self, 'statsmodels_result_'):
+        if STATSMODELS_AVAILABLE and hasattr(self, "statsmodels_result_"):
             std_errors = self.statsmodels_result_.bse
             t_stats = self.statsmodels_result_.tvalues
             p_values = self.statsmodels_result_.pvalues
@@ -337,7 +330,9 @@ class QuantileRegression:
             p_values=p_values,
             pseudo_r2=pseudo_r2,
             n_obs=len(y) if y is not None else 0,
-            feature_names=self.feature_names_ if hasattr(self, 'feature_names_') else None
+            feature_names=(
+                self.feature_names_ if hasattr(self, "feature_names_") else None
+            ),
         )
 
         return result
@@ -353,10 +348,7 @@ class QuantileProcess:
     - Inter-quantile range
     """
 
-    def __init__(
-        self,
-        quantiles: Optional[List[float]] = None
-    ):
+    def __init__(self, quantiles: Optional[List[float]] = None):
         """
         Initialize quantile process.
 
@@ -373,11 +365,8 @@ class QuantileProcess:
         logger.info(f"QuantileProcess initialized with {len(quantiles)} quantiles")
 
     def fit(
-        self,
-        X: np.ndarray,
-        y: np.ndarray,
-        feature_names: Optional[List[str]] = None
-    ) -> 'QuantileProcess':
+        self, X: np.ndarray, y: np.ndarray, feature_names: Optional[List[str]] = None
+    ) -> "QuantileProcess":
         """
         Fit quantile regressions at all quantiles.
 
@@ -400,9 +389,7 @@ class QuantileProcess:
         return self
 
     def predict(
-        self,
-        X: np.ndarray,
-        quantile: Optional[float] = None
+        self, X: np.ndarray, quantile: Optional[float] = None
     ) -> Union[np.ndarray, Dict[float, np.ndarray]]:
         """
         Predict at specified quantile(s).
@@ -425,9 +412,7 @@ class QuantileProcess:
             return {q: model.predict(X) for q, model in self.models.items()}
 
     def get_results(
-        self,
-        X: Optional[np.ndarray] = None,
-        y: Optional[np.ndarray] = None
+        self, X: Optional[np.ndarray] = None, y: Optional[np.ndarray] = None
     ) -> QuantileProcessResult:
         """
         Get results for all quantiles.
@@ -442,21 +427,12 @@ class QuantileProcess:
         if not self.is_fitted:
             raise ValueError("Model not fitted")
 
-        results = [
-            self.models[q].get_result(X, y)
-            for q in self.quantiles
-        ]
+        results = [self.models[q].get_result(X, y) for q in self.quantiles]
 
-        return QuantileProcessResult(
-            quantiles=self.quantiles,
-            results=results
-        )
+        return QuantileProcessResult(quantiles=self.quantiles, results=results)
 
     def get_inter_quantile_range(
-        self,
-        X: np.ndarray,
-        lower_quantile: float = 0.25,
-        upper_quantile: float = 0.75
+        self, X: np.ndarray, lower_quantile: float = 0.25, upper_quantile: float = 0.75
     ) -> np.ndarray:
         """
         Calculate inter-quantile range.
@@ -489,10 +465,7 @@ class QuantileTreatmentEffect:
     Allows for heterogeneous treatment effects across ability levels.
     """
 
-    def __init__(
-        self,
-        quantiles: Optional[List[float]] = None
-    ):
+    def __init__(self, quantiles: Optional[List[float]] = None):
         """
         Initialize QTE estimator.
 
@@ -506,10 +479,7 @@ class QuantileTreatmentEffect:
         logger.info("QuantileTreatmentEffect initialized")
 
     def estimate(
-        self,
-        X: np.ndarray,
-        treatment: np.ndarray,
-        outcome: np.ndarray
+        self, X: np.ndarray, treatment: np.ndarray, outcome: np.ndarray
     ) -> Dict[float, float]:
         """
         Estimate QTE.
@@ -561,11 +531,11 @@ class QuantileTreatmentEffect:
         cv = effect_variance / (abs(effect_mean) + 1e-8)
 
         return {
-            'is_constant': cv < 0.1,
-            'effect_variance': effect_variance,
-            'effect_mean': effect_mean,
-            'coefficient_of_variation': cv,
-            'effects_by_quantile': self.qte_
+            "is_constant": cv < 0.1,
+            "effect_variance": effect_variance,
+            "effect_mean": effect_mean,
+            "coefficient_of_variation": cv,
+            "effects_by_quantile": self.qte_,
         }
 
 
@@ -573,7 +543,7 @@ def estimate_quantile_regression(
     X: np.ndarray,
     y: np.ndarray,
     quantiles: Union[float, List[float]] = 0.5,
-    feature_names: Optional[List[str]] = None
+    feature_names: Optional[List[str]] = None,
 ) -> Union[QuantileRegressionResult, QuantileProcessResult]:
     """
     Convenience function for quantile regression.
@@ -600,10 +570,10 @@ def estimate_quantile_regression(
 
 
 __all__ = [
-    'QuantileRegressionResult',
-    'QuantileProcessResult',
-    'QuantileRegression',
-    'QuantileProcess',
-    'QuantileTreatmentEffect',
-    'estimate_quantile_regression',
+    "QuantileRegressionResult",
+    "QuantileProcessResult",
+    "QuantileRegression",
+    "QuantileProcess",
+    "QuantileTreatmentEffect",
+    "estimate_quantile_regression",
 ]

@@ -36,7 +36,7 @@ sys.path.insert(0, str(project_root))
 from mcp_server.unified_secrets_manager import (
     load_secrets_hierarchical,
     get_secrets_manager,
-    get_health_status
+    get_health_status,
 )
 from mcp_server.betting.notifications import NotificationManager
 
@@ -54,31 +54,31 @@ def check_full_names(context: str, verbose: bool = False) -> bool:
 
     # Map context to naming convention
     context_map = {
-        'production': 'WORKFLOW',
-        'workflow': 'WORKFLOW',
-        'development': 'DEVELOPMENT',
-        'test': 'TEST'
+        "production": "WORKFLOW",
+        "workflow": "WORKFLOW",
+        "development": "DEVELOPMENT",
+        "test": "TEST",
     }
     context_suffix = context_map.get(context.lower(), context.upper())
 
     full_names = [
-        f'TWILIO_ACCOUNT_SID_NBA_MCP_SYNTHESIS_{context_suffix}',
-        f'TWILIO_AUTH_TOKEN_NBA_MCP_SYNTHESIS_{context_suffix}',
-        f'TWILIO_FROM_NUMBER_NBA_MCP_SYNTHESIS_{context_suffix}',
-        f'TWILIO_TO_NUMBERS_NBA_MCP_SYNTHESIS_{context_suffix}'
+        f"TWILIO_ACCOUNT_SID_NBA_MCP_SYNTHESIS_{context_suffix}",
+        f"TWILIO_AUTH_TOKEN_NBA_MCP_SYNTHESIS_{context_suffix}",
+        f"TWILIO_FROM_NUMBER_NBA_MCP_SYNTHESIS_{context_suffix}",
+        f"TWILIO_TO_NUMBERS_NBA_MCP_SYNTHESIS_{context_suffix}",
     ]
 
     all_present = True
     for name in full_names:
         value = os.getenv(name)
-        status = '✅' if value else '❌'
+        status = "✅" if value else "❌"
         print(f"  {status} {name}")
 
         if verbose and value:
             # Show partial value for verification
-            if 'TOKEN' in name or 'PASSWORD' in name:
+            if "TOKEN" in name or "PASSWORD" in name:
                 print(f"      Value: {value[:8]}...***")
-            elif 'NUMBER' in name:
+            elif "NUMBER" in name:
                 print(f"      Value: {value[:5]}...{value[-4:]}")
             else:
                 print(f"      Value: {value[:12]}...")
@@ -99,23 +99,23 @@ def check_aliases(verbose: bool = False) -> bool:
     print_section("Checking Short Name Aliases")
 
     short_names = [
-        'TWILIO_ACCOUNT_SID',
-        'TWILIO_AUTH_TOKEN',
-        'TWILIO_FROM_NUMBER',
-        'TWILIO_TO_NUMBERS'
+        "TWILIO_ACCOUNT_SID",
+        "TWILIO_AUTH_TOKEN",
+        "TWILIO_FROM_NUMBER",
+        "TWILIO_TO_NUMBERS",
     ]
 
     all_present = True
     for name in short_names:
         value = os.getenv(name)
-        status = '✅' if value else '❌'
+        status = "✅" if value else "❌"
         print(f"  {status} {name}")
 
         if verbose and value:
             # Show that alias points to correct value
-            if 'TOKEN' in name:
+            if "TOKEN" in name:
                 print(f"      Value: {value[:8]}...***")
-            elif 'NUMBER' in name:
+            elif "NUMBER" in name:
                 print(f"      Value: {value}")
             else:
                 print(f"      Value: {value[:12]}...")
@@ -137,17 +137,15 @@ def check_notifier_init() -> bool:
 
     try:
         # Try to initialize with SMS enabled
-        notifier = NotificationManager(config={
-            'sms': {'enabled': True}
-        })
+        notifier = NotificationManager(config={"sms": {"enabled": True}})
 
         # Check if SMS notifier was created
-        if 'sms' in notifier.notifiers:
+        if "sms" in notifier.notifiers:
             print(f"  ✅ NotificationManager initialized successfully")
             print(f"  ✅ SMS notifier created")
 
             # Show notifier details
-            sms_notifier = notifier.notifiers['sms']
+            sms_notifier = notifier.notifiers["sms"]
             print(f"\n  SMS Notifier Details:")
             print(f"    Account SID: {sms_notifier.account_sid[:12]}...")
             print(f"    From Number: {sms_notifier.from_number}")
@@ -168,25 +166,23 @@ def send_test_sms(context: str) -> bool:
     print_section("Sending Test SMS")
 
     try:
-        notifier = NotificationManager(config={
-            'sms': {'enabled': True}
-        })
+        notifier = NotificationManager(config={"sms": {"enabled": True}})
 
-        if 'sms' not in notifier.notifiers:
+        if "sms" not in notifier.notifiers:
             print(f"  ❌ SMS notifier not available")
             return False
 
         # Send test message
         message = f"Test SMS from NBA MCP Synthesis ({context} environment)"
         print(f"  📱 Sending test message...")
-        print(f"     Message: \"{message}\"")
+        print(f'     Message: "{message}"')
 
-        result = notifier.notifiers['sms'].send(message)
+        result = notifier.notifiers["sms"].send(message)
 
         if result.success:
             print(f"\n  ✅ SMS sent successfully!")
             if result.metadata:
-                sent_to = result.metadata.get('sent_to', [])
+                sent_to = result.metadata.get("sent_to", [])
                 print(f"     Sent to: {', '.join(sent_to)}")
             return True
         else:
@@ -213,7 +209,7 @@ def show_secrets_manager_health():
     manager = get_secrets_manager()
     secrets = manager.get_all_secrets()
 
-    twilio_secrets = [k for k in secrets.keys() if 'TWILIO' in k]
+    twilio_secrets = [k for k in secrets.keys() if "TWILIO" in k]
 
     if twilio_secrets:
         print(f"\n  TWILIO Secrets Found ({len(twilio_secrets)}):")
@@ -225,32 +221,30 @@ def show_secrets_manager_health():
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Test SMS integration with hierarchical secrets'
+        description="Test SMS integration with hierarchical secrets"
     )
     parser.add_argument(
-        '--context',
-        default='development',
-        choices=['production', 'development', 'test', 'workflow'],
-        help='Context to test (default: development)'
+        "--context",
+        default="development",
+        choices=["production", "development", "test", "workflow"],
+        help="Context to test (default: development)",
     )
     parser.add_argument(
-        '--send-sms',
-        action='store_true',
-        help='Actually send a test SMS'
+        "--send-sms", action="store_true", help="Actually send a test SMS"
     )
     parser.add_argument(
-        '--verbose',
-        '-v',
-        action='store_true',
-        help='Show verbose output including partial credential values'
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Show verbose output including partial credential values",
     )
 
     args = parser.parse_args()
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("  SMS Integration Test")
     print("  NBA MCP Synthesis - Hierarchical Secrets")
-    print("="*60)
+    print("=" * 60)
     print(f"\nContext: {args.context}")
     print(f"Project: nba-mcp-synthesis")
     print(f"Sport: NBA")
@@ -259,7 +253,7 @@ def main():
     print_section("Loading Secrets")
     print(f"  Loading secrets for {args.context} context...")
 
-    success = load_secrets_hierarchical('nba-mcp-synthesis', 'NBA', args.context)
+    success = load_secrets_hierarchical("nba-mcp-synthesis", "NBA", args.context)
 
     if not success:
         print(f"  ❌ Failed to load secrets")
@@ -273,20 +267,20 @@ def main():
     # Run tests
     results = {}
 
-    results['full_names'] = check_full_names(args.context, args.verbose)
-    results['aliases'] = check_aliases(args.verbose)
-    results['notifier_init'] = check_notifier_init()
+    results["full_names"] = check_full_names(args.context, args.verbose)
+    results["aliases"] = check_aliases(args.verbose)
+    results["notifier_init"] = check_notifier_init()
 
     if args.send_sms:
-        results['sms_send'] = send_test_sms(args.context)
+        results["sms_send"] = send_test_sms(args.context)
 
     # Summary
     print_section("Test Summary")
 
     all_passed = True
     for test_name, passed in results.items():
-        status = '✅' if passed else '❌'
-        test_label = test_name.replace('_', ' ').title()
+        status = "✅" if passed else "❌"
+        test_label = test_name.replace("_", " ").title()
         print(f"  {status} {test_label}")
         if not passed:
             all_passed = False
@@ -304,19 +298,21 @@ def main():
         print("❌ Some tests failed")
 
         print("\n🔧 Troubleshooting:")
-        if not results.get('full_names'):
+        if not results.get("full_names"):
             print("  - Check that credential files exist in hierarchical structure")
-            print(f"  - Expected directory: .../nba-mcp-synthesis/.env.nba_mcp_synthesis.{args.context}/")
+            print(
+                f"  - Expected directory: .../nba-mcp-synthesis/.env.nba_mcp_synthesis.{args.context}/"
+            )
 
-        if not results.get('aliases'):
+        if not results.get("aliases"):
             print("  - Verify unified_secrets_manager.py has TWILIO aliases")
             print("  - Check that load_secrets_hierarchical() completed successfully")
 
-        if not results.get('notifier_init'):
+        if not results.get("notifier_init"):
             print("  - Ensure twilio package is installed: pip install twilio")
             print("  - Verify credentials are valid")
 
-        if args.send_sms and not results.get('sms_send'):
+        if args.send_sms and not results.get("sms_send"):
             print("  - Check Twilio account status and balance")
             print("  - Verify phone numbers are in E.164 format (+12345678901)")
             print("  - For trial accounts, verify recipient is verified in Twilio")
@@ -324,5 +320,5 @@ def main():
         return 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

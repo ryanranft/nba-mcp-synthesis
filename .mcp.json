@@ -1,38 +1,32 @@
 {
   "mcpServers": {
     "nba-mcp-server": {
-      "command": "python3",
+      "command": "/Users/ryanranft/miniconda3/envs/mcp-synthesis/bin/python3",
       "args": [
-        "-m",
-        "mcp_server.fastmcp_server"
+        "/Users/ryanranft/nba-mcp-synthesis/mcp_server/server_simple.py"
       ],
-      "cwd": "/home/user/nba-mcp-synthesis",
+      "cwd": "/Users/ryanranft/nba-mcp-synthesis",
       "env": {
-        "PYTHONPATH": "/home/user/nba-mcp-synthesis",
-        "NBA_MCP_DEBUG": "false",
-        "NBA_MCP_LOG_LEVEL": "INFO"
+        "AWS_REGION": "us-east-1",
+        "S3_BUCKET": "nba-sim-raw-data-lake"
       }
     },
     "nba-ddl-server": {
-      "command": "python3",
+      "command": "/Users/ryanranft/miniconda3/envs/mcp-synthesis/bin/python3",
       "args": [
-        "-m",
-        "mcp_server.ddl_server"
+        "/Users/ryanranft/nba-simulator-aws/ddl_server_enhanced.py"
       ],
-      "cwd": "/home/user/nba-mcp-synthesis",
-      "env": {
-        "PYTHONPATH": "/home/user/nba-mcp-synthesis",
-        "NBA_MCP_DEBUG": "false",
-        "NBA_MCP_LOG_LEVEL": "INFO"
-      }
+      "cwd": "/Users/ryanranft/nba-simulator-aws",
+      "env": {}
     },
     "filesystem": {
       "command": "npx",
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "/home/user/nba-mcp-synthesis"
-      ]
+        "/Users/ryanranft"
+      ],
+      "env": {}
     }
   }
 }

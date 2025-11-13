@@ -31,7 +31,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from mcp_server.betting import BettingDecisionEngine, BayesianCalibrator
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 
 def load_calibration_data(data_path: str):
@@ -39,8 +39,8 @@ def load_calibration_data(data_path: str):
     print(f"Loading calibration data from {data_path}...")
     df = pd.read_csv(data_path)
 
-    sim_probs = df['sim_prob'].values
-    outcomes = df['outcome'].values
+    sim_probs = df["sim_prob"].values
+    outcomes = df["outcome"].values
 
     print(f"✓ Loaded {len(df)} predictions")
     print(f"  Home win rate: {outcomes.mean():.1%}")
@@ -49,7 +49,9 @@ def load_calibration_data(data_path: str):
     return sim_probs, outcomes, df
 
 
-def train_calibrator(sim_probs: np.ndarray, outcomes: np.ndarray, calibrator_type: str = 'bayesian'):
+def train_calibrator(
+    sim_probs: np.ndarray, outcomes: np.ndarray, calibrator_type: str = "bayesian"
+):
     """
     Train the Kelly Criterion calibrator.
 
@@ -69,7 +71,7 @@ def train_calibrator(sim_probs: np.ndarray, outcomes: np.ndarray, calibrator_typ
         calibrator_type=calibrator_type,
         fractional_kelly=0.25,  # Quarter Kelly (conservative)
         adaptive_fractions=True,  # Adjust based on uncertainty
-        max_kelly=0.40  # Maximum 40% of bankroll
+        max_kelly=0.40,  # Maximum 40% of bankroll
     )
 
     # Train calibrator
@@ -85,7 +87,7 @@ def evaluate_calibration(
     engine: BettingDecisionEngine,
     sim_probs: np.ndarray,
     outcomes: np.ndarray,
-    output_dir: Path
+    output_dir: Path,
 ):
     """Evaluate calibration quality and generate diagnostic plots."""
     print("\n" + "=" * 80)
@@ -94,9 +96,9 @@ def evaluate_calibration(
 
     # Generate calibrated probabilities
     print("\nGenerating calibrated probabilities...")
-    calibrated_probs = np.array([
-        engine.calibrator.calibrated_probability(p) for p in sim_probs
-    ])
+    calibrated_probs = np.array(
+        [engine.calibrator.calibrated_probability(p) for p in sim_probs]
+    )
 
     # Compute metrics
     brier_uncalibrated = brier_score_loss(outcomes, sim_probs)
@@ -105,10 +107,12 @@ def evaluate_calibration(
     print(f"\nBrier Scores:")
     print(f"  Uncalibrated: {brier_uncalibrated:.4f}")
     print(f"  Calibrated:   {brier_calibrated:.4f}")
-    print(f"  Improvement:  {(brier_uncalibrated - brier_calibrated):.4f} ({((brier_uncalibrated - brier_calibrated) / brier_uncalibrated * 100):.1f}%)")
+    print(
+        f"  Improvement:  {(brier_uncalibrated - brier_calibrated):.4f} ({((brier_uncalibrated - brier_calibrated) / brier_uncalibrated * 100):.1f}%)"
+    )
 
     # Calibration quality assessment
-    if hasattr(engine.calibrator, 'calibration_quality'):
+    if hasattr(engine.calibrator, "calibration_quality"):
         quality = engine.calibrator.calibration_quality()
         print(f"\nCalibration Quality Score: {quality:.4f}")
 
@@ -132,10 +136,12 @@ def evaluate_calibration(
         plot_uncertainty_analysis(engine.calibrator, sim_probs, output_dir)
 
     return {
-        'brier_uncalibrated': brier_uncalibrated,
-        'brier_calibrated': brier_calibrated,
-        'improvement': brier_uncalibrated - brier_calibrated,
-        'improvement_pct': (brier_uncalibrated - brier_calibrated) / brier_uncalibrated * 100
+        "brier_uncalibrated": brier_uncalibrated,
+        "brier_calibrated": brier_calibrated,
+        "improvement": brier_uncalibrated - brier_calibrated,
+        "improvement_pct": (brier_uncalibrated - brier_calibrated)
+        / brier_uncalibrated
+        * 100,
     }
 
 
@@ -143,12 +149,14 @@ def plot_calibration_comparison(
     sim_probs: np.ndarray,
     calibrated_probs: np.ndarray,
     outcomes: np.ndarray,
-    output_dir: Path
+    output_dir: Path,
 ):
     """Plot before/after calibration curves."""
     # Compute calibration curves
     prob_true_uncal, prob_pred_uncal = calibration_curve(outcomes, sim_probs, n_bins=10)
-    prob_true_cal, prob_pred_cal = calibration_curve(outcomes, calibrated_probs, n_bins=10)
+    prob_true_cal, prob_pred_cal = calibration_curve(
+        outcomes, calibrated_probs, n_bins=10
+    )
 
     # Compute Brier scores
     brier_uncal = brier_score_loss(outcomes, sim_probs)
@@ -156,29 +164,40 @@ def plot_calibration_comparison(
 
     plt.figure(figsize=(10, 8))
 
-    plt.plot([0, 1], [0, 1], 'k--', label='Perfect Calibration', linewidth=2)
-    plt.plot(prob_pred_uncal, prob_true_uncal, 'rs-',
-             label=f'Before Calibration (Brier: {brier_uncal:.4f})',
-             linewidth=2, markersize=8, alpha=0.7)
-    plt.plot(prob_pred_cal, prob_true_cal, 'go-',
-             label=f'After Calibration (Brier: {brier_cal:.4f})',
-             linewidth=2, markersize=8)
+    plt.plot([0, 1], [0, 1], "k--", label="Perfect Calibration", linewidth=2)
+    plt.plot(
+        prob_pred_uncal,
+        prob_true_uncal,
+        "rs-",
+        label=f"Before Calibration (Brier: {brier_uncal:.4f})",
+        linewidth=2,
+        markersize=8,
+        alpha=0.7,
+    )
+    plt.plot(
+        prob_pred_cal,
+        prob_true_cal,
+        "go-",
+        label=f"After Calibration (Brier: {brier_cal:.4f})",
+        linewidth=2,
+        markersize=8,
+    )
 
-    plt.xlabel('Predicted Probability', fontsize=13)
-    plt.ylabel('Actual Frequency', fontsize=13)
-    plt.title('Calibration Curve: Before vs After', fontsize=15, fontweight='bold')
-    plt.legend(fontsize=11, loc='best')
+    plt.xlabel("Predicted Probability", fontsize=13)
+    plt.ylabel("Actual Frequency", fontsize=13)
+    plt.title("Calibration Curve: Before vs After", fontsize=15, fontweight="bold")
+    plt.legend(fontsize=11, loc="best")
     plt.grid(alpha=0.3)
     plt.tight_layout()
 
-    plt.savefig(output_dir / 'calibration_comparison.png', dpi=150)
-    print(f"\n✓ Saved calibration comparison to {output_dir}/calibration_comparison.png")
+    plt.savefig(output_dir / "calibration_comparison.png", dpi=150)
+    print(
+        f"\n✓ Saved calibration comparison to {output_dir}/calibration_comparison.png"
+    )
 
 
 def plot_calibration_correction(
-    sim_probs: np.ndarray,
-    calibrated_probs: np.ndarray,
-    output_dir: Path
+    sim_probs: np.ndarray, calibrated_probs: np.ndarray, output_dir: Path
 ):
     """Plot how calibration corrects probabilities."""
     # Sort for smooth plotting
@@ -188,24 +207,32 @@ def plot_calibration_correction(
 
     plt.figure(figsize=(10, 8))
 
-    plt.plot([0, 1], [0, 1], 'k--', label='No Correction', linewidth=2)
-    plt.plot(sim_sorted, cal_sorted, 'b-', label='Calibration Function', linewidth=2)
+    plt.plot([0, 1], [0, 1], "k--", label="No Correction", linewidth=2)
+    plt.plot(sim_sorted, cal_sorted, "b-", label="Calibration Function", linewidth=2)
 
-    plt.fill_between(sim_sorted, sim_sorted, cal_sorted, alpha=0.2, color='blue',
-                     label='Correction Amount')
+    plt.fill_between(
+        sim_sorted,
+        sim_sorted,
+        cal_sorted,
+        alpha=0.2,
+        color="blue",
+        label="Correction Amount",
+    )
 
-    plt.xlabel('Uncalibrated Probability', fontsize=13)
-    plt.ylabel('Calibrated Probability', fontsize=13)
-    plt.title('Calibration Correction Function', fontsize=15, fontweight='bold')
-    plt.legend(fontsize=11, loc='best')
+    plt.xlabel("Uncalibrated Probability", fontsize=13)
+    plt.ylabel("Calibrated Probability", fontsize=13)
+    plt.title("Calibration Correction Function", fontsize=15, fontweight="bold")
+    plt.legend(fontsize=11, loc="best")
     plt.grid(alpha=0.3)
     plt.tight_layout()
 
-    plt.savefig(output_dir / 'calibration_correction.png', dpi=150)
+    plt.savefig(output_dir / "calibration_correction.png", dpi=150)
     print(f"✓ Saved calibration correction to {output_dir}/calibration_correction.png")
 
 
-def plot_uncertainty_analysis(calibrator: BayesianCalibrator, sim_probs: np.ndarray, output_dir: Path):
+def plot_uncertainty_analysis(
+    calibrator: BayesianCalibrator, sim_probs: np.ndarray, output_dir: Path
+):
     """Plot uncertainty estimates from Bayesian calibrator."""
     # Sample test probabilities
     test_probs = np.linspace(0.1, 0.9, 50)
@@ -224,22 +251,26 @@ def plot_uncertainty_analysis(calibrator: BayesianCalibrator, sim_probs: np.ndar
 
     plt.figure(figsize=(10, 8))
 
-    plt.plot(test_probs, calibrated, 'b-', linewidth=2, label='Calibrated Probability')
-    plt.fill_between(test_probs,
-                     calibrated - uncertainties,
-                     calibrated + uncertainties,
-                     alpha=0.3, color='blue', label='±1 Uncertainty')
+    plt.plot(test_probs, calibrated, "b-", linewidth=2, label="Calibrated Probability")
+    plt.fill_between(
+        test_probs,
+        calibrated - uncertainties,
+        calibrated + uncertainties,
+        alpha=0.3,
+        color="blue",
+        label="±1 Uncertainty",
+    )
 
-    plt.plot([0, 1], [0, 1], 'k--', alpha=0.5, label='Perfect Calibration')
+    plt.plot([0, 1], [0, 1], "k--", alpha=0.5, label="Perfect Calibration")
 
-    plt.xlabel('Simulation Probability', fontsize=13)
-    plt.ylabel('Calibrated Probability', fontsize=13)
-    plt.title('Bayesian Calibration with Uncertainty', fontsize=15, fontweight='bold')
-    plt.legend(fontsize=11, loc='best')
+    plt.xlabel("Simulation Probability", fontsize=13)
+    plt.ylabel("Calibrated Probability", fontsize=13)
+    plt.title("Bayesian Calibration with Uncertainty", fontsize=15, fontweight="bold")
+    plt.legend(fontsize=11, loc="best")
     plt.grid(alpha=0.3)
     plt.tight_layout()
 
-    plt.savefig(output_dir / 'bayesian_uncertainty.png', dpi=150)
+    plt.savefig(output_dir / "bayesian_uncertainty.png", dpi=150)
     print(f"✓ Saved uncertainty analysis to {output_dir}/bayesian_uncertainty.png")
 
 
@@ -254,7 +285,7 @@ def test_large_bet_criteria(engine: BettingDecisionEngine, output_dir: Path):
         (0.88, 2.2, 1.9),  # 88% prob, +120/-110 odds
         (0.90, 2.0, 1.95),  # 90% prob, Even/-105 odds
         (0.85, 2.5, 1.85),  # 85% prob, +150/-118 odds
-        (0.75, 1.8, 2.0),   # 75% prob, -125/+100 odds
+        (0.75, 1.8, 2.0),  # 75% prob, -125/+100 odds
     ]
 
     print("\nTesting criteria for 40% bet recommendation:")
@@ -264,39 +295,35 @@ def test_large_bet_criteria(engine: BettingDecisionEngine, output_dir: Path):
         result = engine.get_large_bet_criteria(sim_prob, home_odds, away_odds)
 
         print(f"\nSim Prob: {sim_prob:.1%}, Odds: {home_odds:.2f} / {away_odds:.2f}")
-        print(f"  Calibrated Prob: {result['criteria']['calibrated_prob']['value']:.1%}")
+        print(
+            f"  Calibrated Prob: {result['criteria']['calibrated_prob']['value']:.1%}"
+        )
         print(f"  Edge: {result['criteria']['edge']['value']:.1%}")
         print(f"  Uncertainty: {result['criteria']['uncertainty']['value']:.1%}")
         print(f"  Brier Score: {result['criteria']['calibration_brier']['value']:.4f}")
         print(f"  Safe for 40%: {'✓ YES' if result['safe_for_large_bet'] else '✗ NO'}")
-        if not result['safe_for_large_bet']:
+        if not result["safe_for_large_bet"]:
             print(f"  Reason: {result['reason']}")
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Train Kelly Criterion calibrator"
+    parser = argparse.ArgumentParser(description="Train Kelly Criterion calibrator")
+    parser.add_argument(
+        "--data",
+        default="data/calibration_training_data.csv",
+        help="Path to calibration training data CSV",
     )
     parser.add_argument(
-        '--data',
-        default='data/calibration_training_data.csv',
-        help='Path to calibration training data CSV'
+        "--calibrator-type",
+        default="bayesian",
+        choices=["bayesian", "isotonic"],
+        help="Type of calibrator to use",
     )
     parser.add_argument(
-        '--calibrator-type',
-        default='bayesian',
-        choices=['bayesian', 'isotonic'],
-        help='Type of calibrator to use'
+        "--output", default="models/", help="Output directory for calibrated model"
     )
     parser.add_argument(
-        '--output',
-        default='models/',
-        help='Output directory for calibrated model'
-    )
-    parser.add_argument(
-        '--plots-dir',
-        default='plots/',
-        help='Directory for diagnostic plots'
+        "--plots-dir", default="plots/", help="Directory for diagnostic plots"
     )
 
     args = parser.parse_args()
@@ -330,24 +357,24 @@ def main():
 
     # Save calibrated engine
     print(f"\nSaving calibrated engine to {output_dir}/calibrated_kelly_engine.pkl...")
-    with open(output_dir / 'calibrated_kelly_engine.pkl', 'wb') as f:
+    with open(output_dir / "calibrated_kelly_engine.pkl", "wb") as f:
         pickle.dump(engine, f)
     print("✓ Saved successfully")
 
     # Save metadata
     metadata = {
-        'training_date': datetime.now().isoformat(),
-        'calibrator_type': args.calibrator_type,
-        'training_samples': len(sim_probs),
-        'brier_uncalibrated': metrics['brier_uncalibrated'],
-        'brier_calibrated': metrics['brier_calibrated'],
-        'improvement': metrics['improvement'],
-        'improvement_pct': metrics['improvement_pct'],
-        'fractional_kelly': engine.fractional_kelly,
-        'max_kelly': engine.kelly_calc.max_kelly
+        "training_date": datetime.now().isoformat(),
+        "calibrator_type": args.calibrator_type,
+        "training_samples": len(sim_probs),
+        "brier_uncalibrated": metrics["brier_uncalibrated"],
+        "brier_calibrated": metrics["brier_calibrated"],
+        "improvement": metrics["improvement"],
+        "improvement_pct": metrics["improvement_pct"],
+        "fractional_kelly": engine.fractional_kelly,
+        "max_kelly": engine.kelly_calc.max_kelly,
     }
 
-    with open(output_dir / 'calibrator_metadata.json', 'w') as f:
+    with open(output_dir / "calibrator_metadata.json", "w") as f:
         json.dump(metadata, f, indent=2)
     print(f"✓ Saved metadata to {output_dir}/calibrator_metadata.json")
 
@@ -355,14 +382,16 @@ def main():
     print("\n" + "=" * 80)
     print("Calibrator Training Complete!")
     print("=" * 80)
-    print(f"Brier Score Improvement: {metrics['improvement']:.4f} ({metrics['improvement_pct']:.1f}%)")
+    print(
+        f"Brier Score Improvement: {metrics['improvement']:.4f} ({metrics['improvement_pct']:.1f}%)"
+    )
     print(f"Final Brier Score: {metrics['brier_calibrated']:.4f}")
 
-    if metrics['brier_calibrated'] < 0.06:
+    if metrics["brier_calibrated"] < 0.06:
         print("\n✓ EXCELLENT calibration - Ready for production!")
-    elif metrics['brier_calibrated'] < 0.10:
+    elif metrics["brier_calibrated"] < 0.10:
         print("\n✓ GOOD calibration - Safe for betting")
-    elif metrics['brier_calibrated'] < 0.15:
+    elif metrics["brier_calibrated"] < 0.15:
         print("\n⚠ ACCEPTABLE calibration - Use with caution")
     else:
         print("\n❌ POOR calibration - Consider collecting more data")
@@ -373,5 +402,5 @@ def main():
     print(f"  3. Review calibration plots in {plots_dir}/")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

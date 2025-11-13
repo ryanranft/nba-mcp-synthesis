@@ -12,7 +12,7 @@ from mcp_server.profiling.performance import (
     profile,
     profile_async,
     ProfileResult,
-    get_profiler
+    get_profiler,
 )
 
 
@@ -23,17 +23,13 @@ class TestPerformanceProfiler:
     def profiler(self):
         """Create profiler instance"""
         return PerformanceProfiler(
-            enabled=True,
-            track_memory=False,
-            slow_threshold_ms=50.0
+            enabled=True, track_memory=False, slow_threshold_ms=50.0
         )
 
     def test_profiler_initialization(self):
         """Test profiler initializes correctly"""
         profiler = PerformanceProfiler(
-            enabled=True,
-            track_memory=True,
-            slow_threshold_ms=100.0
+            enabled=True, track_memory=True, slow_threshold_ms=100.0
         )
 
         assert profiler.enabled is True
@@ -43,10 +39,7 @@ class TestPerformanceProfiler:
 
     def test_record_profile_result(self, profiler):
         """Test recording profile results"""
-        result = ProfileResult(
-            function_name="test.function",
-            execution_time_ms=25.5
-        )
+        result = ProfileResult(function_name="test.function", execution_time_ms=25.5)
 
         profiler.record(result)
 
@@ -60,8 +53,7 @@ class TestPerformanceProfiler:
         # Record multiple results
         for i in range(5):
             result = ProfileResult(
-                function_name="test.function",
-                execution_time_ms=10.0 + i
+                function_name="test.function", execution_time_ms=10.0 + i
             )
             profiler.record(result)
 
@@ -85,14 +77,13 @@ class TestPerformanceProfiler:
             ("fast.function", 5.0),
             ("medium.function", 25.0),
             ("slow.function", 100.0),
-            ("very_slow.function", 200.0)
+            ("very_slow.function", 200.0),
         ]
 
         for func_name, exec_time in functions:
             for _ in range(3):
                 result = ProfileResult(
-                    function_name=func_name,
-                    execution_time_ms=exec_time
+                    function_name=func_name, execution_time_ms=exec_time
                 )
                 profiler.record(result)
 
@@ -137,8 +128,7 @@ class TestPerformanceProfiler:
             profiler.record(ProfileResult("slow.rare", 150.0))
 
         bottlenecks = profiler.identify_bottlenecks(
-            time_threshold_ms=50.0,
-            call_threshold=10
+            time_threshold_ms=50.0, call_threshold=10
         )
 
         # Only bottleneck.function should be identified
@@ -198,6 +188,7 @@ class TestProfileDecorator:
 
     def test_profile_simple_function(self, test_profiler):
         """Test profiling a simple function"""
+
         @profile(profiler=test_profiler)
         def simple_function(x):
             return x * 2
@@ -213,6 +204,7 @@ class TestProfileDecorator:
 
     def test_profile_with_execution_time(self, test_profiler):
         """Test that execution time is tracked"""
+
         @profile(profiler=test_profiler)
         def slow_function():
             time.sleep(0.05)  # 50ms
@@ -228,6 +220,7 @@ class TestProfileDecorator:
 
     def test_profile_multiple_calls(self, test_profiler):
         """Test profiling multiple calls to same function"""
+
         @profile(profiler=test_profiler)
         def add_numbers(a, b):
             return a + b
@@ -242,6 +235,7 @@ class TestProfileDecorator:
 
     def test_profile_with_exception(self, test_profiler):
         """Test that profiling works even if function raises exception"""
+
         @profile(profiler=test_profiler)
         def failing_function():
             raise ValueError("Test error")
@@ -254,6 +248,7 @@ class TestProfileDecorator:
 
     def test_profile_decorator_without_parentheses(self, test_profiler):
         """Test using @profile without parentheses"""
+
         @profile
         def simple_func():
             return 42
@@ -267,6 +262,7 @@ class TestProfileDecorator:
 
     def test_profile_with_memory_tracking(self, test_profiler):
         """Test profiling with memory tracking enabled"""
+
         @profile(profiler=test_profiler, track_memory=True)
         def memory_function():
             # Allocate some memory
@@ -295,6 +291,7 @@ class TestProfileAsyncDecorator:
     @pytest.mark.asyncio
     async def test_profile_async_function(self, test_profiler):
         """Test profiling async function"""
+
         @profile_async(profiler=test_profiler)
         async def async_function(x):
             await asyncio.sleep(0.01)
@@ -308,6 +305,7 @@ class TestProfileAsyncDecorator:
     @pytest.mark.asyncio
     async def test_profile_async_execution_time(self, test_profiler):
         """Test that async execution time is tracked"""
+
         @profile_async(profiler=test_profiler)
         async def slow_async_function():
             await asyncio.sleep(0.05)  # 50ms
@@ -324,6 +322,7 @@ class TestProfileAsyncDecorator:
     @pytest.mark.asyncio
     async def test_profile_async_multiple_calls(self, test_profiler):
         """Test profiling multiple async calls"""
+
         @profile_async(profiler=test_profiler)
         async def async_add(a, b):
             await asyncio.sleep(0.001)

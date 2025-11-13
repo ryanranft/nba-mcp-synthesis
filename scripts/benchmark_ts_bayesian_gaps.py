@@ -244,7 +244,9 @@ def run_benchmark():
     try:
         bayes = BayesianAnalyzer(data=bayes_data, target="y_scaled")
         bayes.build_simple_model(formula="y_scaled ~ x1 + x2")
-        bayes_result = bayes.sample_posterior(draws=100, tune=50, chains=2)  # Small for speed
+        bayes_result = bayes.sample_posterior(
+            draws=100, tune=50, chains=2
+        )  # Small for speed
         print("✓")
         model_fitted = True
     except Exception as e:
@@ -265,7 +267,9 @@ def run_benchmark():
         # Test LOO
         results.append(
             benchmark_method(
-                "LOO (Leave-One-Out Cross-Validation)", lambda: bayes.loo(bayes_result), "Bayesian"
+                "LOO (Leave-One-Out Cross-Validation)",
+                lambda: bayes.loo(bayes_result),
+                "Bayesian",
             )
         )
 

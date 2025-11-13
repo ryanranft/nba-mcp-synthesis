@@ -80,6 +80,7 @@ from pathlib import Path
 
 class BetStatus(str, Enum):
     """Status of a paper bet"""
+
     PENDING = "pending"
     WON = "won"
     LOST = "lost"
@@ -89,6 +90,7 @@ class BetStatus(str, Enum):
 
 class BetType(str, Enum):
     """Type of bet (home or away)"""
+
     HOME = "home"
     AWAY = "away"
 
@@ -100,6 +102,7 @@ class PaperBet:
 
     Tracks all metadata needed for performance analysis and CLV tracking.
     """
+
     bet_id: str
     timestamp: datetime
     game_id: str
@@ -127,17 +130,17 @@ class PaperBet:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization"""
         d = asdict(self)
-        d['timestamp'] = self.timestamp.isoformat()
-        d['bet_type'] = self.bet_type.value
-        d['status'] = self.status.value
+        d["timestamp"] = self.timestamp.isoformat()
+        d["bet_type"] = self.bet_type.value
+        d["status"] = self.status.value
         return d
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> 'PaperBet':
+    def from_dict(cls, d: Dict[str, Any]) -> "PaperBet":
         """Create from dictionary"""
-        d['timestamp'] = datetime.fromisoformat(d['timestamp'])
-        d['bet_type'] = BetType(d['bet_type'])
-        d['status'] = BetStatus(d['status'])
+        d["timestamp"] = datetime.fromisoformat(d["timestamp"])
+        d["bet_type"] = BetType(d["bet_type"])
+        d["status"] = BetStatus(d["status"])
         return cls(**d)
 
 
@@ -186,7 +189,8 @@ class PaperBettingDatabase:
         cursor = conn.cursor()
 
         # Bets table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS bets (
                 bet_id TEXT PRIMARY KEY,
                 timestamp TEXT NOT NULL,
@@ -206,10 +210,12 @@ class PaperBettingDatabase:
                 bankroll_at_bet REAL,
                 notes TEXT
             )
-        """)
+        """
+        )
 
         # Bankroll history table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS bankroll_history (
                 timestamp TEXT PRIMARY KEY,
                 bankroll REAL NOT NULL,
@@ -218,10 +224,13 @@ class PaperBettingDatabase:
                 total_lost INTEGER NOT NULL,
                 total_profit_loss REAL NOT NULL
             )
-        """)
+        """
+        )
 
         # Indices for common queries
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_bets_timestamp ON bets(timestamp)")
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_bets_timestamp ON bets(timestamp)"
+        )
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_bets_game_id ON bets(game_id)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_bets_status ON bets(status)")
 
@@ -233,29 +242,32 @@ class PaperBettingDatabase:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT OR REPLACE INTO bets VALUES (
                 ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
-        """, (
-            bet.bet_id,
-            bet.timestamp.isoformat(),
-            bet.game_id,
-            bet.bet_type.value,
-            bet.amount,
-            bet.odds,
-            bet.sim_prob,
-            bet.edge,
-            bet.status.value,
-            bet.outcome,
-            bet.payout,
-            bet.profit_loss,
-            bet.closing_odds,
-            bet.clv,
-            bet.kelly_fraction,
-            bet.bankroll_at_bet,
-            bet.notes
-        ))
+        """,
+            (
+                bet.bet_id,
+                bet.timestamp.isoformat(),
+                bet.game_id,
+                bet.bet_type.value,
+                bet.amount,
+                bet.odds,
+                bet.sim_prob,
+                bet.edge,
+                bet.status.value,
+                bet.outcome,
+                bet.payout,
+                bet.profit_loss,
+                bet.closing_odds,
+                bet.clv,
+                bet.kelly_fraction,
+                bet.bankroll_at_bet,
+                bet.notes,
+            ),
+        )
 
         conn.commit()
         conn.close()
@@ -281,7 +293,10 @@ class PaperBettingDatabase:
         cursor = conn.cursor()
 
         if status:
-            cursor.execute("SELECT * FROM bets WHERE status = ? ORDER BY timestamp DESC", (status.value,))
+            cursor.execute(
+                "SELECT * FROM bets WHERE status = ? ORDER BY timestamp DESC",
+                (status.value,),
+            )
         else:
             cursor.execute("SELECT * FROM bets ORDER BY timestamp DESC")
 
@@ -294,22 +309,31 @@ class PaperBettingDatabase:
         """Get all pending bets"""
         return self.get_all_bets(status=BetStatus.PENDING)
 
-    def save_bankroll_snapshot(self, bankroll: float, total_bets: int,
-                                 total_won: int, total_lost: int, total_pl: float):
+    def save_bankroll_snapshot(
+        self,
+        bankroll: float,
+        total_bets: int,
+        total_won: int,
+        total_lost: int,
+        total_pl: float,
+    ):
         """Save a bankroll snapshot"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT OR REPLACE INTO bankroll_history VALUES (?, ?, ?, ?, ?, ?)
-        """, (
-            datetime.now().isoformat(),
-            bankroll,
-            total_bets,
-            total_won,
-            total_lost,
-            total_pl
-        ))
+        """,
+            (
+                datetime.now().isoformat(),
+                bankroll,
+                total_bets,
+                total_won,
+                total_lost,
+                total_pl,
+            ),
+        )
 
         conn.commit()
         conn.close()
@@ -320,11 +344,14 @@ class PaperBettingDatabase:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT * FROM bankroll_history
             ORDER BY timestamp DESC
             LIMIT ?
-        """, (limit,))
+        """,
+            (limit,),
+        )
 
         rows = cursor.fetchall()
         conn.close()
@@ -334,23 +361,23 @@ class PaperBettingDatabase:
     def _row_to_bet(self, row: sqlite3.Row) -> PaperBet:
         """Convert database row to PaperBet"""
         return PaperBet(
-            bet_id=row['bet_id'],
-            timestamp=datetime.fromisoformat(row['timestamp']),
-            game_id=row['game_id'],
-            bet_type=BetType(row['bet_type']),
-            amount=row['amount'],
-            odds=row['odds'],
-            sim_prob=row['sim_prob'],
-            edge=row['edge'],
-            status=BetStatus(row['status']),
-            outcome=row['outcome'],
-            payout=row['payout'],
-            profit_loss=row['profit_loss'],
-            closing_odds=row['closing_odds'],
-            clv=row['clv'],
-            kelly_fraction=row['kelly_fraction'],
-            bankroll_at_bet=row['bankroll_at_bet'],
-            notes=row['notes']
+            bet_id=row["bet_id"],
+            timestamp=datetime.fromisoformat(row["timestamp"]),
+            game_id=row["game_id"],
+            bet_type=BetType(row["bet_type"]),
+            amount=row["amount"],
+            odds=row["odds"],
+            sim_prob=row["sim_prob"],
+            edge=row["edge"],
+            status=BetStatus(row["status"]),
+            outcome=row["outcome"],
+            payout=row["payout"],
+            profit_loss=row["profit_loss"],
+            closing_odds=row["closing_odds"],
+            clv=row["clv"],
+            kelly_fraction=row["kelly_fraction"],
+            bankroll_at_bet=row["bankroll_at_bet"],
+            notes=row["notes"],
         )
 
 
@@ -367,7 +394,7 @@ class PaperTradingEngine:
         starting_bankroll: float = 10000.0,
         db_path: str = "data/paper_trades.db",
         max_bet_pct: float = 0.10,  # Max 10% of bankroll per bet
-        min_bet: float = 10.0
+        min_bet: float = 10.0,
     ):
         """
         Initialize paper trading engine
@@ -390,7 +417,8 @@ class PaperTradingEngine:
     def _restore_bankroll_state(self):
         """Restore bankroll from database"""
         settled_bets = [
-            bet for bet in self.db.get_all_bets()
+            bet
+            for bet in self.db.get_all_bets()
             if bet.status in (BetStatus.WON, BetStatus.LOST, BetStatus.PUSHED)
         ]
 
@@ -401,13 +429,13 @@ class PaperTradingEngine:
     def place_bet(
         self,
         game_id: str,
-        bet_type: Literal['home', 'away'],
+        bet_type: Literal["home", "away"],
         amount: float,
         odds: float,
         sim_prob: float,
         edge: float,
         kelly_fraction: Optional[float] = None,
-        notes: Optional[str] = None
+        notes: Optional[str] = None,
     ) -> PaperBet:
         """
         Place a paper bet
@@ -431,13 +459,19 @@ class PaperTradingEngine:
         # Validate bet amount
         max_bet = self.current_bankroll * self.max_bet_pct
         if amount > max_bet:
-            raise ValueError(f"Bet amount ${amount:.2f} exceeds max ${max_bet:.2f} ({self.max_bet_pct:.0%} of bankroll)")
+            raise ValueError(
+                f"Bet amount ${amount:.2f} exceeds max ${max_bet:.2f} ({self.max_bet_pct:.0%} of bankroll)"
+            )
 
         if amount < self.min_bet:
-            raise ValueError(f"Bet amount ${amount:.2f} below minimum ${self.min_bet:.2f}")
+            raise ValueError(
+                f"Bet amount ${amount:.2f} below minimum ${self.min_bet:.2f}"
+            )
 
         if amount > self.current_bankroll:
-            raise ValueError(f"Bet amount ${amount:.2f} exceeds current bankroll ${self.current_bankroll:.2f}")
+            raise ValueError(
+                f"Bet amount ${amount:.2f} exceeds current bankroll ${self.current_bankroll:.2f}"
+            )
 
         # Create bet
         bet_id = f"{game_id}_{bet_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -453,7 +487,7 @@ class PaperTradingEngine:
             status=BetStatus.PENDING,
             kelly_fraction=kelly_fraction,
             bankroll_at_bet=self.current_bankroll,
-            notes=notes
+            notes=notes,
         )
 
         # Save to database
@@ -468,8 +502,8 @@ class PaperTradingEngine:
     def settle_bet(
         self,
         bet_id: str,
-        outcome: Literal['win', 'loss', 'push'],
-        closing_odds: Optional[float] = None
+        outcome: Literal["win", "loss", "push"],
+        closing_odds: Optional[float] = None,
     ) -> PaperBet:
         """
         Settle a paper bet and update bankroll
@@ -494,15 +528,15 @@ class PaperTradingEngine:
             raise ValueError(f"Bet {bet_id} already settled with status {bet.status}")
 
         # Calculate payout and profit/loss
-        if outcome == 'win':
+        if outcome == "win":
             bet.status = BetStatus.WON
             bet.payout = bet.amount * bet.odds
             bet.profit_loss = bet.payout - bet.amount
-        elif outcome == 'loss':
+        elif outcome == "loss":
             bet.status = BetStatus.LOST
             bet.payout = 0
             bet.profit_loss = -bet.amount
-        elif outcome == 'push':
+        elif outcome == "push":
             bet.status = BetStatus.PUSHED
             bet.payout = bet.amount
             bet.profit_loss = 0
@@ -529,10 +563,10 @@ class PaperTradingEngine:
         stats = self.get_performance_stats()
         self.db.save_bankroll_snapshot(
             bankroll=self.current_bankroll,
-            total_bets=stats['total_bets'],
-            total_won=stats['total_won'],
-            total_lost=stats['total_lost'],
-            total_pl=stats['total_profit_loss']
+            total_bets=stats["total_bets"],
+            total_won=stats["total_won"],
+            total_lost=stats["total_lost"],
+            total_pl=stats["total_profit_loss"],
         )
 
         return bet
@@ -556,29 +590,30 @@ class PaperTradingEngine:
         """
         all_bets = self.db.get_all_bets()
         settled_bets = [
-            bet for bet in all_bets
+            bet
+            for bet in all_bets
             if bet.status in (BetStatus.WON, BetStatus.LOST, BetStatus.PUSHED)
         ]
 
         if not settled_bets:
             return {
-                'total_bets': 0,
-                'total_won': 0,
-                'total_lost': 0,
-                'total_pushed': 0,
-                'win_rate': 0,
-                'roi': 0,
-                'total_profit_loss': 0,
-                'total_staked': 0,
-                'avg_bet': 0,
-                'avg_odds': 0,
-                'avg_edge': 0,
-                'avg_clv': 0,
-                'sharpe_ratio': 0,
-                'max_drawdown': 0,
-                'current_streak': 0,
-                'bankroll': self.current_bankroll,
-                'bankroll_change_pct': 0
+                "total_bets": 0,
+                "total_won": 0,
+                "total_lost": 0,
+                "total_pushed": 0,
+                "win_rate": 0,
+                "roi": 0,
+                "total_profit_loss": 0,
+                "total_staked": 0,
+                "avg_bet": 0,
+                "avg_odds": 0,
+                "avg_edge": 0,
+                "avg_clv": 0,
+                "sharpe_ratio": 0,
+                "max_drawdown": 0,
+                "current_streak": 0,
+                "bankroll": self.current_bankroll,
+                "bankroll_change_pct": 0,
             }
 
         # Basic stats
@@ -601,14 +636,20 @@ class PaperTradingEngine:
         avg_clv = np.mean([bet.clv for bet in clv_bets]) if clv_bets else 0
 
         # Sharpe ratio (risk-adjusted return)
-        returns = [bet.profit_loss / bet.amount for bet in settled_bets if bet.amount > 0]
+        returns = [
+            bet.profit_loss / bet.amount for bet in settled_bets if bet.amount > 0
+        ]
         if len(returns) > 1:
-            sharpe_ratio = np.mean(returns) / np.std(returns) * np.sqrt(252)  # Annualized
+            sharpe_ratio = (
+                np.mean(returns) / np.std(returns) * np.sqrt(252)
+            )  # Annualized
         else:
             sharpe_ratio = 0
 
         # Max drawdown
-        cumulative_pls = np.cumsum([bet.profit_loss for bet in settled_bets if bet.profit_loss])
+        cumulative_pls = np.cumsum(
+            [bet.profit_loss for bet in settled_bets if bet.profit_loss]
+        )
         if len(cumulative_pls) > 0:
             running_max = np.maximum.accumulate(cumulative_pls)
             drawdowns = cumulative_pls - running_max
@@ -629,21 +670,22 @@ class PaperTradingEngine:
                     break
 
         return {
-            'total_bets': len(settled_bets),
-            'total_won': total_won,
-            'total_lost': total_lost,
-            'total_pushed': total_pushed,
-            'win_rate': win_rate,
-            'roi': roi,
-            'total_profit_loss': total_pl,
-            'total_staked': total_staked,
-            'avg_bet': avg_bet,
-            'avg_odds': avg_odds,
-            'avg_edge': avg_edge,
-            'avg_clv': avg_clv,
-            'sharpe_ratio': sharpe_ratio,
-            'max_drawdown': max_drawdown,
-            'current_streak': current_streak,
-            'bankroll': self.current_bankroll,
-            'bankroll_change_pct': (self.current_bankroll - self.starting_bankroll) / self.starting_bankroll
+            "total_bets": len(settled_bets),
+            "total_won": total_won,
+            "total_lost": total_lost,
+            "total_pushed": total_pushed,
+            "win_rate": win_rate,
+            "roi": roi,
+            "total_profit_loss": total_pl,
+            "total_staked": total_staked,
+            "avg_bet": avg_bet,
+            "avg_odds": avg_odds,
+            "avg_edge": avg_edge,
+            "avg_clv": avg_clv,
+            "sharpe_ratio": sharpe_ratio,
+            "max_drawdown": max_drawdown,
+            "current_streak": current_streak,
+            "bankroll": self.current_bankroll,
+            "bankroll_change_pct": (self.current_bankroll - self.starting_bankroll)
+            / self.starting_bankroll,
         }

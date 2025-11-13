@@ -78,7 +78,7 @@ from datetime import datetime, timedelta, date
 from typing import List, Dict, Any, Optional, Tuple
 
 # Add project root to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from mcp_server.betting.paper_trading import PaperTradingEngine, PaperBet, BetStatus
 from mcp_server.unified_secrets_manager import load_secrets_hierarchical
@@ -86,7 +86,9 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 
 
-def fetch_completed_games(db_conn, game_date: Optional[str] = None) -> List[Dict[str, Any]]:
+def fetch_completed_games(
+    db_conn, game_date: Optional[str] = None
+) -> List[Dict[str, Any]]:
     """
     Fetch completed games from NBA database
 
@@ -122,7 +124,7 @@ def fetch_completed_games(db_conn, game_date: Optional[str] = None) -> List[Dict
         cursor.execute(query, (game_date,))
     else:
         # Get games from yesterday and today
-        yesterday = (date.today() - timedelta(days=1)).strftime('%Y-%m-%d')
+        yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
         query = """
             SELECT
                 g.game_id,
@@ -148,7 +150,9 @@ def fetch_completed_games(db_conn, game_date: Optional[str] = None) -> List[Dict
     return [dict(game) for game in games]
 
 
-def match_bet_to_game(bet: PaperBet, games: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+def match_bet_to_game(
+    bet: PaperBet, games: List[Dict[str, Any]]
+) -> Optional[Dict[str, Any]]:
     """
     Match a paper bet to a completed game
 
@@ -165,14 +169,14 @@ def match_bet_to_game(bet: PaperBet, games: List[Dict[str, Any]]) -> Optional[Di
 
     for game in games:
         # Try to match by team names in bet ID
-        home_team = game['home_team_name'].replace(' ', '_')
-        away_team = game['away_team_name'].replace(' ', '_')
+        home_team = game["home_team_name"].replace(" ", "_")
+        away_team = game["away_team_name"].replace(" ", "_")
 
         if home_team in bet_id and away_team in bet_id:
             return game
 
         # Also try abbreviations
-        if game['home_team_abbr'] in bet_id and game['away_team_abbr'] in bet_id:
+        if game["home_team_abbr"] in bet_id and game["away_team_abbr"] in bet_id:
             return game
 
     return None
@@ -189,20 +193,20 @@ def determine_outcome(bet: PaperBet, game: Dict[str, Any]) -> str:
     Returns:
         'win', 'loss', or 'push'
     """
-    home_score = game['home_team_pts']
-    away_score = game['away_team_pts']
+    home_score = game["home_team_pts"]
+    away_score = game["away_team_pts"]
 
     if home_score == away_score:
-        return 'push'  # Tie (rare in NBA but possible in spreads)
+        return "push"  # Tie (rare in NBA but possible in spreads)
 
     # Determine winner
     home_won = home_score > away_score
 
     # Check if bet won
-    if bet.bet_type.value == 'home':
-        return 'win' if home_won else 'loss'
+    if bet.bet_type.value == "home":
+        return "win" if home_won else "loss"
     else:  # away
-        return 'win' if not home_won else 'loss'
+        return "win" if not home_won else "loss"
 
 
 def get_closing_odds(game: Dict[str, Any], bet_type: str) -> Optional[float]:
@@ -225,12 +229,13 @@ def get_closing_odds(game: Dict[str, Any], bet_type: str) -> Optional[float]:
 
     # Mock implementation: closing odds = opening +/- 2-5%
     import random
-    random.seed(game['game_id'])
+
+    random.seed(game["game_id"])
     variation = random.uniform(-0.05, 0.05)
 
     # Estimate opening odds from game outcome
     # (In production, you'd store opening odds with the bet)
-    if bet_type == 'home':
+    if bet_type == "home":
         estimated_opening = 1.90
     else:
         estimated_opening = 2.00
@@ -244,7 +249,7 @@ def process_bet_outcome(
     bet: PaperBet,
     game: Dict[str, Any],
     verbose: bool = False,
-    dry_run: bool = False
+    dry_run: bool = False,
 ) -> Dict[str, Any]:
     """
     Process outcome for a single bet
@@ -260,68 +265,73 @@ def process_bet_outcome(
         Result dictionary with processing info
     """
     result = {
-        'bet_id': bet.bet_id,
-        'game_id': game['game_id'],
-        'success': False,
-        'outcome': None,
-        'profit_loss': 0,
-        'clv': None
+        "bet_id": bet.bet_id,
+        "game_id": game["game_id"],
+        "success": False,
+        "outcome": None,
+        "profit_loss": 0,
+        "clv": None,
     }
 
     try:
         # Determine outcome
         outcome = determine_outcome(bet, game)
-        result['outcome'] = outcome
+        result["outcome"] = outcome
 
         # Get closing odds
         closing_odds = get_closing_odds(game, bet.bet_type.value)
 
         # Calculate profit/loss
-        if outcome == 'win':
+        if outcome == "win":
             payout = bet.amount * bet.odds
             profit_loss = payout - bet.amount
-        elif outcome == 'loss':
+        elif outcome == "loss":
             profit_loss = -bet.amount
         else:  # push
             profit_loss = 0
 
-        result['profit_loss'] = profit_loss
-        result['closing_odds'] = closing_odds
+        result["profit_loss"] = profit_loss
+        result["closing_odds"] = closing_odds
 
         # Verbose output
         if verbose:
             print(f"\nBet ID: {bet.bet_id}")
             print(f"Game: {game['home_team_name']} vs {game['away_team_name']}")
-            print(f"Score: {game['home_team_name']} {game['home_team_pts']}, "
-                  f"{game['away_team_name']} {game['away_team_pts']}")
-            print(f"Bet: ${bet.amount:.2f} on {bet.bet_type.value.upper()} at {bet.odds:.2f}")
+            print(
+                f"Score: {game['home_team_name']} {game['home_team_pts']}, "
+                f"{game['away_team_name']} {game['away_team_pts']}"
+            )
+            print(
+                f"Bet: ${bet.amount:.2f} on {bet.bet_type.value.upper()} at {bet.odds:.2f}"
+            )
             print(f"Outcome: {outcome.upper()}")
             print(f"Profit/Loss: ${profit_loss:+.2f}")
             if closing_odds:
                 print(f"Closing odds: {closing_odds:.2f}")
                 clv = (closing_odds - bet.odds) / bet.odds
                 print(f"CLV: {clv:+.1%}")
-                result['clv'] = clv
+                result["clv"] = clv
 
         # Settle bet (unless dry run)
         if not dry_run:
             paper_engine.settle_bet(
-                bet_id=bet.bet_id,
-                outcome=outcome,
-                closing_odds=closing_odds
+                bet_id=bet.bet_id, outcome=outcome, closing_odds=closing_odds
             )
 
-        result['success'] = True
+        result["success"] = True
 
     except Exception as e:
         print(f"❌ Error processing bet {bet.bet_id}: {e}")
-        result['error'] = str(e)
+        result["error"] = str(e)
 
     return result
 
 
-def update_calibrator(paper_engine: PaperTradingEngine, processed_bets: List[Dict[str, Any]],
-                       dry_run: bool = False):
+def update_calibrator(
+    paper_engine: PaperTradingEngine,
+    processed_bets: List[Dict[str, Any]],
+    dry_run: bool = False,
+):
     """
     Update calibrator with new observations from settled bets
 
@@ -333,7 +343,7 @@ def update_calibrator(paper_engine: PaperTradingEngine, processed_bets: List[Dic
     # Note: This is a placeholder. The actual calibrator update would happen
     # in the BettingDecisionEngine, not here. This is just for demonstration.
 
-    successful_bets = [b for b in processed_bets if b['success']]
+    successful_bets = [b for b in processed_bets if b["success"]]
 
     if not successful_bets:
         print("\n⚠️  No bets to add to calibrator")
@@ -350,14 +360,21 @@ def update_calibrator(paper_engine: PaperTradingEngine, processed_bets: List[Dic
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Record outcomes for paper trading bets")
-    parser.add_argument('--db-path', default='data/paper_trades.db',
-                        help='Path to paper trading database')
-    parser.add_argument('--date', help='Process bets for specific date (YYYY-MM-DD)')
-    parser.add_argument('--dry-run', action='store_true',
-                        help='Show what would be updated without making changes')
-    parser.add_argument('--verbose', '-v', action='store_true',
-                        help='Verbose output')
+    parser = argparse.ArgumentParser(
+        description="Record outcomes for paper trading bets"
+    )
+    parser.add_argument(
+        "--db-path",
+        default="data/paper_trades.db",
+        help="Path to paper trading database",
+    )
+    parser.add_argument("--date", help="Process bets for specific date (YYYY-MM-DD)")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be updated without making changes",
+    )
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
 
     args = parser.parse_args()
 
@@ -388,11 +405,11 @@ def main():
         print("\n🔗 Connecting to NBA database...")
         load_secrets_hierarchical()
         db_conn = psycopg2.connect(
-            host=os.getenv('RDS_HOST_NBA_MCP_SYNTHESIS_WORKFLOW'),
-            port=os.getenv('RDS_PORT_NBA_MCP_SYNTHESIS_WORKFLOW', '5432'),
-            database=os.getenv('RDS_DATABASE_NBA_MCP_SYNTHESIS_WORKFLOW'),
-            user=os.getenv('RDS_USERNAME_NBA_MCP_SYNTHESIS_WORKFLOW'),
-            password=os.getenv('RDS_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW')
+            host=os.getenv("RDS_HOST_NBA_MCP_SYNTHESIS_WORKFLOW"),
+            port=os.getenv("RDS_PORT_NBA_MCP_SYNTHESIS_WORKFLOW", "5432"),
+            database=os.getenv("RDS_DATABASE_NBA_MCP_SYNTHESIS_WORKFLOW"),
+            user=os.getenv("RDS_USERNAME_NBA_MCP_SYNTHESIS_WORKFLOW"),
+            password=os.getenv("RDS_PASSWORD_NBA_MCP_SYNTHESIS_WORKFLOW"),
         )
         print("   ✓ Connected")
     except Exception as e:
@@ -432,14 +449,16 @@ def main():
             continue
 
         # Process outcome
-        result = process_bet_outcome(paper_engine, bet, game, args.verbose, args.dry_run)
+        result = process_bet_outcome(
+            paper_engine, bet, game, args.verbose, args.dry_run
+        )
         processed.append(result)
         matched += 1
 
         # Summary for this bet
-        if result['success']:
-            outcome = result['outcome'].upper()
-            pl = result['profit_loss']
+        if result["success"]:
+            outcome = result["outcome"].upper()
+            pl = result["profit_loss"]
             symbol = "✓" if outcome == "WIN" else "✗" if outcome == "LOSS" else "⊘"
             print(f"{symbol} {outcome} - P/L: ${pl:+.2f}")
         else:
@@ -454,10 +473,10 @@ def main():
     print(f"Unmatched: {unmatched}")
 
     if processed:
-        won = sum(1 for b in processed if b['outcome'] == 'win')
-        lost = sum(1 for b in processed if b['outcome'] == 'loss')
-        pushed = sum(1 for b in processed if b['outcome'] == 'push')
-        net_pl = sum(b['profit_loss'] for b in processed)
+        won = sum(1 for b in processed if b["outcome"] == "win")
+        lost = sum(1 for b in processed if b["outcome"] == "loss")
+        pushed = sum(1 for b in processed if b["outcome"] == "push")
+        net_pl = sum(b["profit_loss"] for b in processed)
 
         print(f"\nOutcomes:")
         print(f"  Won: {won} ({won / len(processed):.1%})")
@@ -466,7 +485,7 @@ def main():
         print(f"\nNet P/L: ${net_pl:+,.2f}")
 
         # CLV stats
-        clvs = [b['clv'] for b in processed if b.get('clv') is not None]
+        clvs = [b["clv"] for b in processed if b.get("clv") is not None]
         if clvs:
             avg_clv = sum(clvs) / len(clvs)
             print(f"Average CLV: {avg_clv:+.1%}")

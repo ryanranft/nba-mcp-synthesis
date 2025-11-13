@@ -16,8 +16,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 # Import GameOutcomeEnsemble from training script
 from train_game_outcome_model import GameOutcomeEnsemble
 
-from mcp_server.unified_secrets_manager import load_secrets_hierarchical, get_database_config
+from mcp_server.unified_secrets_manager import (
+    load_secrets_hierarchical,
+    get_database_config,
+)
 from mcp_server.betting.feature_extractor import FeatureExtractor
+
 
 def main():
     print("=" * 80)
@@ -27,7 +31,7 @@ def main():
 
     # Load secrets
     print("📦 Loading secrets...")
-    load_secrets_hierarchical('nba-mcp-synthesis', 'NBA', 'production')
+    load_secrets_hierarchical("nba-mcp-synthesis", "NBA", "production")
     print("✓ Secrets loaded\n")
 
     # Connect to database
@@ -43,7 +47,7 @@ def main():
 
     # Load stacking model
     print("📊 Loading stacking ensemble model...")
-    with open('models/ensemble_game_outcome_model.pkl', 'rb') as f:
+    with open("models/ensemble_game_outcome_model.pkl", "rb") as f:
         model = pickle.load(f)
 
     print(f"✓ Model loaded:")
@@ -55,7 +59,8 @@ def main():
     # Get a recent game for testing
     print("🏀 Fetching recent game for testing...")
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT
             game_id,
             game_date,
@@ -69,7 +74,8 @@ def main():
           AND game_date IS NOT NULL
         ORDER BY game_date DESC
         LIMIT 1
-    """)
+    """
+    )
     game = cursor.fetchone()
 
     if not game:
@@ -87,14 +93,16 @@ def main():
     # Extract features
     print("⚙️  Extracting enhanced features...")
     features = extractor.extract_game_features(
-        home_team_id=home_id,
-        away_team_id=away_id,
-        game_date=str(game_date)
+        home_team_id=home_id, away_team_id=away_id, game_date=str(game_date)
     )
 
     print(f"✓ Extracted {len(features)} features")
-    print(f"  - rest__ features: {sum(1 for k in features.keys() if k.startswith('rest__'))}")
-    print(f"  - base__ features: {sum(1 for k in features.keys() if k.startswith('base__'))}")
+    print(
+        f"  - rest__ features: {sum(1 for k in features.keys() if k.startswith('rest__'))}"
+    )
+    print(
+        f"  - base__ features: {sum(1 for k in features.keys() if k.startswith('base__'))}"
+    )
     print()
 
     # Make prediction
@@ -106,9 +114,11 @@ def main():
     features_df = pd.DataFrame([features])
 
     # Remove metadata columns
-    feature_cols = [col for col in features_df.columns if col not in [
-        'game_id', 'game_date', 'season', 'home_team_id', 'away_team_id'
-    ]]
+    feature_cols = [
+        col
+        for col in features_df.columns
+        if col not in ["game_id", "game_date", "season", "home_team_id", "away_team_id"]
+    ]
 
     X = features_df[feature_cols].fillna(0).values
 
@@ -125,7 +135,7 @@ def main():
 
     # Feature breakdown
     print("📊 Enhanced Features Sample:")
-    rest_features = {k: v for k, v in features.items() if k.startswith('rest__')}
+    rest_features = {k: v for k, v in features.items() if k.startswith("rest__")}
     for key, value in list(rest_features.items())[:5]:
         print(f"  {key}: {value}")
 
@@ -148,5 +158,5 @@ def main():
     conn.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

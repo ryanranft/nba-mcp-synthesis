@@ -15,7 +15,7 @@ import numpy as np
 from mcp_server.simulations.deployment.model_persistence import (
     ModelVersion,
     ModelSerializer,
-    ModelRegistry
+    ModelRegistry,
 )
 
 
@@ -29,13 +29,13 @@ class TestModelVersion:
             version="1.0.0",
             created_at=datetime.now(),
             model_type="linear",
-            metrics={'mse': 0.5, 'r2': 0.95},
-            metadata={'notes': 'Initial version'}
+            metrics={"mse": 0.5, "r2": 0.95},
+            metadata={"notes": "Initial version"},
         )
         assert version.model_id == "test_model"
         assert version.version == "1.0.0"
         assert version.model_type == "linear"
-        assert version.metrics['mse'] == 0.5
+        assert version.metrics["mse"] == 0.5
 
     def test_to_dict(self):
         """Test converting to dictionary"""
@@ -44,23 +44,23 @@ class TestModelVersion:
         )
         data = version.to_dict()
         assert isinstance(data, dict)
-        assert data['model_id'] == "test"
-        assert isinstance(data['created_at'], str)
+        assert data["model_id"] == "test"
+        assert isinstance(data["created_at"], str)
 
     def test_from_dict(self):
         """Test creating from dictionary"""
         data = {
-            'model_id': 'test',
-            'version': '1.0',
-            'created_at': datetime.now().isoformat(),
-            'model_type': 'test',
-            'metrics': {},
-            'metadata': {},
-            'file_path': None,
-            'checksum': None
+            "model_id": "test",
+            "version": "1.0",
+            "created_at": datetime.now().isoformat(),
+            "model_type": "test",
+            "metrics": {},
+            "metadata": {},
+            "file_path": None,
+            "checksum": None,
         }
         version = ModelVersion.from_dict(data)
-        assert version.model_id == 'test'
+        assert version.model_id == "test"
         assert isinstance(version.created_at, datetime)
 
 
@@ -97,21 +97,19 @@ class TestModelSerializer:
 
     def test_serialize_model(self, serializer, sample_model):
         """Test serializing model"""
-        file_path, checksum = serializer.serialize(
-            sample_model, "test_model", "1.0"
-        )
+        file_path, checksum = serializer.serialize(sample_model, "test_model", "1.0")
         assert file_path.exists()
         assert checksum is not None
         assert len(checksum) == 64  # SHA256 hex digest
 
     def test_serialize_with_metadata(self, serializer, sample_model):
         """Test serializing with metadata"""
-        metadata = {'author': 'test', 'date': '2024-01-01'}
+        metadata = {"author": "test", "date": "2024-01-01"}
         file_path, checksum = serializer.serialize(
             sample_model, "test_model", "1.0", metadata=metadata
         )
         # Check metadata file exists
-        metadata_path = file_path.with_suffix('.json')
+        metadata_path = file_path.with_suffix(".json")
         assert metadata_path.exists()
 
     def test_deserialize_model(self, serializer, sample_model):
@@ -120,7 +118,9 @@ class TestModelSerializer:
         serializer.serialize(sample_model, "test_model", "1.0")
 
         # Deserialize
-        loaded_model = serializer.deserialize("test_model", "1.0", verify_checksum=False)
+        loaded_model = serializer.deserialize(
+            "test_model", "1.0", verify_checksum=False
+        )
         assert loaded_model is not None
         assert isinstance(loaded_model, LinearRegression)
 
@@ -140,9 +140,10 @@ class TestModelSerializer:
 
         with pytest.raises(ValueError, match="Checksum mismatch"):
             serializer.deserialize(
-                "test_model", "1.0",
+                "test_model",
+                "1.0",
                 verify_checksum=True,
-                expected_checksum="wrong_checksum"
+                expected_checksum="wrong_checksum",
             )
 
     def test_deserialize_nonexistent_model(self, serializer):
@@ -179,9 +180,9 @@ class TestModelSerializer:
         serializer.deserialize("model1", "1.0", verify_checksum=False)
 
         stats = serializer.get_statistics()
-        assert stats['serializations'] == 1
-        assert stats['deserializations'] == 1
-        assert stats['total_models'] == 1
+        assert stats["serializations"] == 1
+        assert stats["deserializations"] == 1
+        assert stats["total_models"] == 1
 
 
 class TestModelRegistry:
@@ -218,11 +219,7 @@ class TestModelRegistry:
     def test_register_model(self, registry, sample_model):
         """Test registering model"""
         version = registry.register_model(
-            sample_model,
-            "test_model",
-            "1.0.0",
-            "linear",
-            metrics={'mse': 0.5}
+            sample_model, "test_model", "1.0.0", "linear", metrics={"mse": 0.5}
         )
         assert version.model_id == "test_model"
         assert version.version == "1.0.0"
@@ -261,14 +258,13 @@ class TestModelRegistry:
     def test_get_version_info(self, registry, sample_model):
         """Test getting version info"""
         registry.register_model(
-            sample_model, "test", "1.0", "linear",
-            metrics={'mse': 0.5}
+            sample_model, "test", "1.0", "linear", metrics={"mse": 0.5}
         )
 
         info = registry.get_version_info("test", "1.0")
         assert info.model_id == "test"
         assert info.version == "1.0"
-        assert info.metrics['mse'] == 0.5
+        assert info.metrics["mse"] == 0.5
 
     def test_list_models(self, registry, sample_model):
         """Test listing models"""
@@ -291,17 +287,17 @@ class TestModelRegistry:
     def test_compare_versions(self, registry, sample_model):
         """Test comparing versions"""
         registry.register_model(
-            sample_model, "test", "1.0", "linear", metrics={'mse': 1.0}
+            sample_model, "test", "1.0", "linear", metrics={"mse": 1.0}
         )
         registry.register_model(
-            sample_model, "test", "2.0", "linear", metrics={'mse': 0.5}
+            sample_model, "test", "2.0", "linear", metrics={"mse": 0.5}
         )
 
         comparison = registry.compare_versions("test", "1.0", "2.0", "mse")
-        assert comparison['value1'] == 1.0
-        assert comparison['value2'] == 0.5
-        assert comparison['difference'] == -0.5
-        assert comparison['percent_change'] == -50.0
+        assert comparison["value1"] == 1.0
+        assert comparison["value2"] == 0.5
+        assert comparison["difference"] == -0.5
+        assert comparison["percent_change"] == -50.0
 
     def test_registry_persistence(self, temp_dir, sample_model):
         """Test registry persistence across instances"""
@@ -310,7 +306,9 @@ class TestModelRegistry:
         registry_path = temp_dir / "registry.json"
         registry1 = ModelRegistry(serializer=serializer1, registry_path=registry_path)
 
-        registry1.register_model(sample_model, "test", "1.0", "linear", metrics={'mse': 0.5})
+        registry1.register_model(
+            sample_model, "test", "1.0", "linear", metrics={"mse": 0.5}
+        )
 
         # Create second registry (should load from disk)
         serializer2 = ModelSerializer(base_path=temp_dir)
@@ -318,7 +316,7 @@ class TestModelRegistry:
 
         assert "test" in registry2.list_models()
         info = registry2.get_version_info("test", "1.0")
-        assert info.metrics['mse'] == 0.5
+        assert info.metrics["mse"] == 0.5
 
     def test_get_statistics(self, registry, sample_model):
         """Test getting statistics"""
@@ -326,7 +324,7 @@ class TestModelRegistry:
         registry.register_model(sample_model, "model2", "1.0", "ensemble")
 
         stats = registry.get_statistics()
-        assert stats['total_models'] == 2
-        assert stats['total_versions'] == 2
-        assert 'linear' in stats['model_types']
-        assert 'ensemble' in stats['model_types']
+        assert stats["total_models"] == 2
+        assert stats["total_versions"] == 2
+        assert "linear" in stats["model_types"]
+        assert "ensemble" in stats["model_types"]

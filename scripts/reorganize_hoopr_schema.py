@@ -27,15 +27,18 @@ from psycopg2.extras import execute_values
 # Add project to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from mcp_server.unified_secrets_manager import load_secrets_hierarchical, get_database_config
+from mcp_server.unified_secrets_manager import (
+    load_secrets_hierarchical,
+    get_database_config,
+)
 
 
 # Table mapping: old_name → new_name
 TABLE_MAPPINGS = {
-    'schedule': 'nba_schedule',
-    'team_box': 'nba_team_box',
-    'player_box': 'nba_player_box',
-    'play_by_play': 'nba_play_by_play'
+    "schedule": "nba_schedule",
+    "team_box": "nba_team_box",
+    "player_box": "nba_player_box",
+    "play_by_play": "nba_play_by_play",
 }
 
 
@@ -43,13 +46,13 @@ def print_header(title):
     """Print formatted section header."""
     print(f"\n{'=' * 80}")
     print(f"{title}")
-    print('=' * 80)
+    print("=" * 80)
 
 
 def print_section(title):
     """Print formatted subsection."""
     print(f"\n{title}")
-    print('-' * 80)
+    print("-" * 80)
 
 
 def create_hoopr_raw_schema(conn):
@@ -66,7 +69,8 @@ def get_table_ddl(conn, schema, table):
     """Get CREATE TABLE statement for existing table."""
     with conn.cursor() as cur:
         # Get column definitions
-        cur.execute(f"""
+        cur.execute(
+            f"""
             SELECT
                 column_name,
                 data_type,
@@ -76,7 +80,8 @@ def get_table_ddl(conn, schema, table):
             FROM information_schema.columns
             WHERE table_schema = '{schema}' AND table_name = '{table}'
             ORDER BY ordinal_position;
-        """)
+        """
+        )
 
         columns = cur.fetchall()
 
@@ -88,38 +93,42 @@ def get_table_ddl(conn, schema, table):
             col_def = f"  {col_name}"
 
             # Handle data type
-            if data_type in ('character varying', 'varchar'):
+            if data_type in ("character varying", "varchar"):
                 col_def += f" VARCHAR({char_len})" if char_len else " VARCHAR"
-            elif data_type == 'character':
+            elif data_type == "character":
                 col_def += f" CHAR({char_len if char_len else 1})"
-            elif data_type == 'ARRAY':
+            elif data_type == "ARRAY":
                 # Get actual array type
-                cur.execute(f"""
+                cur.execute(
+                    f"""
                     SELECT udt_name FROM information_schema.columns
                     WHERE table_schema = '{schema}'
                     AND table_name = '{table}'
                     AND column_name = '{col_name}';
-                """)
+                """
+                )
                 udt_name = cur.fetchone()[0]
                 col_def += f" {udt_name}"
-            elif data_type == 'USER-DEFINED':
+            elif data_type == "USER-DEFINED":
                 # Get actual type name
-                cur.execute(f"""
+                cur.execute(
+                    f"""
                     SELECT udt_name FROM information_schema.columns
                     WHERE table_schema = '{schema}'
                     AND table_name = '{table}'
                     AND column_name = '{col_name}';
-                """)
+                """
+                )
                 udt_name = cur.fetchone()[0]
                 col_def += f" {udt_name}"
             else:
                 col_def += f" {data_type}"
 
             # Add constraints
-            if is_nullable == 'NO':
+            if is_nullable == "NO":
                 col_def += " NOT NULL"
 
-            if col_default and 'nextval' not in col_default:
+            if col_default and "nextval" not in col_default:
                 col_def += f" DEFAULT {col_default}"
 
             col_defs.append(col_def)
@@ -133,12 +142,14 @@ def get_table_ddl(conn, schema, table):
 def get_indexes(conn, schema, table):
     """Get all indexes for a table."""
     with conn.cursor() as cur:
-        cur.execute(f"""
+        cur.execute(
+            f"""
             SELECT indexname, indexdef
             FROM pg_indexes
             WHERE schemaname = '{schema}' AND tablename = '{table}'
             ORDER BY indexname;
-        """)
+        """
+        )
 
         return cur.fetchall()
 
@@ -165,10 +176,12 @@ def copy_table_data(conn, old_schema, old_table, new_schema, new_table):
         print(f"  Copying {row_count:,} rows...")
         start_time = datetime.now()
 
-        cur.execute(f"""
+        cur.execute(
+            f"""
             INSERT INTO {new_schema}.{new_table}
             SELECT * FROM {old_schema}.{old_table};
-        """)
+        """
+        )
         conn.commit()
 
         elapsed = (datetime.now() - start_time).total_seconds()
@@ -202,7 +215,9 @@ def copy_indexes(conn, old_schema, old_table, new_schema, new_table):
         for idx_name, idx_def in indexes:
             # Modify index definition for new schema/table
             new_idx_name = idx_name.replace(old_table, new_table)
-            new_idx_def = idx_def.replace(f"{old_schema}.{old_table}", f"{new_schema}.{new_table}")
+            new_idx_def = idx_def.replace(
+                f"{old_schema}.{old_table}", f"{new_schema}.{new_table}"
+            )
             new_idx_def = new_idx_def.replace(idx_name, new_idx_name)
 
             try:
@@ -225,7 +240,7 @@ def main():
     # Connect to local database
     print_section("Connecting to Database")
     try:
-        load_secrets_hierarchical('nba-mcp-synthesis', 'NBA', 'development')
+        load_secrets_hierarchical("nba-mcp-synthesis", "NBA", "development")
         db_config = get_database_config()
 
         print(f"  Database: {db_config.get('database', 'N/A')}")
@@ -248,10 +263,10 @@ def main():
     fail_count = 0
 
     for old_table, new_table in TABLE_MAPPINGS.items():
-        success = copy_table_data(conn, 'raw', old_table, 'hoopr_raw', new_table)
+        success = copy_table_data(conn, "raw", old_table, "hoopr_raw", new_table)
 
         if success:
-            copy_indexes(conn, 'raw', old_table, 'hoopr_raw', new_table)
+            copy_indexes(conn, "raw", old_table, "hoopr_raw", new_table)
             success_count += 1
         else:
             fail_count += 1
@@ -290,5 +305,5 @@ def main():
     sys.exit(exit_code)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -25,10 +25,13 @@ try:
     import torch.nn as nn
     import torch.optim as optim
     from torch.utils.data import TensorDataset, DataLoader
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
-    logger.warning("PyTorch not available. Neural network models will use sklearn fallback.")
+    logger.warning(
+        "PyTorch not available. Neural network models will use sklearn fallback."
+    )
 
 # Fallback to sklearn MLP
 from sklearn.neural_network import MLPRegressor
@@ -38,6 +41,7 @@ from sklearn.base import BaseEstimator, RegressorMixin
 @dataclass
 class TrainingMetrics:
     """Training metrics for neural networks"""
+
     epoch: int
     train_loss: float
     val_loss: Optional[float] = None
@@ -48,9 +52,10 @@ class TrainingMetrics:
 @dataclass
 class TrainingHistory:
     """Complete training history"""
+
     metrics: List[TrainingMetrics] = field(default_factory=list)
     best_epoch: int = 0
-    best_val_loss: float = float('inf')
+    best_val_loss: float = float("inf")
     total_epochs: int = 0
 
     def add_metrics(self, metrics: TrainingMetrics):
@@ -69,16 +74,19 @@ class TrainingHistory:
             return {}
 
         return {
-            'total_epochs': self.total_epochs,
-            'best_epoch': self.best_epoch,
-            'best_val_loss': self.best_val_loss,
-            'final_train_loss': self.metrics[-1].train_loss,
-            'final_val_loss': self.metrics[-1].val_loss if self.metrics[-1].val_loss else None,
-            'total_training_time': sum(m.train_time for m in self.metrics)
+            "total_epochs": self.total_epochs,
+            "best_epoch": self.best_epoch,
+            "best_val_loss": self.best_val_loss,
+            "final_train_loss": self.metrics[-1].train_loss,
+            "final_val_loss": (
+                self.metrics[-1].val_loss if self.metrics[-1].val_loss else None
+            ),
+            "total_training_time": sum(m.train_time for m in self.metrics),
         }
 
 
 if TORCH_AVAILABLE:
+
     class FeedforwardNN(nn.Module):
         """
         Feedforward neural network for game outcome prediction.
@@ -95,7 +103,7 @@ if TORCH_AVAILABLE:
             hidden_sizes: List[int],
             output_size: int = 1,
             dropout: float = 0.3,
-            use_batch_norm: bool = True
+            use_batch_norm: bool = True,
         ):
             """
             Initialize feedforward network.
@@ -129,7 +137,6 @@ if TORCH_AVAILABLE:
             """Forward pass"""
             return self.network(x)
 
-
     class LSTMPredictor(nn.Module):
         """
         LSTM network for sequential game prediction.
@@ -143,7 +150,7 @@ if TORCH_AVAILABLE:
             hidden_size: int,
             num_layers: int = 2,
             output_size: int = 1,
-            dropout: float = 0.3
+            dropout: float = 0.3,
         ):
             """
             Initialize LSTM predictor.
@@ -165,7 +172,7 @@ if TORCH_AVAILABLE:
                 hidden_size,
                 num_layers,
                 batch_first=True,
-                dropout=dropout if num_layers > 1 else 0
+                dropout=dropout if num_layers > 1 else 0,
             )
 
             self.fc = nn.Linear(hidden_size, output_size)
@@ -191,7 +198,6 @@ if TORCH_AVAILABLE:
 
             return output
 
-
     class PyTorchWrapper(BaseEstimator, RegressorMixin):
         """
         Sklearn-compatible wrapper for PyTorch models.
@@ -208,7 +214,7 @@ if TORCH_AVAILABLE:
             epochs: int = 100,
             validation_split: float = 0.2,
             early_stopping_patience: int = 10,
-            verbose: bool = False
+            verbose: bool = False,
         ):
             """
             Initialize PyTorch wrapper.
@@ -234,7 +240,7 @@ if TORCH_AVAILABLE:
 
             self.model = None
             self.history = TrainingHistory()
-            self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         def fit(self, X, y):
             """
@@ -269,19 +275,15 @@ if TORCH_AVAILABLE:
 
             # Create data loaders
             train_dataset = TensorDataset(
-                torch.FloatTensor(X_train),
-                torch.FloatTensor(y_train)
+                torch.FloatTensor(X_train), torch.FloatTensor(y_train)
             )
             train_loader = DataLoader(
-                train_dataset,
-                batch_size=self.batch_size,
-                shuffle=True
+                train_dataset, batch_size=self.batch_size, shuffle=True
             )
 
             if n_val > 0:
                 val_dataset = TensorDataset(
-                    torch.FloatTensor(X_val),
-                    torch.FloatTensor(y_val)
+                    torch.FloatTensor(X_val), torch.FloatTensor(y_val)
                 )
                 val_loader = DataLoader(val_dataset, batch_size=self.batch_size)
             else:
@@ -295,7 +297,7 @@ if TORCH_AVAILABLE:
             optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
 
             # Training loop
-            best_val_loss = float('inf')
+            best_val_loss = float("inf")
             patience_counter = 0
 
             for epoch in range(self.epochs):
@@ -357,13 +359,15 @@ if TORCH_AVAILABLE:
                     epoch=epoch + 1,
                     train_loss=train_loss,
                     val_loss=val_loss,
-                    train_time=epoch_time
+                    train_time=epoch_time,
                 )
                 self.history.add_metrics(metrics)
 
                 if self.verbose and (epoch + 1) % 10 == 0:
                     if val_loss is not None:
-                        print(f"Epoch {epoch+1}: train_loss={train_loss:.4f}, val_loss={val_loss:.4f}")
+                        print(
+                            f"Epoch {epoch+1}: train_loss={train_loss:.4f}, val_loss={val_loss:.4f}"
+                        )
                     else:
                         print(f"Epoch {epoch+1}: train_loss={train_loss:.4f}")
 
@@ -413,12 +417,12 @@ class MLPWrapper(BaseEstimator, RegressorMixin):
     def __init__(
         self,
         hidden_layer_sizes: Tuple[int, ...] = (100, 50),
-        activation: str = 'relu',
+        activation: str = "relu",
         learning_rate_init: float = 0.001,
         max_iter: int = 200,
         early_stopping: bool = True,
         validation_fraction: float = 0.2,
-        verbose: bool = False
+        verbose: bool = False,
     ):
         """
         Initialize MLP wrapper.
@@ -456,15 +460,14 @@ class MLPWrapper(BaseEstimator, RegressorMixin):
                 early_stopping=self.early_stopping,
                 validation_fraction=self.validation_fraction,
                 verbose=self.verbose,
-                random_state=42
+                random_state=42,
             )
 
             self.model.fit(X, y)
 
             # Record basic metrics
             metrics = TrainingMetrics(
-                epoch=self.model.n_iter_,
-                train_loss=self.model.loss_
+                epoch=self.model.n_iter_, train_loss=self.model.loss_
             )
             self.history.add_metrics(metrics)
 

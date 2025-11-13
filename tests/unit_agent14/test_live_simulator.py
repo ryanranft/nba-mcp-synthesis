@@ -29,22 +29,22 @@ class TestSimulationUpdate:
             home_score_rate=2.0,
             away_score_rate=1.8,
             home_win_prob=0.6,
-            time_remaining=24.0
+            time_remaining=24.0,
         )
 
         update = SimulationUpdate(
             update_id=0,
             timestamp=datetime.now(),
             game_state=state,
-            win_probabilities={'home': 0.6, 'away': 0.4},
-            expected_final_scores={'home': 100.0, 'away': 95.0},
-            confidence_intervals={'home_score': (45.0, 55.0)},
-            event_trigger='score_update'
+            win_probabilities={"home": 0.6, "away": 0.4},
+            expected_final_scores={"home": 100.0, "away": 95.0},
+            confidence_intervals={"home_score": (45.0, 55.0)},
+            event_trigger="score_update",
         )
 
         assert update.update_id == 0
-        assert update.win_probabilities['home'] == 0.6
-        assert update.event_trigger == 'score_update'
+        assert update.win_probabilities["home"] == 0.6
+        assert update.event_trigger == "score_update"
 
     def test_simulation_update_to_dict(self):
         """Test conversion to dictionary"""
@@ -54,23 +54,23 @@ class TestSimulationUpdate:
             home_score_rate=2.0,
             away_score_rate=1.8,
             home_win_prob=0.6,
-            time_remaining=24.0
+            time_remaining=24.0,
         )
 
         update = SimulationUpdate(
             update_id=0,
             timestamp=datetime.now(),
             game_state=state,
-            win_probabilities={'home': 0.6, 'away': 0.4},
-            expected_final_scores={'home': 100.0, 'away': 95.0},
-            confidence_intervals={'home_score': (45.0, 55.0)}
+            win_probabilities={"home": 0.6, "away": 0.4},
+            expected_final_scores={"home": 100.0, "away": 95.0},
+            confidence_intervals={"home_score": (45.0, 55.0)},
         )
 
         d = update.to_dict()
-        assert 'update_id' in d
-        assert 'game_state' in d
-        assert 'win_probabilities' in d
-        assert d['expected_final_scores']['home'] == 100.0
+        assert "update_id" in d
+        assert "game_state" in d
+        assert "win_probabilities" in d
+        assert d["expected_final_scores"]["home"] == 100.0
 
 
 class TestLiveSimulatorConfig:
@@ -89,7 +89,7 @@ class TestLiveSimulatorConfig:
         config = LiveSimulatorConfig(
             min_update_interval_seconds=2.0,
             use_model_predictions=False,
-            model_weight=0.7
+            model_weight=0.7,
         )
 
         assert config.min_update_interval_seconds == 2.0
@@ -102,11 +102,7 @@ class TestLiveGameSimulator:
 
     def test_initialization(self):
         """Test simulator initialization"""
-        sim = LiveGameSimulator(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
-        )
+        sim = LiveGameSimulator(game_id="test_001", home_team="LAL", away_team="BOS")
 
         assert sim.game_id == "test_001"
         assert sim.home_team == "LAL"
@@ -116,37 +112,23 @@ class TestLiveGameSimulator:
 
     def test_initialize_game(self):
         """Test game initialization"""
-        sim = LiveGameSimulator(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
-        )
+        sim = LiveGameSimulator(game_id="test_001", home_team="LAL", away_team="BOS")
 
         update = sim.initialize(
-            home_score=0.0,
-            away_score=0.0,
-            time_remaining=48.0,
-            quarter=1
+            home_score=0.0, away_score=0.0, time_remaining=48.0, quarter=1
         )
 
         assert sim.initialized is True
         assert update.game_state.home_score == 0.0
-        assert update.win_probabilities['home'] == pytest.approx(0.5, abs=0.1)
+        assert update.win_probabilities["home"] == pytest.approx(0.5, abs=0.1)
         assert len(sim.update_history) == 1
 
     def test_update_from_scores(self):
         """Test manual score update"""
-        sim = LiveGameSimulator(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
-        )
+        sim = LiveGameSimulator(game_id="test_001", home_team="LAL", away_team="BOS")
 
         update = sim.update_from_scores(
-            home_score=25.0,
-            away_score=20.0,
-            time_remaining=36.0,
-            quarter=2
+            home_score=25.0, away_score=20.0, time_remaining=36.0, quarter=2
         )
 
         assert update.game_state.home_score == pytest.approx(25.0, abs=0.5)
@@ -155,11 +137,7 @@ class TestLiveGameSimulator:
 
     def test_process_score_update_event(self):
         """Test processing score update event"""
-        sim = LiveGameSimulator(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
-        )
+        sim = LiveGameSimulator(game_id="test_001", home_team="LAL", away_team="BOS")
 
         # Create score update event
         event = StreamEvent(
@@ -167,11 +145,11 @@ class TestLiveGameSimulator:
             timestamp=datetime.now(),
             game_id="test_001",
             data={
-                'home_score': 10.0,
-                'away_score': 8.0,
-                'time_remaining': 45.0,
-                'quarter': 1
-            }
+                "home_score": 10.0,
+                "away_score": 8.0,
+                "time_remaining": 45.0,
+                "quarter": 1,
+            },
         )
 
         update = sim.process_event(event)
@@ -184,10 +162,7 @@ class TestLiveGameSimulator:
         """Test processing generic game event"""
         config = LiveSimulatorConfig(min_update_interval_seconds=0.0)
         sim = LiveGameSimulator(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS",
-            config=config
+            game_id="test_001", home_team="LAL", away_team="BOS", config=config
         )
         sim.initialize()
 
@@ -198,11 +173,7 @@ class TestLiveGameSimulator:
             event_type=StreamEventType.GAME_EVENT,
             timestamp=datetime.now(),
             game_id="test_001",
-            data={
-                'home_score': 15.0,
-                'away_score': 12.0,
-                'time_remaining': 42.0
-            }
+            data={"home_score": 15.0, "away_score": 12.0, "time_remaining": 42.0},
         )
 
         update = sim.process_event(event)
@@ -211,22 +182,18 @@ class TestLiveGameSimulator:
 
     def test_auto_initialize_from_event(self):
         """Test automatic initialization from first event"""
-        sim = LiveGameSimulator(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
-        )
+        sim = LiveGameSimulator(game_id="test_001", home_team="LAL", away_team="BOS")
 
         event = StreamEvent(
             event_type=StreamEventType.SCORE_UPDATE,
             timestamp=datetime.now(),
             game_id="test_001",
             data={
-                'home_score': 5.0,
-                'away_score': 3.0,
-                'time_remaining': 47.0,
-                'quarter': 1
-            }
+                "home_score": 5.0,
+                "away_score": 3.0,
+                "time_remaining": 47.0,
+                "quarter": 1,
+            },
         )
 
         update = sim.process_event(event)
@@ -237,14 +204,10 @@ class TestLiveGameSimulator:
     def test_significant_score_change(self):
         """Test detection of significant score changes"""
         config = LiveSimulatorConfig(
-            significant_score_change=5.0,
-            min_update_interval_seconds=0.0
+            significant_score_change=5.0, min_update_interval_seconds=0.0
         )
         sim = LiveGameSimulator(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS",
-            config=config
+            game_id="test_001", home_team="LAL", away_team="BOS", config=config
         )
 
         sim.initialize(home_score=50.0, away_score=50.0, time_remaining=24.0)
@@ -256,11 +219,7 @@ class TestLiveGameSimulator:
             event_type=StreamEventType.SCORE_UPDATE,
             timestamp=datetime.now(),
             game_id="test_001",
-            data={
-                'home_score': 60.0,
-                'away_score': 50.0,
-                'time_remaining': 23.0
-            }
+            data={"home_score": 60.0, "away_score": 50.0, "time_remaining": 23.0},
         )
 
         update = sim.process_event(event)
@@ -269,29 +228,21 @@ class TestLiveGameSimulator:
 
     def test_predict_final_score(self):
         """Test final score prediction"""
-        sim = LiveGameSimulator(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
-        )
+        sim = LiveGameSimulator(game_id="test_001", home_team="LAL", away_team="BOS")
 
         sim.initialize(home_score=50.0, away_score=45.0, time_remaining=24.0)
 
         prediction = sim.predict_final_score()
 
-        assert 'home_team' in prediction
-        assert 'predicted_home_score' in prediction
-        assert 'predicted_away_score' in prediction
-        assert prediction['predicted_home_score'] > 50.0
-        assert prediction['predicted_away_score'] > 45.0
+        assert "home_team" in prediction
+        assert "predicted_home_score" in prediction
+        assert "predicted_away_score" in prediction
+        assert prediction["predicted_home_score"] > 50.0
+        assert prediction["predicted_away_score"] > 45.0
 
     def test_get_current_state(self):
         """Test getting current state"""
-        sim = LiveGameSimulator(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
-        )
+        sim = LiveGameSimulator(game_id="test_001", home_team="LAL", away_team="BOS")
 
         # Before initialization
         state = sim.get_current_state()
@@ -305,11 +256,7 @@ class TestLiveGameSimulator:
 
     def test_get_history(self):
         """Test getting update history"""
-        sim = LiveGameSimulator(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
-        )
+        sim = LiveGameSimulator(game_id="test_001", home_team="LAL", away_team="BOS")
 
         sim.initialize()
         sim.update_from_scores(10.0, 8.0, 45.0)
@@ -325,11 +272,7 @@ class TestLiveGameSimulator:
 
     def test_callback_registration(self):
         """Test callback registration and notification"""
-        sim = LiveGameSimulator(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
-        )
+        sim = LiveGameSimulator(game_id="test_001", home_team="LAL", away_team="BOS")
 
         callback_called = []
 
@@ -344,11 +287,7 @@ class TestLiveGameSimulator:
 
     def test_multiple_callbacks(self):
         """Test multiple callbacks"""
-        sim = LiveGameSimulator(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
-        )
+        sim = LiveGameSimulator(game_id="test_001", home_team="LAL", away_team="BOS")
 
         callback1_calls = []
         callback2_calls = []
@@ -369,28 +308,20 @@ class TestLiveGameSimulator:
 
     def test_get_statistics(self):
         """Test statistics retrieval"""
-        sim = LiveGameSimulator(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
-        )
+        sim = LiveGameSimulator(game_id="test_001", home_team="LAL", away_team="BOS")
 
         stats = sim.get_statistics()
-        assert 'game_id' in stats
-        assert 'initialized' in stats
-        assert stats['initialized'] is False
+        assert "game_id" in stats
+        assert "initialized" in stats
+        assert stats["initialized"] is False
 
         sim.initialize()
         stats = sim.get_statistics()
-        assert stats['initialized'] is True
+        assert stats["initialized"] is True
 
     def test_reset(self):
         """Test simulator reset"""
-        sim = LiveGameSimulator(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
-        )
+        sim = LiveGameSimulator(game_id="test_001", home_team="LAL", away_team="BOS")
 
         sim.initialize()
         sim.update_from_scores(25.0, 20.0, 36.0)
@@ -406,11 +337,7 @@ class TestLiveGameSimulator:
 
     def test_possession_tracking(self):
         """Test possession tracking"""
-        sim = LiveGameSimulator(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
-        )
+        sim = LiveGameSimulator(game_id="test_001", home_team="LAL", away_team="BOS")
 
         # First initialize
         sim.initialize(home_score=0.0, away_score=0.0, time_remaining=48.0)
@@ -419,10 +346,7 @@ class TestLiveGameSimulator:
         # Note: update_from_scores doesn't accept possession parameter directly
         # This is a limitation that could be enhanced in the future
         update = sim.update_from_scores(
-            home_score=10.0,
-            away_score=8.0,
-            time_remaining=45.0,
-            quarter=1
+            home_score=10.0, away_score=8.0, time_remaining=45.0, quarter=1
         )
 
         # For now, just verify the update happened
@@ -430,32 +354,21 @@ class TestLiveGameSimulator:
 
     def test_quarter_transition(self):
         """Test quarter transition"""
-        sim = LiveGameSimulator(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
-        )
+        sim = LiveGameSimulator(game_id="test_001", home_team="LAL", away_team="BOS")
 
         # Initialize in Q1
         sim.initialize(home_score=25.0, away_score=22.0, time_remaining=12.0, quarter=1)
 
         # Update to Q2
         update = sim.update_from_scores(
-            home_score=30.0,
-            away_score=28.0,
-            time_remaining=12.0,
-            quarter=2
+            home_score=30.0, away_score=28.0, time_remaining=12.0, quarter=2
         )
 
         assert update.game_state.quarter == 2
 
     def test_time_progression(self):
         """Test time progression through game"""
-        sim = LiveGameSimulator(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
-        )
+        sim = LiveGameSimulator(game_id="test_001", home_team="LAL", away_team="BOS")
 
         sim.initialize(home_score=0.0, away_score=0.0, time_remaining=48.0)
 
@@ -464,7 +377,7 @@ class TestLiveGameSimulator:
             sim.update_from_scores(
                 home_score=float((48 - time_remaining) * 2),
                 away_score=float((48 - time_remaining) * 1.8),
-                time_remaining=time_remaining
+                time_remaining=time_remaining,
             )
 
         state = sim.get_current_state()
@@ -472,30 +385,22 @@ class TestLiveGameSimulator:
 
     def test_win_probability_evolution(self):
         """Test win probability changes over time"""
-        sim = LiveGameSimulator(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
-        )
+        sim = LiveGameSimulator(game_id="test_001", home_team="LAL", away_team="BOS")
 
         # Start tied
         update1 = sim.update_from_scores(0.0, 0.0, 48.0)
-        initial_prob = update1.win_probabilities['home']
+        initial_prob = update1.win_probabilities["home"]
 
         # Home team pulls ahead
         update2 = sim.update_from_scores(30.0, 15.0, 30.0)
-        leading_prob = update2.win_probabilities['home']
+        leading_prob = update2.win_probabilities["home"]
 
         # Home win probability should increase
         assert leading_prob > initial_prob
 
     def test_event_trigger_tracking(self):
         """Test that event triggers are tracked"""
-        sim = LiveGameSimulator(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
-        )
+        sim = LiveGameSimulator(game_id="test_001", home_team="LAL", away_team="BOS")
 
         update = sim.initialize()
         assert update.event_trigger == "initialization"
@@ -504,7 +409,7 @@ class TestLiveGameSimulator:
             event_type=StreamEventType.SCORE_UPDATE,
             timestamp=datetime.now(),
             game_id="test_001",
-            data={'home_score': 5.0, 'away_score': 3.0, 'time_remaining': 47.0}
+            data={"home_score": 5.0, "away_score": 3.0, "time_remaining": 47.0},
         )
 
         update = sim.process_event(event)
@@ -512,5 +417,5 @@ class TestLiveGameSimulator:
             assert update.event_trigger is not None
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

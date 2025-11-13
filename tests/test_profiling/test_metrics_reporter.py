@@ -26,7 +26,7 @@ class TestMetricsReporter:
         functions = [
             ("test.fast_function", 10.0, 5),
             ("test.slow_function", 150.0, 3),
-            ("test.frequent_function", 20.0, 50)
+            ("test.frequent_function", 20.0, 50),
         ]
 
         for func_name, exec_time, call_count in functions:
@@ -42,7 +42,7 @@ class TestMetricsReporter:
 
     def test_export_to_json(self, reporter):
         """Test exporting metrics to JSON"""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
             output_path = f.name
 
         try:
@@ -50,7 +50,7 @@ class TestMetricsReporter:
             assert success is True
 
             # Verify file exists and is valid JSON
-            with open(output_path, 'r') as f:
+            with open(output_path, "r") as f:
                 data = json.load(f)
 
             assert "timestamp" in data
@@ -68,14 +68,14 @@ class TestMetricsReporter:
 
     def test_export_to_json_with_raw_data(self, reporter):
         """Test exporting with raw profile results"""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
             output_path = f.name
 
         try:
             success = reporter.export_to_json(output_path, include_raw_data=True)
             assert success is True
 
-            with open(output_path, 'r') as f:
+            with open(output_path, "r") as f:
                 data = json.load(f)
 
             assert "raw_profiles" in data
@@ -86,7 +86,7 @@ class TestMetricsReporter:
 
     def test_export_to_csv(self, reporter):
         """Test exporting metrics to CSV"""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.csv') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv") as f:
             output_path = f.name
 
         try:
@@ -94,7 +94,7 @@ class TestMetricsReporter:
             assert success is True
 
             # Verify file exists and has correct structure
-            with open(output_path, 'r') as f:
+            with open(output_path, "r") as f:
                 reader = csv.DictReader(f)
                 rows = list(reader)
 
@@ -122,7 +122,7 @@ class TestMetricsReporter:
 
     def test_generate_html_report(self, reporter):
         """Test generating HTML report"""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.html') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".html") as f:
             output_path = f.name
 
         try:
@@ -130,7 +130,7 @@ class TestMetricsReporter:
             assert success is True
 
             # Verify file exists and contains HTML
-            with open(output_path, 'r') as f:
+            with open(output_path, "r") as f:
                 html_content = f.read()
 
             assert "<!DOCTYPE html>" in html_content
@@ -149,16 +149,16 @@ class TestMetricsReporter:
             "function_stats": {
                 "test.fast_function": {
                     "avg_time_ms": 12.0,  # Baseline was slower
-                    "call_count": 5
+                    "call_count": 5,
                 },
                 "test.slow_function": {
                     "avg_time_ms": 100.0,  # Current is slower (regression)
-                    "call_count": 3
-                }
-            }
+                    "call_count": 3,
+                },
+            },
         }
 
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
             json.dump(baseline_data, f)
             baseline_path = f.name
 
@@ -188,14 +188,14 @@ class TestMetricsReporter:
         empty_profiler.reset()
         reporter = MetricsReporter(empty_profiler)
 
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
             output_path = f.name
 
         try:
             success = reporter.export_to_json(output_path)
             assert success is True
 
-            with open(output_path, 'r') as f:
+            with open(output_path, "r") as f:
                 data = json.load(f)
 
             assert data["summary"]["total_functions_profiled"] == 0
@@ -222,14 +222,14 @@ class TestMetricsReporter:
 
     def test_html_report_structure(self, reporter):
         """Test HTML report has proper structure"""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.html') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".html") as f:
             output_path = f.name
 
         try:
             success = reporter.generate_html_report(output_path)
             assert success is True
 
-            with open(output_path, 'r') as f:
+            with open(output_path, "r") as f:
                 html = f.read()
 
             # Check for required HTML elements
@@ -254,20 +254,25 @@ class TestMetricsReporter:
 
     def test_csv_export_column_names(self, reporter):
         """Test that CSV has correct column names"""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.csv') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv") as f:
             output_path = f.name
 
         try:
             reporter.export_to_csv(output_path)
 
-            with open(output_path, 'r') as f:
+            with open(output_path, "r") as f:
                 reader = csv.reader(f)
                 headers = next(reader)
 
             expected_columns = [
-                "function_name", "call_count", "total_time_ms",
-                "avg_time_ms", "min_time_ms", "max_time_ms",
-                "median_time_ms", "slow_calls"
+                "function_name",
+                "call_count",
+                "total_time_ms",
+                "avg_time_ms",
+                "min_time_ms",
+                "max_time_ms",
+                "median_time_ms",
+                "slow_calls",
             ]
 
             assert headers == expected_columns

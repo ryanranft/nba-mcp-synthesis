@@ -21,12 +21,13 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from mcp_server.unified_secrets_manager import (
     load_secrets_hierarchical,
-    get_database_config
+    get_database_config,
 )
 
 try:
     import psycopg2
     from psycopg2.extras import RealDictCursor
+
     HAS_PSYCOPG2 = True
 except ImportError:
     HAS_PSYCOPG2 = False
@@ -36,49 +37,53 @@ def test_secrets_loading(context: str) -> Dict[str, Any]:
     """Test that secrets can be loaded from the hierarchical system."""
     print(f"\n{'='*70}")
     print(f"Test 1: Loading Secrets ({context} context)")
-    print('='*70)
+    print("=" * 70)
 
     try:
         load_secrets_hierarchical("nba-mcp-synthesis", "NBA", context)
         print("✓ load_secrets_hierarchical() succeeded")
     except Exception as e:
         print(f"❌ Failed to load secrets: {e}")
-        return {'success': False, 'error': str(e)}
+        return {"success": False, "error": str(e)}
 
     try:
         config = get_database_config()
         print("✓ get_database_config() succeeded")
     except Exception as e:
         print(f"❌ Failed to get database config: {e}")
-        return {'success': False, 'error': str(e)}
+        return {"success": False, "error": str(e)}
 
     # Check for missing credentials
     missing = [k for k, v in config.items() if not v]
     if missing:
         print(f"❌ Missing credentials: {missing}")
-        return {'success': False, 'error': f'Missing: {missing}', 'config': config}
+        return {"success": False, "error": f"Missing: {missing}", "config": config}
 
     # Display loaded credentials (masked)
     print("\nLoaded credentials:")
-    print(f"  Host: {config['host'][:30]}..." if len(config['host']) > 30 else f"  Host: {config['host']}")
+    print(
+        f"  Host: {config['host'][:30]}..."
+        if len(config["host"]) > 30
+        else f"  Host: {config['host']}"
+    )
     print(f"  Port: {config['port']}")
     print(f"  Database: {config['database']}")
     print(f"  User: {config['user']}")
     print(f"  Password: {'*' * 10} ({len(config['password'])} chars)")
 
-    return {'success': True, 'config': config}
+    return {"success": True, "config": config}
 
 
 def test_database_connection(config: Dict[str, str]) -> Dict[str, Any]:
     """Test that we can connect to the database."""
     print(f"\n{'='*70}")
     print("Test 2: Database Connection")
-    print('='*70)
+    print("=" * 70)
 
     if not HAS_PSYCOPG2:
         print("❌ psycopg2 not installed")
         print("   Install with: pip install psycopg2-binary")
-        return {'success': False, 'error': 'psycopg2 not installed'}
+        return {"success": False, "error": "psycopg2 not installed"}
 
     try:
         print("Attempting connection...")
@@ -95,7 +100,7 @@ def test_database_connection(config: Dict[str, str]) -> Dict[str, Any]:
         conn.close()
         print("✓ Connection closed successfully")
 
-        return {'success': True, 'version': version}
+        return {"success": True, "version": version}
 
     except psycopg2.OperationalError as e:
         print(f"❌ Connection failed: {e}")
@@ -104,39 +109,43 @@ def test_database_connection(config: Dict[str, str]) -> Dict[str, Any]:
         print("  2. Verify network connectivity to host")
         print("  3. Check security groups/firewall rules")
         print("  4. Confirm credentials are correct")
-        return {'success': False, 'error': str(e)}
+        return {"success": False, "error": str(e)}
 
     except Exception as e:
         print(f"❌ Unexpected error: {e}")
-        return {'success': False, 'error': str(e)}
+        return {"success": False, "error": str(e)}
 
 
 def test_data_access(config: Dict[str, str]) -> Dict[str, Any]:
     """Test that we can query NBA data from the database."""
     print(f"\n{'='*70}")
     print("Test 3: NBA Data Access")
-    print('='*70)
+    print("=" * 70)
 
     if not HAS_PSYCOPG2:
-        return {'success': False, 'error': 'psycopg2 not installed'}
+        return {"success": False, "error": "psycopg2 not installed"}
 
     try:
         conn = psycopg2.connect(**config)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
 
         # Check games table
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT COUNT(*) as total_games,
                    COUNT(DISTINCT season) as seasons,
                    MIN(game_date) as earliest_game,
                    MAX(game_date) as latest_game
             FROM games
-        """)
+        """
+        )
         games_stats = cursor.fetchone()
         print(f"✓ Games table accessible")
         print(f"  Total games: {games_stats['total_games']:,}")
         print(f"  Seasons: {games_stats['seasons']}")
-        print(f"  Date range: {games_stats['earliest_game']} to {games_stats['latest_game']}")
+        print(
+            f"  Date range: {games_stats['earliest_game']} to {games_stats['latest_game']}"
+        )
 
         # Check team_game_stats table
         cursor.execute("SELECT COUNT(*) FROM team_game_stats")
@@ -145,13 +154,15 @@ def test_data_access(config: Dict[str, str]) -> Dict[str, Any]:
         print(f"  Records: {tgs_count:,}")
 
         # Get sample data
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT season, COUNT(*) as games
             FROM games
             GROUP BY season
             ORDER BY season DESC
             LIMIT 5
-        """)
+        """
+        )
         seasons = cursor.fetchall()
         print("\nRecent seasons:")
         for row in seasons:
@@ -161,9 +172,9 @@ def test_data_access(config: Dict[str, str]) -> Dict[str, Any]:
         conn.close()
 
         return {
-            'success': True,
-            'total_games': games_stats['total_games'],
-            'seasons': games_stats['seasons']
+            "success": True,
+            "total_games": games_stats["total_games"],
+            "seasons": games_stats["seasons"],
         }
 
     except psycopg2.ProgrammingError as e:
@@ -171,25 +182,25 @@ def test_data_access(config: Dict[str, str]) -> Dict[str, Any]:
         print("\nTroubleshooting:")
         print("  1. Check that required tables exist (games, team_game_stats)")
         print("  2. Verify database schema is correctly loaded")
-        return {'success': False, 'error': str(e)}
+        return {"success": False, "error": str(e)}
 
     except Exception as e:
         print(f"❌ Unexpected error: {e}")
-        return {'success': False, 'error': str(e)}
+        return {"success": False, "error": str(e)}
 
 
 def print_summary(results: Dict[str, Dict[str, Any]]):
     """Print final test summary."""
     print(f"\n{'='*70}")
     print("Test Summary")
-    print('='*70)
+    print("=" * 70)
 
-    all_passed = all(r['success'] for r in results.values())
+    all_passed = all(r["success"] for r in results.values())
 
     for test_name, result in results.items():
-        status = "✓ PASS" if result['success'] else "❌ FAIL"
+        status = "✓ PASS" if result["success"] else "❌ FAIL"
         print(f"{status} - {test_name}")
-        if not result['success'] and 'error' in result:
+        if not result["success"] and "error" in result:
             print(f"     Error: {result['error']}")
 
     print()
@@ -205,7 +216,7 @@ def print_summary(results: Dict[str, Dict[str, Any]]):
         print("  2. Verify credentials are in the correct location")
         print("  3. Ensure database server is accessible")
 
-    print('='*70)
+    print("=" * 70)
     print()
 
     return 0 if all_passed else 1
@@ -216,17 +227,17 @@ def main():
         description="Test database credentials configuration"
     )
     parser.add_argument(
-        '--context',
-        choices=['production', 'development'],
-        default='production',
-        help='Secrets context to test (default: production)'
+        "--context",
+        choices=["production", "development"],
+        default="production",
+        help="Secrets context to test (default: production)",
     )
 
     args = parser.parse_args()
 
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("NBA MCP Synthesis - Database Credentials Test")
-    print("="*70)
+    print("=" * 70)
     print(f"\nContext: {args.context}")
     print("Secrets System: Hierarchical")
     print()
@@ -236,32 +247,34 @@ def main():
 
     # Test 1: Secrets loading
     result1 = test_secrets_loading(args.context)
-    results['Secrets Loading'] = result1
+    results["Secrets Loading"] = result1
 
-    if not result1['success']:
+    if not result1["success"]:
         print("\n❌ Cannot proceed without valid credentials")
         print("\nRefer to documentation:")
         print("  - .claude/claude.md")
         print("  - .env.template (deprecation notice with instructions)")
-        print("  - /Users/ryanranft/Desktop/++/big_cat_bets_assets/SECRETS_STRUCTURE.md")
+        print(
+            "  - /Users/ryanranft/Desktop/++/big_cat_bets_assets/SECRETS_STRUCTURE.md"
+        )
         return 1
 
     # Test 2: Database connection
-    config = result1['config']
+    config = result1["config"]
     result2 = test_database_connection(config)
-    results['Database Connection'] = result2
+    results["Database Connection"] = result2
 
-    if not result2['success']:
+    if not result2["success"]:
         print("\n❌ Cannot test data access without database connection")
         return print_summary(results)
 
     # Test 3: Data access
     result3 = test_data_access(config)
-    results['NBA Data Access'] = result3
+    results["NBA Data Access"] = result3
 
     # Print summary
     return print_summary(results)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

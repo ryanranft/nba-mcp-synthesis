@@ -14,9 +14,12 @@ import os
 import warnings
 
 # Add project root to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from mcp_server.betting.probability_calibration import BayesianCalibrator, SimulationCalibrator
+from mcp_server.betting.probability_calibration import (
+    BayesianCalibrator,
+    SimulationCalibrator,
+)
 
 
 def test_bayesian_calibrator_empty():
@@ -36,13 +39,15 @@ def test_bayesian_calibrator_empty():
         quality = calibrator.calibration_quality()
 
         # Verify result
-        if quality == float('inf'):
+        if quality == float("inf"):
             print("❌ FAIL: calibration_quality() returned infinity (bug NOT fixed)")
             return False
         elif quality == 0.15:
             print(f"✅ PASS: calibration_quality() returned {quality} (expected: 0.15)")
         else:
-            print(f"⚠️  WARNING: calibration_quality() returned {quality} (expected: 0.15)")
+            print(
+                f"⚠️  WARNING: calibration_quality() returned {quality} (expected: 0.15)"
+            )
 
         # Verify warning was issued
         if len(w) > 0:
@@ -78,13 +83,15 @@ def test_simulation_calibrator_empty():
         quality = calibrator.calibration_quality()
 
         # Verify result
-        if quality == float('inf'):
+        if quality == float("inf"):
             print("❌ FAIL: calibration_quality() returned infinity (bug NOT fixed)")
             return False
         elif quality == 0.15:
             print(f"✅ PASS: calibration_quality() returned {quality} (expected: 0.15)")
         else:
-            print(f"⚠️  WARNING: calibration_quality() returned {quality} (expected: 0.15)")
+            print(
+                f"⚠️  WARNING: calibration_quality() returned {quality} (expected: 0.15)"
+            )
 
         # Verify warning was issued
         if len(w) > 0:
@@ -107,6 +114,7 @@ def test_calibrator_with_data():
     # Add some synthetic observations (well-calibrated)
     import numpy as np
     from datetime import datetime, timedelta
+
     np.random.seed(42)
 
     base_date = datetime.now() - timedelta(days=20)
@@ -117,7 +125,7 @@ def test_calibrator_with_data():
             date=base_date + timedelta(days=i),
             game_id=f"TEST_{i}",
             sim_prob=sim_prob,
-            outcome=outcome
+            outcome=outcome,
         )
 
     # Test calibration_quality() - should NOT return 0.15 now
@@ -127,9 +135,13 @@ def test_calibrator_with_data():
         quality = calibrator.calibration_quality()
 
         if quality == 0.15:
-            print(f"⚠️  WARNING: calibration_quality() returned default {quality} despite having data")
+            print(
+                f"⚠️  WARNING: calibration_quality() returned default {quality} despite having data"
+            )
         else:
-            print(f"✅ PASS: calibration_quality() returned computed value: {quality:.4f}")
+            print(
+                f"✅ PASS: calibration_quality() returned computed value: {quality:.4f}"
+            )
 
         # Should NOT have warning
         if len(w) > 0:
@@ -155,7 +167,7 @@ def test_betting_decision_with_empty_calibrator():
             print(f"⚠️  SKIP: Engine not found at {engine_path}")
             return True
 
-        with open(engine_path, 'rb') as f:
+        with open(engine_path, "rb") as f:
             engine = pickle.load(f)
 
         # Make a decision with reasonable parameters
@@ -164,19 +176,25 @@ def test_betting_decision_with_empty_calibrator():
             odds=1.90,
             away_odds=2.00,
             bankroll=10000,
-            game_id="TEST_GAME_123"
+            game_id="TEST_GAME_123",
         )
 
         print(f"Decision: {'BET' if decision['should_bet'] else 'NO BET'}")
         print(f"Reason: {decision.get('reason', 'N/A')}")
 
-        if decision['should_bet']:
-            print(f"✅ PASS: System allows betting (bet amount: ${decision['bet_amount']:.2f})")
+        if decision["should_bet"]:
+            print(
+                f"✅ PASS: System allows betting (bet amount: ${decision['bet_amount']:.2f})"
+            )
         else:
-            if "calibration" in decision.get('reason', '').lower():
-                print(f"❌ FAIL: System blocked bet due to calibration (should allow with 0.15)")
+            if "calibration" in decision.get("reason", "").lower():
+                print(
+                    f"❌ FAIL: System blocked bet due to calibration (should allow with 0.15)"
+                )
             else:
-                print(f"✅ PASS: System blocked bet for valid reason: {decision['reason']}")
+                print(
+                    f"✅ PASS: System blocked bet for valid reason: {decision['reason']}"
+                )
 
     except ImportError:
         print("⚠️  SKIP: dill not available or engine cannot be loaded")
@@ -199,7 +217,7 @@ def main():
         test_bayesian_calibrator_empty,
         test_simulation_calibrator_empty,
         test_calibrator_with_data,
-        test_betting_decision_with_empty_calibrator
+        test_betting_decision_with_empty_calibrator,
     ]
 
     results = []
@@ -209,6 +227,7 @@ def main():
         except Exception as e:
             print(f"❌ ERROR: {e}")
             import traceback
+
             traceback.print_exc()
             results.append(False)
 

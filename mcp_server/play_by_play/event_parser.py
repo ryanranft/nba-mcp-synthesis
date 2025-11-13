@@ -13,6 +13,7 @@ import re
 @dataclass
 class BoxScoreEvent:
     """Represents a single box score contribution from an event."""
+
     player_id: int
     fga: int = 0
     fgm: int = 0
@@ -34,6 +35,7 @@ class BoxScoreEvent:
 @dataclass
 class ParsedEvent:
     """Fully parsed play-by-play event with box score contributions."""
+
     sequence_number: int
     type_text: str
     type_id: int
@@ -60,114 +62,104 @@ class EventParser:
     # Note: Excludes 11 (Jump Ball), 70 (Shot Clock Turnover), 75 (Jumpball Violation), 615 (Jumpball)
     SHOT_TYPES = {
         # Basic shots
-        92: 'Jump Shot',
-        93: 'Hook Shot',
-        94: 'Tip Shot',
-        95: 'Layup Shot',
-        96: 'Dunk Shot',
-
+        92: "Jump Shot",
+        93: "Hook Shot",
+        94: "Tip Shot",
+        95: "Layup Shot",
+        96: "Dunk Shot",
         # Running shots
-        109: 'Running Layup Shot',
-        113: 'Running Jump Shot',
-        116: 'Running Dunk Shot',
-        127: 'Layup Running Reverse',
-        129: 'Running Finger Roll Layup',
-        143: 'Running Alley Oop Layup Shot',
-        146: 'Running Pullup Jump Shot',
-        149: 'Running Alley Oop Dunk Shot',
-        153: 'Running Reverse Dunk Shot',
-
+        109: "Running Layup Shot",
+        113: "Running Jump Shot",
+        116: "Running Dunk Shot",
+        127: "Layup Running Reverse",
+        129: "Running Finger Roll Layup",
+        143: "Running Alley Oop Layup Shot",
+        146: "Running Pullup Jump Shot",
+        149: "Running Alley Oop Dunk Shot",
+        153: "Running Reverse Dunk Shot",
         # Driving shots
-        110: 'Driving Layup Shot',
-        115: 'Driving Dunk Shot',
-        119: 'Driving Hook Shot',
-        126: 'Layup Driving Reverse',
-        128: 'Driving Finger Roll Layup',
-        134: 'Driving Jump Shot Bank',
-        144: 'Driving Floating Jump Shot',
-        145: 'Driving Floating Bank Jump Shot',
-        152: 'Driving Reverse Dunk Shot',
-
+        110: "Driving Layup Shot",
+        115: "Driving Dunk Shot",
+        119: "Driving Hook Shot",
+        126: "Layup Driving Reverse",
+        128: "Driving Finger Roll Layup",
+        134: "Driving Jump Shot Bank",
+        144: "Driving Floating Jump Shot",
+        145: "Driving Floating Bank Jump Shot",
+        152: "Driving Reverse Dunk Shot",
         # Turnaround shots
-        114: 'Turnaround Jump Shot',
-        120: 'Turnaround Hook Shot',
-        136: 'Turnaround Bank Jump Shot',
-        137: 'Turnaround Fade Away Jump Shot',
-        148: 'Turnaround Fadeaway Bank Jump Shot',
-
+        114: "Turnaround Jump Shot",
+        120: "Turnaround Hook Shot",
+        136: "Turnaround Bank Jump Shot",
+        137: "Turnaround Fade Away Jump Shot",
+        148: "Turnaround Fadeaway Bank Jump Shot",
         # Cutting shots
-        141: 'Cutting Layup Shot',
-        142: 'Cutting Finger Roll Layup Shot',
-        151: 'Cutting Dunk Shot',
-
+        141: "Cutting Layup Shot",
+        142: "Cutting Finger Roll Layup Shot",
+        151: "Cutting Dunk Shot",
         # Alley oop shots
-        111: 'Alley Oop Layup Shot',
-        118: 'Alley Oop Dunk Shot',
-
+        111: "Alley Oop Layup Shot",
+        118: "Alley Oop Dunk Shot",
         # Reverse shots
-        112: 'Reverse Layup Shot',
-        117: 'Reverse Dunk Shot',
-
+        112: "Reverse Layup Shot",
+        117: "Reverse Dunk Shot",
         # Fadeaway/stepback shots
-        121: 'Fade Away Jump Shot',
-        130: 'Floating Jump Shot',
-        131: 'Pullup Jump Shot',
-        132: 'Step Back Jump Shot',
-        135: 'Fade Away Bank Jump Shot',
-        147: 'Step Back Bank Jump Shot',
-
+        121: "Fade Away Jump Shot",
+        130: "Floating Jump Shot",
+        131: "Pullup Jump Shot",
+        132: "Step Back Jump Shot",
+        135: "Fade Away Bank Jump Shot",
+        147: "Step Back Bank Jump Shot",
         # Putback shots
-        125: 'Layup Shot Putback',
-        138: 'Putback Dunk Shot',
-        211: 'Dunk Putback Slam',
-        212: 'Dunk Putback Reverse',
-
+        125: "Layup Shot Putback",
+        138: "Putback Dunk Shot",
+        211: "Dunk Putback Slam",
+        212: "Dunk Putback Reverse",
         # Bank shots
-        122: 'Jump Shot Bank',
-        123: 'Hook Shot Bank',
-        133: 'Pullup Bank Jump Shot',
-        139: 'Hook Driving Bank',
-        140: 'Hook Turnaround Bank',
-        209: 'Hook Jump Bank',
-        210: 'Hook Running Bank',
-
+        122: "Jump Shot Bank",
+        123: "Hook Shot Bank",
+        133: "Pullup Bank Jump Shot",
+        139: "Hook Driving Bank",
+        140: "Hook Turnaround Bank",
+        209: "Hook Jump Bank",
+        210: "Hook Running Bank",
         # Finger roll / tip shots
-        124: 'Finger Roll Layup',
-        150: 'Tip Dunk Shot',
+        124: "Finger Roll Layup",
+        150: "Tip Dunk Shot",
     }
 
     # Free throw event types
     FREE_THROW_TYPES = {
-        97: 'Free Throw - 1 of 1',
-        98: 'Free Throw - 1 of 2',
-        99: 'Free Throw - 2 of 2',
-        100: 'Free Throw - 1 of 3',
-        101: 'Free Throw - 2 of 3',
-        102: 'Free Throw - 3 of 3',
-        103: 'Free Throw - Technical',
+        97: "Free Throw - 1 of 1",
+        98: "Free Throw - 1 of 2",
+        99: "Free Throw - 2 of 2",
+        100: "Free Throw - 1 of 3",
+        101: "Free Throw - 2 of 3",
+        102: "Free Throw - 3 of 3",
+        103: "Free Throw - Technical",
     }
 
     # Turnover event types
     TURNOVER_TYPES = {
-        62: 'Bad Pass\nTurnover',
-        63: 'Lost Ball Turnover',
-        64: 'Traveling',
-        67: '3-Second Turnover',
-        70: 'Shot Clock Turnover',
-        74: 'Lane Violation Turnover',
-        84: 'Offensive Foul Turnover',
-        86: 'Out of Bounds - Step Turnover',
+        62: "Bad Pass\nTurnover",
+        63: "Lost Ball Turnover",
+        64: "Traveling",
+        67: "3-Second Turnover",
+        70: "Shot Clock Turnover",
+        74: "Lane Violation Turnover",
+        84: "Offensive Foul Turnover",
+        86: "Out of Bounds - Step Turnover",
     }
 
     # Foul event types
     FOUL_TYPES = {
-        22: 'Personal Take Foul',
-        24: 'Offensive Charge',
+        22: "Personal Take Foul",
+        24: "Offensive Charge",
         # 35: 'Technical Foul',  # REMOVED - Technical fouls don't count as personal fouls per NBA rules
-        42: 'Offensive Foul',
-        43: 'Loose Ball Foul',
-        44: 'Shooting Foul',
-        45: 'Personal Foul',
+        42: "Offensive Foul",
+        43: "Loose Ball Foul",
+        44: "Shooting Foul",
+        45: "Personal Foul",
     }
 
     # ESPN Coordinate System (from ESPN/hoopR documentation)
@@ -196,8 +188,9 @@ class EventParser:
         """
         self.use_coordinates = use_coordinates
 
-    def _is_three_pointer_by_coordinates(self, coord_x: float, coord_y: float,
-                                         home_team_id: int, offensive_team_id: int) -> Optional[bool]:
+    def _is_three_pointer_by_coordinates(
+        self, coord_x: float, coord_y: float, home_team_id: int, offensive_team_id: int
+    ) -> Optional[bool]:
         """
         Determine if shot is a 3-pointer based on court coordinates.
 
@@ -227,7 +220,7 @@ class EventParser:
         # Calculate distance from basket
         rel_x = coord_x - basket_x
         rel_y = coord_y - basket_y
-        distance = (rel_x**2 + rel_y**2)**0.5
+        distance = (rel_x**2 + rel_y**2) ** 0.5
 
         # Determine which 3-point line distance applies
         # Corner: 22 ft when shot is far from center (|y| > 22 ft from basket)
@@ -251,9 +244,9 @@ class EventParser:
         Returns:
             ParsedEvent with box score contributions and possession info
         """
-        type_id = event.get('type_id')
-        type_text = event.get('type_text', '')
-        text = event.get('text', '')
+        type_id = event.get("type_id")
+        type_text = event.get("type_text", "")
+        text = event.get("text", "")
 
         player_stats = []
         is_possession_ending = False
@@ -270,41 +263,45 @@ class EventParser:
             player_stats.extend(stats)
             is_possession_ending = poss_ending
 
-        elif type_text in ['Offensive Rebound', 'Defensive Rebound']:
+        elif type_text in ["Offensive Rebound", "Defensive Rebound"]:
             stats, is_offensive_rebound, poss_ending = self._parse_rebound_event(event)
             player_stats.extend(stats)
             is_possession_ending = poss_ending
 
-        elif type_id in self.TURNOVER_TYPES or 'Turnover' in type_text:
+        elif type_id in self.TURNOVER_TYPES or "Turnover" in type_text:
             stats = self._parse_turnover_event(event)
             player_stats.extend(stats)
             is_possession_ending = True  # All turnovers end possession
 
-        elif type_id in self.FOUL_TYPES or ('Foul' in type_text and 'Technical' not in type_text):
+        elif type_id in self.FOUL_TYPES or (
+            "Foul" in type_text and "Technical" not in type_text
+        ):
             stats, poss_ending = self._parse_foul_event(event)
             player_stats.extend(stats)
             is_possession_ending = poss_ending
 
         return ParsedEvent(
-            sequence_number=int(event.get('sequence_number', 0)),
+            sequence_number=int(event.get("sequence_number", 0)),
             type_text=type_text,
             type_id=type_id,
             text=text,
-            period=event.get('period_number', 1),
-            clock=event.get('clock_display_value', ''),
-            away_score=event.get('away_score', 0),
-            home_score=event.get('home_score', 0),
+            period=event.get("period_number", 1),
+            clock=event.get("clock_display_value", ""),
+            away_score=event.get("away_score", 0),
+            home_score=event.get("home_score", 0),
             player_stats=player_stats,
             is_possession_ending=is_possession_ending,
             is_offensive_rebound=is_offensive_rebound,
-            offensive_team_id=event.get('offensive_team_id'),  # Will be filled by possession tracker
-            defensive_team_id=event.get('defensive_team_id'),
+            offensive_team_id=event.get(
+                "offensive_team_id"
+            ),  # Will be filled by possession tracker
+            defensive_team_id=event.get("defensive_team_id"),
         )
 
     def _parse_shot_event(self, event: Dict) -> Tuple[List[BoxScoreEvent], bool]:
         """Parse shot attempt event with optional coordinate-based 3-point detection."""
-        player_id = event.get('athlete_id_1')
-        text = event.get('text', '').lower()
+        player_id = event.get("athlete_id_1")
+        text = event.get("text", "").lower()
 
         if not player_id:
             return [], False
@@ -318,19 +315,23 @@ class EventParser:
         # Coordinate-based 3-pointer detection (most accurate)
         is_three_by_coords = None
         if self.use_coordinates:
-            coord_x = event.get('coordinate_x')
-            coord_y = event.get('coordinate_y')
-            home_team_id = event.get('home_team_id')
-            offensive_team_id = event.get('team_id')  # Shooting team
+            coord_x = event.get("coordinate_x")
+            coord_y = event.get("coordinate_y")
+            home_team_id = event.get("home_team_id")
+            offensive_team_id = event.get("team_id")  # Shooting team
 
-            if (coord_x is not None and coord_y is not None and
-                home_team_id is not None and offensive_team_id is not None):
+            if (
+                coord_x is not None
+                and coord_y is not None
+                and home_team_id is not None
+                and offensive_team_id is not None
+            ):
                 is_three_by_coords = self._is_three_pointer_by_coordinates(
                     coord_x, coord_y, home_team_id, offensive_team_id
                 )
 
         # Text-based 3-pointer detection (fallback)
-        is_three_by_text = 'three point' in text or '3-point' in text
+        is_three_by_text = "three point" in text or "3-point" in text
 
         # Distance-based 3-pointer detection (fallback)
         # NBA 3-point line: 22 ft in corners, 23.75 ft at arc
@@ -338,7 +339,8 @@ class EventParser:
         is_three_by_distance = False
         if not is_three_by_text:
             import re
-            distance_match = re.search(r'(\d+)-foot', text)
+
+            distance_match = re.search(r"(\d+)-foot", text)
             if distance_match:
                 distance = int(distance_match.group(1))
                 if distance >= 23:
@@ -356,11 +358,13 @@ class EventParser:
             shot_stat.fg3a = 1
 
         # Check outcome - handle both "makes/made" and "misses/missed"
-        is_made = 'makes' in text or 'made' in text
-        is_missed = 'misses' in text or 'missed' in text
-        is_blocked = 'block' in text  # Blocked shots are always missed
+        is_made = "makes" in text or "made" in text
+        is_missed = "misses" in text or "missed" in text
+        is_blocked = "block" in text  # Blocked shots are always missed
 
-        if is_made and not is_missed and not is_blocked:  # Avoid "made X misses" edge cases and blocks
+        if (
+            is_made and not is_missed and not is_blocked
+        ):  # Avoid "made X misses" edge cases and blocks
             # Made shot
             shot_stat.fgm = 1
 
@@ -371,8 +375,8 @@ class EventParser:
                 shot_stat.pts = 2
 
             # Check for assist - handle both "(assists)" and "Assisted by"
-            assister_id = event.get('athlete_id_2')
-            has_assist = 'assist' in text  # Catches both patterns
+            assister_id = event.get("athlete_id_2")
+            has_assist = "assist" in text  # Catches both patterns
             if has_assist and assister_id:
                 assist_stat = BoxScoreEvent(player_id=int(assister_id), ast=1)
                 stats.append(assist_stat)
@@ -383,7 +387,7 @@ class EventParser:
         else:
             # Missed or blocked shot
             if is_blocked:
-                blocker_id = event.get('athlete_id_2')
+                blocker_id = event.get("athlete_id_2")
                 if blocker_id:
                     block_stat = BoxScoreEvent(player_id=int(blocker_id), blk=1)
                     stats.append(block_stat)
@@ -395,9 +399,9 @@ class EventParser:
 
     def _parse_free_throw_event(self, event: Dict) -> Tuple[List[BoxScoreEvent], bool]:
         """Parse free throw event."""
-        player_id = event.get('athlete_id_1')
-        text = event.get('text', '').lower()
-        type_text = event.get('type_text', '')
+        player_id = event.get("athlete_id_1")
+        text = event.get("text", "").lower()
+        type_text = event.get("type_text", "")
 
         if not player_id:
             return [], False
@@ -405,8 +409,8 @@ class EventParser:
         ft_stat = BoxScoreEvent(player_id=int(player_id), fta=1)
 
         # Handle both "makes/made" and "misses/missed"
-        is_made = 'makes' in text or 'made' in text
-        is_missed = 'misses' in text or 'missed' in text
+        is_made = "makes" in text or "made" in text
+        is_missed = "misses" in text or "missed" in text
 
         if is_made and not is_missed:
             ft_stat.ftm = 1
@@ -414,26 +418,28 @@ class EventParser:
 
         # Possession ends after FINAL free throw in sequence
         is_final_ft = (
-            '1 of 1' in type_text or
-            '2 of 2' in type_text or
-            '3 of 3' in type_text or
-            'Technical' in type_text
+            "1 of 1" in type_text
+            or "2 of 2" in type_text
+            or "3 of 3" in type_text
+            or "Technical" in type_text
         )
         possession_ending = is_final_ft
 
         return [ft_stat], possession_ending
 
-    def _parse_rebound_event(self, event: Dict) -> Tuple[List[BoxScoreEvent], bool, bool]:
+    def _parse_rebound_event(
+        self, event: Dict
+    ) -> Tuple[List[BoxScoreEvent], bool, bool]:
         """
         Parse rebound event.
 
         Returns:
             (stats, is_offensive_rebound, possession_ending)
         """
-        player_id = event.get('athlete_id_1')
-        type_text = event.get('type_text', '')
+        player_id = event.get("athlete_id_1")
+        type_text = event.get("type_text", "")
 
-        is_offensive = 'Offensive' in type_text
+        is_offensive = "Offensive" in type_text
 
         # Team rebounds (no player attribution)
         if not player_id:
@@ -456,9 +462,9 @@ class EventParser:
 
     def _parse_turnover_event(self, event: Dict) -> List[BoxScoreEvent]:
         """Parse turnover event."""
-        player_id = event.get('athlete_id_1')
-        type_id = event.get('type_id')
-        text = event.get('text', '')
+        player_id = event.get("athlete_id_1")
+        type_id = event.get("type_id")
+        text = event.get("text", "")
 
         # Skip type 84 "Offensive Foul Turnover" - it duplicates type 42 "Offensive Foul"
         # Type 42 creates both the foul (pf+1) and turnover (tov+1)
@@ -475,8 +481,8 @@ class EventParser:
         # else: team turnover (tracked separately)
 
         # Check for steal - handle both modern "steals)" and old "Stolen by"
-        stealer_id = event.get('athlete_id_2')
-        if 'steal' in text.lower() and stealer_id:
+        stealer_id = event.get("athlete_id_2")
+        if "steal" in text.lower() and stealer_id:
             steal_stat = BoxScoreEvent(player_id=int(stealer_id), stl=1)
             stats.append(steal_stat)
 
@@ -484,9 +490,9 @@ class EventParser:
 
     def _parse_foul_event(self, event: Dict) -> Tuple[List[BoxScoreEvent], bool]:
         """Parse foul event."""
-        player_id = event.get('athlete_id_1')
-        type_id = event.get('type_id')
-        type_text = event.get('type_text', '')
+        player_id = event.get("athlete_id_1")
+        type_id = event.get("type_id")
+        type_text = event.get("type_text", "")
 
         # Skip type 84 "Offensive Foul Turnover" - it duplicates type 42 "Offensive Foul"
         # Type 84 always follows type 42 for the same player, creating double-count
@@ -499,7 +505,7 @@ class EventParser:
         foul_stat = BoxScoreEvent(player_id=int(player_id), pf=1)
 
         # Offensive fouls cause turnovers AND end possession
-        is_offensive_foul = 'Offensive' in type_text or 'Charge' in type_text
+        is_offensive_foul = "Offensive" in type_text or "Charge" in type_text
         if is_offensive_foul:
             foul_stat.tov = 1
             possession_ending = True
@@ -527,14 +533,41 @@ def aggregate_player_stats(events: List[BoxScoreEvent]) -> Dict[int, Dict]:
 
         if player_id not in player_totals:
             player_totals[player_id] = {
-                'fga': 0, 'fgm': 0, 'fg3a': 0, 'fg3m': 0,
-                'fta': 0, 'ftm': 0, 'oreb': 0, 'dreb': 0, 'reb': 0,
-                'ast': 0, 'stl': 0, 'blk': 0, 'tov': 0, 'pf': 0, 'pts': 0
+                "fga": 0,
+                "fgm": 0,
+                "fg3a": 0,
+                "fg3m": 0,
+                "fta": 0,
+                "ftm": 0,
+                "oreb": 0,
+                "dreb": 0,
+                "reb": 0,
+                "ast": 0,
+                "stl": 0,
+                "blk": 0,
+                "tov": 0,
+                "pf": 0,
+                "pts": 0,
             }
 
         # Accumulate stats
-        for stat in ['fga', 'fgm', 'fg3a', 'fg3m', 'fta', 'ftm',
-                     'oreb', 'dreb', 'reb', 'ast', 'stl', 'blk', 'tov', 'pf', 'pts']:
+        for stat in [
+            "fga",
+            "fgm",
+            "fg3a",
+            "fg3m",
+            "fta",
+            "ftm",
+            "oreb",
+            "dreb",
+            "reb",
+            "ast",
+            "stl",
+            "blk",
+            "tov",
+            "pf",
+            "pts",
+        ]:
             player_totals[player_id][stat] += getattr(event, stat)
 
     return player_totals

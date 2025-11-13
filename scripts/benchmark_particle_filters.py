@@ -34,12 +34,13 @@ from mcp_server.particle_filters import (
     create_game_filter,
 )
 
+
 # Data Generators
 def generate_player_data(n_games: int = 50) -> pd.DataFrame:
     """Generate synthetic player game log data."""
     np.random.seed(42)
 
-    dates = pd.date_range(start='2023-01-01', periods=n_games, freq='3D')
+    dates = pd.date_range(start="2023-01-01", periods=n_games, freq="3D")
 
     # Simulate player scoring with trend and form fluctuations
     base_skill = 2.5  # log(exp(2.5)) ≈ 12.2 points per game
@@ -49,7 +50,7 @@ def generate_player_data(n_games: int = 50) -> pd.DataFrame:
     form = np.zeros(n_games)
     form[0] = np.random.normal(0, 0.2)
     for i in range(1, n_games):
-        form[i] = 0.7 * form[i-1] + np.random.normal(0, 0.2)
+        form[i] = 0.7 * form[i - 1] + np.random.normal(0, 0.2)
 
     # Generate points from Poisson
     lambda_values = np.exp(base_skill + skill_trend + form)
@@ -61,12 +62,14 @@ def generate_player_data(n_games: int = 50) -> pd.DataFrame:
 
     opponent_strength = np.random.normal(0, 1, n_games)
 
-    return pd.DataFrame({
-        'date': dates,
-        'points': points,
-        'minutes': minutes,
-        'opponent_strength': opponent_strength
-    }).set_index('date')
+    return pd.DataFrame(
+        {
+            "date": dates,
+            "points": points,
+            "minutes": minutes,
+            "opponent_strength": opponent_strength,
+        }
+    ).set_index("date")
 
 
 def generate_game_updates(n_updates: int = 20) -> List[Tuple[float, int, int]]:
@@ -94,9 +97,12 @@ def simple_transition(particles: np.ndarray, **kwargs) -> np.ndarray:
     return particles + noise
 
 
-def simple_observation(particles: np.ndarray, observation: np.ndarray, **kwargs) -> np.ndarray:
+def simple_observation(
+    particles: np.ndarray, observation: np.ndarray, **kwargs
+) -> np.ndarray:
     """Simple Gaussian observation likelihood for testing."""
     from scipy import stats
+
     obs_val = observation if np.isscalar(observation) else observation[0]
     if particles.ndim == 1:
         likelihoods = stats.norm.pdf(obs_val, loc=particles, scale=1.0)
@@ -120,7 +126,7 @@ def measure_performance(func):
 
 def benchmark_method(name: str, func, category: str) -> dict:
     """Benchmark a single method."""
-    print(f"Testing {name}...", end=' ')
+    print(f"Testing {name}...", end=" ")
 
     result, exec_time, error = measure_performance(func)
 
@@ -132,11 +138,11 @@ def benchmark_method(name: str, func, category: str) -> dict:
         print(f"  Error: {error}")
 
     return {
-        'method': name,
-        'category': category,
-        'execution_time': exec_time,
-        'success': success,
-        'error': error
+        "method": name,
+        "category": category,
+        "execution_time": exec_time,
+        "success": success,
+        "error": error,
     }
 
 
@@ -148,8 +154,8 @@ def test_particle_filter_init():
         state_dim=2,
         transition_fn=simple_transition,
         observation_fn=simple_observation,
-        resampling_method='systematic',
-        resampling_threshold=0.5
+        resampling_method="systematic",
+        resampling_threshold=0.5,
     )
 
     assert pf.n_particles == 500
@@ -164,7 +170,7 @@ def test_initialize_particles():
         n_particles=500,
         state_dim=2,
         transition_fn=simple_transition,
-        observation_fn=simple_observation
+        observation_fn=simple_observation,
     )
 
     initial_state = np.array([1.0, 0.5])
@@ -182,7 +188,7 @@ def test_predict():
         n_particles=500,
         state_dim=1,
         transition_fn=simple_transition,
-        observation_fn=simple_observation
+        observation_fn=simple_observation,
     )
 
     pf.initialize_particles(np.array([5.0]), initial_variance=1.0)
@@ -201,7 +207,7 @@ def test_update():
         n_particles=500,
         state_dim=1,
         transition_fn=simple_transition,
-        observation_fn=simple_observation
+        observation_fn=simple_observation,
     )
 
     pf.initialize_particles(np.array([5.0]), initial_variance=1.0)
@@ -224,7 +230,7 @@ def test_resample_if_needed():
         state_dim=1,
         transition_fn=simple_transition,
         observation_fn=simple_observation,
-        resampling_threshold=0.8  # High threshold to trigger resampling
+        resampling_threshold=0.8,  # High threshold to trigger resampling
     )
 
     pf.initialize_particles(np.array([5.0]), initial_variance=1.0)
@@ -237,7 +243,7 @@ def test_resample_if_needed():
 
     assert resampled == True, "Should have resampled with degenerate weights"
     # After resampling, weights should be uniform
-    assert np.allclose(pf.weights, 1.0/500)
+    assert np.allclose(pf.weights, 1.0 / 500)
     return resampled
 
 
@@ -247,7 +253,7 @@ def test_get_state_estimate():
         n_particles=500,
         state_dim=2,
         transition_fn=simple_transition,
-        observation_fn=simple_observation
+        observation_fn=simple_observation,
     )
 
     initial_state = np.array([3.0, 1.5])
@@ -273,13 +279,13 @@ def test_particle_filter_filter():
         n_particles=1000,
         state_dim=1,
         transition_fn=simple_transition,
-        observation_fn=simple_observation
+        observation_fn=simple_observation,
     )
 
     result = pf.filter(
         observations=observations[:, None],
         initial_state=np.array([0.0]),
-        initial_variance=1.0
+        initial_variance=1.0,
     )
 
     assert result.states.shape == (30, 1)
@@ -297,7 +303,7 @@ def test_player_performance_filter_init():
         skill_drift=0.01,
         skill_volatility=0.05,
         form_persistence=0.7,
-        form_volatility=0.2
+        form_volatility=0.2,
     )
 
     assert pf.n_particles == 500
@@ -315,18 +321,15 @@ def test_filter_player_season():
         n_particles=500,
         skill_volatility=0.05,
         form_volatility=0.2,
-        form_persistence=0.7
+        form_persistence=0.7,
     )
 
-    result = pf.filter_player_season(
-        data=player_data,
-        target_col='points'
-    )
+    result = pf.filter_player_season(data=player_data, target_col="points")
 
     assert result.states.shape == (40, 2)  # 40 games, 2 state dims
-    assert 'skill_mean' in result.form_states.columns
-    assert 'form_mean' in result.form_states.columns
-    assert 'skill' in result.skill_trajectory.columns
+    assert "skill_mean" in result.form_states.columns
+    assert "form_mean" in result.form_states.columns
+    assert "skill" in result.skill_trajectory.columns
     assert len(result.ess_history) == 40
     return result
 
@@ -338,7 +341,7 @@ def test_live_game_filter_init():
         home_strength=5.0,
         away_strength=3.0,
         game_length=48.0,
-        noise_per_minute=1.5
+        noise_per_minute=1.5,
     )
 
     assert gf.n_particles == 1000
@@ -353,15 +356,10 @@ def test_track_game():
     score_updates = generate_game_updates(n_updates=15)
 
     gf = LiveGameProbabilityFilter(
-        n_particles=1000,
-        home_strength=5.0,
-        away_strength=3.0
+        n_particles=1000, home_strength=5.0, away_strength=3.0
     )
 
-    result = gf.track_game(
-        score_updates=score_updates,
-        initial_diff=0.0
-    )
+    result = gf.track_game(score_updates=score_updates, initial_diff=0.0)
 
     assert len(result.time_points) == 15
     assert len(result.win_probabilities) == 15
@@ -377,23 +375,22 @@ def test_diagnose_particle_degeneracy():
         n_particles=500,
         state_dim=1,
         transition_fn=simple_transition,
-        observation_fn=simple_observation
+        observation_fn=simple_observation,
     )
 
     observations = np.random.normal(0, 1, 20)
     result = pf.filter(
-        observations=observations[:, None],
-        initial_state=np.array([0.0])
+        observations=observations[:, None], initial_state=np.array([0.0])
     )
 
     diagnostics = diagnose_particle_degeneracy(result)
 
-    assert 'avg_ess' in diagnostics
-    assert 'min_ess' in diagnostics
-    assert 'resampling_rate' in diagnostics
-    assert 'weight_entropy' in diagnostics
-    assert 'is_degenerate' in diagnostics
-    assert isinstance(diagnostics['is_degenerate'], (bool, np.bool_))
+    assert "avg_ess" in diagnostics
+    assert "min_ess" in diagnostics
+    assert "resampling_rate" in diagnostics
+    assert "weight_entropy" in diagnostics
+    assert "is_degenerate" in diagnostics
+    assert isinstance(diagnostics["is_degenerate"], (bool, np.bool_))
     return diagnostics
 
 
@@ -411,14 +408,14 @@ def test_compare_resampling_methods():
         n_particles=500,
         state_dim=1,
         transition_fn=simple_transition,
-        observation_fn=simple_observation
+        observation_fn=simple_observation,
     )
 
     assert len(comparison) == 3  # 3 resampling methods
-    assert 'method' in comparison.columns
-    assert 'log_likelihood' in comparison.columns
-    assert 'avg_ess' in comparison.columns
-    assert set(comparison['method']) == {'systematic', 'multinomial', 'stratified'}
+    assert "method" in comparison.columns
+    assert "log_likelihood" in comparison.columns
+    assert "avg_ess" in comparison.columns
+    assert set(comparison["method"]) == {"systematic", "multinomial", "stratified"}
     return comparison
 
 
@@ -426,24 +423,19 @@ def test_create_player_filter():
     """Test create_player_filter() utility"""
     player_data = generate_player_data(n_games=30)
 
-    pf = create_player_filter(
-        player_data=player_data,
-        n_particles=500
-    )
+    pf = create_player_filter(player_data=player_data, n_particles=500)
 
     assert isinstance(pf, PlayerPerformanceParticleFilter)
     assert pf.n_particles == 500
-    assert hasattr(pf, 'skill_volatility')
-    assert hasattr(pf, 'form_volatility')
+    assert hasattr(pf, "skill_volatility")
+    assert hasattr(pf, "form_volatility")
     return pf
 
 
 def test_create_game_filter():
     """Test create_game_filter() utility"""
     gf = create_game_filter(
-        home_team_rating=5.0,
-        away_team_rating=2.0,
-        n_particles=1000
+        home_team_rating=5.0, away_team_rating=2.0, n_particles=1000
     )
 
     assert isinstance(gf, LiveGameProbabilityFilter)
@@ -469,23 +461,44 @@ def main():
     test_cases = [
         # Base ParticleFilter (7 methods)
         ("ParticleFilter.__init__", test_particle_filter_init, "ParticleFilter Base"),
-        ("ParticleFilter.initialize_particles", test_initialize_particles, "ParticleFilter Base"),
+        (
+            "ParticleFilter.initialize_particles",
+            test_initialize_particles,
+            "ParticleFilter Base",
+        ),
         ("ParticleFilter.predict", test_predict, "ParticleFilter Base"),
         ("ParticleFilter.update", test_update, "ParticleFilter Base"),
-        ("ParticleFilter.resample_if_needed", test_resample_if_needed, "ParticleFilter Base"),
-        ("ParticleFilter.get_state_estimate", test_get_state_estimate, "ParticleFilter Base"),
+        (
+            "ParticleFilter.resample_if_needed",
+            test_resample_if_needed,
+            "ParticleFilter Base",
+        ),
+        (
+            "ParticleFilter.get_state_estimate",
+            test_get_state_estimate,
+            "ParticleFilter Base",
+        ),
         ("ParticleFilter.filter", test_particle_filter_filter, "ParticleFilter Base"),
-
         # PlayerPerformanceParticleFilter (2 methods)
-        ("PlayerPerformanceParticleFilter.__init__", test_player_performance_filter_init, "Player Performance"),
-        ("PlayerPerformanceParticleFilter.filter_player_season", test_filter_player_season, "Player Performance"),
-
+        (
+            "PlayerPerformanceParticleFilter.__init__",
+            test_player_performance_filter_init,
+            "Player Performance",
+        ),
+        (
+            "PlayerPerformanceParticleFilter.filter_player_season",
+            test_filter_player_season,
+            "Player Performance",
+        ),
         # LiveGameProbabilityFilter (2 methods)
         ("LiveGameProbabilityFilter.__init__", test_live_game_filter_init, "Live Game"),
         ("LiveGameProbabilityFilter.track_game", test_track_game, "Live Game"),
-
         # Utility functions (4 methods)
-        ("diagnose_particle_degeneracy", test_diagnose_particle_degeneracy, "Utilities"),
+        (
+            "diagnose_particle_degeneracy",
+            test_diagnose_particle_degeneracy,
+            "Utilities",
+        ),
         ("compare_resampling_methods", test_compare_resampling_methods, "Utilities"),
         ("create_player_filter", test_create_player_filter, "Utilities"),
         ("create_game_filter", test_create_game_filter, "Utilities"),
@@ -501,7 +514,7 @@ def main():
     print("=" * 70)
 
     total_tests = len(results)
-    successful = sum(1 for r in results if r['success'])
+    successful = sum(1 for r in results if r["success"])
     failed = total_tests - successful
 
     print(f"Total Methods Tested: {total_tests}")
@@ -512,20 +525,20 @@ def main():
     # Break down by category
     categories = {}
     for result in results:
-        cat = result['category']
+        cat = result["category"]
         if cat not in categories:
-            categories[cat] = {'total': 0, 'success': 0}
-        categories[cat]['total'] += 1
-        if result['success']:
-            categories[cat]['success'] += 1
+            categories[cat] = {"total": 0, "success": 0}
+        categories[cat]["total"] += 1
+        if result["success"]:
+            categories[cat]["success"] += 1
 
     print("By Category:")
     for cat, stats in sorted(categories.items()):
-        success_rate = stats['success'] / stats['total'] * 100
+        success_rate = stats["success"] / stats["total"] * 100
         print(f"  {cat}: {stats['success']}/{stats['total']} ({success_rate:.1f}%)")
 
     # Calculate average execution time
-    successful_times = [r['execution_time'] for r in results if r['success']]
+    successful_times = [r["execution_time"] for r in results if r["success"]]
     if successful_times:
         avg_time = sum(successful_times) / len(successful_times)
         print(f"\nAverage Execution Time: {avg_time:.4f}s")
@@ -533,24 +546,28 @@ def main():
         print(f"Slowest: {max(successful_times):.4f}s")
 
     # Save results
-    output_dir = Path(__file__).parent.parent / 'benchmark_results'
+    output_dir = Path(__file__).parent.parent / "benchmark_results"
     output_dir.mkdir(exist_ok=True)
 
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     # Save to JSON
-    json_path = output_dir / f'particle_filters_{timestamp}.json'
-    with open(json_path, 'w') as f:
-        json.dump({
-            'timestamp': datetime.now().isoformat(),
-            'total_tests': total_tests,
-            'successful': successful,
-            'failed': failed,
-            'results': results
-        }, f, indent=2)
+    json_path = output_dir / f"particle_filters_{timestamp}.json"
+    with open(json_path, "w") as f:
+        json.dump(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "total_tests": total_tests,
+                "successful": successful,
+                "failed": failed,
+                "results": results,
+            },
+            f,
+            indent=2,
+        )
 
     # Save to CSV
-    csv_path = output_dir / f'particle_filters_{timestamp}.csv'
+    csv_path = output_dir / f"particle_filters_{timestamp}.csv"
     df = pd.DataFrame(results)
     df.to_csv(csv_path, index=False)
 
@@ -559,7 +576,9 @@ def main():
     print(f"  - {csv_path}")
 
     print("\n" + "=" * 70)
-    print(f"COVERAGE UPDATE: {successful}/{total_tests} particle filter methods tested!")
+    print(
+        f"COVERAGE UPDATE: {successful}/{total_tests} particle filter methods tested!"
+    )
     print(f"Expected total coverage: 75 + {successful} = {75 + successful}/99")
     if successful == total_tests:
         print("🎉 ALL PARTICLE FILTER METHODS TESTED SUCCESSFULLY!")
@@ -568,5 +587,5 @@ def main():
     return 0 if successful == total_tests else 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

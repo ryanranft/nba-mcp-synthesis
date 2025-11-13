@@ -17,5 +17,5 @@ Date: 2025-01-05
 from .rest_fatigue import RestFatigueExtractor
 
 __all__ = [
-    'RestFatigueExtractor',
+    "RestFatigueExtractor",
 ]

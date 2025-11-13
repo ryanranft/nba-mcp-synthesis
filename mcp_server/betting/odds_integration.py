@@ -27,6 +27,7 @@ from mcp_server.betting.odds_utilities import OddsUtilities
 # Import Kelly Criterion if available
 try:
     from mcp_server.betting.kelly_criterion import CalibratedKelly
+
     KELLY_AVAILABLE = True
 except ImportError:
     KELLY_AVAILABLE = False
@@ -58,7 +59,7 @@ class OddsIntegration:
         bankroll: float = 10000.0,
         min_edge: float = 0.03,
         max_bet_fraction: float = 0.05,
-        use_kelly: bool = True
+        use_kelly: bool = True,
     ):
         """
         Initialize odds integration
@@ -86,13 +87,15 @@ class OddsIntegration:
                 logger.warning(f"Failed to initialize Kelly: {e}")
                 self.use_kelly = False
 
-        logger.info(f"OddsIntegration initialized: bankroll=${bankroll:,.0f}, min_edge={min_edge:.1%}")
+        logger.info(
+            f"OddsIntegration initialized: bankroll=${bankroll:,.0f}, min_edge={min_edge:.1%}"
+        )
 
     def combine_predictions_with_odds(
         self,
         predictions: List[Dict[str, Any]],
-        market: str = 'h2h',
-        bookmaker_filter: Optional[List[str]] = None
+        market: str = "h2h",
+        bookmaker_filter: Optional[List[str]] = None,
     ) -> List[Dict[str, Any]]:
         """
         Combine ML predictions with live odds
@@ -113,7 +116,7 @@ class OddsIntegration:
             List of combined prediction + odds dicts
         """
         if bookmaker_filter is None:
-            bookmaker_filter = ['draftkings', 'fanduel', 'betmgm', 'pinnacle']
+            bookmaker_filter = ["draftkings", "fanduel", "betmgm", "pinnacle"]
 
         combined = []
 
@@ -121,20 +124,18 @@ class OddsIntegration:
             try:
                 # Map game to event_id
                 event_id = self.odds_connector.map_game_to_event_id(
-                    pred['game_date'],
-                    pred['home_team'],
-                    pred['away_team']
+                    pred["game_date"], pred["home_team"], pred["away_team"]
                 )
 
                 if not event_id:
-                    logger.warning(f"No event_id found for {pred['away_team']} @ {pred['home_team']}")
+                    logger.warning(
+                        f"No event_id found for {pred['away_team']} @ {pred['home_team']}"
+                    )
                     continue
 
                 # Get latest odds
                 odds = self.odds_connector.get_latest_odds_for_game(
-                    event_id,
-                    market=market,
-                    bookmaker_filter=bookmaker_filter
+                    event_id, market=market, bookmaker_filter=bookmaker_filter
                 )
 
                 if not odds:
@@ -143,18 +144,17 @@ class OddsIntegration:
 
                 # Get best odds for each outcome
                 best_odds = self.odds_connector.get_best_odds_by_bookmaker(
-                    event_id,
-                    market=market
+                    event_id, market=market
                 )
 
                 # Combine with prediction
                 combined_item = {
                     **pred,  # Include all prediction fields
-                    'event_id': event_id,
-                    'market': market,
-                    'odds_raw': odds,
-                    'best_odds': best_odds,
-                    'odds_fetched_at': datetime.now()
+                    "event_id": event_id,
+                    "market": market,
+                    "odds_raw": odds,
+                    "best_odds": best_odds,
+                    "odds_fetched_at": datetime.now(),
                 }
 
                 combined.append(combined_item)
@@ -167,8 +167,7 @@ class OddsIntegration:
         return combined
 
     def calculate_edges(
-        self,
-        combined_data: List[Dict[str, Any]]
+        self, combined_data: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
         """
         Calculate betting edges for each outcome
@@ -183,51 +182,55 @@ class OddsIntegration:
 
         for item in combined_data:
             try:
-                best_odds = item['best_odds']
-                prob_home = item['prob_home']
-                prob_away = item.get('prob_away', 1 - prob_home)
+                best_odds = item["best_odds"]
+                prob_home = item["prob_home"]
+                prob_away = item.get("prob_away", 1 - prob_home)
 
                 # Calculate edges for home and away
                 edges = {}
 
                 # Home team edge
-                if item['home_team'] in best_odds:
-                    home_odds_american = best_odds[item['home_team']]['best_price']
-                    home_odds_decimal = OddsUtilities.american_to_decimal(home_odds_american)
+                if item["home_team"] in best_odds:
+                    home_odds_american = best_odds[item["home_team"]]["best_price"]
+                    home_odds_decimal = OddsUtilities.american_to_decimal(
+                        home_odds_american
+                    )
 
                     # Calculate edge: your_prob - implied_prob
                     implied_prob = OddsUtilities.decimal_to_implied(home_odds_decimal)
                     home_edge = prob_home - implied_prob
 
-                    edges['home'] = {
-                        'team': item['home_team'],
-                        'ml_prob': prob_home,
-                        'odds_american': home_odds_american,
-                        'odds_decimal': home_odds_decimal,
-                        'edge': home_edge,
-                        'ev': (prob_home * home_odds_decimal) - 1,  # Expected value
-                        'bookmaker': best_odds[item['home_team']]['best_bookmaker']
+                    edges["home"] = {
+                        "team": item["home_team"],
+                        "ml_prob": prob_home,
+                        "odds_american": home_odds_american,
+                        "odds_decimal": home_odds_decimal,
+                        "edge": home_edge,
+                        "ev": (prob_home * home_odds_decimal) - 1,  # Expected value
+                        "bookmaker": best_odds[item["home_team"]]["best_bookmaker"],
                     }
 
                 # Away team edge
-                if item['away_team'] in best_odds:
-                    away_odds_american = best_odds[item['away_team']]['best_price']
-                    away_odds_decimal = OddsUtilities.american_to_decimal(away_odds_american)
+                if item["away_team"] in best_odds:
+                    away_odds_american = best_odds[item["away_team"]]["best_price"]
+                    away_odds_decimal = OddsUtilities.american_to_decimal(
+                        away_odds_american
+                    )
 
                     implied_prob = OddsUtilities.decimal_to_implied(away_odds_decimal)
                     away_edge = prob_away - implied_prob
 
-                    edges['away'] = {
-                        'team': item['away_team'],
-                        'ml_prob': prob_away,
-                        'odds_american': away_odds_american,
-                        'odds_decimal': away_odds_decimal,
-                        'edge': away_edge,
-                        'ev': (prob_away * away_odds_decimal) - 1,
-                        'bookmaker': best_odds[item['away_team']]['best_bookmaker']
+                    edges["away"] = {
+                        "team": item["away_team"],
+                        "ml_prob": prob_away,
+                        "odds_american": away_odds_american,
+                        "odds_decimal": away_odds_decimal,
+                        "edge": away_edge,
+                        "ev": (prob_away * away_odds_decimal) - 1,
+                        "bookmaker": best_odds[item["away_team"]]["best_bookmaker"],
                     }
 
-                item['edges'] = edges
+                item["edges"] = edges
                 results.append(item)
 
             except Exception as e:
@@ -237,9 +240,7 @@ class OddsIntegration:
         return results
 
     def find_positive_ev_bets(
-        self,
-        data_with_edges: List[Dict[str, Any]],
-        min_edge: Optional[float] = None
+        self, data_with_edges: List[Dict[str, Any]], min_edge: Optional[float] = None
     ) -> List[Dict[str, Any]]:
         """
         Filter for positive EV betting opportunities
@@ -257,44 +258,45 @@ class OddsIntegration:
         positive_ev_bets = []
 
         for item in data_with_edges:
-            edges = item.get('edges', {})
+            edges = item.get("edges", {})
 
             # Check home team edge
-            if 'home' in edges and edges['home']['edge'] >= min_edge:
+            if "home" in edges and edges["home"]["edge"] >= min_edge:
                 bet = {
-                    'game_id': item['game_id'],
-                    'event_id': item['event_id'],
-                    'game_date': item['game_date'],
-                    'matchup': f"{item['away_team']} @ {item['home_team']}",
-                    'bet_side': item['home_team'],
-                    'bet_type': 'home',
-                    **edges['home'],
-                    'confidence': item.get('confidence', 0.0),
-                    'game_time': item.get('commence_time', None)
+                    "game_id": item["game_id"],
+                    "event_id": item["event_id"],
+                    "game_date": item["game_date"],
+                    "matchup": f"{item['away_team']} @ {item['home_team']}",
+                    "bet_side": item["home_team"],
+                    "bet_type": "home",
+                    **edges["home"],
+                    "confidence": item.get("confidence", 0.0),
+                    "game_time": item.get("commence_time", None),
                 }
                 positive_ev_bets.append(bet)
 
             # Check away team edge
-            if 'away' in edges and edges['away']['edge'] >= min_edge:
+            if "away" in edges and edges["away"]["edge"] >= min_edge:
                 bet = {
-                    'game_id': item['game_id'],
-                    'event_id': item['event_id'],
-                    'game_date': item['game_date'],
-                    'matchup': f"{item['away_team']} @ {item['home_team']}",
-                    'bet_side': item['away_team'],
-                    'bet_type': 'away',
-                    **edges['away'],
-                    'confidence': item.get('confidence', 0.0),
-                    'game_time': item.get('commence_time', None)
+                    "game_id": item["game_id"],
+                    "event_id": item["event_id"],
+                    "game_date": item["game_date"],
+                    "matchup": f"{item['away_team']} @ {item['home_team']}",
+                    "bet_side": item["away_team"],
+                    "bet_type": "away",
+                    **edges["away"],
+                    "confidence": item.get("confidence", 0.0),
+                    "game_time": item.get("commence_time", None),
                 }
                 positive_ev_bets.append(bet)
 
-        logger.info(f"Found {len(positive_ev_bets)} positive EV bets (min edge: {min_edge:.1%})")
+        logger.info(
+            f"Found {len(positive_ev_bets)} positive EV bets (min edge: {min_edge:.1%})"
+        )
         return positive_ev_bets
 
     def apply_kelly_criterion(
-        self,
-        positive_ev_bets: List[Dict[str, Any]]
+        self, positive_ev_bets: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
         """
         Apply Kelly Criterion for position sizing
@@ -308,16 +310,15 @@ class OddsIntegration:
         if not self.use_kelly:
             logger.warning("Kelly Criterion not available, using flat 2% stakes")
             for bet in positive_ev_bets:
-                bet['kelly_fraction'] = 0.02
-                bet['recommended_stake'] = self.bankroll * 0.02
+                bet["kelly_fraction"] = 0.02
+                bet["recommended_stake"] = self.bankroll * 0.02
             return positive_ev_bets
 
         for bet in positive_ev_bets:
             try:
                 # Calculate Kelly fraction
                 kelly_fraction = self.kelly.calculate_kelly(
-                    probability=bet['ml_prob'],
-                    decimal_odds=bet['odds_decimal']
+                    probability=bet["ml_prob"], decimal_odds=bet["odds_decimal"]
                 )
 
                 # Apply Kelly adjustments (fractional Kelly, max bet limits)
@@ -329,15 +330,15 @@ class OddsIntegration:
                 # Calculate recommended stake
                 recommended_stake = self.bankroll * final_fraction
 
-                bet['kelly_fraction'] = final_fraction
-                bet['kelly_raw'] = kelly_fraction
-                bet['recommended_stake'] = recommended_stake
+                bet["kelly_fraction"] = final_fraction
+                bet["kelly_raw"] = kelly_fraction
+                bet["recommended_stake"] = recommended_stake
 
             except Exception as e:
                 logger.error(f"Error calculating Kelly for bet: {e}")
                 # Fallback to conservative 2%
-                bet['kelly_fraction'] = 0.02
-                bet['recommended_stake'] = self.bankroll * 0.02
+                bet["kelly_fraction"] = 0.02
+                bet["recommended_stake"] = self.bankroll * 0.02
 
         return positive_ev_bets
 
@@ -345,7 +346,7 @@ class OddsIntegration:
         self,
         predictions: List[Dict[str, Any]],
         min_edge: Optional[float] = None,
-        market: str = 'h2h'
+        market: str = "h2h",
     ) -> Dict[str, Any]:
         """
         Complete workflow: predictions → odds → edges → Kelly → recommendations
@@ -369,9 +370,9 @@ class OddsIntegration:
         if not combined:
             logger.warning("No games with odds available")
             return {
-                'recommendations': [],
-                'summary': {'total_bets': 0, 'total_stake': 0, 'total_ev': 0},
-                'metadata': {'games_processed': 0, 'games_with_odds': 0}
+                "recommendations": [],
+                "summary": {"total_bets": 0, "total_stake": 0, "total_ev": 0},
+                "metadata": {"games_processed": 0, "games_with_odds": 0},
             }
 
         # Step 2: Calculate edges
@@ -385,38 +386,52 @@ class OddsIntegration:
 
         # Step 5: Generate summary
         summary = {
-            'total_bets': len(recommendations),
-            'total_stake': sum(bet['recommended_stake'] for bet in recommendations),
-            'total_ev': sum(bet['ev'] * bet['recommended_stake'] for bet in recommendations),
-            'avg_edge': sum(bet['edge'] for bet in recommendations) / len(recommendations) if recommendations else 0,
-            'avg_kelly': sum(bet['kelly_fraction'] for bet in recommendations) / len(recommendations) if recommendations else 0,
-            'bankroll_exposure': sum(bet['recommended_stake'] for bet in recommendations) / self.bankroll if self.bankroll > 0 else 0
+            "total_bets": len(recommendations),
+            "total_stake": sum(bet["recommended_stake"] for bet in recommendations),
+            "total_ev": sum(
+                bet["ev"] * bet["recommended_stake"] for bet in recommendations
+            ),
+            "avg_edge": (
+                sum(bet["edge"] for bet in recommendations) / len(recommendations)
+                if recommendations
+                else 0
+            ),
+            "avg_kelly": (
+                sum(bet["kelly_fraction"] for bet in recommendations)
+                / len(recommendations)
+                if recommendations
+                else 0
+            ),
+            "bankroll_exposure": (
+                sum(bet["recommended_stake"] for bet in recommendations) / self.bankroll
+                if self.bankroll > 0
+                else 0
+            ),
         }
 
         metadata = {
-            'games_processed': len(predictions),
-            'games_with_odds': len(combined),
-            'positive_ev_bets': len(positive_ev),
-            'min_edge_used': min_edge or self.min_edge,
-            'market': market,
-            'generated_at': datetime.now().isoformat()
+            "games_processed": len(predictions),
+            "games_with_odds": len(combined),
+            "positive_ev_bets": len(positive_ev),
+            "min_edge_used": min_edge or self.min_edge,
+            "market": market,
+            "generated_at": datetime.now().isoformat(),
         }
 
         logger.info(f"Generated {len(recommendations)} recommendations")
-        logger.info(f"Total stake: ${summary['total_stake']:,.0f} ({summary['bankroll_exposure']:.1%} of bankroll)")
+        logger.info(
+            f"Total stake: ${summary['total_stake']:,.0f} ({summary['bankroll_exposure']:.1%} of bankroll)"
+        )
         logger.info(f"Expected value: ${summary['total_ev']:,.2f}")
 
         return {
-            'recommendations': recommendations,
-            'summary': summary,
-            'metadata': metadata
+            "recommendations": recommendations,
+            "summary": summary,
+            "metadata": metadata,
         }
 
     def get_top_picks(
-        self,
-        recommendations_dict: Dict[str, Any],
-        n: int = 3,
-        sort_by: str = 'edge'
+        self, recommendations_dict: Dict[str, Any], n: int = 3, sort_by: str = "edge"
     ) -> List[Dict[str, Any]]:
         """
         Get top N betting picks
@@ -429,20 +444,24 @@ class OddsIntegration:
         Returns:
             List of top N recommendations sorted by criterion
         """
-        recommendations = recommendations_dict.get('recommendations', [])
+        recommendations = recommendations_dict.get("recommendations", [])
 
         if not recommendations:
             return []
 
         # Sort by criterion
-        if sort_by == 'edge':
-            sorted_recs = sorted(recommendations, key=lambda x: x['edge'], reverse=True)
-        elif sort_by == 'ev':
-            sorted_recs = sorted(recommendations, key=lambda x: x['ev'], reverse=True)
-        elif sort_by == 'kelly':
-            sorted_recs = sorted(recommendations, key=lambda x: x['kelly_fraction'], reverse=True)
-        elif sort_by == 'confidence':
-            sorted_recs = sorted(recommendations, key=lambda x: x['confidence'], reverse=True)
+        if sort_by == "edge":
+            sorted_recs = sorted(recommendations, key=lambda x: x["edge"], reverse=True)
+        elif sort_by == "ev":
+            sorted_recs = sorted(recommendations, key=lambda x: x["ev"], reverse=True)
+        elif sort_by == "kelly":
+            sorted_recs = sorted(
+                recommendations, key=lambda x: x["kelly_fraction"], reverse=True
+            )
+        elif sort_by == "confidence":
+            sorted_recs = sorted(
+                recommendations, key=lambda x: x["confidence"], reverse=True
+            )
         else:
             sorted_recs = recommendations
 
@@ -450,7 +469,7 @@ class OddsIntegration:
 
     def close(self):
         """Close database connections"""
-        if hasattr(self, 'odds_connector'):
+        if hasattr(self, "odds_connector"):
             self.odds_connector.close()
 
 
@@ -458,23 +477,24 @@ if __name__ == "__main__":
     # Test the integration
     import sys
     from pathlib import Path
+
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
     from mcp_server.unified_secrets_manager import load_secrets_hierarchical
 
     # Load secrets
-    load_secrets_hierarchical('nba-mcp-synthesis', 'NBA', 'production')
+    load_secrets_hierarchical("nba-mcp-synthesis", "NBA", "production")
 
     # Create test prediction
     mock_predictions = [
         {
-            'game_id': 'test_001',
-            'game_date': '2025-01-06',
-            'home_team': 'Los Angeles Lakers',
-            'away_team': 'Golden State Warriors',
-            'prob_home': 0.58,
-            'prob_away': 0.42,
-            'confidence': 0.85
+            "game_id": "test_001",
+            "game_date": "2025-01-06",
+            "home_team": "Los Angeles Lakers",
+            "away_team": "Golden State Warriors",
+            "prob_home": 0.58,
+            "prob_away": 0.42,
+            "confidence": 0.85,
         }
     ]
 
@@ -486,8 +506,7 @@ if __name__ == "__main__":
 
     try:
         results = integrator.generate_betting_recommendations(
-            predictions=mock_predictions,
-            min_edge=0.03
+            predictions=mock_predictions, min_edge=0.03
         )
 
         print(f"📊 Results:")
@@ -497,18 +516,21 @@ if __name__ == "__main__":
         print(f"  Recommendations: {results['summary']['total_bets']}")
         print()
 
-        if results['recommendations']:
+        if results["recommendations"]:
             print("💰 Top Recommendations:")
             top_picks = integrator.get_top_picks(results, n=3)
             for i, pick in enumerate(top_picks, 1):
                 print(f"{i}. {pick['bet_side']} ({pick['matchup']})")
-                print(f"   Edge: {pick['edge']:.2%} | Kelly: {pick['kelly_fraction']:.2%} | Stake: ${pick['recommended_stake']:.0f}")
+                print(
+                    f"   Edge: {pick['edge']:.2%} | Kelly: {pick['kelly_fraction']:.2%} | Stake: ${pick['recommended_stake']:.0f}"
+                )
         else:
             print("ℹ️  No betting opportunities found (likely no games today)")
 
     except Exception as e:
         print(f"❌ Error: {e}")
         import traceback
+
         traceback.print_exc()
     finally:
         integrator.close()

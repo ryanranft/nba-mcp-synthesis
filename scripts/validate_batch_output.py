@@ -52,8 +52,14 @@ def validate_batch_output(file_path: str) -> bool:
 
     # Expected metadata columns
     expected_metadata = [
-        'game_id', 'game_date', 'season', 'home_team_id', 'away_team_id',
-        'home_win', 'home_score', 'away_score'
+        "game_id",
+        "game_date",
+        "season",
+        "home_team_id",
+        "away_team_id",
+        "home_win",
+        "home_score",
+        "away_score",
     ]
 
     missing_metadata = [col for col in expected_metadata if col not in df.columns]
@@ -64,7 +70,7 @@ def validate_batch_output(file_path: str) -> bool:
     print(f"✅ All metadata columns present ({len(expected_metadata)} columns)")
 
     # Check for player features
-    player_features = [col for col in df.columns if col.startswith('player__')]
+    player_features = [col for col in df.columns if col.startswith("player__")]
 
     if len(player_features) == 0:
         print("❌ No player features found!")
@@ -74,17 +80,17 @@ def validate_batch_output(file_path: str) -> bool:
 
     # Expected player features
     expected_player_prefixes = [
-        'player__home_top1_ppg',
-        'player__home_top2_ppg',
-        'player__home_top3_ppg',
-        'player__away_top1_ppg',
-        'player__away_top2_ppg',
-        'player__away_top3_ppg',
-        'player__home_roster_per',
-        'player__away_roster_per',
-        'player__home_bench_ppg',
-        'player__away_bench_ppg',
-        'player__top5_ppg_advantage',
+        "player__home_top1_ppg",
+        "player__home_top2_ppg",
+        "player__home_top3_ppg",
+        "player__away_top1_ppg",
+        "player__away_top2_ppg",
+        "player__away_top3_ppg",
+        "player__home_roster_per",
+        "player__away_roster_per",
+        "player__home_bench_ppg",
+        "player__away_bench_ppg",
+        "player__top5_ppg_advantage",
     ]
 
     missing_player = []
@@ -122,12 +128,14 @@ def validate_batch_output(file_path: str) -> bool:
     print("-" * 80)
 
     # Check critical features for missing values
-    critical_features = ['home_win', 'home_score', 'away_score']
+    critical_features = ["home_win", "home_score", "away_score"]
 
     for col in critical_features:
         null_count = df[col].isnull().sum()
         if null_count > 0:
-            print(f"⚠️  {col} has {null_count} missing values ({null_count/len(df)*100:.1f}%)")
+            print(
+                f"⚠️  {col} has {null_count} missing values ({null_count/len(df)*100:.1f}%)"
+            )
         else:
             print(f"✅ {col} has no missing values")
 
@@ -152,7 +160,7 @@ def validate_batch_output(file_path: str) -> bool:
     print("-" * 80)
 
     # PPG features should be 5-50 range
-    ppg_features = [col for col in player_features if '_ppg' in col and '_top' in col]
+    ppg_features = [col for col in player_features if "_ppg" in col and "_top" in col]
 
     issues = []
     for col in ppg_features[:6]:  # Check first 6 PPG features
@@ -165,7 +173,9 @@ def validate_batch_output(file_path: str) -> bool:
             if min_val < 0 or max_val > 60:
                 issues.append(f"{col}: range [{min_val:.1f}, {max_val:.1f}]")
             else:
-                print(f"✅ {col}: mean={mean_val:.1f}, range=[{min_val:.1f}, {max_val:.1f}]")
+                print(
+                    f"✅ {col}: mean={mean_val:.1f}, range=[{min_val:.1f}, {max_val:.1f}]"
+                )
 
     if issues:
         print("\n⚠️  PPG features with unusual ranges:")
@@ -177,7 +187,7 @@ def validate_batch_output(file_path: str) -> bool:
     # Season distribution
     print("Season Distribution:")
     print("-" * 80)
-    season_counts = df['season'].value_counts().sort_index()
+    season_counts = df["season"].value_counts().sort_index()
     for season, count in season_counts.items():
         print(f"  {season}: {count} games")
 
@@ -190,10 +200,10 @@ def validate_batch_output(file_path: str) -> bool:
     print()
 
     validation_passed = (
-        len(df) > 0 and
-        len(player_features) >= 20 and
-        total_features >= 120 and
-        len(missing_metadata) == 0
+        len(df) > 0
+        and len(player_features) >= 20
+        and total_features >= 120
+        and len(missing_metadata) == 0
     )
 
     if validation_passed:
@@ -201,7 +211,9 @@ def validate_batch_output(file_path: str) -> bool:
         print()
         print(f"Dataset ready for training:")
         print(f"  - {len(df)} games")
-        print(f"  - {total_features} features (including {len(player_features)} player features)")
+        print(
+            f"  - {total_features} features (including {len(player_features)} player features)"
+        )
         print(f"  - {len(season_counts)} seasons")
         print()
         print("Next step:")
@@ -230,9 +242,9 @@ def main():
         description="Validate batch feature generation output"
     )
     parser.add_argument(
-        '--file',
-        default='data/game_features_with_players.csv',
-        help='Path to batch output CSV file'
+        "--file",
+        default="data/game_features_with_players.csv",
+        help="Path to batch output CSV file",
     )
 
     args = parser.parse_args()
@@ -241,5 +253,5 @@ def main():
     sys.exit(0 if success else 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

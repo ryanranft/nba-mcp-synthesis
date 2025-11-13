@@ -6,7 +6,11 @@ Tests query plan analysis, optimization suggestions, and metrics tracking.
 
 import pytest
 from datetime import datetime
-from mcp_server.optimization.query_optimizer import QueryOptimizer, QueryPlan, QueryMetrics
+from mcp_server.optimization.query_optimizer import (
+    QueryOptimizer,
+    QueryPlan,
+    QueryMetrics,
+)
 
 
 class TestQueryOptimizer:
@@ -16,9 +20,7 @@ class TestQueryOptimizer:
     def optimizer(self):
         """Create optimizer instance"""
         return QueryOptimizer(
-            slow_query_threshold_ms=100.0,
-            cache_enabled=True,
-            track_metrics=True
+            slow_query_threshold_ms=100.0, cache_enabled=True, track_metrics=True
         )
 
     @pytest.fixture
@@ -29,36 +31,38 @@ class TestQueryOptimizer:
     @pytest.fixture
     def sample_plan_with_seq_scan(self):
         """Sample query plan with sequential scan"""
-        return [{
-            "Plan": {
-                "Node Type": "Seq Scan",
-                "Relation Name": "player_stats",
-                "Total Cost": 450.5,
-                "Plans": []
-            },
-            "Execution Time": 150.2
-        }]
+        return [
+            {
+                "Plan": {
+                    "Node Type": "Seq Scan",
+                    "Relation Name": "player_stats",
+                    "Total Cost": 450.5,
+                    "Plans": [],
+                },
+                "Execution Time": 150.2,
+            }
+        ]
 
     @pytest.fixture
     def sample_plan_with_index(self):
         """Sample query plan with index scan"""
-        return [{
-            "Plan": {
-                "Node Type": "Index Scan",
-                "Relation Name": "player_stats",
-                "Index Name": "idx_player_stats_player_id",
-                "Total Cost": 8.5,
-                "Plans": []
-            },
-            "Execution Time": 5.3
-        }]
+        return [
+            {
+                "Plan": {
+                    "Node Type": "Index Scan",
+                    "Relation Name": "player_stats",
+                    "Index Name": "idx_player_stats_player_id",
+                    "Total Cost": 8.5,
+                    "Plans": [],
+                },
+                "Execution Time": 5.3,
+            }
+        ]
 
     def test_optimizer_initialization(self):
         """Test optimizer initializes with correct settings"""
         optimizer = QueryOptimizer(
-            slow_query_threshold_ms=200.0,
-            cache_enabled=False,
-            track_metrics=False
+            slow_query_threshold_ms=200.0, cache_enabled=False, track_metrics=False
         )
 
         assert optimizer.slow_query_threshold == 200.0
@@ -68,16 +72,13 @@ class TestQueryOptimizer:
         assert len(optimizer.plan_cache) == 0
 
     def test_analyze_query_plan_seq_scan(
-        self,
-        optimizer,
-        sample_query,
-        sample_plan_with_seq_scan
+        self, optimizer, sample_query, sample_plan_with_seq_scan
     ):
         """Test analyzing plan with sequential scan"""
         plan = optimizer.analyze_query_plan(
             query=sample_query,
             plan_json=sample_plan_with_seq_scan,
-            execution_time_ms=150.2
+            execution_time_ms=150.2,
         )
 
         assert isinstance(plan, QueryPlan)
@@ -90,16 +91,11 @@ class TestQueryOptimizer:
         assert len(plan.optimization_suggestions) > 0
 
     def test_analyze_query_plan_index_scan(
-        self,
-        optimizer,
-        sample_query,
-        sample_plan_with_index
+        self, optimizer, sample_query, sample_plan_with_index
     ):
         """Test analyzing plan with index scan"""
         plan = optimizer.analyze_query_plan(
-            query=sample_query,
-            plan_json=sample_plan_with_index,
-            execution_time_ms=5.3
+            query=sample_query, plan_json=sample_plan_with_index, execution_time_ms=5.3
         )
 
         assert plan.has_seq_scan is False
@@ -161,18 +157,11 @@ class TestQueryOptimizer:
         assert slow_queries[0].avg_time_ms > optimizer.slow_query_threshold
 
     def test_get_query_recommendations(
-        self,
-        optimizer,
-        sample_query,
-        sample_plan_with_seq_scan
+        self, optimizer, sample_query, sample_plan_with_seq_scan
     ):
         """Test getting query recommendations"""
         # Analyze plan and track execution
-        optimizer.analyze_query_plan(
-            sample_query,
-            sample_plan_with_seq_scan,
-            150.0
-        )
+        optimizer.analyze_query_plan(sample_query, sample_plan_with_seq_scan, 150.0)
         optimizer.track_query_execution(sample_query, 150.0)
 
         # Get recommendations

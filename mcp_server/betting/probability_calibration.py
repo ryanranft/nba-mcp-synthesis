@@ -51,6 +51,7 @@ import warnings
 # Try to import sklearn for isotonic regression
 try:
     from sklearn.isotonic import IsotonicRegression
+
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False
@@ -60,6 +61,7 @@ except ImportError:
 try:
     import pymc as pm
     import arviz as az
+
     PYMC_AVAILABLE = True
 except ImportError:
     PYMC_AVAILABLE = False
@@ -69,6 +71,7 @@ except ImportError:
 @dataclass
 class CalibrationRecord:
     """Single prediction-outcome pair for tracking"""
+
     date: datetime
     game_id: str
     simulation_prob: float
@@ -149,7 +152,7 @@ class CalibrationDatabase:
                 "No calibration data available. Returning default Brier score of 0.15 "
                 "(acceptable threshold). Add observations via add_observation() to get "
                 "accurate calibration quality metrics.",
-                UserWarning
+                UserWarning,
             )
             return 0.15  # Acceptable threshold - allows betting with caution
         return np.mean([r.brier_score for r in recent])
@@ -167,7 +170,7 @@ class CalibrationDatabase:
                 "No calibration data available. Returning default log loss of 0.70 "
                 "(random guessing threshold). Add observations via add_observation() "
                 "to get accurate calibration quality metrics.",
-                UserWarning
+                UserWarning,
             )
             return 0.70  # Random guessing threshold - allows betting with caution
         return np.mean([r.log_loss for r in recent])
@@ -191,18 +194,20 @@ class CalibrationDatabase:
 
     def to_dataframe(self) -> pd.DataFrame:
         """Convert to pandas DataFrame for analysis"""
-        return pd.DataFrame([
-            {
-                'date': r.date,
-                'game_id': r.game_id,
-                'simulation_prob': r.simulation_prob,
-                'vegas_implied_prob': r.vegas_implied_prob,
-                'actual_outcome': r.actual_outcome,
-                'brier_score': r.brier_score,
-                'log_loss': r.log_loss,
-            }
-            for r in self.records
-        ])
+        return pd.DataFrame(
+            [
+                {
+                    "date": r.date,
+                    "game_id": r.game_id,
+                    "simulation_prob": r.simulation_prob,
+                    "vegas_implied_prob": r.vegas_implied_prob,
+                    "actual_outcome": r.actual_outcome,
+                    "brier_score": r.brier_score,
+                    "log_loss": r.log_loss,
+                }
+                for r in self.records
+            ]
+        )
 
 
 class SimulationCalibrator:
@@ -232,9 +237,11 @@ class SimulationCalibrator:
 
     def __init__(self):
         if not SKLEARN_AVAILABLE:
-            raise ImportError("scikit-learn required for Isotonic calibration. Install with: pip install scikit-learn")
+            raise ImportError(
+                "scikit-learn required for Isotonic calibration. Install with: pip install scikit-learn"
+            )
 
-        self.calibrator = IsotonicRegression(out_of_bounds='clip')
+        self.calibrator = IsotonicRegression(out_of_bounds="clip")
         self.is_fitted = False
         self.database = CalibrationDatabase()
 
@@ -250,7 +257,9 @@ class SimulationCalibrator:
         outcomes = np.asarray(outcomes)
 
         if len(sim_probs) < 10:
-            warnings.warn("Less than 10 samples for calibration. Results may be unreliable.")
+            warnings.warn(
+                "Less than 10 samples for calibration. Results may be unreliable."
+            )
 
         self.calibrator.fit(sim_probs, outcomes)
         self.is_fitted = True
@@ -345,7 +354,9 @@ class BayesianCalibrator:
 
     def __init__(self):
         if not PYMC_AVAILABLE:
-            raise ImportError("PyMC required for Bayesian calibration. Install with: pip install pymc")
+            raise ImportError(
+                "PyMC required for Bayesian calibration. Install with: pip install pymc"
+            )
 
         self.trace = None
         self.model = None
@@ -384,16 +395,16 @@ class BayesianCalibrator:
         with pm.Model() as model:
             # Priors
             # α (intercept): should be ~0 if unbiased
-            alpha = pm.Normal('intercept', mu=0, sigma=1)
+            alpha = pm.Normal("intercept", mu=0, sigma=1)
 
             # β (slope): should be ~1 if well-calibrated
-            beta = pm.Normal('slope', mu=1, sigma=0.5)
+            beta = pm.Normal("slope", mu=1, sigma=0.5)
 
             # Calibrated logit
             logit_p_true = alpha + beta * logit_sim
 
             # Likelihood
-            pm.Bernoulli('outcome', logit_p=logit_p_true, observed=outcomes)
+            pm.Bernoulli("outcome", logit_p=logit_p_true, observed=outcomes)
 
             # Sample posterior
             trace = pm.sample(
@@ -408,7 +419,9 @@ class BayesianCalibrator:
         self.trace = trace
         self.is_fitted = True
 
-    def predict_distribution(self, sim_prob: float, n_samples: int = 2000) -> np.ndarray:
+    def predict_distribution(
+        self, sim_prob: float, n_samples: int = 2000
+    ) -> np.ndarray:
         """
         Get full posterior distribution of true probability
 
@@ -427,8 +440,8 @@ class BayesianCalibrator:
         logit_sim = np.log(sim_prob_clipped / (1 - sim_prob_clipped))
 
         # Get posterior samples
-        alpha_samples = self.trace.posterior['intercept'].values.flatten()[:n_samples]
-        beta_samples = self.trace.posterior['slope'].values.flatten()[:n_samples]
+        alpha_samples = self.trace.posterior["intercept"].values.flatten()[:n_samples]
+        beta_samples = self.trace.posterior["slope"].values.flatten()[:n_samples]
 
         # Posterior predictive
         logit_p_samples = alpha_samples + beta_samples * logit_sim
@@ -465,7 +478,9 @@ class BayesianCalibrator:
         p_distribution = self.predict_distribution(sim_prob)
         return float(np.std(p_distribution))
 
-    def calibration_interval(self, sim_prob: float, alpha: float = 0.05) -> Tuple[float, float]:
+    def calibration_interval(
+        self, sim_prob: float, alpha: float = 0.05
+    ) -> Tuple[float, float]:
         """
         Get credible interval for calibrated probability
 
@@ -496,11 +511,11 @@ class BayesianCalibrator:
         summary = az.summary(self.trace)
 
         return {
-            'intercept_rhat': float(summary.loc['intercept', 'r_hat']),
-            'slope_rhat': float(summary.loc['slope', 'r_hat']),
-            'intercept_ess': float(summary.loc['intercept', 'ess_bulk']),
-            'slope_ess': float(summary.loc['slope', 'ess_bulk']),
-            'divergences': int(self.trace.sample_stats['diverging'].sum().values),
+            "intercept_rhat": float(summary.loc["intercept", "r_hat"]),
+            "slope_rhat": float(summary.loc["slope", "r_hat"]),
+            "intercept_ess": float(summary.loc["intercept", "ess_bulk"]),
+            "slope_ess": float(summary.loc["slope", "ess_bulk"]),
+            "divergences": int(self.trace.sample_stats["diverging"].sum().values),
         }
 
     def calibration_quality(self, recent_n: int = 100) -> float:

@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 
 class StageStatus(Enum):
     """Pipeline stage status"""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -61,12 +62,12 @@ class PipelineStage:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'name': self.name,
-            'status': self.status.value,
-            'duration': self.duration(),
-            'error': self.error,
-            'inputs': self.inputs,
-            'outputs': self.outputs
+            "name": self.name,
+            "status": self.status.value,
+            "duration": self.duration(),
+            "error": self.error,
+            "inputs": self.inputs,
+            "outputs": self.outputs,
         }
 
 
@@ -94,9 +95,13 @@ class PipelineResult:
         lines = [
             f"Pipeline: {self.pipeline_name}",
             f"Status: {self.status.value}",
-            f"Total duration: {self.total_duration():.2f}s" if self.total_duration() else "Duration: N/A",
+            (
+                f"Total duration: {self.total_duration():.2f}s"
+                if self.total_duration()
+                else "Duration: N/A"
+            ),
             "",
-            "Stages:"
+            "Stages:",
         ]
 
         for stage in self.stages:
@@ -105,7 +110,7 @@ class PipelineResult:
                 StageStatus.FAILED: "✗",
                 StageStatus.RUNNING: "→",
                 StageStatus.PENDING: "○",
-                StageStatus.SKIPPED: "−"
+                StageStatus.SKIPPED: "−",
             }.get(stage.status, "?")
 
             duration_str = f"({stage.duration():.2f}s)" if stage.duration() else ""
@@ -143,8 +148,8 @@ class Pipeline:
         function: Callable,
         inputs: Optional[List[str]] = None,
         outputs: Optional[List[str]] = None,
-        depends_on: Optional[List[str]] = None
-    ) -> 'Pipeline':
+        depends_on: Optional[List[str]] = None,
+    ) -> "Pipeline":
         """
         Add stage to pipeline.
 
@@ -163,7 +168,7 @@ class Pipeline:
             function=function,
             inputs=inputs or [],
             outputs=outputs or [],
-            depends_on=depends_on or []
+            depends_on=depends_on or [],
         )
 
         self.stages.append(stage)
@@ -206,7 +211,7 @@ class Pipeline:
     def execute(
         self,
         initial_context: Optional[Dict[str, Any]] = None,
-        continue_on_error: bool = False
+        continue_on_error: bool = False,
     ) -> PipelineResult:
         """
         Execute pipeline.
@@ -236,7 +241,7 @@ class Pipeline:
                 status=StageStatus.FAILED,
                 stages=self.stages,
                 start_time=start_time,
-                end_time=datetime.now()
+                end_time=datetime.now(),
             )
 
         # Execute stages
@@ -246,7 +251,9 @@ class Pipeline:
             # Check if dependencies completed successfully
             if not self._dependencies_satisfied(stage):
                 stage.status = StageStatus.SKIPPED
-                logger.warning(f"Stage '{stage.name}' skipped due to failed dependencies")
+                logger.warning(
+                    f"Stage '{stage.name}' skipped due to failed dependencies"
+                )
                 continue
 
             # Execute stage
@@ -257,7 +264,9 @@ class Pipeline:
                 logger.info(f"Executing stage: {stage.name}")
 
                 # Check inputs available
-                missing_inputs = [inp for inp in stage.inputs if inp not in self.context]
+                missing_inputs = [
+                    inp for inp in stage.inputs if inp not in self.context
+                ]
                 if missing_inputs:
                     raise ValueError(f"Missing inputs: {missing_inputs}")
 
@@ -271,7 +280,9 @@ class Pipeline:
                 stage.end_time = time.time()
                 stage.status = StageStatus.COMPLETED
 
-                logger.info(f"Stage '{stage.name}' completed in {stage.duration():.2f}s")
+                logger.info(
+                    f"Stage '{stage.name}' completed in {stage.duration():.2f}s"
+                )
 
             except Exception as e:
                 stage.end_time = time.time()
@@ -292,10 +303,12 @@ class Pipeline:
             stages=ordered_stages,
             outputs=self.context,
             start_time=start_time,
-            end_time=end_time
+            end_time=end_time,
         )
 
-        logger.info(f"Pipeline '{self.name}' completed with status: {overall_status.value}")
+        logger.info(
+            f"Pipeline '{self.name}' completed with status: {overall_status.value}"
+        )
 
         return result
 
@@ -334,40 +347,56 @@ class PipelineTemplate:
         def load_data(context):
             logger.info("Loading player data...")
             # Placeholder - user provides data
-            return {'data_loaded': True}
+            return {"data_loaded": True}
 
         def feature_engineering(context):
             logger.info("Engineering features...")
             # Use FeaturePipeline from ml_bridge
-            return {'features_ready': True}
+            return {"features_ready": True}
 
         def train_models(context):
             logger.info("Training models...")
             # Train Prophet + RandomForest
-            return {'models_trained': True}
+            return {"models_trained": True}
 
         def ensemble(context):
             logger.info("Creating ensemble...")
             # Combine predictions
-            return {'ensemble_ready': True}
+            return {"ensemble_ready": True}
 
         def evaluate(context):
             logger.info("Evaluating...")
-            return {'evaluation_complete': True}
+            return {"evaluation_complete": True}
 
-        pipeline.add_stage("load_data", load_data, outputs=['data_loaded'])
-        pipeline.add_stage("feature_engineering", feature_engineering,
-                          inputs=['data_loaded'], outputs=['features_ready'],
-                          depends_on=['load_data'])
-        pipeline.add_stage("train_models", train_models,
-                          inputs=['features_ready'], outputs=['models_trained'],
-                          depends_on=['feature_engineering'])
-        pipeline.add_stage("ensemble", ensemble,
-                          inputs=['models_trained'], outputs=['ensemble_ready'],
-                          depends_on=['train_models'])
-        pipeline.add_stage("evaluate", evaluate,
-                          inputs=['ensemble_ready'], outputs=['evaluation_complete'],
-                          depends_on=['ensemble'])
+        pipeline.add_stage("load_data", load_data, outputs=["data_loaded"])
+        pipeline.add_stage(
+            "feature_engineering",
+            feature_engineering,
+            inputs=["data_loaded"],
+            outputs=["features_ready"],
+            depends_on=["load_data"],
+        )
+        pipeline.add_stage(
+            "train_models",
+            train_models,
+            inputs=["features_ready"],
+            outputs=["models_trained"],
+            depends_on=["feature_engineering"],
+        )
+        pipeline.add_stage(
+            "ensemble",
+            ensemble,
+            inputs=["models_trained"],
+            outputs=["ensemble_ready"],
+            depends_on=["train_models"],
+        )
+        pipeline.add_stage(
+            "evaluate",
+            evaluate,
+            inputs=["ensemble_ready"],
+            outputs=["evaluation_complete"],
+            depends_on=["ensemble"],
+        )
 
         return pipeline
 
@@ -386,37 +415,53 @@ class PipelineTemplate:
         pipeline = Pipeline("Causal Analysis")
 
         def load_data(context):
-            return {'data_loaded': True}
+            return {"data_loaded": True}
 
         def estimate_ps(context):
             logger.info("Estimating propensity scores...")
-            return {'ps_estimated': True}
+            return {"ps_estimated": True}
 
         def matching(context):
             logger.info("Matching units...")
-            return {'matched': True}
+            return {"matched": True}
 
         def estimate_effects(context):
             logger.info("Estimating treatment effects...")
-            return {'effects_estimated': True}
+            return {"effects_estimated": True}
 
         def sensitivity(context):
             logger.info("Sensitivity analysis...")
-            return {'sensitivity_complete': True}
+            return {"sensitivity_complete": True}
 
-        pipeline.add_stage("load_data", load_data, outputs=['data_loaded'])
-        pipeline.add_stage("estimate_ps", estimate_ps,
-                          inputs=['data_loaded'], outputs=['ps_estimated'],
-                          depends_on=['load_data'])
-        pipeline.add_stage("matching", matching,
-                          inputs=['ps_estimated'], outputs=['matched'],
-                          depends_on=['estimate_ps'])
-        pipeline.add_stage("estimate_effects", estimate_effects,
-                          inputs=['matched'], outputs=['effects_estimated'],
-                          depends_on=['matching'])
-        pipeline.add_stage("sensitivity", sensitivity,
-                          inputs=['effects_estimated'], outputs=['sensitivity_complete'],
-                          depends_on=['estimate_effects'])
+        pipeline.add_stage("load_data", load_data, outputs=["data_loaded"])
+        pipeline.add_stage(
+            "estimate_ps",
+            estimate_ps,
+            inputs=["data_loaded"],
+            outputs=["ps_estimated"],
+            depends_on=["load_data"],
+        )
+        pipeline.add_stage(
+            "matching",
+            matching,
+            inputs=["ps_estimated"],
+            outputs=["matched"],
+            depends_on=["estimate_ps"],
+        )
+        pipeline.add_stage(
+            "estimate_effects",
+            estimate_effects,
+            inputs=["matched"],
+            outputs=["effects_estimated"],
+            depends_on=["matching"],
+        )
+        pipeline.add_stage(
+            "sensitivity",
+            sensitivity,
+            inputs=["effects_estimated"],
+            outputs=["sensitivity_complete"],
+            depends_on=["estimate_effects"],
+        )
 
         return pipeline
 
@@ -434,38 +479,50 @@ class PipelineTemplate:
         pipeline = Pipeline("Structural Break Analysis")
 
         def load_data(context):
-            return {'data_loaded': True}
+            return {"data_loaded": True}
 
         def test_breaks(context):
             logger.info("Testing for structural breaks...")
-            return {'breaks_tested': True}
+            return {"breaks_tested": True}
 
         def estimate_models(context):
             logger.info("Estimating models with breaks...")
-            return {'models_estimated': True}
+            return {"models_estimated": True}
 
         def forecast(context):
             logger.info("Forecasting...")
-            return {'forecast_complete': True}
+            return {"forecast_complete": True}
 
-        pipeline.add_stage("load_data", load_data, outputs=['data_loaded'])
-        pipeline.add_stage("test_breaks", test_breaks,
-                          inputs=['data_loaded'], outputs=['breaks_tested'],
-                          depends_on=['load_data'])
-        pipeline.add_stage("estimate_models", estimate_models,
-                          inputs=['breaks_tested'], outputs=['models_estimated'],
-                          depends_on=['test_breaks'])
-        pipeline.add_stage("forecast", forecast,
-                          inputs=['models_estimated'], outputs=['forecast_complete'],
-                          depends_on=['estimate_models'])
+        pipeline.add_stage("load_data", load_data, outputs=["data_loaded"])
+        pipeline.add_stage(
+            "test_breaks",
+            test_breaks,
+            inputs=["data_loaded"],
+            outputs=["breaks_tested"],
+            depends_on=["load_data"],
+        )
+        pipeline.add_stage(
+            "estimate_models",
+            estimate_models,
+            inputs=["breaks_tested"],
+            outputs=["models_estimated"],
+            depends_on=["test_breaks"],
+        )
+        pipeline.add_stage(
+            "forecast",
+            forecast,
+            inputs=["models_estimated"],
+            outputs=["forecast_complete"],
+            depends_on=["estimate_models"],
+        )
 
         return pipeline
 
 
 __all__ = [
-    'StageStatus',
-    'PipelineStage',
-    'PipelineResult',
-    'Pipeline',
-    'PipelineTemplate',
+    "StageStatus",
+    "PipelineStage",
+    "PipelineResult",
+    "Pipeline",
+    "PipelineTemplate",
 ]

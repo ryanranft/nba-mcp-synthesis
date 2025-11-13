@@ -51,11 +51,12 @@ from mcp_server.unified_secrets_manager import load_secrets_hierarchical
 # The class definition is needed before loading the pickled model
 try:
     # Add scripts directory to path so we can import from train_game_outcome_model
-    scripts_dir = Path(__file__).parent.parent.parent / 'scripts'
+    scripts_dir = Path(__file__).parent.parent.parent / "scripts"
     if str(scripts_dir) not in sys.path:
         sys.path.insert(0, str(scripts_dir))
 
     from train_game_outcome_model import GameOutcomeEnsemble
+
     HAS_ENSEMBLE_CLASS = True
 except ImportError as e:
     HAS_ENSEMBLE_CLASS = False
@@ -78,7 +79,7 @@ class MLPredictionGenerator:
         self,
         model_path: str = "models/ensemble_game_outcome_model.pkl",
         min_confidence: float = 0.5,
-        use_calibration: bool = True
+        use_calibration: bool = True,
     ):
         """
         Initialize ML prediction generator
@@ -129,14 +130,14 @@ class MLPredictionGenerator:
             import sys
 
             # Read the file
-            with open(model_path, 'rb') as f:
+            with open(model_path, "rb") as f:
                 model_bytes = f.read()
 
             # Create a custom unpickler that remaps __main__.GameOutcomeEnsemble
             class CustomUnpickler(pickle_lib.Unpickler):
                 def find_class(self, module, name):
                     # Remap __main__.GameOutcomeEnsemble to our imported class
-                    if module == '__main__' and name == 'GameOutcomeEnsemble':
+                    if module == "__main__" and name == "GameOutcomeEnsemble":
                         if HAS_ENSEMBLE_CLASS:
                             return GameOutcomeEnsemble
                     return super().find_class(module, name)
@@ -147,13 +148,13 @@ class MLPredictionGenerator:
         except Exception as e:
             logger.error(f"Failed to load model with custom unpickler: {e}")
             # Fallback to standard unpickling
-            with open(model_path, 'rb') as f:
+            with open(model_path, "rb") as f:
                 self.model = pickle_lib.load(f)
 
         logger.info(f"✅ Loaded ensemble model from {model_path}")
 
         # Get model metadata if available
-        if hasattr(self.model, 'metadata'):
+        if hasattr(self.model, "metadata"):
             metadata = self.model.metadata
             logger.info(f"   Model trained: {metadata.get('training_date', 'unknown')}")
             logger.info(f"   Test accuracy: {metadata.get('test_accuracy', 'unknown')}")
@@ -165,11 +166,11 @@ class MLPredictionGenerator:
             return  # Already connected
 
         # Get credentials from environment (loaded by secrets manager)
-        db_host = os.getenv('RDS_HOST')
-        db_port = os.getenv('RDS_PORT', '5432')
-        db_name = os.getenv('RDS_DATABASE')
-        db_user = os.getenv('RDS_USERNAME')
-        db_pass = os.getenv('RDS_PASSWORD')
+        db_host = os.getenv("RDS_HOST")
+        db_port = os.getenv("RDS_PORT", "5432")
+        db_name = os.getenv("RDS_DATABASE")
+        db_user = os.getenv("RDS_USERNAME")
+        db_pass = os.getenv("RDS_PASSWORD")
 
         if not all([db_host, db_name, db_user, db_pass]):
             raise ValueError(
@@ -178,11 +179,7 @@ class MLPredictionGenerator:
             )
 
         self.db_conn = psycopg2.connect(
-            host=db_host,
-            port=db_port,
-            database=db_name,
-            user=db_user,
-            password=db_pass
+            host=db_host, port=db_port, database=db_name, user=db_user, password=db_pass
         )
 
         logger.info(f"✅ Connected to database: {db_name}")
@@ -205,7 +202,7 @@ class MLPredictionGenerator:
             List of game dicts with game_id, home_team, away_team, etc.
         """
         cursor = self.db_conn.cursor()
-        today = date.today().strftime('%Y-%m-%d')
+        today = date.today().strftime("%Y-%m-%d")
 
         query = """
             SELECT
@@ -229,13 +226,13 @@ class MLPredictionGenerator:
 
         return [
             {
-                'game_id': g[0],
-                'home_team_id': g[1],
-                'away_team_id': g[2],
-                'home_team': g[3],
-                'away_team': g[4],
-                'game_date': str(g[5]),
-                'game_time': str(g[6]) if g[6] else None
+                "game_id": g[0],
+                "home_team_id": g[1],
+                "away_team_id": g[2],
+                "home_team": g[3],
+                "away_team": g[4],
+                "game_date": str(g[5]),
+                "game_time": str(g[6]) if g[6] else None,
             }
             for g in games
         ]
@@ -246,7 +243,7 @@ class MLPredictionGenerator:
         home_team_id: int,
         away_team_id: int,
         home_team: str,
-        away_team: str
+        away_team: str,
     ) -> Dict[str, Any]:
         """
         Generate prediction for a single game
@@ -266,7 +263,7 @@ class MLPredictionGenerator:
             features = self.feature_extractor.extract_game_features(
                 home_team_id=home_team_id,
                 away_team_id=away_team_id,
-                game_date=date.today()
+                game_date=date.today(),
             )
 
             if features is None or len(features) == 0:
@@ -277,7 +274,7 @@ class MLPredictionGenerator:
             features_array = np.array(features).reshape(1, -1)
 
             # Get probability predictions
-            if hasattr(self.model, 'predict_proba'):
+            if hasattr(self.model, "predict_proba"):
                 proba = self.model.predict_proba(features_array)[0]
                 prob_home = float(proba[1])  # Index 1 is typically "home win"
             else:
@@ -292,7 +289,7 @@ class MLPredictionGenerator:
             confidence = abs(prob_home - 0.5) * 2.0  # Maps 0.5-1.0 to 0.0-1.0
 
             # Use calibrated probability if available
-            if self.use_calibration and hasattr(self.model, 'calibrate'):
+            if self.use_calibration and hasattr(self.model, "calibrate"):
                 try:
                     prob_home = self.model.calibrate(prob_home)
                     prob_away = 1.0 - prob_home
@@ -300,9 +297,9 @@ class MLPredictionGenerator:
                     logger.debug(f"Calibration not available: {e}")
 
             return {
-                'prob_home': prob_home,
-                'prob_away': prob_away,
-                'confidence': confidence
+                "prob_home": prob_home,
+                "prob_away": prob_away,
+                "confidence": confidence,
             }
 
         except Exception as e:
@@ -347,18 +344,18 @@ class MLPredictionGenerator:
             # Generate prediction for each game
             for game in games:
                 prediction = self._predict_game(
-                    game_id=game['game_id'],
-                    home_team_id=game['home_team_id'],
-                    away_team_id=game['away_team_id'],
-                    home_team=game['home_team'],
-                    away_team=game['away_team']
+                    game_id=game["game_id"],
+                    home_team_id=game["home_team_id"],
+                    away_team_id=game["away_team_id"],
+                    home_team=game["home_team"],
+                    away_team=game["away_team"],
                 )
 
                 if prediction is None:
                     continue  # Skip games with errors
 
                 # Check confidence threshold
-                if prediction['confidence'] < self.min_confidence:
+                if prediction["confidence"] < self.min_confidence:
                     logger.info(
                         f"Skipping {game['away_team']} @ {game['home_team']}: "
                         f"Low confidence ({prediction['confidence']:.2f})"
@@ -366,28 +363,30 @@ class MLPredictionGenerator:
                     continue
 
                 # Format game time
-                game_time = game.get('game_time')
+                game_time = game.get("game_time")
                 if game_time:
                     try:
                         # Convert to readable format (e.g., "7:00 PM ET")
-                        time_obj = datetime.strptime(str(game_time), '%H:%M:%S')
-                        commence_time = time_obj.strftime('%-I:%M %p ET')
+                        time_obj = datetime.strptime(str(game_time), "%H:%M:%S")
+                        commence_time = time_obj.strftime("%-I:%M %p ET")
                     except:
                         commence_time = str(game_time)
                 else:
                     commence_time = "TBD"
 
                 # Build prediction dict
-                predictions.append({
-                    'game_id': game['game_id'],
-                    'game_date': game['game_date'],
-                    'home_team': game['home_team'],
-                    'away_team': game['away_team'],
-                    'prob_home': prediction['prob_home'],
-                    'prob_away': prediction['prob_away'],
-                    'confidence': prediction['confidence'],
-                    'commence_time': commence_time
-                })
+                predictions.append(
+                    {
+                        "game_id": game["game_id"],
+                        "game_date": game["game_date"],
+                        "home_team": game["home_team"],
+                        "away_team": game["away_team"],
+                        "prob_home": prediction["prob_home"],
+                        "prob_away": prediction["prob_away"],
+                        "confidence": prediction["confidence"],
+                        "commence_time": commence_time,
+                    }
+                )
 
             logger.info(f"✅ Generated {len(predictions)} predictions")
 
@@ -443,7 +442,7 @@ if __name__ == "__main__":
 
     # Load secrets
     print("📦 Loading secrets...")
-    load_secrets_hierarchical('nba-mcp-synthesis', 'NBA', 'production')
+    load_secrets_hierarchical("nba-mcp-synthesis", "NBA", "production")
     print("✅ Secrets loaded")
     print()
 
@@ -477,4 +476,5 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"❌ Error: {e}")
         import traceback
+
         traceback.print_exc()

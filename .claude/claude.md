@@ -407,5 +407,123 @@ Plus backwards-compatible aliases:
 
 ---
 
-*Last updated: 2025-01-05*
-*System: Hierarchical Secrets Management*
+## Task Tracking Protocol (MANDATORY)
+
+**CRITICAL:** You MUST create and maintain tasks for every user request that involves work to be done.
+
+### When to Create Tasks (ALWAYS)
+
+Create tasks immediately when user:
+- Asks you to "research", "analyze", "build", "create", "fix", "implement", "investigate", "compare", "test", "deploy"
+- Provides any request with multiple steps (>2 distinct actions)
+- Assigns complex work (anything taking >5 minutes)
+- Continues work from previous sessions
+
+**DO NOT** create tasks for:
+- Simple questions/explanations
+- Single-step operations
+- Purely conversational interactions
+
+### Task Creation Pattern
+
+**1. IMMEDIATE task creation when user assigns work:**
+
+```markdown
+[Use TodoWrite or Task MCP to create tasks]
+
+Example structure:
+1. Main task from user request (priority: high)
+2. Sub-task 1: Specific action needed
+3. Sub-task 2: Specific action needed
+4. Sub-task 3: Verification/testing
+```
+
+**2. Update status BEFORE starting work:**
+- Change from "pending" to "in_progress"
+- Have exactly ONE task "in_progress" at a time
+
+**3. Mark complete IMMEDIATELY after finishing:**
+- Change from "in_progress" to "completed"
+- Do NOT batch completions - update as you go
+
+### Session Start Protocol
+
+**At the beginning of EVERY conversation:**
+
+1. **Check for existing tasks:**
+   - Query Task Tracker MCP for pending/in_progress tasks
+   - Check for HANDOFF documents in project root
+
+2. **Display to user:**
+   - Show all pending/in-progress tasks
+   - Ask which task to continue or if starting new work
+
+3. **Resume or start:**
+   - If continuing: mark resumed task as "in_progress"
+   - If new work: create fresh task list
+
+### During Work Protocol
+
+**While working on tasks:**
+
+1. **Update frequently:**
+   - Mark task "in_progress" when you start
+   - Mark "completed" immediately when done
+   - Add notes for discoveries/issues
+
+2. **Track problems:**
+   - If encountering blockers, note in task
+   - If discovering improvements, add to Future Improvements
+
+3. **Stay on track:**
+   - Reference current task in your responses
+   - Don't jump to new tasks without updating status
+
+### Session End Protocol
+
+**Before conversation ends:**
+
+1. **Review all tasks:**
+   - Verify statuses are accurate
+   - Ensure nothing marked "in_progress" incorrectly
+
+2. **For incomplete work:**
+   - Suggest creating HANDOFF document if complex
+   - Ensure all pending tasks are properly documented
+
+3. **Summarize:**
+   - Tell user what was completed
+   - List what remains pending
+
+### Task Tracking Tools Available
+
+**Built-in TodoWrite:** For session-level tracking (doesn't persist)
+
+**Task Tracker MCP:** For persistent cross-session tracking (preferred)
+- `create_task` - Add new task
+- `list_tasks` - View all tasks
+- `update_task_status` - Change status
+- `get_active_tasks` - See current work
+
+**UserPromptSubmit Hook:** Automatically extracts tasks from user prompts and injects them as context
+
+### Enforcement
+
+**This is NON-NEGOTIABLE:**
+- Task tracking prevents wasted time
+- Enables continuity across sessions
+- Helps user stay organized
+- Essential for complex multi-session projects
+
+**VIOLATION CONSEQUENCES:**
+- User loses track of progress
+- Work gets duplicated
+- Context is lost between sessions
+- User frustration increases
+
+**Your commitment:** Use task tracking religiously for all non-trivial work.
+
+---
+
+*Last updated: 2025-11-12*
+*System: Hierarchical Secrets Management + Automatic Task Tracking*

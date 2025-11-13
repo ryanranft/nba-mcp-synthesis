@@ -40,7 +40,7 @@ import warnings
 
 import pandas as pd
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -62,7 +62,7 @@ class ContinuousRetrainingPipeline:
         reports_dir: str = "reports",
         keep_last_n_models: int = 5,
         min_improvement: float = 0.01,  # 1% Brier score improvement
-        notify: Optional[str] = None
+        notify: Optional[str] = None,
     ):
         """
         Initialize retraining pipeline
@@ -87,7 +87,13 @@ class ContinuousRetrainingPipeline:
         self.notify = notify
 
         # Create directories
-        for directory in [self.data_dir, self.models_dir, self.archive_dir, self.plots_dir, self.reports_dir]:
+        for directory in [
+            self.data_dir,
+            self.models_dir,
+            self.archive_dir,
+            self.plots_dir,
+            self.reports_dir,
+        ]:
             directory.mkdir(parents=True, exist_ok=True)
 
         # Generate timestamp for this run
@@ -98,7 +104,9 @@ class ContinuousRetrainingPipeline:
         self.calibration_file = self.data_dir / "calibration_training_data.csv"
 
         # Current model paths
-        self.current_ensemble_model = self.models_dir / "ensemble_game_outcome_model.pkl"
+        self.current_ensemble_model = (
+            self.models_dir / "ensemble_game_outcome_model.pkl"
+        )
         self.current_calibrator = self.models_dir / "calibrated_kelly_engine.pkl"
 
         # New model paths (versioned)
@@ -114,7 +122,7 @@ class ContinuousRetrainingPipeline:
             "steps_completed": [],
             "steps_failed": [],
             "metrics": {},
-            "deployed": False
+            "deployed": False,
         }
 
     def run_feature_extraction(self) -> bool:
@@ -127,8 +135,10 @@ class ContinuousRetrainingPipeline:
             from subprocess import run, PIPE
 
             cmd = [
-                "python", "scripts/prepare_game_features_complete.py",
-                "--output", str(self.features_file)
+                "python",
+                "scripts/prepare_game_features_complete.py",
+                "--output",
+                str(self.features_file),
             ]
 
             result = run(cmd, stdout=PIPE, stderr=PIPE, text=True)
@@ -175,9 +185,12 @@ class ContinuousRetrainingPipeline:
             temp_output.mkdir(exist_ok=True)
 
             cmd = [
-                "python", "scripts/train_game_outcome_model.py",
-                "--features", str(self.features_file),
-                "--output", str(temp_output) + "/"
+                "python",
+                "scripts/train_game_outcome_model.py",
+                "--features",
+                str(self.features_file),
+                "--output",
+                str(temp_output) + "/",
             ]
 
             result = run(cmd, stdout=PIPE, stderr=PIPE, text=True)
@@ -202,7 +215,7 @@ class ContinuousRetrainingPipeline:
             # Load metadata
             metadata_path = temp_output / "model_metadata.json"
             if metadata_path.exists():
-                with open(metadata_path, 'r') as f:
+                with open(metadata_path, "r") as f:
                     metadata = json.load(f)
                     self.results["metrics"].update(metadata)
 
@@ -228,10 +241,14 @@ class ContinuousRetrainingPipeline:
             from subprocess import run, PIPE
 
             cmd = [
-                "python", "scripts/backtest_historical_games.py",
-                "--features", str(self.features_file),
-                "--model", str(self.new_ensemble_model),
-                "--output", str(self.calibration_file)
+                "python",
+                "scripts/backtest_historical_games.py",
+                "--features",
+                str(self.features_file),
+                "--model",
+                str(self.new_ensemble_model),
+                "--output",
+                str(self.calibration_file),
             ]
 
             result = run(cmd, stdout=PIPE, stderr=PIPE, text=True)
@@ -276,9 +293,12 @@ class ContinuousRetrainingPipeline:
             temp_output.mkdir(exist_ok=True)
 
             cmd = [
-                "python", "scripts/train_kelly_calibrator.py",
-                "--data", str(self.calibration_file),
-                "--output", str(temp_output) + "/"
+                "python",
+                "scripts/train_kelly_calibrator.py",
+                "--data",
+                str(self.calibration_file),
+                "--output",
+                str(temp_output) + "/",
             ]
 
             result = run(cmd, stdout=PIPE, stderr=PIPE, text=True)
@@ -303,7 +323,7 @@ class ContinuousRetrainingPipeline:
             # Load calibrator metadata
             cal_metadata_path = temp_output / "calibrator_metadata.json"
             if cal_metadata_path.exists():
-                with open(cal_metadata_path, 'r') as f:
+                with open(cal_metadata_path, "r") as f:
                     cal_metadata = json.load(f)
                     self.results["metrics"]["calibrator"] = cal_metadata
 
@@ -342,7 +362,7 @@ class ContinuousRetrainingPipeline:
                 print("⚠ Current model metadata not found - deploying new model")
                 return (True, "missing_metadata")
 
-            with open(current_metadata_path, 'r') as f:
+            with open(current_metadata_path, "r") as f:
                 current_metadata = json.load(f)
 
             # Compare Brier scores
@@ -360,16 +380,22 @@ class ContinuousRetrainingPipeline:
             improvement_pct = (improvement / current_brier) * 100
 
             print(f"Improvement: {improvement:.4f} ({improvement_pct:.1f}%)")
-            print(f"Minimum required: {self.min_improvement:.4f} ({self.min_improvement * 100:.1f}%)")
+            print(
+                f"Minimum required: {self.min_improvement:.4f} ({self.min_improvement * 100:.1f}%)"
+            )
 
             self.results["metrics"]["brier_improvement"] = improvement
             self.results["metrics"]["brier_improvement_pct"] = improvement_pct
 
             if improvement >= self.min_improvement:
-                print(f"✓ New model improves Brier score by {improvement_pct:.1f}% - DEPLOYING")
+                print(
+                    f"✓ New model improves Brier score by {improvement_pct:.1f}% - DEPLOYING"
+                )
                 return (True, "performance_improved")
             else:
-                print(f"❌ New model improvement ({improvement_pct:.1f}%) below threshold - KEEPING CURRENT")
+                print(
+                    f"❌ New model improvement ({improvement_pct:.1f}%) below threshold - KEEPING CURRENT"
+                )
                 return (False, "insufficient_improvement")
 
         except Exception as e:
@@ -398,7 +424,9 @@ class ContinuousRetrainingPipeline:
         try:
             # Archive current models if they exist
             if self.current_ensemble_model.exists():
-                archive_name = f"ensemble_{datetime.now().strftime('%Y%m%d_%H%M%S')}_archived.pkl"
+                archive_name = (
+                    f"ensemble_{datetime.now().strftime('%Y%m%d_%H%M%S')}_archived.pkl"
+                )
                 archive_path = self.archive_dir / archive_name
                 shutil.copy(str(self.current_ensemble_model), str(archive_path))
                 print(f"✓ Archived current ensemble: {archive_path}")
@@ -418,7 +446,7 @@ class ContinuousRetrainingPipeline:
 
             # Update metadata
             metadata_path = self.models_dir / "model_metadata.json"
-            with open(metadata_path, 'w') as f:
+            with open(metadata_path, "w") as f:
                 json.dump(self.results["metrics"], f, indent=2)
             print(f"✓ Updated metadata: {metadata_path}")
 
@@ -439,11 +467,15 @@ class ContinuousRetrainingPipeline:
         """Remove old archived models, keeping last N"""
         try:
             # Get all archived models
-            archives = sorted(self.archive_dir.glob("*.pkl"), key=lambda p: p.stat().st_mtime, reverse=True)
+            archives = sorted(
+                self.archive_dir.glob("*.pkl"),
+                key=lambda p: p.stat().st_mtime,
+                reverse=True,
+            )
 
             # Keep last N models
             if len(archives) > self.keep_last_n_models:
-                for old_model in archives[self.keep_last_n_models:]:
+                for old_model in archives[self.keep_last_n_models :]:
                     old_model.unlink()
                     print(f"✓ Removed old archive: {old_model}")
 
@@ -456,17 +488,18 @@ class ContinuousRetrainingPipeline:
             return
 
         try:
-            if self.notify == 'sms':
+            if self.notify == "sms":
                 from mcp_server.betting.notifications import NotificationManager
-                notifier = NotificationManager(config={'sms': {'enabled': True}})
+
+                notifier = NotificationManager(config={"sms": {"enabled": True}})
                 notifier.send_message(
                     subject="NBA Model Retraining Complete",
                     message=message,
-                    channels=['sms']
+                    channels=["sms"],
                 )
                 print("✓ SMS notification sent")
 
-            elif self.notify == 'email':
+            elif self.notify == "email":
                 # Email notification (not implemented yet)
                 print("⚠ Email notifications not implemented yet")
 
@@ -476,7 +509,7 @@ class ContinuousRetrainingPipeline:
     def save_report(self):
         """Save retraining report"""
         report_path = self.reports_dir / f"retraining_report_{self.timestamp}.json"
-        with open(report_path, 'w') as f:
+        with open(report_path, "w") as f:
             json.dump(self.results, f, indent=2)
         print(f"✓ Saved retraining report: {report_path}")
 
@@ -526,7 +559,7 @@ class ContinuousRetrainingPipeline:
         should_deploy, reason = self.compare_models()
         self.results["deployment_decision"] = {
             "should_deploy": should_deploy,
-            "reason": reason
+            "reason": reason,
         }
 
         # Step 6: Deployment
@@ -560,34 +593,28 @@ class ContinuousRetrainingPipeline:
         print(f"Deployed: {'✓ YES' if self.results['deployed'] else '✗ NO'}")
         print()
 
-        return len(self.results['steps_failed']) == 0
+        return len(self.results["steps_failed"]) == 0
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="NBA Continuous Retraining Pipeline"
-    )
+    parser = argparse.ArgumentParser(description="NBA Continuous Retraining Pipeline")
     parser.add_argument(
-        '--min-improvement',
+        "--min-improvement",
         type=float,
         default=0.01,
-        help='Minimum Brier score improvement for deployment (default: 0.01 = 1%%)'
+        help="Minimum Brier score improvement for deployment (default: 0.01 = 1%%)",
     )
     parser.add_argument(
-        '--keep-models',
+        "--keep-models",
         type=int,
         default=5,
-        help='Number of archived models to keep (default: 5)'
+        help="Number of archived models to keep (default: 5)",
     )
     parser.add_argument(
-        '--notify',
-        choices=['sms', 'email'],
-        help='Send notification via SMS or email'
+        "--notify", choices=["sms", "email"], help="Send notification via SMS or email"
     )
     parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Run training but do not deploy models'
+        "--dry-run", action="store_true", help="Run training but do not deploy models"
     )
 
     args = parser.parse_args()
@@ -599,7 +626,7 @@ def main():
     pipeline = ContinuousRetrainingPipeline(
         min_improvement=args.min_improvement,
         keep_last_n_models=args.keep_models,
-        notify=args.notify
+        notify=args.notify,
     )
 
     success = pipeline.run(dry_run=args.dry_run)
@@ -607,5 +634,5 @@ def main():
     sys.exit(0 if success else 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

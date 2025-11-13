@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 class EnsembleMethod(Enum):
     """Ensemble combination methods"""
+
     AVERAGE = "average"  # Simple average
     WEIGHTED_AVERAGE = "weighted_average"  # Weighted by performance
     MEDIAN = "median"  # Median prediction
@@ -45,13 +46,13 @@ class EnsembleConfig:
     model_weights: Optional[Dict[str, float]] = None
 
     # Weight calculation
-    weight_by: str = 'test_score'  # test_score, cv_score, aic, bic
+    weight_by: str = "test_score"  # test_score, cv_score, aic, bic
 
     # Stacking
     meta_learner: Optional[Any] = None
 
     # Selection
-    selection_metric: str = 'rmse'  # rmse, mae, r2
+    selection_metric: str = "rmse"  # rmse, mae, r2
 
     # Uncertainty
     compute_uncertainty: bool = True
@@ -80,14 +81,13 @@ class EnsemblePrediction:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'predictions': self.predictions.tolist(),
-            'model_predictions': {
-                name: preds.tolist()
-                for name, preds in self.model_predictions.items()
+            "predictions": self.predictions.tolist(),
+            "model_predictions": {
+                name: preds.tolist() for name, preds in self.model_predictions.items()
             },
-            'has_uncertainty': self.std_errors is not None,
-            'model_weights': self.model_weights,
-            'best_model': self.best_model_name
+            "has_uncertainty": self.std_errors is not None,
+            "model_weights": self.model_weights,
+            "best_model": self.best_model_name,
         }
 
 
@@ -109,14 +109,11 @@ class ModelEnsemble:
         self.model_scores: Dict[str, float] = {}
         self.is_fitted = False
 
-        logger.info(f"ModelEnsemble initialized with method: {self.config.method.value}")
+        logger.info(
+            f"ModelEnsemble initialized with method: {self.config.method.value}"
+        )
 
-    def add_model(
-        self,
-        name: str,
-        model: Any,
-        score: Optional[float] = None
-    ):
+    def add_model(self, name: str, model: Any, score: Optional[float] = None):
         """
         Add model to ensemble.
 
@@ -168,9 +165,7 @@ class ModelEnsemble:
         return weights
 
     def predict(
-        self,
-        X: np.ndarray,
-        return_details: bool = False
+        self, X: np.ndarray, return_details: bool = False
     ) -> Union[np.ndarray, EnsemblePrediction]:
         """
         Generate ensemble predictions.
@@ -231,24 +226,23 @@ class ModelEnsemble:
                 std_errors=std_errors,
                 confidence_intervals=ci,
                 model_weights=weights,
-                best_model_name=best_model if self.config.method == EnsembleMethod.BEST_MODEL else None
+                best_model_name=(
+                    best_model
+                    if self.config.method == EnsembleMethod.BEST_MODEL
+                    else None
+                ),
             )
             return result
         else:
             return predictions
 
-    def _average_predictions(
-        self,
-        predictions: Dict[str, np.ndarray]
-    ) -> np.ndarray:
+    def _average_predictions(self, predictions: Dict[str, np.ndarray]) -> np.ndarray:
         """Simple average of predictions"""
         pred_matrix = np.column_stack(list(predictions.values()))
         return np.mean(pred_matrix, axis=1)
 
     def _weighted_average_predictions(
-        self,
-        predictions: Dict[str, np.ndarray],
-        weights: Dict[str, float]
+        self, predictions: Dict[str, np.ndarray], weights: Dict[str, float]
     ) -> np.ndarray:
         """Weighted average of predictions"""
         weighted_sum = np.zeros(len(next(iter(predictions.values()))))
@@ -259,17 +253,13 @@ class ModelEnsemble:
 
         return weighted_sum
 
-    def _median_predictions(
-        self,
-        predictions: Dict[str, np.ndarray]
-    ) -> np.ndarray:
+    def _median_predictions(self, predictions: Dict[str, np.ndarray]) -> np.ndarray:
         """Median of predictions"""
         pred_matrix = np.column_stack(list(predictions.values()))
         return np.median(pred_matrix, axis=1)
 
     def _best_model_prediction(
-        self,
-        predictions: Dict[str, np.ndarray]
+        self, predictions: Dict[str, np.ndarray]
     ) -> Tuple[np.ndarray, str]:
         """Select best model's predictions"""
         if self.model_scores:
@@ -280,9 +270,7 @@ class ModelEnsemble:
         return predictions[best_model], best_model
 
     def _calculate_uncertainty(
-        self,
-        all_predictions: Dict[str, np.ndarray],
-        ensemble_pred: np.ndarray
+        self, all_predictions: Dict[str, np.ndarray], ensemble_pred: np.ndarray
     ) -> Tuple[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         """
         Calculate prediction uncertainty.
@@ -301,11 +289,7 @@ class ModelEnsemble:
 
         return std_errors, (lower, upper)
 
-    def evaluate(
-        self,
-        X: np.ndarray,
-        y_true: np.ndarray
-    ) -> Dict[str, Any]:
+    def evaluate(self, X: np.ndarray, y_true: np.ndarray) -> Dict[str, Any]:
         """
         Evaluate ensemble performance.
 
@@ -326,27 +310,30 @@ class ModelEnsemble:
                 preds = model.predict(X)
                 rmse = np.sqrt(np.mean((y_true - preds) ** 2))
                 mae = np.mean(np.abs(y_true - preds))
-                individual_metrics[name] = {'rmse': rmse, 'mae': mae}
+                individual_metrics[name] = {"rmse": rmse, "mae": mae}
             except:
-                individual_metrics[name] = {'rmse': np.inf, 'mae': np.inf}
+                individual_metrics[name] = {"rmse": np.inf, "mae": np.inf}
 
         # Ensemble metrics
         ensemble_rmse = np.sqrt(np.mean((y_true - ensemble_pred) ** 2))
         ensemble_mae = np.mean(np.abs(y_true - ensemble_pred))
 
         # Best individual model
-        best_model = min(individual_metrics.items(), key=lambda x: x[1]['rmse'])
+        best_model = min(individual_metrics.items(), key=lambda x: x[1]["rmse"])
 
         results = {
-            'ensemble_rmse': ensemble_rmse,
-            'ensemble_mae': ensemble_mae,
-            'individual_metrics': individual_metrics,
-            'best_individual_model': best_model[0],
-            'best_individual_rmse': best_model[1]['rmse'],
-            'improvement_over_best': (best_model[1]['rmse'] - ensemble_rmse) / best_model[1]['rmse']
+            "ensemble_rmse": ensemble_rmse,
+            "ensemble_mae": ensemble_mae,
+            "individual_metrics": individual_metrics,
+            "best_individual_model": best_model[0],
+            "best_individual_rmse": best_model[1]["rmse"],
+            "improvement_over_best": (best_model[1]["rmse"] - ensemble_rmse)
+            / best_model[1]["rmse"],
         }
 
-        logger.info(f"Ensemble RMSE: {ensemble_rmse:.4f}, Best individual: {best_model[1]['rmse']:.4f}")
+        logger.info(
+            f"Ensemble RMSE: {ensemble_rmse:.4f}, Best individual: {best_model[1]['rmse']:.4f}"
+        )
 
         return results
 
@@ -366,11 +353,7 @@ class ContextualEnsemble:
 
         logger.info("ContextualEnsemble initialized")
 
-    def add_model_group(
-        self,
-        context: str,
-        ensemble: ModelEnsemble
-    ):
+    def add_model_group(self, context: str, ensemble: ModelEnsemble):
         """
         Add model ensemble for specific context.
 
@@ -390,11 +373,7 @@ class ContextualEnsemble:
         """
         self.context_selector = selector
 
-    def predict(
-        self,
-        X: np.ndarray,
-        context: Optional[str] = None
-    ) -> np.ndarray:
+    def predict(self, X: np.ndarray, context: Optional[str] = None) -> np.ndarray:
         """
         Predict with context selection.
 
@@ -421,7 +400,7 @@ class ContextualEnsemble:
 def create_ensemble(
     models: Dict[str, Any],
     scores: Optional[Dict[str, float]] = None,
-    method: EnsembleMethod = EnsembleMethod.WEIGHTED_AVERAGE
+    method: EnsembleMethod = EnsembleMethod.WEIGHTED_AVERAGE,
 ) -> ModelEnsemble:
     """
     Convenience function to create ensemble.
@@ -445,10 +424,10 @@ def create_ensemble(
 
 
 __all__ = [
-    'EnsembleMethod',
-    'EnsembleConfig',
-    'EnsemblePrediction',
-    'ModelEnsemble',
-    'ContextualEnsemble',
-    'create_ensemble',
+    "EnsembleMethod",
+    "EnsembleConfig",
+    "EnsemblePrediction",
+    "ModelEnsemble",
+    "ContextualEnsemble",
+    "create_ensemble",
 ]

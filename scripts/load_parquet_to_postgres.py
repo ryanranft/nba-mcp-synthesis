@@ -45,43 +45,46 @@ from tqdm import tqdm
 # Add project to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from mcp_server.unified_secrets_manager import load_secrets_hierarchical, get_database_config
+from mcp_server.unified_secrets_manager import (
+    load_secrets_hierarchical,
+    get_database_config,
+)
 
 
 # ============================================================================
 # Configuration
 # ============================================================================
 
-PARQUET_BASE = Path('/Users/ryanranft/Desktop/sports_data_backup/hoopR/nba')
+PARQUET_BASE = Path("/Users/ryanranft/Desktop/sports_data_backup/hoopR/nba")
 
 DATASETS = {
-    'schedule': {
-        'parquet_dir': 'load_nba_schedule/parquet',
-        'table': 'raw.schedule',
-        'file_pattern': 'nba_data_{year}.parquet',
-        'batch_size': 5000,
-        'description': 'Game schedule and metadata',
+    "schedule": {
+        "parquet_dir": "load_nba_schedule/parquet",
+        "table": "raw.schedule",
+        "file_pattern": "nba_data_{year}.parquet",
+        "batch_size": 5000,
+        "description": "Game schedule and metadata",
     },
-    'team_box': {
-        'parquet_dir': 'load_nba_team_box/parquet',
-        'table': 'raw.team_box',
-        'file_pattern': 'nba_data_{year}.parquet',
-        'batch_size': 5000,
-        'description': 'Team box scores',
+    "team_box": {
+        "parquet_dir": "load_nba_team_box/parquet",
+        "table": "raw.team_box",
+        "file_pattern": "nba_data_{year}.parquet",
+        "batch_size": 5000,
+        "description": "Team box scores",
     },
-    'player_box': {
-        'parquet_dir': 'load_nba_player_box/parquet',
-        'table': 'raw.player_box',
-        'file_pattern': 'nba_data_{year}.parquet',
-        'batch_size': 5000,
-        'description': 'Player box scores',
+    "player_box": {
+        "parquet_dir": "load_nba_player_box/parquet",
+        "table": "raw.player_box",
+        "file_pattern": "nba_data_{year}.parquet",
+        "batch_size": 5000,
+        "description": "Player box scores",
     },
-    'play_by_play': {
-        'parquet_dir': 'load_nba_pbp/parquet',
-        'table': 'raw.play_by_play',
-        'file_pattern': 'nba_data_{year}.parquet',
-        'batch_size': 10000,
-        'description': 'Event-level play-by-play data',
+    "play_by_play": {
+        "parquet_dir": "load_nba_pbp/parquet",
+        "table": "raw.play_by_play",
+        "file_pattern": "nba_data_{year}.parquet",
+        "batch_size": 10000,
+        "description": "Event-level play-by-play data",
     },
 }
 
@@ -90,17 +93,18 @@ DATASETS = {
 # Helper Functions
 # ============================================================================
 
+
 def print_header(title: str):
     """Print formatted section header."""
     print(f"\n{'=' * 80}")
     print(f"{title}")
-    print('=' * 80)
+    print("=" * 80)
 
 
 def print_section(title: str):
     """Print formatted subsection."""
     print(f"\n{title}")
-    print('-' * 80)
+    print("-" * 80)
 
 
 def get_parquet_files(dataset_name: str, years: List[int]) -> List[Tuple[int, Path]]:
@@ -111,11 +115,11 @@ def get_parquet_files(dataset_name: str, years: List[int]) -> List[Tuple[int, Pa
         List of (year, filepath) tuples
     """
     config = DATASETS[dataset_name]
-    parquet_dir = PARQUET_BASE / config['parquet_dir']
+    parquet_dir = PARQUET_BASE / config["parquet_dir"]
 
     files = []
     for year in sorted(years):
-        filename = config['file_pattern'].format(year=year)
+        filename = config["file_pattern"].format(year=year)
         filepath = parquet_dir / filename
 
         if filepath.exists():
@@ -156,7 +160,7 @@ def load_dataset_to_postgres(
     years: List[int],
     conn,
     dry_run: bool = False,
-    truncate: bool = True
+    truncate: bool = True,
 ) -> int:
     """
     Load a single dataset from parquet files to PostgreSQL.
@@ -172,8 +176,8 @@ def load_dataset_to_postgres(
         Total rows inserted
     """
     config = DATASETS[dataset_name]
-    table_name = config['table']
-    batch_size = config['batch_size']
+    table_name = config["table"]
+    batch_size = config["batch_size"]
 
     print_section(f"Phase: Loading {table_name}")
     print(f"Description: {config['description']}")
@@ -214,7 +218,7 @@ def load_dataset_to_postgres(
 
             # Prepare data for insertion
             columns = list(df.columns)
-            placeholders = ','.join(['%s'] * len(columns))
+            placeholders = ",".join(["%s"] * len(columns))
             insert_query = f"""
                 INSERT INTO {table_name} ({','.join(columns)})
                 VALUES ({placeholders})
@@ -255,28 +259,34 @@ def validate_database_schema(conn) -> bool:
     Returns:
         True if all tables exist
     """
-    required_tables = [config['table'] for config in DATASETS.values()]
+    required_tables = [config["table"] for config in DATASETS.values()]
 
     cur = conn.cursor()
 
     # Check each schema.table separately
     missing_tables = []
     for table_name in required_tables:
-        if '.' in table_name:
-            schema, table = table_name.split('.')
-            cur.execute("""
+        if "." in table_name:
+            schema, table = table_name.split(".")
+            cur.execute(
+                """
                 SELECT COUNT(*)
                 FROM information_schema.tables
                 WHERE table_schema = %s
                 AND table_name = %s
-            """, (schema, table))
+            """,
+                (schema, table),
+            )
         else:
-            cur.execute("""
+            cur.execute(
+                """
                 SELECT COUNT(*)
                 FROM information_schema.tables
                 WHERE table_schema = 'public'
                 AND table_name = %s
-            """, (table_name,))
+            """,
+                (table_name,),
+            )
 
         count = cur.fetchone()[0]
         if count == 0:
@@ -296,10 +306,11 @@ def validate_database_schema(conn) -> bool:
 # Main Function
 # ============================================================================
 
+
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description='Load hoopR parquet data into PostgreSQL',
+        description="Load hoopR parquet data into PostgreSQL",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -317,50 +328,48 @@ Examples:
 
   # Use development database
   python scripts/load_parquet_to_postgres.py --context development
-        """
+        """,
     )
 
     parser.add_argument(
-        '--years',
+        "--years",
         type=str,
-        default='2002-2025',
-        help='Year range to load (e.g., 2023-2025)'
+        default="2002-2025",
+        help="Year range to load (e.g., 2023-2025)",
     )
 
     parser.add_argument(
-        '--table',
-        choices=['schedule', 'team_box', 'player_box', 'play_by_play', 'all'],
-        default='all',
-        help='Which dataset to load'
+        "--table",
+        choices=["schedule", "team_box", "player_box", "play_by_play", "all"],
+        default="all",
+        help="Which dataset to load",
     )
 
     parser.add_argument(
-        '--context',
-        choices=['development', 'production'],
-        default='development',
-        help='Database context (development = local, production = RDS)'
+        "--context",
+        choices=["development", "production"],
+        default="development",
+        help="Database context (development = local, production = RDS)",
     )
 
     parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Preview without loading data'
+        "--dry-run", action="store_true", help="Preview without loading data"
     )
 
     parser.add_argument(
-        '--no-truncate',
-        action='store_true',
-        help='Do not truncate tables before loading (append mode)'
+        "--no-truncate",
+        action="store_true",
+        help="Do not truncate tables before loading (append mode)",
     )
 
     args = parser.parse_args()
 
     # Parse year range
-    start_year, end_year = map(int, args.years.split('-'))
+    start_year, end_year = map(int, args.years.split("-"))
     years = list(range(start_year, end_year + 1))
 
     # Determine which datasets to load
-    if args.table == 'all':
+    if args.table == "all":
         datasets_to_load = list(DATASETS.keys())
     else:
         datasets_to_load = [args.table]
@@ -372,13 +381,17 @@ Examples:
     print(f"Source: {PARQUET_BASE}")
     print(f"Years: {start_year}-{end_year} ({len(years)} years)")
     print(f"Datasets: {', '.join(datasets_to_load)}")
-    print(f"Mode: {'DRY RUN (preview only)' if args.dry_run else 'LIVE (will modify database)'}")
-    print(f"Truncate: {'No (append mode)' if args.no_truncate else 'Yes (will delete existing data)'}")
+    print(
+        f"Mode: {'DRY RUN (preview only)' if args.dry_run else 'LIVE (will modify database)'}"
+    )
+    print(
+        f"Truncate: {'No (append mode)' if args.no_truncate else 'Yes (will delete existing data)'}"
+    )
 
     # Load secrets and connect to database
     print_section("Connecting to Database")
     try:
-        load_secrets_hierarchical('nba-mcp-synthesis', 'NBA', args.context)
+        load_secrets_hierarchical("nba-mcp-synthesis", "NBA", args.context)
         db_config = get_database_config()
 
         print(f"  Database: {db_config.get('database', 'N/A')}")
@@ -408,7 +421,7 @@ Examples:
     for dataset_name in datasets_to_load:
         count = estimates.get(dataset_name, 0)
         total_estimated += count
-        table_name = DATASETS[dataset_name]['table']
+        table_name = DATASETS[dataset_name]["table"]
         print(f"  {table_name:25s} {count:>15,} rows")
 
     print(f"  {'─' * 25} {'─' * 15}")
@@ -418,7 +431,7 @@ Examples:
     if not args.dry_run and not args.no_truncate:
         print(f"\n⚠️  This will TRUNCATE and reload {len(datasets_to_load)} table(s)")
         response = input("Continue? [y/N]: ")
-        if response.lower() != 'y':
+        if response.lower() != "y":
             print("Aborted by user")
             conn.close()
             sys.exit(0)
@@ -435,7 +448,7 @@ Examples:
                 years=years,
                 conn=conn,
                 dry_run=args.dry_run,
-                truncate=not args.no_truncate
+                truncate=not args.no_truncate,
             )
             results[dataset_name] = rows
             total_rows_loaded += rows
@@ -447,7 +460,7 @@ Examples:
 
         print("Final Statistics:")
         for dataset_name, rows in results.items():
-            table_name = DATASETS[dataset_name]['table']
+            table_name = DATASETS[dataset_name]["table"]
             print(f"  {table_name:25s} {rows:>15,} rows")
 
         print(f"  {'─' * 25} {'─' * 15}")
@@ -460,7 +473,9 @@ Examples:
         if not args.dry_run:
             print("\n💡 Next Steps:")
             print("  1. Validate data: python scripts/validate_hoopr_data.py")
-            print("  2. Rebuild indexes: psql -c 'REINDEX DATABASE espn_nba_mcp_synthesis;'")
+            print(
+                "  2. Rebuild indexes: psql -c 'REINDEX DATABASE espn_nba_mcp_synthesis;'"
+            )
             print("  3. Update statistics: psql -c 'VACUUM ANALYZE;'")
 
     except Exception as e:
@@ -472,5 +487,5 @@ Examples:
         print("\n" + "=" * 80)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

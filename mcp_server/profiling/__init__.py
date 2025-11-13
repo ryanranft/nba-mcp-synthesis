@@ -8,7 +8,7 @@ from mcp_server.profiling.performance import (
     PerformanceProfiler,
     profile,
     profile_async,
-    ProfileResult
+    ProfileResult,
 )
 from mcp_server.profiling.metrics_reporter import MetricsReporter
 
@@ -17,5 +17,5 @@ __all__ = [
     "profile",
     "profile_async",
     "ProfileResult",
-    "MetricsReporter"
+    "MetricsReporter",
 ]

@@ -81,14 +81,14 @@ class PlayOutcome:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'resulted_in_shot': self.resulted_in_shot,
-            'shot_made': self.shot_made,
-            'points_scored': self.points_scored,
-            'turnover': self.resulted_in_turnover,
-            'foul_drawn': self.resulted_in_foul,
-            'free_throws': f"{self.free_throws_made}/{self.free_throws_attempted}",
-            'successful': self.is_successful(),
-            'ppp': self.points_per_play()
+            "resulted_in_shot": self.resulted_in_shot,
+            "shot_made": self.shot_made,
+            "points_scored": self.points_scored,
+            "turnover": self.resulted_in_turnover,
+            "foul_drawn": self.resulted_in_foul,
+            "free_throws": f"{self.free_throws_made}/{self.free_throws_attempted}",
+            "successful": self.is_successful(),
+            "ppp": self.points_per_play(),
         }
 
 
@@ -124,16 +124,16 @@ class PlaySequence:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'play_id': self.play_id,
-            'play_type': self.play_type.value,
-            'primary_player': self.primary_player_id,
-            'secondary_player': self.secondary_player_id,
-            'quarter': self.quarter,
-            'time_remaining': self.time_remaining,
-            'score_diff': self.score_differential,
-            'outcome': self.outcome.to_dict() if self.outcome else None,
-            'passes': self.passes_in_play,
-            'duration': self.duration
+            "play_id": self.play_id,
+            "play_type": self.play_type.value,
+            "primary_player": self.primary_player_id,
+            "secondary_player": self.secondary_player_id,
+            "quarter": self.quarter,
+            "time_remaining": self.time_remaining,
+            "score_diff": self.score_differential,
+            "outcome": self.outcome.to_dict() if self.outcome else None,
+            "passes": self.passes_in_play,
+            "duration": self.duration,
         }
 
 
@@ -195,14 +195,14 @@ class PlayTypeEfficiency:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'play_type': self.play_type.value,
-            'player_id': self.player_id,
-            'total_plays': self.total_plays,
-            'points_per_play': self.points_per_play,
-            'fg_pct': self.shots_made / max(self.shots_attempted, 1),
-            'turnover_rate': self.turnover_rate,
-            'efficiency_score': self.efficiency_score(),
-            'shots': f"{self.shots_made}/{self.shots_attempted}",
+            "play_type": self.play_type.value,
+            "player_id": self.player_id,
+            "total_plays": self.total_plays,
+            "points_per_play": self.points_per_play,
+            "fg_pct": self.shots_made / max(self.shots_attempted, 1),
+            "turnover_rate": self.turnover_rate,
+            "efficiency_score": self.efficiency_score(),
+            "shots": f"{self.shots_made}/{self.shots_attempted}",
         }
 
 
@@ -221,7 +221,9 @@ class PlayTypeAnalyzer:
     def __init__(self):
         """Initialize play type analyzer"""
         self.plays: List[PlaySequence] = []
-        self.plays_by_type: Dict[PlayType, List[PlaySequence]] = {pt: [] for pt in PlayType}
+        self.plays_by_type: Dict[PlayType, List[PlaySequence]] = {
+            pt: [] for pt in PlayType
+        }
         self.plays_by_player: Dict[str, List[PlaySequence]] = {}
 
         logger.info("PlayTypeAnalyzer initialized")
@@ -247,7 +249,7 @@ class PlayTypeAnalyzer:
         self,
         play_type: PlayType,
         player_id: Optional[str] = None,
-        context_filter: Optional[Dict[str, Any]] = None
+        context_filter: Optional[Dict[str, Any]] = None,
     ) -> PlayTypeEfficiency:
         """
         Calculate efficiency for a play type.
@@ -263,7 +265,8 @@ class PlayTypeAnalyzer:
         # Filter plays
         if player_id:
             plays = [
-                p for p in self.plays_by_player.get(player_id, [])
+                p
+                for p in self.plays_by_player.get(player_id, [])
                 if p.play_type == play_type
             ]
         else:
@@ -278,12 +281,17 @@ class PlayTypeAnalyzer:
 
         # Calculate metrics
         total_plays = len(plays)
-        shots_attempted = sum(1 for p in plays if p.outcome and p.outcome.resulted_in_shot)
+        shots_attempted = sum(
+            1 for p in plays if p.outcome and p.outcome.resulted_in_shot
+        )
         shots_made = sum(
-            1 for p in plays
+            1
+            for p in plays
             if p.outcome and p.outcome.resulted_in_shot and p.outcome.shot_made
         )
-        turnovers = sum(1 for p in plays if p.outcome and p.outcome.resulted_in_turnover)
+        turnovers = sum(
+            1 for p in plays if p.outcome and p.outcome.resulted_in_turnover
+        )
         fouls_drawn = sum(1 for p in plays if p.outcome and p.outcome.resulted_in_foul)
         total_points = sum(p.outcome.points_scored for p in plays if p.outcome)
 
@@ -296,13 +304,10 @@ class PlayTypeAnalyzer:
             shots_made=shots_made,
             turnovers=turnovers,
             fouls_drawn=fouls_drawn,
-            total_points=total_points
+            total_points=total_points,
         )
 
-    def get_player_play_profile(
-        self,
-        player_id: str
-    ) -> Dict[str, Any]:
+    def get_player_play_profile(self, player_id: str) -> Dict[str, Any]:
         """
         Get play type profile for a player.
 
@@ -315,7 +320,7 @@ class PlayTypeAnalyzer:
         plays = self.plays_by_player.get(player_id, [])
 
         if not plays:
-            return {'player_id': player_id, 'total_plays': 0}
+            return {"player_id": player_id, "total_plays": 0}
 
         # Count by play type
         play_type_counts = {}
@@ -330,39 +335,37 @@ class PlayTypeAnalyzer:
             efficiency = self.calculate_play_type_efficiency(play_type, player_id)
             if efficiency.total_plays > 0:
                 play_type_efficiencies[play_type.value] = {
-                    'plays': efficiency.total_plays,
-                    'ppp': efficiency.points_per_play,
-                    'efficiency_score': efficiency.efficiency_score()
+                    "plays": efficiency.total_plays,
+                    "ppp": efficiency.points_per_play,
+                    "efficiency_score": efficiency.efficiency_score(),
                 }
 
         # Find best/worst play types
         if play_type_efficiencies:
             best_play_type = max(
-                play_type_efficiencies.items(),
-                key=lambda x: x[1]['efficiency_score']
+                play_type_efficiencies.items(), key=lambda x: x[1]["efficiency_score"]
             )
             worst_play_type = min(
-                play_type_efficiencies.items(),
-                key=lambda x: x[1]['efficiency_score']
+                play_type_efficiencies.items(), key=lambda x: x[1]["efficiency_score"]
             )
         else:
             best_play_type = None
             worst_play_type = None
 
         return {
-            'player_id': player_id,
-            'total_plays': len(plays),
-            'play_type_distribution': play_type_counts,
-            'play_type_efficiency': play_type_efficiencies,
-            'best_play_type': best_play_type[0] if best_play_type else None,
-            'worst_play_type': worst_play_type[0] if worst_play_type else None,
+            "player_id": player_id,
+            "total_plays": len(plays),
+            "play_type_distribution": play_type_counts,
+            "play_type_efficiency": play_type_efficiencies,
+            "best_play_type": best_play_type[0] if best_play_type else None,
+            "worst_play_type": worst_play_type[0] if worst_play_type else None,
         }
 
     def analyze_clutch_performance(
         self,
         player_id: Optional[str] = None,
         clutch_time_remaining: float = 2.0,  # Last 2 minutes
-        close_score_diff: int = 5  # Within 5 points
+        close_score_diff: int = 5,  # Within 5 points
     ) -> Dict[str, Any]:
         """
         Analyze clutch time performance.
@@ -377,8 +380,8 @@ class PlayTypeAnalyzer:
         """
         # Filter to clutch situations
         clutch_filter = {
-            'max_time_remaining': clutch_time_remaining,
-            'max_score_diff': close_score_diff
+            "max_time_remaining": clutch_time_remaining,
+            "max_score_diff": close_score_diff,
         }
 
         if player_id:
@@ -389,7 +392,7 @@ class PlayTypeAnalyzer:
         clutch_plays = self._apply_context_filter(plays, clutch_filter)
 
         if not clutch_plays:
-            return {'clutch_plays': 0}
+            return {"clutch_plays": 0}
 
         # Calculate clutch efficiency
         total_clutch = len(clutch_plays)
@@ -397,7 +400,9 @@ class PlayTypeAnalyzer:
         clutch_ppp = clutch_points / total_clutch if total_clutch > 0 else 0.0
 
         # Success rate
-        successful = sum(1 for p in clutch_plays if p.outcome and p.outcome.is_successful())
+        successful = sum(
+            1 for p in clutch_plays if p.outcome and p.outcome.is_successful()
+        )
         success_rate = successful / total_clutch if total_clutch > 0 else 0.0
 
         # Compare to overall performance
@@ -406,25 +411,25 @@ class PlayTypeAnalyzer:
         else:
             overall_plays = self.plays
 
-        overall_points = sum(p.outcome.points_scored for p in overall_plays if p.outcome)
+        overall_points = sum(
+            p.outcome.points_scored for p in overall_plays if p.outcome
+        )
         overall_ppp = overall_points / len(overall_plays) if overall_plays else 0.0
 
         clutch_improvement = clutch_ppp - overall_ppp
 
         return {
-            'player_id': player_id,
-            'clutch_plays': total_clutch,
-            'clutch_ppp': clutch_ppp,
-            'clutch_success_rate': success_rate,
-            'overall_ppp': overall_ppp,
-            'clutch_vs_overall': clutch_improvement,
-            'is_clutch_performer': clutch_improvement > 0.1
+            "player_id": player_id,
+            "clutch_plays": total_clutch,
+            "clutch_ppp": clutch_ppp,
+            "clutch_success_rate": success_rate,
+            "overall_ppp": overall_ppp,
+            "clutch_vs_overall": clutch_improvement,
+            "is_clutch_performer": clutch_improvement > 0.1,
         }
 
     def recommend_play_call(
-        self,
-        player_id: str,
-        context: Optional[Dict[str, Any]] = None
+        self, player_id: str, context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Recommend best play type for a player in given context.
@@ -439,7 +444,7 @@ class PlayTypeAnalyzer:
         plays = self.plays_by_player.get(player_id, [])
 
         if not plays:
-            return {'error': 'No play data for player'}
+            return {"error": "No play data for player"}
 
         # Apply context filter if provided
         if context:
@@ -455,49 +460,46 @@ class PlayTypeAnalyzer:
                 efficiencies[play_type] = eff
 
         if not efficiencies:
-            return {'error': 'Insufficient data for recommendation'}
+            return {"error": "Insufficient data for recommendation"}
 
         # Find best play type
         best_play_type = max(
-            efficiencies.items(),
-            key=lambda x: x[1].efficiency_score()
+            efficiencies.items(), key=lambda x: x[1].efficiency_score()
         )
 
         play_type, efficiency = best_play_type
 
         return {
-            'recommended_play': play_type.value,
-            'efficiency_score': efficiency.efficiency_score(),
-            'points_per_play': efficiency.points_per_play,
-            'sample_size': efficiency.total_plays,
-            'reason': f"{efficiency.points_per_play:.2f} PPP on {efficiency.total_plays} plays"
+            "recommended_play": play_type.value,
+            "efficiency_score": efficiency.efficiency_score(),
+            "points_per_play": efficiency.points_per_play,
+            "sample_size": efficiency.total_plays,
+            "reason": f"{efficiency.points_per_play:.2f} PPP on {efficiency.total_plays} plays",
         }
 
     def _apply_context_filter(
-        self,
-        plays: List[PlaySequence],
-        context_filter: Dict[str, Any]
+        self, plays: List[PlaySequence], context_filter: Dict[str, Any]
     ) -> List[PlaySequence]:
         """Apply context filtering to plays"""
         filtered = plays
 
-        if 'quarter' in context_filter:
-            filtered = [p for p in filtered if p.quarter == context_filter['quarter']]
+        if "quarter" in context_filter:
+            filtered = [p for p in filtered if p.quarter == context_filter["quarter"]]
 
-        if 'max_time_remaining' in context_filter:
-            max_time = context_filter['max_time_remaining']
+        if "max_time_remaining" in context_filter:
+            max_time = context_filter["max_time_remaining"]
             filtered = [p for p in filtered if p.time_remaining <= max_time]
 
-        if 'min_time_remaining' in context_filter:
-            min_time = context_filter['min_time_remaining']
+        if "min_time_remaining" in context_filter:
+            min_time = context_filter["min_time_remaining"]
             filtered = [p for p in filtered if p.time_remaining >= min_time]
 
-        if 'max_score_diff' in context_filter:
-            max_diff = context_filter['max_score_diff']
+        if "max_score_diff" in context_filter:
+            max_diff = context_filter["max_score_diff"]
             filtered = [p for p in filtered if abs(p.score_differential) <= max_diff]
 
-        if 'winning' in context_filter:
-            if context_filter['winning']:
+        if "winning" in context_filter:
+            if context_filter["winning"]:
                 filtered = [p for p in filtered if p.score_differential > 0]
             else:
                 filtered = [p for p in filtered if p.score_differential < 0]
@@ -507,16 +509,20 @@ class PlayTypeAnalyzer:
     def get_statistics(self) -> Dict[str, Any]:
         """Get analyzer statistics"""
         return {
-            'total_plays': len(self.plays),
-            'unique_players': len(self.plays_by_player),
-            'play_type_distribution': {
+            "total_plays": len(self.plays),
+            "unique_players": len(self.plays_by_player),
+            "play_type_distribution": {
                 pt.value: len(plays)
                 for pt, plays in self.plays_by_type.items()
                 if len(plays) > 0
             },
-            'avg_points_per_play': float(np.mean([
-                p.outcome.points_scored for p in self.plays if p.outcome
-            ])) if self.plays else 0.0
+            "avg_points_per_play": (
+                float(
+                    np.mean([p.outcome.points_scored for p in self.plays if p.outcome])
+                )
+                if self.plays
+                else 0.0
+            ),
         }
 
     def clear(self):

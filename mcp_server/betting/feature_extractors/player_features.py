@@ -53,13 +53,10 @@ class PlayerFeatureExtractor:
         self.db_conn = db_conn
 
         # Position mappings (for matchup analysis)
-        self.positions = ['PG', 'SG', 'SF', 'PF', 'C']
+        self.positions = ["PG", "SG", "SF", "PF", "C"]
 
     def extract_features(
-        self,
-        home_team_id: int,
-        away_team_id: int,
-        game_date: str
+        self, home_team_id: int, away_team_id: int, game_date: str
     ) -> Dict[str, float]:
         """
         Extract all player-level features for a game
@@ -76,53 +73,71 @@ class PlayerFeatureExtractor:
 
         # Convert game_date to datetime if string
         if isinstance(game_date, str):
-            game_date_dt = datetime.strptime(game_date, '%Y-%m-%d')
+            game_date_dt = datetime.strptime(game_date, "%Y-%m-%d")
         else:
             game_date_dt = game_date
 
         # 1. Top Scorers (top 3 by PPG L10)
-        home_top_scorers = self._get_top_scorers(home_team_id, game_date_dt, n=3, lookback=10)
-        away_top_scorers = self._get_top_scorers(away_team_id, game_date_dt, n=3, lookback=10)
+        home_top_scorers = self._get_top_scorers(
+            home_team_id, game_date_dt, n=3, lookback=10
+        )
+        away_top_scorers = self._get_top_scorers(
+            away_team_id, game_date_dt, n=3, lookback=10
+        )
 
         # Add top scorer features
         for i, scorer in enumerate(home_top_scorers, 1):
-            features[f'home_top{i}_ppg_l10'] = scorer['ppg']
-            features[f'home_top{i}_minutes_l10'] = scorer['minutes']
-            features[f'home_top{i}_usage_pct_l10'] = scorer['usage_pct']
+            features[f"home_top{i}_ppg_l10"] = scorer["ppg"]
+            features[f"home_top{i}_minutes_l10"] = scorer["minutes"]
+            features[f"home_top{i}_usage_pct_l10"] = scorer["usage_pct"]
 
         for i, scorer in enumerate(away_top_scorers, 1):
-            features[f'away_top{i}_ppg_l10'] = scorer['ppg']
-            features[f'away_top{i}_minutes_l10'] = scorer['minutes']
-            features[f'away_top{i}_usage_pct_l10'] = scorer['usage_pct']
+            features[f"away_top{i}_ppg_l10"] = scorer["ppg"]
+            features[f"away_top{i}_minutes_l10"] = scorer["minutes"]
+            features[f"away_top{i}_usage_pct_l10"] = scorer["usage_pct"]
 
         # 2. Roster Strength (sum of PER for top 5 players)
-        features['home_roster_per_sum'] = self._get_roster_strength(home_team_id, game_date_dt, n=5)
-        features['away_roster_per_sum'] = self._get_roster_strength(away_team_id, game_date_dt, n=5)
+        features["home_roster_per_sum"] = self._get_roster_strength(
+            home_team_id, game_date_dt, n=5
+        )
+        features["away_roster_per_sum"] = self._get_roster_strength(
+            away_team_id, game_date_dt, n=5
+        )
 
         # 3. Injury Impact (estimated PPG lost from missing players)
-        features['home_injury_impact'] = self._get_injury_impact(home_team_id, game_date_dt)
-        features['away_injury_impact'] = self._get_injury_impact(away_team_id, game_date_dt)
+        features["home_injury_impact"] = self._get_injury_impact(
+            home_team_id, game_date_dt
+        )
+        features["away_injury_impact"] = self._get_injury_impact(
+            away_team_id, game_date_dt
+        )
 
         # 4. Star Player Availability (binary: are top 3 scorers available?)
-        features['home_stars_available'] = self._check_star_availability(home_team_id, game_date_dt)
-        features['away_stars_available'] = self._check_star_availability(away_team_id, game_date_dt)
+        features["home_stars_available"] = self._check_star_availability(
+            home_team_id, game_date_dt
+        )
+        features["away_stars_available"] = self._check_star_availability(
+            away_team_id, game_date_dt
+        )
 
         # 5. Depth Score (bench strength - PPG from players ranked 6-10)
-        features['home_bench_ppg'] = self._get_bench_strength(home_team_id, game_date_dt)
-        features['away_bench_ppg'] = self._get_bench_strength(away_team_id, game_date_dt)
+        features["home_bench_ppg"] = self._get_bench_strength(
+            home_team_id, game_date_dt
+        )
+        features["away_bench_ppg"] = self._get_bench_strength(
+            away_team_id, game_date_dt
+        )
 
         # 6. Position Matchups (average PPG by position: home vs away)
-        matchup_features = self._get_position_matchups(home_team_id, away_team_id, game_date_dt)
+        matchup_features = self._get_position_matchups(
+            home_team_id, away_team_id, game_date_dt
+        )
         features.update(matchup_features)
 
         return features
 
     def _get_top_scorers(
-        self,
-        team_id: int,
-        as_of_date: datetime,
-        n: int = 3,
-        lookback: int = 10
+        self, team_id: int, as_of_date: datetime, n: int = 3, lookback: int = 10
     ) -> List[Dict[str, float]]:
         """
         Get top N scorers for a team based on recent PPG
@@ -194,33 +209,34 @@ class PlayerFeatureExtractor:
         # Convert to list of dicts
         top_scorers = []
         for i, row in enumerate(results):
-            top_scorers.append({
-                'athlete_id': row['athlete_id'],
-                'athlete_name': row['athlete_display_name'],
-                'ppg': float(row['ppg']) if row['ppg'] else 0.0,
-                'minutes': float(row['minutes']) if row['minutes'] else 0.0,
-                'usage_pct': float(row['usage_pct']) if row['usage_pct'] else 20.0,
-                'games_played': row['games_played']
-            })
+            top_scorers.append(
+                {
+                    "athlete_id": row["athlete_id"],
+                    "athlete_name": row["athlete_display_name"],
+                    "ppg": float(row["ppg"]) if row["ppg"] else 0.0,
+                    "minutes": float(row["minutes"]) if row["minutes"] else 0.0,
+                    "usage_pct": float(row["usage_pct"]) if row["usage_pct"] else 20.0,
+                    "games_played": row["games_played"],
+                }
+            )
 
         # Fill with defaults if fewer than n players found
         while len(top_scorers) < n:
-            top_scorers.append({
-                'athlete_id': None,
-                'athlete_name': 'Unknown',
-                'ppg': 0.0,
-                'minutes': 0.0,
-                'usage_pct': 0.0,
-                'games_played': 0
-            })
+            top_scorers.append(
+                {
+                    "athlete_id": None,
+                    "athlete_name": "Unknown",
+                    "ppg": 0.0,
+                    "minutes": 0.0,
+                    "usage_pct": 0.0,
+                    "games_played": 0,
+                }
+            )
 
         return top_scorers
 
     def _get_roster_strength(
-        self,
-        team_id: int,
-        as_of_date: datetime,
-        n: int = 5
+        self, team_id: int, as_of_date: datetime, n: int = 5
     ) -> float:
         """
         Calculate roster strength as sum of PER for top N players
@@ -286,15 +302,11 @@ class PlayerFeatureExtractor:
         results = cursor.fetchall()
 
         # Sum PER for top N players
-        total_per = sum(row['per'] for row in results if row['per'])
+        total_per = sum(row["per"] for row in results if row["per"])
 
         return float(total_per) if total_per else 0.0
 
-    def _get_injury_impact(
-        self,
-        team_id: int,
-        as_of_date: datetime
-    ) -> float:
+    def _get_injury_impact(self, team_id: int, as_of_date: datetime) -> float:
         """
         Estimate injury impact as PPG lost from missing players
 
@@ -312,11 +324,7 @@ class PlayerFeatureExtractor:
         # TODO: Implement proper injury tracking once schema is clarified
         return 0.0
 
-    def _check_star_availability(
-        self,
-        team_id: int,
-        as_of_date: datetime
-    ) -> float:
+    def _check_star_availability(self, team_id: int, as_of_date: datetime) -> float:
         """
         Check if star players (top 3 scorers) are available
 
@@ -326,7 +334,7 @@ class PlayerFeatureExtractor:
         # Get top 3 scorers
         top_scorers = self._get_top_scorers(team_id, as_of_date, n=3, lookback=10)
 
-        if not top_scorers or all(s['athlete_id'] is None for s in top_scorers):
+        if not top_scorers or all(s["athlete_id"] is None for s in top_scorers):
             return 1.0  # No data, assume available
 
         # Check how many are playing in recent games (not DNP)
@@ -352,7 +360,7 @@ class PlayerFeatureExtractor:
         # Check if top scorers played in last game
         available_count = 0
         for scorer in top_scorers:
-            if scorer['athlete_id'] is None:
+            if scorer["athlete_id"] is None:
                 continue
 
             query_played = """
@@ -365,7 +373,7 @@ class PlayerFeatureExtractor:
             AND pb.did_not_play = 0
             """
 
-            cursor.execute(query_played, (scorer['athlete_id'], last_game_date))
+            cursor.execute(query_played, (scorer["athlete_id"], last_game_date))
             played_result = cursor.fetchone()
 
             if played_result and played_result[0] > 0:
@@ -373,11 +381,7 @@ class PlayerFeatureExtractor:
 
         return available_count / 3.0  # Percentage of top 3 available
 
-    def _get_bench_strength(
-        self,
-        team_id: int,
-        as_of_date: datetime
-    ) -> float:
+    def _get_bench_strength(self, team_id: int, as_of_date: datetime) -> float:
         """
         Calculate bench strength as average PPG from players ranked 6-10
 
@@ -431,15 +435,12 @@ class PlayerFeatureExtractor:
         cursor.execute(query, (team_id, as_of_date.date()))
         result = cursor.fetchone()
 
-        bench_ppg = result['bench_ppg'] if result and result['bench_ppg'] else 0.0
+        bench_ppg = result["bench_ppg"] if result and result["bench_ppg"] else 0.0
 
         return float(bench_ppg)
 
     def _get_position_matchups(
-        self,
-        home_team_id: int,
-        away_team_id: int,
-        as_of_date: datetime
+        self, home_team_id: int, away_team_id: int, as_of_date: datetime
     ) -> Dict[str, float]:
         """
         Calculate position-based matchup advantages
@@ -459,14 +460,18 @@ class PlayerFeatureExtractor:
         # For now, return simplified matchup based on top scorer differential
 
         # Get total PPG for each team's top players
-        home_top_ppg = sum(s['ppg'] for s in self._get_top_scorers(home_team_id, as_of_date, n=5))
-        away_top_ppg = sum(s['ppg'] for s in self._get_top_scorers(away_team_id, as_of_date, n=5))
+        home_top_ppg = sum(
+            s["ppg"] for s in self._get_top_scorers(home_team_id, as_of_date, n=5)
+        )
+        away_top_ppg = sum(
+            s["ppg"] for s in self._get_top_scorers(away_team_id, as_of_date, n=5)
+        )
 
         matchup_advantage = home_top_ppg - away_top_ppg
 
         # Simplified matchup features (can be expanded with position-specific data later)
         return {
-            'top5_ppg_advantage': float(matchup_advantage),
-            'home_top5_ppg': float(home_top_ppg),
-            'away_top5_ppg': float(away_top_ppg)
+            "top5_ppg_advantage": float(matchup_advantage),
+            "home_top5_ppg": float(home_top_ppg),
+            "away_top5_ppg": float(away_top_ppg),
         }

@@ -22,13 +22,19 @@ from enum import Enum
 
 import numpy as np
 
-from mcp_server.simulations.streaming.kalman_filter import StreamingKalmanFilter, GameState
-from mcp_server.simulations.streaming.live_simulator import LiveGameSimulator, SimulationUpdate
+from mcp_server.simulations.streaming.kalman_filter import (
+    StreamingKalmanFilter,
+    GameState,
+)
+from mcp_server.simulations.streaming.live_simulator import (
+    LiveGameSimulator,
+    SimulationUpdate,
+)
 from mcp_server.simulations.streaming.data_connector import (
     DataMessage,
     StreamingDataConnector,
     MockDataConnector,
-    create_mock_connector
+    create_mock_connector,
 )
 from mcp_server.streaming_analytics import StreamEvent, StreamEventType
 
@@ -37,6 +43,7 @@ logger = logging.getLogger(__name__)
 
 class PredictionConfidence(Enum):
     """Confidence level for predictions"""
+
     VERY_LOW = "very_low"
     LOW = "low"
     MEDIUM = "medium"
@@ -83,38 +90,38 @@ class PredictionUpdate:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'update_id': self.update_id,
-            'timestamp': self.timestamp.isoformat(),
-            'game_id': self.game_id,
-            'current_state': {
-                'home_score': self.home_score,
-                'away_score': self.away_score,
-                'time_remaining': self.time_remaining,
-                'quarter': self.quarter,
+            "update_id": self.update_id,
+            "timestamp": self.timestamp.isoformat(),
+            "game_id": self.game_id,
+            "current_state": {
+                "home_score": self.home_score,
+                "away_score": self.away_score,
+                "time_remaining": self.time_remaining,
+                "quarter": self.quarter,
             },
-            'predictions': {
-                'home_win_probability': self.home_win_probability,
-                'away_win_probability': self.away_win_probability,
-                'predicted_final_home_score': self.predicted_final_home_score,
-                'predicted_final_away_score': self.predicted_final_away_score,
+            "predictions": {
+                "home_win_probability": self.home_win_probability,
+                "away_win_probability": self.away_win_probability,
+                "predicted_final_home_score": self.predicted_final_home_score,
+                "predicted_final_away_score": self.predicted_final_away_score,
             },
-            'confidence': {
-                'level': self.confidence_level.value,
-                'intervals': {
-                    k: {'lower': v[0], 'upper': v[1]}
+            "confidence": {
+                "level": self.confidence_level.value,
+                "intervals": {
+                    k: {"lower": v[0], "upper": v[1]}
                     for k, v in self.confidence_intervals.items()
-                }
+                },
             },
-            'momentum': {
-                'home_momentum': self.home_momentum,
-                'scoring_rate_ratio': self.scoring_rate_ratio,
+            "momentum": {
+                "home_momentum": self.home_momentum,
+                "scoring_rate_ratio": self.scoring_rate_ratio,
             },
-            'model_info': {
-                'kalman_contribution': self.kalman_contribution,
-                'model_contribution': self.model_contribution,
+            "model_info": {
+                "kalman_contribution": self.kalman_contribution,
+                "model_contribution": self.model_contribution,
             },
-            'event_trigger': self.event_trigger,
-            'metadata': self.metadata,
+            "event_trigger": self.event_trigger,
+            "metadata": self.metadata,
         }
 
 
@@ -167,7 +174,7 @@ class InGamePredictor:
         home_team: str,
         away_team: str,
         config: Optional[PredictorConfig] = None,
-        simulation_service: Optional[Any] = None
+        simulation_service: Optional[Any] = None,
     ):
         """
         Initialize in-game predictor.
@@ -190,7 +197,7 @@ class InGamePredictor:
             game_id=game_id,
             home_team=home_team,
             away_team=away_team,
-            simulation_service=simulation_service
+            simulation_service=simulation_service,
         )
 
         self.data_connector = StreamingDataConnector()
@@ -209,10 +216,10 @@ class InGamePredictor:
 
         # Statistics
         self.stats = {
-            'predictions_generated': 0,
-            'data_messages_processed': 0,
-            'errors': 0,
-            'average_latency_ms': 0.0,
+            "predictions_generated": 0,
+            "data_messages_processed": 0,
+            "errors": 0,
+            "average_latency_ms": 0.0,
         }
 
         logger.info(
@@ -225,7 +232,7 @@ class InGamePredictor:
         home_score: float = 0.0,
         away_score: float = 0.0,
         time_remaining: float = 48.0,
-        quarter: int = 1
+        quarter: int = 1,
     ) -> PredictionUpdate:
         """
         Initialize predictor with starting game state.
@@ -244,7 +251,7 @@ class InGamePredictor:
             home_score=home_score,
             away_score=away_score,
             time_remaining=time_remaining,
-            quarter=quarter
+            quarter=quarter,
         )
 
         self.initialized = True
@@ -258,12 +265,7 @@ class InGamePredictor:
         logger.info("Predictor initialized")
         return prediction
 
-    def add_data_source(
-        self,
-        name: str,
-        connector: Any,
-        auto_start: bool = True
-    ):
+    def add_data_source(self, name: str, connector: Any, auto_start: bool = True):
         """
         Add a data source to the predictor.
 
@@ -301,7 +303,7 @@ class InGamePredictor:
         home_score: float,
         away_score: float,
         time_remaining: float,
-        quarter: Optional[int] = None
+        quarter: Optional[int] = None,
     ) -> PredictionUpdate:
         """
         Manually update predictor with current scores.
@@ -323,7 +325,7 @@ class InGamePredictor:
             home_score=home_score,
             away_score=away_score,
             time_remaining=time_remaining,
-            quarter=quarter
+            quarter=quarter,
         )
 
         # Create prediction
@@ -338,7 +340,9 @@ class InGamePredictor:
         """Get most recent prediction"""
         return self.prediction_history[-1] if self.prediction_history else None
 
-    def get_prediction_history(self, limit: Optional[int] = None) -> List[PredictionUpdate]:
+    def get_prediction_history(
+        self, limit: Optional[int] = None
+    ) -> List[PredictionUpdate]:
         """
         Get prediction history.
 
@@ -352,7 +356,9 @@ class InGamePredictor:
             return self.prediction_history.copy()
         return self.prediction_history[-limit:]
 
-    def analyze_momentum(self, window_minutes: Optional[float] = None) -> Dict[str, Any]:
+    def analyze_momentum(
+        self, window_minutes: Optional[float] = None
+    ) -> Dict[str, Any]:
         """
         Analyze game momentum over recent period.
 
@@ -367,9 +373,9 @@ class InGamePredictor:
         # Get recent predictions
         if len(self.prediction_history) < 2:
             return {
-                'home_momentum': 0.0,
-                'away_momentum': 0.0,
-                'momentum_strength': 'neutral',
+                "home_momentum": 0.0,
+                "away_momentum": 0.0,
+                "momentum_strength": "neutral",
             }
 
         recent = self.prediction_history[-10:]  # Last 10 updates
@@ -377,14 +383,14 @@ class InGamePredictor:
         # Calculate momentum from probability changes
         home_prob_changes = []
         for i in range(1, len(recent)):
-            change = recent[i].home_win_probability - recent[i-1].home_win_probability
+            change = recent[i].home_win_probability - recent[i - 1].home_win_probability
             home_prob_changes.append(change)
 
         if not home_prob_changes:
             return {
-                'home_momentum': 0.0,
-                'away_momentum': 0.0,
-                'momentum_strength': 'neutral',
+                "home_momentum": 0.0,
+                "away_momentum": 0.0,
+                "momentum_strength": "neutral",
             }
 
         # Average momentum
@@ -394,17 +400,17 @@ class InGamePredictor:
         # Classify momentum strength
         abs_momentum = abs(home_momentum)
         if abs_momentum > 0.05:
-            strength = 'strong'
+            strength = "strong"
         elif abs_momentum > 0.02:
-            strength = 'moderate'
+            strength = "moderate"
         else:
-            strength = 'neutral'
+            strength = "neutral"
 
         return {
-            'home_momentum': home_momentum,
-            'away_momentum': away_momentum,
-            'momentum_strength': strength,
-            'leading_team': self.home_team if home_momentum > 0 else self.away_team,
+            "home_momentum": home_momentum,
+            "away_momentum": away_momentum,
+            "momentum_strength": strength,
+            "leading_team": self.home_team if home_momentum > 0 else self.away_team,
         }
 
     def register_callback(self, callback: Callable[[PredictionUpdate], None]):
@@ -420,12 +426,12 @@ class InGamePredictor:
     def get_statistics(self) -> Dict[str, Any]:
         """Get predictor statistics"""
         return {
-            'game_id': self.game_id,
-            'initialized': self.initialized,
-            'predictions_generated': len(self.prediction_history),
-            'simulator_stats': self.simulator.get_statistics(),
-            'connector_stats': self.data_connector.get_statistics(),
-            **self.stats
+            "game_id": self.game_id,
+            "initialized": self.initialized,
+            "predictions_generated": len(self.prediction_history),
+            "simulator_stats": self.simulator.get_statistics(),
+            "connector_stats": self.data_connector.get_statistics(),
+            **self.stats,
         }
 
     def _process_data_message(self, message: DataMessage):
@@ -448,7 +454,7 @@ class InGamePredictor:
                 self._notify_callbacks(prediction)
                 self.last_update_time = datetime.now()
 
-            self.stats['data_messages_processed'] += 1
+            self.stats["data_messages_processed"] += 1
 
             # Update latency
             latency_ms = (datetime.now() - start_time).total_seconds() * 1000
@@ -456,28 +462,27 @@ class InGamePredictor:
 
         except Exception as e:
             logger.error(f"Error processing data message: {e}")
-            self.stats['errors'] += 1
+            self.stats["errors"] += 1
 
     def _message_to_event(self, message: DataMessage) -> Optional[StreamEvent]:
         """Convert data message to stream event"""
         try:
             # Determine event type
             event_type_map = {
-                'score_update': StreamEventType.SCORE_UPDATE,
-                'player_stat': StreamEventType.PLAYER_STAT,
-                'game_event': StreamEventType.GAME_EVENT,
+                "score_update": StreamEventType.SCORE_UPDATE,
+                "player_stat": StreamEventType.PLAYER_STAT,
+                "game_event": StreamEventType.GAME_EVENT,
             }
 
             event_type = event_type_map.get(
-                message.message_type,
-                StreamEventType.GAME_EVENT
+                message.message_type, StreamEventType.GAME_EVENT
             )
 
             return StreamEvent(
                 event_type=event_type,
                 timestamp=message.timestamp,
                 game_id=self.game_id,
-                data=message.data
+                data=message.data,
             )
 
         except Exception as e:
@@ -485,8 +490,7 @@ class InGamePredictor:
             return None
 
     def _create_prediction_update(
-        self,
-        sim_update: SimulationUpdate
+        self, sim_update: SimulationUpdate
     ) -> PredictionUpdate:
         """Create prediction update from simulation update"""
 
@@ -494,7 +498,7 @@ class InGamePredictor:
 
         # Calculate momentum
         momentum_analysis = self.analyze_momentum()
-        home_momentum = momentum_analysis['home_momentum']
+        home_momentum = momentum_analysis["home_momentum"]
 
         # Calculate scoring rate ratio
         if state.away_score_rate > 0:
@@ -514,25 +518,27 @@ class InGamePredictor:
             away_score=state.away_score,
             time_remaining=state.time_remaining,
             quarter=state.quarter,
-            home_win_probability=sim_update.win_probabilities['home'],
-            away_win_probability=sim_update.win_probabilities['away'],
-            predicted_final_home_score=sim_update.expected_final_scores['home'],
-            predicted_final_away_score=sim_update.expected_final_scores['away'],
+            home_win_probability=sim_update.win_probabilities["home"],
+            away_win_probability=sim_update.win_probabilities["away"],
+            predicted_final_home_score=sim_update.expected_final_scores["home"],
+            predicted_final_away_score=sim_update.expected_final_scores["away"],
             confidence_level=confidence_level,
             confidence_intervals=sim_update.confidence_intervals,
             home_momentum=home_momentum,
             scoring_rate_ratio=rate_ratio,
             kalman_contribution=1.0 - self.config.model_weight,
             model_contribution=self.config.model_weight,
-            event_trigger=sim_update.event_trigger
+            event_trigger=sim_update.event_trigger,
         )
 
         self.update_count += 1
-        self.stats['predictions_generated'] += 1
+        self.stats["predictions_generated"] += 1
 
         return prediction
 
-    def _calculate_confidence(self, sim_update: SimulationUpdate) -> PredictionConfidence:
+    def _calculate_confidence(
+        self, sim_update: SimulationUpdate
+    ) -> PredictionConfidence:
         """
         Calculate confidence level for prediction.
 
@@ -575,14 +581,13 @@ class InGamePredictor:
 
     def _update_latency(self, latency_ms: float):
         """Update average latency metric"""
-        if self.stats['predictions_generated'] == 1:
-            self.stats['average_latency_ms'] = latency_ms
+        if self.stats["predictions_generated"] == 1:
+            self.stats["average_latency_ms"] = latency_ms
         else:
             # Exponential moving average
             alpha = 0.1
-            self.stats['average_latency_ms'] = (
-                alpha * latency_ms +
-                (1 - alpha) * self.stats['average_latency_ms']
+            self.stats["average_latency_ms"] = (
+                alpha * latency_ms + (1 - alpha) * self.stats["average_latency_ms"]
             )
 
     def reset(self):
@@ -601,7 +606,7 @@ def create_mock_predictor(
     game_id: str = "test_game_001",
     home_team: str = "LAL",
     away_team: str = "BOS",
-    event_rate_hz: float = 1.0
+    event_rate_hz: float = 1.0,
 ) -> InGamePredictor:
     """
     Create an in-game predictor with mock data source for testing.
@@ -616,15 +621,12 @@ def create_mock_predictor(
         InGamePredictor instance with mock connector
     """
     predictor = InGamePredictor(
-        game_id=game_id,
-        home_team=home_team,
-        away_team=away_team
+        game_id=game_id, home_team=home_team, away_team=away_team
     )
 
     # Add mock data source
     mock_connector = create_mock_connector(
-        endpoint=f"mock://{game_id}",
-        event_rate_hz=event_rate_hz
+        endpoint=f"mock://{game_id}", event_rate_hz=event_rate_hz
     )
     predictor.add_data_source("mock", mock_connector, auto_start=False)
 

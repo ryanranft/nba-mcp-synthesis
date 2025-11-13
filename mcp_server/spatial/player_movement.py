@@ -124,7 +124,7 @@ class MovementFrame:
             else:
                 return MovementDirection.AWAY_FROM_BASKET
 
-    def distance_traveled(self, other: 'MovementFrame') -> float:
+    def distance_traveled(self, other: "MovementFrame") -> float:
         """Calculate distance traveled between two frames"""
         dx = self.x - other.x
         dy = self.y - other.y
@@ -133,17 +133,19 @@ class MovementFrame:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'player_id': self.player_id,
-            'timestamp': self.timestamp,
-            'x': self.x,
-            'y': self.y,
-            'velocity_x': self.velocity_x,
-            'velocity_y': self.velocity_y,
-            'speed': self.speed,
-            'acceleration': self.acceleration,
-            'direction': self.direction,
-            'movement_type': self.movement_type.value if self.movement_type else None,
-            'movement_direction': self.movement_direction.value if self.movement_direction else None,
+            "player_id": self.player_id,
+            "timestamp": self.timestamp,
+            "x": self.x,
+            "y": self.y,
+            "velocity_x": self.velocity_x,
+            "velocity_y": self.velocity_y,
+            "speed": self.speed,
+            "acceleration": self.acceleration,
+            "direction": self.direction,
+            "movement_type": self.movement_type.value if self.movement_type else None,
+            "movement_direction": (
+                self.movement_direction.value if self.movement_direction else None
+            ),
         }
 
 
@@ -171,7 +173,7 @@ class MovementPattern:
         # Calculate total distance
         distances = []
         for i in range(1, len(self.frames)):
-            dist = self.frames[i].distance_traveled(self.frames[i-1])
+            dist = self.frames[i].distance_traveled(self.frames[i - 1])
             distances.append(dist)
         self.total_distance = sum(distances)
 
@@ -195,16 +197,16 @@ class MovementPattern:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'player_id': self.player_id,
-            'pattern_type': self.pattern_type,
-            'start_time': self.start_time,
-            'end_time': self.end_time,
-            'duration': self.duration(),
-            'total_distance': self.total_distance,
-            'avg_speed': self.avg_speed,
-            'max_speed': self.max_speed,
-            'efficiency_score': self.efficiency_score,
-            'num_frames': len(self.frames),
+            "player_id": self.player_id,
+            "pattern_type": self.pattern_type,
+            "start_time": self.start_time,
+            "end_time": self.end_time,
+            "duration": self.duration(),
+            "total_distance": self.total_distance,
+            "avg_speed": self.avg_speed,
+            "max_speed": self.max_speed,
+            "efficiency_score": self.efficiency_score,
+            "num_frames": len(self.frames),
         }
 
 
@@ -214,10 +216,7 @@ class VelocityAnalyzer:
 
     smoothing_window: int = 5  # Frames for smoothing
 
-    def compute_velocities(
-        self,
-        frames: List[MovementFrame]
-    ) -> List[MovementFrame]:
+    def compute_velocities(self, frames: List[MovementFrame]) -> List[MovementFrame]:
         """
         Compute velocities for a sequence of frames.
 
@@ -253,10 +252,7 @@ class VelocityAnalyzer:
 
         return frames
 
-    def compute_accelerations(
-        self,
-        frames: List[MovementFrame]
-    ) -> List[MovementFrame]:
+    def compute_accelerations(self, frames: List[MovementFrame]) -> List[MovementFrame]:
         """
         Compute accelerations for a sequence of frames.
 
@@ -280,10 +276,7 @@ class VelocityAnalyzer:
 
         return frames
 
-    def smooth_velocities(
-        self,
-        frames: List[MovementFrame]
-    ) -> List[MovementFrame]:
+    def smooth_velocities(self, frames: List[MovementFrame]) -> List[MovementFrame]:
         """
         Apply smoothing to velocity estimates.
 
@@ -334,7 +327,7 @@ class MovementTracker:
     def __init__(
         self,
         sampling_rate: float = 25.0,  # Hz (frames per second)
-        smoothing_window: int = 5
+        smoothing_window: int = 5,
     ):
         """
         Initialize movement tracker.
@@ -371,7 +364,7 @@ class MovementTracker:
         player_id: str,
         compute_velocities: bool = True,
         compute_accelerations: bool = True,
-        smooth_velocities: bool = True
+        smooth_velocities: bool = True,
     ) -> List[MovementFrame]:
         """
         Process trajectory for a player.
@@ -418,7 +411,7 @@ class MovementTracker:
         player_id: str,
         min_speed: float = 10.0,  # ft/s
         min_duration: float = 0.5,  # seconds
-        min_distance: float = 8.0  # feet
+        min_distance: float = 8.0,  # feet
     ) -> List[MovementPattern]:
         """
         Identify cutting movements.
@@ -448,11 +441,16 @@ class MovementTracker:
             else:
                 if cut_started and len(current_cut_frames) > 0:
                     # Check if cut meets criteria
-                    duration = current_cut_frames[-1].timestamp - current_cut_frames[0].timestamp
+                    duration = (
+                        current_cut_frames[-1].timestamp
+                        - current_cut_frames[0].timestamp
+                    )
                     if duration >= min_duration:
                         # Calculate distance
                         distance = sum(
-                            current_cut_frames[i].distance_traveled(current_cut_frames[i-1])
+                            current_cut_frames[i].distance_traveled(
+                                current_cut_frames[i - 1]
+                            )
                             for i in range(1, len(current_cut_frames))
                         )
 
@@ -463,7 +461,7 @@ class MovementTracker:
                                 start_time=current_cut_frames[0].timestamp,
                                 end_time=current_cut_frames[-1].timestamp,
                                 frames=current_cut_frames.copy(),
-                                pattern_type="cut"
+                                pattern_type="cut",
                             )
                             cuts.append(pattern)
 
@@ -476,7 +474,7 @@ class MovementTracker:
         self,
         player_id: str,
         start_time: Optional[float] = None,
-        end_time: Optional[float] = None
+        end_time: Optional[float] = None,
     ) -> float:
         """
         Calculate total distance traveled by player.
@@ -494,9 +492,10 @@ class MovementTracker:
         # Filter by time
         if start_time or end_time:
             frames = [
-                f for f in frames
-                if (start_time is None or f.timestamp >= start_time) and
-                   (end_time is None or f.timestamp <= end_time)
+                f
+                for f in frames
+                if (start_time is None or f.timestamp >= start_time)
+                and (end_time is None or f.timestamp <= end_time)
             ]
 
         if len(frames) < 2:
@@ -508,7 +507,7 @@ class MovementTracker:
         # Calculate distance
         total_distance = 0.0
         for i in range(1, len(frames)):
-            total_distance += frames[i].distance_traveled(frames[i-1])
+            total_distance += frames[i].distance_traveled(frames[i - 1])
 
         return total_distance
 
@@ -516,7 +515,7 @@ class MovementTracker:
         self,
         player_id: str,
         start_time: Optional[float] = None,
-        end_time: Optional[float] = None
+        end_time: Optional[float] = None,
     ) -> float:
         """
         Calculate average speed for player.
@@ -534,9 +533,10 @@ class MovementTracker:
         # Filter by time
         if start_time or end_time:
             frames = [
-                f for f in frames
-                if (start_time is None or f.timestamp >= start_time) and
-                   (end_time is None or f.timestamp <= end_time)
+                f
+                for f in frames
+                if (start_time is None or f.timestamp >= start_time)
+                and (end_time is None or f.timestamp <= end_time)
             ]
 
         if not frames:
@@ -546,9 +546,7 @@ class MovementTracker:
         return float(np.mean(speeds)) if speeds else 0.0
 
     def get_movement_heatmap(
-        self,
-        player_id: str,
-        grid_size: int = 50
+        self, player_id: str, grid_size: int = 50
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Generate movement heatmap (time spent in each location).
@@ -573,10 +571,7 @@ class MovementTracker:
 
         # Create histogram
         heatmap, x_edges, y_edges = np.histogram2d(
-            x_coords,
-            y_coords,
-            bins=[grid_size, grid_size],
-            range=[[0, 50], [0, 47]]
+            x_coords, y_coords, bins=[grid_size, grid_size], range=[[0, 50], [0, 47]]
         )
 
         return heatmap.T, x_edges, y_edges
@@ -585,7 +580,7 @@ class MovementTracker:
         self,
         player_id: str,
         ball_handler_frames: List[MovementFrame],
-        radius: float = 15.0
+        radius: float = 15.0,
     ) -> Dict[str, Any]:
         """
         Analyze off-ball movement while another player has the ball.
@@ -602,10 +597,10 @@ class MovementTracker:
 
         if not player_frames or not ball_handler_frames:
             return {
-                'distance_traveled': 0.0,
-                'avg_speed': 0.0,
-                'cuts': 0,
-                'time_near_ball_handler': 0.0
+                "distance_traveled": 0.0,
+                "avg_speed": 0.0,
+                "cuts": 0,
+                "time_near_ball_handler": 0.0,
             }
 
         # Match frames by timestamp
@@ -613,19 +608,18 @@ class MovementTracker:
         for pf in player_frames:
             # Find nearest ball handler frame
             nearest_bh = min(
-                ball_handler_frames,
-                key=lambda bf: abs(bf.timestamp - pf.timestamp)
+                ball_handler_frames, key=lambda bf: abs(bf.timestamp - pf.timestamp)
             )
 
             if abs(nearest_bh.timestamp - pf.timestamp) < 0.1:  # Within 0.1s
                 matched_frames.append((pf, nearest_bh))
 
         if not matched_frames:
-            return {'distance_traveled': 0.0, 'avg_speed': 0.0, 'cuts': 0}
+            return {"distance_traveled": 0.0, "avg_speed": 0.0, "cuts": 0}
 
         # Calculate metrics
         distance_traveled = sum(
-            matched_frames[i][0].distance_traveled(matched_frames[i-1][0])
+            matched_frames[i][0].distance_traveled(matched_frames[i - 1][0])
             for i in range(1, len(matched_frames))
         )
 
@@ -633,32 +627,37 @@ class MovementTracker:
         avg_speed = float(np.mean(speeds)) if speeds else 0.0
 
         # Time near ball handler
-        time_near = sum(
-            1 for pf, bf in matched_frames
-            if math.sqrt((pf.x - bf.x)**2 + (pf.y - bf.y)**2) <= radius
-        ) / self.sampling_rate
+        time_near = (
+            sum(
+                1
+                for pf, bf in matched_frames
+                if math.sqrt((pf.x - bf.x) ** 2 + (pf.y - bf.y) ** 2) <= radius
+            )
+            / self.sampling_rate
+        )
 
         # Count cuts (high-speed movements)
         cuts = sum(1 for pf, _ in matched_frames if pf.speed and pf.speed > 10.0)
 
         return {
-            'distance_traveled': distance_traveled,
-            'avg_speed': avg_speed,
-            'cuts': cuts,
-            'time_near_ball_handler': time_near,
-            'total_time': len(matched_frames) / self.sampling_rate
+            "distance_traveled": distance_traveled,
+            "avg_speed": avg_speed,
+            "cuts": cuts,
+            "time_near_ball_handler": time_near,
+            "total_time": len(matched_frames) / self.sampling_rate,
         }
 
     def get_statistics(self) -> Dict[str, Any]:
         """Get tracker statistics"""
         return {
-            'total_frames': len(self.frames),
-            'unique_players': len(self.frames_by_player),
-            'patterns_identified': len(self.patterns),
-            'tracking_duration': (
+            "total_frames": len(self.frames),
+            "unique_players": len(self.frames_by_player),
+            "patterns_identified": len(self.patterns),
+            "tracking_duration": (
                 self.frames[-1].timestamp - self.frames[0].timestamp
-                if len(self.frames) >= 2 else 0.0
-            )
+                if len(self.frames) >= 2
+                else 0.0
+            ),
         }
 
     def clear(self):

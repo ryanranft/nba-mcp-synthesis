@@ -15,9 +15,13 @@ import psycopg2
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from mcp_server.unified_secrets_manager import load_secrets_hierarchical, get_database_config
+from mcp_server.unified_secrets_manager import (
+    load_secrets_hierarchical,
+    get_database_config,
+)
 from mcp_server.betting.feature_extractor import FeatureExtractor
 from mcp_server.betting.feature_extractors.rest_fatigue import RestFatigueExtractor
+
 
 def main():
     print("=" * 80)
@@ -27,7 +31,7 @@ def main():
 
     # Load secrets
     print("📦 Loading secrets...")
-    load_secrets_hierarchical('nba-mcp-synthesis', 'NBA', 'production')
+    load_secrets_hierarchical("nba-mcp-synthesis", "NBA", "production")
     print("✓ Secrets loaded\n")
 
     # Connect to database
@@ -38,7 +42,8 @@ def main():
 
     # Get a recent completed game
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT
             game_id,
             game_date,
@@ -51,7 +56,8 @@ def main():
           AND away_score IS NOT NULL
         ORDER BY game_date DESC
         LIMIT 1
-    """)
+    """
+    )
     game = cursor.fetchone()
 
     if not game:
@@ -69,9 +75,7 @@ def main():
     try:
         extractor = RestFatigueExtractor(db_conn=conn)
         features = extractor.extract_features(
-            home_team_id=home_id,
-            away_team_id=away_id,
-            game_date=game_date
+            home_team_id=home_id, away_team_id=away_id, game_date=game_date
         )
         print(f"✅ SUCCESS - Extracted {len(features)} rest/fatigue features")
         print(f"   Sample features:")
@@ -90,18 +94,23 @@ def main():
     try:
         extractor = FeatureExtractor(conn)
         features = extractor.extract_game_features(
-            home_team_id=home_id,
-            away_team_id=away_id,
-            game_date=str(game_date)
+            home_team_id=home_id, away_team_id=away_id, game_date=str(game_date)
         )
         print(f"✅ SUCCESS - Extracted {len(features)} total features")
         print(f"   Feature breakdown:")
-        print(f"     rest__ features: {sum(1 for k in features.keys() if k.startswith('rest__'))}")
-        print(f"     base__ features: {sum(1 for k in features.keys() if k.startswith('base__'))}")
-        print(f"     Other features: {sum(1 for k in features.keys() if not k.startswith(('rest__', 'base__')))}")
+        print(
+            f"     rest__ features: {sum(1 for k in features.keys() if k.startswith('rest__'))}"
+        )
+        print(
+            f"     base__ features: {sum(1 for k in features.keys() if k.startswith('base__'))}"
+        )
+        print(
+            f"     Other features: {sum(1 for k in features.keys() if not k.startswith(('rest__', 'base__')))}"
+        )
     except Exception as e:
         print(f"❌ FAILED - {e}")
         import traceback
+
         traceback.print_exc()
         return
 
@@ -128,5 +137,5 @@ def main():
     conn.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

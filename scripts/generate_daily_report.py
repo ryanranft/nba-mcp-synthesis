@@ -61,10 +61,7 @@ import json
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from mcp_server.betting.paper_trading import (
-    PaperTradingEngine,
-    BetStatus
-)
+from mcp_server.betting.paper_trading import PaperTradingEngine, BetStatus
 from mcp_server.betting.probability_calibration import SimulationCalibrator
 from mcp_server.betting.alert_system import AlertSystem, AlertLevel
 from mcp_server.betting.notifications import NotificationManager
@@ -73,6 +70,7 @@ from mcp_server.betting.notifications import NotificationManager
 # ============================================================================
 # Report Generation Functions
 # ============================================================================
+
 
 def generate_performance_summary(stats: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -85,25 +83,27 @@ def generate_performance_summary(stats: Dict[str, Any]) -> Dict[str, Any]:
         Summary dict
     """
     return {
-        'bankroll': stats['bankroll'],
-        'bankroll_change': stats['total_profit_loss'],
-        'bankroll_change_pct': stats['bankroll_change_pct'],
-        'roi': stats['roi'],
-        'win_rate': stats['win_rate'],
-        'sharpe_ratio': stats['sharpe_ratio'],
-        'total_bets': stats['total_bets'],
-        'total_won': stats['total_won'],
-        'total_lost': stats['total_lost'],
-        'total_staked': stats['total_staked'],
-        'avg_bet': stats['avg_bet'],
-        'avg_edge': stats['avg_edge'],
-        'avg_clv': stats['avg_clv'],
-        'max_drawdown': stats['max_drawdown'],
-        'current_streak': stats['current_streak']
+        "bankroll": stats["bankroll"],
+        "bankroll_change": stats["total_profit_loss"],
+        "bankroll_change_pct": stats["bankroll_change_pct"],
+        "roi": stats["roi"],
+        "win_rate": stats["win_rate"],
+        "sharpe_ratio": stats["sharpe_ratio"],
+        "total_bets": stats["total_bets"],
+        "total_won": stats["total_won"],
+        "total_lost": stats["total_lost"],
+        "total_staked": stats["total_staked"],
+        "avg_bet": stats["avg_bet"],
+        "avg_edge": stats["avg_edge"],
+        "avg_clv": stats["avg_clv"],
+        "max_drawdown": stats["max_drawdown"],
+        "current_streak": stats["current_streak"],
     }
 
 
-def generate_recent_bets_summary(all_bets: List[Any], days: int = 1) -> List[Dict[str, Any]]:
+def generate_recent_bets_summary(
+    all_bets: List[Any], days: int = 1
+) -> List[Dict[str, Any]]:
     """
     Generate recent bets summary
 
@@ -116,31 +116,30 @@ def generate_recent_bets_summary(all_bets: List[Any], days: int = 1) -> List[Dic
     """
     cutoff = datetime.now() - timedelta(days=days)
 
-    recent_bets = [
-        bet for bet in all_bets
-        if bet.timestamp >= cutoff
-    ]
+    recent_bets = [bet for bet in all_bets if bet.timestamp >= cutoff]
 
     # Sort by timestamp descending
     recent_bets = sorted(recent_bets, key=lambda x: x.timestamp, reverse=True)
 
     return [
         {
-            'timestamp': bet.timestamp,
-            'game_id': bet.game_id,
-            'bet_type': bet.bet_type.value,
-            'amount': bet.amount,
-            'odds': bet.odds,
-            'edge': bet.edge,
-            'status': bet.status.value,
-            'profit_loss': bet.profit_loss if bet.profit_loss else 0,
-            'clv': bet.clv if bet.clv else 0
+            "timestamp": bet.timestamp,
+            "game_id": bet.game_id,
+            "bet_type": bet.bet_type.value,
+            "amount": bet.amount,
+            "odds": bet.odds,
+            "edge": bet.edge,
+            "status": bet.status.value,
+            "profit_loss": bet.profit_loss if bet.profit_loss else 0,
+            "clv": bet.clv if bet.clv else 0,
         }
         for bet in recent_bets
     ]
 
 
-def generate_alert_summary(alert_system: AlertSystem, hours: int = 24) -> Dict[str, Any]:
+def generate_alert_summary(
+    alert_system: AlertSystem, hours: int = 24
+) -> Dict[str, Any]:
     """
     Generate alert summary
 
@@ -164,18 +163,22 @@ def generate_calibration_summary(calibrator: SimulationCalibrator) -> Dict[str, 
     Returns:
         Calibration summary dict
     """
-    brier = calibrator.calibration_quality(method='brier')
-    log_loss = calibrator.calibration_quality(method='log_loss')
+    brier = calibrator.calibration_quality(method="brier")
+    log_loss = calibrator.calibration_quality(method="log_loss")
 
     num_records = 0
     if calibrator.calibration_db:
         num_records = len(calibrator.calibration_db.get_all_records())
 
     return {
-        'brier_score': brier,
-        'log_loss': log_loss,
-        'num_predictions': num_records,
-        'quality': 'Excellent' if brier < 0.10 else 'Good' if brier < 0.15 else 'Acceptable' if brier < 0.20 else 'Poor'
+        "brier_score": brier,
+        "log_loss": log_loss,
+        "num_predictions": num_records,
+        "quality": (
+            "Excellent"
+            if brier < 0.10
+            else "Good" if brier < 0.15 else "Acceptable" if brier < 0.20 else "Poor"
+        ),
     }
 
 
@@ -183,12 +186,13 @@ def generate_calibration_summary(calibrator: SimulationCalibrator) -> Dict[str, 
 # Report Formatting Functions
 # ============================================================================
 
+
 def format_report_plain_text(
     performance: Dict[str, Any],
     recent_bets: List[Dict[str, Any]],
     alerts: Dict[str, Any],
     calibration: Dict[str, Any],
-    days: int = 1
+    days: int = 1,
 ) -> str:
     """
     Format report as plain text
@@ -216,11 +220,11 @@ def format_report_plain_text(
     # Alert Status
     report.append("ALERT STATUS")
     report.append("-" * 70)
-    if alerts['has_critical']:
+    if alerts["has_critical"]:
         report.append(f"🔴 CRITICAL ALERTS: {alerts['critical']}")
-    if alerts['has_warnings']:
+    if alerts["has_warnings"]:
         report.append(f"🟡 WARNINGS: {alerts['warnings']}")
-    if not alerts['has_critical'] and not alerts['has_warnings']:
+    if not alerts["has_critical"] and not alerts["has_warnings"]:
         report.append("✅ All systems healthy")
     report.append("")
 
@@ -228,7 +232,9 @@ def format_report_plain_text(
     report.append("PERFORMANCE SUMMARY")
     report.append("-" * 70)
     report.append(f"Current Bankroll:       ${performance['bankroll']:,.2f}")
-    report.append(f"Profit/Loss:            ${performance['bankroll_change']:,.2f} ({performance['bankroll_change_pct']*100:+.1f}%)")
+    report.append(
+        f"Profit/Loss:            ${performance['bankroll_change']:,.2f} ({performance['bankroll_change_pct']*100:+.1f}%)"
+    )
     report.append(f"ROI:                    {performance['roi']*100:.1f}%")
     report.append(f"Win Rate:               {performance['win_rate']*100:.1f}%")
     report.append(f"Sharpe Ratio:           {performance['sharpe_ratio']:.2f}")
@@ -238,7 +244,9 @@ def format_report_plain_text(
     report.append("BET STATISTICS")
     report.append("-" * 70)
     report.append(f"Total Bets:             {performance['total_bets']}")
-    report.append(f"Won / Lost:             {performance['total_won']} / {performance['total_lost']}")
+    report.append(
+        f"Won / Lost:             {performance['total_won']} / {performance['total_lost']}"
+    )
     report.append(f"Total Staked:           ${performance['total_staked']:,.2f}")
     report.append(f"Average Bet Size:       ${performance['avg_bet']:,.2f}")
     report.append(f"Average Edge:           {performance['avg_edge']*100:.1f}%")
@@ -248,7 +256,11 @@ def format_report_plain_text(
     # Risk Metrics
     report.append("RISK METRICS")
     report.append("-" * 70)
-    max_dd_pct = abs(performance['max_drawdown']) / performance['bankroll'] if performance['bankroll'] > 0 else 0
+    max_dd_pct = (
+        abs(performance["max_drawdown"]) / performance["bankroll"]
+        if performance["bankroll"] > 0
+        else 0
+    )
     report.append(f"Max Drawdown:           {max_dd_pct*100:.1f}%")
     report.append(f"Current Streak:         {performance['current_streak']:+d}")
     report.append("")
@@ -256,7 +268,9 @@ def format_report_plain_text(
     # Calibration Quality
     report.append("CALIBRATION QUALITY")
     report.append("-" * 70)
-    report.append(f"Brier Score:            {calibration['brier_score']:.4f} ({calibration['quality']})")
+    report.append(
+        f"Brier Score:            {calibration['brier_score']:.4f} ({calibration['quality']})"
+    )
     report.append(f"Log Loss:               {calibration['log_loss']:.4f}")
     report.append(f"Total Predictions:      {calibration['num_predictions']}")
     report.append("")
@@ -267,7 +281,11 @@ def format_report_plain_text(
         report.append("-" * 70)
 
         for bet in recent_bets[:10]:  # Show max 10
-            status_icon = "✅" if bet['status'] == 'won' else "❌" if bet['status'] == 'lost' else "⏳"
+            status_icon = (
+                "✅"
+                if bet["status"] == "won"
+                else "❌" if bet["status"] == "lost" else "⏳"
+            )
             report.append(
                 f"{status_icon} {bet['timestamp'].strftime('%m-%d %H:%M')} | "
                 f"{bet['game_id'][:20]:20s} | "
@@ -294,7 +312,7 @@ def format_report_html(
     recent_bets: List[Dict[str, Any]],
     alerts: Dict[str, Any],
     calibration: Dict[str, Any],
-    days: int = 1
+    days: int = 1,
 ) -> str:
     """
     Format report as HTML
@@ -310,21 +328,25 @@ def format_report_html(
         HTML report
     """
     # Determine alert color
-    if alerts['has_critical']:
-        alert_color = '#d9534f'
+    if alerts["has_critical"]:
+        alert_color = "#d9534f"
         alert_status = f"🔴 CRITICAL: {alerts['critical']} alerts"
-    elif alerts['has_warnings']:
-        alert_color = '#f0ad4e'
+    elif alerts["has_warnings"]:
+        alert_color = "#f0ad4e"
         alert_status = f"🟡 WARNING: {alerts['warnings']} alerts"
     else:
-        alert_color = '#5cb85c'
+        alert_color = "#5cb85c"
         alert_status = "✅ All systems healthy"
 
     # ROI color
-    roi_color = '#5cb85c' if performance['roi'] > 0 else '#d9534f'
+    roi_color = "#5cb85c" if performance["roi"] > 0 else "#d9534f"
 
     # Calibration color
-    cal_color = '#5cb85c' if calibration['brier_score'] < 0.15 else '#f0ad4e' if calibration['brier_score'] < 0.20 else '#d9534f'
+    cal_color = (
+        "#5cb85c"
+        if calibration["brier_score"] < 0.15
+        else "#f0ad4e" if calibration["brier_score"] < 0.20 else "#d9534f"
+    )
 
     html = f"""
     <!DOCTYPE html>
@@ -499,8 +521,12 @@ def format_report_html(
         """
 
         for bet in recent_bets[:20]:  # Show max 20
-            status_class = bet['status']
-            status_icon = "✅" if bet['status'] == 'won' else "❌" if bet['status'] == 'lost' else "⏳"
+            status_class = bet["status"]
+            status_icon = (
+                "✅"
+                if bet["status"] == "won"
+                else "❌" if bet["status"] == "lost" else "⏳"
+            )
 
             html += f"""
                     <tr>
@@ -540,9 +566,9 @@ def format_report_html(
 # Main Report Generation
 # ============================================================================
 
+
 def generate_report(
-    days: int = 1,
-    output_format: Literal['text', 'html', 'both'] = 'both'
+    days: int = 1, output_format: Literal["text", "html", "both"] = "both"
 ) -> Dict[str, str]:
     """
     Generate daily report
@@ -555,10 +581,7 @@ def generate_report(
         Dict with 'text' and/or 'html' keys
     """
     # Load data
-    engine = PaperTradingEngine(
-        starting_bankroll=10000,
-        db_path="data/paper_trades.db"
-    )
+    engine = PaperTradingEngine(starting_bankroll=10000, db_path="data/paper_trades.db")
 
     calibrator = SimulationCalibrator(db_path="data/calibration.db")
     alert_system = AlertSystem(db_path="data/alerts.db")
@@ -570,19 +593,19 @@ def generate_report(
     all_bets = engine.db.get_all_bets()
     recent_bets = generate_recent_bets_summary(all_bets, days=days)
 
-    alerts = generate_alert_summary(alert_system, hours=days*24)
+    alerts = generate_alert_summary(alert_system, hours=days * 24)
     calibration = generate_calibration_summary(calibrator)
 
     # Format report
     reports = {}
 
-    if output_format in ['text', 'both']:
-        reports['text'] = format_report_plain_text(
+    if output_format in ["text", "both"]:
+        reports["text"] = format_report_plain_text(
             performance, recent_bets, alerts, calibration, days
         )
 
-    if output_format in ['html', 'both']:
-        reports['html'] = format_report_html(
+    if output_format in ["html", "both"]:
+        reports["html"] = format_report_html(
             performance, recent_bets, alerts, calibration, days
         )
 
@@ -593,6 +616,7 @@ def generate_report(
 # CLI
 # ============================================================================
 
+
 def main():
     """Main CLI"""
     parser = argparse.ArgumentParser(
@@ -600,41 +624,27 @@ def main():
     )
 
     parser.add_argument(
-        '--days',
+        "--days",
         type=int,
         default=1,
-        help='Number of days to include in report (default: 1)'
+        help="Number of days to include in report (default: 1)",
     )
 
-    parser.add_argument(
-        '--email',
-        action='store_true',
-        help='Send report via email'
-    )
+    parser.add_argument("--email", action="store_true", help="Send report via email")
+
+    parser.add_argument("--slack", action="store_true", help="Send report via Slack")
 
     parser.add_argument(
-        '--slack',
-        action='store_true',
-        help='Send report via Slack'
+        "--sms", action="store_true", help="Send report via SMS/text message"
     )
 
-    parser.add_argument(
-        '--sms',
-        action='store_true',
-        help='Send report via SMS/text message'
-    )
+    parser.add_argument("--output", type=str, help="Save report to file (HTML format)")
 
     parser.add_argument(
-        '--output',
-        type=str,
-        help='Save report to file (HTML format)'
-    )
-
-    parser.add_argument(
-        '--format',
-        choices=['text', 'html', 'both'],
-        default='both',
-        help='Output format (default: both)'
+        "--format",
+        choices=["text", "html", "both"],
+        default="both",
+        help="Output format (default: both)",
     )
 
     args = parser.parse_args()
@@ -644,16 +654,16 @@ def main():
     reports = generate_report(days=args.days, output_format=args.format)
 
     # Print to console
-    if 'text' in reports:
-        print("\n" + reports['text'])
+    if "text" in reports:
+        print("\n" + reports["text"])
 
     # Save to file
     if args.output:
-        if 'html' not in reports:
+        if "html" not in reports:
             print("❌ HTML format not generated. Use --format html or both")
         else:
             output_path = Path(args.output)
-            output_path.write_text(reports['html'])
+            output_path.write_text(reports["html"])
             print(f"\n✅ Report saved to: {output_path}")
 
     # Send via email/Slack/SMS
@@ -662,53 +672,57 @@ def main():
 
         channels = []
         if args.email:
-            channels.append('email')
+            channels.append("email")
         if args.slack:
-            channels.append('slack')
+            channels.append("slack")
         if args.sms:
-            channels.append('sms')
+            channels.append("sms")
 
         try:
-            notifier = NotificationManager(config={
-                'email': {
-                    'enabled': args.email,
-                },
-                'slack': {
-                    'enabled': args.slack,
-                },
-                'sms': {
-                    'enabled': args.sms,
+            notifier = NotificationManager(
+                config={
+                    "email": {
+                        "enabled": args.email,
+                    },
+                    "slack": {
+                        "enabled": args.slack,
+                    },
+                    "sms": {
+                        "enabled": args.sms,
+                    },
                 }
-            })
+            )
 
             subject = f"NBA Betting System - {args.days}-Day Report"
 
             # Send HTML via email, text via Slack/SMS
             results = {}
 
-            if args.email and 'email' in notifier.notifiers:
-                result = notifier.notifiers['email'].send(
+            if args.email and "email" in notifier.notifiers:
+                result = notifier.notifiers["email"].send(
                     subject=subject,
-                    body=reports.get('html', reports.get('text', '')),
-                    html='html' in reports
+                    body=reports.get("html", reports.get("text", "")),
+                    html="html" in reports,
                 )
-                results['email'] = result
+                results["email"] = result
 
-            if args.slack and 'slack' in notifier.notifiers:
-                result = notifier.notifiers['slack'].send(
-                    message=reports.get('text', ''),
-                    title=subject
+            if args.slack and "slack" in notifier.notifiers:
+                result = notifier.notifiers["slack"].send(
+                    message=reports.get("text", ""), title=subject
                 )
-                results['slack'] = result
+                results["slack"] = result
 
-            if args.sms and 'sms' in notifier.notifiers:
+            if args.sms and "sms" in notifier.notifiers:
                 # For SMS, send a short summary
                 from mcp_server.betting.paper_trading import PaperTradingEngine
-                engine = PaperTradingEngine(starting_bankroll=10000, db_path="data/paper_trades.db")
+
+                engine = PaperTradingEngine(
+                    starting_bankroll=10000, db_path="data/paper_trades.db"
+                )
                 stats = engine.get_performance_stats()
                 sms_text = f"NBA Betting {args.days}d: ROI {stats['roi']*100:.1f}%, WR {stats['win_rate']*100:.1f}%, Bankroll ${stats['bankroll']:,.0f}"
-                result = notifier.notifiers['sms'].send(sms_text)
-                results['sms'] = result
+                result = notifier.notifiers["sms"].send(sms_text)
+                results["sms"] = result
 
             # Print results
             for channel, result in results.items():
@@ -719,7 +733,9 @@ def main():
 
         except Exception as e:
             print(f"❌ Failed to send notifications: {e}")
-            print("💡 Make sure environment variables are set (SMTP_HOST, SLACK_WEBHOOK_URL, TWILIO credentials, etc.)")
+            print(
+                "💡 Make sure environment variables are set (SMTP_HOST, SLACK_WEBHOOK_URL, TWILIO credentials, etc.)"
+            )
 
 
 if __name__ == "__main__":

@@ -20,7 +20,10 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from mcp_server.unified_secrets_manager import load_secrets_hierarchical, get_database_config
+from mcp_server.unified_secrets_manager import (
+    load_secrets_hierarchical,
+    get_database_config,
+)
 from mcp_server.betting.feature_extractor import FeatureExtractor
 import psycopg2
 
@@ -54,7 +57,8 @@ def test_player_feature_extraction():
     # Get a recent game to test with
     print("Finding a recent game to test...")
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT
             home_team_id,
             away_team_id,
@@ -66,7 +70,8 @@ def test_player_feature_extraction():
         AND game_date >= '2024-11-01'  -- Recent games with player data
         ORDER BY game_date DESC
         LIMIT 1
-    """)
+    """
+    )
     game = cursor.fetchone()
 
     if not game:
@@ -83,13 +88,14 @@ def test_player_feature_extraction():
         features = extractor.extract_game_features(
             home_team_id=int(home_team_id),
             away_team_id=int(away_team_id),
-            game_date=str(game_date)
+            game_date=str(game_date),
         )
         print(f"✓ Extracted {len(features)} features")
         print()
     except Exception as e:
         print(f"❌ Error extracting features: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -101,19 +107,38 @@ def test_player_feature_extraction():
 
     # Group features by category
     categories = {
-        'Player Features': [k for k in features.keys() if k.startswith('player__')],
-        'Rolling Stats (L5)': [k for k in features.keys() if '_l5' in k and not k.startswith('player__')],
-        'Rolling Stats (L10)': [k for k in features.keys() if '_l10' in k and not k.startswith('player__')],
-        'Rolling Stats (L20)': [k for k in features.keys() if '_l20' in k and not k.startswith('player__')],
-        'Rest & Fatigue (rest__)': [k for k in features.keys() if k.startswith('rest__')],
-        'Rest & Fatigue (base__)': [k for k in features.keys() if k.startswith('base__')],
-        'Head-to-Head': [k for k in features.keys() if 'h2h_' in k],
-        'Other': [k for k in features.keys() if not any([
-            k.startswith('player__'),
-            '_l5' in k, '_l10' in k, '_l20' in k,
-            k.startswith('rest__'), k.startswith('base__'),
-            'h2h_' in k
-        ])]
+        "Player Features": [k for k in features.keys() if k.startswith("player__")],
+        "Rolling Stats (L5)": [
+            k for k in features.keys() if "_l5" in k and not k.startswith("player__")
+        ],
+        "Rolling Stats (L10)": [
+            k for k in features.keys() if "_l10" in k and not k.startswith("player__")
+        ],
+        "Rolling Stats (L20)": [
+            k for k in features.keys() if "_l20" in k and not k.startswith("player__")
+        ],
+        "Rest & Fatigue (rest__)": [
+            k for k in features.keys() if k.startswith("rest__")
+        ],
+        "Rest & Fatigue (base__)": [
+            k for k in features.keys() if k.startswith("base__")
+        ],
+        "Head-to-Head": [k for k in features.keys() if "h2h_" in k],
+        "Other": [
+            k
+            for k in features.keys()
+            if not any(
+                [
+                    k.startswith("player__"),
+                    "_l5" in k,
+                    "_l10" in k,
+                    "_l20" in k,
+                    k.startswith("rest__"),
+                    k.startswith("base__"),
+                    "h2h_" in k,
+                ]
+            )
+        ],
     }
 
     for category, feature_list in categories.items():
@@ -135,7 +160,7 @@ def test_player_feature_extraction():
     print("=" * 80)
     print()
 
-    player_features = [k for k in features.keys() if k.startswith('player__')]
+    player_features = [k for k in features.keys() if k.startswith("player__")]
 
     if len(player_features) == 0:
         print("❌ FAILED: No player features found!")
@@ -146,23 +171,23 @@ def test_player_feature_extraction():
 
     # Expected player features
     expected_features = [
-        'player__home_top1_ppg_l10',
-        'player__home_top2_ppg_l10',
-        'player__home_top3_ppg_l10',
-        'player__away_top1_ppg_l10',
-        'player__away_top2_ppg_l10',
-        'player__away_top3_ppg_l10',
-        'player__home_roster_per_sum',
-        'player__away_roster_per_sum',
-        'player__home_injury_impact',
-        'player__away_injury_impact',
-        'player__home_stars_available',
-        'player__away_stars_available',
-        'player__home_bench_ppg',
-        'player__away_bench_ppg',
-        'player__top5_ppg_advantage',
-        'player__home_top5_ppg',
-        'player__away_top5_ppg'
+        "player__home_top1_ppg_l10",
+        "player__home_top2_ppg_l10",
+        "player__home_top3_ppg_l10",
+        "player__away_top1_ppg_l10",
+        "player__away_top2_ppg_l10",
+        "player__away_top3_ppg_l10",
+        "player__home_roster_per_sum",
+        "player__away_roster_per_sum",
+        "player__home_injury_impact",
+        "player__away_injury_impact",
+        "player__home_stars_available",
+        "player__away_stars_available",
+        "player__home_bench_ppg",
+        "player__away_bench_ppg",
+        "player__top5_ppg_advantage",
+        "player__home_top5_ppg",
+        "player__away_top5_ppg",
     ]
 
     missing_features = [f for f in expected_features if f not in features]
@@ -182,8 +207,8 @@ def test_player_feature_extraction():
 
     # Top scorer PPG should be positive and reasonable (5-40 PPG)
     for i in [1, 2, 3]:
-        home_key = f'player__home_top{i}_ppg_l10'
-        away_key = f'player__away_top{i}_ppg_l10'
+        home_key = f"player__home_top{i}_ppg_l10"
+        away_key = f"player__away_top{i}_ppg_l10"
 
         if home_key in features:
             value = features[home_key]
@@ -196,24 +221,24 @@ def test_player_feature_extraction():
                 issues.append(f"{away_key} has unrealistic value: {value}")
 
     # Roster PER sum should be positive
-    if 'player__home_roster_per_sum' in features:
-        value = features['player__home_roster_per_sum']
+    if "player__home_roster_per_sum" in features:
+        value = features["player__home_roster_per_sum"]
         if value < 0 or value > 200:
             issues.append(f"player__home_roster_per_sum has unrealistic value: {value}")
 
-    if 'player__away_roster_per_sum' in features:
-        value = features['player__away_roster_per_sum']
+    if "player__away_roster_per_sum" in features:
+        value = features["player__away_roster_per_sum"]
         if value < 0 or value > 200:
             issues.append(f"player__away_roster_per_sum has unrealistic value: {value}")
 
     # Star availability should be 0-1
-    if 'player__home_stars_available' in features:
-        value = features['player__home_stars_available']
+    if "player__home_stars_available" in features:
+        value = features["player__home_stars_available"]
         if value < 0 or value > 1:
             issues.append(f"player__home_stars_available out of range [0,1]: {value}")
 
-    if 'player__away_stars_available' in features:
-        value = features['player__away_stars_available']
+    if "player__away_stars_available" in features:
+        value = features["player__away_stars_available"]
         if value < 0 or value > 1:
             issues.append(f"player__away_stars_available out of range [0,1]: {value}")
 
@@ -266,6 +291,6 @@ def test_player_feature_extraction():
     return success
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     success = test_player_feature_extraction()
     sys.exit(0 if success else 1)

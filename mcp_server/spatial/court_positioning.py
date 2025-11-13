@@ -113,7 +113,7 @@ class CourtPosition:
 
         return math.sqrt(dx * dx + dy * dy)
 
-    def distance_to(self, other: 'CourtPosition') -> float:
+    def distance_to(self, other: "CourtPosition") -> float:
         """Compute Euclidean distance to another position"""
         dx = self.x - other.x
         dy = self.y - other.y
@@ -122,14 +122,14 @@ class CourtPosition:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'player_id': self.player_id,
-            'x': self.x,
-            'y': self.y,
-            'timestamp': self.timestamp,
-            'team': self.team,
-            'has_ball': self.has_ball,
-            'region': self.region.value if self.region else None,
-            'distance_to_basket': self.distance_to_basket,
+            "player_id": self.player_id,
+            "x": self.x,
+            "y": self.y,
+            "timestamp": self.timestamp,
+            "team": self.team,
+            "has_ball": self.has_ball,
+            "region": self.region.value if self.region else None,
+            "distance_to_basket": self.distance_to_basket,
         }
 
 
@@ -163,17 +163,17 @@ class SpacingMetrics:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'timestamp': self.timestamp,
-            'team': self.team,
-            'avg_distance': self.avg_distance_between_players,
-            'std_distance': self.std_distance_between_players,
-            'min_distance': self.min_distance_between_players,
-            'max_distance': self.max_distance_between_players,
-            'coverage_area': self.court_coverage_area,
-            'perimeter': self.perimeter_length,
-            'compactness': self.compactness_score,
-            'centroid': (self.centroid_x, self.centroid_y),
-            'num_players': self.num_players,
+            "timestamp": self.timestamp,
+            "team": self.team,
+            "avg_distance": self.avg_distance_between_players,
+            "std_distance": self.std_distance_between_players,
+            "min_distance": self.min_distance_between_players,
+            "max_distance": self.max_distance_between_players,
+            "coverage_area": self.court_coverage_area,
+            "perimeter": self.perimeter_length,
+            "compactness": self.compactness_score,
+            "centroid": (self.centroid_x, self.centroid_y),
+            "num_players": self.num_players,
         }
 
 
@@ -211,9 +211,7 @@ class PositionAnalyzer:
             self.add_position(pos)
 
     def analyze_spacing(
-        self,
-        positions: List[CourtPosition],
-        team: Optional[str] = None
+        self, positions: List[CourtPosition], team: Optional[str] = None
     ) -> SpacingMetrics:
         """
         Analyze spacing for a set of positions.
@@ -256,6 +254,7 @@ class PositionAnalyzer:
         if len(positions) >= 3:
             try:
                 from scipy.spatial import ConvexHull
+
                 hull = ConvexHull(coords)
                 coverage_area = float(hull.volume)  # In 2D, volume = area
                 perimeter = float(hull.area)  # In 2D, area = perimeter
@@ -287,14 +286,11 @@ class PositionAnalyzer:
             compactness_score=compactness,
             centroid_x=centroid_x,
             centroid_y=centroid_y,
-            num_players=len(positions)
+            num_players=len(positions),
         )
 
     def get_player_separation(
-        self,
-        player1_id: str,
-        player2_id: str,
-        timestamp: Optional[float] = None
+        self, player1_id: str, player2_id: str, timestamp: Optional[float] = None
     ) -> Optional[float]:
         """
         Get distance between two players at a timestamp.
@@ -310,12 +306,30 @@ class PositionAnalyzer:
         # Find positions
         if timestamp is None:
             # Most recent
-            p1_pos = next((p for p in reversed(self.positions) if p.player_id == player1_id), None)
-            p2_pos = next((p for p in reversed(self.positions) if p.player_id == player2_id), None)
+            p1_pos = next(
+                (p for p in reversed(self.positions) if p.player_id == player1_id), None
+            )
+            p2_pos = next(
+                (p for p in reversed(self.positions) if p.player_id == player2_id), None
+            )
         else:
             # At specific timestamp
-            p1_pos = next((p for p in self.positions if p.player_id == player1_id and abs(p.timestamp - timestamp) < 0.1), None)
-            p2_pos = next((p for p in self.positions if p.player_id == player2_id and abs(p.timestamp - timestamp) < 0.1), None)
+            p1_pos = next(
+                (
+                    p
+                    for p in self.positions
+                    if p.player_id == player1_id and abs(p.timestamp - timestamp) < 0.1
+                ),
+                None,
+            )
+            p2_pos = next(
+                (
+                    p
+                    for p in self.positions
+                    if p.player_id == player2_id and abs(p.timestamp - timestamp) < 0.1
+                ),
+                None,
+            )
 
         if p1_pos and p2_pos:
             return p1_pos.distance_to(p2_pos)
@@ -323,9 +337,7 @@ class PositionAnalyzer:
         return None
 
     def identify_formation(
-        self,
-        positions: List[CourtPosition],
-        n_clusters: int = 3
+        self, positions: List[CourtPosition], n_clusters: int = 3
     ) -> Dict[str, Any]:
         """
         Identify offensive formation using clustering.
@@ -338,7 +350,7 @@ class PositionAnalyzer:
             Dictionary with formation analysis
         """
         if len(positions) < n_clusters:
-            return {'formation': 'insufficient_data'}
+            return {"formation": "insufficient_data"}
 
         # Extract coordinates
         coords = np.array([[p.x, p.y] for p in positions])
@@ -355,29 +367,31 @@ class PositionAnalyzer:
 
             if len(cluster_coords) > 0:
                 centroid = kmeans.cluster_centers_[i]
-                avg_distance_to_basket = float(np.mean([p.distance_to_basket for p in cluster_positions]))
+                avg_distance_to_basket = float(
+                    np.mean([p.distance_to_basket for p in cluster_positions])
+                )
 
-                clusters.append({
-                    'cluster_id': i,
-                    'num_players': len(cluster_positions),
-                    'centroid': tuple(centroid),
-                    'avg_distance_to_basket': avg_distance_to_basket,
-                    'player_ids': [p.player_id for p in cluster_positions]
-                })
+                clusters.append(
+                    {
+                        "cluster_id": i,
+                        "num_players": len(cluster_positions),
+                        "centroid": tuple(centroid),
+                        "avg_distance_to_basket": avg_distance_to_basket,
+                        "player_ids": [p.player_id for p in cluster_positions],
+                    }
+                )
 
         # Sort clusters by distance to basket
-        clusters.sort(key=lambda x: x['avg_distance_to_basket'])
+        clusters.sort(key=lambda x: x["avg_distance_to_basket"])
 
         return {
-            'formation': f"{len(clusters)}_cluster",
-            'clusters': clusters,
-            'spacing': self.analyze_spacing(positions).to_dict()
+            "formation": f"{len(clusters)}_cluster",
+            "clusters": clusters,
+            "spacing": self.analyze_spacing(positions).to_dict(),
         }
 
     def find_open_spaces(
-        self,
-        positions: List[CourtPosition],
-        grid_size: int = 20
+        self, positions: List[CourtPosition], grid_size: int = 20
     ) -> np.ndarray:
         """
         Identify open spaces on the court using Voronoi diagram.
@@ -412,8 +426,7 @@ class PositionAnalyzer:
         return open_space_map
 
     def get_region_occupancy(
-        self,
-        positions: List[CourtPosition]
+        self, positions: List[CourtPosition]
     ) -> Dict[CourtRegion, int]:
         """
         Get number of players in each court region.
@@ -433,9 +446,7 @@ class PositionAnalyzer:
         return occupancy
 
     def calculate_optimal_spacing(
-        self,
-        num_players: int = 5,
-        formation: str = "spread"
+        self, num_players: int = 5, formation: str = "spread"
     ) -> List[Tuple[float, float]]:
         """
         Calculate optimal player positions for given formation.
@@ -450,31 +461,31 @@ class PositionAnalyzer:
         if formation == "spread":
             # Maximum spacing formation (4-out-1-in)
             positions = [
-                (25, 8),    # Center near basket
-                (10, 20),   # Left wing
-                (40, 20),   # Right wing
-                (8, 8),     # Left corner
-                (42, 8),    # Right corner
+                (25, 8),  # Center near basket
+                (10, 20),  # Left wing
+                (40, 20),  # Right wing
+                (8, 8),  # Left corner
+                (42, 8),  # Right corner
             ]
 
         elif formation == "compact":
             # More compact formation (everyone close to basket)
             positions = [
-                (25, 8),    # Center
-                (20, 12),   # Left block
-                (30, 12),   # Right block
-                (15, 18),   # Left elbow
-                (35, 18),   # Right elbow
+                (25, 8),  # Center
+                (20, 12),  # Left block
+                (30, 12),  # Right block
+                (15, 18),  # Left elbow
+                (35, 18),  # Right elbow
             ]
 
         elif formation == "motion":
             # Balanced motion offense
             positions = [
-                (25, 10),   # High post
-                (15, 15),   # Left wing
-                (35, 15),   # Right wing
-                (10, 8),    # Left corner
-                (40, 8),    # Right corner
+                (25, 10),  # High post
+                (15, 15),  # Left wing
+                (35, 15),  # Right wing
+                (10, 8),  # Left corner
+                (40, 8),  # Right corner
             ]
 
         else:
@@ -486,15 +497,15 @@ class PositionAnalyzer:
         """Get analyzer statistics"""
         teams = list(self.positions_by_team.keys())
         stats = {
-            'total_positions': len(self.positions),
-            'unique_teams': len(teams),
-            'spacing_measurements': len(self.spacing_history),
+            "total_positions": len(self.positions),
+            "unique_teams": len(teams),
+            "spacing_measurements": len(self.spacing_history),
         }
 
         # Per-team stats
         for team in teams:
             team_positions = self.positions_by_team[team]
-            stats[f'{team}_positions'] = len(team_positions)
+            stats[f"{team}_positions"] = len(team_positions)
 
         return stats
 

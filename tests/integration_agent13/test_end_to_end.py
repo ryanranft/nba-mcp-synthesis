@@ -10,7 +10,7 @@ from datetime import datetime
 
 from tests.integration_agent13.test_framework import (
     IntegrationTestBuilder,
-    SystemValidator
+    SystemValidator,
 )
 
 
@@ -45,7 +45,9 @@ class TestEndToEndWorkflow:
         assert result.request_id == "test_request"
         assert 0.0 <= result.home_win_probability <= 1.0
         assert 0.0 <= result.away_win_probability <= 1.0
-        assert abs(result.home_win_probability + result.away_win_probability - 1.0) < 0.01
+        assert (
+            abs(result.home_win_probability + result.away_win_probability - 1.0) < 0.01
+        )
 
     def test_multiple_model_versions(self, context):
         """Test managing multiple model versions"""
@@ -78,6 +80,7 @@ class TestEndToEndWorkflow:
 
         # Create batch simulator
         from mcp_server.simulations.deployment.simulation_service import BatchSimulator
+
         batch_sim = BatchSimulator(context.simulation_service, max_workers=2)
 
         # Create multiple requests
@@ -98,16 +101,18 @@ class TestEndToEndWorkflow:
         import pandas as pd
 
         # Create time series data
-        data = pd.DataFrame({
-            'points': [100, 105, 110, 108, 112],
-            'rebounds': [45, 47, 46, 48, 50],
-            'win': [1, 0, 1, 1, 0]
-        })
+        data = pd.DataFrame(
+            {
+                "points": [100, 105, 110, 108, 112],
+                "rebounds": [45, 47, 46, 48, 50],
+                "win": [1, 0, 1, 1, 0],
+            }
+        )
 
         # Generate features
-        time_gen = context.feature_generators['time_based']
+        time_gen = context.feature_generators["time_based"]
         rolling_features = time_gen.create_rolling_features(
-            data, ['points', 'rebounds'], ['mean', 'std']
+            data, ["points", "rebounds"], ["mean", "std"]
         )
 
         assert len(rolling_features.columns) > 0
@@ -115,7 +120,7 @@ class TestEndToEndWorkflow:
 
         # Generate momentum features
         momentum = time_gen.create_momentum_features(data)
-        assert 'win_streak' in momentum.columns
+        assert "win_streak" in momentum.columns
 
     def test_validation_integration(self, context):
         """Test validation integrated with simulation"""
@@ -129,11 +134,12 @@ class TestEndToEndWorkflow:
 
         # Test game parameters
         from mcp_server.simulations.validation.sim_validator import GameParameters
+
         params = GameParameters(
             home_team_id="LAL",
             away_team_id="BOS",
             season="2024-25",
-            game_date=datetime.now()
+            game_date=datetime.now(),
         )
 
         result = context.validator.validate_game_parameters(params)
@@ -146,11 +152,11 @@ class TestEndToEndWorkflow:
 
         # Simulate realistic game stats
         sim_data = {
-            'points': 105.0,
-            'rebounds': 45.0,
-            'assists': 25.0,
-            'field_goal_pct': 0.48,
-            'three_point_pct': 0.36
+            "points": 105.0,
+            "rebounds": 45.0,
+            "assists": 25.0,
+            "field_goal_pct": 0.48,
+            "three_point_pct": 0.36,
         }
 
         # Compute realism score
@@ -196,22 +202,22 @@ class TestSystemValidation:
         """Test overall system integrity"""
         results = SystemValidator.validate_end_to_end_pipeline(context)
 
-        assert results['passed'] is True
-        assert len(results['errors']) == 0
-        assert results['checks']['model_registry']['passed'] is True
-        assert results['checks']['simulation_service']['passed'] is True
+        assert results["passed"] is True
+        assert len(results["errors"]) == 0
+        assert results["checks"]["model_registry"]["passed"] is True
+        assert results["checks"]["simulation_service"]["passed"] is True
 
     def test_data_flow_validation(self, context):
         """Test data flow through entire system"""
         results = SystemValidator.validate_data_flow(context)
 
-        assert results['passed'] is True
-        assert len(results['errors']) == 0
-        assert len(results['steps']) >= 3
+        assert results["passed"] is True
+        assert len(results["errors"]) == 0
+        assert len(results["steps"]) >= 3
 
         # Check each step passed
-        for step in results['steps']:
-            assert step['passed'] is True
+        for step in results["steps"]:
+            assert step["passed"] is True
 
 
 class TestErrorHandling:
@@ -235,12 +241,13 @@ class TestErrorHandling:
 
     def test_invalid_roster_handling(self, context):
         """Test handling of invalid roster"""
-        from mcp_server.simulations.validation.sim_validator import TeamRoster, PlayerStats
+        from mcp_server.simulations.validation.sim_validator import (
+            TeamRoster,
+            PlayerStats,
+        )
 
         # Create roster with too few players
-        players = [
-            PlayerStats("p1", 20.0, 5.0, 8.0, 1.0, 1.0, 2.0, 30.0)
-        ]
+        players = [PlayerStats("p1", 20.0, 5.0, 8.0, 1.0, 1.0, 2.0, 30.0)]
         roster = TeamRoster("TEST", "Test Team", players, "2024-25")
 
         result = context.validator.validate_roster(roster)
@@ -263,15 +270,15 @@ class TestErrorHandling:
             ),
             IntegrationTestBuilder.create_simulation_request(
                 model_id="invalid_model", model_version="1.0"
-            )
+            ),
         ]
 
         # Should handle errors gracefully
         results = batch_sim.simulate_batch(requests, parallel=False)
         assert len(results) == 2
         # First should succeed, second should have error metadata
-        assert results[0].metadata.get('error') is None
-        assert results[1].metadata.get('error') is not None
+        assert results[0].metadata.get("error") is None
+        assert results[1].metadata.get("error") is not None
 
 
 class TestPerformance:
@@ -377,13 +384,12 @@ class TestDataConsistency:
         # Create new registry with same path
         from mcp_server.simulations.deployment.model_persistence import (
             ModelSerializer,
-            ModelRegistry
+            ModelRegistry,
         )
 
         serializer = ModelSerializer(base_path=context.temp_dir / "models")
         new_registry = ModelRegistry(
-            serializer=serializer,
-            registry_path=context.temp_dir / "registry.json"
+            serializer=serializer, registry_path=context.temp_dir / "registry.json"
         )
 
         # Should have the registered model

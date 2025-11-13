@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ModelVersion:
     """Version information for a deployed model"""
+
     model_id: str
     version: str
     created_at: datetime
@@ -37,14 +38,14 @@ class ModelVersion:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         data = asdict(self)
-        data['created_at'] = self.created_at.isoformat()
+        data["created_at"] = self.created_at.isoformat()
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'ModelVersion':
+    def from_dict(cls, data: Dict[str, Any]) -> "ModelVersion":
         """Create from dictionary"""
         data = data.copy()
-        data['created_at'] = datetime.fromisoformat(data['created_at'])
+        data["created_at"] = datetime.fromisoformat(data["created_at"])
         return cls(**data)
 
 
@@ -75,7 +76,7 @@ class ModelSerializer:
         model: Any,
         model_id: str,
         version: str,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> Tuple[Path, str]:
         """
         Serialize model to disk.
@@ -96,7 +97,7 @@ class ModelSerializer:
         # Serialize model
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            with open(file_path, 'wb') as f:
+            with open(file_path, "wb") as f:
                 pickle.dump(model, f, protocol=pickle.HIGHEST_PROTOCOL)
 
         # Compute checksum
@@ -104,8 +105,8 @@ class ModelSerializer:
 
         # Save metadata if provided
         if metadata:
-            metadata_path = file_path.with_suffix('.json')
-            with open(metadata_path, 'w') as f:
+            metadata_path = file_path.with_suffix(".json")
+            with open(metadata_path, "w") as f:
                 json.dump(metadata, f, indent=2)
 
         self.serializations_count += 1
@@ -118,7 +119,7 @@ class ModelSerializer:
         model_id: str,
         version: str,
         verify_checksum: bool = True,
-        expected_checksum: Optional[str] = None
+        expected_checksum: Optional[str] = None,
     ) -> Any:
         """
         Deserialize model from disk.
@@ -155,7 +156,7 @@ class ModelSerializer:
         # Deserialize
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 model = pickle.load(f)
 
         self.deserializations_count += 1
@@ -174,7 +175,7 @@ class ModelSerializer:
             Hex digest of checksum
         """
         sha256 = hashlib.sha256()
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             while chunk := f.read(8192):
                 sha256.update(chunk)
         return sha256.hexdigest()
@@ -190,8 +191,8 @@ class ModelSerializer:
         for file_path in self.base_path.glob("*.pkl"):
             # Parse filename: model_id_vversion.pkl
             name = file_path.stem
-            if '_v' in name:
-                model_id, version = name.rsplit('_v', 1)
+            if "_v" in name:
+                model_id, version = name.rsplit("_v", 1)
                 models.append((model_id, version))
         return sorted(models)
 
@@ -212,7 +213,7 @@ class ModelSerializer:
         if file_path.exists():
             file_path.unlink()
             # Also delete metadata if exists
-            metadata_path = file_path.with_suffix('.json')
+            metadata_path = file_path.with_suffix(".json")
             if metadata_path.exists():
                 metadata_path.unlink()
             logger.info(f"Deleted model {model_id} v{version}")
@@ -223,10 +224,10 @@ class ModelSerializer:
     def get_statistics(self) -> Dict[str, Any]:
         """Get serializer statistics"""
         return {
-            'base_path': str(self.base_path),
-            'serializations': self.serializations_count,
-            'deserializations': self.deserializations_count,
-            'total_models': len(self.list_models())
+            "base_path": str(self.base_path),
+            "serializations": self.serializations_count,
+            "deserializations": self.deserializations_count,
+            "total_models": len(self.list_models()),
         }
 
 
@@ -244,7 +245,7 @@ class ModelRegistry:
     def __init__(
         self,
         serializer: Optional[ModelSerializer] = None,
-        registry_path: Optional[Path] = None
+        registry_path: Optional[Path] = None,
     ):
         """
         Initialize model registry.
@@ -265,7 +266,7 @@ class ModelRegistry:
         version: str,
         model_type: str,
         metrics: Optional[Dict[str, float]] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> ModelVersion:
         """
         Register a new model version.
@@ -295,7 +296,7 @@ class ModelRegistry:
             metrics=metrics or {},
             metadata=metadata or {},
             file_path=str(file_path),
-            checksum=checksum
+            checksum=checksum,
         )
 
         # Add to registry
@@ -313,7 +314,7 @@ class ModelRegistry:
         self,
         model_id: str,
         version: Optional[str] = None,
-        verify_checksum: bool = False
+        verify_checksum: bool = False,
     ) -> Any:
         """
         Get model by ID and version.
@@ -352,13 +353,11 @@ class ModelRegistry:
             model_id,
             model_version.version,
             verify_checksum=verify_checksum,
-            expected_checksum=model_version.checksum if verify_checksum else None
+            expected_checksum=model_version.checksum if verify_checksum else None,
         )
 
     def get_version_info(
-        self,
-        model_id: str,
-        version: Optional[str] = None
+        self, model_id: str, version: Optional[str] = None
     ) -> ModelVersion:
         """
         Get version information without loading model.
@@ -404,11 +403,7 @@ class ModelRegistry:
         return [v.version for v in self.versions[model_id]]
 
     def compare_versions(
-        self,
-        model_id: str,
-        version1: str,
-        version2: str,
-        metric: str
+        self, model_id: str, version1: str, version2: str, metric: str
     ) -> Dict[str, Any]:
         """
         Compare two model versions on a metric.
@@ -432,26 +427,26 @@ class ModelRegistry:
             raise ValueError(f"Metric {metric} not found in one or both versions")
 
         return {
-            'model_id': model_id,
-            'version1': version1,
-            'version2': version2,
-            'metric': metric,
-            'value1': v1_metric,
-            'value2': v2_metric,
-            'difference': v2_metric - v1_metric,
-            'percent_change': ((v2_metric - v1_metric) / v1_metric * 100) if v1_metric != 0 else 0
+            "model_id": model_id,
+            "version1": version1,
+            "version2": version2,
+            "metric": metric,
+            "value1": v1_metric,
+            "value2": v2_metric,
+            "difference": v2_metric - v1_metric,
+            "percent_change": (
+                ((v2_metric - v1_metric) / v1_metric * 100) if v1_metric != 0 else 0
+            ),
         }
 
     def _load_registry(self):
         """Load registry from disk"""
         if self.registry_path.exists():
-            with open(self.registry_path, 'r') as f:
+            with open(self.registry_path, "r") as f:
                 data = json.load(f)
 
             for model_id, versions in data.items():
-                self.versions[model_id] = [
-                    ModelVersion.from_dict(v) for v in versions
-                ]
+                self.versions[model_id] = [ModelVersion.from_dict(v) for v in versions]
 
             logger.info(f"Loaded registry with {len(self.versions)} models")
 
@@ -462,18 +457,20 @@ class ModelRegistry:
             for model_id, versions in self.versions.items()
         }
 
-        with open(self.registry_path, 'w') as f:
+        with open(self.registry_path, "w") as f:
             json.dump(data, f, indent=2)
 
     def get_statistics(self) -> Dict[str, Any]:
         """Get registry statistics"""
         return {
-            'total_models': len(self.versions),
-            'total_versions': sum(len(v) for v in self.versions.values()),
-            'model_types': list(set(
-                v.model_type
-                for versions in self.versions.values()
-                for v in versions
-            )),
-            'serializer_stats': self.serializer.get_statistics()
+            "total_models": len(self.versions),
+            "total_versions": sum(len(v) for v in self.versions.values()),
+            "model_types": list(
+                set(
+                    v.model_type
+                    for versions in self.versions.values()
+                    for v in versions
+                )
+            ),
+            "serializer_stats": self.serializer.get_statistics(),
         }

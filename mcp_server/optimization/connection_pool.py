@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 class ConnectionState(Enum):
     """Connection health states"""
+
     HEALTHY = "healthy"
     DEGRADED = "degraded"
     FAILED = "failed"
@@ -26,6 +27,7 @@ class ConnectionState(Enum):
 @dataclass
 class ConnectionMetrics:
     """Metrics for a single database connection"""
+
     connection_id: int
     created_at: datetime
     last_used: datetime
@@ -39,6 +41,7 @@ class ConnectionMetrics:
 @dataclass
 class PoolStatistics:
     """Statistics for connection pool"""
+
     total_connections: int = 0
     active_connections: int = 0
     idle_connections: int = 0
@@ -69,7 +72,7 @@ class EnhancedConnectionPool:
         health_check_interval: int = 60,  # seconds
         connection_lifetime: int = 3600,  # seconds
         idle_timeout: int = 300,  # seconds
-        enable_adaptive_sizing: bool = True
+        enable_adaptive_sizing: bool = True,
     ):
         """
         Initialize enhanced connection pool.
@@ -170,10 +173,7 @@ class EnhancedConnectionPool:
         self.last_health_check = now
 
     def track_query_execution(
-        self,
-        connection_id: int,
-        execution_time_ms: float,
-        success: bool = True
+        self, connection_id: int, execution_time_ms: float, success: bool = True
     ):
         """
         Track query execution metrics.
@@ -224,7 +224,9 @@ class EnhancedConnectionPool:
         # Adjust size based on utilization
         if utilization > 0.8:  # High utilization, increase
             recommended = min(total + 1, self.max_pool_size)
-        elif utilization < 0.3 and total > self.min_pool_size:  # Low utilization, decrease
+        elif (
+            utilization < 0.3 and total > self.min_pool_size
+        ):  # Low utilization, decrease
             recommended = max(total - 1, self.min_pool_size)
         else:
             recommended = total
@@ -234,7 +236,8 @@ class EnhancedConnectionPool:
     def _get_active_count(self) -> int:
         """Count active (healthy or degraded) connections"""
         return sum(
-            1 for m in self.connection_metrics.values()
+            1
+            for m in self.connection_metrics.values()
             if m.state in [ConnectionState.HEALTHY, ConnectionState.DEGRADED]
         )
 
@@ -258,7 +261,7 @@ class EnhancedConnectionPool:
             connection_id=conn_id,
             created_at=datetime.now(),
             last_used=datetime.now(),
-            state=ConnectionState.HEALTHY
+            state=ConnectionState.HEALTHY,
         )
 
         logger.debug(f"Registered new connection {conn_id}")
@@ -273,25 +276,32 @@ class EnhancedConnectionPool:
         """
         total_conns = len(self.connection_metrics)
         active_conns = sum(
-            1 for m in self.connection_metrics.values()
+            1
+            for m in self.connection_metrics.values()
             if m.state in [ConnectionState.HEALTHY, ConnectionState.DEGRADED]
         )
         idle_conns = sum(
-            1 for m in self.connection_metrics.values()
+            1
+            for m in self.connection_metrics.values()
             if m.state == ConnectionState.IDLE
         )
         failed_conns = sum(
-            1 for m in self.connection_metrics.values()
+            1
+            for m in self.connection_metrics.values()
             if m.state == ConnectionState.FAILED
         )
 
         # Calculate average query time
-        total_time = sum(m.total_execution_time_ms for m in self.connection_metrics.values())
+        total_time = sum(
+            m.total_execution_time_ms for m in self.connection_metrics.values()
+        )
         total_queries = sum(m.total_queries for m in self.connection_metrics.values())
         avg_time = total_time / total_queries if total_queries > 0 else 0.0
 
         # Calculate utilization
-        utilization = active_conns / self.max_pool_size if self.max_pool_size > 0 else 0.0
+        utilization = (
+            active_conns / self.max_pool_size if self.max_pool_size > 0 else 0.0
+        )
 
         self.stats = PoolStatistics(
             total_connections=total_conns,
@@ -302,7 +312,7 @@ class EnhancedConnectionPool:
             total_failed_queries=self.stats.total_failed_queries,
             avg_query_time_ms=avg_time,
             pool_utilization=utilization,
-            health_check_failures=self.stats.health_check_failures
+            health_check_failures=self.stats.health_check_failures,
         )
 
         return self.stats
@@ -320,22 +330,26 @@ class EnhancedConnectionPool:
             age_seconds = (datetime.now() - metrics.created_at).total_seconds()
             idle_seconds = (datetime.now() - metrics.last_used).total_seconds()
 
-            details.append({
-                "connection_id": conn_id,
-                "state": metrics.state.value,
-                "age_seconds": age_seconds,
-                "idle_seconds": idle_seconds,
-                "total_queries": metrics.total_queries,
-                "failed_queries": metrics.failed_queries,
-                "avg_query_time_ms": (
-                    metrics.total_execution_time_ms / metrics.total_queries
-                    if metrics.total_queries > 0 else 0.0
-                ),
-                "last_health_check": (
-                    metrics.last_health_check.isoformat()
-                    if metrics.last_health_check else None
-                )
-            })
+            details.append(
+                {
+                    "connection_id": conn_id,
+                    "state": metrics.state.value,
+                    "age_seconds": age_seconds,
+                    "idle_seconds": idle_seconds,
+                    "total_queries": metrics.total_queries,
+                    "failed_queries": metrics.failed_queries,
+                    "avg_query_time_ms": (
+                        metrics.total_execution_time_ms / metrics.total_queries
+                        if metrics.total_queries > 0
+                        else 0.0
+                    ),
+                    "last_health_check": (
+                        metrics.last_health_check.isoformat()
+                        if metrics.last_health_check
+                        else None
+                    ),
+                }
+            )
 
         return details
 

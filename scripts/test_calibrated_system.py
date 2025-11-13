@@ -35,7 +35,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from mcp_server.betting import BettingDecisionEngine
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 
 class SystemValidator:
@@ -44,7 +44,7 @@ class SystemValidator:
     def __init__(self, engine: BettingDecisionEngine, features_df: pd.DataFrame):
         self.engine = engine
         self.features_df = features_df
-        self.holdout_df = features_df[features_df['season'] == '2024-25'].copy()
+        self.holdout_df = features_df[features_df["season"] == "2024-25"].copy()
         self.results = {}
 
     def run_all_tests(self, output_dir: Path):
@@ -70,26 +70,39 @@ class SystemValidator:
 
         if len(self.holdout_df) == 0:
             print("⚠ No holdout data available for 2024-25 season")
-            self.results['calibration'] = {'status': 'SKIPPED'}
+            self.results["calibration"] = {"status": "SKIPPED"}
             return
 
         # Get feature columns
-        feature_cols = [col for col in self.features_df.columns if col not in [
-            'game_id', 'game_date', 'season', 'home_team_id', 'away_team_id',
-            'home_win', 'home_score', 'away_score'
-        ]]
+        feature_cols = [
+            col
+            for col in self.features_df.columns
+            if col
+            not in [
+                "game_id",
+                "game_date",
+                "season",
+                "home_team_id",
+                "away_team_id",
+                "home_win",
+                "home_score",
+                "away_score",
+            ]
+        ]
 
         # Simulate predictions (using simplified approach - in reality would use actual model)
         # For testing purposes, use the actual features as proxy
-        sim_probs = self.holdout_df['home_win'].values + np.random.normal(0, 0.1, len(self.holdout_df))
+        sim_probs = self.holdout_df["home_win"].values + np.random.normal(
+            0, 0.1, len(self.holdout_df)
+        )
         sim_probs = np.clip(sim_probs, 0.1, 0.9)  # Realistic range
 
-        outcomes = self.holdout_df['home_win'].values
+        outcomes = self.holdout_df["home_win"].values
 
         # Calibrate
-        calibrated_probs = np.array([
-            self.engine.calibrator.calibrated_probability(p) for p in sim_probs
-        ])
+        calibrated_probs = np.array(
+            [self.engine.calibrator.calibrated_probability(p) for p in sim_probs]
+        )
 
         # Compute Brier scores
         brier_uncal = brier_score_loss(outcomes, sim_probs)
@@ -98,7 +111,9 @@ class SystemValidator:
         print(f"\nHoldout Set Size: {len(self.holdout_df)} games")
         print(f"Brier Score (Uncalibrated): {brier_uncal:.4f}")
         print(f"Brier Score (Calibrated): {brier_cal:.4f}")
-        print(f"Improvement: {(brier_uncal - brier_cal):.4f} ({((brier_uncal - brier_cal) / brier_uncal * 100):.1f}%)")
+        print(
+            f"Improvement: {(brier_uncal - brier_cal):.4f} ({((brier_uncal - brier_cal) / brier_uncal * 100):.1f}%)"
+        )
 
         # Assessment
         if brier_cal < 0.06:
@@ -113,16 +128,18 @@ class SystemValidator:
         print(f"Status: {status}")
 
         # Save results
-        self.results['calibration'] = {
-            'status': status,
-            'brier_uncalibrated': brier_uncal,
-            'brier_calibrated': brier_cal,
-            'improvement': brier_uncal - brier_cal,
-            'holdout_size': len(self.holdout_df)
+        self.results["calibration"] = {
+            "status": status,
+            "brier_uncalibrated": brier_uncal,
+            "brier_calibrated": brier_cal,
+            "improvement": brier_uncal - brier_cal,
+            "holdout_size": len(self.holdout_df),
         }
 
         # Plot
-        self._plot_holdout_calibration(sim_probs, calibrated_probs, outcomes, output_dir)
+        self._plot_holdout_calibration(
+            sim_probs, calibrated_probs, outcomes, output_dir
+        )
 
     def test_kelly_sizing(self, output_dir: Path):
         """Test 2: Kelly Sizing Validation."""
@@ -151,21 +168,23 @@ class SystemValidator:
                 odds=odds,
                 away_odds=away_odds,
                 bankroll=10000,
-                game_id=f"test_{sim_prob}_{odds}"
+                game_id=f"test_{sim_prob}_{odds}",
             )
 
             print(f"\nSim Prob: {sim_prob:.0%}, Odds: {odds:.2f}/{away_odds:.2f}")
             print(f"  Expected: {expected}")
             print(f"  Should Bet: {decision['should_bet']}")
-            if decision['should_bet']:
-                print(f"  Bet Amount: ${decision['bet_amount']:.2f} ({decision['bet_amount']/10000:.1%} of bankroll)")
+            if decision["should_bet"]:
+                print(
+                    f"  Bet Amount: ${decision['bet_amount']:.2f} ({decision['bet_amount']/10000:.1%} of bankroll)"
+                )
                 print(f"  Edge: {decision['edge']:.1%}")
 
             # Validate behavior
-            if sim_prob >= 0.70 and decision['should_bet']:
+            if sim_prob >= 0.70 and decision["should_bet"]:
                 pass_count += 1
                 print("  Result: ✓ PASS")
-            elif sim_prob < 0.52 and not decision['should_bet']:
+            elif sim_prob < 0.52 and not decision["should_bet"]:
                 pass_count += 1
                 print("  Result: ✓ PASS")
             elif 0.52 <= sim_prob < 0.70:
@@ -177,10 +196,10 @@ class SystemValidator:
 
         print(f"\nKelly Sizing: {pass_count}/{total_count} tests passed")
 
-        self.results['kelly_sizing'] = {
-            'status': '✓ PASS' if pass_count >= total_count * 0.8 else '⚠ WARNING',
-            'passed': pass_count,
-            'total': total_count
+        self.results["kelly_sizing"] = {
+            "status": "✓ PASS" if pass_count >= total_count * 0.8 else "⚠ WARNING",
+            "passed": pass_count,
+            "total": total_count,
         }
 
     def test_edge_detection(self, output_dir: Path):
@@ -191,9 +210,9 @@ class SystemValidator:
 
         # Test edge calculation
         test_cases = [
-            (0.60, 2.0, 1.9, "Positive"),   # 60% prob, -110 odds, 47.6% implied
-            (0.50, 2.0, 2.0, "Zero"),       # 50% prob, even odds, 50% implied
-            (0.45, 1.9, 2.1, "Negative"),   # 45% prob, -120 odds, 54.5% implied
+            (0.60, 2.0, 1.9, "Positive"),  # 60% prob, -110 odds, 47.6% implied
+            (0.50, 2.0, 2.0, "Zero"),  # 50% prob, even odds, 50% implied
+            (0.45, 1.9, 2.1, "Negative"),  # 45% prob, -120 odds, 54.5% implied
         ]
 
         print("\nEdge Calculation Tests:")
@@ -204,10 +223,10 @@ class SystemValidator:
                 odds=odds,
                 away_odds=away_odds,
                 bankroll=10000,
-                game_id=f"edge_test_{sim_prob}"
+                game_id=f"edge_test_{sim_prob}",
             )
 
-            edge = decision['edge']
+            edge = decision["edge"]
 
             print(f"\nSim Prob: {sim_prob:.0%}, Odds: {odds:.2f}")
             print(f"  Calculated Edge: {edge:.2%}")
@@ -222,7 +241,7 @@ class SystemValidator:
             else:
                 print("  Result: ⚠ FAIL")
 
-        self.results['edge_detection'] = {'status': '✓ PASS'}
+        self.results["edge_detection"] = {"status": "✓ PASS"}
 
     def test_clv_tracking(self, output_dir: Path):
         """Test 4: CLV Tracking Simulation."""
@@ -269,10 +288,10 @@ class SystemValidator:
 
         print(f"  Status: {status}")
 
-        self.results['clv_tracking'] = {
-            'status': status,
-            'avg_clv': avg_clv,
-            'positive_rate': positive_clv_rate
+        self.results["clv_tracking"] = {
+            "status": status,
+            "avg_clv": avg_clv,
+            "positive_rate": positive_clv_rate,
         }
 
     def test_large_bet_criteria(self, output_dir: Path):
@@ -298,7 +317,9 @@ class SystemValidator:
 
             print(f"\n{desc}")
             print(f"  Sim Prob: {sim_prob:.1%}, Odds: {odds:.2f}/{away_odds:.2f}")
-            print(f"  Calibrated: {criteria['criteria']['calibrated_prob']['value']:.1%}")
+            print(
+                f"  Calibrated: {criteria['criteria']['calibrated_prob']['value']:.1%}"
+            )
             print(f"  Edge: {criteria['criteria']['edge']['value']:.1%}")
             print(f"  Safe for 40%: {criteria['safe_for_large_bet']}")
 
@@ -308,13 +329,15 @@ class SystemValidator:
 
             print(f"\n{desc}")
             print(f"  Sim Prob: {sim_prob:.1%}, Odds: {odds:.2f}/{away_odds:.2f}")
-            print(f"  Calibrated: {criteria['criteria']['calibrated_prob']['value']:.1%}")
+            print(
+                f"  Calibrated: {criteria['criteria']['calibrated_prob']['value']:.1%}"
+            )
             print(f"  Edge: {criteria['criteria']['edge']['value']:.1%}")
             print(f"  Safe for 40%: {criteria['safe_for_large_bet']}")
-            if not criteria['safe_for_large_bet']:
+            if not criteria["safe_for_large_bet"]:
                 print(f"  Reason: {criteria['reason']}")
 
-        self.results['large_bet_criteria'] = {'status': '✓ PASS'}
+        self.results["large_bet_criteria"] = {"status": "✓ PASS"}
 
     def test_end_to_end_workflow(self, output_dir: Path):
         """Test 6: End-to-End Betting Workflow."""
@@ -326,13 +349,15 @@ class SystemValidator:
 
         # Example: Today's game
         sim_prob = 0.65  # 65% probability home team wins (from your 10k simulation)
-        odds = 1.9       # -110 odds on home team
+        odds = 1.9  # -110 odds on home team
         away_odds = 2.0  # -105 odds on away team
         bankroll = 10000
 
         print(f"\nScenario:")
         print(f"  Your simulation: Home team 65% to win")
-        print(f"  Market odds: Home {odds:.2f} ({1/odds:.1%}), Away {away_odds:.2f} ({1/away_odds:.1%})")
+        print(
+            f"  Market odds: Home {odds:.2f} ({1/odds:.1%}), Away {away_odds:.2f} ({1/away_odds:.1%})"
+        )
         print(f"  Bankroll: ${bankroll:,}")
 
         # Get betting decision
@@ -341,14 +366,16 @@ class SystemValidator:
             odds=odds,
             away_odds=away_odds,
             bankroll=bankroll,
-            game_id="LAL_vs_GSW_2024_12_25"
+            game_id="LAL_vs_GSW_2024_12_25",
         )
 
         print(f"\nBetting Decision:")
         print(f"  Should Bet: {decision['should_bet']}")
 
-        if decision['should_bet']:
-            print(f"  Bet Amount: ${decision['bet_amount']:.2f} ({decision['bet_amount']/bankroll:.1%} of bankroll)")
+        if decision["should_bet"]:
+            print(
+                f"  Bet Amount: ${decision['bet_amount']:.2f} ({decision['bet_amount']/bankroll:.1%} of bankroll)"
+            )
             print(f"  Expected Value: {decision['edge']:.2%}")
             print(f"  Kelly Fraction: {decision['kelly_fraction']:.1%}")
 
@@ -367,30 +394,53 @@ class SystemValidator:
         # print(f"\nCLV Tracking:")
         # print(f"  Number of bets: {clv_stats['bet_count']}")
         # print(f"  Average CLV: {clv_stats['average_clv']:.2%}")
-        print(f"\nCLV Tracking: Skipped (use engine.clv_tracker directly for production)")
+        print(
+            f"\nCLV Tracking: Skipped (use engine.clv_tracker directly for production)"
+        )
 
         print("\n✓ End-to-end workflow test complete")
 
-        self.results['end_to_end'] = {'status': '✓ PASS'}
+        self.results["end_to_end"] = {"status": "✓ PASS"}
 
-    def _plot_holdout_calibration(self, sim_probs, calibrated_probs, outcomes, output_dir):
+    def _plot_holdout_calibration(
+        self, sim_probs, calibrated_probs, outcomes, output_dir
+    ):
         """Plot calibration on holdout set."""
-        prob_true_uncal, prob_pred_uncal = calibration_curve(outcomes, sim_probs, n_bins=10)
-        prob_true_cal, prob_pred_cal = calibration_curve(outcomes, calibrated_probs, n_bins=10)
+        prob_true_uncal, prob_pred_uncal = calibration_curve(
+            outcomes, sim_probs, n_bins=10
+        )
+        prob_true_cal, prob_pred_cal = calibration_curve(
+            outcomes, calibrated_probs, n_bins=10
+        )
 
         plt.figure(figsize=(10, 8))
-        plt.plot([0, 1], [0, 1], 'k--', label='Perfect', linewidth=2)
-        plt.plot(prob_pred_uncal, prob_true_uncal, 'rs-', label='Uncalibrated', linewidth=2, markersize=8, alpha=0.7)
-        plt.plot(prob_pred_cal, prob_true_cal, 'go-', label='Calibrated', linewidth=2, markersize=8)
+        plt.plot([0, 1], [0, 1], "k--", label="Perfect", linewidth=2)
+        plt.plot(
+            prob_pred_uncal,
+            prob_true_uncal,
+            "rs-",
+            label="Uncalibrated",
+            linewidth=2,
+            markersize=8,
+            alpha=0.7,
+        )
+        plt.plot(
+            prob_pred_cal,
+            prob_true_cal,
+            "go-",
+            label="Calibrated",
+            linewidth=2,
+            markersize=8,
+        )
 
-        plt.xlabel('Predicted Probability', fontsize=13)
-        plt.ylabel('Actual Frequency', fontsize=13)
-        plt.title('Holdout Set Calibration (2024-25)', fontsize=15, fontweight='bold')
+        plt.xlabel("Predicted Probability", fontsize=13)
+        plt.ylabel("Actual Frequency", fontsize=13)
+        plt.title("Holdout Set Calibration (2024-25)", fontsize=15, fontweight="bold")
         plt.legend(fontsize=11)
         plt.grid(alpha=0.3)
         plt.tight_layout()
 
-        plt.savefig(output_dir / 'holdout_calibration.png', dpi=150)
+        plt.savefig(output_dir / "holdout_calibration.png", dpi=150)
 
     def generate_summary_report(self, output_dir: Path):
         """Generate comprehensive summary report."""
@@ -403,7 +453,7 @@ class SystemValidator:
             print(f"\n{test_name.replace('_', ' ').title()}:")
             print(f"  Status: {result['status']}")
             for key, val in result.items():
-                if key != 'status':
+                if key != "status":
                     if isinstance(val, float):
                         print(f"  {key}: {val:.4f}")
                     else:
@@ -411,9 +461,9 @@ class SystemValidator:
 
         # Overall assessment
         all_passed = all(
-            '✓' in str(result['status'])
+            "✓" in str(result["status"])
             for result in self.results.values()
-            if 'status' in result
+            if "status" in result
         )
 
         print("\n" + "=" * 80)
@@ -424,13 +474,17 @@ class SystemValidator:
         print("=" * 80)
 
         # Save report
-        report_path = output_dir / 'validation_report.json'
-        with open(report_path, 'w') as f:
-            json.dump({
-                'validation_date': datetime.now().isoformat(),
-                'results': self.results,
-                'overall_status': 'PASS' if all_passed else 'FAIL'
-            }, f, indent=2)
+        report_path = output_dir / "validation_report.json"
+        with open(report_path, "w") as f:
+            json.dump(
+                {
+                    "validation_date": datetime.now().isoformat(),
+                    "results": self.results,
+                    "overall_status": "PASS" if all_passed else "FAIL",
+                },
+                f,
+                indent=2,
+            )
 
         print(f"\n✓ Saved detailed report to {report_path}")
 
@@ -440,19 +494,15 @@ def main():
         description="Comprehensive validation of calibrated Kelly Criterion system"
     )
     parser.add_argument(
-        '--features',
-        default='data/game_features.csv',
-        help='Path to features CSV'
+        "--features", default="data/game_features.csv", help="Path to features CSV"
     )
     parser.add_argument(
-        '--engine',
-        default='models/calibrated_kelly_engine.pkl',
-        help='Path to calibrated engine'
+        "--engine",
+        default="models/calibrated_kelly_engine.pkl",
+        help="Path to calibrated engine",
     )
     parser.add_argument(
-        '--output',
-        default='reports/',
-        help='Output directory for validation reports'
+        "--output", default="reports/", help="Output directory for validation reports"
     )
 
     args = parser.parse_args()
@@ -470,7 +520,7 @@ def main():
 
     # Load engine
     print(f"\nLoading calibrated engine...")
-    with open(args.engine, 'rb') as f:
+    with open(args.engine, "rb") as f:
         engine = pickle.load(f)
     print("✓ Engine loaded")
 
@@ -486,5 +536,5 @@ def main():
     print("\n✓ Validation complete! Check reports/ for detailed results.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

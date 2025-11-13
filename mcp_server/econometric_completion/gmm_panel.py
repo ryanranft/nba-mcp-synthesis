@@ -62,21 +62,21 @@ class GMMResult:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         result = {
-            'coefficients': self.coefficients.tolist(),
-            'std_errors': self.std_errors.tolist(),
-            't_stats': self.t_stats.tolist(),
-            'p_values': self.p_values.tolist(),
-            'j_statistic': self.j_statistic,
-            'j_pvalue': self.j_pvalue,
-            'n_instruments': self.n_instruments,
-            'n_parameters': self.n_parameters,
-            'df_overid': self.df_overid,
-            'n_obs': self.n_obs,
-            'n_groups': self.n_groups
+            "coefficients": self.coefficients.tolist(),
+            "std_errors": self.std_errors.tolist(),
+            "t_stats": self.t_stats.tolist(),
+            "p_values": self.p_values.tolist(),
+            "j_statistic": self.j_statistic,
+            "j_pvalue": self.j_pvalue,
+            "n_instruments": self.n_instruments,
+            "n_parameters": self.n_parameters,
+            "df_overid": self.df_overid,
+            "n_obs": self.n_obs,
+            "n_groups": self.n_groups,
         }
 
         if self.feature_names:
-            result['coef_dict'] = dict(zip(self.feature_names, self.coefficients))
+            result["coef_dict"] = dict(zip(self.feature_names, self.coefficients))
 
         return result
 
@@ -93,16 +93,22 @@ class GMMResult:
             f"  Statistic: {self.j_statistic:.4f}",
             f"  P-value: {self.j_pvalue:.4f}",
             f"  {'Instruments valid' if self.j_pvalue > 0.05 else 'WARNING: Instruments may be invalid'}",
-            ""
+            "",
         ]
 
         if self.ar1_statistic is not None:
-            lines.extend([
-                "Arellano-Bond tests for autocorrelation:",
-                f"  AR(1): {self.ar1_statistic:.4f} (p={self.ar1_pvalue:.4f})",
-                f"  AR(2): {self.ar2_statistic:.4f} (p={self.ar2_pvalue:.4f})" if self.ar2_statistic else "",
-                ""
-            ])
+            lines.extend(
+                [
+                    "Arellano-Bond tests for autocorrelation:",
+                    f"  AR(1): {self.ar1_statistic:.4f} (p={self.ar1_pvalue:.4f})",
+                    (
+                        f"  AR(2): {self.ar2_statistic:.4f} (p={self.ar2_pvalue:.4f})"
+                        if self.ar2_statistic
+                        else ""
+                    ),
+                    "",
+                ]
+            )
 
         lines.append("Coefficients:")
         for i, coef in enumerate(self.coefficients):
@@ -110,7 +116,9 @@ class GMMResult:
             se = self.std_errors[i]
             t = self.t_stats[i]
             p = self.p_values[i]
-            sig = "***" if p < 0.01 else ("**" if p < 0.05 else ("*" if p < 0.1 else ""))
+            sig = (
+                "***" if p < 0.01 else ("**" if p < 0.05 else ("*" if p < 0.1 else ""))
+            )
             lines.append(f"  {name:20s}: {coef:10.4f} ({se:.4f}) [t={t:.2f}] {sig}")
 
         return "\n".join(lines)
@@ -129,12 +137,7 @@ class DifferenceGMM:
     Uses lagged levels as instruments for differenced variables.
     """
 
-    def __init__(
-        self,
-        max_lags: int = 2,
-        two_step: bool = True,
-        robust: bool = True
-    ):
+    def __init__(self, max_lags: int = 2, two_step: bool = True, robust: bool = True):
         """
         Initialize difference GMM.
 
@@ -148,7 +151,9 @@ class DifferenceGMM:
         self.robust = robust
         self.is_fitted = False
 
-        logger.info(f"DifferenceGMM initialized (max_lags={max_lags}, two_step={two_step})")
+        logger.info(
+            f"DifferenceGMM initialized (max_lags={max_lags}, two_step={two_step})"
+        )
 
     def fit(
         self,
@@ -156,8 +161,8 @@ class DifferenceGMM:
         X: np.ndarray,
         group_id: np.ndarray,
         time_id: np.ndarray,
-        feature_names: Optional[List[str]] = None
-    ) -> 'DifferenceGMM':
+        feature_names: Optional[List[str]] = None,
+    ) -> "DifferenceGMM":
         """
         Fit difference GMM.
 
@@ -175,7 +180,9 @@ class DifferenceGMM:
         unique_groups = np.unique(group_id)
         unique_times = np.unique(time_id)
 
-        logger.info(f"Fitting difference GMM: {len(unique_groups)} groups, {len(unique_times)} periods")
+        logger.info(
+            f"Fitting difference GMM: {len(unique_groups)} groups, {len(unique_times)} periods"
+        )
 
         # Create lagged y
         y_lag = self._create_lag(y, group_id, time_id)
@@ -184,14 +191,10 @@ class DifferenceGMM:
         X_aug = np.column_stack([y_lag, X])
 
         # First difference transformation
-        y_diff, X_diff, valid_mask = self._first_difference(
-            y, X_aug, group_id, time_id
-        )
+        y_diff, X_diff, valid_mask = self._first_difference(y, X_aug, group_id, time_id)
 
         # Create instruments (lagged levels)
-        Z = self._create_instruments(
-            y, X, group_id, time_id, valid_mask
-        )
+        Z = self._create_instruments(y, X, group_id, time_id, valid_mask)
 
         # GMM estimation
         if self.two_step:
@@ -213,17 +216,20 @@ class DifferenceGMM:
 
         # Calculate standard errors
         residuals = y_diff - X_diff @ beta
-        self.std_errors_ = self._robust_standard_errors(
-            X_diff, Z, residuals, group_id[valid_mask]
-        ) if self.robust else self._standard_errors(X_diff, Z, residuals)
-
-        # Compute diagnostics
-        self.j_statistic_, self.j_pvalue_ = self._hansen_j_test(
-            X_diff, y_diff, Z, beta
+        self.std_errors_ = (
+            self._robust_standard_errors(X_diff, Z, residuals, group_id[valid_mask])
+            if self.robust
+            else self._standard_errors(X_diff, Z, residuals)
         )
 
-        self.ar1_stat_, self.ar1_pval_, self.ar2_stat_, self.ar2_pval_ = \
-            self._arellano_bond_test(residuals, group_id[valid_mask], time_id[valid_mask])
+        # Compute diagnostics
+        self.j_statistic_, self.j_pvalue_ = self._hansen_j_test(X_diff, y_diff, Z, beta)
+
+        self.ar1_stat_, self.ar1_pval_, self.ar2_stat_, self.ar2_pval_ = (
+            self._arellano_bond_test(
+                residuals, group_id[valid_mask], time_id[valid_mask]
+            )
+        )
 
         self.n_obs_ = len(y_diff)
         self.n_groups_ = len(unique_groups)
@@ -232,16 +238,14 @@ class DifferenceGMM:
 
         self.is_fitted = True
 
-        logger.info(f"Difference GMM fitted: {len(beta)} parameters, {Z.shape[1]} instruments")
+        logger.info(
+            f"Difference GMM fitted: {len(beta)} parameters, {Z.shape[1]} instruments"
+        )
 
         return self
 
     def _create_lag(
-        self,
-        y: np.ndarray,
-        group_id: np.ndarray,
-        time_id: np.ndarray,
-        lag: int = 1
+        self, y: np.ndarray, group_id: np.ndarray, time_id: np.ndarray, lag: int = 1
     ) -> np.ndarray:
         """Create lagged variable"""
         y_lag = np.full_like(y, np.nan)
@@ -265,11 +269,7 @@ class DifferenceGMM:
         return y_lag
 
     def _first_difference(
-        self,
-        y: np.ndarray,
-        X: np.ndarray,
-        group_id: np.ndarray,
-        time_id: np.ndarray
+        self, y: np.ndarray, X: np.ndarray, group_id: np.ndarray, time_id: np.ndarray
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Apply first difference transformation.
@@ -310,7 +310,7 @@ class DifferenceGMM:
         X: np.ndarray,
         group_id: np.ndarray,
         time_id: np.ndarray,
-        valid_mask: np.ndarray
+        valid_mask: np.ndarray,
     ) -> np.ndarray:
         """
         Create instrument matrix (lagged levels).
@@ -341,7 +341,7 @@ class DifferenceGMM:
         X: np.ndarray,
         y: np.ndarray,
         Z: np.ndarray,
-        W: Optional[np.ndarray] = None
+        W: Optional[np.ndarray] = None,
     ) -> np.ndarray:
         """
         Single GMM step.
@@ -383,10 +383,7 @@ class DifferenceGMM:
         return beta
 
     def _optimal_weight_matrix(
-        self,
-        Z: np.ndarray,
-        residuals: np.ndarray,
-        group_id: np.ndarray
+        self, Z: np.ndarray, residuals: np.ndarray, group_id: np.ndarray
     ) -> np.ndarray:
         """
         Compute optimal weighting matrix for two-step GMM.
@@ -424,10 +421,7 @@ class DifferenceGMM:
         return W
 
     def _standard_errors(
-        self,
-        X: np.ndarray,
-        Z: np.ndarray,
-        residuals: np.ndarray
+        self, X: np.ndarray, Z: np.ndarray, residuals: np.ndarray
     ) -> np.ndarray:
         """Calculate standard errors"""
         min_n = min(X.shape[0], Z.shape[0], len(residuals))
@@ -435,7 +429,7 @@ class DifferenceGMM:
         Z = Z[:min_n]
         residuals = residuals[:min_n]
 
-        sigma2 = np.sum(residuals ** 2) / (len(residuals) - X.shape[1])
+        sigma2 = np.sum(residuals**2) / (len(residuals) - X.shape[1])
         ZX = Z.T @ X
 
         try:
@@ -447,11 +441,7 @@ class DifferenceGMM:
         return se
 
     def _robust_standard_errors(
-        self,
-        X: np.ndarray,
-        Z: np.ndarray,
-        residuals: np.ndarray,
-        group_id: np.ndarray
+        self, X: np.ndarray, Z: np.ndarray, residuals: np.ndarray, group_id: np.ndarray
     ) -> np.ndarray:
         """Calculate cluster-robust standard errors"""
         min_n = min(X.shape[0], Z.shape[0], len(residuals), len(group_id))
@@ -480,11 +470,7 @@ class DifferenceGMM:
         return se
 
     def _hansen_j_test(
-        self,
-        X: np.ndarray,
-        y: np.ndarray,
-        Z: np.ndarray,
-        beta: np.ndarray
+        self, X: np.ndarray, y: np.ndarray, Z: np.ndarray, beta: np.ndarray
     ) -> Tuple[float, float]:
         """
         Hansen J-test for over-identification.
@@ -510,10 +496,7 @@ class DifferenceGMM:
         return float(J), float(p_value)
 
     def _arellano_bond_test(
-        self,
-        residuals: np.ndarray,
-        group_id: np.ndarray,
-        time_id: np.ndarray
+        self, residuals: np.ndarray, group_id: np.ndarray, time_id: np.ndarray
     ) -> Tuple[float, float, float, float]:
         """
         Arellano-Bond test for autocorrelation in differenced residuals.
@@ -572,13 +555,15 @@ class DifferenceGMM:
             ar2_pvalue=self.ar2_pval_,
             n_obs=self.n_obs_,
             n_groups=self.n_groups_,
-            feature_names=self.feature_names_ if hasattr(self, 'feature_names_') else None
+            feature_names=(
+                self.feature_names_ if hasattr(self, "feature_names_") else None
+            ),
         )
 
         return result
 
 
 __all__ = [
-    'GMMResult',
-    'DifferenceGMM',
+    "GMMResult",
+    "DifferenceGMM",
 ]

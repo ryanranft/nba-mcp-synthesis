@@ -93,26 +93,22 @@ from .betting_decision import (
 __all__ = [
     # Main Interface
     "BettingDecisionEngine",
-
     # Calibration
     "BayesianCalibrator",
     "SimulationCalibrator",
     "CalibrationDatabase",
     "CalibrationRecord",
-
     # Kelly Criterion
     "CalibratedKelly",
     "AdaptiveKelly",
     "KellyResult",
     "kelly_full_formula",
     "fractional_kelly",
-
     # Odds Utilities
     "OddsUtilities",
     "OddsConverter",
     "OddsFormat",
     "VigRemovalMethod",
-
     # Market Analysis
     "ClosingLineValueTracker",
     "MarketEfficiencyAnalyzer",

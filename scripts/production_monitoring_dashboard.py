@@ -83,11 +83,11 @@ sys.path.insert(0, str(project_root))
 from mcp_server.betting.paper_trading import (
     PaperTradingEngine,
     PaperBettingDatabase,
-    BetStatus
+    BetStatus,
 )
 from mcp_server.betting.probability_calibration import (
     SimulationCalibrator,
-    CalibrationDatabase
+    CalibrationDatabase,
 )
 
 
@@ -100,12 +100,12 @@ CALIBRATION_DB_PATH = "data/calibration.db"
 
 # Alert thresholds
 THRESHOLDS = {
-    'roi': {'critical': -0.10, 'warning': 0.0, 'healthy': 0.05},
-    'win_rate': {'critical': 0.45, 'warning': 0.50, 'healthy': 0.55},
-    'sharpe_ratio': {'critical': 0.5, 'warning': 1.0, 'healthy': 1.5},
-    'brier_score': {'critical': 0.20, 'warning': 0.15, 'healthy': 0.10},
-    'max_drawdown': {'critical': 0.30, 'warning': 0.20, 'healthy': 0.15},
-    'clv': {'critical': -0.05, 'warning': 0.0, 'healthy': 0.02}
+    "roi": {"critical": -0.10, "warning": 0.0, "healthy": 0.05},
+    "win_rate": {"critical": 0.45, "warning": 0.50, "healthy": 0.55},
+    "sharpe_ratio": {"critical": 0.5, "warning": 1.0, "healthy": 1.5},
+    "brier_score": {"critical": 0.20, "warning": 0.15, "healthy": 0.10},
+    "max_drawdown": {"critical": 0.30, "warning": 0.20, "healthy": 0.15},
+    "clv": {"critical": -0.05, "warning": 0.0, "healthy": 0.02},
 }
 
 # Streamlit page config
@@ -113,13 +113,14 @@ st.set_page_config(
     page_title="NBA Betting Monitor",
     page_icon="🏀",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
 
 # ============================================================================
 # Data Loading Functions
 # ============================================================================
+
 
 @st.cache_data(ttl=10)  # Cache for 10 seconds
 def load_paper_trading_data() -> Tuple[Dict[str, Any], List[Any], List[Dict]]:
@@ -129,10 +130,7 @@ def load_paper_trading_data() -> Tuple[Dict[str, Any], List[Any], List[Dict]]:
     Returns:
         Tuple of (performance_stats, all_bets, bankroll_history)
     """
-    engine = PaperTradingEngine(
-        starting_bankroll=10000,
-        db_path=PAPER_TRADING_DB_PATH
-    )
+    engine = PaperTradingEngine(starting_bankroll=10000, db_path=PAPER_TRADING_DB_PATH)
 
     stats = engine.get_performance_stats()
     all_bets = engine.db.get_all_bets()
@@ -171,29 +169,31 @@ def get_alert_level(metric: str, value: float) -> str:
         'critical', 'warning', or 'healthy'
     """
     if metric not in THRESHOLDS:
-        return 'healthy'
+        return "healthy"
 
     thresholds = THRESHOLDS[metric]
 
     # Handle metrics where lower is better (brier_score, max_drawdown)
-    if metric in ['brier_score', 'max_drawdown']:
-        if value >= thresholds['critical']:
-            return 'critical'
-        elif value >= thresholds['warning']:
-            return 'warning'
+    if metric in ["brier_score", "max_drawdown"]:
+        if value >= thresholds["critical"]:
+            return "critical"
+        elif value >= thresholds["warning"]:
+            return "warning"
         else:
-            return 'healthy'
+            return "healthy"
     else:
         # Higher is better (roi, win_rate, sharpe_ratio, clv)
-        if value <= thresholds['critical']:
-            return 'critical'
-        elif value <= thresholds['warning']:
-            return 'warning'
+        if value <= thresholds["critical"]:
+            return "critical"
+        elif value <= thresholds["warning"]:
+            return "warning"
         else:
-            return 'healthy'
+            return "healthy"
 
 
-def format_metric_with_alert(label: str, value: Any, metric_key: str, format_str: str = ".2f") -> None:
+def format_metric_with_alert(
+    label: str, value: Any, metric_key: str, format_str: str = ".2f"
+) -> None:
     """
     Display metric with color-coded alert level
 
@@ -206,24 +206,20 @@ def format_metric_with_alert(label: str, value: Any, metric_key: str, format_str
     alert_level = get_alert_level(metric_key, value)
 
     # Color mapping
-    colors = {
-        'critical': '🔴',
-        'warning': '🟡',
-        'healthy': '🟢'
-    }
+    colors = {"critical": "🔴", "warning": "🟡", "healthy": "🟢"}
 
     color_css = {
-        'critical': 'color: #FF4444;',
-        'warning': 'color: #FFB000;',
-        'healthy': 'color: #00C851;'
+        "critical": "color: #FF4444;",
+        "warning": "color: #FFB000;",
+        "healthy": "color: #00C851;",
     }
 
-    icon = colors.get(alert_level, '⚪')
-    css = color_css.get(alert_level, '')
+    icon = colors.get(alert_level, "⚪")
+    css = color_css.get(alert_level, "")
 
     # Format value
     if isinstance(value, float):
-        if format_str.endswith('%'):
+        if format_str.endswith("%"):
             formatted_value = f"{value*100:.1f}%"
         else:
             formatted_value = f"{value:{format_str}}"
@@ -232,13 +228,14 @@ def format_metric_with_alert(label: str, value: Any, metric_key: str, format_str
 
     st.markdown(
         f"{icon} **{label}:** <span style='{css}'>{formatted_value}</span>",
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
 
 # ============================================================================
 # Visualization Functions
 # ============================================================================
+
 
 def plot_bankroll_over_time(bankroll_history: List[Dict]) -> go.Figure:
     """
@@ -258,33 +255,35 @@ def plot_bankroll_over_time(bankroll_history: List[Dict]) -> go.Figure:
     fig = go.Figure()
 
     # Bankroll line
-    fig.add_trace(go.Scatter(
-        x=df['timestamp'],
-        y=df['bankroll'],
-        mode='lines+markers',
-        name='Bankroll',
-        line=dict(color='#00C851', width=3),
-        marker=dict(size=6),
-        hovertemplate='<b>%{x}</b><br>Bankroll: $%{y:,.2f}<extra></extra>'
-    ))
+    fig.add_trace(
+        go.Scatter(
+            x=df["timestamp"],
+            y=df["bankroll"],
+            mode="lines+markers",
+            name="Bankroll",
+            line=dict(color="#00C851", width=3),
+            marker=dict(size=6),
+            hovertemplate="<b>%{x}</b><br>Bankroll: $%{y:,.2f}<extra></extra>",
+        )
+    )
 
     # Starting bankroll reference line
-    starting_bankroll = df['bankroll'].iloc[0]
+    starting_bankroll = df["bankroll"].iloc[0]
     fig.add_hline(
         y=starting_bankroll,
         line_dash="dash",
         line_color="gray",
         annotation_text="Starting Bankroll",
-        annotation_position="right"
+        annotation_position="right",
     )
 
     fig.update_layout(
         title="Bankroll Over Time",
         xaxis_title="Date",
         yaxis_title="Bankroll ($)",
-        hovermode='x unified',
-        template='plotly_white',
-        height=400
+        hovermode="x unified",
+        template="plotly_white",
+        height=400,
     )
 
     return fig
@@ -301,8 +300,10 @@ def plot_cumulative_pl(all_bets: List[Any]) -> go.Figure:
         Plotly figure
     """
     settled_bets = [
-        bet for bet in all_bets
-        if bet.status in (BetStatus.WON, BetStatus.LOST, BetStatus.PUSHED) and bet.profit_loss is not None
+        bet
+        for bet in all_bets
+        if bet.status in (BetStatus.WON, BetStatus.LOST, BetStatus.PUSHED)
+        and bet.profit_loss is not None
     ]
 
     if not settled_bets:
@@ -318,16 +319,18 @@ def plot_cumulative_pl(all_bets: List[Any]) -> go.Figure:
     fig = go.Figure()
 
     # Cumulative P/L line
-    fig.add_trace(go.Scatter(
-        x=timestamps,
-        y=cumulative_pl,
-        mode='lines+markers',
-        name='Cumulative P/L',
-        fill='tozeroy',
-        line=dict(color='#4285F4', width=3),
-        marker=dict(size=6),
-        hovertemplate='<b>%{x}</b><br>P/L: $%{y:,.2f}<extra></extra>'
-    ))
+    fig.add_trace(
+        go.Scatter(
+            x=timestamps,
+            y=cumulative_pl,
+            mode="lines+markers",
+            name="Cumulative P/L",
+            fill="tozeroy",
+            line=dict(color="#4285F4", width=3),
+            marker=dict(size=6),
+            hovertemplate="<b>%{x}</b><br>P/L: $%{y:,.2f}<extra></extra>",
+        )
+    )
 
     # Zero line
     fig.add_hline(
@@ -335,16 +338,16 @@ def plot_cumulative_pl(all_bets: List[Any]) -> go.Figure:
         line_dash="dash",
         line_color="gray",
         annotation_text="Break Even",
-        annotation_position="right"
+        annotation_position="right",
     )
 
     fig.update_layout(
         title="Cumulative Profit/Loss",
         xaxis_title="Date",
         yaxis_title="Cumulative P/L ($)",
-        hovermode='x unified',
-        template='plotly_white',
-        height=400
+        hovermode="x unified",
+        template="plotly_white",
+        height=400,
     )
 
     return fig
@@ -362,8 +365,7 @@ def plot_win_rate_rolling(all_bets: List[Any], window: int = 10) -> go.Figure:
         Plotly figure
     """
     settled_bets = [
-        bet for bet in all_bets
-        if bet.status in (BetStatus.WON, BetStatus.LOST)
+        bet for bet in all_bets if bet.status in (BetStatus.WON, BetStatus.LOST)
     ]
 
     if len(settled_bets) < window:
@@ -374,24 +376,25 @@ def plot_win_rate_rolling(all_bets: List[Any], window: int = 10) -> go.Figure:
 
     # Calculate rolling win rate
     wins = [1 if bet.status == BetStatus.WON else 0 for bet in settled_bets]
-    df = pd.DataFrame({
-        'timestamp': [bet.timestamp for bet in settled_bets],
-        'win': wins
-    })
+    df = pd.DataFrame(
+        {"timestamp": [bet.timestamp for bet in settled_bets], "win": wins}
+    )
 
-    df['rolling_win_rate'] = df['win'].rolling(window=window).mean()
+    df["rolling_win_rate"] = df["win"].rolling(window=window).mean()
 
     fig = go.Figure()
 
     # Rolling win rate
-    fig.add_trace(go.Scatter(
-        x=df['timestamp'],
-        y=df['rolling_win_rate'] * 100,
-        mode='lines',
-        name=f'{window}-Bet Rolling Win Rate',
-        line=dict(color='#FF6F00', width=3),
-        hovertemplate='<b>%{x}</b><br>Win Rate: %{y:.1f}%<extra></extra>'
-    ))
+    fig.add_trace(
+        go.Scatter(
+            x=df["timestamp"],
+            y=df["rolling_win_rate"] * 100,
+            mode="lines",
+            name=f"{window}-Bet Rolling Win Rate",
+            line=dict(color="#FF6F00", width=3),
+            hovertemplate="<b>%{x}</b><br>Win Rate: %{y:.1f}%<extra></extra>",
+        )
+    )
 
     # 50% reference line
     fig.add_hline(
@@ -399,16 +402,16 @@ def plot_win_rate_rolling(all_bets: List[Any], window: int = 10) -> go.Figure:
         line_dash="dash",
         line_color="gray",
         annotation_text="50%",
-        annotation_position="right"
+        annotation_position="right",
     )
 
     fig.update_layout(
         title=f"Rolling Win Rate ({window} Bets)",
         xaxis_title="Date",
         yaxis_title="Win Rate (%)",
-        hovermode='x unified',
-        template='plotly_white',
-        height=400
+        hovermode="x unified",
+        template="plotly_white",
+        height=400,
     )
 
     return fig
@@ -431,20 +434,22 @@ def plot_bet_distribution(all_bets: List[Any]) -> go.Figure:
 
     fig = go.Figure()
 
-    fig.add_trace(go.Histogram(
-        x=bet_amounts,
-        nbinsx=20,
-        name='Bet Amount',
-        marker=dict(color='#AB47BC'),
-        hovertemplate='Bet Size: $%{x:,.2f}<br>Count: %{y}<extra></extra>'
-    ))
+    fig.add_trace(
+        go.Histogram(
+            x=bet_amounts,
+            nbinsx=20,
+            name="Bet Amount",
+            marker=dict(color="#AB47BC"),
+            hovertemplate="Bet Size: $%{x:,.2f}<br>Count: %{y}<extra></extra>",
+        )
+    )
 
     fig.update_layout(
         title="Bet Size Distribution",
         xaxis_title="Bet Amount ($)",
         yaxis_title="Frequency",
-        template='plotly_white',
-        height=400
+        template="plotly_white",
+        height=400,
     )
 
     return fig
@@ -469,55 +474,56 @@ def plot_calibration_curve(calibrator: Any) -> go.Figure:
         return go.Figure()
 
     # Bin predictions
-    df = pd.DataFrame([
-        {
-            'sim_prob': r.simulation_prob,
-            'outcome': r.actual_outcome
-        }
-        for r in records
-    ])
+    df = pd.DataFrame(
+        [{"sim_prob": r.simulation_prob, "outcome": r.actual_outcome} for r in records]
+    )
 
     # Create bins
     bins = np.linspace(0, 1, 11)
-    df['bin'] = pd.cut(df['sim_prob'], bins=bins, labels=bins[:-1] + 0.05)
+    df["bin"] = pd.cut(df["sim_prob"], bins=bins, labels=bins[:-1] + 0.05)
 
     # Calculate average actual outcome per bin
-    calibration_data = df.groupby('bin', observed=True).agg({
-        'sim_prob': 'mean',
-        'outcome': 'mean'
-    }).reset_index()
+    calibration_data = (
+        df.groupby("bin", observed=True)
+        .agg({"sim_prob": "mean", "outcome": "mean"})
+        .reset_index()
+    )
 
     fig = go.Figure()
 
     # Perfect calibration line
-    fig.add_trace(go.Scatter(
-        x=[0, 1],
-        y=[0, 1],
-        mode='lines',
-        name='Perfect Calibration',
-        line=dict(color='gray', dash='dash', width=2)
-    ))
+    fig.add_trace(
+        go.Scatter(
+            x=[0, 1],
+            y=[0, 1],
+            mode="lines",
+            name="Perfect Calibration",
+            line=dict(color="gray", dash="dash", width=2),
+        )
+    )
 
     # Actual calibration
-    fig.add_trace(go.Scatter(
-        x=calibration_data['sim_prob'],
-        y=calibration_data['outcome'],
-        mode='lines+markers',
-        name='Actual Calibration',
-        line=dict(color='#4285F4', width=3),
-        marker=dict(size=10),
-        hovertemplate='Predicted: %{x:.1%}<br>Actual: %{y:.1%}<extra></extra>'
-    ))
+    fig.add_trace(
+        go.Scatter(
+            x=calibration_data["sim_prob"],
+            y=calibration_data["outcome"],
+            mode="lines+markers",
+            name="Actual Calibration",
+            line=dict(color="#4285F4", width=3),
+            marker=dict(size=10),
+            hovertemplate="Predicted: %{x:.1%}<br>Actual: %{y:.1%}<extra></extra>",
+        )
+    )
 
     fig.update_layout(
         title="Calibration Curve",
         xaxis_title="Predicted Probability",
         yaxis_title="Actual Win Rate",
-        hovermode='closest',
-        template='plotly_white',
+        hovermode="closest",
+        template="plotly_white",
         height=400,
         xaxis=dict(range=[0, 1]),
-        yaxis=dict(range=[0, 1])
+        yaxis=dict(range=[0, 1]),
     )
 
     return fig
@@ -526,6 +532,7 @@ def plot_calibration_curve(calibrator: Any) -> go.Figure:
 # ============================================================================
 # Main Dashboard
 # ============================================================================
+
 
 def main():
     """Main dashboard application"""
@@ -576,24 +583,27 @@ def main():
     # Check all metrics for alerts
     alerts = []
 
-    if stats['total_bets'] > 10:  # Only show alerts if we have enough data
+    if stats["total_bets"] > 10:  # Only show alerts if we have enough data
         metrics_to_check = {
-            'ROI': ('roi', stats['roi']),
-            'Win Rate': ('win_rate', stats['win_rate']),
-            'Sharpe Ratio': ('sharpe_ratio', stats['sharpe_ratio']),
-            'Max Drawdown': ('max_drawdown', abs(stats['max_drawdown']) / stats['bankroll']),
-            'CLV': ('clv', stats['avg_clv']),
-            'Brier Score': ('brier_score', brier_score)
+            "ROI": ("roi", stats["roi"]),
+            "Win Rate": ("win_rate", stats["win_rate"]),
+            "Sharpe Ratio": ("sharpe_ratio", stats["sharpe_ratio"]),
+            "Max Drawdown": (
+                "max_drawdown",
+                abs(stats["max_drawdown"]) / stats["bankroll"],
+            ),
+            "CLV": ("clv", stats["avg_clv"]),
+            "Brier Score": ("brier_score", brier_score),
         }
 
         for label, (key, value) in metrics_to_check.items():
             alert_level = get_alert_level(key, value)
-            if alert_level in ['critical', 'warning']:
+            if alert_level in ["critical", "warning"]:
                 alerts.append(f"{label}: {alert_level.upper()}")
 
     if alerts:
         alert_msg = " | ".join(alerts)
-        if 'CRITICAL' in alert_msg:
+        if "CRITICAL" in alert_msg:
             st.error(f"⛔ CRITICAL ALERTS: {alert_msg}")
         else:
             st.warning(f"⚠️ WARNINGS: {alert_msg}")
@@ -614,34 +624,36 @@ def main():
         st.metric(
             label="Current Bankroll",
             value=f"${stats['bankroll']:,.2f}",
-            delta=f"${stats['total_profit_loss']:,.2f} ({stats['bankroll_change_pct']*100:.1f}%)"
+            delta=f"${stats['total_profit_loss']:,.2f} ({stats['bankroll_change_pct']*100:.1f}%)",
         )
-        format_metric_with_alert("ROI", stats['roi'], 'roi', '.1%')
+        format_metric_with_alert("ROI", stats["roi"], "roi", ".1%")
 
     with col2:
         st.metric(
             label="Total Bets",
             value=f"{stats['total_bets']}",
-            delta=f"{stats['total_won']}W / {stats['total_lost']}L"
+            delta=f"{stats['total_won']}W / {stats['total_lost']}L",
         )
-        format_metric_with_alert("Win Rate", stats['win_rate'], 'win_rate', '.1%')
+        format_metric_with_alert("Win Rate", stats["win_rate"], "win_rate", ".1%")
 
     with col3:
         st.metric(
             label="Total Staked",
             value=f"${stats['total_staked']:,.2f}",
-            delta=f"Avg: ${stats['avg_bet']:,.2f}"
+            delta=f"Avg: ${stats['avg_bet']:,.2f}",
         )
-        format_metric_with_alert("Sharpe Ratio", stats['sharpe_ratio'], 'sharpe_ratio', '.2f')
+        format_metric_with_alert(
+            "Sharpe Ratio", stats["sharpe_ratio"], "sharpe_ratio", ".2f"
+        )
 
     with col4:
         st.metric(
             label="Calibration (Brier)",
             value=f"{brier_score:.3f}",
             delta="Lower is better",
-            delta_color="inverse"
+            delta_color="inverse",
         )
-        format_metric_with_alert("CLV", stats['avg_clv'], 'clv', '.1%')
+        format_metric_with_alert("CLV", stats["avg_clv"], "clv", ".1%")
 
     st.markdown("---")
 
@@ -654,8 +666,12 @@ def main():
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        max_dd_pct = abs(stats['max_drawdown']) / stats['bankroll'] if stats['bankroll'] > 0 else 0
-        format_metric_with_alert("Max Drawdown", max_dd_pct, 'max_drawdown', '.1%')
+        max_dd_pct = (
+            abs(stats["max_drawdown"]) / stats["bankroll"]
+            if stats["bankroll"] > 0
+            else 0
+        )
+        format_metric_with_alert("Max Drawdown", max_dd_pct, "max_drawdown", ".1%")
 
     with col2:
         st.markdown(f"**Avg Edge:** {stats['avg_edge']*100:.1f}%")
@@ -709,7 +725,7 @@ def main():
 
     with col2:
         st.subheader("Calibration Metrics")
-        format_metric_with_alert("Brier Score", brier_score, 'brier_score', '.4f')
+        format_metric_with_alert("Brier Score", brier_score, "brier_score", ".4f")
         st.markdown(f"**Log Loss:** {log_loss:.4f}")
 
         if calibrator and calibrator.calibration_db:
@@ -717,13 +733,15 @@ def main():
             st.markdown(f"**Total Predictions:** {num_records}")
 
         st.markdown("---")
-        st.markdown("""
+        st.markdown(
+            """
         **Calibration Quality:**
         - Brier < 0.10: Excellent
         - Brier < 0.15: Good
         - Brier < 0.20: Acceptable
         - Brier > 0.20: Poor (don't bet!)
-        """)
+        """
+        )
 
     st.markdown("---")
 
@@ -739,28 +757,30 @@ def main():
     if recent_bets:
         bet_data = []
         for bet in recent_bets:
-            bet_data.append({
-                'Date': bet.timestamp.strftime('%Y-%m-%d %H:%M'),
-                'Game': bet.game_id,
-                'Type': bet.bet_type.value,
-                'Amount': f"${bet.amount:.2f}",
-                'Odds': f"{bet.odds:.2f}",
-                'Edge': f"{bet.edge*100:.1f}%",
-                'Status': bet.status.value,
-                'P/L': f"${bet.profit_loss:.2f}" if bet.profit_loss else "-",
-                'CLV': f"{bet.clv*100:.1f}%" if bet.clv else "-"
-            })
+            bet_data.append(
+                {
+                    "Date": bet.timestamp.strftime("%Y-%m-%d %H:%M"),
+                    "Game": bet.game_id,
+                    "Type": bet.bet_type.value,
+                    "Amount": f"${bet.amount:.2f}",
+                    "Odds": f"{bet.odds:.2f}",
+                    "Edge": f"{bet.edge*100:.1f}%",
+                    "Status": bet.status.value,
+                    "P/L": f"${bet.profit_loss:.2f}" if bet.profit_loss else "-",
+                    "CLV": f"{bet.clv*100:.1f}%" if bet.clv else "-",
+                }
+            )
 
         df_bets = pd.DataFrame(bet_data)
 
         # Color-code by status
         def highlight_status(row):
-            if row['Status'] == 'won':
-                return ['background-color: #d4edda'] * len(row)
-            elif row['Status'] == 'lost':
-                return ['background-color: #f8d7da'] * len(row)
+            if row["Status"] == "won":
+                return ["background-color: #d4edda"] * len(row)
+            elif row["Status"] == "lost":
+                return ["background-color: #f8d7da"] * len(row)
             else:
-                return [''] * len(row)
+                return [""] * len(row)
 
         styled_df = df_bets.style.apply(highlight_status, axis=1)
         st.dataframe(styled_df, use_container_width=True, height=400)
@@ -774,7 +794,8 @@ def main():
     # ========================================================================
 
     st.markdown("---")
-    st.markdown("""
+    st.markdown(
+        """
     **Dashboard Controls:**
     - Use sidebar to enable auto-refresh
     - Click "Refresh Now" for manual updates
@@ -784,7 +805,8 @@ def main():
     - 🔴 Critical: Requires immediate attention
     - 🟡 Warning: Monitor closely
     - 🟢 Healthy: System performing well
-    """)
+    """
+    )
 
 
 if __name__ == "__main__":

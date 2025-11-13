@@ -11,6 +11,7 @@ import numpy as np
 # Check if PySpark is available
 try:
     import pyspark
+
     PYSPARK_AVAILABLE = True
 except ImportError:
     PYSPARK_AVAILABLE = False
@@ -20,12 +21,11 @@ if PYSPARK_AVAILABLE:
     from mcp_server.distributed.spark_integration import (
         SparkSessionManager,
         DataFrameConverter,
-        DistributedDataValidator
+        DistributedDataValidator,
     )
 
 pytest_mark_skipif = pytest.mark.skipif(
-    not PYSPARK_AVAILABLE,
-    reason="PySpark not installed"
+    not PYSPARK_AVAILABLE, reason="PySpark not installed"
 )
 
 
@@ -35,10 +35,7 @@ class TestSparkSessionManager:
 
     def test_session_creation(self):
         """Test creating a Spark session"""
-        manager = SparkSessionManager(
-            app_name="test_app",
-            master="local[2]"
-        )
+        manager = SparkSessionManager(app_name="test_app", master="local[2]")
 
         spark = manager.get_or_create_session()
 
@@ -67,10 +64,7 @@ class TestSparkSessionManager:
 
     def test_get_session_info(self):
         """Test getting session information"""
-        manager = SparkSessionManager(
-            app_name="info_test",
-            executor_memory="1g"
-        )
+        manager = SparkSessionManager(app_name="info_test", executor_memory="1g")
 
         # Before creation
         info = manager.get_session_info()
@@ -90,7 +84,7 @@ class TestSparkSessionManager:
         """Test adding custom Spark configuration"""
         custom_config = {
             "spark.sql.shuffle.partitions": "10",
-            "spark.default.parallelism": "4"
+            "spark.default.parallelism": "4",
         }
 
         manager = SparkSessionManager(config=custom_config)
@@ -120,11 +114,13 @@ class TestDataFrameConverter:
     @pytest.fixture
     def sample_pandas_df(self):
         """Create sample pandas DataFrame"""
-        return pd.DataFrame({
-            "id": [1, 2, 3, 4, 5],
-            "name": ["Player1", "Player2", "Player3", "Player4", "Player5"],
-            "score": [25.5, 30.2, 15.8, 22.1, 28.9]
-        })
+        return pd.DataFrame(
+            {
+                "id": [1, 2, 3, 4, 5],
+                "name": ["Player1", "Player2", "Player3", "Player4", "Player5"],
+                "score": [25.5, 30.2, 15.8, 22.1, 28.9],
+            }
+        )
 
     def test_pandas_to_spark_conversion(self, converter, sample_pandas_df):
         """Test converting pandas to Spark DataFrame"""
@@ -146,10 +142,7 @@ class TestDataFrameConverter:
     def test_conversion_with_limit(self, converter):
         """Test converting large Spark DF with limit"""
         # Create large pandas DF
-        large_df = pd.DataFrame({
-            "id": range(1000),
-            "value": np.random.randn(1000)
-        })
+        large_df = pd.DataFrame({"id": range(1000), "value": np.random.randn(1000)})
 
         spark_df = converter.pandas_to_spark(large_df)
         limited_df = converter.spark_to_pandas(spark_df, limit=100)
@@ -165,10 +158,7 @@ class TestDataFrameConverter:
     def test_optimize_partitioning(self, converter):
         """Test partition optimization"""
         # Create moderately sized DF
-        df = pd.DataFrame({
-            "id": range(10000),
-            "value": np.random.randn(10000)
-        })
+        df = pd.DataFrame({"id": range(10000), "value": np.random.randn(10000)})
 
         spark_df = converter.pandas_to_spark(df)
         optimized_df = converter.optimize_partitioning(spark_df)
@@ -195,12 +185,14 @@ class TestDistributedDataValidator:
     @pytest.fixture
     def sample_spark_df(self, spark_manager):
         """Create sample Spark DataFrame"""
-        data = pd.DataFrame({
-            "player_id": [1, 2, 3, None, 5],  # Has null
-            "name": ["A", "B", "C", "D", "E"],
-            "score": [10, 25, 15, 30, 20],  # All valid
-            "invalid_score": [5, 150, 10, 200, 15]  # Some out of range
-        })
+        data = pd.DataFrame(
+            {
+                "player_id": [1, 2, 3, None, 5],  # Has null
+                "name": ["A", "B", "C", "D", "E"],
+                "score": [10, 25, 15, 30, 20],  # All valid
+                "invalid_score": [5, 150, 10, 200, 15],  # Some out of range
+            }
+        )
 
         converter = DataFrameConverter(spark_manager)
         return converter.pandas_to_spark(data)
@@ -216,8 +208,7 @@ class TestDistributedDataValidator:
     def test_validate_nulls_specific_columns(self, validator, sample_spark_df):
         """Test null validation for specific columns"""
         null_counts = validator.validate_nulls(
-            sample_spark_df,
-            columns=["player_id", "name"]
+            sample_spark_df, columns=["player_id", "name"]
         )
 
         assert len(null_counts) == 2
@@ -226,10 +217,7 @@ class TestDistributedDataValidator:
     def test_validate_ranges(self, validator, sample_spark_df):
         """Test range validation"""
         result = validator.validate_ranges(
-            sample_spark_df,
-            column="score",
-            min_value=0,
-            max_value=100
+            sample_spark_df, column="score", min_value=0, max_value=100
         )
 
         assert result["column"] == "score"
@@ -241,10 +229,7 @@ class TestDistributedDataValidator:
     def test_validate_ranges_with_violations(self, validator, sample_spark_df):
         """Test range validation with violations"""
         result = validator.validate_ranges(
-            sample_spark_df,
-            column="invalid_score",
-            min_value=0,
-            max_value=100
+            sample_spark_df, column="invalid_score", min_value=0, max_value=100
         )
 
         assert result["violations"] == 2  # Two values > 100
@@ -253,9 +238,7 @@ class TestDistributedDataValidator:
     def test_validate_uniqueness(self, validator, spark_manager):
         """Test uniqueness validation"""
         # Create DF with duplicates
-        data = pd.DataFrame({
-            "id": [1, 2, 2, 3, 3, 3]  # Has duplicates
-        })
+        data = pd.DataFrame({"id": [1, 2, 2, 3, 3, 3]})  # Has duplicates
 
         converter = DataFrameConverter(spark_manager)
         df = converter.pandas_to_spark(data)
@@ -269,9 +252,7 @@ class TestDistributedDataValidator:
 
     def test_validate_uniqueness_unique_column(self, validator, spark_manager):
         """Test uniqueness validation on unique column"""
-        data = pd.DataFrame({
-            "id": [1, 2, 3, 4, 5]  # All unique
-        })
+        data = pd.DataFrame({"id": [1, 2, 3, 4, 5]})  # All unique
 
         converter = DataFrameConverter(spark_manager)
         df = converter.pandas_to_spark(data)
@@ -285,10 +266,8 @@ class TestDistributedDataValidator:
         """Test comprehensive validation"""
         validation_rules = {
             "required_columns": ["player_id", "name"],
-            "ranges": {
-                "score": {"min": 0, "max": 100}
-            },
-            "unique_columns": ["name"]
+            "ranges": {"score": {"min": 0, "max": 100}},
+            "unique_columns": ["name"],
         }
 
         result = validator.run_full_validation(sample_spark_df, validation_rules)

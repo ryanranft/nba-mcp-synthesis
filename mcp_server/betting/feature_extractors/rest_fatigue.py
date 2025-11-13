@@ -52,10 +52,7 @@ class RestFatigueExtractor:
         logger.info("RestFatigueExtractor initialized")
 
     def extract_features(
-        self,
-        home_team_id: int,
-        away_team_id: int,
-        game_date: date
+        self, home_team_id: int, away_team_id: int, game_date: date
     ) -> Dict[str, float]:
         """
         Extract rest/fatigue features for a specific game
@@ -76,25 +73,33 @@ class RestFatigueExtractor:
             away_rest, away_schedule = self._get_rest_days(away_team_id, game_date)
 
             # Basic rest features
-            features['home_rest_days'] = home_rest
-            features['away_rest_days'] = away_rest
-            features['rest_advantage'] = home_rest - away_rest
+            features["home_rest_days"] = home_rest
+            features["away_rest_days"] = away_rest
+            features["rest_advantage"] = home_rest - away_rest
 
             # Back-to-back indicators
-            features['home_back_to_back'] = 1.0 if home_rest == 0 else 0.0
-            features['away_back_to_back'] = 1.0 if away_rest == 0 else 0.0
+            features["home_back_to_back"] = 1.0 if home_rest == 0 else 0.0
+            features["away_back_to_back"] = 1.0 if away_rest == 0 else 0.0
 
             # Extreme fatigue: 3rd game in 4 nights
-            features['home_third_in_4'] = self._check_third_in_4_nights(home_schedule, game_date)
-            features['away_third_in_4'] = self._check_third_in_4_nights(away_schedule, game_date)
+            features["home_third_in_4"] = self._check_third_in_4_nights(
+                home_schedule, game_date
+            )
+            features["away_third_in_4"] = self._check_third_in_4_nights(
+                away_schedule, game_date
+            )
 
             # Schedule density features
-            home_games_l7 = self._count_games_in_window(home_schedule, game_date, days=7)
-            away_games_l7 = self._count_games_in_window(away_schedule, game_date, days=7)
+            home_games_l7 = self._count_games_in_window(
+                home_schedule, game_date, days=7
+            )
+            away_games_l7 = self._count_games_in_window(
+                away_schedule, game_date, days=7
+            )
 
-            features['home_games_last_7'] = home_games_l7
-            features['away_games_last_7'] = away_games_l7
-            features['schedule_density_diff'] = home_games_l7 - away_games_l7
+            features["home_games_last_7"] = home_games_l7
+            features["away_games_last_7"] = away_games_l7
+            features["schedule_density_diff"] = home_games_l7 - away_games_l7
 
             logger.debug(
                 f"Rest features extracted: home={home_rest}d, away={away_rest}d, "
@@ -105,25 +110,21 @@ class RestFatigueExtractor:
             logger.error(f"Error extracting rest/fatigue features: {e}")
             # Return default values on error
             features = {
-                'home_rest_days': 1.0,
-                'away_rest_days': 1.0,
-                'rest_advantage': 0.0,
-                'home_back_to_back': 0.0,
-                'away_back_to_back': 0.0,
-                'home_third_in_4': 0.0,
-                'away_third_in_4': 0.0,
-                'home_games_last_7': 3.0,
-                'away_games_last_7': 3.0,
-                'schedule_density_diff': 0.0
+                "home_rest_days": 1.0,
+                "away_rest_days": 1.0,
+                "rest_advantage": 0.0,
+                "home_back_to_back": 0.0,
+                "away_back_to_back": 0.0,
+                "home_third_in_4": 0.0,
+                "away_third_in_4": 0.0,
+                "home_games_last_7": 3.0,
+                "away_games_last_7": 3.0,
+                "schedule_density_diff": 0.0,
             }
 
         return features
 
-    def _get_rest_days(
-        self,
-        team_id: int,
-        game_date: date
-    ) -> Tuple[int, List[date]]:
+    def _get_rest_days(self, team_id: int, game_date: date) -> Tuple[int, List[date]]:
         """
         Calculate days of rest for a team
 
@@ -174,11 +175,7 @@ class RestFatigueExtractor:
 
         return rest_days, schedule
 
-    def _check_third_in_4_nights(
-        self,
-        schedule: List[date],
-        game_date: date
-    ) -> float:
+    def _check_third_in_4_nights(self, schedule: List[date], game_date: date) -> float:
         """
         Check if this is the third game in 4 nights (extreme fatigue)
 
@@ -205,10 +202,7 @@ class RestFatigueExtractor:
         return 0.0
 
     def _count_games_in_window(
-        self,
-        schedule: List[date],
-        game_date: date,
-        days: int
+        self, schedule: List[date], game_date: date, days: int
     ) -> int:
         """
         Count games played in last N days
@@ -227,10 +221,7 @@ class RestFatigueExtractor:
 
         return count
 
-    def extract_batch(
-        self,
-        games: List[Dict[str, any]]
-    ) -> pd.DataFrame:
+    def extract_batch(self, games: List[Dict[str, any]]) -> pd.DataFrame:
         """
         Extract features for multiple games at once (more efficient)
 
@@ -244,11 +235,11 @@ class RestFatigueExtractor:
 
         for game in games:
             features = self.extract_features(
-                home_team_id=game['home_team_id'],
-                away_team_id=game['away_team_id'],
-                game_date=game['game_date']
+                home_team_id=game["home_team_id"],
+                away_team_id=game["away_team_id"],
+                game_date=game["game_date"],
             )
-            features['game_id'] = game.get('game_id')
+            features["game_id"] = game.get("game_id")
             features_list.append(features)
 
         return pd.DataFrame(features_list)
@@ -278,18 +269,18 @@ if __name__ == "__main__":
 
     # Load secrets
     print("📦 Loading secrets...")
-    load_secrets_hierarchical('nba-mcp-synthesis', 'NBA', 'production')
+    load_secrets_hierarchical("nba-mcp-synthesis", "NBA", "production")
     print("✅ Secrets loaded")
     print()
 
     # Connect to database
     print("🔌 Connecting to database...")
     conn = psycopg2.connect(
-        host=os.getenv('RDS_HOST'),
-        port=os.getenv('RDS_PORT'),
-        database=os.getenv('RDS_DATABASE'),
-        user=os.getenv('RDS_USERNAME'),
-        password=os.getenv('RDS_PASSWORD')
+        host=os.getenv("RDS_HOST"),
+        port=os.getenv("RDS_PORT"),
+        database=os.getenv("RDS_DATABASE"),
+        user=os.getenv("RDS_USERNAME"),
+        password=os.getenv("RDS_PASSWORD"),
     )
     print("✅ Database connected")
     print()
@@ -299,7 +290,8 @@ if __name__ == "__main__":
 
     # Get a recent game for testing
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT
             game_id,
             home_team_id,
@@ -312,7 +304,8 @@ if __name__ == "__main__":
           AND home_score IS NOT NULL
         ORDER BY game_date DESC
         LIMIT 5
-    """)
+    """
+    )
 
     games = cursor.fetchall()
 
@@ -328,14 +321,12 @@ if __name__ == "__main__":
 
             # Extract features
             features = extractor.extract_features(
-                home_team_id=home_id,
-                away_team_id=away_id,
-                game_date=g_date
+                home_team_id=home_id, away_team_id=away_id, game_date=g_date
             )
 
             print(f"\nFeatures:")
             for key, value in features.items():
-                if 'back_to_back' in key or 'third_in_4' in key:
+                if "back_to_back" in key or "third_in_4" in key:
                     print(f"  {key}: {'YES' if value == 1.0 else 'NO'}")
                 else:
                     print(f"  {key}: {value}")

@@ -20,9 +20,12 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Optional
 
 # Add project root to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from mcp_server.unified_secrets_manager import load_secrets_hierarchical, get_database_config
+from mcp_server.unified_secrets_manager import (
+    load_secrets_hierarchical,
+    get_database_config,
+)
 
 try:
     import psycopg2
@@ -54,7 +57,7 @@ class ESPNDataFetcher:
             List of game dictionaries with IDs and metadata
         """
         url = f"{self.BASE_URL}/scoreboard"
-        params = {'dates': date.replace('-', '')}  # ESPN wants YYYYMMDD
+        params = {"dates": date.replace("-", "")}  # ESPN wants YYYYMMDD
 
         try:
             response = requests.get(url, params=params, timeout=10)
@@ -62,22 +65,40 @@ class ESPNDataFetcher:
             data = response.json()
 
             games = []
-            for event in data.get('events', []):
-                game_id = event.get('id')
-                competitions = event.get('competitions', [{}])[0]
+            for event in data.get("events", []):
+                game_id = event.get("id")
+                competitions = event.get("competitions", [{}])[0]
 
                 game_info = {
-                    'game_id': game_id,
-                    'game_date': date,
-                    'season': event.get('season', {}).get('year'),
-                    'season_type': event.get('season', {}).get('type'),
-                    'status': competitions.get('status', {}).get('type', {}).get('name'),
-                    'home_team': competitions.get('competitors', [{}])[0].get('team', {}).get('displayName'),
-                    'away_team': competitions.get('competitors', [{}])[1].get('team', {}).get('displayName'),
-                    'home_team_id': int(competitions.get('competitors', [{}])[0].get('team', {}).get('id', 0)),
-                    'away_team_id': int(competitions.get('competitors', [{}])[1].get('team', {}).get('id', 0)),
-                    'home_score': int(competitions.get('competitors', [{}])[0].get('score', 0)),
-                    'away_score': int(competitions.get('competitors', [{}])[1].get('score', 0)),
+                    "game_id": game_id,
+                    "game_date": date,
+                    "season": event.get("season", {}).get("year"),
+                    "season_type": event.get("season", {}).get("type"),
+                    "status": competitions.get("status", {})
+                    .get("type", {})
+                    .get("name"),
+                    "home_team": competitions.get("competitors", [{}])[0]
+                    .get("team", {})
+                    .get("displayName"),
+                    "away_team": competitions.get("competitors", [{}])[1]
+                    .get("team", {})
+                    .get("displayName"),
+                    "home_team_id": int(
+                        competitions.get("competitors", [{}])[0]
+                        .get("team", {})
+                        .get("id", 0)
+                    ),
+                    "away_team_id": int(
+                        competitions.get("competitors", [{}])[1]
+                        .get("team", {})
+                        .get("id", 0)
+                    ),
+                    "home_score": int(
+                        competitions.get("competitors", [{}])[0].get("score", 0)
+                    ),
+                    "away_score": int(
+                        competitions.get("competitors", [{}])[1].get("score", 0)
+                    ),
                 }
                 games.append(game_info)
 
@@ -98,7 +119,7 @@ class ESPNDataFetcher:
             List of play-by-play event dictionaries or None if error
         """
         url = f"{self.BASE_URL}/summary"
-        params = {'event': game_id}
+        params = {"event": game_id}
 
         try:
             response = requests.get(url, params=params, timeout=15)
@@ -107,30 +128,34 @@ class ESPNDataFetcher:
 
             # Extract play-by-play events
             plays = []
-            for play_data in data.get('plays', []):
-                for play in play_data.get('items', []):
+            for play_data in data.get("plays", []):
+                for play in play_data.get("items", []):
                     event = {
-                        'game_id': game_id,
-                        'sequence_number': play.get('sequenceNumber'),
-                        'type_id': play.get('type', {}).get('id'),
-                        'type_text': play.get('type', {}).get('text'),
-                        'text': play.get('text'),
-                        'period': play.get('period', {}).get('number'),
-                        'clock_display_value': play.get('clock', {}).get('displayValue'),
-                        'team_id': play.get('team', {}).get('id'),
-                        'scoring_play': 1 if play.get('scoringPlay') else 0,
-                        'shooting_play': 1 if play.get('shootingPlay') else 0,
-                        'score_value': play.get('scoreValue', 0),
-                        'home_score': play.get('homeScore'),
-                        'away_score': play.get('awayScore'),
-                        'coordinate_x': play.get('coordinate', {}).get('x'),
-                        'coordinate_y': play.get('coordinate', {}).get('y'),
+                        "game_id": game_id,
+                        "sequence_number": play.get("sequenceNumber"),
+                        "type_id": play.get("type", {}).get("id"),
+                        "type_text": play.get("type", {}).get("text"),
+                        "text": play.get("text"),
+                        "period": play.get("period", {}).get("number"),
+                        "clock_display_value": play.get("clock", {}).get(
+                            "displayValue"
+                        ),
+                        "team_id": play.get("team", {}).get("id"),
+                        "scoring_play": 1 if play.get("scoringPlay") else 0,
+                        "shooting_play": 1 if play.get("shootingPlay") else 0,
+                        "score_value": play.get("scoreValue", 0),
+                        "home_score": play.get("homeScore"),
+                        "away_score": play.get("awayScore"),
+                        "coordinate_x": play.get("coordinate", {}).get("x"),
+                        "coordinate_y": play.get("coordinate", {}).get("y"),
                     }
 
                     # Extract athlete IDs (up to 3 participants)
-                    participants = play.get('participants', [])
+                    participants = play.get("participants", [])
                     for i, participant in enumerate(participants[:3]):
-                        event[f'athlete_id_{i+1}'] = participant.get('athlete', {}).get('id')
+                        event[f"athlete_id_{i+1}"] = participant.get("athlete", {}).get(
+                            "id"
+                        )
 
                     plays.append(event)
 
@@ -152,7 +177,8 @@ class DatabaseLoader:
         cursor = self.conn.cursor()
 
         try:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO games (
                     game_id, game_date, season, season_type,
                     home_team, away_team, home_team_id, away_team_id,
@@ -166,7 +192,9 @@ class DatabaseLoader:
                     home_score = EXCLUDED.home_score,
                     away_score = EXCLUDED.away_score,
                     updated_at = CURRENT_TIMESTAMP
-            """, game)
+            """,
+                game,
+            )
 
             self.conn.commit()
             return True
@@ -206,7 +234,7 @@ class DatabaseLoader:
                         updated_at = CURRENT_TIMESTAMP
                 """,
                 plays,
-                page_size=1000
+                page_size=1000,
             )
 
             self.conn.commit()
@@ -219,16 +247,24 @@ class DatabaseLoader:
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Load recent NBA games into local database')
-    parser.add_argument('--days', type=int, default=7,
-                        help='Number of days to load (default: 7)')
-    parser.add_argument('--date', type=str,
-                        help='Specific date to load (YYYY-MM-DD)')
-    parser.add_argument('--full', action='store_true',
-                        help='Load full play-by-play data (default: games only)')
-    parser.add_argument('--context', default='development',
-                        choices=['development', 'production'],
-                        help='Database context (default: development)')
+    parser = argparse.ArgumentParser(
+        description="Load recent NBA games into local database"
+    )
+    parser.add_argument(
+        "--days", type=int, default=7, help="Number of days to load (default: 7)"
+    )
+    parser.add_argument("--date", type=str, help="Specific date to load (YYYY-MM-DD)")
+    parser.add_argument(
+        "--full",
+        action="store_true",
+        help="Load full play-by-play data (default: games only)",
+    )
+    parser.add_argument(
+        "--context",
+        default="development",
+        choices=["development", "production"],
+        help="Database context (default: development)",
+    )
 
     args = parser.parse_args()
 
@@ -245,25 +281,29 @@ def main():
     else:
         end_date = datetime.now()
         start_date = end_date - timedelta(days=args.days)
-        dates = [(start_date + timedelta(days=i)).strftime('%Y-%m-%d')
-                 for i in range(args.days + 1)]
-        print(f"Loading data for: {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
+        dates = [
+            (start_date + timedelta(days=i)).strftime("%Y-%m-%d")
+            for i in range(args.days + 1)
+        ]
+        print(
+            f"Loading data for: {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}"
+        )
 
     print(f"Mode: {'Full (play-by-play)' if args.full else 'Games only'}")
 
     # Load credentials and connect
     print(f"\n🔐 Loading {args.context} credentials...")
-    load_secrets_hierarchical('nba-mcp-synthesis', 'NBA', args.context)
+    load_secrets_hierarchical("nba-mcp-synthesis", "NBA", args.context)
     config = get_database_config()
 
     print(f"🔌 Connecting to database...")
     try:
         conn = psycopg2.connect(
-            host=config['host'],
-            port=int(config['port']),
-            database=config['database'],
-            user=config['user'],
-            password=config['password']
+            host=config["host"],
+            port=int(config["port"]),
+            database=config["database"],
+            user=config["user"],
+            password=config["password"],
         )
         print(f"✅ Connected to {config['database']}")
     except psycopg2.OperationalError as e:
@@ -301,10 +341,10 @@ def main():
                 print(f"      ✅ Game metadata loaded")
 
                 # Load play-by-play if requested
-                if args.full and game['status'] == 'STATUS_FINAL':
-                    plays = fetcher.get_play_by_play(game['game_id'])
+                if args.full and game["status"] == "STATUS_FINAL":
+                    plays = fetcher.get_play_by_play(game["game_id"])
                     if plays:
-                        plays_loaded = loader.load_play_by_play(game['game_id'], plays)
+                        plays_loaded = loader.load_play_by_play(game["game_id"], plays)
                         total_plays += plays_loaded
                         print(f"      ✅ {plays_loaded} plays loaded")
                     else:
@@ -327,11 +367,13 @@ def main():
         print("\n💡 Next steps:")
         print("   1. Validate database: python scripts/init_local_database.py --stats")
         if not args.full:
-            print("   2. Load full play-by-play: python scripts/load_recent_games.py --days 7 --full")
+            print(
+                "   2. Load full play-by-play: python scripts/load_recent_games.py --days 7 --full"
+            )
         print("   3. Start using the local database with --context development")
 
     conn.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

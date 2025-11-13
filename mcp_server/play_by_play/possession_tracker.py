@@ -12,6 +12,7 @@ from .event_parser import ParsedEvent, EventParser
 @dataclass
 class Possession:
     """Represents a single possession in a basketball game."""
+
     possession_number: int
     offensive_team_id: int
     defensive_team_id: int
@@ -26,7 +27,7 @@ class Possession:
 
     # Possession outcome
     points_scored: int = 0
-    ended_by: str = ''  # 'made_shot', 'defensive_rebound', 'turnover', 'end_period'
+    ended_by: str = ""  # 'made_shot', 'defensive_rebound', 'turnover', 'end_period'
 
     # Advanced metrics
     num_shot_attempts: int = 0
@@ -74,15 +75,13 @@ class PossessionTracker:
 
             # Determine offensive team for this event
             offensive_team = self._determine_offensive_team(
-                parsed_event,
-                current_offensive_team,
-                events[i]
+                parsed_event, current_offensive_team, events[i]
             )
 
             # Check if possession changes
             possession_changed = (
-                offensive_team != current_offensive_team and
-                current_offensive_team is not None
+                offensive_team != current_offensive_team
+                and current_offensive_team is not None
             )
 
             # Start new possession if needed
@@ -92,7 +91,7 @@ class PossessionTracker:
                     possession = self._finalize_possession(
                         possession_number,
                         current_offensive_team,
-                        current_possession_events
+                        current_possession_events,
                     )
                     possessions.append(possession)
                     possession_number += 1
@@ -107,9 +106,7 @@ class PossessionTracker:
             # Check if this event ends the possession
             if parsed_event.is_possession_ending:
                 possession = self._finalize_possession(
-                    possession_number,
-                    current_offensive_team,
-                    current_possession_events
+                    possession_number, current_offensive_team, current_possession_events
                 )
                 possessions.append(possession)
                 possession_number += 1
@@ -121,9 +118,7 @@ class PossessionTracker:
         # Finalize any remaining possession
         if current_possession_events and current_offensive_team:
             possession = self._finalize_possession(
-                possession_number,
-                current_offensive_team,
-                current_possession_events
+                possession_number, current_offensive_team, current_possession_events
             )
             possessions.append(possession)
 
@@ -132,11 +127,11 @@ class PossessionTracker:
     def _is_administrative_event(self, event: ParsedEvent) -> bool:
         """Check if event is administrative (timeout, substitution, etc.)."""
         administrative_types = [
-            'Substitution',
-            'Full Timeout',
-            'Short Timeout',
-            'Official Time Out',
-            'Jump Ball',  # Will handle separately for possession determination
+            "Substitution",
+            "Full Timeout",
+            "Short Timeout",
+            "Official Time Out",
+            "Jump Ball",  # Will handle separately for possession determination
         ]
         return event.type_text in administrative_types
 
@@ -144,7 +139,7 @@ class PossessionTracker:
         self,
         parsed_event: ParsedEvent,
         current_offensive_team: Optional[int],
-        raw_event: Dict
+        raw_event: Dict,
     ) -> int:
         """
         Determine which team has possession for this event.
@@ -158,7 +153,7 @@ class PossessionTracker:
             Team ID that has possession
         """
         # For rebound events, determine based on rebound type
-        if 'Rebound' in parsed_event.type_text:
+        if "Rebound" in parsed_event.type_text:
             if parsed_event.is_offensive_rebound:
                 # Offensive rebound - same team keeps possession
                 return current_offensive_team
@@ -170,7 +165,7 @@ class PossessionTracker:
                     return self.home_team_id
 
         # For turnovers, possession changes to other team
-        if 'Turnover' in parsed_event.type_text:
+        if "Turnover" in parsed_event.type_text:
             # Possession goes to OTHER team
             if current_offensive_team == self.home_team_id:
                 return self.away_team_id
@@ -190,14 +185,16 @@ class PossessionTracker:
         # (This handles start of game, after timeouts, etc.)
         return self._infer_team_from_context(parsed_event, raw_event)
 
-    def _infer_team_from_context(self, parsed_event: ParsedEvent, raw_event: Dict) -> int:
+    def _infer_team_from_context(
+        self, parsed_event: ParsedEvent, raw_event: Dict
+    ) -> int:
         """
         Infer offensive team from context when not explicitly known.
 
         This is used at the start of the game or after ambiguous events.
         """
         # Check if there's a team_id field in the raw event
-        team_id = raw_event.get('team_id') or raw_event.get('offensive_team_id')
+        team_id = raw_event.get("team_id") or raw_event.get("offensive_team_id")
         if team_id:
             return int(team_id)
 
@@ -206,10 +203,7 @@ class PossessionTracker:
         return self.home_team_id
 
     def _finalize_possession(
-        self,
-        possession_number: int,
-        offensive_team_id: int,
-        events: List[ParsedEvent]
+        self, possession_number: int, offensive_team_id: int, events: List[ParsedEvent]
     ) -> Possession:
         """
         Finalize a possession and calculate summary statistics.
@@ -231,8 +225,8 @@ class PossessionTracker:
                 start_sequence=0,
                 end_sequence=0,
                 period=1,
-                start_clock='',
-                end_clock='',
+                start_clock="",
+                end_clock="",
             )
 
         defensive_team_id = self._get_defensive_team(offensive_team_id)
@@ -240,30 +234,18 @@ class PossessionTracker:
         last_event = events[-1]
 
         # Calculate possession outcome
-        points_scored = sum(
-            stat.pts
-            for event in events
-            for stat in event.player_stats
-        )
+        points_scored = sum(stat.pts for event in events for stat in event.player_stats)
 
         # Count shot attempts
         num_shot_attempts = sum(
-            stat.fga
-            for event in events
-            for stat in event.player_stats
+            stat.fga for event in events for stat in event.player_stats
         )
 
         # Count offensive rebounds
-        offensive_rebounds = sum(
-            1 for event in events if event.is_offensive_rebound
-        )
+        offensive_rebounds = sum(1 for event in events if event.is_offensive_rebound)
 
         # Count turnovers
-        turnovers = sum(
-            stat.tov
-            for event in events
-            for stat in event.player_stats
-        )
+        turnovers = sum(stat.tov for event in events for stat in event.player_stats)
 
         # Determine how possession ended
         ended_by = self._determine_possession_ending(last_event)
@@ -294,16 +276,16 @@ class PossessionTracker:
 
     def _determine_possession_ending(self, last_event: ParsedEvent) -> str:
         """Determine how the possession ended."""
-        if 'Rebound' in last_event.type_text and not last_event.is_offensive_rebound:
-            return 'defensive_rebound'
-        elif 'Turnover' in last_event.type_text:
-            return 'turnover'
+        if "Rebound" in last_event.type_text and not last_event.is_offensive_rebound:
+            return "defensive_rebound"
+        elif "Turnover" in last_event.type_text:
+            return "turnover"
         elif any(stat.fgm > 0 for stat in last_event.player_stats):
-            return 'made_shot'
-        elif 'End Period' in last_event.type_text or 'End Game' in last_event.type_text:
-            return 'end_period'
+            return "made_shot"
+        elif "End Period" in last_event.type_text or "End Game" in last_event.type_text:
+            return "end_period"
         else:
-            return 'unknown'
+            return "unknown"
 
 
 def calculate_true_possessions(possessions: List[Possession]) -> Dict[int, int]:
@@ -326,11 +308,7 @@ def calculate_true_possessions(possessions: List[Possession]) -> Dict[int, int]:
 
 
 def estimate_possessions_from_stats(
-    fga: int,
-    fta: int,
-    oreb: int,
-    tov: int,
-    ft_constant: float = 0.44
+    fga: int, fta: int, oreb: int, tov: int, ft_constant: float = 0.44
 ) -> float:
     """
     Estimate possessions using standard formula.
