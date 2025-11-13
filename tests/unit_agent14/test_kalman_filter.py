@@ -27,7 +27,7 @@ class TestGameState:
             away_score_rate=1.8,
             home_win_prob=0.6,
             time_remaining=24.0,
-            quarter=2
+            quarter=2,
         )
 
         assert state.home_score == 50.0
@@ -42,7 +42,7 @@ class TestGameState:
             home_score_rate=2.0,
             away_score_rate=1.8,
             home_win_prob=0.6,
-            time_remaining=24.0
+            time_remaining=24.0,
         )
 
         vec = state.to_vector()
@@ -70,14 +70,14 @@ class TestGameState:
             home_win_prob=0.6,
             time_remaining=24.0,
             quarter=2,
-            possession='home'
+            possession="home",
         )
 
         d = state.to_dict()
-        assert d['home_score'] == 50.0
-        assert d['quarter'] == 2
-        assert d['possession'] == 'home'
-        assert 'last_update' in d
+        assert d["home_score"] == 50.0
+        assert d["quarter"] == 2
+        assert d["possession"] == "home"
+        assert "last_update" in d
 
 
 class TestKalmanFilterConfig:
@@ -98,7 +98,7 @@ class TestKalmanFilterConfig:
             process_noise_std=0.2,
             measurement_noise_std=1.0,
             min_score_rate=0.8,
-            max_score_rate=3.5
+            max_score_rate=3.5,
         )
 
         assert config.process_noise_std == 0.2
@@ -122,10 +122,7 @@ class TestStreamingKalmanFilter:
         """Test game initialization"""
         kf = StreamingKalmanFilter()
         state = kf.initialize(
-            home_score=0.0,
-            away_score=0.0,
-            time_remaining=48.0,
-            quarter=1
+            home_score=0.0, away_score=0.0, time_remaining=48.0, quarter=1
         )
 
         assert state is not None
@@ -139,10 +136,7 @@ class TestStreamingKalmanFilter:
         """Test initialization with non-zero scores"""
         kf = StreamingKalmanFilter()
         state = kf.initialize(
-            home_score=25.0,
-            away_score=20.0,
-            time_remaining=36.0,
-            quarter=2
+            home_score=25.0, away_score=20.0, time_remaining=36.0, quarter=2
         )
 
         assert state.home_score == 25.0
@@ -170,11 +164,7 @@ class TestStreamingKalmanFilter:
         kf.initialize(home_score=0.0, away_score=0.0, time_remaining=48.0)
 
         # Update with observed score
-        observation = {
-            'home_score': 5.0,
-            'away_score': 3.0,
-            'time_remaining': 47.0
-        }
+        observation = {"home_score": 5.0, "away_score": 3.0, "time_remaining": 47.0}
         updated_state = kf.update(observation, dt=1.0)
 
         assert updated_state.home_score == pytest.approx(5.0, abs=0.1)
@@ -189,9 +179,9 @@ class TestStreamingKalmanFilter:
 
         # Simulate game progression
         observations = [
-            {'home_score': 5.0, 'away_score': 3.0, 'time_remaining': 45.0},
-            {'home_score': 12.0, 'away_score': 10.0, 'time_remaining': 42.0},
-            {'home_score': 20.0, 'away_score': 18.0, 'time_remaining': 39.0},
+            {"home_score": 5.0, "away_score": 3.0, "time_remaining": 45.0},
+            {"home_score": 12.0, "away_score": 10.0, "time_remaining": 42.0},
+            {"home_score": 20.0, "away_score": 18.0, "time_remaining": 39.0},
         ]
 
         for obs in observations:
@@ -210,11 +200,7 @@ class TestStreamingKalmanFilter:
         kf.initialize(home_score=0.0, away_score=0.0, time_remaining=48.0)
 
         # Update with home team leading
-        observation = {
-            'home_score': 50.0,
-            'away_score': 30.0,
-            'time_remaining': 10.0
-        }
+        observation = {"home_score": 50.0, "away_score": 30.0, "time_remaining": 10.0}
         state = kf.update(observation, dt=1.0)
 
         # Home win probability should be high
@@ -232,9 +218,9 @@ class TestStreamingKalmanFilter:
         assert away_final > 45.0
 
         # Statistics should include uncertainties
-        assert 'home_score_std' in stats
-        assert 'away_score_std' in stats
-        assert 'home_win_prob' in stats
+        assert "home_score_std" in stats
+        assert "away_score_std" in stats
+        assert "home_win_prob" in stats
 
     def test_confidence_intervals(self):
         """Test confidence interval calculation"""
@@ -243,12 +229,12 @@ class TestStreamingKalmanFilter:
 
         intervals = kf.get_confidence_interval(confidence=0.95)
 
-        assert 'home_score' in intervals
-        assert 'away_score' in intervals
-        assert isinstance(intervals['home_score'], tuple)
+        assert "home_score" in intervals
+        assert "away_score" in intervals
+        assert isinstance(intervals["home_score"], tuple)
 
         # Lower bound should be less than upper bound
-        lower, upper = intervals['home_score']
+        lower, upper = intervals["home_score"]
         assert lower < upper
 
     def test_state_constraints(self):
@@ -258,9 +244,9 @@ class TestStreamingKalmanFilter:
 
         # Update with unrealistic observation
         observation = {
-            'home_score': -5.0,  # Negative score (invalid)
-            'away_score': 150.0,
-            'time_remaining': 24.0
+            "home_score": -5.0,  # Negative score (invalid)
+            "away_score": 150.0,
+            "time_remaining": 24.0,
         }
         state = kf.update(observation, dt=1.0)
 
@@ -279,13 +265,13 @@ class TestStreamingKalmanFilter:
             away_score=0.0,
             time_remaining=48.0,
             home_score_rate=2.0,
-            away_score_rate=2.0
+            away_score_rate=2.0,
         )
 
         # Observe higher home scoring
         observations = [
-            {'home_score': 8.0, 'away_score': 2.0, 'time_remaining': 44.0},
-            {'home_score': 16.0, 'away_score': 4.0, 'time_remaining': 40.0},
+            {"home_score": 8.0, "away_score": 2.0, "time_remaining": 44.0},
+            {"home_score": 16.0, "away_score": 4.0, "time_remaining": 40.0},
         ]
 
         for obs in observations:
@@ -303,20 +289,22 @@ class TestStreamingKalmanFilter:
 
         # Before initialization
         stats = kf.get_statistics()
-        assert stats['initialized'] is False
+        assert stats["initialized"] is False
 
         # After initialization
         kf.initialize(home_score=0.0, away_score=0.0, time_remaining=48.0)
         stats = kf.get_statistics()
-        assert stats['initialized'] is True
-        assert 'update_count' in stats
-        assert 'current_state' in stats
+        assert stats["initialized"] is True
+        assert "update_count" in stats
+        assert "current_state" in stats
 
     def test_reset(self):
         """Test filter reset"""
         kf = StreamingKalmanFilter()
         kf.initialize(home_score=50.0, away_score=45.0, time_remaining=24.0)
-        kf.update({'home_score': 55.0, 'away_score': 50.0, 'time_remaining': 23.0}, dt=1.0)
+        kf.update(
+            {"home_score": 55.0, "away_score": 50.0, "time_remaining": 23.0}, dt=1.0
+        )
 
         assert kf.update_count > 0
         assert len(kf.state_history) > 0
@@ -335,11 +323,14 @@ class TestStreamingKalmanFilter:
         # Update several times
         for i in range(5):
             time_remaining = 48.0 - (i + 1) * 2.0
-            kf.update({
-                'home_score': float(i * 5),
-                'away_score': float(i * 4),
-                'time_remaining': time_remaining
-            }, dt=2.0)
+            kf.update(
+                {
+                    "home_score": float(i * 5),
+                    "away_score": float(i * 4),
+                    "time_remaining": time_remaining,
+                },
+                dt=2.0,
+            )
 
         state = kf.get_state()
         assert state.time_remaining < 48.0
@@ -352,7 +343,7 @@ class TestStreamingKalmanFilter:
 
         # Get current uncertainty
         intervals_now = kf.get_confidence_interval()
-        width_now = intervals_now['home_score'][1] - intervals_now['home_score'][0]
+        width_now = intervals_now["home_score"][1] - intervals_now["home_score"][0]
 
         # Predict to end of game
         predicted_state = kf.predict(dt=24.0)
@@ -369,11 +360,7 @@ class TestStreamingKalmanFilter:
         """Test automatic initialization from first update"""
         kf = StreamingKalmanFilter()
 
-        observation = {
-            'home_score': 10.0,
-            'away_score': 8.0,
-            'time_remaining': 45.0
-        }
+        observation = {"home_score": 10.0, "away_score": 8.0, "time_remaining": 45.0}
 
         # Should auto-initialize
         state = kf.update(observation, dt=1.0)
@@ -388,12 +375,15 @@ class TestStreamingKalmanFilter:
         kf.initialize(home_score=0.0, away_score=0.0, time_remaining=48.0, quarter=1)
 
         # Update with quarter 2
-        state = kf.update({
-            'home_score': 25.0,
-            'away_score': 22.0,
-            'time_remaining': 36.0,
-            'quarter': 2
-        }, dt=12.0)
+        state = kf.update(
+            {
+                "home_score": 25.0,
+                "away_score": 22.0,
+                "time_remaining": 36.0,
+                "quarter": 2,
+            },
+            dt=12.0,
+        )
 
         assert state.quarter == 2
 
@@ -402,15 +392,18 @@ class TestStreamingKalmanFilter:
         kf = StreamingKalmanFilter()
         kf.initialize(home_score=0.0, away_score=0.0, time_remaining=48.0)
 
-        state = kf.update({
-            'home_score': 5.0,
-            'away_score': 3.0,
-            'time_remaining': 47.0,
-            'possession': 'home'
-        }, dt=1.0)
+        state = kf.update(
+            {
+                "home_score": 5.0,
+                "away_score": 3.0,
+                "time_remaining": 47.0,
+                "possession": "home",
+            },
+            dt=1.0,
+        )
 
-        assert state.possession == 'home'
+        assert state.possession == "home"
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

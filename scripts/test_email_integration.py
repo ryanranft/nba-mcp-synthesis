@@ -40,17 +40,17 @@ def test_email_basic(to_addr: str = None):
 
     # Load secrets
     print("📦 Loading secrets...")
-    success = load_secrets_hierarchical('nba-mcp-synthesis', 'NBA', 'production')
+    success = load_secrets_hierarchical("nba-mcp-synthesis", "NBA", "production")
 
     if not success:
         print("❌ Failed to load secrets. Check unified_secrets_manager configuration.")
         return False
 
     # Check SMTP credentials
-    smtp_host = os.getenv('SMTP_HOST')
-    smtp_user = os.getenv('SMTP_USER')
-    email_from = os.getenv('EMAIL_FROM')
-    email_to = os.getenv('EMAIL_TO')
+    smtp_host = os.getenv("SMTP_HOST")
+    smtp_user = os.getenv("SMTP_USER")
+    email_from = os.getenv("EMAIL_FROM")
+    email_to = os.getenv("EMAIL_TO")
 
     print(f"✅ Secrets loaded successfully")
     print(f"   SMTP Host: {smtp_host}")
@@ -62,11 +62,7 @@ def test_email_basic(to_addr: str = None):
     # Initialize notification manager
     print("🔧 Initializing notification manager...")
     try:
-        notifier = NotificationManager(config={
-            'email': {
-                'enabled': True
-            }
-        })
+        notifier = NotificationManager(config={"email": {"enabled": True}})
         print("✅ Notification manager initialized")
         print()
     except Exception as e:
@@ -116,12 +112,10 @@ Powered by Claude Code
     print("📧 Sending test email...")
     try:
         results = notifier.send_message(
-            subject=subject,
-            message=message,
-            channels=['email']
+            subject=subject, message=message, channels=["email"]
         )
 
-        if results and 'email' in results and results['email'].success:
+        if results and "email" in results and results["email"].success:
             print("✅ Email sent successfully!")
             print()
             print("📬 Check your inbox:")
@@ -134,13 +128,16 @@ Powered by Claude Code
             print()
             return True
         else:
-            error = results.get('email').error if 'email' in results else 'Unknown error'
+            error = (
+                results.get("email").error if "email" in results else "Unknown error"
+            )
             print(f"❌ Email delivery failed: {error}")
             return False
 
     except Exception as e:
         print(f"❌ Exception during email send: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -154,7 +151,7 @@ def test_email_html():
 
     # Load secrets
     print("📦 Loading secrets...")
-    success = load_secrets_hierarchical('nba-mcp-synthesis', 'NBA', 'production')
+    success = load_secrets_hierarchical("nba-mcp-synthesis", "NBA", "production")
 
     if not success:
         print("❌ Failed to load secrets")
@@ -164,10 +161,12 @@ def test_email_html():
     print()
 
     # Initialize notifier
-    notifier = NotificationManager(config={'email': {'enabled': True}})
+    notifier = NotificationManager(config={"email": {"enabled": True}})
 
     # Create HTML email
-    subject = f"🏀 NBA Betting Alert - Top 3 Picks - {datetime.now().strftime('%Y-%m-%d')}"
+    subject = (
+        f"🏀 NBA Betting Alert - Top 3 Picks - {datetime.now().strftime('%Y-%m-%d')}"
+    )
 
     html_body = f"""
 <html>
@@ -249,7 +248,7 @@ def test_email_html():
     print("📧 Sending HTML test email...")
     try:
         # Get email notifier directly
-        email_notifier = notifier.notifiers['email']
+        email_notifier = notifier.notifiers["email"]
         result = email_notifier.send(subject, html_body, html=True)
 
         if result.success:
@@ -263,6 +262,7 @@ def test_email_html():
     except Exception as e:
         print(f"❌ Exception: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -270,17 +270,11 @@ def test_email_html():
 def main():
     """Main test function"""
     parser = argparse.ArgumentParser(
-        description='Test NBA MCP Synthesis email integration'
+        description="Test NBA MCP Synthesis email integration"
     )
+    parser.add_argument("--to", help="Override recipient email address", default=None)
     parser.add_argument(
-        '--to',
-        help='Override recipient email address',
-        default=None
-    )
-    parser.add_argument(
-        '--html',
-        action='store_true',
-        help='Test HTML email formatting'
+        "--html", action="store_true", help="Test HTML email formatting"
     )
 
     args = parser.parse_args()

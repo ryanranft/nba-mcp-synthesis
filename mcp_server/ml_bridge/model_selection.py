@@ -29,14 +29,20 @@ logger = logging.getLogger(__name__)
 # Try to import sklearn (optional)
 try:
     from sklearn.model_selection import (
-        KFold, TimeSeriesSplit, GroupKFold,
-        cross_val_score, cross_validate
+        KFold,
+        TimeSeriesSplit,
+        GroupKFold,
+        cross_val_score,
+        cross_validate,
     )
     from sklearn.metrics import (
-        mean_squared_error, mean_absolute_error,
-        r2_score, mean_absolute_percentage_error
+        mean_squared_error,
+        mean_absolute_error,
+        r2_score,
+        mean_absolute_percentage_error,
     )
     from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False
@@ -45,6 +51,7 @@ except ImportError:
 
 class CVStrategy(Enum):
     """Cross-validation strategies"""
+
     K_FOLD = "k_fold"  # Standard k-fold
     TIME_SERIES = "time_series"  # Expanding window
     GROUP = "group"  # Group by player/team
@@ -111,17 +118,17 @@ class ModelPerformance:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'model_name': self.model_name,
-            'train_score': self.train_score,
-            'test_score': self.test_score,
-            'cv_mean': self.cv_mean,
-            'cv_std': self.cv_std,
-            'rmse': self.rmse,
-            'mae': self.mae,
-            'mape': self.mape,
-            'r2': self.r2,
-            'overfit_gap': self.overfit_gap,
-            'fit_time': self.fit_time
+            "model_name": self.model_name,
+            "train_score": self.train_score,
+            "test_score": self.test_score,
+            "cv_mean": self.cv_mean,
+            "cv_std": self.cv_std,
+            "rmse": self.rmse,
+            "mae": self.mae,
+            "mape": self.mape,
+            "r2": self.r2,
+            "overfit_gap": self.overfit_gap,
+            "fit_time": self.fit_time,
         }
 
 
@@ -143,7 +150,9 @@ class CrossValidator:
             raise ImportError("scikit-learn required for CrossValidator")
 
         self.config = config or CVConfig()
-        logger.info(f"CrossValidator initialized with {self.config.strategy.value} strategy")
+        logger.info(
+            f"CrossValidator initialized with {self.config.strategy.value} strategy"
+        )
 
     def create_splitter(self) -> Any:
         """Create sklearn splitter based on strategy"""
@@ -151,14 +160,14 @@ class CrossValidator:
             return KFold(
                 n_splits=self.config.n_splits,
                 shuffle=self.config.shuffle,
-                random_state=42
+                random_state=42,
             )
 
         elif self.config.strategy == CVStrategy.TIME_SERIES:
             return TimeSeriesSplit(
                 n_splits=self.config.n_splits,
                 max_train_size=self.config.max_train_size,
-                gap=self.config.gap
+                gap=self.config.gap,
             )
 
         elif self.config.strategy == CVStrategy.GROUP:
@@ -174,7 +183,7 @@ class CrossValidator:
         X: np.ndarray,
         y: np.ndarray,
         groups: Optional[np.ndarray] = None,
-        scoring: Union[str, Callable] = 'r2'
+        scoring: Union[str, Callable] = "r2",
     ) -> Dict[str, Any]:
         """
         Perform cross-validation on model.
@@ -194,35 +203,39 @@ class CrossValidator:
         # Run cross-validation
         if self.config.strategy == CVStrategy.GROUP and groups is not None:
             cv_results = cross_validate(
-                model, X, y,
+                model,
+                X,
+                y,
                 cv=splitter,
                 groups=groups,
                 scoring=scoring,
                 return_train_score=True,
-                n_jobs=-1
+                n_jobs=-1,
             )
         else:
             cv_results = cross_validate(
-                model, X, y,
+                model,
+                X,
+                y,
                 cv=splitter,
                 scoring=scoring,
                 return_train_score=True,
-                n_jobs=-1
+                n_jobs=-1,
             )
 
         # Extract scores
-        test_scores = cv_results['test_score']
-        train_scores = cv_results['train_score']
+        test_scores = cv_results["test_score"]
+        train_scores = cv_results["train_score"]
 
         logger.info(f"CV: {np.mean(test_scores):.4f} ± {np.std(test_scores):.4f}")
 
         return {
-            'test_scores': test_scores.tolist(),
-            'train_scores': train_scores.tolist(),
-            'mean_test_score': float(np.mean(test_scores)),
-            'std_test_score': float(np.std(test_scores)),
-            'mean_train_score': float(np.mean(train_scores)),
-            'fit_times': cv_results['fit_time'].tolist()
+            "test_scores": test_scores.tolist(),
+            "train_scores": train_scores.tolist(),
+            "mean_test_score": float(np.mean(test_scores)),
+            "std_test_score": float(np.std(test_scores)),
+            "mean_train_score": float(np.mean(train_scores)),
+            "fit_times": cv_results["fit_time"].tolist(),
         }
 
     def walk_forward_validation(
@@ -231,7 +244,7 @@ class CrossValidator:
         X: np.ndarray,
         y: np.ndarray,
         initial_train_size: int,
-        step_size: int = 1
+        step_size: int = 1,
     ) -> List[Dict[str, Any]]:
         """
         Walk-forward time series validation.
@@ -257,8 +270,8 @@ class CrossValidator:
             y_train = y[:current_train_size]
 
             # Test on next step
-            X_test = X[current_train_size:current_train_size + step_size]
-            y_test = y[current_train_size:current_train_size + step_size]
+            X_test = X[current_train_size : current_train_size + step_size]
+            y_test = y[current_train_size : current_train_size + step_size]
 
             # Fit and predict
             model.fit(X_train, y_train)
@@ -268,12 +281,14 @@ class CrossValidator:
             mse = mean_squared_error(y_test, y_pred)
             mae = mean_absolute_error(y_test, y_pred)
 
-            results.append({
-                'train_size': current_train_size,
-                'test_size': step_size,
-                'mse': float(mse),
-                'mae': float(mae)
-            })
+            results.append(
+                {
+                    "train_size": current_train_size,
+                    "test_size": step_size,
+                    "mse": float(mse),
+                    "mae": float(mae),
+                }
+            )
 
             current_train_size += step_size
 
@@ -310,8 +325,8 @@ class HyperparameterTuner:
         param_grid: Dict[str, List[Any]],
         X: np.ndarray,
         y: np.ndarray,
-        scoring: str = 'r2',
-        n_jobs: int = -1
+        scoring: str = "r2",
+        n_jobs: int = -1,
     ) -> Dict[str, Any]:
         """
         Perform grid search.
@@ -330,11 +345,7 @@ class HyperparameterTuner:
         cv = CrossValidator(self.cv_config).create_splitter()
 
         search = GridSearchCV(
-            model, param_grid,
-            cv=cv,
-            scoring=scoring,
-            n_jobs=n_jobs,
-            verbose=1
+            model, param_grid, cv=cv, scoring=scoring, n_jobs=n_jobs, verbose=1
         )
 
         logger.info(f"Running grid search with {len(param_grid)} parameters")
@@ -347,9 +358,9 @@ class HyperparameterTuner:
         logger.info(f"Best params: {self.best_params_}")
 
         return {
-            'best_params': self.best_params_,
-            'best_score': float(self.best_score_),
-            'cv_results': search.cv_results_
+            "best_params": self.best_params_,
+            "best_score": float(self.best_score_),
+            "cv_results": search.cv_results_,
         }
 
     def random_search(
@@ -359,8 +370,8 @@ class HyperparameterTuner:
         X: np.ndarray,
         y: np.ndarray,
         n_iter: int = 10,
-        scoring: str = 'r2',
-        n_jobs: int = -1
+        scoring: str = "r2",
+        n_jobs: int = -1,
     ) -> Dict[str, Any]:
         """
         Perform randomized search.
@@ -380,13 +391,14 @@ class HyperparameterTuner:
         cv = CrossValidator(self.cv_config).create_splitter()
 
         search = RandomizedSearchCV(
-            model, param_distributions,
+            model,
+            param_distributions,
             n_iter=n_iter,
             cv=cv,
             scoring=scoring,
             n_jobs=n_jobs,
             random_state=42,
-            verbose=1
+            verbose=1,
         )
 
         logger.info(f"Running random search with {n_iter} iterations")
@@ -399,9 +411,9 @@ class HyperparameterTuner:
         logger.info(f"Best params: {self.best_params_}")
 
         return {
-            'best_params': self.best_params_,
-            'best_score': float(self.best_score_),
-            'cv_results': search.cv_results_
+            "best_params": self.best_params_,
+            "best_score": float(self.best_score_),
+            "cv_results": search.cv_results_,
         }
 
 
@@ -431,7 +443,7 @@ class ModelComparator:
         y_train: np.ndarray,
         X_test: np.ndarray,
         y_test: np.ndarray,
-        groups: Optional[np.ndarray] = None
+        groups: Optional[np.ndarray] = None,
     ) -> ModelPerformance:
         """
         Evaluate a single model.
@@ -480,7 +492,7 @@ class ModelComparator:
             cv_results = cv_validator.cross_validate_model(
                 model, X_train, y_train, groups=groups
             )
-            cv_scores = cv_results['test_scores']
+            cv_scores = cv_results["test_scores"]
         else:
             cv_scores = []
 
@@ -495,7 +507,7 @@ class ModelComparator:
             mape=mape,
             r2=test_r2,
             fit_time=fit_time,
-            predict_time=predict_time
+            predict_time=predict_time,
         )
 
         self.results[name] = performance
@@ -511,7 +523,7 @@ class ModelComparator:
         y_train: np.ndarray,
         X_test: np.ndarray,
         y_test: np.ndarray,
-        groups: Optional[np.ndarray] = None
+        groups: Optional[np.ndarray] = None,
     ) -> Dict[str, ModelPerformance]:
         """
         Compare multiple models.
@@ -534,7 +546,7 @@ class ModelComparator:
 
         return self.results
 
-    def get_rankings(self, metric: str = 'test_score') -> List[Tuple[str, float]]:
+    def get_rankings(self, metric: str = "test_score") -> List[Tuple[str, float]]:
         """
         Get model rankings by metric.
 
@@ -547,13 +559,13 @@ class ModelComparator:
         rankings = []
 
         for name, perf in self.results.items():
-            if metric == 'test_score':
+            if metric == "test_score":
                 score = perf.test_score
-            elif metric == 'cv_mean':
+            elif metric == "cv_mean":
                 score = perf.cv_mean
-            elif metric == 'rmse':
+            elif metric == "rmse":
                 score = -perf.rmse  # Negative so higher is better
-            elif metric == 'mae':
+            elif metric == "mae":
                 score = -perf.mae
             else:
                 score = perf.test_score
@@ -564,11 +576,7 @@ class ModelComparator:
 
         return rankings
 
-    def test_significance(
-        self,
-        model1_name: str,
-        model2_name: str
-    ) -> Dict[str, Any]:
+    def test_significance(self, model1_name: str, model2_name: str) -> Dict[str, Any]:
         """
         Test if difference between two models is statistically significant.
 
@@ -595,12 +603,14 @@ class ModelComparator:
         t_stat, p_value = stats.ttest_rel(scores1, scores2)
 
         result = {
-            'model1': model1_name,
-            'model2': model2_name,
-            't_statistic': float(t_stat),
-            'p_value': float(p_value),
-            'significant': p_value < 0.05,
-            'better_model': model1_name if np.mean(scores1) > np.mean(scores2) else model2_name
+            "model1": model1_name,
+            "model2": model2_name,
+            "t_statistic": float(t_stat),
+            "p_value": float(p_value),
+            "significant": p_value < 0.05,
+            "better_model": (
+                model1_name if np.mean(scores1) > np.mean(scores2) else model2_name
+            ),
         }
 
         logger.info(f"Significance test: {model1_name} vs {model2_name}")
@@ -615,16 +625,11 @@ class ModelComparator:
         Returns:
             Dictionary of {model_name: metrics}
         """
-        return {
-            name: perf.to_dict()
-            for name, perf in self.results.items()
-        }
+        return {name: perf.to_dict() for name, perf in self.results.items()}
 
 
 def calculate_metrics(
-    y_true: np.ndarray,
-    y_pred: np.ndarray,
-    n_params: Optional[int] = None
+    y_true: np.ndarray, y_pred: np.ndarray, n_params: Optional[int] = None
 ) -> Dict[str, float]:
     """
     Calculate comprehensive prediction metrics.
@@ -640,43 +645,45 @@ def calculate_metrics(
     metrics = {}
 
     # Basic metrics
-    metrics['mse'] = float(mean_squared_error(y_true, y_pred))
-    metrics['rmse'] = float(np.sqrt(metrics['mse']))
-    metrics['mae'] = float(mean_absolute_error(y_true, y_pred))
-    metrics['r2'] = float(r2_score(y_true, y_pred))
+    metrics["mse"] = float(mean_squared_error(y_true, y_pred))
+    metrics["rmse"] = float(np.sqrt(metrics["mse"]))
+    metrics["mae"] = float(mean_absolute_error(y_true, y_pred))
+    metrics["r2"] = float(r2_score(y_true, y_pred))
 
     # MAPE
     try:
         if SKLEARN_AVAILABLE:
-            metrics['mape'] = float(mean_absolute_percentage_error(y_true, y_pred))
+            metrics["mape"] = float(mean_absolute_percentage_error(y_true, y_pred))
         else:
             # Manual MAPE
             mask = y_true != 0
-            metrics['mape'] = float(np.mean(np.abs((y_true[mask] - y_pred[mask]) / y_true[mask])) * 100)
+            metrics["mape"] = float(
+                np.mean(np.abs((y_true[mask] - y_pred[mask]) / y_true[mask])) * 100
+            )
     except:
-        metrics['mape'] = None
+        metrics["mape"] = None
 
     # Information criteria (if n_params provided)
     if n_params is not None:
         n = len(y_true)
         residuals = y_true - y_pred
-        rss = np.sum(residuals ** 2)
+        rss = np.sum(residuals**2)
 
         # AIC = 2k + n*ln(RSS/n)
-        metrics['aic'] = float(2 * n_params + n * np.log(rss / n))
+        metrics["aic"] = float(2 * n_params + n * np.log(rss / n))
 
         # BIC = k*ln(n) + n*ln(RSS/n)
-        metrics['bic'] = float(n_params * np.log(n) + n * np.log(rss / n))
+        metrics["bic"] = float(n_params * np.log(n) + n * np.log(rss / n))
 
     return metrics
 
 
 __all__ = [
-    'CVStrategy',
-    'CVConfig',
-    'ModelPerformance',
-    'CrossValidator',
-    'HyperparameterTuner',
-    'ModelComparator',
-    'calculate_metrics',
+    "CVStrategy",
+    "CVConfig",
+    "ModelPerformance",
+    "CrossValidator",
+    "HyperparameterTuner",
+    "ModelComparator",
+    "calculate_metrics",
 ]

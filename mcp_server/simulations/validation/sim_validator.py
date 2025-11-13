@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ValidationResult:
     """Result of a validation check"""
+
     is_valid: bool
     errors: List[str] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
@@ -41,6 +42,7 @@ class ValidationResult:
 @dataclass
 class PlayerStats:
     """Player statistics for validation"""
+
     player_id: str
     points: float
     assists: float
@@ -57,6 +59,7 @@ class PlayerStats:
 @dataclass
 class TeamRoster:
     """Team roster for validation"""
+
     team_id: str
     team_name: str
     players: List[PlayerStats]
@@ -77,6 +80,7 @@ class TeamRoster:
 @dataclass
 class GameParameters:
     """Game simulation parameters"""
+
     home_team_id: str
     away_team_id: str
     season: str
@@ -101,7 +105,9 @@ class GameParameters:
             result.add_error("Overtime periods cannot be negative")
 
         if self.overtime_periods > 10:
-            result.add_warning(f"Unusual number of overtime periods: {self.overtime_periods}")
+            result.add_warning(
+                f"Unusual number of overtime periods: {self.overtime_periods}"
+            )
 
         return result
 
@@ -109,6 +115,7 @@ class GameParameters:
 @dataclass
 class BoxScore:
     """Game box score for validation"""
+
     home_score: int
     away_score: int
     home_stats: Dict[str, PlayerStats]
@@ -178,7 +185,9 @@ class SimulationValidator:
         # Check roster size
         num_players = roster.get_total_players()
         if num_players < self.MIN_PLAYERS_PER_TEAM:
-            result.add_error(f"Team {roster.team_id} has too few players: {num_players}")
+            result.add_error(
+                f"Team {roster.team_id} has too few players: {num_players}"
+            )
         elif num_players > self.MAX_PLAYERS_PER_TEAM:
             result.add_warning(f"Team {roster.team_id} has many players: {num_players}")
 
@@ -221,50 +230,70 @@ class SimulationValidator:
         if player.points < 0:
             result.add_error(f"Player {player.player_id}: negative points")
         elif player.points > self.MAX_POINTS_PER_PLAYER:
-            result.add_warning(f"Player {player.player_id}: unusually high points: {player.points}")
+            result.add_warning(
+                f"Player {player.player_id}: unusually high points: {player.points}"
+            )
 
         if player.assists < 0:
             result.add_error(f"Player {player.player_id}: negative assists")
         elif player.assists > self.MAX_ASSISTS_PER_PLAYER:
-            result.add_warning(f"Player {player.player_id}: unusually high assists: {player.assists}")
+            result.add_warning(
+                f"Player {player.player_id}: unusually high assists: {player.assists}"
+            )
 
         if player.rebounds < 0:
             result.add_error(f"Player {player.player_id}: negative rebounds")
         elif player.rebounds > self.MAX_REBOUNDS_PER_PLAYER:
-            result.add_warning(f"Player {player.player_id}: unusually high rebounds: {player.rebounds}")
+            result.add_warning(
+                f"Player {player.player_id}: unusually high rebounds: {player.rebounds}"
+            )
 
         if player.steals < 0:
             result.add_error(f"Player {player.player_id}: negative steals")
         elif player.steals > self.MAX_STEALS_PER_PLAYER:
-            result.add_warning(f"Player {player.player_id}: unusually high steals: {player.steals}")
+            result.add_warning(
+                f"Player {player.player_id}: unusually high steals: {player.steals}"
+            )
 
         if player.blocks < 0:
             result.add_error(f"Player {player.player_id}: negative blocks")
         elif player.blocks > self.MAX_BLOCKS_PER_PLAYER:
-            result.add_warning(f"Player {player.player_id}: unusually high blocks: {player.blocks}")
+            result.add_warning(
+                f"Player {player.player_id}: unusually high blocks: {player.blocks}"
+            )
 
         if player.turnovers < 0:
             result.add_error(f"Player {player.player_id}: negative turnovers")
         elif player.turnovers > self.MAX_TURNOVERS_PER_PLAYER:
-            result.add_warning(f"Player {player.player_id}: unusually high turnovers: {player.turnovers}")
+            result.add_warning(
+                f"Player {player.player_id}: unusually high turnovers: {player.turnovers}"
+            )
 
         if player.minutes < self.MIN_MINUTES_PER_PLAYER:
             result.add_error(f"Player {player.player_id}: negative minutes")
         elif player.minutes > self.MAX_MINUTES_PER_PLAYER:
-            result.add_warning(f"Player {player.player_id}: minutes exceed game length: {player.minutes}")
+            result.add_warning(
+                f"Player {player.player_id}: minutes exceed game length: {player.minutes}"
+            )
 
         # Validate percentages
         if player.field_goal_pct is not None:
             if not (0.0 <= player.field_goal_pct <= 1.0):
-                result.add_error(f"Player {player.player_id}: invalid FG%: {player.field_goal_pct}")
+                result.add_error(
+                    f"Player {player.player_id}: invalid FG%: {player.field_goal_pct}"
+                )
 
         if player.three_point_pct is not None:
             if not (0.0 <= player.three_point_pct <= 1.0):
-                result.add_error(f"Player {player.player_id}: invalid 3P%: {player.three_point_pct}")
+                result.add_error(
+                    f"Player {player.player_id}: invalid 3P%: {player.three_point_pct}"
+                )
 
         if player.free_throw_pct is not None:
             if not (0.0 <= player.free_throw_pct <= 1.0):
-                result.add_error(f"Player {player.player_id}: invalid FT%: {player.free_throw_pct}")
+                result.add_error(
+                    f"Player {player.player_id}: invalid FT%: {player.free_throw_pct}"
+                )
 
         return result
 
@@ -320,10 +349,14 @@ class SimulationValidator:
         total_away = box_score.get_total_away_score()
 
         if total_home != box_score.home_score:
-            result.add_error(f"Home score mismatch: {box_score.home_score} != {total_home} (sum of quarters)")
+            result.add_error(
+                f"Home score mismatch: {box_score.home_score} != {total_home} (sum of quarters)"
+            )
 
         if total_away != box_score.away_score:
-            result.add_error(f"Away score mismatch: {box_score.away_score} != {total_away} (sum of quarters)")
+            result.add_error(
+                f"Away score mismatch: {box_score.away_score} != {total_away} (sum of quarters)"
+            )
 
         # Validate number of quarters
         num_quarters = len(box_score.quarters)
@@ -376,12 +409,20 @@ class SimulationValidator:
             Dict with validation stats
         """
         return {
-            'total_validations': self.validation_count,
-            'total_errors': self.error_count,
-            'total_warnings': self.warning_count,
-            'error_rate': self.error_count / self.validation_count if self.validation_count > 0 else 0,
-            'warning_rate': self.warning_count / self.validation_count if self.validation_count > 0 else 0,
-            'strict_mode': self.strict_mode
+            "total_validations": self.validation_count,
+            "total_errors": self.error_count,
+            "total_warnings": self.warning_count,
+            "error_rate": (
+                self.error_count / self.validation_count
+                if self.validation_count > 0
+                else 0
+            ),
+            "warning_rate": (
+                self.warning_count / self.validation_count
+                if self.validation_count > 0
+                else 0
+            ),
+            "strict_mode": self.strict_mode,
         }
 
     def reset_statistics(self):

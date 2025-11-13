@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SimulationRequest:
     """Request for game simulation"""
+
     request_id: str
     home_team_id: str
     away_team_id: str
@@ -38,15 +39,15 @@ class SimulationRequest:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         data = asdict(self)
-        data['created_at'] = self.created_at.isoformat()
+        data["created_at"] = self.created_at.isoformat()
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'SimulationRequest':
+    def from_dict(cls, data: Dict[str, Any]) -> "SimulationRequest":
         """Create from dictionary"""
         data = data.copy()
-        if 'created_at' in data:
-            data['created_at'] = datetime.fromisoformat(data['created_at'])
+        if "created_at" in data:
+            data["created_at"] = datetime.fromisoformat(data["created_at"])
         return cls(**data)
 
     def get_hash(self) -> str:
@@ -58,6 +59,7 @@ class SimulationRequest:
 @dataclass
 class SimulationResult:
     """Result of game simulation"""
+
     request_id: str
     home_win_probability: float
     away_win_probability: float
@@ -72,17 +74,17 @@ class SimulationResult:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         data = asdict(self)
-        data['completed_at'] = self.completed_at.isoformat()
+        data["completed_at"] = self.completed_at.isoformat()
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'SimulationResult':
+    def from_dict(cls, data: Dict[str, Any]) -> "SimulationResult":
         """Create from dictionary"""
         data = data.copy()
-        if 'completed_at' in data:
-            data['completed_at'] = datetime.fromisoformat(data['completed_at'])
-        if 'confidence_interval_95' in data and data['confidence_interval_95']:
-            data['confidence_interval_95'] = tuple(data['confidence_interval_95'])
+        if "completed_at" in data:
+            data["completed_at"] = datetime.fromisoformat(data["completed_at"])
+        if "confidence_interval_95" in data and data["confidence_interval_95"]:
+            data["confidence_interval_95"] = tuple(data["confidence_interval_95"])
         return cls(**data)
 
 
@@ -98,10 +100,7 @@ class SimulationService:
     """
 
     def __init__(
-        self,
-        model_registry: Any,
-        cache_enabled: bool = True,
-        cache_size: int = 100
+        self, model_registry: Any, cache_enabled: bool = True, cache_size: int = 100
     ):
         """
         Initialize simulation service.
@@ -142,10 +141,7 @@ class SimulationService:
         model = self._get_model(request.model_id, request.model_version)
 
         # Prepare features
-        features = self._prepare_features(
-            request.home_features,
-            request.away_features
-        )
+        features = self._prepare_features(request.home_features, request.away_features)
 
         # Run simulations
         predictions = []
@@ -170,7 +166,7 @@ class SimulationService:
         if request.num_simulations > 1:
             ci_95 = (
                 float(mean_pred - 1.96 * std_pred),
-                float(mean_pred + 1.96 * std_pred)
+                float(mean_pred + 1.96 * std_pred),
             )
         else:
             ci_95 = None
@@ -186,11 +182,11 @@ class SimulationService:
             simulation_count=request.num_simulations,
             confidence_interval_95=ci_95,
             metadata={
-                'model_id': request.model_id,
-                'model_version': request.model_version,
-                'mean_prediction': mean_pred,
-                'std_prediction': std_pred
-            }
+                "model_id": request.model_id,
+                "model_version": request.model_version,
+                "mean_prediction": mean_pred,
+                "std_prediction": std_pred,
+            },
         )
 
         # Update cache
@@ -221,9 +217,7 @@ class SimulationService:
         return self.loaded_models[cache_key]
 
     def _prepare_features(
-        self,
-        home_features: Dict[str, float],
-        away_features: Dict[str, float]
+        self, home_features: Dict[str, float], away_features: Dict[str, float]
     ) -> np.ndarray:
         """
         Prepare features for prediction.
@@ -273,15 +267,16 @@ class SimulationService:
         """Get service statistics"""
         cache_hit_rate = (
             self.cache_hits / self.requests_processed
-            if self.requests_processed > 0 else 0.0
+            if self.requests_processed > 0
+            else 0.0
         )
 
         return {
-            'requests_processed': self.requests_processed,
-            'cache_hits': self.cache_hits,
-            'cache_hit_rate': cache_hit_rate,
-            'cache_size': len(self.cache),
-            'loaded_models': len(self.loaded_models)
+            "requests_processed": self.requests_processed,
+            "cache_hits": self.cache_hits,
+            "cache_hit_rate": cache_hit_rate,
+            "cache_size": len(self.cache),
+            "loaded_models": len(self.loaded_models),
         }
 
 
@@ -296,11 +291,7 @@ class BatchSimulator:
     - Result aggregation
     """
 
-    def __init__(
-        self,
-        simulation_service: SimulationService,
-        max_workers: int = 4
-    ):
+    def __init__(self, simulation_service: SimulationService, max_workers: int = 4):
         """
         Initialize batch simulator.
 
@@ -313,9 +304,7 @@ class BatchSimulator:
         self.batches_processed = 0
 
     def simulate_batch(
-        self,
-        requests: List[SimulationRequest],
-        parallel: bool = True
+        self, requests: List[SimulationRequest], parallel: bool = True
     ) -> List[SimulationResult]:
         """
         Execute batch of simulations.
@@ -343,7 +332,7 @@ class BatchSimulator:
                         away_win_probability=0.5,
                         expected_home_score=100.0,
                         expected_away_score=100.0,
-                        metadata={'error': str(e)}
+                        metadata={"error": str(e)},
                     )
                     results.append(error_result)
         else:
@@ -356,8 +345,7 @@ class BatchSimulator:
         return results
 
     def _simulate_parallel(
-        self,
-        requests: List[SimulationRequest]
+        self, requests: List[SimulationRequest]
     ) -> List[SimulationResult]:
         """
         Execute simulations in parallel.
@@ -391,15 +379,12 @@ class BatchSimulator:
                         away_win_probability=0.5,
                         expected_home_score=100.0,
                         expected_away_score=100.0,
-                        metadata={'error': str(e)}
+                        metadata={"error": str(e)},
                     )
 
         return results
 
-    def aggregate_results(
-        self,
-        results: List[SimulationResult]
-    ) -> Dict[str, Any]:
+    def aggregate_results(self, results: List[SimulationResult]) -> Dict[str, Any]:
         """
         Aggregate results across multiple simulations.
 
@@ -417,19 +402,19 @@ class BatchSimulator:
         expected_away = [r.expected_away_score for r in results]
 
         return {
-            'total_simulations': len(results),
-            'avg_home_win_prob': float(np.mean(home_win_probs)),
-            'std_home_win_prob': float(np.std(home_win_probs)),
-            'avg_home_score': float(np.mean(expected_home)),
-            'avg_away_score': float(np.mean(expected_away)),
-            'home_wins': sum(1 for p in home_win_probs if p > 0.5),
-            'away_wins': sum(1 for p in home_win_probs if p < 0.5)
+            "total_simulations": len(results),
+            "avg_home_win_prob": float(np.mean(home_win_probs)),
+            "std_home_win_prob": float(np.std(home_win_probs)),
+            "avg_home_score": float(np.mean(expected_home)),
+            "avg_away_score": float(np.mean(expected_away)),
+            "home_wins": sum(1 for p in home_win_probs if p > 0.5),
+            "away_wins": sum(1 for p in home_win_probs if p < 0.5),
         }
 
     def get_statistics(self) -> Dict[str, Any]:
         """Get batch simulator statistics"""
         return {
-            'batches_processed': self.batches_processed,
-            'max_workers': self.max_workers,
-            'service_stats': self.simulation_service.get_statistics()
+            "batches_processed": self.batches_processed,
+            "max_workers": self.max_workers,
+            "service_stats": self.simulation_service.get_statistics(),
         }

@@ -1,0 +1,11 @@
+{
+  "training_date": "2025-11-06T15:55:59.219014",
+  "calibrator_type": "bayesian",
+  "training_samples": 1383,
+  "brier_uncalibrated": 0.22360077526084152,
+  "brier_calibrated": 0.22277701807777095,
+  "improvement": 0.000823757183070567,
+  "improvement_pct": 0.3684053340645232,
+  "fractional_kelly": 0.25,
+  "max_kelly": 0.4
+}

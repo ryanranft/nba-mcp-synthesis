@@ -48,10 +48,12 @@ def generate_time_series_data(n=200, seed=42):
 
     y = 100 + trend + seasonal + noise
 
-    return pd.DataFrame({
-        "date": dates,
-        "value": y,
-    })
+    return pd.DataFrame(
+        {
+            "date": dates,
+            "value": y,
+        }
+    )
 
 
 def generate_multivariate_ts(n=150, p=3, seed=42):
@@ -68,7 +70,7 @@ def generate_multivariate_ts(n=150, p=3, seed=42):
 
         for t in range(1, n):
             # AR component
-            ar_component = 0.5 * series[t-1]
+            ar_component = 0.5 * series[t - 1]
             # Random shock
             shock = np.random.normal(0, 1)
             series[t] = ar_component + shock
@@ -96,12 +98,14 @@ def generate_causal_data(n=500, seed=42):
     # Outcome (with treatment effect)
     y = 2 + 0.5 * x1 + 0.3 * x2 + 1.5 * treatment + np.random.normal(0, 1, n)
 
-    return pd.DataFrame({
-        "y": y,
-        "treatment": treatment,
-        "x1": x1,
-        "x2": x2,
-    })
+    return pd.DataFrame(
+        {
+            "y": y,
+            "treatment": treatment,
+            "x1": x1,
+            "x2": x2,
+        }
+    )
 
 
 def generate_panel_data(n_entities=50, n_periods=10, seed=42):
@@ -114,12 +118,14 @@ def generate_panel_data(n_entities=50, n_periods=10, seed=42):
         periods = n_periods if entity_id % 3 != 0 else n_periods - 2
 
         for period in range(periods):
-            data.append({
-                "entity_id": entity_id,
-                "time_period": period,
-                "y": np.random.normal(10, 2),
-                "x": np.random.normal(5, 1),
-            })
+            data.append(
+                {
+                    "entity_id": entity_id,
+                    "time_period": period,
+                    "y": np.random.normal(10, 2),
+                    "x": np.random.normal(5, 1),
+                }
+            )
 
     return pd.DataFrame(data)
 
@@ -201,9 +207,7 @@ def run_benchmark():
     results.append(
         benchmark_method(
             "Structural Time Series (level + seasonal)",
-            lambda: ats.structural_time_series(
-                level=True, seasonal=7, trend=False
-            ),
+            lambda: ats.structural_time_series(level=True, seasonal=7, trend=False),
             "Advanced Time Series",
         )
     )
@@ -267,9 +271,7 @@ def run_benchmark():
         results.append(
             benchmark_method(
                 "BVAR Impulse Response (20 periods)",
-                lambda: bvar.impulse_response(
-                    bvar_result, horizon=20, n_samples=100
-                ),
+                lambda: bvar.impulse_response(bvar_result, horizon=20, n_samples=100),
                 "Bayesian Time Series",
             )
         )
@@ -359,7 +361,12 @@ def run_benchmark():
 
     # Category breakdown
     print(f"\n📊 By Category:")
-    for category in ["Advanced Time Series", "Bayesian Time Series", "Causal Inference", "Panel Data"]:
+    for category in [
+        "Advanced Time Series",
+        "Bayesian Time Series",
+        "Causal Inference",
+        "Panel Data",
+    ]:
         cat_results = [r for r in results if r["category"] == category]
         cat_success = [r for r in cat_results if r["success"]]
         if cat_results:

@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 
 class ModelStatus(Enum):
     """Model lifecycle status"""
+
     TRAINING = "training"
     VALIDATION = "validation"
     STAGING = "staging"
@@ -78,14 +79,14 @@ class ModelMetadata:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         d = asdict(self)
-        d['status'] = self.status.value
+        d["status"] = self.status.value
         return d
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> 'ModelMetadata':
+    def from_dict(cls, d: Dict[str, Any]) -> "ModelMetadata":
         """Create from dictionary"""
-        if 'status' in d and isinstance(d['status'], str):
-            d['status'] = ModelStatus(d['status'])
+        if "status" in d and isinstance(d["status"], str):
+            d["status"] = ModelStatus(d["status"])
         return cls(**d)
 
 
@@ -141,7 +142,7 @@ class ModelRegistry:
         """Load metadata from disk"""
         if self.metadata_file.exists():
             try:
-                with open(self.metadata_file, 'r') as f:
+                with open(self.metadata_file, "r") as f:
                     data = json.load(f)
 
                 for model_id, meta_dict in data.items():
@@ -155,22 +156,17 @@ class ModelRegistry:
         """Save metadata to disk"""
         try:
             data = {
-                model_id: meta.to_dict()
-                for model_id, meta in self.metadata_db.items()
+                model_id: meta.to_dict() for model_id, meta in self.metadata_db.items()
             }
 
-            with open(self.metadata_file, 'w') as f:
+            with open(self.metadata_file, "w") as f:
                 json.dump(data, f, indent=2)
 
             logger.debug("Metadata saved")
         except Exception as e:
             logger.error(f"Failed to save metadata: {e}")
 
-    def _generate_model_id(
-        self,
-        model_name: str,
-        model_type: str
-    ) -> str:
+    def _generate_model_id(self, model_name: str, model_type: str) -> str:
         """Generate unique model ID"""
         timestamp = datetime.now().isoformat()
         raw_id = f"{model_name}_{model_type}_{timestamp}"
@@ -183,10 +179,7 @@ class ModelRegistry:
     def _compute_data_hash(self, X: np.ndarray, y: np.ndarray) -> str:
         """Compute hash of training data"""
         # Sample hash (full data hash can be expensive)
-        sample_data = np.concatenate([
-            X.flatten()[:1000],
-            y.flatten()[:1000]
-        ])
+        sample_data = np.concatenate([X.flatten()[:1000], y.flatten()[:1000]])
 
         return hashlib.md5(sample_data.tobytes()).hexdigest()[:12]
 
@@ -198,7 +191,7 @@ class ModelRegistry:
         metadata: Optional[ModelMetadata] = None,
         scaler: Optional[Any] = None,
         feature_selector: Optional[Any] = None,
-        **kwargs
+        **kwargs,
     ) -> str:
         """
         Save model to registry.
@@ -225,7 +218,7 @@ class ModelRegistry:
                 model_name=model_name,
                 model_type=model_type,
                 version="1.0.0",
-                training_date=datetime.now().isoformat()
+                training_date=datetime.now().isoformat(),
             )
 
         # Update with kwargs
@@ -238,14 +231,14 @@ class ModelRegistry:
             metadata=metadata,
             model=model,
             scaler=scaler,
-            feature_selector=feature_selector
+            feature_selector=feature_selector,
         )
 
         # Save to disk
         model_path = self.models_dir / f"{model_id}.pkl"
 
         try:
-            with open(model_path, 'wb') as f:
+            with open(model_path, "wb") as f:
                 pickle.dump(artifact, f)
 
             logger.info(f"Saved model {model_id} to {model_path}")
@@ -276,7 +269,7 @@ class ModelRegistry:
             return None
 
         try:
-            with open(model_path, 'rb') as f:
+            with open(model_path, "rb") as f:
                 artifact = pickle.load(f)
 
             logger.info(f"Loaded model {model_id}")
@@ -294,7 +287,7 @@ class ModelRegistry:
         self,
         model_type: Optional[str] = None,
         status: Optional[ModelStatus] = None,
-        tags: Optional[List[str]] = None
+        tags: Optional[List[str]] = None,
     ) -> List[ModelMetadata]:
         """
         List models with optional filtering.
@@ -319,18 +312,11 @@ class ModelRegistry:
 
         # Filter by tags
         if tags:
-            models = [
-                m for m in models
-                if any(tag in m.tags for tag in tags)
-            ]
+            models = [m for m in models if any(tag in m.tags for tag in tags)]
 
         return models
 
-    def update_status(
-        self,
-        model_id: str,
-        status: ModelStatus
-    ) -> bool:
+    def update_status(self, model_id: str, status: ModelStatus) -> bool:
         """
         Update model status.
 
@@ -352,9 +338,7 @@ class ModelRegistry:
         return True
 
     def promote_to_production(
-        self,
-        model_id: str,
-        demote_existing: bool = True
+        self, model_id: str, demote_existing: bool = True
     ) -> bool:
         """
         Promote model to production.
@@ -384,8 +368,7 @@ class ModelRegistry:
         return True
 
     def get_production_model(
-        self,
-        model_type: Optional[str] = None
+        self, model_type: Optional[str] = None
     ) -> Optional[ModelArtifact]:
         """
         Get current production model.
@@ -397,8 +380,7 @@ class ModelRegistry:
             Production model artifact or None
         """
         production_models = self.list_models(
-            model_type=model_type,
-            status=ModelStatus.PRODUCTION
+            model_type=model_type, status=ModelStatus.PRODUCTION
         )
 
         if not production_models:
@@ -412,9 +394,7 @@ class ModelRegistry:
         return self.load_model(model_id)
 
     def compare_models(
-        self,
-        model_ids: List[str],
-        metric: str = 'test_score'
+        self, model_ids: List[str], metric: str = "test_score"
     ) -> List[Tuple[str, float]]:
         """
         Compare models by a metric.
@@ -465,9 +445,7 @@ class ModelRegistry:
         return True
 
     def get_best_model(
-        self,
-        model_type: Optional[str] = None,
-        metric: str = 'test_score'
+        self, model_type: Optional[str] = None, metric: str = "test_score"
     ) -> Optional[Tuple[str, ModelMetadata]]:
         """
         Get best model by metric.
@@ -500,13 +478,15 @@ class ModelRegistry:
         # Count by status
         status_counts = {}
         for model in models:
-            status_counts[model.status.value] = status_counts.get(model.status.value, 0) + 1
+            status_counts[model.status.value] = (
+                status_counts.get(model.status.value, 0) + 1
+            )
 
         return {
-            'total_models': len(models),
-            'models_by_type': type_counts,
-            'models_by_status': status_counts,
-            'registry_path': str(self.registry_path)
+            "total_models": len(models),
+            "models_by_type": type_counts,
+            "models_by_status": status_counts,
+            "registry_path": str(self.registry_path),
         }
 
 
@@ -517,7 +497,7 @@ def create_metadata_from_results(
     test_score: float,
     hyperparameters: Dict[str, Any],
     feature_names: List[str],
-    **kwargs
+    **kwargs,
 ) -> ModelMetadata:
     """
     Helper to create metadata from training results.
@@ -548,7 +528,7 @@ def create_metadata_from_results(
         test_score=test_score,
         hyperparameters=hyperparameters,
         feature_names=feature_names,
-        n_features=len(feature_names)
+        n_features=len(feature_names),
     )
 
     # Update with additional fields
@@ -560,9 +540,9 @@ def create_metadata_from_results(
 
 
 __all__ = [
-    'ModelStatus',
-    'ModelMetadata',
-    'ModelArtifact',
-    'ModelRegistry',
-    'create_metadata_from_results',
+    "ModelStatus",
+    "ModelMetadata",
+    "ModelArtifact",
+    "ModelRegistry",
+    "create_metadata_from_results",
 ]

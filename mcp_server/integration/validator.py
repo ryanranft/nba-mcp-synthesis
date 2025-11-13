@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 class HealthStatus(Enum):
     """Health check status"""
+
     HEALTHY = "healthy"
     DEGRADED = "degraded"
     UNHEALTHY = "unhealthy"
@@ -48,12 +49,12 @@ class ModuleHealth:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'module': self.module_name,
-            'status': self.status.value,
-            'available': self.available,
-            'dependencies_met': self.dependencies_met,
-            'issues': self.issues,
-            'warnings': self.warnings
+            "module": self.module_name,
+            "status": self.status.value,
+            "available": self.available,
+            "dependencies_met": self.dependencies_met,
+            "issues": self.issues,
+            "warnings": self.warnings,
         }
 
 
@@ -68,9 +69,11 @@ class SystemHealth:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'status': self.status.value,
-            'modules': {name: health.to_dict() for name, health in self.modules.items()},
-            'summary': self.summary
+            "status": self.status.value,
+            "modules": {
+                name: health.to_dict() for name, health in self.modules.items()
+            },
+            "summary": self.summary,
         }
 
 
@@ -109,30 +112,36 @@ class IntegrationValidator:
             # Try to import module
             if module_name == "econometric":
                 from mcp_server import panel_data, time_series, causal_inference
+
                 available = True
 
             elif module_name == "streaming":
                 from mcp_server.simulations import streaming
+
                 available = True
 
             elif module_name == "spatial":
                 from mcp_server import spatial
+
                 available = True
 
             elif module_name == "network":
                 from mcp_server import network
+
                 available = True
 
             elif module_name == "ml_bridge":
                 from mcp_server import ml_bridge
+
                 available = True
                 # Check optional dependencies
-                if not ml_bridge.check_ml_available()['sklearn']:
+                if not ml_bridge.check_ml_available()["sklearn"]:
                     warnings.append("scikit-learn not available, ML features limited")
                     dependencies_met = False
 
             elif module_name == "econometric_completion":
                 from mcp_server import econometric_completion
+
                 available = True
                 # Check optional dependencies
                 if not econometric_completion.check_statsmodels_available():
@@ -166,7 +175,7 @@ class IntegrationValidator:
             available=available,
             dependencies_met=dependencies_met,
             issues=issues,
-            warnings=warnings
+            warnings=warnings,
         )
 
         self.module_checks[module_name] = health
@@ -186,7 +195,7 @@ class IntegrationValidator:
             "spatial",
             "network",
             "ml_bridge",
-            "econometric_completion"
+            "econometric_completion",
         ]
 
         for module in modules:
@@ -203,30 +212,27 @@ class IntegrationValidator:
         """
         logger.info("Running integration test...")
 
-        results = {
-            'passed': True,
-            'tests': []
-        }
+        results = {"passed": True, "tests": []}
 
         # Test 1: Import all modules
         try:
             from mcp_server import (
-                panel_data, time_series, causal_inference,
-                spatial, network, ml_bridge, econometric_completion
+                panel_data,
+                time_series,
+                causal_inference,
+                spatial,
+                network,
+                ml_bridge,
+                econometric_completion,
             )
             from mcp_server.simulations import streaming
 
-            results['tests'].append({
-                'name': 'Import all modules',
-                'status': 'PASS'
-            })
+            results["tests"].append({"name": "Import all modules", "status": "PASS"})
         except Exception as e:
-            results['passed'] = False
-            results['tests'].append({
-                'name': 'Import all modules',
-                'status': 'FAIL',
-                'error': str(e)
-            })
+            results["passed"] = False
+            results["tests"].append(
+                {"name": "Import all modules", "status": "FAIL", "error": str(e)}
+            )
 
         # Test 2: Create simple data and pass through components
         try:
@@ -235,37 +241,28 @@ class IntegrationValidator:
 
             # Test ml_bridge
             from mcp_server.ml_bridge import FeaturePipeline, FeatureConfig
+
             config = FeatureConfig(create_lags=False, create_interactions=False)
             pipeline = FeaturePipeline(config)
             X_transformed, _ = pipeline.fit_transform(X, y)
 
-            results['tests'].append({
-                'name': 'Feature pipeline',
-                'status': 'PASS'
-            })
+            results["tests"].append({"name": "Feature pipeline", "status": "PASS"})
         except Exception as e:
-            results['passed'] = False
-            results['tests'].append({
-                'name': 'Feature pipeline',
-                'status': 'FAIL',
-                'error': str(e)
-            })
+            results["passed"] = False
+            results["tests"].append(
+                {"name": "Feature pipeline", "status": "FAIL", "error": str(e)}
+            )
 
         # Test 3: Integration module
         try:
             from mcp_server.integration import ModelEnsemble, Pipeline
 
-            results['tests'].append({
-                'name': 'Integration module',
-                'status': 'PASS'
-            })
+            results["tests"].append({"name": "Integration module", "status": "PASS"})
         except Exception as e:
-            results['passed'] = False
-            results['tests'].append({
-                'name': 'Integration module',
-                'status': 'FAIL',
-                'error': str(e)
-            })
+            results["passed"] = False
+            results["tests"].append(
+                {"name": "Integration module", "status": "FAIL", "error": str(e)}
+            )
 
         logger.info(f"Integration test: {'PASSED' if results['passed'] else 'FAILED'}")
 
@@ -289,19 +286,23 @@ class IntegrationValidator:
             summary = "All modules healthy"
         elif any(s == HealthStatus.UNHEALTHY for s in statuses):
             overall_status = HealthStatus.UNHEALTHY
-            unhealthy = [name for name, h in module_health.items()
-                        if h.status == HealthStatus.UNHEALTHY]
+            unhealthy = [
+                name
+                for name, h in module_health.items()
+                if h.status == HealthStatus.UNHEALTHY
+            ]
             summary = f"Unhealthy modules: {', '.join(unhealthy)}"
         else:
             overall_status = HealthStatus.DEGRADED
-            degraded = [name for name, h in module_health.items()
-                       if h.status == HealthStatus.DEGRADED]
+            degraded = [
+                name
+                for name, h in module_health.items()
+                if h.status == HealthStatus.DEGRADED
+            ]
             summary = f"Degraded modules: {', '.join(degraded)}"
 
         health = SystemHealth(
-            status=overall_status,
-            modules=module_health,
-            summary=summary
+            status=overall_status, modules=module_health, summary=summary
         )
 
         return health
@@ -323,7 +324,7 @@ class IntegrationValidator:
             f"Summary: {health.summary}",
             "",
             "Module Status:",
-            "-" * 60
+            "-" * 60,
         ]
 
         for name, module_health in health.modules.items():
@@ -331,7 +332,7 @@ class IntegrationValidator:
                 HealthStatus.HEALTHY: "✓",
                 HealthStatus.DEGRADED: "⚠",
                 HealthStatus.UNHEALTHY: "✗",
-                HealthStatus.UNKNOWN: "?"
+                HealthStatus.UNKNOWN: "?",
             }.get(module_health.status, "?")
 
             lines.append(f"{status_symbol} {name:30s} {module_health.status.value}")
@@ -344,10 +345,7 @@ class IntegrationValidator:
                 for warning in module_health.warnings:
                     lines.append(f"    Warning: {warning}")
 
-        lines.extend([
-            "",
-            "=" * 60
-        ])
+        lines.extend(["", "=" * 60])
 
         return "\n".join(lines)
 
@@ -370,10 +368,10 @@ def print_health_report():
 
 
 __all__ = [
-    'HealthStatus',
-    'ModuleHealth',
-    'SystemHealth',
-    'IntegrationValidator',
-    'check_system_health',
-    'print_health_report',
+    "HealthStatus",
+    "ModuleHealth",
+    "SystemHealth",
+    "IntegrationValidator",
+    "check_system_health",
+    "print_health_report",
 ]

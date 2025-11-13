@@ -21,9 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 def format_top_picks_email(
-    picks: List[Dict[str, Any]],
-    summary: Dict[str, Any],
-    bankroll: float = 10000.0
+    picks: List[Dict[str, Any]], summary: Dict[str, Any], bankroll: float = 10000.0
 ) -> Tuple[str, str, str]:
     """
     Format top betting picks as email
@@ -36,7 +34,7 @@ def format_top_picks_email(
     Returns:
         Tuple of (subject, html_body, plain_text_body)
     """
-    today = datetime.now().strftime('%A, %B %d, %Y')
+    today = datetime.now().strftime("%A, %B %d, %Y")
     subject = f"🏀 NBA Betting Picks - {datetime.now().strftime('%B %d, %Y')}"
 
     # HTML body
@@ -148,8 +146,12 @@ def format_top_picks_email(
 
     # Add each pick
     for i, pick in enumerate(picks, 1):
-        edge_class = 'edge-high' if pick['edge'] > 0.07 else ('edge-medium' if pick['edge'] > 0.04 else 'edge-low')
-        game_time = pick.get('game_time', 'TBD')
+        edge_class = (
+            "edge-high"
+            if pick["edge"] > 0.07
+            else ("edge-medium" if pick["edge"] > 0.04 else "edge-low")
+        )
+        game_time = pick.get("game_time", "TBD")
 
         html += f"""
         <div class="pick">
@@ -246,7 +248,7 @@ TOP {len(picks)} PICKS FOR TODAY
 """
 
     for i, pick in enumerate(picks, 1):
-        game_time = pick.get('game_time', 'TBD')
+        game_time = pick.get("game_time", "TBD")
         plain += f"""
 #{i}. {pick['matchup']} - {game_time}
 BET: ${pick['recommended_stake']:.0f} on {pick['bet_side']} at {pick['odds_american']:+.0f}
@@ -274,9 +276,7 @@ Average Kelly: {summary['avg_kelly']:.2%}
     return subject, html, plain
 
 
-def format_arbitrage_alert(
-    arb: Dict[str, Any]
-) -> Tuple[str, str, str]:
+def format_arbitrage_alert(arb: Dict[str, Any]) -> Tuple[str, str, str]:
     """
     Format arbitrage opportunity as urgent email
 
@@ -293,7 +293,9 @@ def format_arbitrage_alert(
     Returns:
         Tuple of (subject, html_body, plain_text_body)
     """
-    subject = f"🚨 ARBITRAGE ALERT: {arb['matchup']} - {arb['arb_percentage']:.2%} Profit"
+    subject = (
+        f"🚨 ARBITRAGE ALERT: {arb['matchup']} - {arb['arb_percentage']:.2%} Profit"
+    )
 
     html = f"""
 <html>
@@ -445,9 +447,7 @@ Detected: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
 
 def format_daily_summary(
-    stats: Dict[str, Any],
-    picks_count: int = 0,
-    arb_count: int = 0
+    stats: Dict[str, Any], picks_count: int = 0, arb_count: int = 0
 ) -> Tuple[str, str, str]:
     """
     Format daily summary email
@@ -540,27 +540,27 @@ if __name__ == "__main__":
     # Test top picks
     mock_picks = [
         {
-            'matchup': 'Lakers vs Warriors',
-            'bet_side': 'Lakers',
-            'odds_american': -110,
-            'recommended_stake': 183.0,
-            'edge': 0.107,
-            'ml_prob': 0.652,
-            'kelly_fraction': 0.032,
-            'confidence': 0.87,
-            'ev': 0.107,
-            'bookmaker': 'DraftKings',
-            'game_time': '7:00 PM ET'
+            "matchup": "Lakers vs Warriors",
+            "bet_side": "Lakers",
+            "odds_american": -110,
+            "recommended_stake": 183.0,
+            "edge": 0.107,
+            "ml_prob": 0.652,
+            "kelly_fraction": 0.032,
+            "confidence": 0.87,
+            "ev": 0.107,
+            "bookmaker": "DraftKings",
+            "game_time": "7:00 PM ET",
         }
     ]
 
     mock_summary = {
-        'total_bets': 3,
-        'total_stake': 456.0,
-        'total_ev': 37.42,
-        'avg_edge': 0.074,
-        'avg_kelly': 0.025,
-        'bankroll_exposure': 0.091
+        "total_bets": 3,
+        "total_stake": 456.0,
+        "total_ev": 37.42,
+        "avg_edge": 0.074,
+        "avg_kelly": 0.025,
+        "bankroll_exposure": 0.091,
     }
 
     subject, html, plain = format_top_picks_email(mock_picks, mock_summary, 5000.0)
@@ -571,18 +571,18 @@ if __name__ == "__main__":
 
     # Test arbitrage alert
     mock_arb = {
-        'matchup': 'Heat vs Nuggets',
-        'market_type': 'h2h',
-        'bookmaker_a': 'DraftKings',
-        'bookmaker_b': 'FanDuel',
-        'side_a': 'Heat',
-        'side_b': 'Nuggets',
-        'odds_a': 195,
-        'odds_b': -180,
-        'arb_percentage': 0.024,
-        'bet_amount_a': 500,
-        'bet_amount_b': 512,
-        'guaranteed_profit': 24.0
+        "matchup": "Heat vs Nuggets",
+        "market_type": "h2h",
+        "bookmaker_a": "DraftKings",
+        "bookmaker_b": "FanDuel",
+        "side_a": "Heat",
+        "side_b": "Nuggets",
+        "odds_a": 195,
+        "odds_b": -180,
+        "arb_percentage": 0.024,
+        "bet_amount_a": 500,
+        "bet_amount_b": 512,
+        "guaranteed_profit": 24.0,
     }
 
     subject, html, plain = format_arbitrage_alert(mock_arb)

@@ -30,11 +30,12 @@ from mcp_server.ensemble import (
     DynamicEnsemble,
 )
 
+
 # Data Generators
 def generate_time_series_data(n_points: int = 150) -> pd.DataFrame:
     """Generate synthetic time series data for ensemble testing."""
     np.random.seed(42)
-    dates = pd.date_range(start='2020-01-01', periods=n_points, freq='D')
+    dates = pd.date_range(start="2020-01-01", periods=n_points, freq="D")
 
     # Generate with trend and seasonality
     trend = np.linspace(20, 30, n_points)
@@ -43,29 +44,30 @@ def generate_time_series_data(n_points: int = 150) -> pd.DataFrame:
 
     values = trend + seasonal + noise
 
-    return pd.DataFrame({
-        'date': dates,
-        'value': values
-    })
+    return pd.DataFrame({"date": dates, "value": values})
 
 
 def generate_multivariate_data(n_points: int = 150) -> pd.DataFrame:
     """Generate multivariate time series data."""
     np.random.seed(42)
-    dates = pd.date_range(start='2020-01-01', periods=n_points, freq='D')
+    dates = pd.date_range(start="2020-01-01", periods=n_points, freq="D")
 
     # Generate 3 correlated series
     base = np.linspace(20, 30, n_points)
 
-    return pd.DataFrame({
-        'date': dates,
-        'series1': base + np.random.normal(0, 2, n_points),
-        'series2': base * 1.2 + np.random.normal(0, 3, n_points),
-        'series3': base * 0.8 + np.random.normal(0, 1.5, n_points)
-    })
+    return pd.DataFrame(
+        {
+            "date": dates,
+            "series1": base + np.random.normal(0, 2, n_points),
+            "series2": base * 1.2 + np.random.normal(0, 3, n_points),
+            "series3": base * 0.8 + np.random.normal(0, 1.5, n_points),
+        }
+    )
 
 
-def generate_regression_data(n_samples: int = 100, n_features: int = 5) -> Tuple[np.ndarray, np.ndarray]:
+def generate_regression_data(
+    n_samples: int = 100, n_features: int = 5
+) -> Tuple[np.ndarray, np.ndarray]:
     """Generate synthetic regression data for stacking ensemble."""
     np.random.seed(42)
 
@@ -104,7 +106,7 @@ def create_sklearn_models() -> List:
     return [
         LinearRegression(),
         Ridge(alpha=1.0),
-        RandomForestRegressor(n_estimators=10, random_state=42, max_depth=3)
+        RandomForestRegressor(n_estimators=10, random_state=42, max_depth=3),
     ]
 
 
@@ -123,7 +125,7 @@ def measure_performance(func):
 
 def benchmark_method(name: str, func, category: str) -> dict:
     """Benchmark a single method."""
-    print(f"Testing {name}...", end=' ')
+    print(f"Testing {name}...", end=" ")
 
     result, exec_time, error = measure_performance(func)
 
@@ -135,11 +137,11 @@ def benchmark_method(name: str, func, category: str) -> dict:
         print(f"  Error: {error}")
 
     return {
-        'method': name,
-        'category': category,
-        'execution_time': exec_time,
-        'success': success,
-        'error': error
+        "method": name,
+        "category": category,
+        "execution_time": exec_time,
+        "success": success,
+        "error": error,
     }
 
 
@@ -147,7 +149,7 @@ def benchmark_method(name: str, func, category: str) -> dict:
 def test_simple_ensemble_predict():
     """Test SimpleEnsemble.predict()"""
     data = generate_time_series_data(150)
-    train_data = data['value'][:100]
+    train_data = data["value"][:100]
 
     models = create_fitted_arima_models(train_data, n_models=3)
     if len(models) < 2:
@@ -163,8 +165,8 @@ def test_simple_ensemble_predict():
 def test_simple_ensemble_evaluate():
     """Test SimpleEnsemble.evaluate()"""
     data = generate_time_series_data(150)
-    train_data = data['value'][:100]
-    test_data = data['value'][100:110]
+    train_data = data["value"][:100]
+    test_data = data["value"][100:110]
 
     models = create_fitted_arima_models(train_data, n_models=3)
     if len(models) < 2:
@@ -173,15 +175,15 @@ def test_simple_ensemble_evaluate():
     ensemble = SimpleEnsemble(models=models)
     metrics = ensemble.evaluate(y_true=test_data.values, n_steps=10)
 
-    assert 'rmse' in metrics, "Expected RMSE in metrics"
-    assert 'mae' in metrics, "Expected MAE in metrics"
+    assert "rmse" in metrics, "Expected RMSE in metrics"
+    assert "mae" in metrics, "Expected MAE in metrics"
     return metrics
 
 
 def test_weighted_ensemble_predict():
     """Test WeightedEnsemble.predict()"""
     data = generate_time_series_data(150)
-    train_data = data['value'][:100]
+    train_data = data["value"][:100]
 
     models = create_fitted_arima_models(train_data, n_models=3)
     if len(models) < 2:
@@ -194,7 +196,7 @@ def test_weighted_ensemble_predict():
     result = ensemble.predict(n_steps=10)
 
     # Check if result is EnsembleResult or array
-    if hasattr(result, 'predictions'):
+    if hasattr(result, "predictions"):
         predictions = result.predictions
     else:
         predictions = result
@@ -206,8 +208,8 @@ def test_weighted_ensemble_predict():
 def test_weighted_ensemble_fit_weights():
     """Test WeightedEnsemble.fit_weights()"""
     data = generate_time_series_data(150)
-    train_data = data['value'][:80]
-    val_data = data['value'][80:100]
+    train_data = data["value"][:80]
+    val_data = data["value"][80:100]
 
     models = create_fitted_arima_models(train_data, n_models=3)
     if len(models) < 2:
@@ -225,8 +227,12 @@ def test_weighted_ensemble_fit_weights():
     ensemble = WeightedEnsemble(models=models)
     weights = ensemble.fit_weights(y_train=val_data.values, predictions=predictions)
 
-    assert len(weights) == len(models), f"Expected {len(models)} weights, got {len(weights)}"
-    assert abs(sum(weights) - 1.0) < 0.01, f"Weights should sum to 1, got {sum(weights)}"
+    assert len(weights) == len(
+        models
+    ), f"Expected {len(models)} weights, got {len(weights)}"
+    assert (
+        abs(sum(weights) - 1.0) < 0.01
+    ), f"Weights should sum to 1, got {sum(weights)}"
     return weights
 
 
@@ -236,12 +242,11 @@ def test_stacking_ensemble_fit():
 
     base_models = create_sklearn_models()
     from sklearn.linear_model import Ridge
+
     meta_model = Ridge(alpha=0.1)
 
     ensemble = StackingEnsemble(
-        base_models=base_models,
-        meta_model=meta_model,
-        cv_folds=3
+        base_models=base_models, meta_model=meta_model, cv_folds=3
     )
 
     # Fit on training data
@@ -249,7 +254,7 @@ def test_stacking_ensemble_fit():
     ensemble.fit(X_train, y_train)
 
     # Check that meta model was fitted
-    assert hasattr(ensemble.meta_model, 'coef_'), "Meta model should be fitted"
+    assert hasattr(ensemble.meta_model, "coef_"), "Meta model should be fitted"
     return ensemble
 
 
@@ -259,12 +264,11 @@ def test_stacking_ensemble_predict():
 
     base_models = create_sklearn_models()
     from sklearn.linear_model import Ridge
+
     meta_model = Ridge(alpha=0.1)
 
     ensemble = StackingEnsemble(
-        base_models=base_models,
-        meta_model=meta_model,
-        cv_folds=3
+        base_models=base_models, meta_model=meta_model, cv_folds=3
     )
 
     # Fit and predict
@@ -274,29 +278,28 @@ def test_stacking_ensemble_predict():
     ensemble.fit(X_train, y_train)
     predictions = ensemble.predict(X_test)
 
-    assert len(predictions) == len(X_test), f"Expected {len(X_test)} predictions, got {len(predictions)}"
+    assert len(predictions) == len(
+        X_test
+    ), f"Expected {len(X_test)} predictions, got {len(predictions)}"
     return predictions
 
 
 def test_dynamic_ensemble_predict():
     """Test DynamicEnsemble.predict()"""
     data = generate_time_series_data(150)
-    train_data = data['value'][:100]
+    train_data = data["value"][:100]
 
     models = create_fitted_arima_models(train_data, n_models=3)
     if len(models) < 2:
         raise ValueError("Need at least 2 models for ensemble")
 
     ensemble = DynamicEnsemble(
-        models=models,
-        window_size=10,
-        selection_metric='mae',
-        top_k=2
+        models=models, window_size=10, selection_metric="mae", top_k=2
     )
 
     # Initialize performance history with some data
     for i in range(10):
-        y_true = data['value'][100 + i]
+        y_true = data["value"][100 + i]
         preds = [25.0 + np.random.randn() for _ in models]  # Mock predictions
         ensemble.update_performance(y_true, preds)
 
@@ -304,35 +307,38 @@ def test_dynamic_ensemble_predict():
     predictions, selected_indices = ensemble.predict(n_steps=1)
 
     assert len(predictions) == 1, f"Expected 1 prediction, got {len(predictions)}"
-    assert len(selected_indices) <= 2, f"Expected at most 2 selected models, got {len(selected_indices)}"
+    assert (
+        len(selected_indices) <= 2
+    ), f"Expected at most 2 selected models, got {len(selected_indices)}"
     return predictions, selected_indices
 
 
 def test_dynamic_ensemble_update_performance():
     """Test DynamicEnsemble.update_performance()"""
     data = generate_time_series_data(150)
-    train_data = data['value'][:100]
+    train_data = data["value"][:100]
 
     models = create_fitted_arima_models(train_data, n_models=3)
     if len(models) < 2:
         raise ValueError("Need at least 2 models for ensemble")
 
     ensemble = DynamicEnsemble(
-        models=models,
-        window_size=5,
-        selection_metric='rmse',
-        top_k=2
+        models=models, window_size=5, selection_metric="rmse", top_k=2
     )
 
     # Update performance multiple times
     for i in range(10):
-        y_true = data['value'][100 + i]
+        y_true = data["value"][100 + i]
         preds = [y_true + np.random.randn() for _ in models]
         ensemble.update_performance(y_true, preds)
 
     # Check that history is maintained
-    assert len(ensemble.performance_history) > 0, "Performance history should be populated"
-    assert len(ensemble.performance_history) <= 5, f"History should be capped at window_size=5"
+    assert (
+        len(ensemble.performance_history) > 0
+    ), "Performance history should be populated"
+    assert (
+        len(ensemble.performance_history) <= 5
+    ), f"History should be capped at window_size=5"
 
     return ensemble.performance_history
 
@@ -353,12 +359,28 @@ def main():
     test_cases = [
         ("SimpleEnsemble.predict", test_simple_ensemble_predict, "Simple Ensemble"),
         ("SimpleEnsemble.evaluate", test_simple_ensemble_evaluate, "Simple Ensemble"),
-        ("WeightedEnsemble.predict", test_weighted_ensemble_predict, "Weighted Ensemble"),
-        ("WeightedEnsemble.fit_weights", test_weighted_ensemble_fit_weights, "Weighted Ensemble"),
+        (
+            "WeightedEnsemble.predict",
+            test_weighted_ensemble_predict,
+            "Weighted Ensemble",
+        ),
+        (
+            "WeightedEnsemble.fit_weights",
+            test_weighted_ensemble_fit_weights,
+            "Weighted Ensemble",
+        ),
         ("StackingEnsemble.fit", test_stacking_ensemble_fit, "Stacking Ensemble"),
-        ("StackingEnsemble.predict", test_stacking_ensemble_predict, "Stacking Ensemble"),
+        (
+            "StackingEnsemble.predict",
+            test_stacking_ensemble_predict,
+            "Stacking Ensemble",
+        ),
         ("DynamicEnsemble.predict", test_dynamic_ensemble_predict, "Dynamic Ensemble"),
-        ("DynamicEnsemble.update_performance", test_dynamic_ensemble_update_performance, "Dynamic Ensemble"),
+        (
+            "DynamicEnsemble.update_performance",
+            test_dynamic_ensemble_update_performance,
+            "Dynamic Ensemble",
+        ),
     ]
 
     for name, test_func, category in test_cases:
@@ -371,7 +393,7 @@ def main():
     print("=" * 70)
 
     total_tests = len(results)
-    successful = sum(1 for r in results if r['success'])
+    successful = sum(1 for r in results if r["success"])
     failed = total_tests - successful
 
     print(f"Total Methods Tested: {total_tests}")
@@ -382,20 +404,20 @@ def main():
     # Break down by category
     categories = {}
     for result in results:
-        cat = result['category']
+        cat = result["category"]
         if cat not in categories:
-            categories[cat] = {'total': 0, 'success': 0}
-        categories[cat]['total'] += 1
-        if result['success']:
-            categories[cat]['success'] += 1
+            categories[cat] = {"total": 0, "success": 0}
+        categories[cat]["total"] += 1
+        if result["success"]:
+            categories[cat]["success"] += 1
 
     print("By Ensemble Type:")
     for cat, stats in sorted(categories.items()):
-        success_rate = stats['success'] / stats['total'] * 100
+        success_rate = stats["success"] / stats["total"] * 100
         print(f"  {cat}: {stats['success']}/{stats['total']} ({success_rate:.1f}%)")
 
     # Calculate average execution time
-    successful_times = [r['execution_time'] for r in results if r['success']]
+    successful_times = [r["execution_time"] for r in results if r["success"]]
     if successful_times:
         avg_time = sum(successful_times) / len(successful_times)
         print(f"\nAverage Execution Time: {avg_time:.4f}s")
@@ -403,24 +425,28 @@ def main():
         print(f"Slowest: {max(successful_times):.4f}s")
 
     # Save results
-    output_dir = Path(__file__).parent.parent / 'benchmark_results'
+    output_dir = Path(__file__).parent.parent / "benchmark_results"
     output_dir.mkdir(exist_ok=True)
 
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     # Save to JSON
-    json_path = output_dir / f'ensemble_methods_{timestamp}.json'
-    with open(json_path, 'w') as f:
-        json.dump({
-            'timestamp': datetime.now().isoformat(),
-            'total_tests': total_tests,
-            'successful': successful,
-            'failed': failed,
-            'results': results
-        }, f, indent=2)
+    json_path = output_dir / f"ensemble_methods_{timestamp}.json"
+    with open(json_path, "w") as f:
+        json.dump(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "total_tests": total_tests,
+                "successful": successful,
+                "failed": failed,
+                "results": results,
+            },
+            f,
+            indent=2,
+        )
 
     # Save to CSV
-    csv_path = output_dir / f'ensemble_methods_{timestamp}.csv'
+    csv_path = output_dir / f"ensemble_methods_{timestamp}.csv"
     df = pd.DataFrame(results)
     df.to_csv(csv_path, index=False)
 
@@ -439,5 +465,5 @@ def main():
     return 0 if successful == total_tests else 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

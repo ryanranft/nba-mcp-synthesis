@@ -107,7 +107,7 @@ class FeatureExtractor:
         home_team_id: int,
         away_team_id: int,
         game_date: str,
-        lookback_games: int = 10
+        lookback_games: int = 10,
     ) -> Dict[str, float]:
         """
         Extract all features for a game
@@ -123,7 +123,7 @@ class FeatureExtractor:
         """
         # Convert game_date string to datetime for consistency
         if isinstance(game_date, str):
-            game_date_dt = datetime.strptime(game_date, '%Y-%m-%d')
+            game_date_dt = datetime.strptime(game_date, "%Y-%m-%d")
             game_date_obj = game_date_dt.date()
         else:
             game_date_obj = game_date
@@ -134,45 +134,77 @@ class FeatureExtractor:
 
         # Get rolling stats for multiple windows (L5, L10, L20)
         for window in [5, 10, 20]:
-            home_stats = self._get_team_recent_stats(home_team_id, game_date, window, is_home=True)
-            away_stats = self._get_team_recent_stats(away_team_id, game_date, window, is_home=False)
+            home_stats = self._get_team_recent_stats(
+                home_team_id, game_date, window, is_home=True
+            )
+            away_stats = self._get_team_recent_stats(
+                away_team_id, game_date, window, is_home=False
+            )
 
             # Add home team features with window suffix
             for key, value in home_stats.items():
-                if key in ['home_win_pct', 'away_win_pct', 'win_pct', 'wins_last_10', 'losses_last_10']:
+                if key in [
+                    "home_win_pct",
+                    "away_win_pct",
+                    "win_pct",
+                    "wins_last_10",
+                    "losses_last_10",
+                ]:
                     # Skip these - they're not window-specific
                     continue
-                features[f'home_{key}_l{window}'] = value
+                features[f"home_{key}_l{window}"] = value
 
             # Add away team features with window suffix
             for key, value in away_stats.items():
-                if key in ['home_win_pct', 'away_win_pct', 'win_pct', 'wins_last_10', 'losses_last_10']:
+                if key in [
+                    "home_win_pct",
+                    "away_win_pct",
+                    "win_pct",
+                    "wins_last_10",
+                    "losses_last_10",
+                ]:
                     # Skip these - they're not window-specific
                     continue
-                features[f'away_{key}_l{window}'] = value
+                features[f"away_{key}_l{window}"] = value
 
         # Add games_played count for L10 (used for minimum game filtering)
-        home_stats_10 = self._get_team_recent_stats(home_team_id, game_date, 10, is_home=True)
-        away_stats_10 = self._get_team_recent_stats(away_team_id, game_date, 10, is_home=False)
-        features['home_games_played'] = home_stats_10.get('games_played', 0)
-        features['away_games_played'] = away_stats_10.get('games_played', 0)
+        home_stats_10 = self._get_team_recent_stats(
+            home_team_id, game_date, 10, is_home=True
+        )
+        away_stats_10 = self._get_team_recent_stats(
+            away_team_id, game_date, 10, is_home=False
+        )
+        features["home_games_played"] = home_stats_10.get("games_played", 0)
+        features["away_games_played"] = away_stats_10.get("games_played", 0)
 
         # Location-specific rolling stats (home team AT home, away team ON road)
-        home_at_home_stats = self._get_location_specific_stats(home_team_id, game_date, location='home', window=20)
-        away_on_road_stats = self._get_location_specific_stats(away_team_id, game_date, location='away', window=20)
+        home_at_home_stats = self._get_location_specific_stats(
+            home_team_id, game_date, location="home", window=20
+        )
+        away_on_road_stats = self._get_location_specific_stats(
+            away_team_id, game_date, location="away", window=20
+        )
 
         for key, value in home_at_home_stats.items():
-            features[f'home_{key}'] = value
+            features[f"home_{key}"] = value
         for key, value in away_on_road_stats.items():
-            features[f'away_{key}'] = value
+            features[f"away_{key}"] = value
 
         # Recent form (win % in last 5 games)
-        features['home_form_l5'] = self._get_recent_form(home_team_id, game_date, window=5)
-        features['away_form_l5'] = self._get_recent_form(away_team_id, game_date, window=5)
+        features["home_form_l5"] = self._get_recent_form(
+            home_team_id, game_date, window=5
+        )
+        features["away_form_l5"] = self._get_recent_form(
+            away_team_id, game_date, window=5
+        )
 
         # Season progress
-        features['home_season_progress'] = self._get_season_progress(home_team_id, game_date_dt)
-        features['away_season_progress'] = self._get_season_progress(away_team_id, game_date_dt)
+        features["home_season_progress"] = self._get_season_progress(
+            home_team_id, game_date_dt
+        )
+        features["away_season_progress"] = self._get_season_progress(
+            away_team_id, game_date_dt
+        )
 
         # Get head-to-head record
         h2h_stats = self._get_head_to_head_stats(home_team_id, away_team_id, game_date)
@@ -182,40 +214,34 @@ class FeatureExtractor:
         rest_fatigue_features = self.rest_fatigue_extractor.extract_features(
             home_team_id=home_team_id,
             away_team_id=away_team_id,
-            game_date=game_date_obj
+            game_date=game_date_obj,
         )
 
         # Rest & fatigue features (prefix: rest__)
         for key, value in rest_fatigue_features.items():
-            features[f'rest__{key}'] = value
+            features[f"rest__{key}"] = value
 
         # Legacy rest features for backwards compatibility (using old simple method)
         home_rest_legacy = self._get_rest_days(home_team_id, game_date)
         away_rest_legacy = self._get_rest_days(away_team_id, game_date)
-        features['base__home_rest_days'] = home_rest_legacy
-        features['base__away_rest_days'] = away_rest_legacy
-        features['base__home_back_to_back'] = 1 if home_rest_legacy <= 1 else 0
-        features['base__away_back_to_back'] = 1 if away_rest_legacy <= 1 else 0
+        features["base__home_rest_days"] = home_rest_legacy
+        features["base__away_rest_days"] = away_rest_legacy
+        features["base__home_back_to_back"] = 1 if home_rest_legacy <= 1 else 0
+        features["base__away_back_to_back"] = 1 if away_rest_legacy <= 1 else 0
 
         # Extract player-level features (NEW: Phase 1 enhancement)
         player_features = self.player_feature_extractor.extract_features(
-            home_team_id=home_team_id,
-            away_team_id=away_team_id,
-            game_date=game_date
+            home_team_id=home_team_id, away_team_id=away_team_id, game_date=game_date
         )
 
         # Player features (prefix: player__)
         for key, value in player_features.items():
-            features[f'player__{key}'] = value
+            features[f"player__{key}"] = value
 
         return features
 
     def _get_team_recent_stats(
-        self,
-        team_id: int,
-        as_of_date: str,
-        n_games: int = 10,
-        is_home: bool = True
+        self, team_id: int, as_of_date: str, n_games: int = 10, is_home: bool = True
     ) -> Dict[str, float]:
         """
         Get team's recent performance statistics
@@ -270,64 +296,64 @@ class FeatureExtractor:
 
         # Calculate rolling averages
         stats = {
-            'ppg': [],
-            'fg_pct': [],
-            'fg3_pct': [],
-            'ft_pct': [],
-            'reb': [],
-            'ast': [],
-            'stl': [],
-            'blk': [],
-            'tov': [],
-            'wins': 0,
-            'losses': 0
+            "ppg": [],
+            "fg_pct": [],
+            "fg3_pct": [],
+            "ft_pct": [],
+            "reb": [],
+            "ast": [],
+            "stl": [],
+            "blk": [],
+            "tov": [],
+            "wins": 0,
+            "losses": 0,
         }
 
         for game in games:
-            is_team_home = game['home_team_id'] == team_id
+            is_team_home = game["home_team_id"] == team_id
 
             # Points scored (from hoopr_team_box)
-            pts = game['pts'] or 0  # Team's score from hoopr_team_box
+            pts = game["pts"] or 0  # Team's score from hoopr_team_box
 
             # Opponent's score from games table
-            opp_pts = game['away_score'] if is_team_home else game['home_score']
+            opp_pts = game["away_score"] if is_team_home else game["home_score"]
 
             # Win/loss
             if pts > opp_pts:
-                stats['wins'] += 1
+                stats["wins"] += 1
             else:
-                stats['losses'] += 1
+                stats["losses"] += 1
 
             # Game stats (always available from hoopr_team_box)
-            stats['ppg'].append(game['pts'] or 0)
-            stats['reb'].append(game['reb'] or 0)
-            stats['ast'].append(game['ast'] or 0)
-            stats['stl'].append(game['stl'] or 0)
-            stats['blk'].append(game['blk'] or 0)
-            stats['tov'].append(game['turnover'] or 0)
+            stats["ppg"].append(game["pts"] or 0)
+            stats["reb"].append(game["reb"] or 0)
+            stats["ast"].append(game["ast"] or 0)
+            stats["stl"].append(game["stl"] or 0)
+            stats["blk"].append(game["blk"] or 0)
+            stats["tov"].append(game["turnover"] or 0)
 
             # Calculate percentages
-            fgm = game['fgm'] or 0
-            fga = game['fga'] or 1  # Avoid division by zero
-            stats['fg_pct'].append(fgm / fga if fga > 0 else 0)
+            fgm = game["fgm"] or 0
+            fga = game["fga"] or 1  # Avoid division by zero
+            stats["fg_pct"].append(fgm / fga if fga > 0 else 0)
 
-            fg3m = game['fg3m'] or 0
-            fg3a = game['fg3a'] or 1
-            stats['fg3_pct'].append(fg3m / fg3a if fg3a > 0 else 0)
+            fg3m = game["fg3m"] or 0
+            fg3a = game["fg3a"] or 1
+            stats["fg3_pct"].append(fg3m / fg3a if fg3a > 0 else 0)
 
-            ftm = game['ftm'] or 0
-            fta = game['fta'] or 1
-            stats['ft_pct'].append(ftm / fta if fta > 0 else 0)
+            ftm = game["ftm"] or 0
+            fta = game["fta"] or 1
+            stats["ft_pct"].append(ftm / fta if fta > 0 else 0)
 
         # Calculate advanced metrics (TS% and eFG%)
         ts_pcts = []
         efg_pcts = []
         for game in games:
-            pts = game['pts'] or 0
-            fgm = game['fgm'] or 0
-            fga = game['fga'] or 1
-            fg3m = game['fg3m'] or 0
-            fta = game['fta'] or 1
+            pts = game["pts"] or 0
+            fgm = game["fgm"] or 0
+            fga = game["fga"] or 1
+            fg3m = game["fg3m"] or 0
+            fta = game["fta"] or 1
 
             # True Shooting % = PTS / (2 * (FGA + 0.44 * FTA))
             ts_denominator = 2 * (fga + 0.44 * fta)
@@ -340,38 +366,58 @@ class FeatureExtractor:
 
         # Calculate averages
         result = {
-            'ppg': np.mean(stats['ppg']) if stats['ppg'] else 100.0,
-            'fg_pct': np.mean(stats['fg_pct']) if stats['fg_pct'] else 0.45,
-            'three_pt_pct': np.mean(stats['fg3_pct']) if stats['fg3_pct'] else 0.35,  # Renamed to match batch
-            'ft_pct': np.mean(stats['ft_pct']) if stats['ft_pct'] else 0.75,
-            'rebounds': np.mean(stats['reb']) if stats['reb'] else 45.0,  # Renamed to match batch
-            'assists': np.mean(stats['ast']) if stats['ast'] else 25.0,  # Renamed to match batch
-            'steals': np.mean(stats['stl']) if stats['stl'] else 7.0,  # Renamed to match batch
-            'blocks': np.mean(stats['blk']) if stats['blk'] else 5.0,  # Renamed to match batch
-            'turnovers': np.mean(stats['tov']) if stats['tov'] else 13.0,  # Renamed to match batch
-            'ts_pct': np.mean(ts_pcts) if ts_pcts else 0.55,  # True Shooting %
-            'efg_pct': np.mean(efg_pcts) if efg_pcts else 0.52,  # Effective FG%
-            'win_pct': stats['wins'] / (stats['wins'] + stats['losses']) if (stats['wins'] + stats['losses']) > 0 else 0.5,
-            'wins_last_10': stats['wins'],
-            'losses_last_10': stats['losses'],
-            'games_played': len(games)  # Add games played count
+            "ppg": np.mean(stats["ppg"]) if stats["ppg"] else 100.0,
+            "fg_pct": np.mean(stats["fg_pct"]) if stats["fg_pct"] else 0.45,
+            "three_pt_pct": (
+                np.mean(stats["fg3_pct"]) if stats["fg3_pct"] else 0.35
+            ),  # Renamed to match batch
+            "ft_pct": np.mean(stats["ft_pct"]) if stats["ft_pct"] else 0.75,
+            "rebounds": (
+                np.mean(stats["reb"]) if stats["reb"] else 45.0
+            ),  # Renamed to match batch
+            "assists": (
+                np.mean(stats["ast"]) if stats["ast"] else 25.0
+            ),  # Renamed to match batch
+            "steals": (
+                np.mean(stats["stl"]) if stats["stl"] else 7.0
+            ),  # Renamed to match batch
+            "blocks": (
+                np.mean(stats["blk"]) if stats["blk"] else 5.0
+            ),  # Renamed to match batch
+            "turnovers": (
+                np.mean(stats["tov"]) if stats["tov"] else 13.0
+            ),  # Renamed to match batch
+            "ts_pct": np.mean(ts_pcts) if ts_pcts else 0.55,  # True Shooting %
+            "efg_pct": np.mean(efg_pcts) if efg_pcts else 0.52,  # Effective FG%
+            "win_pct": (
+                stats["wins"] / (stats["wins"] + stats["losses"])
+                if (stats["wins"] + stats["losses"]) > 0
+                else 0.5
+            ),
+            "wins_last_10": stats["wins"],
+            "losses_last_10": stats["losses"],
+            "games_played": len(games),  # Add games played count
         }
 
         # Home/away specific stats
         if is_home:
-            home_games = [g for g in games if g['home_team_id'] == team_id]
+            home_games = [g for g in games if g["home_team_id"] == team_id]
             if home_games:
-                home_wins = sum(1 for g in home_games if g['home_score'] > g['away_score'])
-                result['home_win_pct'] = home_wins / len(home_games)
+                home_wins = sum(
+                    1 for g in home_games if g["home_score"] > g["away_score"]
+                )
+                result["home_win_pct"] = home_wins / len(home_games)
             else:
-                result['home_win_pct'] = 0.55  # Slight home court advantage default
+                result["home_win_pct"] = 0.55  # Slight home court advantage default
         else:
-            away_games = [g for g in games if g['away_team_id'] == team_id]
+            away_games = [g for g in games if g["away_team_id"] == team_id]
             if away_games:
-                away_wins = sum(1 for g in away_games if g['away_score'] > g['home_score'])
-                result['away_win_pct'] = away_wins / len(away_games)
+                away_wins = sum(
+                    1 for g in away_games if g["away_score"] > g["home_score"]
+                )
+                result["away_win_pct"] = away_wins / len(away_games)
             else:
-                result['away_win_pct'] = 0.45  # Slight away disadvantage default
+                result["away_win_pct"] = 0.45  # Slight away disadvantage default
 
         return result
 
@@ -380,7 +426,7 @@ class FeatureExtractor:
         home_team_id: int,
         away_team_id: int,
         as_of_date: str,
-        lookback_years: int = 3
+        lookback_years: int = 3,
     ) -> Dict[str, float]:
         """
         Get head-to-head statistics between two teams
@@ -397,7 +443,10 @@ class FeatureExtractor:
         cursor = self.db_conn.cursor(cursor_factory=RealDictCursor)
 
         # Get recent matchups
-        cutoff_date = (datetime.strptime(as_of_date, '%Y-%m-%d') - timedelta(days=365 * lookback_years)).strftime('%Y-%m-%d')
+        cutoff_date = (
+            datetime.strptime(as_of_date, "%Y-%m-%d")
+            - timedelta(days=365 * lookback_years)
+        ).strftime("%Y-%m-%d")
 
         query = """
             SELECT
@@ -415,22 +464,28 @@ class FeatureExtractor:
             LIMIT 10
         """
 
-        cursor.execute(query, (
-            home_team_id, away_team_id,
-            away_team_id, home_team_id,
-            cutoff_date, as_of_date
-        ))
+        cursor.execute(
+            query,
+            (
+                home_team_id,
+                away_team_id,
+                away_team_id,
+                home_team_id,
+                cutoff_date,
+                as_of_date,
+            ),
+        )
 
         games = cursor.fetchall()
 
         if not games or len(games) == 0:
             # No H2H history - return neutral stats
             return {
-                'h2h_home_wins': 0,
-                'h2h_away_wins': 0,
-                'h2h_total_games': 0,
-                'h2h_home_win_pct': 0.5,
-                'h2h_avg_point_diff': 0.0
+                "h2h_home_wins": 0,
+                "h2h_away_wins": 0,
+                "h2h_total_games": 0,
+                "h2h_home_win_pct": 0.5,
+                "h2h_avg_point_diff": 0.0,
             }
 
         # Calculate H2H stats
@@ -438,26 +493,26 @@ class FeatureExtractor:
         point_diffs = []
 
         for game in games:
-            if game['home_team_id'] == home_team_id:
+            if game["home_team_id"] == home_team_id:
                 # Target home team was home
-                if game['home_score'] > game['away_score']:
+                if game["home_score"] > game["away_score"]:
                     home_wins += 1
-                point_diffs.append(game['home_score'] - game['away_score'])
+                point_diffs.append(game["home_score"] - game["away_score"])
             else:
                 # Target home team was away
-                if game['away_score'] > game['home_score']:
+                if game["away_score"] > game["home_score"]:
                     home_wins += 1
-                point_diffs.append(game['away_score'] - game['home_score'])
+                point_diffs.append(game["away_score"] - game["home_score"])
 
         total_games = len(games)
         away_wins = total_games - home_wins
 
         return {
-            'h2h_home_wins': home_wins,
-            'h2h_away_wins': away_wins,
-            'h2h_total_games': total_games,
-            'h2h_home_win_pct': home_wins / total_games if total_games > 0 else 0.5,
-            'h2h_avg_point_diff': np.mean(point_diffs) if point_diffs else 0.0
+            "h2h_home_wins": home_wins,
+            "h2h_away_wins": away_wins,
+            "h2h_total_games": total_games,
+            "h2h_home_win_pct": home_wins / total_games if total_games > 0 else 0.5,
+            "h2h_avg_point_diff": np.mean(point_diffs) if point_diffs else 0.0,
         }
 
     def _get_rest_days(self, team_id: int, game_date: str) -> int:
@@ -486,9 +541,9 @@ class FeatureExtractor:
 
         if result and result[0]:
             last_game_date = result[0]
-            current_date = datetime.strptime(game_date, '%Y-%m-%d').date()
+            current_date = datetime.strptime(game_date, "%Y-%m-%d").date()
             if isinstance(last_game_date, str):
-                last_game_date = datetime.strptime(last_game_date, '%Y-%m-%d').date()
+                last_game_date = datetime.strptime(last_game_date, "%Y-%m-%d").date()
 
             rest_days = (current_date - last_game_date).days
             return rest_days
@@ -499,31 +554,27 @@ class FeatureExtractor:
     def _default_team_stats(self) -> Dict[str, float]:
         """Return default team stats when no data available"""
         return {
-            'ppg': 110.0,  # League average
-            'fg_pct': 0.46,
-            'three_pt_pct': 0.36,
-            'ft_pct': 0.78,
-            'rebounds': 45.0,
-            'assists': 25.0,
-            'steals': 7.5,
-            'blocks': 5.0,
-            'turnovers': 13.0,
-            'ts_pct': 0.55,
-            'efg_pct': 0.52,
-            'win_pct': 0.5,
-            'wins_last_10': 5,
-            'losses_last_10': 5,
-            'home_win_pct': 0.55,
-            'away_win_pct': 0.45,
-            'games_played': 0
+            "ppg": 110.0,  # League average
+            "fg_pct": 0.46,
+            "three_pt_pct": 0.36,
+            "ft_pct": 0.78,
+            "rebounds": 45.0,
+            "assists": 25.0,
+            "steals": 7.5,
+            "blocks": 5.0,
+            "turnovers": 13.0,
+            "ts_pct": 0.55,
+            "efg_pct": 0.52,
+            "win_pct": 0.5,
+            "wins_last_10": 5,
+            "losses_last_10": 5,
+            "home_win_pct": 0.55,
+            "away_win_pct": 0.45,
+            "games_played": 0,
         }
 
     def _get_location_specific_stats(
-        self,
-        team_id: int,
-        as_of_date: str,
-        location: str,
-        window: int = 20
+        self, team_id: int, as_of_date: str, location: str, window: int = 20
     ) -> Dict[str, float]:
         """
         Get location-specific rolling stats (home team AT home, away team ON road)
@@ -558,24 +609,19 @@ class FeatureExtractor:
 
         if not games or len(games) == 0:
             return {
-                f'ppg_{location}_l{window}': 110.0,  # Default
-                f'{location}_games': 0
+                f"ppg_{location}_l{window}": 110.0,  # Default
+                f"{location}_games": 0,
             }
 
         # Calculate PPG at location
-        ppg = np.mean([g['pts'] for g in games if g['pts'] is not None])
+        ppg = np.mean([g["pts"] for g in games if g["pts"] is not None])
 
         return {
-            f'ppg_{location}_l{window}': float(ppg),
-            f'{location}_games': len(games)
+            f"ppg_{location}_l{window}": float(ppg),
+            f"{location}_games": len(games),
         }
 
-    def _get_recent_form(
-        self,
-        team_id: int,
-        as_of_date: str,
-        window: int = 5
-    ) -> float:
+    def _get_recent_form(self, team_id: int, as_of_date: str, window: int = 5) -> float:
         """
         Calculate recent win percentage (form)
 
@@ -612,22 +658,18 @@ class FeatureExtractor:
         # Calculate wins
         wins = 0
         for game in games:
-            if game['home_team_id'] == team_id:
+            if game["home_team_id"] == team_id:
                 # Team was home
-                if game['home_score'] > game['away_score']:
+                if game["home_score"] > game["away_score"]:
                     wins += 1
             else:
                 # Team was away
-                if game['away_score'] > game['home_score']:
+                if game["away_score"] > game["home_score"]:
                     wins += 1
 
         return wins / len(games)
 
-    def _get_season_progress(
-        self,
-        team_id: int,
-        as_of_date: datetime
-    ) -> float:
+    def _get_season_progress(self, team_id: int, as_of_date: datetime) -> float:
         """
         Calculate season completion percentage
 
@@ -670,7 +712,9 @@ class FeatureExtractor:
         # NBA regular season is 82 games
         return min(games_played / 82.0, 1.0)
 
-    def get_todays_games(self, target_date: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_todays_games(
+        self, target_date: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
         """
         Get list of games for a specific date
 
@@ -681,7 +725,7 @@ class FeatureExtractor:
             List of game dictionaries with team info
         """
         if target_date is None:
-            target_date = datetime.now().strftime('%Y-%m-%d')
+            target_date = datetime.now().strftime("%Y-%m-%d")
 
         cursor = self.db_conn.cursor(cursor_factory=RealDictCursor)
 

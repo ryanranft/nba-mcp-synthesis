@@ -37,6 +37,7 @@ logger = logging.getLogger(__name__)
 try:
     from sklearn.linear_model import LogisticRegression
     from sklearn.neighbors import NearestNeighbors
+
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False
@@ -45,6 +46,7 @@ except ImportError:
 
 class MatchingMethod(Enum):
     """Matching method types"""
+
     PROPENSITY_SCORE = "propensity_score"
     NEAREST_NEIGHBOR = "nearest_neighbor"
     KERNEL = "kernel"
@@ -55,6 +57,7 @@ class MatchingMethod(Enum):
 
 class KernelType(Enum):
     """Kernel function types"""
+
     GAUSSIAN = "gaussian"
     EPANECHNIKOV = "epanechnikov"
     UNIFORM = "uniform"
@@ -110,7 +113,9 @@ class MatchingResult:
     balance_after: Optional[Dict[str, float]] = None
 
     # Matched pairs
-    matched_indices: Optional[Dict[int, List[int]]] = None  # treated_idx -> [control_idx]
+    matched_indices: Optional[Dict[int, List[int]]] = (
+        None  # treated_idx -> [control_idx]
+    )
 
     # Propensity scores
     propensity_scores: Optional[np.ndarray] = None
@@ -118,14 +123,14 @@ class MatchingResult:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'att': self.att,
-            'ate': self.ate,
-            'atc': self.atc,
-            'se_att': self.se_att,
-            'n_treated': self.n_treated,
-            'n_control': self.n_control,
-            'n_matched': self.n_matched,
-            'has_balance_stats': self.balance_before is not None
+            "att": self.att,
+            "ate": self.ate,
+            "atc": self.atc,
+            "se_att": self.se_att,
+            "n_treated": self.n_treated,
+            "n_control": self.n_control,
+            "n_matched": self.n_matched,
+            "has_balance_stats": self.balance_before is not None,
         }
 
 
@@ -153,9 +158,7 @@ class PropensityScoreMatcher:
         logger.info("PropensityScoreMatcher initialized")
 
     def estimate_propensity_scores(
-        self,
-        X: np.ndarray,
-        treatment: np.ndarray
+        self, X: np.ndarray, treatment: np.ndarray
     ) -> np.ndarray:
         """
         Estimate propensity scores.
@@ -177,14 +180,14 @@ class PropensityScoreMatcher:
         # Predict propensity scores
         ps = self.propensity_model.predict_proba(X)[:, 1]
 
-        logger.info(f"Propensity scores: mean={ps.mean():.3f}, min={ps.min():.3f}, max={ps.max():.3f}")
+        logger.info(
+            f"Propensity scores: mean={ps.mean():.3f}, min={ps.min():.3f}, max={ps.max():.3f}"
+        )
 
         return ps
 
     def enforce_common_support(
-        self,
-        ps: np.ndarray,
-        treatment: np.ndarray
+        self, ps: np.ndarray, treatment: np.ndarray
     ) -> np.ndarray:
         """
         Enforce common support (overlap) requirement.
@@ -222,10 +225,7 @@ class PropensityScoreMatcher:
         return common_support
 
     def match_nearest_neighbor(
-        self,
-        ps: np.ndarray,
-        treatment: np.ndarray,
-        outcome: np.ndarray
+        self, ps: np.ndarray, treatment: np.ndarray, outcome: np.ndarray
     ) -> MatchingResult:
         """
         Nearest neighbor matching on propensity scores.
@@ -289,7 +289,11 @@ class PropensityScoreMatcher:
             att_values.append(treated_outcome - np.mean(control_outcomes))
 
         att = np.mean(att_values) if att_values else 0.0
-        se_att = np.std(att_values) / np.sqrt(len(att_values)) if len(att_values) > 1 else None
+        se_att = (
+            np.std(att_values) / np.sqrt(len(att_values))
+            if len(att_values) > 1
+            else None
+        )
 
         result = MatchingResult(
             att=att,
@@ -298,7 +302,7 @@ class PropensityScoreMatcher:
             n_control=len(control_idx),
             n_matched=len(matched_indices),
             matched_indices=matched_indices,
-            propensity_scores=ps
+            propensity_scores=ps,
         )
 
         logger.info(f"NN Matching: ATT={att:.4f}, SE={se_att:.4f if se_att else 0:.4f}")
@@ -307,10 +311,7 @@ class PropensityScoreMatcher:
         return result
 
     def match_kernel(
-        self,
-        ps: np.ndarray,
-        treatment: np.ndarray,
-        outcome: np.ndarray
+        self, ps: np.ndarray, treatment: np.ndarray, outcome: np.ndarray
     ) -> MatchingResult:
         """
         Kernel matching on propensity scores.
@@ -349,7 +350,11 @@ class PropensityScoreMatcher:
             att_values.append(treated_outcome - weighted_control)
 
         att = np.mean(att_values) if att_values else 0.0
-        se_att = np.std(att_values) / np.sqrt(len(att_values)) if len(att_values) > 1 else None
+        se_att = (
+            np.std(att_values) / np.sqrt(len(att_values))
+            if len(att_values) > 1
+            else None
+        )
 
         result = MatchingResult(
             att=att,
@@ -357,31 +362,30 @@ class PropensityScoreMatcher:
             n_treated=len(treated_idx),
             n_control=len(control_idx),
             n_matched=len(treated_idx),  # All treated are matched
-            propensity_scores=ps
+            propensity_scores=ps,
         )
 
-        logger.info(f"Kernel Matching: ATT={att:.4f}, SE={se_att:.4f if se_att else 0:.4f}")
+        logger.info(
+            f"Kernel Matching: ATT={att:.4f}, SE={se_att:.4f if se_att else 0:.4f}"
+        )
 
         return result
 
     def _kernel_function(self, u: np.ndarray) -> np.ndarray:
         """Kernel function"""
         if self.config.kernel_type == KernelType.GAUSSIAN:
-            return np.exp(-0.5 * u ** 2) / np.sqrt(2 * np.pi)
+            return np.exp(-0.5 * u**2) / np.sqrt(2 * np.pi)
         elif self.config.kernel_type == KernelType.EPANECHNIKOV:
-            return np.where(np.abs(u) <= 1, 0.75 * (1 - u ** 2), 0)
+            return np.where(np.abs(u) <= 1, 0.75 * (1 - u**2), 0)
         elif self.config.kernel_type == KernelType.UNIFORM:
             return np.where(np.abs(u) <= 1, 0.5, 0)
         elif self.config.kernel_type == KernelType.TRIANGULAR:
             return np.where(np.abs(u) <= 1, 1 - np.abs(u), 0)
         else:
-            return np.exp(-0.5 * u ** 2) / np.sqrt(2 * np.pi)
+            return np.exp(-0.5 * u**2) / np.sqrt(2 * np.pi)
 
     def match(
-        self,
-        X: np.ndarray,
-        treatment: np.ndarray,
-        outcome: np.ndarray
+        self, X: np.ndarray, treatment: np.ndarray, outcome: np.ndarray
     ) -> MatchingResult:
         """
         Perform propensity score matching.
@@ -406,8 +410,10 @@ class PropensityScoreMatcher:
             ps = ps[common_support]
 
         # Match based on method
-        if self.config.method == MatchingMethod.NEAREST_NEIGHBOR or \
-           self.config.method == MatchingMethod.PROPENSITY_SCORE:
+        if (
+            self.config.method == MatchingMethod.NEAREST_NEIGHBOR
+            or self.config.method == MatchingMethod.PROPENSITY_SCORE
+        ):
             result = self.match_nearest_neighbor(ps, treatment, outcome)
         elif self.config.method == MatchingMethod.KERNEL:
             result = self.match_kernel(ps, treatment, outcome)
@@ -426,10 +432,7 @@ class PropensityScoreMatcher:
         return result
 
     def calculate_balance(
-        self,
-        X: np.ndarray,
-        treatment: np.ndarray,
-        weights: Optional[np.ndarray] = None
+        self, X: np.ndarray, treatment: np.ndarray, weights: Optional[np.ndarray] = None
     ) -> Dict[str, float]:
         """
         Calculate covariate balance (standardized mean differences).
@@ -449,12 +452,20 @@ class PropensityScoreMatcher:
 
         for j in range(X.shape[1]):
             if weights is not None:
-                mean_treated = np.average(X[treated_mask, j], weights=weights[treated_mask])
-                mean_control = np.average(X[control_mask, j], weights=weights[control_mask])
-                var_treated = np.average((X[treated_mask, j] - mean_treated) ** 2,
-                                        weights=weights[treated_mask])
-                var_control = np.average((X[control_mask, j] - mean_control) ** 2,
-                                        weights=weights[control_mask])
+                mean_treated = np.average(
+                    X[treated_mask, j], weights=weights[treated_mask]
+                )
+                mean_control = np.average(
+                    X[control_mask, j], weights=weights[control_mask]
+                )
+                var_treated = np.average(
+                    (X[treated_mask, j] - mean_treated) ** 2,
+                    weights=weights[treated_mask],
+                )
+                var_control = np.average(
+                    (X[control_mask, j] - mean_control) ** 2,
+                    weights=weights[control_mask],
+                )
             else:
                 mean_treated = np.mean(X[treated_mask, j])
                 mean_control = np.mean(X[control_mask, j])
@@ -464,7 +475,7 @@ class PropensityScoreMatcher:
             pooled_std = np.sqrt((var_treated + var_control) / 2)
             smd = (mean_treated - mean_control) / pooled_std if pooled_std > 0 else 0.0
 
-            balance[f'feature_{j}'] = abs(smd)
+            balance[f"feature_{j}"] = abs(smd)
 
         return balance
 
@@ -472,7 +483,7 @@ class PropensityScoreMatcher:
         self,
         X: np.ndarray,
         treatment: np.ndarray,
-        matched_indices: Dict[int, List[int]]
+        matched_indices: Dict[int, List[int]],
     ) -> Dict[str, float]:
         """Calculate balance after matching"""
         # Extract matched sample
@@ -493,7 +504,7 @@ class PropensityScoreMatcher:
             pooled_std = np.sqrt((var_treated + var_control) / 2)
             smd = (mean_treated - mean_control) / pooled_std if pooled_std > 0 else 0.0
 
-            balance[f'feature_{j}'] = abs(smd)
+            balance[f"feature_{j}"] = abs(smd)
 
         return balance
 
@@ -515,10 +526,7 @@ class MahalanobisDistanceMatcher:
         logger.info("MahalanobisDistanceMatcher initialized")
 
     def match(
-        self,
-        X: np.ndarray,
-        treatment: np.ndarray,
-        outcome: np.ndarray
+        self, X: np.ndarray, treatment: np.ndarray, outcome: np.ndarray
     ) -> MatchingResult:
         """
         Match using Mahalanobis distance.
@@ -547,10 +555,12 @@ class MahalanobisDistanceMatcher:
 
         for t_idx in treated_idx:
             # Calculate Mahalanobis distances to all controls
-            distances = np.array([
-                mahalanobis(X[t_idx], X[c_idx], self.cov_inv_)
-                for c_idx in control_idx
-            ])
+            distances = np.array(
+                [
+                    mahalanobis(X[t_idx], X[c_idx], self.cov_inv_)
+                    for c_idx in control_idx
+                ]
+            )
 
             # Apply caliper if specified
             if self.caliper is not None:
@@ -561,8 +571,11 @@ class MahalanobisDistanceMatcher:
 
             # Find nearest neighbors
             sorted_idx = np.argsort(distances)
-            matches = [control_idx[idx] for idx in sorted_idx[:self.n_neighbors]
-                      if distances[idx] < np.inf]
+            matches = [
+                control_idx[idx]
+                for idx in sorted_idx[: self.n_neighbors]
+                if distances[idx] < np.inf
+            ]
 
             if matches:
                 matched_indices[t_idx] = matches
@@ -575,7 +588,11 @@ class MahalanobisDistanceMatcher:
             att_values.append(treated_outcome - np.mean(control_outcomes))
 
         att = np.mean(att_values) if att_values else 0.0
-        se_att = np.std(att_values) / np.sqrt(len(att_values)) if len(att_values) > 1 else None
+        se_att = (
+            np.std(att_values) / np.sqrt(len(att_values))
+            if len(att_values) > 1
+            else None
+        )
 
         result = MatchingResult(
             att=att,
@@ -583,10 +600,12 @@ class MahalanobisDistanceMatcher:
             n_treated=len(treated_idx),
             n_control=len(control_idx),
             n_matched=len(matched_indices),
-            matched_indices=matched_indices
+            matched_indices=matched_indices,
         )
 
-        logger.info(f"Mahalanobis Matching: ATT={att:.4f}, SE={se_att:.4f if se_att else 0:.4f}")
+        logger.info(
+            f"Mahalanobis Matching: ATT={att:.4f}, SE={se_att:.4f if se_att else 0:.4f}"
+        )
         logger.info(f"Matched {len(matched_indices)}/{len(treated_idx)} treated units")
 
         return result
@@ -597,7 +616,7 @@ def estimate_treatment_effect(
     treatment: np.ndarray,
     outcome: np.ndarray,
     method: MatchingMethod = MatchingMethod.PROPENSITY_SCORE,
-    config: Optional[MatchingConfig] = None
+    config: Optional[MatchingConfig] = None,
 ) -> MatchingResult:
     """
     Convenience function to estimate treatment effects using matching.
@@ -617,14 +636,17 @@ def estimate_treatment_effect(
     else:
         config.method = method
 
-    if method in [MatchingMethod.PROPENSITY_SCORE, MatchingMethod.NEAREST_NEIGHBOR, MatchingMethod.KERNEL]:
+    if method in [
+        MatchingMethod.PROPENSITY_SCORE,
+        MatchingMethod.NEAREST_NEIGHBOR,
+        MatchingMethod.KERNEL,
+    ]:
         matcher = PropensityScoreMatcher(config)
         return matcher.match(X, treatment, outcome)
 
     elif method == MatchingMethod.MAHALANOBIS:
         matcher = MahalanobisDistanceMatcher(
-            n_neighbors=config.n_neighbors,
-            caliper=config.ps_caliper
+            n_neighbors=config.n_neighbors, caliper=config.ps_caliper
         )
         return matcher.match(X, treatment, outcome)
 
@@ -633,11 +655,11 @@ def estimate_treatment_effect(
 
 
 __all__ = [
-    'MatchingMethod',
-    'KernelType',
-    'MatchingConfig',
-    'MatchingResult',
-    'PropensityScoreMatcher',
-    'MahalanobisDistanceMatcher',
-    'estimate_treatment_effect',
+    "MatchingMethod",
+    "KernelType",
+    "MatchingConfig",
+    "MatchingResult",
+    "PropensityScoreMatcher",
+    "MahalanobisDistanceMatcher",
+    "estimate_treatment_effect",
 ]

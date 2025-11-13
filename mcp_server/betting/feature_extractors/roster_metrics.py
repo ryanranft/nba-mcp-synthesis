@@ -50,7 +50,7 @@ class RosterMetrics:
         ftm: float,
         fta: float,
         minutes: float,
-        team_pace: Optional[float] = None
+        team_pace: Optional[float] = None,
     ) -> float:
         """
         Calculate Player Efficiency Rating (PER)
@@ -87,7 +87,9 @@ class RosterMetrics:
 
         # Basic PER calculation
         positive_actions = points + rebounds + assists + steals + blocks
-        negative_actions = turnovers + missed_fg + (0.44 * missed_ft)  # FT misses weighted less
+        negative_actions = (
+            turnovers + missed_fg + (0.44 * missed_ft)
+        )  # FT misses weighted less
 
         # Normalize to per-48-minutes
         per = (positive_actions - negative_actions) / minutes * 48
@@ -108,7 +110,7 @@ class RosterMetrics:
         team_minutes: float = 240.0,  # 5 players * 48 minutes
         team_fga: Optional[float] = None,
         team_fta: Optional[float] = None,
-        team_turnovers: Optional[float] = None
+        team_turnovers: Optional[float] = None,
     ) -> float:
         """
         Calculate Usage Rate
@@ -142,7 +144,11 @@ class RosterMetrics:
         if team_fga is not None and team_fta is not None and team_turnovers is not None:
             team_poss = team_fga + (0.44 * team_fta) + team_turnovers
             if team_poss > 0:
-                usage_rate = 100 * (player_poss_used * (team_minutes / 5)) / (minutes * team_poss)
+                usage_rate = (
+                    100
+                    * (player_poss_used * (team_minutes / 5))
+                    / (minutes * team_poss)
+                )
                 return float(usage_rate)
 
         # Approximation when team stats unavailable
@@ -151,10 +157,7 @@ class RosterMetrics:
         return float(usage_rate)
 
     def calculate_true_shooting_pct(
-        self,
-        points: float,
-        fga: float,
-        fta: float
+        self, points: float, fga: float, fta: float
     ) -> float:
         """
         Calculate True Shooting Percentage
@@ -181,10 +184,7 @@ class RosterMetrics:
 
         return float(ts_pct)
 
-    def calculate_depth_score(
-        self,
-        player_ppg_list: List[float]
-    ) -> float:
+    def calculate_depth_score(self, player_ppg_list: List[float]) -> float:
         """
         Calculate team depth score
 
@@ -204,7 +204,7 @@ class RosterMetrics:
             return 0.0
 
         # Take top 10 players (or fewer if roster is smaller)
-        top_players = player_ppg_list[:min(10, len(player_ppg_list))]
+        top_players = player_ppg_list[: min(10, len(player_ppg_list))]
 
         # Calculate coefficient of variation
         mean_ppg = np.mean(top_players)
@@ -227,7 +227,7 @@ class RosterMetrics:
         top_players_per: List[float],
         depth_score: float,
         star_weight: float = 0.7,
-        depth_weight: float = 0.3
+        depth_weight: float = 0.3,
     ) -> float:
         """
         Calculate overall roster strength index
@@ -248,14 +248,14 @@ class RosterMetrics:
         normalized_star_power = min(100, star_power)  # Cap at 100
 
         # Weighted combination
-        roster_index = (star_weight * normalized_star_power) + (depth_weight * depth_score)
+        roster_index = (star_weight * normalized_star_power) + (
+            depth_weight * depth_score
+        )
 
         return float(roster_index)
 
     def calculate_offensive_rating(
-        self,
-        points_scored: float,
-        possessions: float
+        self, points_scored: float, possessions: float
     ) -> float:
         """
         Calculate Offensive Rating
@@ -280,9 +280,7 @@ class RosterMetrics:
         return float(ortg)
 
     def calculate_defensive_rating(
-        self,
-        points_allowed: float,
-        possessions: float
+        self, points_allowed: float, possessions: float
     ) -> float:
         """
         Calculate Defensive Rating
@@ -307,11 +305,7 @@ class RosterMetrics:
         return float(drtg)
 
     def estimate_possessions(
-        self,
-        fga: float,
-        orb: float,
-        turnovers: float,
-        fta: float
+        self, fga: float, orb: float, turnovers: float, fta: float
     ) -> float:
         """
         Estimate number of possessions
@@ -332,9 +326,7 @@ class RosterMetrics:
         return max(0, float(possessions))
 
     def calculate_net_rating(
-        self,
-        offensive_rating: float,
-        defensive_rating: float
+        self, offensive_rating: float, defensive_rating: float
     ) -> float:
         """
         Calculate Net Rating
@@ -353,10 +345,7 @@ class RosterMetrics:
         return float(offensive_rating - defensive_rating)
 
     def classify_player_role(
-        self,
-        ppg: float,
-        usage_rate: float,
-        minutes: float
+        self, ppg: float, usage_rate: float, minutes: float
     ) -> str:
         """
         Classify player role based on stats
@@ -370,19 +359,19 @@ class RosterMetrics:
             Role classification: 'star', 'starter', 'role_player', 'bench'
         """
         if ppg >= 20 and usage_rate >= 25 and minutes >= 30:
-            return 'star'
+            return "star"
         elif ppg >= 12 and minutes >= 25:
-            return 'starter'
+            return "starter"
         elif minutes >= 15:
-            return 'role_player'
+            return "role_player"
         else:
-            return 'bench'
+            return "bench"
 
     def calculate_injury_adjusted_rating(
         self,
         base_rating: float,
         missing_players_contribution_pct: float,
-        adjustment_factor: float = 0.8
+        adjustment_factor: float = 0.8,
     ) -> float:
         """
         Adjust team rating for missing players

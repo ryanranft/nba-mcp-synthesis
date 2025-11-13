@@ -51,10 +51,7 @@ class LineupFeaturesExtractor:
         logger.info("LineupFeaturesExtractor initialized")
 
     def extract_features(
-        self,
-        home_team_id: int,
-        away_team_id: int,
-        game_date: date
+        self, home_team_id: int, away_team_id: int, game_date: date
     ) -> Dict[str, float]:
         """
         Extract lineup/availability features for a specific game
@@ -74,16 +71,16 @@ class LineupFeaturesExtractor:
             home_quality = self._get_team_starter_quality(home_team_id, game_date)
             away_quality = self._get_team_starter_quality(away_team_id, game_date)
 
-            features['home_starter_quality_avg'] = home_quality
-            features['away_starter_quality_avg'] = away_quality
-            features['lineup_quality_advantage'] = home_quality - away_quality
+            features["home_starter_quality_avg"] = home_quality
+            features["away_starter_quality_avg"] = away_quality
+            features["lineup_quality_advantage"] = home_quality - away_quality
 
             # Estimate stars out (simplified - based on recent starter consistency)
             home_stars_out = self._estimate_stars_out(home_team_id, game_date)
             away_stars_out = self._estimate_stars_out(away_team_id, game_date)
 
-            features['home_stars_out'] = home_stars_out
-            features['away_stars_out'] = away_stars_out
+            features["home_stars_out"] = home_stars_out
+            features["away_stars_out"] = away_stars_out
 
             logger.debug(
                 f"Lineup features: home_quality={home_quality:.1f}, "
@@ -95,20 +92,16 @@ class LineupFeaturesExtractor:
             logger.error(f"Error extracting lineup features: {e}")
             # Return default values
             features = {
-                'home_starter_quality_avg': 50.0,
-                'away_starter_quality_avg': 50.0,
-                'lineup_quality_advantage': 0.0,
-                'home_stars_out': 0.0,
-                'away_stars_out': 0.0
+                "home_starter_quality_avg": 50.0,
+                "away_starter_quality_avg": 50.0,
+                "lineup_quality_advantage": 0.0,
+                "home_stars_out": 0.0,
+                "away_stars_out": 0.0,
             }
 
         return features
 
-    def _get_team_starter_quality(
-        self,
-        team_id: int,
-        game_date: date
-    ) -> float:
+    def _get_team_starter_quality(self, team_id: int, game_date: date) -> float:
         """
         Calculate average starter quality for a team
 
@@ -199,12 +192,29 @@ class LineupFeaturesExtractor:
 
         # Execute query with repeated parameters
         params = (
-            team_id, team_id, game_date, game_date,  # player1
-            team_id, team_id, game_date, game_date,  # player2
-            team_id, team_id, game_date, game_date,  # player3
-            team_id, team_id, game_date, game_date,  # player4
-            team_id, team_id, game_date, game_date,  # player5
-            game_date, game_date, team_id  # final filters
+            team_id,
+            team_id,
+            game_date,
+            game_date,  # player1
+            team_id,
+            team_id,
+            game_date,
+            game_date,  # player2
+            team_id,
+            team_id,
+            game_date,
+            game_date,  # player3
+            team_id,
+            team_id,
+            game_date,
+            game_date,  # player4
+            team_id,
+            team_id,
+            game_date,
+            game_date,  # player5
+            game_date,
+            game_date,
+            team_id,  # final filters
         )
 
         cursor.execute(query, params)
@@ -222,11 +232,7 @@ class LineupFeaturesExtractor:
         self._cache[cache_key] = quality
         return quality
 
-    def _estimate_stars_out(
-        self,
-        team_id: int,
-        game_date: date
-    ) -> float:
+    def _estimate_stars_out(self, team_id: int, game_date: date) -> float:
         """
         Estimate number of star players unavailable
 
@@ -248,10 +254,7 @@ class LineupFeaturesExtractor:
         # For now, return 0 (assume all starters available)
         return 0.0
 
-    def extract_batch(
-        self,
-        games: List[Dict[str, any]]
-    ) -> pd.DataFrame:
+    def extract_batch(self, games: List[Dict[str, any]]) -> pd.DataFrame:
         """
         Extract features for multiple games (more efficient)
 
@@ -265,11 +268,11 @@ class LineupFeaturesExtractor:
 
         for game in games:
             features = self.extract_features(
-                home_team_id=game['home_team_id'],
-                away_team_id=game['away_team_id'],
-                game_date=game['game_date']
+                home_team_id=game["home_team_id"],
+                away_team_id=game["away_team_id"],
+                game_date=game["game_date"],
             )
-            features['game_id'] = game.get('game_id')
+            features["game_id"] = game.get("game_id")
             features_list.append(features)
 
         return pd.DataFrame(features_list)
@@ -298,18 +301,18 @@ if __name__ == "__main__":
 
     # Load secrets
     print("📦 Loading secrets...")
-    load_secrets_hierarchical('nba-mcp-synthesis', 'NBA', 'production')
+    load_secrets_hierarchical("nba-mcp-synthesis", "NBA", "production")
     print("✅ Secrets loaded")
     print()
 
     # Connect to database
     print("🔌 Connecting to database...")
     conn = psycopg2.connect(
-        host=os.getenv('RDS_HOST'),
-        port=os.getenv('RDS_PORT'),
-        database=os.getenv('RDS_DATABASE'),
-        user=os.getenv('RDS_USERNAME'),
-        password=os.getenv('RDS_PASSWORD')
+        host=os.getenv("RDS_HOST"),
+        port=os.getenv("RDS_PORT"),
+        database=os.getenv("RDS_DATABASE"),
+        user=os.getenv("RDS_USERNAME"),
+        password=os.getenv("RDS_PASSWORD"),
     )
     print("✅ Database connected")
     print()
@@ -319,7 +322,8 @@ if __name__ == "__main__":
 
     # Get recent games
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT
             game_id,
             home_team_id,
@@ -330,7 +334,8 @@ if __name__ == "__main__":
           AND home_score IS NOT NULL
         ORDER BY game_date DESC
         LIMIT 3
-    """)
+    """
+    )
 
     games = cursor.fetchall()
 
@@ -342,15 +347,15 @@ if __name__ == "__main__":
             print(f"\nGame {game_id} on {g_date}")
 
             features = extractor.extract_features(
-                home_team_id=home_id,
-                away_team_id=away_id,
-                game_date=g_date
+                home_team_id=home_id, away_team_id=away_id, game_date=g_date
             )
 
             print(f"  Home starter quality: {features['home_starter_quality_avg']:.1f}")
             print(f"  Away starter quality: {features['away_starter_quality_avg']:.1f}")
             print(f"  Quality advantage: {features['lineup_quality_advantage']:+.1f}")
-            print(f"  Stars out (home/away): {features['home_stars_out']:.0f} / {features['away_stars_out']:.0f}")
+            print(
+                f"  Stars out (home/away): {features['home_stars_out']:.0f} / {features['away_stars_out']:.0f}"
+            )
 
         print()
         print("✅ Feature extraction successful!")

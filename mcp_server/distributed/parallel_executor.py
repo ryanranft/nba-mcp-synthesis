@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ParallelTaskResult:
     """Result from a parallel task execution"""
+
     task_id: int
     success: bool
     result: Any = None
@@ -40,7 +41,7 @@ class ParallelExecutor:
         self,
         max_workers: Optional[int] = None,
         use_processes: bool = True,
-        timeout: Optional[float] = None
+        timeout: Optional[float] = None,
     ):
         """
         Initialize parallel executor.
@@ -67,7 +68,7 @@ class ParallelExecutor:
         self,
         func: Callable,
         task_args: List[Tuple],
-        task_kwargs: Optional[List[Dict[str, Any]]] = None
+        task_kwargs: Optional[List[Dict[str, Any]]] = None,
     ) -> List[ParallelTaskResult]:
         """
         Execute function in parallel with different arguments.
@@ -87,7 +88,9 @@ class ParallelExecutor:
             task_kwargs = [{}] * n_tasks
 
         # Choose executor type
-        executor_class = ProcessPoolExecutor if self.use_processes else ThreadPoolExecutor
+        executor_class = (
+            ProcessPoolExecutor if self.use_processes else ThreadPoolExecutor
+        )
 
         results = []
         start_time = time.time()
@@ -96,7 +99,9 @@ class ParallelExecutor:
             # Submit all tasks
             future_to_task_id = {}
             for task_id, (args, kwargs) in enumerate(zip(task_args, task_kwargs)):
-                future = executor.submit(self._execute_task, func, task_id, args, kwargs)
+                future = executor.submit(
+                    self._execute_task, func, task_id, args, kwargs
+                )
                 future_to_task_id[future] = task_id
 
             # Collect results as they complete
@@ -114,11 +119,9 @@ class ParallelExecutor:
 
                 except Exception as e:
                     logger.error(f"Task {task_id} raised exception: {e}")
-                    results.append(ParallelTaskResult(
-                        task_id=task_id,
-                        success=False,
-                        error=str(e)
-                    ))
+                    results.append(
+                        ParallelTaskResult(task_id=task_id, success=False, error=str(e))
+                    )
                     self.total_failures += 1
                     self.total_tasks_executed += 1
 
@@ -133,11 +136,7 @@ class ParallelExecutor:
         return results
 
     def _execute_task(
-        self,
-        func: Callable,
-        task_id: int,
-        args: Tuple,
-        kwargs: Dict[str, Any]
+        self, func: Callable, task_id: int, args: Tuple, kwargs: Dict[str, Any]
     ) -> ParallelTaskResult:
         """Execute a single task and track metrics"""
         start_time = time.time()
@@ -150,7 +149,7 @@ class ParallelExecutor:
                 task_id=task_id,
                 success=True,
                 result=result,
-                execution_time=execution_time
+                execution_time=execution_time,
             )
 
         except Exception as e:
@@ -159,7 +158,7 @@ class ParallelExecutor:
                 task_id=task_id,
                 success=False,
                 error=str(e),
-                execution_time=execution_time
+                execution_time=execution_time,
             )
 
     def parallel_hyperparameter_search(
@@ -168,7 +167,7 @@ class ParallelExecutor:
         X_train: Any,
         y_train: Any,
         param_grid: Dict[str, List[Any]],
-        scoring_func: Callable
+        scoring_func: Callable,
     ) -> Dict[str, Any]:
         """
         Perform parallel hyperparameter grid search.
@@ -187,6 +186,7 @@ class ParallelExecutor:
 
         # Generate parameter combinations
         from itertools import product
+
         keys = param_grid.keys()
         values = param_grid.values()
         param_combinations = [dict(zip(keys, v)) for v in product(*values)]
@@ -200,10 +200,7 @@ class ParallelExecutor:
         ]
 
         # Execute in parallel
-        results = self.execute_parallel(
-            func=self._train_and_score,
-            task_args=task_args
-        )
+        results = self.execute_parallel(func=self._train_and_score, task_args=task_args)
 
         # Find best parameters
         successful_results = [r for r in results if r.success]
@@ -221,10 +218,10 @@ class ParallelExecutor:
                 {
                     "params": r.result["params"],
                     "score": r.result["score"],
-                    "time": r.execution_time
+                    "time": r.execution_time,
                 }
                 for r in successful_results
-            ]
+            ],
         }
 
     @staticmethod
@@ -233,7 +230,7 @@ class ParallelExecutor:
         X_train: Any,
         y_train: Any,
         params: Dict[str, Any],
-        scoring_func: Callable
+        scoring_func: Callable,
     ) -> Dict[str, Any]:
         """Train model with given params and return score"""
         # Instantiate and train model
@@ -246,7 +243,7 @@ class ParallelExecutor:
         return {
             "params": params,
             "score": score,
-            "model": model  # Note: May not be pickle-able for all models
+            "model": model,  # Note: May not be pickle-able for all models
         }
 
     def parallel_cross_validation(
@@ -256,7 +253,7 @@ class ParallelExecutor:
         y: Any,
         n_splits: int = 5,
         params: Optional[Dict[str, Any]] = None,
-        scoring_func: Optional[Callable] = None
+        scoring_func: Optional[Callable] = None,
     ) -> Dict[str, Any]:
         """
         Perform k-fold cross-validation in parallel.
@@ -278,24 +275,31 @@ class ParallelExecutor:
 
         # Create train/test splits
         from sklearn.model_selection import KFold
+
         kfold = KFold(n_splits=n_splits, shuffle=True, random_state=42)
 
         task_args = []
         for fold_idx, (train_idx, test_idx) in enumerate(kfold.split(X)):
-            X_train = X[train_idx] if hasattr(X, '__getitem__') else X.iloc[train_idx]
-            X_test = X[test_idx] if hasattr(X, '__getitem__') else X.iloc[test_idx]
-            y_train = y[train_idx] if hasattr(y, '__getitem__') else y.iloc[train_idx]
-            y_test = y[test_idx] if hasattr(y, '__getitem__') else y.iloc[test_idx]
+            X_train = X[train_idx] if hasattr(X, "__getitem__") else X.iloc[train_idx]
+            X_test = X[test_idx] if hasattr(X, "__getitem__") else X.iloc[test_idx]
+            y_train = y[train_idx] if hasattr(y, "__getitem__") else y.iloc[train_idx]
+            y_test = y[test_idx] if hasattr(y, "__getitem__") else y.iloc[test_idx]
 
-            task_args.append((
-                model_class, X_train, X_test, y_train, y_test, params, scoring_func, fold_idx
-            ))
+            task_args.append(
+                (
+                    model_class,
+                    X_train,
+                    X_test,
+                    y_train,
+                    y_test,
+                    params,
+                    scoring_func,
+                    fold_idx,
+                )
+            )
 
         # Execute folds in parallel
-        results = self.execute_parallel(
-            func=self._cv_fold,
-            task_args=task_args
-        )
+        results = self.execute_parallel(func=self._cv_fold, task_args=task_args)
 
         # Aggregate results
         successful_results = [r for r in results if r.success]
@@ -308,7 +312,7 @@ class ParallelExecutor:
             "std_score": np.std(scores),
             "min_score": np.min(scores),
             "max_score": np.max(scores),
-            "fold_scores": scores
+            "fold_scores": scores,
         }
 
     @staticmethod
@@ -320,7 +324,7 @@ class ParallelExecutor:
         y_test: Any,
         params: Dict[str, Any],
         scoring_func: Optional[Callable],
-        fold_idx: int
+        fold_idx: int,
     ) -> Dict[str, Any]:
         """Execute a single cross-validation fold"""
         # Train model
@@ -334,16 +338,15 @@ class ParallelExecutor:
             # Default: use model's score method
             score = model.score(X_test, y_test)
 
-        return {
-            "fold": fold_idx,
-            "score": score
-        }
+        return {"fold": fold_idx, "score": score}
 
     def get_statistics(self) -> Dict[str, Any]:
         """Get executor statistics"""
         success_rate = (
-            (self.total_tasks_executed - self.total_failures) / self.total_tasks_executed
-            if self.total_tasks_executed > 0 else 0.0
+            (self.total_tasks_executed - self.total_failures)
+            / self.total_tasks_executed
+            if self.total_tasks_executed > 0
+            else 0.0
         )
 
         return {
@@ -351,5 +354,5 @@ class ParallelExecutor:
             "total_failures": self.total_failures,
             "success_rate": success_rate,
             "max_workers": self.max_workers,
-            "backend": "process" if self.use_processes else "thread"
+            "backend": "process" if self.use_processes else "thread",
         }

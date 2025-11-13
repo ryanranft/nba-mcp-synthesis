@@ -37,6 +37,7 @@ logger = logging.getLogger(__name__)
 try:
     from prophet import Prophet
     from prophet.diagnostics import cross_validation, performance_metrics
+
     PROPHET_AVAILABLE = True
 except ImportError:
     PROPHET_AVAILABLE = False
@@ -46,6 +47,7 @@ except ImportError:
 
 class SeasonMode(Enum):
     """NBA season phases"""
+
     PRESEASON = "preseason"
     REGULAR = "regular_season"
     PLAYOFFS = "playoffs"
@@ -57,7 +59,7 @@ class ProphetConfig:
     """Configuration for Prophet models"""
 
     # Growth
-    growth: str = 'linear'  # 'linear' or 'logistic'
+    growth: str = "linear"  # 'linear' or 'logistic'
     cap: Optional[float] = None  # For logistic growth (e.g., max PPG)
     floor: Optional[float] = None  # Minimum value
 
@@ -108,13 +110,13 @@ class ForecastResult:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'dates': [d.isoformat() for d in self.dates],
-            'predictions': self.predictions.tolist(),
-            'lower_bound': self.lower_bound.tolist(),
-            'upper_bound': self.upper_bound.tolist(),
-            'horizon': self.horizon,
-            'mape': self.mape,
-            'has_components': self.trend is not None
+            "dates": [d.isoformat() for d in self.dates],
+            "predictions": self.predictions.tolist(),
+            "lower_bound": self.lower_bound.tolist(),
+            "upper_bound": self.upper_bound.tolist(),
+            "horizon": self.horizon,
+            "mape": self.mape,
+            "has_components": self.trend is not None,
         }
 
 
@@ -147,7 +149,7 @@ class NBAProphetForecaster:
         self,
         dates: List[datetime],
         values: List[float],
-        regressors: Optional[Dict[str, List[float]]] = None
+        regressors: Optional[Dict[str, List[float]]] = None,
     ) -> pd.DataFrame:
         """
         Prepare data in Prophet format.
@@ -160,23 +162,20 @@ class NBAProphetForecaster:
         Returns:
             DataFrame in Prophet format (ds, y, ...)
         """
-        df = pd.DataFrame({
-            'ds': pd.to_datetime(dates),
-            'y': values
-        })
+        df = pd.DataFrame({"ds": pd.to_datetime(dates), "y": values})
 
         # Add cap/floor for logistic growth
-        if self.config.growth == 'logistic':
+        if self.config.growth == "logistic":
             if self.config.cap is not None:
-                df['cap'] = self.config.cap
+                df["cap"] = self.config.cap
             else:
                 # Auto-set cap as 1.2x max observed
-                df['cap'] = df['y'].max() * 1.2
+                df["cap"] = df["y"].max() * 1.2
 
             if self.config.floor is not None:
-                df['floor'] = self.config.floor
+                df["floor"] = self.config.floor
             else:
-                df['floor'] = 0.0
+                df["floor"] = 0.0
 
         # Add regressors
         if regressors:
@@ -193,9 +192,11 @@ class NBAProphetForecaster:
         self,
         dates: Union[List[datetime], pd.Series],
         values: Union[List[float], np.ndarray, pd.Series],
-        regressors: Optional[Dict[str, Union[List[float], np.ndarray, pd.Series]]] = None,
-        holidays: Optional[pd.DataFrame] = None
-    ) -> 'NBAProphetForecaster':
+        regressors: Optional[
+            Dict[str, Union[List[float], np.ndarray, pd.Series]]
+        ] = None,
+        holidays: Optional[pd.DataFrame] = None,
+    ) -> "NBAProphetForecaster":
         """
         Fit Prophet model to data.
 
@@ -220,16 +221,16 @@ class NBAProphetForecaster:
             yearly_seasonality=self.config.yearly_seasonality,
             weekly_seasonality=self.config.weekly_seasonality,
             daily_seasonality=self.config.daily_seasonality,
-            mcmc_samples=self.config.mcmc_samples
+            mcmc_samples=self.config.mcmc_samples,
         )
 
         # Add custom seasonality (game-level patterns)
         if self.config.add_game_seasonality:
             # Games happen ~3.5x per week
             self.model.add_seasonality(
-                name='game_cycle',
+                name="game_cycle",
                 period=7.0 / self.config.games_per_week,  # ~2 days
-                fourier_order=3
+                fourier_order=3,
             )
 
         # Add regressors
@@ -254,8 +255,8 @@ class NBAProphetForecaster:
     def predict(
         self,
         periods: int,
-        freq: str = 'D',
-        future_regressors: Optional[Dict[str, List[float]]] = None
+        freq: str = "D",
+        future_regressors: Optional[Dict[str, List[float]]] = None,
     ) -> ForecastResult:
         """
         Generate forecast.
@@ -275,16 +276,18 @@ class NBAProphetForecaster:
         future = self.model.make_future_dataframe(periods=periods, freq=freq)
 
         # Add cap/floor for logistic growth
-        if self.config.growth == 'logistic':
+        if self.config.growth == "logistic":
             if self.config.cap is not None:
-                future['cap'] = self.config.cap
+                future["cap"] = self.config.cap
             else:
-                future['cap'] = future['y'].max() * 1.2 if 'y' in future.columns else 100.0
+                future["cap"] = (
+                    future["y"].max() * 1.2 if "y" in future.columns else 100.0
+                )
 
             if self.config.floor is not None:
-                future['floor'] = self.config.floor
+                future["floor"] = self.config.floor
             else:
-                future['floor'] = 0.0
+                future["floor"] = 0.0
 
         # Add future regressors
         if future_regressors:
@@ -292,10 +295,12 @@ class NBAProphetForecaster:
                 if name in self.feature_columns:
                     # Pad with last value or zeros if not enough future values
                     if len(values) < len(future):
-                        padding = [values[-1] if values else 0.0] * (len(future) - len(values))
+                        padding = [values[-1] if values else 0.0] * (
+                            len(future) - len(values)
+                        )
                         values = list(values) + padding
 
-                    future[name] = values[:len(future)]
+                    future[name] = values[: len(future)]
 
         # Generate forecast
         forecast = self.model.predict(future)
@@ -305,22 +310,19 @@ class NBAProphetForecaster:
 
         # Build result
         result = ForecastResult(
-            dates=forecast_only['ds'].dt.to_pydatetime().tolist(),
-            predictions=forecast_only['yhat'].values,
-            lower_bound=forecast_only['yhat_lower'].values,
-            upper_bound=forecast_only['yhat_upper'].values,
-            trend=forecast_only['trend'].values if 'trend' in forecast_only else None,
-            weekly=forecast_only.get('weekly', None),
-            horizon=periods
+            dates=forecast_only["ds"].dt.to_pydatetime().tolist(),
+            predictions=forecast_only["yhat"].values,
+            lower_bound=forecast_only["yhat_lower"].values,
+            upper_bound=forecast_only["yhat_upper"].values,
+            trend=forecast_only["trend"].values if "trend" in forecast_only else None,
+            weekly=forecast_only.get("weekly", None),
+            horizon=periods,
         )
 
         return result
 
     def cross_validate(
-        self,
-        initial_days: int = 30,
-        period_days: int = 7,
-        horizon_days: int = 7
+        self, initial_days: int = 30, period_days: int = 7, horizon_days: int = 7
     ) -> Dict[str, float]:
         """
         Perform time series cross-validation.
@@ -345,9 +347,9 @@ class NBAProphetForecaster:
             # Run cross-validation
             df_cv = cross_validation(
                 self.model,
-                initial=f'{initial_days} days',
-                period=f'{period_days} days',
-                horizon=f'{horizon_days} days'
+                initial=f"{initial_days} days",
+                period=f"{period_days} days",
+                horizon=f"{horizon_days} days",
             )
 
             # Calculate metrics
@@ -355,10 +357,14 @@ class NBAProphetForecaster:
 
             # Aggregate metrics
             metrics = {
-                'mape': float(df_metrics['mape'].mean()),
-                'rmse': float(df_metrics['rmse'].mean()),
-                'mae': float(df_metrics['mae'].mean()),
-                'coverage': float(df_metrics['coverage'].mean()) if 'coverage' in df_metrics else None
+                "mape": float(df_metrics["mape"].mean()),
+                "rmse": float(df_metrics["rmse"].mean()),
+                "mae": float(df_metrics["mae"].mean()),
+                "coverage": (
+                    float(df_metrics["coverage"].mean())
+                    if "coverage" in df_metrics
+                    else None
+                ),
             }
 
             logger.info(f"CV MAPE: {metrics['mape']:.4f}, RMSE: {metrics['rmse']:.4f}")
@@ -379,18 +385,17 @@ class NBAProphetForecaster:
         if not self.is_fitted or self.model is None:
             return None
 
-        if hasattr(self.model, 'changepoints'):
+        if hasattr(self.model, "changepoints"):
             changepoints = self.model.changepoints
-            deltas = self.model.params['delta'][0]  # Rate changes
+            deltas = self.model.params["delta"][0]  # Rate changes
 
-            df = pd.DataFrame({
-                'date': changepoints,
-                'delta': deltas[:len(changepoints)]
-            })
+            df = pd.DataFrame(
+                {"date": changepoints, "delta": deltas[: len(changepoints)]}
+            )
 
             # Filter significant changepoints
             threshold = np.abs(deltas).mean() * 0.5
-            df = df[np.abs(df['delta']) > threshold]
+            df = df[np.abs(df["delta"]) > threshold]
 
             return df
         else:
@@ -408,11 +413,7 @@ class NBAProphetForecaster:
 
         # This requires a forecast to have been made
         # Return placeholder
-        return {
-            'trend': 0.0,
-            'weekly': 0.0,
-            'regressors': 0.0
-        }
+        return {"trend": 0.0, "weekly": 0.0, "regressors": 0.0}
 
 
 class PlayerPerformanceForecaster:
@@ -439,8 +440,8 @@ class PlayerPerformanceForecaster:
         minutes_played: Optional[List[float]] = None,
         rest_days: Optional[List[int]] = None,
         is_home: Optional[List[bool]] = None,
-        opponent_rating: Optional[List[float]] = None
-    ) -> 'PlayerPerformanceForecaster':
+        opponent_rating: Optional[List[float]] = None,
+    ) -> "PlayerPerformanceForecaster":
         """
         Fit model for a player.
 
@@ -460,18 +461,18 @@ class PlayerPerformanceForecaster:
         regressors = {}
 
         if minutes_played is not None:
-            regressors['minutes'] = minutes_played
+            regressors["minutes"] = minutes_played
 
         if rest_days is not None:
-            regressors['rest_days'] = rest_days
+            regressors["rest_days"] = rest_days
 
         if is_home is not None:
-            regressors['home'] = [1.0 if h else 0.0 for h in is_home]
+            regressors["home"] = [1.0 if h else 0.0 for h in is_home]
 
         if opponent_rating is not None:
             # Normalize opponent rating
             mean_rating = np.mean(opponent_rating)
-            regressors['opponent_strength'] = [r - mean_rating for r in opponent_rating]
+            regressors["opponent_strength"] = [r - mean_rating for r in opponent_rating]
 
         # Fit forecaster
         self.forecaster.fit(game_dates, stat_values, regressors)
@@ -486,7 +487,7 @@ class PlayerPerformanceForecaster:
         future_minutes: Optional[List[float]] = None,
         future_rest_days: Optional[List[int]] = None,
         future_is_home: Optional[List[bool]] = None,
-        future_opponent_rating: Optional[List[float]] = None
+        future_opponent_rating: Optional[List[float]] = None,
     ) -> ForecastResult:
         """
         Forecast next N games for player.
@@ -505,22 +506,22 @@ class PlayerPerformanceForecaster:
         future_regressors = {}
 
         if future_minutes is not None:
-            future_regressors['minutes'] = future_minutes
+            future_regressors["minutes"] = future_minutes
 
         if future_rest_days is not None:
-            future_regressors['rest_days'] = future_rest_days
+            future_regressors["rest_days"] = future_rest_days
 
         if future_is_home is not None:
-            future_regressors['home'] = [1.0 if h else 0.0 for h in future_is_home]
+            future_regressors["home"] = [1.0 if h else 0.0 for h in future_is_home]
 
         if future_opponent_rating is not None:
-            future_regressors['opponent_strength'] = future_opponent_rating
+            future_regressors["opponent_strength"] = future_opponent_rating
 
         # Forecast (assume ~3.5 games per week, so periods = n_games * 2 days)
         forecast = self.forecaster.predict(
             periods=n_games * 2,  # Approximate days
-            freq='D',
-            future_regressors=future_regressors
+            freq="D",
+            future_regressors=future_regressors,
         )
 
         return forecast
@@ -534,20 +535,24 @@ def create_nba_holidays() -> pd.DataFrame:
         DataFrame with holidays in Prophet format
     """
     # Define key NBA dates
-    holidays = pd.DataFrame({
-        'holiday': [
-            'All_Star_Break',
-            'Trade_Deadline',
-            'Playoff_Start',
-            'Finals_Start'
-        ],
-        'ds': pd.to_datetime([
-            '2024-02-15',  # Placeholder dates
-            '2024-02-08',
-            '2024-04-15',
-            '2024-06-01'
-        ])
-    })
+    holidays = pd.DataFrame(
+        {
+            "holiday": [
+                "All_Star_Break",
+                "Trade_Deadline",
+                "Playoff_Start",
+                "Finals_Start",
+            ],
+            "ds": pd.to_datetime(
+                [
+                    "2024-02-15",  # Placeholder dates
+                    "2024-02-08",
+                    "2024-04-15",
+                    "2024-06-01",
+                ]
+            ),
+        }
+    )
 
     return holidays
 
@@ -558,11 +563,11 @@ def check_prophet_available() -> bool:
 
 
 __all__ = [
-    'ProphetConfig',
-    'ForecastResult',
-    'NBAProphetForecaster',
-    'PlayerPerformanceForecaster',
-    'SeasonMode',
-    'create_nba_holidays',
-    'check_prophet_available',
+    "ProphetConfig",
+    "ForecastResult",
+    "NBAProphetForecaster",
+    "PlayerPerformanceForecaster",
+    "SeasonMode",
+    "create_nba_holidays",
+    "check_prophet_available",
 ]

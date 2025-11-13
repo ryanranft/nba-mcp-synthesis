@@ -20,7 +20,7 @@ class TestCacheManager:
             redis_url=None,  # Force memory cache
             default_ttl=60,
             max_memory_cache_size=100,
-            enabled=True
+            enabled=True,
         )
 
     @pytest.fixture
@@ -29,16 +29,12 @@ class TestCacheManager:
         return {
             "player_id": 123,
             "name": "LeBron James",
-            "stats": {"ppg": 27.1, "rpg": 7.5, "apg": 7.4}
+            "stats": {"ppg": 27.1, "rpg": 7.5, "apg": 7.4},
         }
 
     def test_cache_initialization(self):
         """Test cache manager initializes correctly"""
-        cache = CacheManager(
-            default_ttl=120,
-            max_memory_cache_size=500,
-            enabled=True
-        )
+        cache = CacheManager(default_ttl=120, max_memory_cache_size=500, enabled=True)
 
         assert cache.enabled is True
         assert cache.default_ttl == 120
@@ -76,6 +72,7 @@ class TestCacheManager:
 
         # Wait for expiration
         import time
+
         time.sleep(1.5)
 
         # Should be expired
@@ -213,7 +210,7 @@ class TestCacheManager:
             key="test:key",
             value={"data": "test"},
             created_at=datetime.now(),
-            ttl_seconds=300
+            ttl_seconds=300,
         )
 
         assert entry.key == "test:key"
@@ -265,7 +262,7 @@ class TestCacheManager:
             ("list:key", [1, 2, 3]),
             ("dict:key", {"a": 1, "b": 2}),
             ("bool:key", True),
-            ("null:key", None)
+            ("null:key", None),
         ]
 
         for key, value in test_cases:

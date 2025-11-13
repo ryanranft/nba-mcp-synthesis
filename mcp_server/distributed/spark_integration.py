@@ -14,7 +14,15 @@ try:
     from pyspark.sql import SparkSession
     from pyspark.sql import DataFrame as SparkDataFrame
     import pyspark.sql.functions as F
-    from pyspark.sql.types import StructType, StructField, StringType, IntegerType, FloatType, TimestampType
+    from pyspark.sql.types import (
+        StructType,
+        StructField,
+        StringType,
+        IntegerType,
+        FloatType,
+        TimestampType,
+    )
+
     PYSPARK_AVAILABLE = True
 except ImportError:
     PYSPARK_AVAILABLE = False
@@ -46,7 +54,7 @@ class SparkSessionManager:
         executor_memory: str = "2g",
         driver_memory: str = "2g",
         executor_cores: int = 2,
-        config: Optional[Dict[str, str]] = None
+        config: Optional[Dict[str, str]] = None,
     ):
         """
         Initialize Spark session manager.
@@ -60,7 +68,9 @@ class SparkSessionManager:
             config: Additional Spark configuration
         """
         if not PYSPARK_AVAILABLE:
-            raise ImportError("PySpark is not installed. Install with: pip install pyspark")
+            raise ImportError(
+                "PySpark is not installed. Install with: pip install pyspark"
+            )
 
         self.app_name = app_name
         self.master = master
@@ -71,7 +81,9 @@ class SparkSessionManager:
 
         self._spark: Optional[SparkSession] = None
 
-        logger.info(f"SparkSessionManager initialized (app={app_name}, master={master})")
+        logger.info(
+            f"SparkSessionManager initialized (app={app_name}, master={master})"
+        )
 
     def get_or_create_session(self) -> SparkSession:
         """
@@ -86,8 +98,7 @@ class SparkSessionManager:
         logger.info("Creating new Spark session")
 
         builder = (
-            SparkSession.builder
-            .appName(self.app_name)
+            SparkSession.builder.appName(self.app_name)
             .master(self.master)
             .config("spark.executor.memory", self.executor_memory)
             .config("spark.driver.memory", self.driver_memory)
@@ -132,7 +143,7 @@ class SparkSessionManager:
             "spark_version": self._spark.version,
             "executor_memory": self.executor_memory,
             "driver_memory": self.driver_memory,
-            "executor_cores": self.executor_cores
+            "executor_cores": self.executor_cores,
         }
 
     def __enter__(self):
@@ -168,7 +179,7 @@ class DataFrameConverter:
         self,
         df: pd.DataFrame,
         schema: Optional[StructType] = None,
-        num_partitions: Optional[int] = None
+        num_partitions: Optional[int] = None,
     ) -> SparkDataFrame:
         """
         Convert pandas DataFrame to Spark DataFrame.
@@ -195,9 +206,7 @@ class DataFrameConverter:
         return spark_df
 
     def spark_to_pandas(
-        self,
-        df: SparkDataFrame,
-        limit: Optional[int] = None
+        self, df: SparkDataFrame, limit: Optional[int] = None
     ) -> pd.DataFrame:
         """
         Convert Spark DataFrame to pandas DataFrame.
@@ -224,9 +233,7 @@ class DataFrameConverter:
         return pandas_df
 
     def optimize_partitioning(
-        self,
-        df: SparkDataFrame,
-        target_partition_size_mb: int = 128
+        self, df: SparkDataFrame, target_partition_size_mb: int = 128
     ) -> SparkDataFrame:
         """
         Optimize DataFrame partitioning based on size.
@@ -272,9 +279,7 @@ class DistributedDataValidator:
         self.spark_manager = spark_manager
 
     def validate_nulls(
-        self,
-        df: SparkDataFrame,
-        columns: Optional[List[str]] = None
+        self, df: SparkDataFrame, columns: Optional[List[str]] = None
     ) -> Dict[str, int]:
         """
         Check for null values across all partitions.
@@ -306,7 +311,7 @@ class DistributedDataValidator:
         df: SparkDataFrame,
         column: str,
         min_value: Optional[float] = None,
-        max_value: Optional[float] = None
+        max_value: Optional[float] = None,
     ) -> Dict[str, Any]:
         """
         Validate column values are within acceptable range.
@@ -329,7 +334,7 @@ class DistributedDataValidator:
         stats = df.select(
             F.min(column).alias("actual_min"),
             F.max(column).alias("actual_max"),
-            F.count(column).alias("count")
+            F.count(column).alias("count"),
         ).collect()[0]
 
         actual_min = stats["actual_min"]
@@ -351,14 +356,10 @@ class DistributedDataValidator:
             "expected_max": max_value,
             "total_rows": count,
             "violations": violations,
-            "valid": violations == 0
+            "valid": violations == 0,
         }
 
-    def validate_uniqueness(
-        self,
-        df: SparkDataFrame,
-        column: str
-    ) -> Dict[str, Any]:
+    def validate_uniqueness(self, df: SparkDataFrame, column: str) -> Dict[str, Any]:
         """
         Check for duplicate values in a column.
 
@@ -384,13 +385,13 @@ class DistributedDataValidator:
             "distinct_values": distinct_count,
             "duplicates": duplicates,
             "is_unique": duplicates == 0,
-            "uniqueness_ratio": distinct_count / total_count if total_count > 0 else 0.0
+            "uniqueness_ratio": (
+                distinct_count / total_count if total_count > 0 else 0.0
+            ),
         }
 
     def run_full_validation(
-        self,
-        df: SparkDataFrame,
-        validation_rules: Dict[str, Any]
+        self, df: SparkDataFrame, validation_rules: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
         Run comprehensive validation suite.
@@ -408,7 +409,7 @@ class DistributedDataValidator:
             "total_rows": df.count(),
             "total_columns": len(df.columns),
             "validations": {},
-            "overall_valid": True
+            "overall_valid": True,
         }
 
         # Null checks
@@ -423,9 +424,7 @@ class DistributedDataValidator:
             range_results = []
             for col, ranges in validation_rules["ranges"].items():
                 result = self.validate_ranges(
-                    df, col,
-                    min_value=ranges.get("min"),
-                    max_value=ranges.get("max")
+                    df, col, min_value=ranges.get("min"), max_value=ranges.get("max")
                 )
                 range_results.append(result)
                 if not result["valid"]:
@@ -444,6 +443,8 @@ class DistributedDataValidator:
 
             results["validations"]["uniqueness"] = uniqueness_results
 
-        logger.info(f"Validation complete: {'PASSED' if results['overall_valid'] else 'FAILED'}")
+        logger.info(
+            f"Validation complete: {'PASSED' if results['overall_valid'] else 'FAILED'}"
+        )
 
         return results

@@ -26,20 +26,25 @@ from sklearn.linear_model import LogisticRegression, Ridge
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.base import clone
 from sklearn.metrics import (
-    accuracy_score, roc_auc_score, log_loss, brier_score_loss,
-    classification_report, confusion_matrix
+    accuracy_score,
+    roc_auc_score,
+    log_loss,
+    brier_score_loss,
+    classification_report,
+    confusion_matrix,
 )
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 try:
     import xgboost as xgb
+
     HAS_XGBOOST = True
 except ImportError:
     HAS_XGBOOST = False
     print("Warning: XGBoost not installed. Install with: pip install xgboost")
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 
 class GameOutcomeEnsemble:
@@ -48,7 +53,7 @@ class GameOutcomeEnsemble:
     for NBA game outcome prediction.
     """
 
-    def __init__(self, use_stacking=False, meta_learner_type='logistic'):
+    def __init__(self, use_stacking=False, meta_learner_type="logistic"):
         """
         Initialize ensemble model.
 
@@ -73,26 +78,23 @@ class GameOutcomeEnsemble:
         models = {}
 
         # Logistic Regression with L2 regularization
-        models['logistic'] = LogisticRegression(
-            C=1.0,
-            max_iter=1000,
-            random_state=42,
-            n_jobs=-1
+        models["logistic"] = LogisticRegression(
+            C=1.0, max_iter=1000, random_state=42, n_jobs=-1
         )
 
         # Random Forest
-        models['random_forest'] = RandomForestClassifier(
+        models["random_forest"] = RandomForestClassifier(
             n_estimators=200,
             max_depth=12,
             min_samples_split=20,
             min_samples_leaf=10,
             random_state=42,
-            n_jobs=-1
+            n_jobs=-1,
         )
 
         # XGBoost (if available)
         if HAS_XGBOOST:
-            models['xgboost'] = xgb.XGBClassifier(
+            models["xgboost"] = xgb.XGBClassifier(
                 n_estimators=200,
                 max_depth=6,
                 learning_rate=0.05,
@@ -100,7 +102,7 @@ class GameOutcomeEnsemble:
                 colsample_bytree=0.8,
                 random_state=42,
                 n_jobs=-1,
-                eval_metric='logloss'
+                eval_metric="logloss",
             )
         else:
             print("⚠ XGBoost not available, using LR + RF only")
@@ -145,7 +147,9 @@ class GameOutcomeEnsemble:
             train_auc = roc_auc_score(y_train, train_pred_proba)
             train_brier = brier_score_loss(y_train, train_pred_proba)
 
-            print(f"  Train - Accuracy: {train_acc:.4f}, AUC: {train_auc:.4f}, Brier: {train_brier:.4f}")
+            print(
+                f"  Train - Accuracy: {train_acc:.4f}, AUC: {train_auc:.4f}, Brier: {train_brier:.4f}"
+            )
 
             # Evaluate on validation set if provided
             if X_val is not None:
@@ -154,7 +158,9 @@ class GameOutcomeEnsemble:
                 val_auc = roc_auc_score(y_val, val_pred_proba)
                 val_brier = brier_score_loss(y_val, val_pred_proba)
 
-                print(f"  Val   - Accuracy: {val_acc:.4f}, AUC: {val_auc:.4f}, Brier: {val_brier:.4f}")
+                print(
+                    f"  Val   - Accuracy: {val_acc:.4f}, AUC: {val_auc:.4f}, Brier: {val_brier:.4f}"
+                )
 
         # Optimize ensemble (stacking or weighted average)
         if X_val is not None:
@@ -183,7 +189,7 @@ class GameOutcomeEnsemble:
         """Optimize ensemble weights using grid search on validation set."""
         from itertools import product
 
-        best_score = float('inf')
+        best_score = float("inf")
         best_weights = None
 
         # Grid search over weight combinations (normalized to sum to 1)
@@ -210,8 +216,9 @@ class GameOutcomeEnsemble:
 
             if score < best_score:
                 best_score = score
-                best_weights = {name: weights_array[idx]
-                               for idx, name in enumerate(self.models)}
+                best_weights = {
+                    name: weights_array[idx] for idx, name in enumerate(self.models)
+                }
 
         self.weights = best_weights
 
@@ -237,7 +244,9 @@ class GameOutcomeEnsemble:
 
         for fold_idx, (train_idx, val_idx) in enumerate(kfold.split(X)):
             X_fold_train, X_fold_val = X[train_idx], X[val_idx]
-            y_fold_train = y.iloc[train_idx] if isinstance(y, pd.Series) else y[train_idx]
+            y_fold_train = (
+                y.iloc[train_idx] if isinstance(y, pd.Series) else y[train_idx]
+            )
 
             # Train base models on fold
             for model_idx, (name, model) in enumerate(self.models.items()):
@@ -287,7 +296,7 @@ class GameOutcomeEnsemble:
         meta_features_val = self._get_base_predictions(X_val)
 
         # Train meta-learner(s)
-        if self.meta_learner_type == 'both':
+        if self.meta_learner_type == "both":
             # Train both and compare
             print("\n  Training Logistic Regression meta-learner...")
             meta_logistic = LogisticRegression(C=1.0, max_iter=1000, random_state=42)
@@ -297,7 +306,9 @@ class GameOutcomeEnsemble:
             brier_logistic = brier_score_loss(y_val, val_pred_logistic)
             acc_logistic = accuracy_score(y_val, (val_pred_logistic >= 0.5).astype(int))
 
-            print(f"    Val - Accuracy: {acc_logistic:.4f}, Brier: {brier_logistic:.4f}")
+            print(
+                f"    Val - Accuracy: {acc_logistic:.4f}, Brier: {brier_logistic:.4f}"
+            )
 
             print("\n  Training Ridge meta-learner...")
             meta_ridge = Ridge(alpha=1.0, random_state=42)
@@ -311,24 +322,21 @@ class GameOutcomeEnsemble:
             print(f"    Val - Accuracy: {acc_ridge:.4f}, Brier: {brier_ridge:.4f}")
 
             # Store both
-            self.meta_learners = {
-                'logistic': meta_logistic,
-                'ridge': meta_ridge
-            }
+            self.meta_learners = {"logistic": meta_logistic, "ridge": meta_ridge}
 
             # Select best based on Brier score
             if brier_logistic < brier_ridge:
                 self.meta_learner = meta_logistic
-                best_name = 'logistic'
+                best_name = "logistic"
                 best_brier = brier_logistic
             else:
                 self.meta_learner = meta_ridge
-                best_name = 'ridge'
+                best_name = "ridge"
                 best_brier = brier_ridge
 
             print(f"\n  ✓ Best meta-learner: {best_name} (Brier: {best_brier:.4f})")
 
-        elif self.meta_learner_type == 'ridge':
+        elif self.meta_learner_type == "ridge":
             print("\n  Training Ridge meta-learner...")
             self.meta_learner = Ridge(alpha=1.0, random_state=42)
             self.meta_learner.fit(meta_features_train, y_train)
@@ -342,7 +350,9 @@ class GameOutcomeEnsemble:
 
         else:  # logistic (default)
             print("\n  Training Logistic Regression meta-learner...")
-            self.meta_learner = LogisticRegression(C=1.0, max_iter=1000, random_state=42)
+            self.meta_learner = LogisticRegression(
+                C=1.0, max_iter=1000, random_state=42
+            )
             self.meta_learner.fit(meta_features_train, y_train)
 
             val_pred = self.meta_learner.predict_proba(meta_features_val)[:, 1]
@@ -393,11 +403,13 @@ class GameOutcomeEnsemble:
         """Get feature importance from tree-based models."""
         importance_dict = {}
 
-        if 'random_forest' in self.models:
-            importance_dict['random_forest'] = self.models['random_forest'].feature_importances_
+        if "random_forest" in self.models:
+            importance_dict["random_forest"] = self.models[
+                "random_forest"
+            ].feature_importances_
 
-        if 'xgboost' in self.models:
-            importance_dict['xgboost'] = self.models['xgboost'].feature_importances_
+        if "xgboost" in self.models:
+            importance_dict["xgboost"] = self.models["xgboost"].feature_importances_
 
         return importance_dict
 
@@ -409,21 +421,32 @@ def load_and_prepare_data(features_path: str):
     print(f"✓ Loaded {len(df)} games")
 
     # Remove metadata columns
-    feature_cols = [col for col in df.columns if col not in [
-        'game_id', 'game_date', 'season', 'home_team_id', 'away_team_id',
-        'home_win', 'home_score', 'away_score'
-    ]]
+    feature_cols = [
+        col
+        for col in df.columns
+        if col
+        not in [
+            "game_id",
+            "game_date",
+            "season",
+            "home_team_id",
+            "away_team_id",
+            "home_win",
+            "home_score",
+            "away_score",
+        ]
+    ]
 
     X = df[feature_cols]
-    y = df['home_win']
+    y = df["home_win"]
 
     # Handle missing values
     X = X.fillna(X.mean())
 
     # Split by season (temporal split)
-    train_mask = df['season'].isin(['2021-22', '2022-23'])
-    val_mask = df['season'] == '2023-24'
-    test_mask = df['season'] == '2024-25'
+    train_mask = df["season"].isin(["2021-22", "2022-23"])
+    val_mask = df["season"] == "2023-24"
+    test_mask = df["season"] == "2024-25"
 
     X_train, y_train = X[train_mask], y[train_mask]
     X_val, y_val = X[val_mask], y[val_mask]
@@ -462,7 +485,7 @@ def evaluate_model(model, X_test, y_test, output_dir):
 
     # Classification report
     print(f"\nClassification Report:")
-    print(classification_report(y_test, y_pred, target_names=['Away Win', 'Home Win']))
+    print(classification_report(y_test, y_pred, target_names=["Away Win", "Home Win"]))
 
     # Confusion matrix
     cm = confusion_matrix(y_test, y_pred)
@@ -472,38 +495,39 @@ def evaluate_model(model, X_test, y_test, output_dir):
 
     # Save confusion matrix plot
     plt.figure(figsize=(8, 6))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-                xticklabels=['Away Win', 'Home Win'],
-                yticklabels=['Away Win', 'Home Win'])
-    plt.title('Confusion Matrix - Test Set')
-    plt.ylabel('True Label')
-    plt.xlabel('Predicted Label')
+    sns.heatmap(
+        cm,
+        annot=True,
+        fmt="d",
+        cmap="Blues",
+        xticklabels=["Away Win", "Home Win"],
+        yticklabels=["Away Win", "Home Win"],
+    )
+    plt.title("Confusion Matrix - Test Set")
+    plt.ylabel("True Label")
+    plt.xlabel("Predicted Label")
     plt.tight_layout()
-    plt.savefig(output_dir / 'confusion_matrix.png', dpi=150)
+    plt.savefig(output_dir / "confusion_matrix.png", dpi=150)
     print(f"\n✓ Saved confusion matrix to {output_dir}/confusion_matrix.png")
 
     # Calibration curve
     from sklearn.calibration import calibration_curve
+
     prob_true, prob_pred = calibration_curve(y_test, y_pred_proba, n_bins=10)
 
     plt.figure(figsize=(8, 6))
-    plt.plot([0, 1], [0, 1], 'k--', label='Perfect Calibration')
-    plt.plot(prob_pred, prob_true, 'bo-', label=f'Model (Brier: {brier:.4f})')
-    plt.xlabel('Predicted Probability')
-    plt.ylabel('True Probability')
-    plt.title('Calibration Curve - Test Set')
+    plt.plot([0, 1], [0, 1], "k--", label="Perfect Calibration")
+    plt.plot(prob_pred, prob_true, "bo-", label=f"Model (Brier: {brier:.4f})")
+    plt.xlabel("Predicted Probability")
+    plt.ylabel("True Probability")
+    plt.title("Calibration Curve - Test Set")
     plt.legend()
     plt.grid(alpha=0.3)
     plt.tight_layout()
-    plt.savefig(output_dir / 'calibration_curve.png', dpi=150)
+    plt.savefig(output_dir / "calibration_curve.png", dpi=150)
     print(f"✓ Saved calibration curve to {output_dir}/calibration_curve.png")
 
-    return {
-        'accuracy': accuracy,
-        'auc': auc,
-        'brier_score': brier,
-        'log_loss': logloss
-    }
+    return {"accuracy": accuracy, "auc": auc, "brier_score": brier, "log_loss": logloss}
 
 
 def main():
@@ -511,25 +535,21 @@ def main():
         description="Train ensemble model for NBA game outcome prediction"
     )
     parser.add_argument(
-        '--features',
-        default='data/game_features.csv',
-        help='Path to features CSV file'
+        "--features", default="data/game_features.csv", help="Path to features CSV file"
     )
     parser.add_argument(
-        '--output',
-        default='models/',
-        help='Output directory for models and plots'
+        "--output", default="models/", help="Output directory for models and plots"
     )
     parser.add_argument(
-        '--use-stacking',
-        action='store_true',
-        help='Use stacking meta-learner instead of weighted ensemble'
+        "--use-stacking",
+        action="store_true",
+        help="Use stacking meta-learner instead of weighted ensemble",
     )
     parser.add_argument(
-        '--meta-learner',
-        choices=['logistic', 'ridge', 'both'],
-        default='both',
-        help='Type of meta-learner for stacking (default: both - compare and select best)'
+        "--meta-learner",
+        choices=["logistic", "ridge", "both"],
+        default="both",
+        help="Type of meta-learner for stacking (default: both - compare and select best)",
     )
 
     args = parser.parse_args()
@@ -549,12 +569,13 @@ def main():
     print()
 
     # Load and prepare data
-    X_train, y_train, X_val, y_val, X_test, y_test, feature_names = load_and_prepare_data(args.features)
+    X_train, y_train, X_val, y_val, X_test, y_test, feature_names = (
+        load_and_prepare_data(args.features)
+    )
 
     # Train ensemble
     ensemble = GameOutcomeEnsemble(
-        use_stacking=args.use_stacking,
-        meta_learner_type=args.meta_learner
+        use_stacking=args.use_stacking, meta_learner_type=args.meta_learner
     )
     ensemble.fit(X_train, y_train, X_val, y_val)
 
@@ -563,31 +584,31 @@ def main():
 
     # Save models
     print("\nSaving models...")
-    with open(output_dir / 'ensemble_game_outcome_model.pkl', 'wb') as f:
+    with open(output_dir / "ensemble_game_outcome_model.pkl", "wb") as f:
         pickle.dump(ensemble, f)
     print(f"✓ Saved ensemble model to {output_dir}/ensemble_game_outcome_model.pkl")
 
     # Save metadata
     metadata = {
-        'training_date': datetime.now().isoformat(),
-        'train_size': len(X_train),
-        'val_size': len(X_val),
-        'test_size': len(X_test),
-        'num_features': len(feature_names),
-        'feature_names': feature_names,
-        'ensemble_type': 'stacking' if ensemble.use_stacking else 'weighted',
-        'model_weights': ensemble.weights,
-        'test_metrics': metrics
+        "training_date": datetime.now().isoformat(),
+        "train_size": len(X_train),
+        "val_size": len(X_val),
+        "test_size": len(X_test),
+        "num_features": len(feature_names),
+        "feature_names": feature_names,
+        "ensemble_type": "stacking" if ensemble.use_stacking else "weighted",
+        "model_weights": ensemble.weights,
+        "test_metrics": metrics,
     }
 
     # Add stacking-specific metadata
     if ensemble.use_stacking:
-        metadata['meta_learner_type'] = ensemble.meta_learner_type
-        metadata['meta_learner_class'] = ensemble.meta_learner.__class__.__name__
+        metadata["meta_learner_type"] = ensemble.meta_learner_type
+        metadata["meta_learner_class"] = ensemble.meta_learner.__class__.__name__
         if ensemble.meta_learners:
-            metadata['all_meta_learners'] = list(ensemble.meta_learners.keys())
+            metadata["all_meta_learners"] = list(ensemble.meta_learners.keys())
 
-    with open(output_dir / 'model_metadata.json', 'w') as f:
+    with open(output_dir / "model_metadata.json", "w") as f:
         json.dump(metadata, f, indent=2)
     print(f"✓ Saved metadata to {output_dir}/model_metadata.json")
 
@@ -603,5 +624,5 @@ def main():
     print("  2. This will generate predictions for calibration training")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

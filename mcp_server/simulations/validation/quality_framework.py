@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class QualityMetrics:
     """Quality metrics for simulation results"""
+
     realism_score: float  # 0.0 to 1.0
     variance_score: float  # Measure of appropriate variability
     historical_alignment: float  # Match with historical data
@@ -32,14 +33,17 @@ class QualityMetrics:
 
     def is_high_quality(self, threshold: float = 0.8) -> bool:
         """Check if metrics indicate high quality"""
-        return (self.realism_score >= threshold and
-                self.historical_alignment >= threshold and
-                self.anomaly_count == 0)
+        return (
+            self.realism_score >= threshold
+            and self.historical_alignment >= threshold
+            and self.anomaly_count == 0
+        )
 
 
 @dataclass
 class HistoricalStats:
     """Historical statistics for comparison"""
+
     stat_name: str
     mean: float
     std: float
@@ -100,13 +104,13 @@ class SimulationQualityChecker:
                         max_value=float(data.max()),
                         percentile_25=float(data.quantile(0.25)),
                         percentile_50=float(data.quantile(0.50)),
-                        percentile_75=float(data.quantile(0.75))
+                        percentile_75=float(data.quantile(0.75)),
                     )
 
     def compute_realism_score(
         self,
         simulated_data: Dict[str, float],
-        weights: Optional[Dict[str, float]] = None
+        weights: Optional[Dict[str, float]] = None,
     ) -> float:
         """
         Compute realism score by comparing simulation to historical data.
@@ -158,7 +162,7 @@ class SimulationQualityChecker:
     def analyze_variance(
         self,
         simulation_runs: List[Dict[str, float]],
-        expected_variance: Optional[Dict[str, float]] = None
+        expected_variance: Optional[Dict[str, float]] = None,
     ) -> float:
         """
         Analyze variance across multiple simulation runs.
@@ -210,9 +214,7 @@ class SimulationQualityChecker:
         return sum(variance_scores) / len(variance_scores)
 
     def validate_historical_alignment(
-        self,
-        simulated_stats: Dict[str, float],
-        std_devs_threshold: float = 3.0
+        self, simulated_stats: Dict[str, float], std_devs_threshold: float = 3.0
     ) -> Tuple[float, List[str]]:
         """
         Validate that simulated stats align with historical ranges.
@@ -239,7 +241,9 @@ class SimulationQualityChecker:
                 if hist_stat.is_within_range(sim_value, std_devs_threshold):
                     in_range_count += 1
                 else:
-                    anomalies.append(f"{stat_name}: {sim_value} (expected {hist_stat.mean:.2f} ± {hist_stat.std:.2f})")
+                    anomalies.append(
+                        f"{stat_name}: {sim_value} (expected {hist_stat.mean:.2f} ± {hist_stat.std:.2f})"
+                    )
 
         if total_count == 0:
             return 0.5, []
@@ -250,9 +254,7 @@ class SimulationQualityChecker:
         return alignment_score, anomalies
 
     def detect_anomalies(
-        self,
-        simulated_data: Dict[str, float],
-        threshold: float = 3.0
+        self, simulated_data: Dict[str, float], threshold: float = 3.0
     ) -> List[str]:
         """
         Detect statistical anomalies in simulated data.
@@ -283,7 +285,7 @@ class SimulationQualityChecker:
     def compute_quality_metrics(
         self,
         simulated_data: Dict[str, float],
-        simulation_runs: Optional[List[Dict[str, float]]] = None
+        simulation_runs: Optional[List[Dict[str, float]]] = None,
     ) -> QualityMetrics:
         """
         Compute comprehensive quality metrics for simulation.
@@ -311,7 +313,7 @@ class SimulationQualityChecker:
             realism_score=realism_score,
             variance_score=variance_score,
             historical_alignment=alignment_score,
-            anomaly_count=len(anomalies)
+            anomaly_count=len(anomalies),
         )
 
     def get_statistics(self) -> Dict[str, Any]:
@@ -322,7 +324,7 @@ class SimulationQualityChecker:
             Dict with statistics
         """
         return {
-            'total_checks': self.quality_checks_performed,
-            'historical_stats_available': len(self.historical_stats),
-            'has_historical_data': self.historical_data is not None
+            "total_checks": self.quality_checks_performed,
+            "historical_stats_available": len(self.historical_stats),
+            "has_historical_data": self.historical_data is not None,
         }

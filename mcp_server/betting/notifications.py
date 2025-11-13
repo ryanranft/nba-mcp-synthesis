@@ -84,6 +84,7 @@ from pathlib import Path
 # Optional imports
 try:
     from mcp_server.betting.alert_system import Alert, AlertLevel
+
     ALERT_SYSTEM_AVAILABLE = True
 except ImportError:
     ALERT_SYSTEM_AVAILABLE = False
@@ -93,6 +94,7 @@ except ImportError:
 @dataclass
 class NotificationResult:
     """Result of a notification attempt"""
+
     channel: str
     success: bool
     timestamp: datetime
@@ -121,20 +123,24 @@ class EmailNotifier:
                 - to_addrs: List of recipient email addresses
                 - use_tls: Use TLS (default: True)
         """
-        self.smtp_host = config.get('smtp_host', os.getenv('SMTP_HOST'))
-        self.smtp_port = config.get('smtp_port', int(os.getenv('SMTP_PORT', '587')))
-        self.username = config.get('username', os.getenv('SMTP_USER'))
-        self.password = config.get('password', os.getenv('SMTP_PASSWORD'))
-        self.from_addr = config.get('from_addr', os.getenv('EMAIL_FROM'))
-        self.to_addrs = config.get('to_addrs', os.getenv('EMAIL_TO', '').split(','))
-        self.use_tls = config.get('use_tls', True)
+        self.smtp_host = config.get("smtp_host", os.getenv("SMTP_HOST"))
+        self.smtp_port = config.get("smtp_port", int(os.getenv("SMTP_PORT", "587")))
+        self.username = config.get("username", os.getenv("SMTP_USER"))
+        self.password = config.get("password", os.getenv("SMTP_PASSWORD"))
+        self.from_addr = config.get("from_addr", os.getenv("EMAIL_FROM"))
+        self.to_addrs = config.get("to_addrs", os.getenv("EMAIL_TO", "").split(","))
+        self.use_tls = config.get("use_tls", True)
 
         # Validate config
         if not all([self.smtp_host, self.username, self.password, self.from_addr]):
-            raise ValueError("Email config incomplete: need smtp_host, username, password, from_addr")
+            raise ValueError(
+                "Email config incomplete: need smtp_host, username, password, from_addr"
+            )
 
         if not self.to_addrs or not self.to_addrs[0]:
-            raise ValueError("Email config incomplete: need at least one recipient in to_addrs")
+            raise ValueError(
+                "Email config incomplete: need at least one recipient in to_addrs"
+            )
 
     def send(self, subject: str, body: str, html: bool = False) -> NotificationResult:
         """
@@ -149,16 +155,16 @@ class EmailNotifier:
             NotificationResult
         """
         try:
-            msg = MIMEMultipart('alternative')
-            msg['Subject'] = subject
-            msg['From'] = self.from_addr
-            msg['To'] = ', '.join(self.to_addrs)
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = subject
+            msg["From"] = self.from_addr
+            msg["To"] = ", ".join(self.to_addrs)
 
             # Attach body
             if html:
-                msg.attach(MIMEText(body, 'html'))
+                msg.attach(MIMEText(body, "html"))
             else:
-                msg.attach(MIMEText(body, 'plain'))
+                msg.attach(MIMEText(body, "plain"))
 
             # Send via SMTP
             with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
@@ -168,18 +174,15 @@ class EmailNotifier:
                 server.send_message(msg)
 
             return NotificationResult(
-                channel='email',
+                channel="email",
                 success=True,
                 timestamp=datetime.now(),
-                metadata={'subject': subject, 'recipients': self.to_addrs}
+                metadata={"subject": subject, "recipients": self.to_addrs},
             )
 
         except Exception as e:
             return NotificationResult(
-                channel='email',
-                success=False,
-                timestamp=datetime.now(),
-                error=str(e)
+                channel="email", success=False, timestamp=datetime.now(), error=str(e)
             )
 
 
@@ -201,10 +204,10 @@ class SlackNotifier:
                 - username: Bot username (optional)
                 - icon_emoji: Bot emoji icon (optional)
         """
-        self.webhook_url = config.get('webhook_url', os.getenv('SLACK_WEBHOOK_URL'))
-        self.channel = config.get('channel', os.getenv('SLACK_CHANNEL'))
-        self.username = config.get('username', 'NBA Betting Bot')
-        self.icon_emoji = config.get('icon_emoji', ':basketball:')
+        self.webhook_url = config.get("webhook_url", os.getenv("SLACK_WEBHOOK_URL"))
+        self.channel = config.get("channel", os.getenv("SLACK_CHANNEL"))
+        self.username = config.get("username", "NBA Betting Bot")
+        self.icon_emoji = config.get("icon_emoji", ":basketball:")
 
         if not self.webhook_url:
             raise ValueError("Slack config incomplete: need webhook_url")
@@ -222,49 +225,40 @@ class SlackNotifier:
         """
         try:
             payload = {
-                'username': self.username,
-                'icon_emoji': self.icon_emoji,
-                'text': message
+                "username": self.username,
+                "icon_emoji": self.icon_emoji,
+                "text": message,
             }
 
             if self.channel:
-                payload['channel'] = self.channel
+                payload["channel"] = self.channel
 
             if title:
-                payload['attachments'] = [{
-                    'title': title,
-                    'text': message,
-                    'color': 'good'
-                }]
-                payload['text'] = ''  # Use attachment for text
+                payload["attachments"] = [
+                    {"title": title, "text": message, "color": "good"}
+                ]
+                payload["text"] = ""  # Use attachment for text
 
-            response = requests.post(
-                self.webhook_url,
-                json=payload,
-                timeout=10
-            )
+            response = requests.post(self.webhook_url, json=payload, timeout=10)
 
             if response.status_code == 200:
                 return NotificationResult(
-                    channel='slack',
+                    channel="slack",
                     success=True,
                     timestamp=datetime.now(),
-                    metadata={'channel': self.channel}
+                    metadata={"channel": self.channel},
                 )
             else:
                 return NotificationResult(
-                    channel='slack',
+                    channel="slack",
                     success=False,
                     timestamp=datetime.now(),
-                    error=f"HTTP {response.status_code}: {response.text}"
+                    error=f"HTTP {response.status_code}: {response.text}",
                 )
 
         except Exception as e:
             return NotificationResult(
-                channel='slack',
-                success=False,
-                timestamp=datetime.now(),
-                error=str(e)
+                channel="slack", success=False, timestamp=datetime.now(), error=str(e)
             )
 
 
@@ -286,29 +280,36 @@ class SmsNotifier:
                 - from_number: Twilio phone number (format: +1234567890)
                 - to_numbers: List of recipient phone numbers
         """
-        self.account_sid = config.get('account_sid', os.getenv('TWILIO_ACCOUNT_SID'))
-        self.auth_token = config.get('auth_token', os.getenv('TWILIO_AUTH_TOKEN'))
-        self.from_number = config.get('from_number', os.getenv('TWILIO_FROM_NUMBER'))
-        self.to_numbers = config.get('to_numbers', [])
+        self.account_sid = config.get("account_sid", os.getenv("TWILIO_ACCOUNT_SID"))
+        self.auth_token = config.get("auth_token", os.getenv("TWILIO_AUTH_TOKEN"))
+        self.from_number = config.get("from_number", os.getenv("TWILIO_FROM_NUMBER"))
+        self.to_numbers = config.get("to_numbers", [])
 
         # Also check env var for to_numbers
         if not self.to_numbers:
-            env_numbers = os.getenv('TWILIO_TO_NUMBERS', '')
+            env_numbers = os.getenv("TWILIO_TO_NUMBERS", "")
             if env_numbers:
-                self.to_numbers = [n.strip() for n in env_numbers.split(',')]
+                self.to_numbers = [n.strip() for n in env_numbers.split(",")]
 
         if not all([self.account_sid, self.auth_token, self.from_number]):
-            raise ValueError("SMS config incomplete: need account_sid, auth_token, from_number")
+            raise ValueError(
+                "SMS config incomplete: need account_sid, auth_token, from_number"
+            )
 
         if not self.to_numbers:
-            raise ValueError("SMS config incomplete: need at least one recipient in to_numbers")
+            raise ValueError(
+                "SMS config incomplete: need at least one recipient in to_numbers"
+            )
 
         # Try to import Twilio client
         try:
             from twilio.rest import Client
+
             self.client = Client(self.account_sid, self.auth_token)
         except ImportError:
-            raise ImportError("Twilio SDK required for SMS. Install with: pip install twilio")
+            raise ImportError(
+                "Twilio SDK required for SMS. Install with: pip install twilio"
+            )
 
     def send(self, message: str, title: Optional[str] = None) -> NotificationResult:
         """
@@ -336,42 +337,41 @@ class SmsNotifier:
             for to_number in self.to_numbers:
                 try:
                     msg = self.client.messages.create(
-                        body=full_message,
-                        from_=self.from_number,
-                        to=to_number
+                        body=full_message, from_=self.from_number, to=to_number
                     )
-                    results.append({'number': to_number, 'success': True, 'sid': msg.sid})
+                    results.append(
+                        {"number": to_number, "success": True, "sid": msg.sid}
+                    )
                 except Exception as e:
-                    results.append({'number': to_number, 'success': False, 'error': str(e)})
+                    results.append(
+                        {"number": to_number, "success": False, "error": str(e)}
+                    )
 
             # Check if any succeeded
-            successes = [r for r in results if r['success']]
-            failures = [r for r in results if not r['success']]
+            successes = [r for r in results if r["success"]]
+            failures = [r for r in results if not r["success"]]
 
             if successes:
                 return NotificationResult(
-                    channel='sms',
+                    channel="sms",
                     success=True,
                     timestamp=datetime.now(),
                     metadata={
-                        'sent_to': [r['number'] for r in successes],
-                        'failed': [r['number'] for r in failures] if failures else []
-                    }
+                        "sent_to": [r["number"] for r in successes],
+                        "failed": [r["number"] for r in failures] if failures else [],
+                    },
                 )
             else:
                 return NotificationResult(
-                    channel='sms',
+                    channel="sms",
                     success=False,
                     timestamp=datetime.now(),
-                    error=f"Failed to send to all recipients: {failures}"
+                    error=f"Failed to send to all recipients: {failures}",
                 )
 
         except Exception as e:
             return NotificationResult(
-                channel='sms',
-                success=False,
-                timestamp=datetime.now(),
-                error=str(e)
+                channel="sms", success=False, timestamp=datetime.now(), error=str(e)
             )
 
 
@@ -403,29 +403,31 @@ class NotificationManager:
         self.notifiers = {}
 
         # Email
-        if self.config.get('email', {}).get('enabled'):
+        if self.config.get("email", {}).get("enabled"):
             try:
-                self.notifiers['email'] = EmailNotifier(self.config['email'])
+                self.notifiers["email"] = EmailNotifier(self.config["email"])
             except Exception as e:
                 warnings.warn(f"Failed to initialize email notifier: {e}")
 
         # Slack
-        if self.config.get('slack', {}).get('enabled'):
+        if self.config.get("slack", {}).get("enabled"):
             try:
-                self.notifiers['slack'] = SlackNotifier(self.config['slack'])
+                self.notifiers["slack"] = SlackNotifier(self.config["slack"])
             except Exception as e:
                 warnings.warn(f"Failed to initialize Slack notifier: {e}")
 
         # SMS
-        if self.config.get('sms', {}).get('enabled'):
+        if self.config.get("sms", {}).get("enabled"):
             try:
-                self.notifiers['sms'] = SmsNotifier(self.config['sms'])
+                self.notifiers["sms"] = SmsNotifier(self.config["sms"])
             except Exception as e:
                 warnings.warn(f"Failed to initialize SMS notifier: {e}")
 
         # Rate limiting state
         self._last_notification = {}
-        self._min_interval = timedelta(minutes=5)  # Min 5 minutes between similar alerts
+        self._min_interval = timedelta(
+            minutes=5
+        )  # Min 5 minutes between similar alerts
 
     def _should_send(self, alert_key: str) -> bool:
         """
@@ -443,7 +445,7 @@ class NotificationManager:
         last_sent = self._last_notification[alert_key]
         return (datetime.now() - last_sent) > self._min_interval
 
-    def _format_alert_email(self, alert: 'Alert') -> tuple[str, str]:
+    def _format_alert_email(self, alert: "Alert") -> tuple[str, str]:
         """
         Format alert as email
 
@@ -457,13 +459,8 @@ class NotificationManager:
         subject = f"[{alert.level.value.upper()}] NBA Betting Alert: {alert.metric}"
 
         # HTML body
-        icon_map = {
-            'critical': '🔴',
-            'warning': '🟡',
-            'info': '🔵',
-            'healthy': '🟢'
-        }
-        icon = icon_map.get(alert.level.value, '⚪')
+        icon_map = {"critical": "🔴", "warning": "🟡", "info": "🔵", "healthy": "🟢"}
+        icon = icon_map.get(alert.level.value, "⚪")
 
         html = f"""
         <html>
@@ -486,7 +483,7 @@ class NotificationManager:
 
         return subject, html
 
-    def _format_alert_slack(self, alert: 'Alert') -> tuple[str, str]:
+    def _format_alert_slack(self, alert: "Alert") -> tuple[str, str]:
         """
         Format alert as Slack message
 
@@ -497,12 +494,12 @@ class NotificationManager:
             Tuple of (title, message)
         """
         icon_map = {
-            'critical': ':red_circle:',
-            'warning': ':large_orange_diamond:',
-            'info': ':large_blue_circle:',
-            'healthy': ':white_check_mark:'
+            "critical": ":red_circle:",
+            "warning": ":large_orange_diamond:",
+            "info": ":large_blue_circle:",
+            "healthy": ":white_check_mark:",
         }
-        icon = icon_map.get(alert.level.value, ':white_circle:')
+        icon = icon_map.get(alert.level.value, ":white_circle:")
 
         title = f"{icon} {alert.level.value.upper()} Alert: {alert.metric}"
 
@@ -518,9 +515,7 @@ class NotificationManager:
         return title, message
 
     def send_alert(
-        self,
-        alert: 'Alert',
-        channels: Optional[List[str]] = None
+        self, alert: "Alert", channels: Optional[List[str]] = None
     ) -> Dict[str, NotificationResult]:
         """
         Send alert via configured channels
@@ -552,25 +547,29 @@ class NotificationManager:
                 continue
 
             try:
-                if channel == 'email':
+                if channel == "email":
                     subject, body = self._format_alert_email(alert)
-                    results[channel] = self.notifiers['email'].send(subject, body, html=True)
+                    results[channel] = self.notifiers["email"].send(
+                        subject, body, html=True
+                    )
 
-                elif channel == 'slack':
+                elif channel == "slack":
                     title, message = self._format_alert_slack(alert)
-                    results[channel] = self.notifiers['slack'].send(message, title)
+                    results[channel] = self.notifiers["slack"].send(message, title)
 
-                elif channel == 'sms':
+                elif channel == "sms":
                     # Format SMS (short version for text messages)
-                    sms_message = f"[{alert.level.value.upper()}] {alert.metric}: {alert.message}"
-                    results[channel] = self.notifiers['sms'].send(sms_message)
+                    sms_message = (
+                        f"[{alert.level.value.upper()}] {alert.metric}: {alert.message}"
+                    )
+                    results[channel] = self.notifiers["sms"].send(sms_message)
 
             except Exception as e:
                 results[channel] = NotificationResult(
                     channel=channel,
                     success=False,
                     timestamp=datetime.now(),
-                    error=str(e)
+                    error=str(e),
                 )
 
         # Update rate limiting
@@ -580,9 +579,7 @@ class NotificationManager:
         return results
 
     def send_alert_batch(
-        self,
-        alerts: List['Alert'],
-        channels: Optional[List[str]] = None
+        self, alerts: List["Alert"], channels: Optional[List[str]] = None
     ) -> Dict[str, NotificationResult]:
         """
         Send batch of alerts as single notification
@@ -607,9 +604,9 @@ class NotificationManager:
         results = {}
 
         # Group alerts by level
-        critical = [a for a in alerts if a.level.value == 'critical']
-        warnings = [a for a in alerts if a.level.value == 'warning']
-        info = [a for a in alerts if a.level.value == 'info']
+        critical = [a for a in alerts if a.level.value == "critical"]
+        warnings = [a for a in alerts if a.level.value == "warning"]
+        info = [a for a in alerts if a.level.value == "info"]
 
         # Send via each channel
         for channel in channels:
@@ -617,40 +614,39 @@ class NotificationManager:
                 continue
 
             try:
-                if channel == 'email':
+                if channel == "email":
                     subject = f"NBA Betting System: {len(alerts)} Alerts"
                     body = self._format_batch_email(critical, warnings, info)
-                    results[channel] = self.notifiers['email'].send(subject, body, html=True)
+                    results[channel] = self.notifiers["email"].send(
+                        subject, body, html=True
+                    )
 
-                elif channel == 'slack':
+                elif channel == "slack":
                     title = f"NBA Betting System: {len(alerts)} Alerts"
                     message = self._format_batch_slack(critical, warnings, info)
-                    results[channel] = self.notifiers['slack'].send(message, title)
+                    results[channel] = self.notifiers["slack"].send(message, title)
 
-                elif channel == 'sms':
+                elif channel == "sms":
                     # Format SMS batch (concise version)
                     sms_msg = f"NBA Betting: {len(alerts)} alerts"
                     if critical:
                         sms_msg += f"\n🔴 {len(critical)} CRITICAL"
                     if warnings:
                         sms_msg += f"\n🟡 {len(warnings)} warnings"
-                    results[channel] = self.notifiers['sms'].send(sms_msg)
+                    results[channel] = self.notifiers["sms"].send(sms_msg)
 
             except Exception as e:
                 results[channel] = NotificationResult(
                     channel=channel,
                     success=False,
                     timestamp=datetime.now(),
-                    error=str(e)
+                    error=str(e),
                 )
 
         return results
 
     def _format_batch_email(
-        self,
-        critical: List['Alert'],
-        warnings: List['Alert'],
-        info: List['Alert']
+        self, critical: List["Alert"], warnings: List["Alert"], info: List["Alert"]
     ) -> str:
         """Format batch of alerts as HTML email"""
         html = """
@@ -697,10 +693,7 @@ class NotificationManager:
         return html
 
     def _format_batch_slack(
-        self,
-        critical: List['Alert'],
-        warnings: List['Alert'],
-        info: List['Alert']
+        self, critical: List["Alert"], warnings: List["Alert"], info: List["Alert"]
     ) -> str:
         """Format batch of alerts as Slack message"""
         message = "*NBA Betting System Alert Summary*\n\n"
@@ -725,10 +718,7 @@ class NotificationManager:
         return message
 
     def send_message(
-        self,
-        subject: str,
-        message: str,
-        channels: Optional[List[str]] = None
+        self, subject: str, message: str, channels: Optional[List[str]] = None
     ) -> Dict[str, NotificationResult]:
         """
         Send custom message
@@ -753,23 +743,25 @@ class NotificationManager:
                 continue
 
             try:
-                if channel == 'email':
-                    results[channel] = self.notifiers['email'].send(subject, message, html=False)
+                if channel == "email":
+                    results[channel] = self.notifiers["email"].send(
+                        subject, message, html=False
+                    )
 
-                elif channel == 'slack':
-                    results[channel] = self.notifiers['slack'].send(message, subject)
+                elif channel == "slack":
+                    results[channel] = self.notifiers["slack"].send(message, subject)
 
-                elif channel == 'sms':
+                elif channel == "sms":
                     # For SMS, combine subject and message
                     sms_text = f"{subject}: {message[:140]}"  # Keep it short
-                    results[channel] = self.notifiers['sms'].send(sms_text)
+                    results[channel] = self.notifiers["sms"].send(sms_text)
 
             except Exception as e:
                 results[channel] = NotificationResult(
                     channel=channel,
                     success=False,
                     timestamp=datetime.now(),
-                    error=str(e)
+                    error=str(e),
                 )
 
         return results

@@ -70,25 +70,25 @@ class LineupPerformance:
             return {}
 
         return {
-            'points_per_minute': self.points_for / self.minutes,
-            'points_allowed_per_minute': self.points_against / self.minutes,
-            'plus_minus_per_minute': self.plus_minus / self.minutes
+            "points_per_minute": self.points_for / self.minutes,
+            "points_allowed_per_minute": self.points_against / self.minutes,
+            "plus_minus_per_minute": self.plus_minus / self.minutes,
         }
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'lineup': list(self.lineup),
-            'possessions': self.possessions,
-            'minutes': self.minutes,
-            'games': self.games_played,
-            'plus_minus': self.plus_minus,
-            'offensive_rating': self.offensive_rating,
-            'defensive_rating': self.defensive_rating,
-            'net_rating': self.net_rating,
-            'wins': self.wins,
-            'losses': self.losses,
-            'win_pct': self.win_percentage(),
+            "lineup": list(self.lineup),
+            "possessions": self.possessions,
+            "minutes": self.minutes,
+            "games": self.games_played,
+            "plus_minus": self.plus_minus,
+            "offensive_rating": self.offensive_rating,
+            "defensive_rating": self.defensive_rating,
+            "net_rating": self.net_rating,
+            "wins": self.wins,
+            "losses": self.losses,
+            "win_pct": self.win_percentage(),
         }
 
 
@@ -125,22 +125,22 @@ class ChemistryMetrics:
         positive_lineup_component = self.positive_lineup_pct
 
         self.cohesion_score = (
-            consistency_component * 0.3 +
-            performance_component * 0.4 +
-            positive_lineup_component * 0.3
+            consistency_component * 0.3
+            + performance_component * 0.4
+            + positive_lineup_component * 0.3
         )
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'team_id': self.team_id,
-            'total_lineups': self.total_lineups_used,
-            'avg_net_rating': self.avg_lineup_net_rating,
-            'std_net_rating': self.std_lineup_net_rating,
-            'best_net_rating': self.best_lineup_net_rating,
-            'positive_lineup_pct': self.positive_lineup_pct,
-            'cohesion_score': self.cohesion_score,
-            'rotation_stability': self.rotation_stability,
+            "team_id": self.team_id,
+            "total_lineups": self.total_lineups_used,
+            "avg_net_rating": self.avg_lineup_net_rating,
+            "std_net_rating": self.std_lineup_net_rating,
+            "best_net_rating": self.best_lineup_net_rating,
+            "positive_lineup_pct": self.positive_lineup_pct,
+            "cohesion_score": self.cohesion_score,
+            "rotation_stability": self.rotation_stability,
         }
 
 
@@ -160,7 +160,9 @@ class ChemistryAnalyzer:
     def __init__(self):
         """Initialize chemistry analyzer"""
         self.lineups: Dict[Tuple[str, ...], LineupPerformance] = {}
-        self.lineups_by_team: Dict[str, Dict[Tuple[str, ...], LineupPerformance]] = defaultdict(dict)
+        self.lineups_by_team: Dict[str, Dict[Tuple[str, ...], LineupPerformance]] = (
+            defaultdict(dict)
+        )
         self.player_lineups: Dict[str, List[Tuple[str, ...]]] = defaultdict(list)
 
         logger.info("ChemistryAnalyzer initialized")
@@ -173,7 +175,7 @@ class ChemistryAnalyzer:
         points_for: int,
         points_against: int,
         minutes: float,
-        won_game: Optional[bool] = None
+        won_game: Optional[bool] = None,
     ):
         """
         Add or update lineup performance data.
@@ -221,7 +223,7 @@ class ChemistryAnalyzer:
                 points_against=points_against,
                 plus_minus=float(points_for - points_against),
                 wins=1 if won_game else 0,
-                losses=0 if won_game or won_game is None else 1
+                losses=0 if won_game or won_game is None else 1,
             )
             self.lineups[lineup_key] = lineup
             self.lineups_by_team[team_id][lineup_key] = lineup
@@ -230,10 +232,7 @@ class ChemistryAnalyzer:
             for player in players:
                 self.player_lineups[player].append(lineup_key)
 
-    def get_lineup_performance(
-        self,
-        players: Set[str]
-    ) -> Optional[LineupPerformance]:
+    def get_lineup_performance(self, players: Set[str]) -> Optional[LineupPerformance]:
         """Get performance for a specific lineup"""
         lineup_key = tuple(sorted(players))
         return self.lineups.get(lineup_key)
@@ -243,7 +242,7 @@ class ChemistryAnalyzer:
         team_id: Optional[str] = None,
         n: int = 10,
         min_minutes: float = 5.0,
-        metric: str = 'net_rating'
+        metric: str = "net_rating",
     ) -> List[LineupPerformance]:
         """
         Get best performing lineups.
@@ -267,11 +266,11 @@ class ChemistryAnalyzer:
         lineups = [l for l in lineups if l.minutes >= min_minutes]
 
         # Sort by metric
-        if metric == 'net_rating':
+        if metric == "net_rating":
             lineups.sort(key=lambda x: x.net_rating, reverse=True)
-        elif metric == 'plus_minus':
+        elif metric == "plus_minus":
             lineups.sort(key=lambda x: x.plus_minus, reverse=True)
-        elif metric == 'win_pct':
+        elif metric == "win_pct":
             lineups.sort(key=lambda x: x.win_percentage(), reverse=True)
         else:
             lineups.sort(key=lambda x: x.net_rating, reverse=True)
@@ -283,16 +282,15 @@ class ChemistryAnalyzer:
         team_id: Optional[str] = None,
         n: int = 10,
         min_minutes: float = 5.0,
-        metric: str = 'net_rating'
+        metric: str = "net_rating",
     ) -> List[LineupPerformance]:
         """Get worst performing lineups"""
-        lineups = self.get_best_lineups(team_id, n=len(self.lineups), min_minutes=min_minutes, metric=metric)
+        lineups = self.get_best_lineups(
+            team_id, n=len(self.lineups), min_minutes=min_minutes, metric=metric
+        )
         return lineups[-n:]
 
-    def calculate_team_chemistry(
-        self,
-        team_id: str
-    ) -> ChemistryMetrics:
+    def calculate_team_chemistry(self, team_id: str) -> ChemistryMetrics:
         """
         Calculate overall team chemistry metrics.
 
@@ -314,7 +312,7 @@ class ChemistryAnalyzer:
                 std_lineup_net_rating=0.0,
                 best_lineup_net_rating=0.0,
                 worst_lineup_net_rating=0.0,
-                positive_lineup_pct=0.0
+                positive_lineup_pct=0.0,
             )
 
         # Lineup diversity
@@ -336,7 +334,9 @@ class ChemistryAnalyzer:
 
         # Rotation stability (inverse of lineup diversity)
         # More stable = fewer lineups, more minutes on best lineups
-        lineup_concentration = most_used_minutes / sum(minutes_list) if sum(minutes_list) > 0 else 0
+        lineup_concentration = (
+            most_used_minutes / sum(minutes_list) if sum(minutes_list) > 0 else 0
+        )
         rotation_stability = min(lineup_concentration * 2, 1.0)  # Normalize
 
         return ChemistryMetrics(
@@ -349,13 +349,10 @@ class ChemistryAnalyzer:
             best_lineup_net_rating=best_net_rating,
             worst_lineup_net_rating=worst_net_rating,
             positive_lineup_pct=positive_pct,
-            rotation_stability=rotation_stability
+            rotation_stability=rotation_stability,
         )
 
-    def analyze_player_lineup_impact(
-        self,
-        player_id: str
-    ) -> Dict[str, Any]:
+    def analyze_player_lineup_impact(self, player_id: str) -> Dict[str, Any]:
         """
         Analyze a player's impact across different lineups.
 
@@ -368,7 +365,7 @@ class ChemistryAnalyzer:
         player_lineup_keys = self.player_lineups.get(player_id, [])
 
         if not player_lineup_keys:
-            return {'lineups_played': 0}
+            return {"lineups_played": 0}
 
         lineups = [self.lineups[key] for key in player_lineup_keys]
 
@@ -384,27 +381,24 @@ class ChemistryAnalyzer:
         total_minutes = sum(l.minutes for l in lineups)
 
         return {
-            'player_id': player_id,
-            'lineups_played': len(lineups),
-            'total_minutes': total_minutes,
-            'avg_net_rating': avg_net_rating,
-            'best_lineup': {
-                'players': list(best_lineup.lineup),
-                'net_rating': best_lineup.net_rating,
-                'minutes': best_lineup.minutes
+            "player_id": player_id,
+            "lineups_played": len(lineups),
+            "total_minutes": total_minutes,
+            "avg_net_rating": avg_net_rating,
+            "best_lineup": {
+                "players": list(best_lineup.lineup),
+                "net_rating": best_lineup.net_rating,
+                "minutes": best_lineup.minutes,
             },
-            'worst_lineup': {
-                'players': list(worst_lineup.lineup),
-                'net_rating': worst_lineup.net_rating,
-                'minutes': worst_lineup.minutes
-            }
+            "worst_lineup": {
+                "players": list(worst_lineup.lineup),
+                "net_rating": worst_lineup.net_rating,
+                "minutes": worst_lineup.minutes,
+            },
         }
 
     def find_optimal_lineup(
-        self,
-        available_players: Set[str],
-        team_id: str,
-        strategy: str = 'best_known'
+        self, available_players: Set[str], team_id: str, strategy: str = "best_known"
     ) -> Dict[str, Any]:
         """
         Find optimal 5-player lineup from available players.
@@ -418,12 +412,12 @@ class ChemistryAnalyzer:
             Dictionary with recommended lineup and reasoning
         """
         if len(available_players) < 5:
-            return {'error': 'Need at least 5 available players'}
+            return {"error": "Need at least 5 available players"}
 
-        if strategy == 'best_known':
+        if strategy == "best_known":
             # Find best known 5-man combination
             best_lineup = None
-            best_net_rating = -float('inf')
+            best_net_rating = -float("inf")
 
             # Check all possible 5-player combinations
             for combo in combinations(available_players, 5):
@@ -436,13 +430,13 @@ class ChemistryAnalyzer:
 
             if best_lineup:
                 return {
-                    'lineup': list(best_lineup.lineup),
-                    'net_rating': best_lineup.net_rating,
-                    'minutes_together': best_lineup.minutes,
-                    'strategy': strategy
+                    "lineup": list(best_lineup.lineup),
+                    "net_rating": best_lineup.net_rating,
+                    "minutes_together": best_lineup.minutes,
+                    "strategy": strategy,
                 }
 
-        elif strategy == 'highest_average':
+        elif strategy == "highest_average":
             # Find combination with highest average pair-wise net rating
             # This would require player_interaction data
             pass
@@ -450,26 +444,23 @@ class ChemistryAnalyzer:
         # Default: return most experienced lineup
         all_lineups = list(self.lineups_by_team.get(team_id, {}).values())
         valid_lineups = [
-            l for l in all_lineups
-            if set(l.lineup).issubset(available_players)
+            l for l in all_lineups if set(l.lineup).issubset(available_players)
         ]
 
         if valid_lineups:
             # Return lineup with most minutes
             best_lineup = max(valid_lineups, key=lambda x: x.minutes)
             return {
-                'lineup': list(best_lineup.lineup),
-                'net_rating': best_lineup.net_rating,
-                'minutes_together': best_lineup.minutes,
-                'strategy': 'most_experienced'
+                "lineup": list(best_lineup.lineup),
+                "net_rating": best_lineup.net_rating,
+                "minutes_together": best_lineup.minutes,
+                "strategy": "most_experienced",
             }
 
-        return {'error': 'No suitable lineup found'}
+        return {"error": "No suitable lineup found"}
 
     def analyze_stagger_patterns(
-        self,
-        player1_id: str,
-        player2_id: str
+        self, player1_id: str, player2_id: str
     ) -> Dict[str, Any]:
         """
         Analyze whether two players should be staggered (not play together).
@@ -490,10 +481,7 @@ class ChemistryAnalyzer:
         p2_alone_lineups = p2_lineups - together_lineups
 
         if not together_lineups:
-            return {
-                'recommendation': 'no_data',
-                'lineups_together': 0
-            }
+            return {"recommendation": "no_data", "lineups_together": 0}
 
         # Performance together
         together_perf = [self.lineups[key] for key in together_lineups]
@@ -501,46 +489,58 @@ class ChemistryAnalyzer:
         together_minutes = sum(l.minutes for l in together_perf)
 
         # Performance apart
-        p1_alone_perf = [self.lineups[key] for key in p1_alone_lineups] if p1_alone_lineups else []
-        p2_alone_perf = [self.lineups[key] for key in p2_alone_lineups] if p2_alone_lineups else []
+        p1_alone_perf = (
+            [self.lineups[key] for key in p1_alone_lineups] if p1_alone_lineups else []
+        )
+        p2_alone_perf = (
+            [self.lineups[key] for key in p2_alone_lineups] if p2_alone_lineups else []
+        )
 
-        p1_alone_net_rating = np.mean([l.net_rating for l in p1_alone_perf]) if p1_alone_perf else 0
-        p2_alone_net_rating = np.mean([l.net_rating for l in p2_alone_perf]) if p2_alone_perf else 0
+        p1_alone_net_rating = (
+            np.mean([l.net_rating for l in p1_alone_perf]) if p1_alone_perf else 0
+        )
+        p2_alone_net_rating = (
+            np.mean([l.net_rating for l in p2_alone_perf]) if p2_alone_perf else 0
+        )
 
         # Recommendation
         avg_alone = (p1_alone_net_rating + p2_alone_net_rating) / 2
 
         if together_net_rating > avg_alone + 2:
-            recommendation = 'play_together'
-            reason = f"Better together (+{together_net_rating - avg_alone:.1f} net rating)"
+            recommendation = "play_together"
+            reason = (
+                f"Better together (+{together_net_rating - avg_alone:.1f} net rating)"
+            )
         elif together_net_rating < avg_alone - 2:
-            recommendation = 'stagger'
+            recommendation = "stagger"
             reason = f"Better apart ({avg_alone - together_net_rating:.1f} net rating difference)"
         else:
-            recommendation = 'neutral'
+            recommendation = "neutral"
             reason = "Similar performance together and apart"
 
         return {
-            'player1': player1_id,
-            'player2': player2_id,
-            'recommendation': recommendation,
-            'reason': reason,
-            'together_net_rating': float(together_net_rating),
-            'apart_net_rating': float(avg_alone),
-            'lineups_together': len(together_lineups),
-            'minutes_together': together_minutes
+            "player1": player1_id,
+            "player2": player2_id,
+            "recommendation": recommendation,
+            "reason": reason,
+            "together_net_rating": float(together_net_rating),
+            "apart_net_rating": float(avg_alone),
+            "lineups_together": len(together_lineups),
+            "minutes_together": together_minutes,
         }
 
     def get_statistics(self) -> Dict[str, Any]:
         """Get analyzer statistics"""
         return {
-            'total_lineups': len(self.lineups),
-            'unique_teams': len(self.lineups_by_team),
-            'unique_players': len(self.player_lineups),
-            'total_minutes_tracked': sum(l.minutes for l in self.lineups.values()),
-            'avg_lineup_net_rating': float(np.mean([
-                l.net_rating for l in self.lineups.values()
-            ])) if self.lineups else 0.0
+            "total_lineups": len(self.lineups),
+            "unique_teams": len(self.lineups_by_team),
+            "unique_players": len(self.player_lineups),
+            "total_minutes_tracked": sum(l.minutes for l in self.lineups.values()),
+            "avg_lineup_net_rating": (
+                float(np.mean([l.net_rating for l in self.lineups.values()]))
+                if self.lineups
+                else 0.0
+            ),
         }
 
     def clear(self):

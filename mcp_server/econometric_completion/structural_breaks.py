@@ -47,12 +47,12 @@ class BreakPoint:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'index': self.index,
-            'test_statistic': self.test_statistic,
-            'p_value': self.p_value,
-            'confidence': self.confidence,
-            'date': str(self.date) if self.date else None,
-            'description': self.description
+            "index": self.index,
+            "test_statistic": self.test_statistic,
+            "p_value": self.p_value,
+            "confidence": self.confidence,
+            "date": str(self.date) if self.date else None,
+            "description": self.description,
         }
 
 
@@ -77,12 +77,12 @@ class StructuralBreakResult:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'has_breaks': self.has_breaks,
-            'n_breaks': len(self.break_points),
-            'break_points': [bp.to_dict() for bp in self.break_points],
-            'test_statistic': self.test_statistic,
-            'critical_value': self.critical_value,
-            'p_value': self.p_value
+            "has_breaks": self.has_breaks,
+            "n_breaks": len(self.break_points),
+            "break_points": [bp.to_dict() for bp in self.break_points],
+            "test_statistic": self.test_statistic,
+            "critical_value": self.critical_value,
+            "p_value": self.p_value,
         }
 
 
@@ -99,10 +99,7 @@ class ChowTest:
         logger.info("ChowTest initialized")
 
     def test(
-        self,
-        X: np.ndarray,
-        y: np.ndarray,
-        break_point: int
+        self, X: np.ndarray, y: np.ndarray, break_point: int
     ) -> StructuralBreakResult:
         """
         Perform Chow test at specified break point.
@@ -160,7 +157,7 @@ class ChowTest:
             index=break_point,
             test_statistic=f_stat,
             p_value=p_value,
-            confidence=1 - p_value if p_value < 1 else 0.0
+            confidence=1 - p_value if p_value < 1 else 0.0,
         )
 
         result = StructuralBreakResult(
@@ -170,10 +167,12 @@ class ChowTest:
             critical_value=critical_value,
             p_value=p_value,
             coefficients_before=beta1,
-            coefficients_after=beta2
+            coefficients_after=beta2,
         )
 
-        logger.info(f"Chow test: F={f_stat:.4f}, p-value={p_value:.4f}, break={'detected' if has_break else 'not detected'}")
+        logger.info(
+            f"Chow test: F={f_stat:.4f}, p-value={p_value:.4f}, break={'detected' if has_break else 'not detected'}"
+        )
 
         return result
 
@@ -186,10 +185,7 @@ class SupFTest:
     over all possible break points.
     """
 
-    def __init__(
-        self,
-        trim: float = 0.15
-    ):
+    def __init__(self, trim: float = 0.15):
         """
         Initialize sup-F test.
 
@@ -199,11 +195,7 @@ class SupFTest:
         self.trim = trim
         logger.info(f"SupFTest initialized with trim={trim}")
 
-    def test(
-        self,
-        X: np.ndarray,
-        y: np.ndarray
-    ) -> StructuralBreakResult:
+    def test(self, X: np.ndarray, y: np.ndarray) -> StructuralBreakResult:
         """
         Perform sup-F test for unknown break.
 
@@ -233,12 +225,7 @@ class SupFTest:
         break_index = candidate_points[np.argmax(f_stats)]
 
         # Critical values (Andrews 1993, approximate)
-        critical_values_5pct = {
-            1: 8.58,  # 1 regressor
-            2: 10.13,
-            3: 11.14,
-            4: 11.83
-        }
+        critical_values_5pct = {1: 8.58, 2: 10.13, 3: 11.14, 4: 11.83}  # 1 regressor
 
         n_vars = X.shape[1]
         critical_value = critical_values_5pct.get(n_vars, 12.0)
@@ -254,7 +241,9 @@ class SupFTest:
                 index=break_index,
                 test_statistic=sup_f,
                 p_value=chow_result.p_value,
-                confidence=1.0 - chow_result.p_value if chow_result.p_value < 1 else 0.0
+                confidence=(
+                    1.0 - chow_result.p_value if chow_result.p_value < 1 else 0.0
+                ),
             )
 
             result = StructuralBreakResult(
@@ -263,17 +252,19 @@ class SupFTest:
                 test_statistic=sup_f,
                 critical_value=critical_value,
                 coefficients_before=chow_result.coefficients_before,
-                coefficients_after=chow_result.coefficients_after
+                coefficients_after=chow_result.coefficients_after,
             )
         else:
             result = StructuralBreakResult(
                 has_breaks=False,
                 break_points=[],
                 test_statistic=sup_f,
-                critical_value=critical_value
+                critical_value=critical_value,
             )
 
-        logger.info(f"Sup-F test: stat={sup_f:.4f}, crit={critical_value:.4f}, break={'detected at ' + str(break_index) if has_break else 'not detected'}")
+        logger.info(
+            f"Sup-F test: stat={sup_f:.4f}, crit={critical_value:.4f}, break={'detected at ' + str(break_index) if has_break else 'not detected'}"
+        )
 
         return result
 
@@ -290,11 +281,7 @@ class CUSUMTest:
         """Initialize CUSUM test"""
         logger.info("CUSUMTest initialized")
 
-    def test(
-        self,
-        X: np.ndarray,
-        y: np.ndarray
-    ) -> StructuralBreakResult:
+    def test(self, X: np.ndarray, y: np.ndarray) -> StructuralBreakResult:
         """
         Perform CUSUM test.
 
@@ -356,7 +343,7 @@ class CUSUMTest:
                     index=min_obs + idx,
                     test_statistic=abs(cusum[idx]),
                     p_value=0.05 if abs(cusum[idx]) > bound else 0.5,
-                    confidence=0.95 if abs(cusum[idx]) > bound else 0.5
+                    confidence=0.95 if abs(cusum[idx]) > bound else 0.5,
                 )
                 break_points.append(break_pt)
 
@@ -367,10 +354,12 @@ class CUSUMTest:
             break_points=break_points,
             test_statistic=max_cusum,
             critical_value=bound,
-            cusum=cusum
+            cusum=cusum,
         )
 
-        logger.info(f"CUSUM test: max={max_cusum:.4f}, bound={bound:.4f}, stable={'No' if crosses_bound else 'Yes'}")
+        logger.info(
+            f"CUSUM test: max={max_cusum:.4f}, bound={bound:.4f}, stable={'No' if crosses_bound else 'Yes'}"
+        )
 
         return result
 
@@ -382,11 +371,7 @@ class BaiPerronTest:
     Tests for multiple breaks using sequential F-tests and information criteria.
     """
 
-    def __init__(
-        self,
-        max_breaks: int = 5,
-        trim: float = 0.15
-    ):
+    def __init__(self, max_breaks: int = 5, trim: float = 0.15):
         """
         Initialize Bai-Perron test.
 
@@ -399,11 +384,7 @@ class BaiPerronTest:
 
         logger.info(f"BaiPerronTest initialized (max_breaks={max_breaks})")
 
-    def test(
-        self,
-        X: np.ndarray,
-        y: np.ndarray
-    ) -> StructuralBreakResult:
+    def test(self, X: np.ndarray, y: np.ndarray) -> StructuralBreakResult:
         """
         Perform Bai-Perron test.
 
@@ -431,7 +412,9 @@ class BaiPerronTest:
                     continue  # Segment too small
 
                 # Search for break in this segment
-                for break_point in range(seg_start + trim_points, seg_end - trim_points):
+                for break_point in range(
+                    seg_start + trim_points, seg_end - trim_points
+                ):
                     # Test this break
                     X_seg = X[seg_start:seg_end]
                     y_seg = y[seg_start:seg_end]
@@ -445,7 +428,12 @@ class BaiPerronTest:
 
                         if result.test_statistic > best_f_stat:
                             best_f_stat = result.test_statistic
-                            best_break = (break_point, result.p_value, seg_start, seg_end)
+                            best_break = (
+                                break_point,
+                                result.p_value,
+                                seg_start,
+                                seg_end,
+                            )
                     except:
                         continue
 
@@ -453,12 +441,14 @@ class BaiPerronTest:
             if best_break and best_f_stat > 10:  # Threshold
                 break_pt, p_val, seg_start, seg_end = best_break
 
-                detected_breaks.append(BreakPoint(
-                    index=break_pt,
-                    test_statistic=best_f_stat,
-                    p_value=p_val,
-                    confidence=1 - p_val if p_val < 1 else 0.5
-                ))
+                detected_breaks.append(
+                    BreakPoint(
+                        index=break_pt,
+                        test_statistic=best_f_stat,
+                        p_value=p_val,
+                        confidence=1 - p_val if p_val < 1 else 0.5,
+                    )
+                )
 
                 # Split segment
                 remaining_segments.remove((seg_start, seg_end))
@@ -473,8 +463,12 @@ class BaiPerronTest:
         result = StructuralBreakResult(
             has_breaks=len(detected_breaks) > 0,
             break_points=detected_breaks,
-            test_statistic=max([bp.test_statistic for bp in detected_breaks]) if detected_breaks else 0.0,
-            critical_value=10.0  # Threshold used
+            test_statistic=(
+                max([bp.test_statistic for bp in detected_breaks])
+                if detected_breaks
+                else 0.0
+            ),
+            critical_value=10.0,  # Threshold used
         )
 
         logger.info(f"Bai-Perron test: detected {len(detected_breaks)} break(s)")
@@ -483,10 +477,7 @@ class BaiPerronTest:
 
 
 def detect_structural_breaks(
-    X: np.ndarray,
-    y: np.ndarray,
-    method: str = 'sup_f',
-    **kwargs
+    X: np.ndarray, y: np.ndarray, method: str = "sup_f", **kwargs
 ) -> StructuralBreakResult:
     """
     Convenience function to detect structural breaks.
@@ -500,25 +491,25 @@ def detect_structural_breaks(
     Returns:
         StructuralBreakResult
     """
-    if method == 'chow':
-        break_point = kwargs.get('break_point')
+    if method == "chow":
+        break_point = kwargs.get("break_point")
         if break_point is None:
             raise ValueError("break_point required for Chow test")
         test = ChowTest()
         return test.test(X, y, break_point)
 
-    elif method == 'sup_f':
-        trim = kwargs.get('trim', 0.15)
+    elif method == "sup_f":
+        trim = kwargs.get("trim", 0.15)
         test = SupFTest(trim=trim)
         return test.test(X, y)
 
-    elif method == 'cusum':
+    elif method == "cusum":
         test = CUSUMTest()
         return test.test(X, y)
 
-    elif method == 'bai_perron':
-        max_breaks = kwargs.get('max_breaks', 5)
-        trim = kwargs.get('trim', 0.15)
+    elif method == "bai_perron":
+        max_breaks = kwargs.get("max_breaks", 5)
+        trim = kwargs.get("trim", 0.15)
         test = BaiPerronTest(max_breaks=max_breaks, trim=trim)
         return test.test(X, y)
 
@@ -527,11 +518,11 @@ def detect_structural_breaks(
 
 
 __all__ = [
-    'BreakPoint',
-    'StructuralBreakResult',
-    'ChowTest',
-    'SupFTest',
-    'CUSUMTest',
-    'BaiPerronTest',
-    'detect_structural_breaks',
+    "BreakPoint",
+    "StructuralBreakResult",
+    "ChowTest",
+    "SupFTest",
+    "CUSUMTest",
+    "BaiPerronTest",
+    "detect_structural_breaks",
 ]

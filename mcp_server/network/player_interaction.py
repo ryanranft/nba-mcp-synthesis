@@ -53,9 +53,13 @@ class PlayerInteraction:
         """Compute advanced metrics"""
         if self.possessions_together > 0:
             if self.offensive_rating is None:
-                self.offensive_rating = (self.points_for / self.possessions_together) * 100
+                self.offensive_rating = (
+                    self.points_for / self.possessions_together
+                ) * 100
             if self.defensive_rating is None:
-                self.defensive_rating = (self.points_against / self.possessions_together) * 100
+                self.defensive_rating = (
+                    self.points_against / self.possessions_together
+                ) * 100
             if self.net_rating is None:
                 self.net_rating = self.offensive_rating - self.defensive_rating
 
@@ -69,7 +73,11 @@ class PlayerInteraction:
         - Minutes together (trust/chemistry)
         """
         # Net rating component (normalize to 0-1, assuming +/-20 range)
-        net_rating_component = min(max((self.net_rating + 20) / 40, 0), 1) * 0.5 if self.net_rating else 0.5
+        net_rating_component = (
+            min(max((self.net_rating + 20) / 40, 0), 1) * 0.5
+            if self.net_rating
+            else 0.5
+        )
 
         # Assist synergy (normalize to 0-1, assuming 10 assists is high)
         assist_component = min(self.assists_between / 10.0, 1.0) * 0.3
@@ -97,17 +105,17 @@ class PlayerInteraction:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'player1_id': self.player1_id,
-            'player2_id': self.player2_id,
-            'possessions_together': self.possessions_together,
-            'minutes_together': self.minutes_together,
-            'plus_minus': self.plus_minus,
-            'offensive_rating': self.offensive_rating,
-            'defensive_rating': self.defensive_rating,
-            'net_rating': self.net_rating,
-            'assists_between': self.assists_between,
-            'synergy_score': self.synergy_score(),
-            'complement_score': self.complement_score(),
+            "player1_id": self.player1_id,
+            "player2_id": self.player2_id,
+            "possessions_together": self.possessions_together,
+            "minutes_together": self.minutes_together,
+            "plus_minus": self.plus_minus,
+            "offensive_rating": self.offensive_rating,
+            "defensive_rating": self.defensive_rating,
+            "net_rating": self.net_rating,
+            "assists_between": self.assists_between,
+            "synergy_score": self.synergy_score(),
+            "complement_score": self.complement_score(),
         }
 
 
@@ -134,15 +142,15 @@ class InteractionMetrics:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'player_id': self.player_id,
-            'best_teammate': self.best_teammate_id,
-            'best_net_rating': self.best_teammate_net_rating,
-            'worst_teammate': self.worst_teammate_id,
-            'worst_net_rating': self.worst_teammate_net_rating,
-            'avg_net_rating': self.avg_net_rating_with_teammates,
-            'total_teammates': self.total_teammates,
-            'high_synergy_count': len(self.high_synergy_teammates),
-            'low_synergy_count': len(self.low_synergy_teammates),
+            "player_id": self.player_id,
+            "best_teammate": self.best_teammate_id,
+            "best_net_rating": self.best_teammate_net_rating,
+            "worst_teammate": self.worst_teammate_id,
+            "worst_net_rating": self.worst_teammate_net_rating,
+            "avg_net_rating": self.avg_net_rating_with_teammates,
+            "total_teammates": self.total_teammates,
+            "high_synergy_count": len(self.high_synergy_teammates),
+            "low_synergy_count": len(self.low_synergy_teammates),
         }
 
 
@@ -178,7 +186,7 @@ class InteractionAnalyzer:
         possessions: int,
         points_for: int,
         points_against: int,
-        minutes: float
+        minutes: float,
     ):
         """
         Add lineup performance data.
@@ -208,7 +216,9 @@ class InteractionAnalyzer:
                     interaction.minutes_together += minutes
                     interaction.points_for += points_for
                     interaction.points_against += points_against
-                    interaction.plus_minus = interaction.points_for - interaction.points_against
+                    interaction.plus_minus = (
+                        interaction.points_for - interaction.points_against
+                    )
 
                     # Recompute ratings
                     if interaction.possessions_together > 0:
@@ -216,7 +226,8 @@ class InteractionAnalyzer:
                             interaction.points_for / interaction.possessions_together
                         ) * 100
                         interaction.defensive_rating = (
-                            interaction.points_against / interaction.possessions_together
+                            interaction.points_against
+                            / interaction.possessions_together
                         ) * 100
                         interaction.net_rating = (
                             interaction.offensive_rating - interaction.defensive_rating
@@ -230,7 +241,7 @@ class InteractionAnalyzer:
                         minutes_together=minutes,
                         points_for=points_for,
                         points_against=points_against,
-                        plus_minus=points_for - points_against
+                        plus_minus=points_for - points_against,
                     )
                     self.interactions[players_key] = interaction
 
@@ -239,18 +250,13 @@ class InteractionAnalyzer:
             self.player_lineups[player].append(lineup)
 
     def get_interaction(
-        self,
-        player1_id: str,
-        player2_id: str
+        self, player1_id: str, player2_id: str
     ) -> Optional[PlayerInteraction]:
         """Get interaction between two players"""
         players_key = tuple(sorted([player1_id, player2_id]))
         return self.interactions.get(players_key)
 
-    def get_player_interactions(
-        self,
-        player_id: str
-    ) -> List[PlayerInteraction]:
+    def get_player_interactions(self, player_id: str) -> List[PlayerInteraction]:
         """Get all interactions involving a player"""
         return [
             interaction
@@ -258,10 +264,7 @@ class InteractionAnalyzer:
             if player_id in players
         ]
 
-    def calculate_player_metrics(
-        self,
-        player_id: str
-    ) -> InteractionMetrics:
+    def calculate_player_metrics(self, player_id: str) -> InteractionMetrics:
         """Calculate interaction metrics for a player"""
         interactions = self.get_player_interactions(player_id)
 
@@ -314,13 +317,11 @@ class InteractionAnalyzer:
             avg_net_rating_with_teammates=avg_net_rating,
             total_teammates=len(interactions),
             high_synergy_teammates=high_synergy,
-            low_synergy_teammates=low_synergy
+            low_synergy_teammates=low_synergy,
         )
 
     def find_best_pairings(
-        self,
-        n: int = 10,
-        metric: str = 'net_rating'
+        self, n: int = 10, metric: str = "net_rating"
     ) -> List[Tuple[str, str, float]]:
         """
         Find best player pairings.
@@ -335,11 +336,11 @@ class InteractionAnalyzer:
         pairings = []
 
         for (p1, p2), interaction in self.interactions.items():
-            if metric == 'net_rating':
+            if metric == "net_rating":
                 score = interaction.net_rating or 0.0
-            elif metric == 'synergy':
+            elif metric == "synergy":
                 score = interaction.synergy_score()
-            elif metric == 'complement':
+            elif metric == "complement":
                 score = interaction.complement_score()
             else:
                 score = 0.0
@@ -352,18 +353,14 @@ class InteractionAnalyzer:
         return pairings[:n]
 
     def find_worst_pairings(
-        self,
-        n: int = 10,
-        metric: str = 'net_rating'
+        self, n: int = 10, metric: str = "net_rating"
     ) -> List[Tuple[str, str, float]]:
         """Find worst player pairings"""
         pairings = self.find_best_pairings(n=len(self.interactions), metric=metric)
         return pairings[-n:]
 
     def recommend_lineup_adjustments(
-        self,
-        current_lineup: Set[str],
-        available_players: Set[str]
+        self, current_lineup: Set[str], available_players: Set[str]
     ) -> List[Dict[str, Any]]:
         """
         Recommend lineup adjustments based on interaction data.
@@ -382,13 +379,14 @@ class InteractionAnalyzer:
             # Get interactions with current teammates
             teammates = current_lineup - {player}
             teammate_interactions = [
-                self.get_interaction(player, teammate)
-                for teammate in teammates
+                self.get_interaction(player, teammate) for teammate in teammates
             ]
             teammate_interactions = [x for x in teammate_interactions if x is not None]
 
             if teammate_interactions:
-                avg_synergy = np.mean([x.synergy_score() for x in teammate_interactions])
+                avg_synergy = np.mean(
+                    [x.synergy_score() for x in teammate_interactions]
+                )
 
                 # If low synergy, recommend substitution
                 if avg_synergy < 0.4:
@@ -402,45 +400,56 @@ class InteractionAnalyzer:
                             self.get_interaction(candidate, teammate)
                             for teammate in teammates
                         ]
-                        candidate_interactions = [x for x in candidate_interactions if x]
+                        candidate_interactions = [
+                            x for x in candidate_interactions if x
+                        ]
 
                         if candidate_interactions:
-                            candidate_synergy = np.mean([
-                                x.synergy_score() for x in candidate_interactions
-                            ])
+                            candidate_synergy = np.mean(
+                                [x.synergy_score() for x in candidate_interactions]
+                            )
 
                             if candidate_synergy > best_replacement_synergy:
                                 best_replacement = candidate
                                 best_replacement_synergy = candidate_synergy
 
-                    if best_replacement and best_replacement_synergy > avg_synergy + 0.1:
-                        recommendations.append({
-                            'replace': player,
-                            'with': best_replacement,
-                            'current_synergy': avg_synergy,
-                            'projected_synergy': best_replacement_synergy,
-                            'improvement': best_replacement_synergy - avg_synergy
-                        })
+                    if (
+                        best_replacement
+                        and best_replacement_synergy > avg_synergy + 0.1
+                    ):
+                        recommendations.append(
+                            {
+                                "replace": player,
+                                "with": best_replacement,
+                                "current_synergy": avg_synergy,
+                                "projected_synergy": best_replacement_synergy,
+                                "improvement": best_replacement_synergy - avg_synergy,
+                            }
+                        )
 
         # Sort by improvement
-        recommendations.sort(key=lambda x: x['improvement'], reverse=True)
+        recommendations.sort(key=lambda x: x["improvement"], reverse=True)
 
         return recommendations
 
     def get_statistics(self) -> Dict[str, Any]:
         """Get analyzer statistics"""
         return {
-            'total_interactions': len(self.interactions),
-            'unique_players': len(self.player_lineups),
-            'avg_minutes_together': float(np.mean([
-                x.minutes_together for x in self.interactions.values()
-            ])) if self.interactions else 0.0,
-            'positive_pairings': sum(
-                1 for x in self.interactions.values()
+            "total_interactions": len(self.interactions),
+            "unique_players": len(self.player_lineups),
+            "avg_minutes_together": (
+                float(np.mean([x.minutes_together for x in self.interactions.values()]))
+                if self.interactions
+                else 0.0
+            ),
+            "positive_pairings": sum(
+                1
+                for x in self.interactions.values()
                 if x.net_rating and x.net_rating > 0
             ),
-            'negative_pairings': sum(
-                1 for x in self.interactions.values()
+            "negative_pairings": sum(
+                1
+                for x in self.interactions.values()
                 if x.net_rating and x.net_rating < 0
             ),
         }

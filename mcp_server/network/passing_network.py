@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 # Try to import NetworkX (optional)
 try:
     import networkx as nx
+
     NETWORKX_AVAILABLE = True
 except ImportError:
     NETWORKX_AVAILABLE = False
@@ -69,10 +70,9 @@ class Pass:
 
     def __post_init__(self):
         """Compute derived metrics"""
-        if self.distance is None and all([
-            self.passer_x, self.passer_y,
-            self.receiver_x, self.receiver_y
-        ]):
+        if self.distance is None and all(
+            [self.passer_x, self.passer_y, self.receiver_x, self.receiver_y]
+        ):
             self.distance = self._compute_distance()
 
     def _compute_distance(self) -> float:
@@ -84,14 +84,14 @@ class Pass:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'passer_id': self.passer_id,
-            'receiver_id': self.receiver_id,
-            'timestamp': self.timestamp,
-            'game_id': self.game_id,
-            'pass_type': self.pass_type.value,
-            'assist': self.resulted_in_assist,
-            'turnover': self.resulted_in_turnover,
-            'distance': self.distance,
+            "passer_id": self.passer_id,
+            "receiver_id": self.receiver_id,
+            "timestamp": self.timestamp,
+            "game_id": self.game_id,
+            "pass_type": self.pass_type.value,
+            "assist": self.resulted_in_assist,
+            "turnover": self.resulted_in_turnover,
+            "distance": self.distance,
         }
 
 
@@ -128,23 +128,25 @@ class PassingMetrics:
         # Weight: 40% completion, 30% assists, 30% volume (normalized)
         completion_component = self.completion_rate * 0.4
         assist_component = min(self.assist_rate * 2, 1.0) * 0.3  # Cap at 50%
-        volume_component = min(self.total_passes / 50.0, 1.0) * 0.3  # Normalize to 50 passes
+        volume_component = (
+            min(self.total_passes / 50.0, 1.0) * 0.3
+        )  # Normalize to 50 passes
 
         return completion_component + assist_component + volume_component
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'passer_id': self.passer_id,
-            'receiver_id': self.receiver_id,
-            'total_passes': self.total_passes,
-            'assists': self.assists,
-            'turnovers': self.turnovers,
-            'assist_rate': self.assist_rate,
-            'turnover_rate': self.turnover_rate,
-            'completion_rate': self.completion_rate,
-            'avg_distance': self.avg_pass_distance,
-            'effectiveness': self.effectiveness_score(),
+            "passer_id": self.passer_id,
+            "receiver_id": self.receiver_id,
+            "total_passes": self.total_passes,
+            "assists": self.assists,
+            "turnovers": self.turnovers,
+            "assist_rate": self.assist_rate,
+            "turnover_rate": self.turnover_rate,
+            "completion_rate": self.completion_rate,
+            "avg_distance": self.avg_pass_distance,
+            "effectiveness": self.effectiveness_score(),
         }
 
 
@@ -182,7 +184,7 @@ class PassingNetwork:
 
             # Add/update edge
             if self.graph.has_edge(*edge):
-                self.graph[edge[0]][edge[1]]['weight'] += 1
+                self.graph[edge[0]][edge[1]]["weight"] += 1
             else:
                 self.graph.add_edge(*edge, weight=1)
 
@@ -192,14 +194,13 @@ class PassingNetwork:
             self.add_pass(pass_event)
 
     def get_pass_metrics(
-        self,
-        passer_id: str,
-        receiver_id: str
+        self, passer_id: str, receiver_id: str
     ) -> Optional[PassingMetrics]:
         """Get passing metrics between two players"""
         # Filter passes
         passes = [
-            p for p in self.passes
+            p
+            for p in self.passes
             if p.passer_id == passer_id and p.receiver_id == receiver_id
         ]
 
@@ -212,7 +213,9 @@ class PassingNetwork:
 
         assist_rate = assists / total_passes if total_passes > 0 else 0.0
         turnover_rate = turnovers / total_passes if total_passes > 0 else 0.0
-        completion_rate = (total_passes - turnovers) / total_passes if total_passes > 0 else 0.0
+        completion_rate = (
+            (total_passes - turnovers) / total_passes if total_passes > 0 else 0.0
+        )
 
         # Distance metrics
         distances = [p.distance for p in passes if p.distance is not None]
@@ -229,13 +232,11 @@ class PassingNetwork:
             turnover_rate=turnover_rate,
             completion_rate=completion_rate,
             avg_pass_distance=avg_distance,
-            max_pass_distance=max_distance
+            max_pass_distance=max_distance,
         )
 
     def get_top_connections(
-        self,
-        n: int = 10,
-        metric: str = 'frequency'
+        self, n: int = 10, metric: str = "frequency"
     ) -> List[Tuple[str, str, float]]:
         """
         Get top N passing connections.
@@ -253,11 +254,11 @@ class PassingNetwork:
             metrics = self.get_pass_metrics(passer, receiver)
 
             if metrics:
-                if metric == 'frequency':
+                if metric == "frequency":
                     score = float(metrics.total_passes)
-                elif metric == 'effectiveness':
+                elif metric == "effectiveness":
                     score = metrics.effectiveness_score()
-                elif metric == 'assists':
+                elif metric == "assists":
                     score = float(metrics.assists)
                 else:
                     score = float(count)
@@ -270,9 +271,7 @@ class PassingNetwork:
         return connections[:n]
 
     def get_player_centrality(
-        self,
-        player_id: str,
-        centrality_type: str = 'degree'
+        self, player_id: str, centrality_type: str = "degree"
     ) -> float:
         """
         Get centrality score for a player.
@@ -292,16 +291,16 @@ class PassingNetwork:
             return 0.0
 
         try:
-            if centrality_type == 'degree':
-                return self.graph.degree(player_id, weight='weight')
-            elif centrality_type == 'betweenness':
-                centrality = nx.betweenness_centrality(self.graph, weight='weight')
+            if centrality_type == "degree":
+                return self.graph.degree(player_id, weight="weight")
+            elif centrality_type == "betweenness":
+                centrality = nx.betweenness_centrality(self.graph, weight="weight")
                 return centrality.get(player_id, 0.0)
-            elif centrality_type == 'closeness':
-                centrality = nx.closeness_centrality(self.graph, distance='weight')
+            elif centrality_type == "closeness":
+                centrality = nx.closeness_centrality(self.graph, distance="weight")
                 return centrality.get(player_id, 0.0)
-            elif centrality_type == 'pagerank':
-                centrality = nx.pagerank(self.graph, weight='weight')
+            elif centrality_type == "pagerank":
+                centrality = nx.pagerank(self.graph, weight="weight")
                 return centrality.get(player_id, 0.0)
             else:
                 return 0.0
@@ -309,8 +308,7 @@ class PassingNetwork:
             return 0.0
 
     def get_all_player_centralities(
-        self,
-        centrality_type: str = 'degree'
+        self, centrality_type: str = "degree"
     ) -> Dict[str, float]:
         """Get centrality scores for all players"""
         if not NETWORKX_AVAILABLE or self.graph is None:
@@ -322,10 +320,7 @@ class PassingNetwork:
             for player in players
         }
 
-    def identify_passing_clusters(
-        self,
-        min_cluster_size: int = 3
-    ) -> List[Set[str]]:
+    def identify_passing_clusters(self, min_cluster_size: int = 3) -> List[Set[str]]:
         """
         Identify clusters of players with strong passing connections.
 
@@ -345,7 +340,10 @@ class PassingNetwork:
             # Use Louvain community detection if available
             try:
                 import community as community_louvain
-                communities = community_louvain.best_partition(undirected, weight='weight')
+
+                communities = community_louvain.best_partition(
+                    undirected, weight="weight"
+                )
 
                 # Group by community
                 clusters_dict: Dict[int, Set[str]] = {}
@@ -356,7 +354,8 @@ class PassingNetwork:
 
                 # Filter by size
                 clusters = [
-                    cluster for cluster in clusters_dict.values()
+                    cluster
+                    for cluster in clusters_dict.values()
                     if len(cluster) >= min_cluster_size
                 ]
 
@@ -365,8 +364,7 @@ class PassingNetwork:
                 # Fallback to connected components
                 components = nx.connected_components(undirected)
                 return [
-                    set(comp) for comp in components
-                    if len(comp) >= min_cluster_size
+                    set(comp) for comp in components if len(comp) >= min_cluster_size
                 ]
         except:
             return []
@@ -406,10 +404,7 @@ class NetworkAnalyzer:
         for pass_event in passes:
             self.add_pass(pass_event)
 
-    def analyze_player_role(
-        self,
-        player_id: str
-    ) -> Dict[str, Any]:
+    def analyze_player_role(self, player_id: str) -> Dict[str, Any]:
         """
         Analyze player's role in passing network.
 
@@ -428,39 +423,34 @@ class NetworkAnalyzer:
         total_passes = total_passes_from + total_passes_to
 
         if total_passes == 0:
-            return {
-                'role': 'isolated',
-                'pass_ratio': 0.0,
-                'centrality': 0.0
-            }
+            return {"role": "isolated", "pass_ratio": 0.0, "centrality": 0.0}
 
         # Pass ratio (outgoing / total)
         pass_ratio = total_passes_from / total_passes if total_passes > 0 else 0.0
 
         # Classify role
         if pass_ratio > 0.7:
-            role = 'playmaker'  # Primarily passes
+            role = "playmaker"  # Primarily passes
         elif pass_ratio > 0.4:
-            role = 'balanced'  # Both passes and receives
+            role = "balanced"  # Both passes and receives
         else:
-            role = 'finisher'  # Primarily receives
+            role = "finisher"  # Primarily receives
 
         # Get centrality
-        centrality = self.network.get_player_centrality(player_id, 'degree')
+        centrality = self.network.get_player_centrality(player_id, "degree")
 
         return {
-            'role': role,
-            'passes_from': total_passes_from,
-            'passes_to': total_passes_to,
-            'pass_ratio': pass_ratio,
-            'centrality': centrality,
-            'assists_given': sum(1 for p in passes_from if p.resulted_in_assist),
-            'assists_received': sum(1 for p in passes_to if p.resulted_in_assist)
+            "role": role,
+            "passes_from": total_passes_from,
+            "passes_to": total_passes_to,
+            "pass_ratio": pass_ratio,
+            "centrality": centrality,
+            "assists_given": sum(1 for p in passes_from if p.resulted_in_assist),
+            "assists_received": sum(1 for p in passes_to if p.resulted_in_assist),
         }
 
     def get_ball_movement_metrics(
-        self,
-        game_id: Optional[str] = None
+        self, game_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Get ball movement metrics.
@@ -495,24 +485,21 @@ class NetworkAnalyzer:
         unique_receivers = len(set(p.receiver_id for p in passes))
 
         return {
-            'total_passes': total_passes,
-            'assists': assists,
-            'turnovers': turnovers,
-            'assist_rate': assists / total_passes if total_passes > 0 else 0.0,
-            'turnover_rate': turnovers / total_passes if total_passes > 0 else 0.0,
-            'avg_pass_distance': avg_distance,
-            'unique_passers': unique_passers,
-            'unique_receivers': unique_receivers,
-            'ball_movement_score': self._calculate_ball_movement_score(
+            "total_passes": total_passes,
+            "assists": assists,
+            "turnovers": turnovers,
+            "assist_rate": assists / total_passes if total_passes > 0 else 0.0,
+            "turnover_rate": turnovers / total_passes if total_passes > 0 else 0.0,
+            "avg_pass_distance": avg_distance,
+            "unique_passers": unique_passers,
+            "unique_receivers": unique_receivers,
+            "ball_movement_score": self._calculate_ball_movement_score(
                 total_passes, unique_passers, avg_distance
-            )
+            ),
         }
 
     def _calculate_ball_movement_score(
-        self,
-        total_passes: int,
-        unique_passers: int,
-        avg_distance: float
+        self, total_passes: int, unique_passers: int, avg_distance: float
     ) -> float:
         """
         Calculate overall ball movement quality score (0-100).
@@ -529,13 +516,15 @@ class NetworkAnalyzer:
     def get_statistics(self) -> Dict[str, Any]:
         """Get analyzer statistics"""
         return {
-            'total_passes': len(self.network.passes),
-            'games_analyzed': len(self.networks_by_game),
-            'unique_players': len(set(
-                [p.passer_id for p in self.network.passes] +
-                [p.receiver_id for p in self.network.passes]
-            )),
-            'top_connections': self.network.get_top_connections(5, 'frequency')
+            "total_passes": len(self.network.passes),
+            "games_analyzed": len(self.networks_by_game),
+            "unique_players": len(
+                set(
+                    [p.passer_id for p in self.network.passes]
+                    + [p.receiver_id for p in self.network.passes]
+                )
+            ),
+            "top_connections": self.network.get_top_connections(5, "frequency"),
         }
 
     def clear(self):

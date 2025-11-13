@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 class DataSourceType(Enum):
     """Types of data sources"""
+
     WEBSOCKET = "websocket"
     REST_API = "rest_api"
     FILE = "file"
@@ -38,6 +39,7 @@ class DataSourceType(Enum):
 
 class ConnectionStatus(Enum):
     """Connection status"""
+
     DISCONNECTED = "disconnected"
     CONNECTING = "connecting"
     CONNECTED = "connected"
@@ -48,6 +50,7 @@ class ConnectionStatus(Enum):
 @dataclass
 class DataSourceConfig:
     """Configuration for data source"""
+
     source_type: DataSourceType
     endpoint: str
     auth_token: Optional[str] = None
@@ -61,6 +64,7 @@ class DataSourceConfig:
 @dataclass
 class DataMessage:
     """Message from data source"""
+
     message_id: str
     timestamp: datetime
     source: str
@@ -71,12 +75,12 @@ class DataMessage:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'message_id': self.message_id,
-            'timestamp': self.timestamp.isoformat(),
-            'source': self.source,
-            'data': self.data,
-            'message_type': self.message_type,
-            'sequence_number': self.sequence_number,
+            "message_id": self.message_id,
+            "timestamp": self.timestamp.isoformat(),
+            "source": self.source,
+            "data": self.data,
+            "message_type": self.message_type,
+            "sequence_number": self.sequence_number,
         }
 
 
@@ -99,11 +103,11 @@ class DataConnector(ABC):
         self.message_buffer: Queue[DataMessage] = Queue(maxsize=config.buffer_size)
         self.callbacks: List[Callable[[DataMessage], None]] = []
         self.stats = {
-            'messages_received': 0,
-            'messages_dropped': 0,
-            'connection_attempts': 0,
-            'last_message_time': None,
-            'errors': 0,
+            "messages_received": 0,
+            "messages_dropped": 0,
+            "connection_attempts": 0,
+            "last_message_time": None,
+            "errors": 0,
         }
         self._running = False
         self._thread: Optional[threading.Thread] = None
@@ -174,10 +178,10 @@ class DataConnector(ABC):
     def get_statistics(self) -> Dict[str, Any]:
         """Get connector statistics"""
         return {
-            'status': self.status.value,
-            'source_type': self.config.source_type.value,
-            'endpoint': self.config.endpoint,
-            **self.stats
+            "status": self.status.value,
+            "source_type": self.config.source_type.value,
+            "endpoint": self.config.endpoint,
+            **self.stats,
         }
 
     def _notify_callbacks(self, message: DataMessage):
@@ -192,11 +196,11 @@ class DataConnector(ABC):
         """Add message to buffer and notify callbacks"""
         try:
             self.message_buffer.put_nowait(message)
-            self.stats['messages_received'] += 1
-            self.stats['last_message_time'] = datetime.now()
+            self.stats["messages_received"] += 1
+            self.stats["last_message_time"] = datetime.now()
             self._notify_callbacks(message)
         except:
-            self.stats['messages_dropped'] += 1
+            self.stats["messages_dropped"] += 1
             logger.warning("Message buffer full, dropping message")
 
 
@@ -218,10 +222,10 @@ class MockDataConnector(DataConnector):
         super().__init__(config)
         self.event_rate_hz = event_rate_hz
         self.game_state = {
-            'home_score': 0,
-            'away_score': 0,
-            'time_remaining': 48.0,
-            'quarter': 1,
+            "home_score": 0,
+            "away_score": 0,
+            "time_remaining": 48.0,
+            "quarter": 1,
         }
 
     def connect(self) -> bool:
@@ -256,16 +260,16 @@ class MockDataConnector(DataConnector):
         # Randomly update score
         if random.random() < 0.3:  # 30% chance of score
             if random.random() < 0.5:
-                self.game_state['home_score'] += random.choice([2, 3])
+                self.game_state["home_score"] += random.choice([2, 3])
             else:
-                self.game_state['away_score'] += random.choice([2, 3])
+                self.game_state["away_score"] += random.choice([2, 3])
 
         # Update time
-        self.game_state['time_remaining'] -= 0.1
+        self.game_state["time_remaining"] -= 0.1
 
-        if self.game_state['time_remaining'] <= 0:
-            self.game_state['quarter'] += 1
-            self.game_state['time_remaining'] = 12.0
+        if self.game_state["time_remaining"] <= 0:
+            self.game_state["quarter"] += 1
+            self.game_state["time_remaining"] = 12.0
 
         # Create message
         message = DataMessage(
@@ -274,7 +278,7 @@ class MockDataConnector(DataConnector):
             source="mock",
             data=self.game_state.copy(),
             message_type="score_update",
-            sequence_number=sequence
+            sequence_number=sequence,
         )
 
         self._add_message(message)
@@ -298,7 +302,7 @@ class WebSocketConnector(DataConnector):
             # Note: Actual WebSocket implementation would require 'websockets' or 'websocket-client'
             # This is a placeholder for the interface
             self.status = ConnectionStatus.CONNECTING
-            self.stats['connection_attempts'] += 1
+            self.stats["connection_attempts"] += 1
 
             # Placeholder: In real implementation, establish WebSocket connection
             # import websocket
@@ -315,7 +319,7 @@ class WebSocketConnector(DataConnector):
 
         except Exception as e:
             self.status = ConnectionStatus.ERROR
-            self.stats['errors'] += 1
+            self.stats["errors"] += 1
             logger.error(f"WebSocket connection failed: {e}")
             return False
 
@@ -351,11 +355,11 @@ class WebSocketConnector(DataConnector):
         try:
             data = json.loads(message_str)
             message = DataMessage(
-                message_id=data.get('id', f"ws_{int(time.time() * 1000)}"),
+                message_id=data.get("id", f"ws_{int(time.time() * 1000)}"),
                 timestamp=datetime.now(),
                 source="websocket",
                 data=data,
-                message_type=data.get('type')
+                message_type=data.get("type"),
             )
             self._add_message(message)
         except Exception as e:
@@ -363,12 +367,14 @@ class WebSocketConnector(DataConnector):
 
     def _should_reconnect(self) -> bool:
         """Check if reconnection should be attempted"""
-        return self.stats['connection_attempts'] < self.config.reconnect_attempts
+        return self.stats["connection_attempts"] < self.config.reconnect_attempts
 
     def _reconnect(self):
         """Attempt to reconnect"""
         self.status = ConnectionStatus.RECONNECTING
-        logger.info(f"Attempting reconnect ({self.stats['connection_attempts']} / {self.config.reconnect_attempts})")
+        logger.info(
+            f"Attempting reconnect ({self.stats['connection_attempts']} / {self.config.reconnect_attempts})"
+        )
         time.sleep(self.config.reconnect_delay_seconds)
         self.connect()
 
@@ -396,7 +402,7 @@ class RESTAPIConnector(DataConnector):
         """Check API connectivity"""
         try:
             self.status = ConnectionStatus.CONNECTING
-            self.stats['connection_attempts'] += 1
+            self.stats["connection_attempts"] += 1
 
             # Placeholder: Would test API endpoint
             # import requests
@@ -415,7 +421,7 @@ class RESTAPIConnector(DataConnector):
 
         except Exception as e:
             self.status = ConnectionStatus.ERROR
-            self.stats['errors'] += 1
+            self.stats["errors"] += 1
             logger.error(f"REST API connection failed: {e}")
             return False
 
@@ -434,7 +440,7 @@ class RESTAPIConnector(DataConnector):
                 time.sleep(self.poll_interval_seconds)
             except Exception as e:
                 logger.error(f"API polling error: {e}")
-                self.stats['errors'] += 1
+                self.stats["errors"] += 1
 
     def _poll_api(self):
         """Poll API endpoint once"""
@@ -537,8 +543,7 @@ class StreamingDataConnector:
 
 # Convenience function
 def create_mock_connector(
-    endpoint: str = "mock://test",
-    event_rate_hz: float = 1.0
+    endpoint: str = "mock://test", event_rate_hz: float = 1.0
 ) -> MockDataConnector:
     """
     Create a mock data connector for testing.
@@ -550,8 +555,5 @@ def create_mock_connector(
     Returns:
         MockDataConnector instance
     """
-    config = DataSourceConfig(
-        source_type=DataSourceType.MOCK,
-        endpoint=endpoint
-    )
+    config = DataSourceConfig(source_type=DataSourceType.MOCK, endpoint=endpoint)
     return MockDataConnector(config, event_rate_hz=event_rate_hz)

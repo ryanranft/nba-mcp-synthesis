@@ -147,17 +147,17 @@ class ShotLocation:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'x': self.x,
-            'y': self.y,
-            'made': self.made,
-            'points': self.points,
-            'distance': self.distance,
-            'angle': self.angle,
-            'zone': self.zone.value if self.zone else None,
-            'player_id': self.player_id,
-            'game_id': self.game_id,
-            'timestamp': self.timestamp,
-            'shot_type': self.shot_type,
+            "x": self.x,
+            "y": self.y,
+            "made": self.made,
+            "points": self.points,
+            "distance": self.distance,
+            "angle": self.angle,
+            "zone": self.zone.value if self.zone else None,
+            "player_id": self.player_id,
+            "game_id": self.game_id,
+            "timestamp": self.timestamp,
+            "shot_type": self.shot_type,
         }
 
 
@@ -189,7 +189,7 @@ class ShotEfficiency:
             self.effective_fg_pct = 0.0
 
     @classmethod
-    def from_shots(cls, shots: List[ShotLocation]) -> 'ShotEfficiency':
+    def from_shots(cls, shots: List[ShotLocation]) -> "ShotEfficiency":
         """Create efficiency metrics from shot list"""
         if not shots:
             return cls(
@@ -197,7 +197,7 @@ class ShotEfficiency:
                 makes=0,
                 fg_pct=0.0,
                 points_per_shot=0.0,
-                effective_fg_pct=0.0
+                effective_fg_pct=0.0,
             )
 
         attempts = len(shots)
@@ -205,9 +205,13 @@ class ShotEfficiency:
         total_points = sum(s.points for s in shots)
 
         # Breakdown by shot value
-        two_pt_attempts = sum(1 for s in shots if s.points == 2 or (s.points == 0 and s.distance < 23.75))
+        two_pt_attempts = sum(
+            1 for s in shots if s.points == 2 or (s.points == 0 and s.distance < 23.75)
+        )
         two_pt_makes = sum(1 for s in shots if s.made and s.points == 2)
-        three_pt_attempts = sum(1 for s in shots if s.points == 3 or (s.points == 0 and s.distance >= 23.75))
+        three_pt_attempts = sum(
+            1 for s in shots if s.points == 3 or (s.points == 0 and s.distance >= 23.75)
+        )
         three_pt_makes = sum(1 for s in shots if s.made and s.points == 3)
 
         # Calculate percentages
@@ -215,7 +219,9 @@ class ShotEfficiency:
         points_per_shot = total_points / attempts if attempts > 0 else 0.0
 
         # Effective FG% = (FGM + 0.5 * 3PM) / FGA
-        effective_fg_pct = (makes + 0.5 * three_pt_makes) / attempts if attempts > 0 else 0.0
+        effective_fg_pct = (
+            (makes + 0.5 * three_pt_makes) / attempts if attempts > 0 else 0.0
+        )
 
         # Distance statistics
         distances = [s.distance for s in shots if s.distance is not None]
@@ -233,23 +239,23 @@ class ShotEfficiency:
             three_point_attempts=three_pt_attempts,
             three_point_makes=three_pt_makes,
             avg_distance=avg_distance,
-            std_distance=std_distance
+            std_distance=std_distance,
         )
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'attempts': self.attempts,
-            'makes': self.makes,
-            'fg_pct': self.fg_pct,
-            'points_per_shot': self.points_per_shot,
-            'effective_fg_pct': self.effective_fg_pct,
-            'two_point_attempts': self.two_point_attempts,
-            'two_point_makes': self.two_point_makes,
-            'three_point_attempts': self.three_point_attempts,
-            'three_point_makes': self.three_pt_makes,
-            'avg_distance': self.avg_distance,
-            'std_distance': self.std_distance,
+            "attempts": self.attempts,
+            "makes": self.makes,
+            "fg_pct": self.fg_pct,
+            "points_per_shot": self.points_per_shot,
+            "effective_fg_pct": self.effective_fg_pct,
+            "two_point_attempts": self.two_point_attempts,
+            "two_point_makes": self.two_point_makes,
+            "three_point_attempts": self.three_point_attempts,
+            "three_point_makes": self.three_pt_makes,
+            "avg_distance": self.avg_distance,
+            "std_distance": self.std_distance,
         }
 
 
@@ -267,10 +273,7 @@ class ShotLocationAnalyzer:
     """
 
     def __init__(
-        self,
-        grid_size: int = 50,
-        court_length: float = 94.0,
-        court_width: float = 50.0
+        self, grid_size: int = 50, court_length: float = 94.0, court_width: float = 50.0
     ):
         """
         Initialize shot location analyzer.
@@ -322,10 +325,7 @@ class ShotLocationAnalyzer:
 
     def get_all_zone_efficiencies(self) -> Dict[ShotZone, ShotEfficiency]:
         """Get efficiency metrics for all zones"""
-        return {
-            zone: self.get_zone_efficiency(zone)
-            for zone in ShotZone
-        }
+        return {zone: self.get_zone_efficiency(zone) for zone in ShotZone}
 
     def get_player_efficiency(self, player_id: str) -> ShotEfficiency:
         """Get efficiency metrics for a player"""
@@ -335,8 +335,8 @@ class ShotLocationAnalyzer:
     def generate_heatmap(
         self,
         player_id: Optional[str] = None,
-        metric: str = 'fg_pct',
-        min_attempts: int = 5
+        metric: str = "fg_pct",
+        min_attempts: int = 5,
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Generate shot heatmap as a 2D grid.
@@ -367,7 +367,9 @@ class ShotLocationAnalyzer:
 
         # Create grid
         x_edges = np.linspace(0, self.court_width, self.grid_size + 1)
-        y_edges = np.linspace(0, self.court_length / 2, self.grid_size + 1)  # Half court
+        y_edges = np.linspace(
+            0, self.court_length / 2, self.grid_size + 1
+        )  # Half court
 
         # Initialize grids
         attempts_grid = np.zeros((self.grid_size, self.grid_size))
@@ -377,8 +379,13 @@ class ShotLocationAnalyzer:
         # Populate grids
         for shot in shots:
             # Find grid cell
-            x_idx = min(int(shot.x / self.court_width * self.grid_size), self.grid_size - 1)
-            y_idx = min(int(shot.y / (self.court_length / 2) * self.grid_size), self.grid_size - 1)
+            x_idx = min(
+                int(shot.x / self.court_width * self.grid_size), self.grid_size - 1
+            )
+            y_idx = min(
+                int(shot.y / (self.court_length / 2) * self.grid_size),
+                self.grid_size - 1,
+            )
 
             attempts_grid[y_idx, x_idx] += 1
             if shot.made:
@@ -386,24 +393,24 @@ class ShotLocationAnalyzer:
             points_grid[y_idx, x_idx] += shot.points
 
         # Compute heatmap based on metric
-        if metric == 'fg_pct':
+        if metric == "fg_pct":
             # Field goal percentage
             heatmap = np.divide(
                 makes_grid,
                 attempts_grid,
                 out=np.zeros_like(makes_grid),
-                where=attempts_grid >= min_attempts
+                where=attempts_grid >= min_attempts,
             )
-        elif metric == 'attempts':
+        elif metric == "attempts":
             # Shot attempt frequency
             heatmap = attempts_grid
-        elif metric == 'points_per_shot':
+        elif metric == "points_per_shot":
             # Expected points per shot
             heatmap = np.divide(
                 points_grid,
                 attempts_grid,
                 out=np.zeros_like(points_grid),
-                where=attempts_grid >= min_attempts
+                where=attempts_grid >= min_attempts,
             )
         else:
             raise ValueError(f"Unknown metric: {metric}")
@@ -414,7 +421,7 @@ class ShotLocationAnalyzer:
         self,
         player_id: Optional[str] = None,
         threshold: float = 0.50,
-        min_attempts: int = 10
+        min_attempts: int = 10,
     ) -> List[Tuple[ShotZone, ShotEfficiency]]:
         """
         Identify hot zones (high efficiency zones).
@@ -456,7 +463,7 @@ class ShotLocationAnalyzer:
         self,
         player_id: Optional[str] = None,
         threshold: float = 0.35,
-        min_attempts: int = 10
+        min_attempts: int = 10,
     ) -> List[Tuple[ShotZone, ShotEfficiency]]:
         """
         Identify cold zones (low efficiency zones).
@@ -494,10 +501,7 @@ class ShotLocationAnalyzer:
         return cold_zones
 
     def get_expected_points(
-        self,
-        x: float,
-        y: float,
-        player_id: Optional[str] = None
+        self, x: float, y: float, player_id: Optional[str] = None
     ) -> float:
         """
         Get expected points for a shot at given location.
@@ -535,10 +539,10 @@ class ShotLocationAnalyzer:
     def get_statistics(self) -> Dict[str, Any]:
         """Get analyzer statistics"""
         return {
-            'total_shots': len(self.shots),
-            'unique_players': len(self.shots_by_player),
-            'zones_with_shots': len(self.shots_by_zone),
-            'overall_efficiency': ShotEfficiency.from_shots(self.shots).to_dict(),
+            "total_shots": len(self.shots),
+            "unique_players": len(self.shots_by_player),
+            "zones_with_shots": len(self.shots_by_zone),
+            "overall_efficiency": ShotEfficiency.from_shots(self.shots).to_dict(),
         }
 
     def clear(self):

@@ -46,17 +46,17 @@ class SimulationUpdate:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'update_id': self.update_id,
-            'timestamp': self.timestamp.isoformat(),
-            'game_state': self.game_state.to_dict(),
-            'win_probabilities': self.win_probabilities,
-            'expected_final_scores': self.expected_final_scores,
-            'confidence_intervals': {
-                k: {'lower': v[0], 'upper': v[1]}
+            "update_id": self.update_id,
+            "timestamp": self.timestamp.isoformat(),
+            "game_state": self.game_state.to_dict(),
+            "win_probabilities": self.win_probabilities,
+            "expected_final_scores": self.expected_final_scores,
+            "confidence_intervals": {
+                k: {"lower": v[0], "upper": v[1]}
                 for k, v in self.confidence_intervals.items()
             },
-            'model_prediction': self.model_prediction,
-            'event_trigger': self.event_trigger,
+            "model_prediction": self.model_prediction,
+            "event_trigger": self.event_trigger,
         }
 
 
@@ -72,7 +72,9 @@ class LiveSimulatorConfig:
 
     # Model integration
     use_model_predictions: bool = True
-    model_weight: float = 0.5  # Weight for model vs Kalman (0=Kalman only, 1=model only)
+    model_weight: float = (
+        0.5  # Weight for model vs Kalman (0=Kalman only, 1=model only)
+    )
 
     # Significant event thresholds
     significant_score_change: float = 5.0  # Points
@@ -100,7 +102,7 @@ class LiveGameSimulator:
         home_team: str,
         away_team: str,
         config: Optional[LiveSimulatorConfig] = None,
-        simulation_service: Optional[Any] = None
+        simulation_service: Optional[Any] = None,
     ):
         """
         Initialize live game simulator.
@@ -119,9 +121,7 @@ class LiveGameSimulator:
         self.simulation_service = simulation_service
 
         # Initialize Kalman filter
-        self.kalman_filter = StreamingKalmanFilter(
-            config=self.config.kalman_config
-        )
+        self.kalman_filter = StreamingKalmanFilter(config=self.config.kalman_config)
 
         # State
         self.initialized = False
@@ -142,7 +142,7 @@ class LiveGameSimulator:
         home_score: float = 0.0,
         away_score: float = 0.0,
         time_remaining: float = 48.0,
-        quarter: int = 1
+        quarter: int = 1,
     ) -> SimulationUpdate:
         """
         Initialize simulator with starting game state.
@@ -161,16 +161,14 @@ class LiveGameSimulator:
             home_score=home_score,
             away_score=away_score,
             time_remaining=time_remaining,
-            quarter=quarter
+            quarter=quarter,
         )
 
         self.initialized = True
         self.last_update_time = datetime.now()
 
         # Create initial update
-        update = self._create_update(
-            event_trigger="initialization"
-        )
+        update = self._create_update(event_trigger="initialization")
 
         self.update_history.append(update)
         self._notify_callbacks(update)
@@ -194,10 +192,10 @@ class LiveGameSimulator:
         """
         if not self.initialized:
             # Auto-initialize from first event
-            home_score = event.data.get('home_score', 0)
-            away_score = event.data.get('away_score', 0)
-            time_remaining = event.data.get('time_remaining', 48.0)
-            quarter = event.data.get('quarter', 1)
+            home_score = event.data.get("home_score", 0)
+            away_score = event.data.get("away_score", 0)
+            time_remaining = event.data.get("time_remaining", 48.0)
+            quarter = event.data.get("quarter", 1)
 
             return self.initialize(home_score, away_score, time_remaining, quarter)
 
@@ -246,7 +244,7 @@ class LiveGameSimulator:
         away_score: float,
         time_remaining: float,
         quarter: Optional[int] = None,
-        possession: Optional[str] = None
+        possession: Optional[str] = None,
     ) -> SimulationUpdate:
         """
         Update simulation with current scores (manual update).
@@ -266,15 +264,15 @@ class LiveGameSimulator:
 
         # Create observation
         observation = {
-            'home_score': home_score,
-            'away_score': away_score,
-            'time_remaining': time_remaining,
+            "home_score": home_score,
+            "away_score": away_score,
+            "time_remaining": time_remaining,
         }
 
         if quarter is not None:
-            observation['quarter'] = quarter
+            observation["quarter"] = quarter
         if possession is not None:
-            observation['possession'] = possession
+            observation["possession"] = possession
 
         # Calculate time delta
         dt = self._calculate_time_delta()
@@ -314,16 +312,16 @@ class LiveGameSimulator:
         # Combine Kalman and model predictions if available
         if model_prediction:
             w = self.config.model_weight
-            home_final = w * model_prediction['home_score'] + (1 - w) * home_final
-            away_final = w * model_prediction['away_score'] + (1 - w) * away_final
+            home_final = w * model_prediction["home_score"] + (1 - w) * home_final
+            away_final = w * model_prediction["away_score"] + (1 - w) * away_final
 
         return {
-            'home_team': self.home_team,
-            'away_team': self.away_team,
-            'predicted_home_score': float(home_final),
-            'predicted_away_score': float(away_final),
-            'kalman_statistics': stats,
-            'model_prediction': model_prediction,
+            "home_team": self.home_team,
+            "away_team": self.away_team,
+            "predicted_home_score": float(home_final),
+            "predicted_away_score": float(away_final),
+            "kalman_statistics": stats,
+            "model_prediction": model_prediction,
         }
 
     def get_current_state(self) -> Optional[GameState]:
@@ -357,14 +355,14 @@ class LiveGameSimulator:
     def get_statistics(self) -> Dict[str, Any]:
         """Get simulator statistics"""
         return {
-            'game_id': self.game_id,
-            'home_team': self.home_team,
-            'away_team': self.away_team,
-            'initialized': self.initialized,
-            'update_count': self.update_count,
-            'history_length': len(self.update_history),
-            'kalman_stats': self.kalman_filter.get_statistics(),
-            'callbacks_registered': len(self.callbacks),
+            "game_id": self.game_id,
+            "home_team": self.home_team,
+            "away_team": self.away_team,
+            "initialized": self.initialized,
+            "update_count": self.update_count,
+            "history_length": len(self.update_history),
+            "kalman_stats": self.kalman_filter.get_statistics(),
+            "callbacks_registered": len(self.callbacks),
         }
 
     def _create_update(self, event_trigger: Optional[str] = None) -> SimulationUpdate:
@@ -378,15 +376,15 @@ class LiveGameSimulator:
 
         # Calculate win probabilities
         win_probabilities = {
-            'home': float(state.home_win_prob),
-            'away': float(1.0 - state.home_win_prob),
+            "home": float(state.home_win_prob),
+            "away": float(1.0 - state.home_win_prob),
         }
 
         # Predict final scores
         home_final, away_final, _ = self.kalman_filter.predict_final_score()
         expected_final_scores = {
-            'home': float(home_final),
-            'away': float(away_final),
+            "home": float(home_final),
+            "away": float(away_final),
         }
 
         # Get model prediction if available
@@ -397,11 +395,14 @@ class LiveGameSimulator:
                 # Blend predictions
                 w = self.config.model_weight
                 if model_prediction:
-                    win_probabilities['home'] = (
-                        w * model_prediction.get('home_win_prob', win_probabilities['home'])
-                        + (1 - w) * win_probabilities['home']
+                    win_probabilities["home"] = (
+                        w
+                        * model_prediction.get(
+                            "home_win_prob", win_probabilities["home"]
+                        )
+                        + (1 - w) * win_probabilities["home"]
                     )
-                    win_probabilities['away'] = 1.0 - win_probabilities['home']
+                    win_probabilities["away"] = 1.0 - win_probabilities["home"]
             except Exception as e:
                 logger.debug(f"Model prediction unavailable: {e}")
 
@@ -413,7 +414,7 @@ class LiveGameSimulator:
             expected_final_scores=expected_final_scores,
             confidence_intervals=confidence_intervals,
             model_prediction=model_prediction,
-            event_trigger=event_trigger
+            event_trigger=event_trigger,
         )
 
         self.update_count += 1
@@ -424,28 +425,28 @@ class LiveGameSimulator:
         observation = {}
 
         if event.event_type == StreamEventType.SCORE_UPDATE:
-            if 'score' in event.data:
-                score = event.data['score']
-                observation['home_score'] = score.get('home', 0)
-                observation['away_score'] = score.get('away', 0)
+            if "score" in event.data:
+                score = event.data["score"]
+                observation["home_score"] = score.get("home", 0)
+                observation["away_score"] = score.get("away", 0)
             else:
-                observation['home_score'] = event.data.get('home_score', 0)
-                observation['away_score'] = event.data.get('away_score', 0)
+                observation["home_score"] = event.data.get("home_score", 0)
+                observation["away_score"] = event.data.get("away_score", 0)
 
         elif event.event_type == StreamEventType.GAME_EVENT:
-            observation['home_score'] = event.data.get('home_score', 0)
-            observation['away_score'] = event.data.get('away_score', 0)
+            observation["home_score"] = event.data.get("home_score", 0)
+            observation["away_score"] = event.data.get("away_score", 0)
 
         elif event.event_type == StreamEventType.PLAYER_STAT:
             # May contain partial score info
-            if 'home_score' in event.data and 'away_score' in event.data:
-                observation['home_score'] = event.data['home_score']
-                observation['away_score'] = event.data['away_score']
+            if "home_score" in event.data and "away_score" in event.data:
+                observation["home_score"] = event.data["home_score"]
+                observation["away_score"] = event.data["away_score"]
 
         # Extract time and metadata
-        observation['time_remaining'] = event.data.get('time_remaining', 0)
-        observation['quarter'] = event.data.get('quarter')
-        observation['possession'] = event.data.get('possession')
+        observation["time_remaining"] = event.data.get("time_remaining", 0)
+        observation["quarter"] = event.data.get("quarter")
+        observation["possession"] = event.data.get("possession")
 
         return observation if observation else None
 
@@ -496,11 +497,11 @@ class LiveGameSimulator:
 
         # Create features for model (simplified)
         features = {
-            'score_differential': state.home_score - state.away_score,
-            'home_score_rate': state.home_score_rate,
-            'away_score_rate': state.away_score_rate,
-            'time_remaining': state.time_remaining,
-            'quarter': float(state.quarter),
+            "score_differential": state.home_score - state.away_score,
+            "home_score_rate": state.home_score_rate,
+            "away_score_rate": state.away_score_rate,
+            "time_remaining": state.time_remaining,
+            "quarter": float(state.quarter),
         }
 
         # This would call the actual simulation service

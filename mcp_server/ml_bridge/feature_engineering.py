@@ -26,13 +26,14 @@ logger = logging.getLogger(__name__)
 
 # Try to import sklearn (optional)
 try:
-    from sklearn.preprocessing import (
-        PolynomialFeatures, StandardScaler, MinMaxScaler
-    )
+    from sklearn.preprocessing import PolynomialFeatures, StandardScaler, MinMaxScaler
     from sklearn.feature_selection import (
-        SelectKBest, f_regression, mutual_info_regression,
-        RFE
+        SelectKBest,
+        f_regression,
+        mutual_info_regression,
+        RFE,
     )
+
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False
@@ -94,7 +95,7 @@ class TimeSeriesFeatureCreator:
         self,
         data: Union[np.ndarray, pd.Series],
         lag_periods: Optional[List[int]] = None,
-        fill_value: float = 0.0
+        fill_value: float = 0.0,
     ) -> np.ndarray:
         """
         Create lag features.
@@ -125,7 +126,7 @@ class TimeSeriesFeatureCreator:
         self,
         data: Union[np.ndarray, pd.Series],
         windows: Optional[List[int]] = None,
-        functions: Optional[List[str]] = None
+        functions: Optional[List[str]] = None,
     ) -> np.ndarray:
         """
         Create rolling window features.
@@ -142,7 +143,7 @@ class TimeSeriesFeatureCreator:
             windows = self.config.rolling_windows
 
         if functions is None:
-            functions = ['mean', 'std']
+            functions = ["mean", "std"]
 
         if isinstance(data, np.ndarray):
             data = pd.Series(data)
@@ -151,13 +152,18 @@ class TimeSeriesFeatureCreator:
 
         for window in windows:
             for func in functions:
-                if func == 'mean':
+                if func == "mean":
                     feat = data.rolling(window=window, min_periods=1).mean().values
-                elif func == 'std':
-                    feat = data.rolling(window=window, min_periods=1).std().fillna(0).values
-                elif func == 'min':
+                elif func == "std":
+                    feat = (
+                        data.rolling(window=window, min_periods=1)
+                        .std()
+                        .fillna(0)
+                        .values
+                    )
+                elif func == "min":
                     feat = data.rolling(window=window, min_periods=1).min().values
-                elif func == 'max':
+                elif func == "max":
                     feat = data.rolling(window=window, min_periods=1).max().values
                 else:
                     continue
@@ -167,9 +173,7 @@ class TimeSeriesFeatureCreator:
         return np.column_stack(features)
 
     def create_difference_features(
-        self,
-        data: Union[np.ndarray, pd.Series],
-        orders: List[int] = [1, 2]
+        self, data: Union[np.ndarray, pd.Series], orders: List[int] = [1, 2]
     ) -> np.ndarray:
         """
         Create difference features.
@@ -195,9 +199,7 @@ class TimeSeriesFeatureCreator:
         return np.column_stack(differences)
 
     def create_ewm_features(
-        self,
-        data: Union[np.ndarray, pd.Series],
-        spans: List[int] = [3, 10, 20]
+        self, data: Union[np.ndarray, pd.Series], spans: List[int] = [3, 10, 20]
     ) -> np.ndarray:
         """
         Create exponential weighted moving average features.
@@ -223,7 +225,7 @@ class TimeSeriesFeatureCreator:
     def create_all_ts_features(
         self,
         data: Union[np.ndarray, pd.Series],
-        feature_names: Optional[List[str]] = None
+        feature_names: Optional[List[str]] = None,
     ) -> Tuple[np.ndarray, List[str]]:
         """
         Create all time series features.
@@ -235,29 +237,35 @@ class TimeSeriesFeatureCreator:
         Returns:
             (features_array, feature_names)
         """
-        all_features = [data.reshape(-1, 1) if isinstance(data, np.ndarray) else data.values.reshape(-1, 1)]
-        names = [feature_names[0] if feature_names else 'original']
+        all_features = [
+            (
+                data.reshape(-1, 1)
+                if isinstance(data, np.ndarray)
+                else data.values.reshape(-1, 1)
+            )
+        ]
+        names = [feature_names[0] if feature_names else "original"]
 
         # Lags
         if self.config.create_lags:
             lags = self.create_lag_features(data)
             all_features.append(lags)
             for i, lag in enumerate(self.config.lag_periods):
-                names.append(f'lag_{lag}')
+                names.append(f"lag_{lag}")
 
         # Rolling
         if self.config.create_rolling:
             rolling = self.create_rolling_features(data)
             all_features.append(rolling)
             for window in self.config.rolling_windows:
-                for func in ['mean', 'std']:
-                    names.append(f'rolling_{window}_{func}')
+                for func in ["mean", "std"]:
+                    names.append(f"rolling_{window}_{func}")
 
         # Differences
         if self.config.create_differences:
             diffs = self.create_difference_features(data)
             all_features.append(diffs)
-            names.extend(['diff_1', 'diff_2'])
+            names.extend(["diff_1", "diff_2"])
 
         # Concatenate
         features = np.hstack(all_features)
@@ -282,9 +290,7 @@ class InteractionFeatureCreator:
         logger.info("InteractionFeatureCreator initialized")
 
     def create_pairwise_products(
-        self,
-        X: np.ndarray,
-        feature_names: Optional[List[str]] = None
+        self, X: np.ndarray, feature_names: Optional[List[str]] = None
     ) -> Tuple[np.ndarray, List[str]]:
         """
         Create pairwise product interactions.
@@ -306,9 +312,9 @@ class InteractionFeatureCreator:
                 interactions.append(interaction)
 
                 if feature_names:
-                    interaction_names.append(f'{feature_names[i]}_x_{feature_names[j]}')
+                    interaction_names.append(f"{feature_names[i]}_x_{feature_names[j]}")
                 else:
-                    interaction_names.append(f'X{i}_x_X{j}')
+                    interaction_names.append(f"X{i}_x_X{j}")
 
         if interactions:
             interactions = np.column_stack(interactions)
@@ -321,7 +327,7 @@ class InteractionFeatureCreator:
         self,
         X: np.ndarray,
         feature_names: Optional[List[str]] = None,
-        epsilon: float = 1e-8
+        epsilon: float = 1e-8,
     ) -> Tuple[np.ndarray, List[str]]:
         """
         Create ratio features (X1 / X2).
@@ -346,9 +352,9 @@ class InteractionFeatureCreator:
                     ratios.append(ratio)
 
                     if feature_names:
-                        ratio_names.append(f'{feature_names[i]}_div_{feature_names[j]}')
+                        ratio_names.append(f"{feature_names[i]}_div_{feature_names[j]}")
                     else:
-                        ratio_names.append(f'X{i}_div_X{j}')
+                        ratio_names.append(f"X{i}_div_X{j}")
 
         if ratios:
             ratios = np.column_stack(ratios)
@@ -378,7 +384,7 @@ class NBAFeatureCreator:
         points: np.ndarray,
         fga: np.ndarray,
         fta: np.ndarray,
-        epsilon: float = 1e-8
+        epsilon: float = 1e-8,
     ) -> np.ndarray:
         """
         Calculate True Shooting %.
@@ -408,7 +414,7 @@ class NBAFeatureCreator:
         team_fga: np.ndarray,
         team_fta: np.ndarray,
         team_tov: np.ndarray,
-        epsilon: float = 1e-8
+        epsilon: float = 1e-8,
     ) -> np.ndarray:
         """
         Calculate Usage Rate.
@@ -433,7 +439,11 @@ class NBAFeatureCreator:
         player_possessions = fga + 0.44 * fta + tov
         team_possessions = team_fga + 0.44 * team_fta + team_tov + epsilon
 
-        usg = 100 * (player_possessions * (team_minutes / 5)) / (minutes * team_possessions + epsilon)
+        usg = (
+            100
+            * (player_possessions * (team_minutes / 5))
+            / (minutes * team_possessions + epsilon)
+        )
 
         return np.clip(usg, 0, 100)
 
@@ -450,7 +460,7 @@ class NBAFeatureCreator:
         fta: np.ndarray,
         ft: np.ndarray,
         minutes: np.ndarray,
-        epsilon: float = 1e-8
+        epsilon: float = 1e-8,
     ) -> np.ndarray:
         """
         Calculate simplified PER approximation.
@@ -478,10 +488,7 @@ class NBAFeatureCreator:
         return np.clip(per, -10, 50)
 
     def create_pace_adjusted_stats(
-        self,
-        stat: np.ndarray,
-        team_pace: np.ndarray,
-        league_avg_pace: float = 100.0
+        self, stat: np.ndarray, team_pace: np.ndarray, league_avg_pace: float = 100.0
     ) -> np.ndarray:
         """
         Adjust stats for pace.
@@ -517,11 +524,7 @@ class FeatureSelector:
         logger.info("FeatureSelector initialized")
 
     def select_k_best(
-        self,
-        X: np.ndarray,
-        y: np.ndarray,
-        k: int,
-        method: str = 'f_regression'
+        self, X: np.ndarray, y: np.ndarray, k: int, method: str = "f_regression"
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Select k best features.
@@ -535,9 +538,9 @@ class FeatureSelector:
         Returns:
             (selected_features, selected_indices)
         """
-        if method == 'f_regression':
+        if method == "f_regression":
             selector = SelectKBest(f_regression, k=k)
-        elif method == 'mutual_info':
+        elif method == "mutual_info":
             selector = SelectKBest(mutual_info_regression, k=k)
         else:
             selector = SelectKBest(f_regression, k=k)
@@ -550,11 +553,7 @@ class FeatureSelector:
         return X_selected, selected_indices
 
     def recursive_elimination(
-        self,
-        X: np.ndarray,
-        y: np.ndarray,
-        estimator: Any,
-        n_features: int
+        self, X: np.ndarray, y: np.ndarray, estimator: Any, n_features: int
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Recursive feature elimination.
@@ -608,7 +607,7 @@ class FeaturePipeline:
         self,
         X: Union[np.ndarray, pd.DataFrame],
         y: Optional[np.ndarray] = None,
-        feature_names: Optional[List[str]] = None
+        feature_names: Optional[List[str]] = None,
     ) -> Tuple[np.ndarray, List[str]]:
         """
         Fit and transform features.
@@ -626,7 +625,7 @@ class FeaturePipeline:
             X = X.values
 
         all_features = [X]
-        all_names = feature_names or [f'X{i}' for i in range(X.shape[1])]
+        all_names = feature_names or [f"X{i}" for i in range(X.shape[1])]
 
         # Interactions
         if self.config.create_interactions:
@@ -640,13 +639,12 @@ class FeaturePipeline:
         # Polynomials
         if self.config.create_polynomials and SKLEARN_AVAILABLE:
             poly = PolynomialFeatures(
-                degree=self.config.polynomial_degree,
-                include_bias=False
+                degree=self.config.polynomial_degree, include_bias=False
             )
             X_poly = poly.fit_transform(X)
             # Only add new features (not original)
-            all_features.append(X_poly[:, X.shape[1]:])
-            poly_names = [f'poly_{i}' for i in range(X_poly.shape[1] - X.shape[1])]
+            all_features.append(X_poly[:, X.shape[1] :])
+            poly_names = [f"poly_{i}" for i in range(X_poly.shape[1] - X.shape[1])]
             all_names.extend(poly_names)
 
         # Combine
@@ -664,9 +662,9 @@ class FeaturePipeline:
 
         # Scaling
         if self.config.scale_features and SKLEARN_AVAILABLE:
-            if self.config.scaler_type == 'standard':
+            if self.config.scaler_type == "standard":
                 self.scaler = StandardScaler()
-            elif self.config.scaler_type == 'minmax':
+            elif self.config.scaler_type == "minmax":
                 self.scaler = MinMaxScaler()
             else:
                 self.scaler = StandardScaler()
@@ -701,11 +699,10 @@ class FeaturePipeline:
         # Polynomials
         if self.config.create_polynomials and SKLEARN_AVAILABLE:
             poly = PolynomialFeatures(
-                degree=self.config.polynomial_degree,
-                include_bias=False
+                degree=self.config.polynomial_degree, include_bias=False
             )
             X_poly = poly.fit_transform(X)
-            all_features.append(X_poly[:, X.shape[1]:])
+            all_features.append(X_poly[:, X.shape[1] :])
 
         # Combine
         X_combined = np.hstack(all_features)
@@ -722,10 +719,10 @@ class FeaturePipeline:
 
 
 __all__ = [
-    'FeatureConfig',
-    'TimeSeriesFeatureCreator',
-    'InteractionFeatureCreator',
-    'NBAFeatureCreator',
-    'FeatureSelector',
-    'FeaturePipeline',
+    "FeatureConfig",
+    "TimeSeriesFeatureCreator",
+    "InteractionFeatureCreator",
+    "NBAFeatureCreator",
+    "FeatureSelector",
+    "FeaturePipeline",
 ]

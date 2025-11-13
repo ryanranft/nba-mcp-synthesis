@@ -54,11 +54,11 @@ class TestPredictionUpdate:
             predicted_final_home_score=105.0,
             predicted_final_away_score=98.0,
             confidence_level=PredictionConfidence.HIGH,
-            confidence_intervals={'home_score': (45.0, 55.0)},
+            confidence_intervals={"home_score": (45.0, 55.0)},
             home_momentum=0.15,
             scoring_rate_ratio=1.1,
             kalman_contribution=0.5,
-            model_contribution=0.5
+            model_contribution=0.5,
         )
 
         assert update.home_score == 50.0
@@ -80,20 +80,20 @@ class TestPredictionUpdate:
             predicted_final_home_score=105.0,
             predicted_final_away_score=98.0,
             confidence_level=PredictionConfidence.HIGH,
-            confidence_intervals={'home_score': (45.0, 55.0)},
+            confidence_intervals={"home_score": (45.0, 55.0)},
             home_momentum=0.15,
             scoring_rate_ratio=1.1,
             kalman_contribution=0.5,
-            model_contribution=0.5
+            model_contribution=0.5,
         )
 
         d = update.to_dict()
-        assert 'update_id' in d
-        assert 'current_state' in d
-        assert 'predictions' in d
-        assert 'confidence' in d
-        assert 'momentum' in d
-        assert d['predictions']['home_win_probability'] == 0.65
+        assert "update_id" in d
+        assert "current_state" in d
+        assert "predictions" in d
+        assert "confidence" in d
+        assert "momentum" in d
+        assert d["predictions"]["home_win_probability"] == 0.65
 
 
 class TestPredictorConfig:
@@ -115,7 +115,7 @@ class TestPredictorConfig:
             auto_start=False,
             kalman_weight=0.7,
             model_weight=0.3,
-            momentum_window_minutes=10.0
+            momentum_window_minutes=10.0,
         )
 
         assert config.min_update_interval_seconds == 3.0
@@ -130,9 +130,7 @@ class TestInGamePredictor:
     def test_predictor_creation(self):
         """Test predictor creation"""
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
+            game_id="test_001", home_team="LAL", away_team="BOS"
         )
 
         assert predictor.game_id == "test_001"
@@ -144,16 +142,11 @@ class TestInGamePredictor:
     def test_initialize(self):
         """Test predictor initialization"""
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
+            game_id="test_001", home_team="LAL", away_team="BOS"
         )
 
         update = predictor.initialize(
-            home_score=0.0,
-            away_score=0.0,
-            time_remaining=48.0,
-            quarter=1
+            home_score=0.0, away_score=0.0, time_remaining=48.0, quarter=1
         )
 
         assert predictor.initialized is True
@@ -164,16 +157,11 @@ class TestInGamePredictor:
     def test_update_from_scores(self):
         """Test manual score update"""
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
+            game_id="test_001", home_team="LAL", away_team="BOS"
         )
 
         update = predictor.update_from_scores(
-            home_score=25.0,
-            away_score=20.0,
-            time_remaining=36.0,
-            quarter=2
+            home_score=25.0, away_score=20.0, time_remaining=36.0, quarter=2
         )
 
         assert update.home_score == pytest.approx(25.0, abs=0.5)
@@ -183,9 +171,7 @@ class TestInGamePredictor:
     def test_get_current_prediction(self):
         """Test getting current prediction"""
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
+            game_id="test_001", home_team="LAL", away_team="BOS"
         )
 
         # Before initialization
@@ -201,9 +187,7 @@ class TestInGamePredictor:
     def test_prediction_history(self):
         """Test prediction history"""
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
+            game_id="test_001", home_team="LAL", away_team="BOS"
         )
 
         predictor.initialize()
@@ -221,14 +205,12 @@ class TestInGamePredictor:
     def test_momentum_analysis(self):
         """Test momentum analysis"""
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
+            game_id="test_001", home_team="LAL", away_team="BOS"
         )
 
         # Not enough data yet
         momentum = predictor.analyze_momentum()
-        assert momentum['home_momentum'] == 0.0
+        assert momentum["home_momentum"] == 0.0
 
         # Add some updates
         predictor.initialize(home_score=0.0, away_score=0.0, time_remaining=48.0)
@@ -238,15 +220,13 @@ class TestInGamePredictor:
 
         # Now should have momentum
         momentum = predictor.analyze_momentum()
-        assert 'home_momentum' in momentum
-        assert 'momentum_strength' in momentum
+        assert "home_momentum" in momentum
+        assert "momentum_strength" in momentum
 
     def test_callback_registration(self):
         """Test callback registration"""
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
+            game_id="test_001", home_team="LAL", away_team="BOS"
         )
 
         callback_calls = []
@@ -263,9 +243,7 @@ class TestInGamePredictor:
     def test_multiple_callbacks(self):
         """Test multiple callbacks"""
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
+            game_id="test_001", home_team="LAL", away_team="BOS"
         )
 
         calls1 = []
@@ -282,9 +260,7 @@ class TestInGamePredictor:
     def test_add_data_source(self):
         """Test adding data source"""
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
+            game_id="test_001", home_team="LAL", away_team="BOS"
         )
 
         connector = create_mock_connector(event_rate_hz=5.0)
@@ -295,9 +271,7 @@ class TestInGamePredictor:
     def test_start_and_stop(self):
         """Test starting and stopping predictor"""
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
+            game_id="test_001", home_team="LAL", away_team="BOS"
         )
 
         connector = create_mock_connector(event_rate_hz=10.0)
@@ -313,9 +287,7 @@ class TestInGamePredictor:
     def test_automatic_data_processing(self):
         """Test automatic prediction from data stream"""
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
+            game_id="test_001", home_team="LAL", away_team="BOS"
         )
 
         connector = create_mock_connector(event_rate_hz=10.0)
@@ -338,26 +310,22 @@ class TestInGamePredictor:
     def test_get_statistics(self):
         """Test statistics retrieval"""
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
+            game_id="test_001", home_team="LAL", away_team="BOS"
         )
 
         stats = predictor.get_statistics()
-        assert 'game_id' in stats
-        assert 'initialized' in stats
-        assert stats['initialized'] is False
+        assert "game_id" in stats
+        assert "initialized" in stats
+        assert stats["initialized"] is False
 
         predictor.initialize()
         stats = predictor.get_statistics()
-        assert stats['initialized'] is True
+        assert stats["initialized"] is True
 
     def test_reset(self):
         """Test predictor reset"""
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
+            game_id="test_001", home_team="LAL", away_team="BOS"
         )
 
         predictor.initialize()
@@ -374,9 +342,7 @@ class TestInGamePredictor:
     def test_confidence_calculation(self):
         """Test confidence level calculation"""
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
+            game_id="test_001", home_team="LAL", away_team="BOS"
         )
 
         # Start of game - low confidence
@@ -384,22 +350,20 @@ class TestInGamePredictor:
         assert update1.confidence_level in [
             PredictionConfidence.VERY_LOW,
             PredictionConfidence.LOW,
-            PredictionConfidence.MEDIUM
+            PredictionConfidence.MEDIUM,
         ]
 
         # End of game with large lead - high confidence
         update2 = predictor.update_from_scores(100.0, 70.0, 2.0, quarter=4)
         assert update2.confidence_level in [
             PredictionConfidence.HIGH,
-            PredictionConfidence.VERY_HIGH
+            PredictionConfidence.VERY_HIGH,
         ]
 
     def test_momentum_tracking(self):
         """Test momentum is tracked in predictions"""
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
+            game_id="test_001", home_team="LAL", away_team="BOS"
         )
 
         predictor.initialize(home_score=0.0, away_score=0.0, time_remaining=48.0)
@@ -411,34 +375,26 @@ class TestInGamePredictor:
 
         pred = predictor.get_current_prediction()
         # Home should have positive momentum
-        assert 'home_momentum' in pred.__dict__
+        assert "home_momentum" in pred.__dict__
 
     def test_scoring_rate_ratio(self):
         """Test scoring rate ratio calculation"""
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
+            game_id="test_001", home_team="LAL", away_team="BOS"
         )
 
         update = predictor.update_from_scores(60.0, 30.0, 24.0)
 
-        assert 'scoring_rate_ratio' in update.__dict__
+        assert "scoring_rate_ratio" in update.__dict__
         # Home scoring faster, ratio should be > 1
         assert update.scoring_rate_ratio >= 0
 
     def test_model_contributions(self):
         """Test model contribution tracking"""
-        config = PredictorConfig(
-            kalman_weight=0.7,
-            model_weight=0.3
-        )
+        config = PredictorConfig(kalman_weight=0.7, model_weight=0.3)
 
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS",
-            config=config
+            game_id="test_001", home_team="LAL", away_team="BOS", config=config
         )
 
         update = predictor.initialize()
@@ -452,7 +408,7 @@ class TestInGamePredictor:
             game_id="convenience_test",
             home_team="LAL",
             away_team="BOS",
-            event_rate_hz=5.0
+            event_rate_hz=5.0,
         )
 
         assert isinstance(predictor, InGamePredictor)
@@ -462,9 +418,7 @@ class TestInGamePredictor:
     def test_event_trigger_propagation(self):
         """Test that event triggers are propagated to predictions"""
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
+            game_id="test_001", home_team="LAL", away_team="BOS"
         )
 
         update = predictor.initialize()
@@ -476,9 +430,7 @@ class TestInGamePredictor:
     def test_win_probability_consistency(self):
         """Test that win probabilities sum to 1"""
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
+            game_id="test_001", home_team="LAL", away_team="BOS"
         )
 
         update = predictor.initialize()
@@ -489,22 +441,18 @@ class TestInGamePredictor:
     def test_confidence_intervals_present(self):
         """Test that confidence intervals are included"""
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
+            game_id="test_001", home_team="LAL", away_team="BOS"
         )
 
         update = predictor.initialize()
 
-        assert 'home_score' in update.confidence_intervals
-        assert isinstance(update.confidence_intervals['home_score'], tuple)
+        assert "home_score" in update.confidence_intervals
+        assert isinstance(update.confidence_intervals["home_score"], tuple)
 
     def test_time_progression(self):
         """Test time progression through predictions"""
         predictor = InGamePredictor(
-            game_id="test_001",
-            home_team="LAL",
-            away_team="BOS"
+            game_id="test_001", home_team="LAL", away_team="BOS"
         )
 
         predictor.initialize(home_score=0.0, away_score=0.0, time_remaining=48.0)
@@ -513,12 +461,12 @@ class TestInGamePredictor:
             predictor.update_from_scores(
                 home_score=float((48 - time_remaining) * 2),
                 away_score=float((48 - time_remaining) * 1.8),
-                time_remaining=time_remaining
+                time_remaining=time_remaining,
             )
 
         pred = predictor.get_current_prediction()
         assert pred.time_remaining < 48.0
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

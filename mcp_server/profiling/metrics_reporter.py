@@ -34,11 +34,7 @@ class MetricsReporter:
         """
         self.profiler = profiler
 
-    def export_to_json(
-        self,
-        output_path: str,
-        include_raw_data: bool = False
-    ) -> bool:
+    def export_to_json(self, output_path: str, include_raw_data: bool = False) -> bool:
         """
         Export metrics to JSON file.
 
@@ -56,7 +52,7 @@ class MetricsReporter:
                 "function_stats": self.profiler.get_all_stats(),
                 "slowest_functions": self.profiler.get_slowest_functions(),
                 "most_called_functions": self.profiler.get_most_called_functions(),
-                "bottlenecks": self.profiler.identify_bottlenecks()
+                "bottlenecks": self.profiler.identify_bottlenecks(),
             }
 
             if include_raw_data:
@@ -68,13 +64,13 @@ class MetricsReporter:
                             "execution_time_ms": r.execution_time_ms,
                             "memory_peak_mb": r.memory_peak_mb,
                             "memory_delta_mb": r.memory_delta_mb,
-                            "timestamp": r.timestamp.isoformat()
+                            "timestamp": r.timestamp.isoformat(),
                         }
                         for r in results
                     ]
                 data["raw_profiles"] = raw_data
 
-            with open(output_path, 'w') as f:
+            with open(output_path, "w") as f:
                 json.dump(data, f, indent=2)
 
             logger.info(f"Metrics exported to {output_path}")
@@ -97,11 +93,16 @@ class MetricsReporter:
         try:
             stats = self.profiler.get_all_stats()
 
-            with open(output_path, 'w', newline='') as f:
+            with open(output_path, "w", newline="") as f:
                 fieldnames = [
-                    "function_name", "call_count", "total_time_ms",
-                    "avg_time_ms", "min_time_ms", "max_time_ms",
-                    "median_time_ms", "slow_calls"
+                    "function_name",
+                    "call_count",
+                    "total_time_ms",
+                    "avg_time_ms",
+                    "min_time_ms",
+                    "max_time_ms",
+                    "median_time_ms",
+                    "slow_calls",
                 ]
 
                 writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -136,10 +137,14 @@ class MetricsReporter:
         summary = self.profiler.get_summary()
         lines.append("SUMMARY")
         lines.append("-" * 80)
-        lines.append(f"  Total Functions Profiled: {summary['total_functions_profiled']}")
+        lines.append(
+            f"  Total Functions Profiled: {summary['total_functions_profiled']}"
+        )
         lines.append(f"  Total Function Calls: {summary['total_calls']}")
         lines.append(f"  Total Execution Time: {summary['total_time_ms']:.2f} ms")
-        lines.append(f"  Average Time per Call: {summary['avg_time_per_call_ms']:.2f} ms")
+        lines.append(
+            f"  Average Time per Call: {summary['avg_time_per_call_ms']:.2f} ms"
+        )
         lines.append(f"  Slow Function Threshold: {summary['slow_threshold_ms']} ms")
         lines.append("")
 
@@ -175,11 +180,13 @@ class MetricsReporter:
             for i, bottleneck in enumerate(bottlenecks, 1):
                 lines.append(f"{i}. {bottleneck['function_name']}")
                 lines.append(f"   Impact Score: {bottleneck['impact_score']:.2f}")
-                lines.append(f"   Calls: {bottleneck['call_count']}, Avg Time: {bottleneck['avg_time_ms']:.2f} ms")
+                lines.append(
+                    f"   Calls: {bottleneck['call_count']}, Avg Time: {bottleneck['avg_time_ms']:.2f} ms"
+                )
 
-                if bottleneck['recommendations']:
+                if bottleneck["recommendations"]:
                     lines.append("   Recommendations:")
-                    for rec in bottleneck['recommendations']:
+                    for rec in bottleneck["recommendations"]:
                         lines.append(f"     • {rec}")
                 lines.append("")
 
@@ -307,7 +314,11 @@ class MetricsReporter:
 """
 
             for i, func in enumerate(slowest, 1):
-                slow_class = ' class="slow"' if func['avg_time_ms'] > summary['slow_threshold_ms'] else ''
+                slow_class = (
+                    ' class="slow"'
+                    if func["avg_time_ms"] > summary["slow_threshold_ms"]
+                    else ""
+                )
                 html += f"""
         <tr>
             <td>{i}</td>
@@ -358,9 +369,9 @@ class MetricsReporter:
         <p><strong>Impact Score:</strong> {bottleneck['impact_score']:.2f}</p>
         <p><strong>Calls:</strong> {bottleneck['call_count']}, <strong>Avg Time:</strong> {bottleneck['avg_time_ms']:.2f} ms</p>
 """
-                    if bottleneck['recommendations']:
+                    if bottleneck["recommendations"]:
                         html += "<p><strong>Recommendations:</strong></p><ul>"
-                        for rec in bottleneck['recommendations']:
+                        for rec in bottleneck["recommendations"]:
                             html += f"<li class='recommendation'>{rec}</li>"
                         html += "</ul>"
 
@@ -371,7 +382,7 @@ class MetricsReporter:
 </html>
 """
 
-            with open(output_path, 'w') as f:
+            with open(output_path, "w") as f:
                 f.write(html)
 
             logger.info(f"HTML report generated: {output_path}")
@@ -381,10 +392,7 @@ class MetricsReporter:
             logger.error(f"Failed to generate HTML report: {e}")
             return False
 
-    def compare_with_baseline(
-        self,
-        baseline_path: str
-    ) -> Dict[str, Any]:
+    def compare_with_baseline(self, baseline_path: str) -> Dict[str, Any]:
         """
         Compare current metrics with baseline.
 
@@ -395,7 +403,7 @@ class MetricsReporter:
             Dict with comparison results
         """
         try:
-            with open(baseline_path, 'r') as f:
+            with open(baseline_path, "r") as f:
                 baseline = json.load(f)
 
             current_stats = self.profiler.get_all_stats()
@@ -409,18 +417,23 @@ class MetricsReporter:
 
                     # Calculate percentage changes
                     avg_time_change = (
-                        (current["avg_time_ms"] - baseline_func["avg_time_ms"]) /
-                        baseline_func["avg_time_ms"] * 100
+                        (current["avg_time_ms"] - baseline_func["avg_time_ms"])
+                        / baseline_func["avg_time_ms"]
+                        * 100
                     )
 
-                    comparisons.append({
-                        "function_name": func_name,
-                        "current_avg_time_ms": current["avg_time_ms"],
-                        "baseline_avg_time_ms": baseline_func["avg_time_ms"],
-                        "change_percent": avg_time_change,
-                        "regression": avg_time_change > 10,  # 10% slower is regression
-                        "improvement": avg_time_change < -10  # 10% faster is improvement
-                    })
+                    comparisons.append(
+                        {
+                            "function_name": func_name,
+                            "current_avg_time_ms": current["avg_time_ms"],
+                            "baseline_avg_time_ms": baseline_func["avg_time_ms"],
+                            "change_percent": avg_time_change,
+                            "regression": avg_time_change
+                            > 10,  # 10% slower is regression
+                            "improvement": avg_time_change
+                            < -10,  # 10% faster is improvement
+                        }
+                    )
 
             # Sort by absolute change
             comparisons.sort(key=lambda c: abs(c["change_percent"]), reverse=True)
@@ -435,7 +448,7 @@ class MetricsReporter:
                 "total_functions_compared": len(comparisons),
                 "regressions": regressions,
                 "improvements": improvements,
-                "detailed_comparisons": comparisons
+                "detailed_comparisons": comparisons,
             }
 
         except Exception as e:

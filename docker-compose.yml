@@ -64,7 +64,7 @@ services:
     image: postgres:16-alpine
     container_name: nba-mcp-postgres
     environment:
-      POSTGRES_DB: espn_nba_mcp_synthesis
+      POSTGRES_DB: nba_mcp_synthesis
       POSTGRES_USER: ryanranft
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nba_mcp_local_dev}
       PGDATA: /var/lib/postgresql/data/pgdata
@@ -83,7 +83,7 @@ services:
     networks:
       - mcp-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ryanranft -d espn_nba_mcp_synthesis"]
+      test: ["CMD-SHELL", "pg_isready -U ryanranft -d nba_mcp_synthesis"]
       interval: 10s
       timeout: 5s
       retries: 5

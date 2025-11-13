@@ -169,7 +169,7 @@ def test_kelly_criterion(calibrator):
         bankroll=bankroll,
         away_odds=away_odds,
         fractional=0.25,
-        adaptive_fraction=True
+        adaptive_fraction=True,
     )
 
     print("Results:")
@@ -222,12 +222,12 @@ def test_clv_tracking():
         outcome = np.random.binomial(1, bet_prob + 0.05)  # Slight edge
 
         tracker.add_bet(
-            date=datetime.now() - timedelta(days=50-i),
+            date=datetime.now() - timedelta(days=50 - i),
             game_id=f"GAME_{i}",
             bet_odds=bet_odds,
             closing_odds=closing_odds,
             outcome=outcome,
-            bet_amount=100
+            bet_amount=100,
         )
 
     # Get statistics
@@ -242,7 +242,7 @@ def test_clv_tracking():
     print(f"Recent CLV (20): {stats['recent_clv_20']:.1%}")
     print()
 
-    if stats['is_sharp']:
+    if stats["is_sharp"]:
         print("✓ SHARP BETTOR: Consistently beating closing line")
         print("  → Your edge is VALIDATED by sharp money")
         print("  → Safe to increase Kelly fractions")
@@ -263,10 +263,10 @@ def test_complete_pipeline():
 
     # Initialize engine
     engine = BettingDecisionEngine(
-        calibrator_type='isotonic',  # Faster for testing
+        calibrator_type="isotonic",  # Faster for testing
         fractional_kelly=0.25,
         adaptive_fractions=True,
-        drawdown_protection=True
+        drawdown_protection=True,
     )
 
     # Generate training data
@@ -304,22 +304,26 @@ def test_complete_pipeline():
             odds=odds,
             away_odds=away_odds,
             bankroll=bankroll,
-            game_id=game_id
+            game_id=game_id,
         )
 
         decisions.append(decision)
 
         print(f"\nGame {i+1}: {desc}")
-        print(f"  Sim: {decision['simulation_prob']:.1%} → "
-              f"Cal: {decision['calibrated_prob']:.1%} "
-              f"(Edge: {decision['edge']:+.1%})")
+        print(
+            f"  Sim: {decision['simulation_prob']:.1%} → "
+            f"Cal: {decision['calibrated_prob']:.1%} "
+            f"(Edge: {decision['edge']:+.1%})"
+        )
 
-        if decision['should_bet']:
-            print(f"  ✓ BET ${decision['bet_amount']:.2f} "
-                  f"({decision['kelly_fraction']:.1%} of bankroll)")
+        if decision["should_bet"]:
+            print(
+                f"  ✓ BET ${decision['bet_amount']:.2f} "
+                f"({decision['kelly_fraction']:.1%} of bankroll)"
+            )
 
             # Simulate outcome
-            win = np.random.random() < decision['calibrated_prob']
+            win = np.random.random() < decision["calibrated_prob"]
             outcome = 1 if win else 0
 
             # Simulate closing odds
@@ -329,12 +333,14 @@ def test_complete_pipeline():
             engine.update_outcome(game_id, outcome, closing_odds)
 
             if outcome == 1:
-                profit = decision['bet_amount'] * (odds - 1)
+                profit = decision["bet_amount"] * (odds - 1)
                 bankroll += profit
                 print(f"    Result: WON ${profit:.2f} (new bankroll: ${bankroll:.2f})")
             else:
-                bankroll -= decision['bet_amount']
-                print(f"    Result: LOST ${decision['bet_amount']:.2f} (new bankroll: ${bankroll:.2f})")
+                bankroll -= decision["bet_amount"]
+                print(
+                    f"    Result: LOST ${decision['bet_amount']:.2f} (new bankroll: ${bankroll:.2f})"
+                )
         else:
             print(f"  ✗ NO BET: {decision['reason']}")
 
@@ -346,7 +352,7 @@ def test_complete_pipeline():
     print("-" * 80)
     summary = engine.performance_summary()
 
-    if 'error' not in summary:
+    if "error" not in summary:
         print(f"  Total Bets: {summary['total_bets']}")
         print(f"  Win Rate: {summary['win_rate']:.1%}")
         print(f"  ROI: {summary['roi']:.1%}")
@@ -380,9 +386,9 @@ def test_large_bet_criteria():
 
     # Train engine
     engine = BettingDecisionEngine(
-        calibrator_type='isotonic',
+        calibrator_type="isotonic",
         fractional_kelly=1.0,  # Full Kelly initially
-        adaptive_fractions=True
+        adaptive_fractions=True,
     )
 
     engine.train_calibrator(sim_probs, outcomes)
@@ -396,7 +402,7 @@ def test_large_bet_criteria():
             game_id=f"CLV_GAME_{i}",
             bet_odds=bet_odds,
             closing_odds=closing_odds,
-            outcome=1
+            outcome=1,
         )
 
     # Test large bet scenario
@@ -414,10 +420,12 @@ def test_large_bet_criteria():
     print("Large Bet (40%) Criteria Check:")
     print("-" * 80)
 
-    for name, info in criteria['criteria'].items():
-        status = "✓" if info['met'] else "✗"
-        print(f"  {status} {name:20s}: {info['value']:.1%} "
-              f"(threshold: {info['threshold']:.1%})")
+    for name, info in criteria["criteria"].items():
+        status = "✓" if info["met"] else "✗"
+        print(
+            f"  {status} {name:20s}: {info['value']:.1%} "
+            f"(threshold: {info['threshold']:.1%})"
+        )
 
     print()
     print(f"Safe for 40% bet: {criteria['safe_for_large_bet']}")
@@ -425,7 +433,7 @@ def test_large_bet_criteria():
     print(f"Reason: {criteria['reason']}")
     print()
 
-    if criteria['safe_for_large_bet']:
+    if criteria["safe_for_large_bet"]:
         print("✓ ALL CRITERIA MET - 40% bet is safe!")
     else:
         print("✗ Criteria not met - stick to smaller bets")
@@ -485,6 +493,7 @@ def run_all_tests():
     except Exception as e:
         print(f"\n❌ TEST FAILED: {str(e)}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -498,18 +507,21 @@ if __name__ == "__main__":
     # Check dependencies
     try:
         import sklearn
+
         print("✓ scikit-learn available")
     except ImportError:
         print("✗ scikit-learn not available (pip install scikit-learn)")
 
     try:
         import pymc
+
         print("✓ PyMC available")
     except ImportError:
         print("✗ PyMC not available (pip install pymc)")
 
     try:
         import statsmodels
+
         print("✓ statsmodels available")
     except ImportError:
         print("✗ statsmodels not available (pip install statsmodels)")

@@ -32,14 +32,14 @@ class TestDataMessage:
             message_id="msg_001",
             timestamp=datetime.now(),
             source="test",
-            data={'score': 100},
+            data={"score": 100},
             message_type="score_update",
-            sequence_number=1
+            sequence_number=1,
         )
 
         assert msg.message_id == "msg_001"
         assert msg.source == "test"
-        assert msg.data['score'] == 100
+        assert msg.data["score"] == 100
         assert msg.sequence_number == 1
 
     def test_data_message_to_dict(self):
@@ -48,14 +48,14 @@ class TestDataMessage:
             message_id="msg_001",
             timestamp=datetime.now(),
             source="test",
-            data={'score': 100}
+            data={"score": 100},
         )
 
         d = msg.to_dict()
-        assert 'message_id' in d
-        assert 'timestamp' in d
-        assert 'data' in d
-        assert d['data']['score'] == 100
+        assert "message_id" in d
+        assert "timestamp" in d
+        assert "data" in d
+        assert d["data"]["score"] == 100
 
 
 class TestDataSourceConfig:
@@ -64,8 +64,7 @@ class TestDataSourceConfig:
     def test_default_config(self):
         """Test configuration creation"""
         config = DataSourceConfig(
-            source_type=DataSourceType.WEBSOCKET,
-            endpoint="ws://localhost:8080"
+            source_type=DataSourceType.WEBSOCKET, endpoint="ws://localhost:8080"
         )
 
         assert config.source_type == DataSourceType.WEBSOCKET
@@ -79,7 +78,7 @@ class TestDataSourceConfig:
             endpoint="http://api.example.com",
             auth_token="secret123",
             reconnect_attempts=5,
-            timeout_seconds=60.0
+            timeout_seconds=60.0,
         )
 
         assert config.auth_token == "secret123"
@@ -93,8 +92,7 @@ class TestMockDataConnector:
     def test_mock_connector_creation(self):
         """Test mock connector creation"""
         config = DataSourceConfig(
-            source_type=DataSourceType.MOCK,
-            endpoint="mock://test"
+            source_type=DataSourceType.MOCK, endpoint="mock://test"
         )
         connector = MockDataConnector(config, event_rate_hz=10.0)
 
@@ -104,8 +102,7 @@ class TestMockDataConnector:
     def test_mock_connector_connect(self):
         """Test mock connection"""
         config = DataSourceConfig(
-            source_type=DataSourceType.MOCK,
-            endpoint="mock://test"
+            source_type=DataSourceType.MOCK, endpoint="mock://test"
         )
         connector = MockDataConnector(config)
 
@@ -117,8 +114,7 @@ class TestMockDataConnector:
     def test_mock_connector_disconnect(self):
         """Test mock disconnection"""
         config = DataSourceConfig(
-            source_type=DataSourceType.MOCK,
-            endpoint="mock://test"
+            source_type=DataSourceType.MOCK, endpoint="mock://test"
         )
         connector = MockDataConnector(config)
 
@@ -130,8 +126,7 @@ class TestMockDataConnector:
     def test_mock_data_generation(self):
         """Test mock data generation"""
         config = DataSourceConfig(
-            source_type=DataSourceType.MOCK,
-            endpoint="mock://test"
+            source_type=DataSourceType.MOCK, endpoint="mock://test"
         )
         connector = MockDataConnector(config, event_rate_hz=10.0)
 
@@ -153,8 +148,7 @@ class TestMockDataConnector:
     def test_mock_score_updates(self):
         """Test that mock connector generates score updates"""
         config = DataSourceConfig(
-            source_type=DataSourceType.MOCK,
-            endpoint="mock://test"
+            source_type=DataSourceType.MOCK, endpoint="mock://test"
         )
         connector = MockDataConnector(config, event_rate_hz=5.0)
 
@@ -166,15 +160,14 @@ class TestMockDataConnector:
         connector.stop()
 
         assert msg is not None
-        assert 'home_score' in msg.data
-        assert 'away_score' in msg.data
-        assert 'time_remaining' in msg.data
+        assert "home_score" in msg.data
+        assert "away_score" in msg.data
+        assert "time_remaining" in msg.data
 
     def test_callback_registration(self):
         """Test callback registration"""
         config = DataSourceConfig(
-            source_type=DataSourceType.MOCK,
-            endpoint="mock://test"
+            source_type=DataSourceType.MOCK, endpoint="mock://test"
         )
         connector = MockDataConnector(config)
 
@@ -194,8 +187,7 @@ class TestMockDataConnector:
     def test_multiple_callbacks(self):
         """Test multiple callbacks"""
         config = DataSourceConfig(
-            source_type=DataSourceType.MOCK,
-            endpoint="mock://test"
+            source_type=DataSourceType.MOCK, endpoint="mock://test"
         )
         connector = MockDataConnector(config, event_rate_hz=10.0)
 
@@ -216,8 +208,7 @@ class TestMockDataConnector:
     def test_get_message_timeout(self):
         """Test get_message with timeout"""
         config = DataSourceConfig(
-            source_type=DataSourceType.MOCK,
-            endpoint="mock://test"
+            source_type=DataSourceType.MOCK, endpoint="mock://test"
         )
         connector = MockDataConnector(config)
 
@@ -228,8 +219,7 @@ class TestMockDataConnector:
     def test_statistics(self):
         """Test statistics collection"""
         config = DataSourceConfig(
-            source_type=DataSourceType.MOCK,
-            endpoint="mock://test"
+            source_type=DataSourceType.MOCK, endpoint="mock://test"
         )
         connector = MockDataConnector(config, event_rate_hz=10.0)
 
@@ -238,15 +228,14 @@ class TestMockDataConnector:
         connector.stop()
 
         stats = connector.get_statistics()
-        assert 'messages_received' in stats
-        assert 'status' in stats
-        assert stats['messages_received'] > 0
+        assert "messages_received" in stats
+        assert "status" in stats
+        assert stats["messages_received"] > 0
 
     def test_create_mock_connector_convenience(self):
         """Test convenience function for creating mock connector"""
         connector = create_mock_connector(
-            endpoint="mock://convenience_test",
-            event_rate_hz=5.0
+            endpoint="mock://convenience_test", event_rate_hz=5.0
         )
 
         assert isinstance(connector, MockDataConnector)
@@ -259,8 +248,7 @@ class TestWebSocketConnector:
     def test_websocket_connector_creation(self):
         """Test WebSocket connector creation"""
         config = DataSourceConfig(
-            source_type=DataSourceType.WEBSOCKET,
-            endpoint="ws://localhost:8080"
+            source_type=DataSourceType.WEBSOCKET, endpoint="ws://localhost:8080"
         )
         connector = WebSocketConnector(config)
 
@@ -270,8 +258,7 @@ class TestWebSocketConnector:
     def test_websocket_connect_placeholder(self):
         """Test WebSocket connect (placeholder implementation)"""
         config = DataSourceConfig(
-            source_type=DataSourceType.WEBSOCKET,
-            endpoint="ws://localhost:8080"
+            source_type=DataSourceType.WEBSOCKET, endpoint="ws://localhost:8080"
         )
         connector = WebSocketConnector(config)
 
@@ -282,8 +269,7 @@ class TestWebSocketConnector:
     def test_websocket_disconnect(self):
         """Test WebSocket disconnect"""
         config = DataSourceConfig(
-            source_type=DataSourceType.WEBSOCKET,
-            endpoint="ws://localhost:8080"
+            source_type=DataSourceType.WEBSOCKET, endpoint="ws://localhost:8080"
         )
         connector = WebSocketConnector(config)
 
@@ -299,8 +285,7 @@ class TestRESTAPIConnector:
     def test_rest_api_connector_creation(self):
         """Test REST API connector creation"""
         config = DataSourceConfig(
-            source_type=DataSourceType.REST_API,
-            endpoint="http://api.example.com"
+            source_type=DataSourceType.REST_API, endpoint="http://api.example.com"
         )
         connector = RESTAPIConnector(config, poll_interval_seconds=5.0)
 
@@ -310,8 +295,7 @@ class TestRESTAPIConnector:
     def test_rest_api_connect_placeholder(self):
         """Test REST API connect (placeholder implementation)"""
         config = DataSourceConfig(
-            source_type=DataSourceType.REST_API,
-            endpoint="http://api.example.com"
+            source_type=DataSourceType.REST_API, endpoint="http://api.example.com"
         )
         connector = RESTAPIConnector(config)
 
@@ -322,8 +306,7 @@ class TestRESTAPIConnector:
     def test_rest_api_disconnect(self):
         """Test REST API disconnect"""
         config = DataSourceConfig(
-            source_type=DataSourceType.REST_API,
-            endpoint="http://api.example.com"
+            source_type=DataSourceType.REST_API, endpoint="http://api.example.com"
         )
         connector = RESTAPIConnector(config)
 
@@ -348,8 +331,7 @@ class TestStreamingDataConnector:
         manager = StreamingDataConnector()
 
         config = DataSourceConfig(
-            source_type=DataSourceType.MOCK,
-            endpoint="mock://test"
+            source_type=DataSourceType.MOCK, endpoint="mock://test"
         )
         connector = MockDataConnector(config)
 
@@ -363,8 +345,7 @@ class TestStreamingDataConnector:
         manager = StreamingDataConnector()
 
         config = DataSourceConfig(
-            source_type=DataSourceType.MOCK,
-            endpoint="mock://test"
+            source_type=DataSourceType.MOCK, endpoint="mock://test"
         )
         connector = MockDataConnector(config)
 
@@ -397,8 +378,7 @@ class TestStreamingDataConnector:
 
         # Add mock connector
         config = DataSourceConfig(
-            source_type=DataSourceType.MOCK,
-            endpoint="mock://test"
+            source_type=DataSourceType.MOCK, endpoint="mock://test"
         )
         connector = MockDataConnector(config, event_rate_hz=10.0)
         manager.add_connector("mock", connector)
@@ -418,8 +398,7 @@ class TestStreamingDataConnector:
         # Add multiple connectors
         for i in range(3):
             config = DataSourceConfig(
-                source_type=DataSourceType.MOCK,
-                endpoint=f"mock://test_{i}"
+                source_type=DataSourceType.MOCK, endpoint=f"mock://test_{i}"
             )
             connector = MockDataConnector(config)
             manager.add_connector(f"mock_{i}", connector)
@@ -440,8 +419,7 @@ class TestStreamingDataConnector:
         manager = StreamingDataConnector()
 
         config = DataSourceConfig(
-            source_type=DataSourceType.MOCK,
-            endpoint="mock://test"
+            source_type=DataSourceType.MOCK, endpoint="mock://test"
         )
         connector = MockDataConnector(config)
         manager.add_connector("mock", connector)
@@ -458,14 +436,12 @@ class TestStreamingDataConnector:
         manager = StreamingDataConnector()
 
         config1 = DataSourceConfig(
-            source_type=DataSourceType.MOCK,
-            endpoint="mock://test1"
+            source_type=DataSourceType.MOCK, endpoint="mock://test1"
         )
         connector1 = MockDataConnector(config1)
 
         config2 = DataSourceConfig(
-            source_type=DataSourceType.MOCK,
-            endpoint="mock://test2"
+            source_type=DataSourceType.MOCK, endpoint="mock://test2"
         )
         connector2 = MockDataConnector(config2)
 
@@ -476,8 +452,8 @@ class TestStreamingDataConnector:
 
         assert "mock1" in stats
         assert "mock2" in stats
-        assert 'status' in stats["mock1"]
-        assert 'status' in stats["mock2"]
+        assert "status" in stats["mock1"]
+        assert "status" in stats["mock2"]
 
     def test_multiple_handlers(self):
         """Test multiple message handlers"""
@@ -490,8 +466,7 @@ class TestStreamingDataConnector:
         manager.register_handler(lambda msg: calls2.append(msg))
 
         config = DataSourceConfig(
-            source_type=DataSourceType.MOCK,
-            endpoint="mock://test"
+            source_type=DataSourceType.MOCK, endpoint="mock://test"
         )
         connector = MockDataConnector(config, event_rate_hz=10.0)
         manager.add_connector("mock", connector)
@@ -506,5 +481,5 @@ class TestStreamingDataConnector:
         assert len(calls1) == len(calls2)
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

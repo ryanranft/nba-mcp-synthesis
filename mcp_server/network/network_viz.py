@@ -31,6 +31,7 @@ try:
     import matplotlib.pyplot as plt
     import matplotlib.patches as patches
     from matplotlib.colors import LinearSegmentedColormap
+
     MATPLOTLIB_AVAILABLE = True
 except ImportError:
     MATPLOTLIB_AVAILABLE = False
@@ -38,6 +39,7 @@ except ImportError:
 
 try:
     import networkx as nx
+
     NETWORKX_AVAILABLE = True
 except ImportError:
     NETWORKX_AVAILABLE = False
@@ -53,10 +55,10 @@ class VisualizationConfig:
     dpi: int = 100
 
     # Color scheme
-    primary_color: str = '#1f77b4'
-    secondary_color: str = '#ff7f0e'
-    positive_color: str = '#2ca02c'
-    negative_color: str = '#d62728'
+    primary_color: str = "#1f77b4"
+    secondary_color: str = "#ff7f0e"
+    positive_color: str = "#2ca02c"
+    negative_color: str = "#d62728"
 
     # Graph settings
     node_size_scale: float = 1000.0
@@ -68,7 +70,7 @@ class VisualizationConfig:
     font_size: int = 10
 
     # Layout
-    layout_algorithm: str = 'spring'  # spring, circular, kamada_kawai
+    layout_algorithm: str = "spring"  # spring, circular, kamada_kawai
 
 
 class PassingNetworkVisualizer:
@@ -97,10 +99,10 @@ class PassingNetworkVisualizer:
         self,
         graph: Any,  # nx.DiGraph
         player_names: Optional[Dict[str, str]] = None,
-        centrality_metric: str = 'degree',
+        centrality_metric: str = "degree",
         min_passes: int = 5,
         title: str = "Passing Network",
-        ax: Optional[Any] = None
+        ax: Optional[Any] = None,
     ) -> Optional[Any]:
         """
         Plot passing network as graph.
@@ -126,7 +128,7 @@ class PassingNetworkVisualizer:
         # Filter edges by minimum passes
         filtered_graph = nx.DiGraph()
         for u, v, data in graph.edges(data=True):
-            if data.get('weight', 0) >= min_passes:
+            if data.get("weight", 0) >= min_passes:
                 filtered_graph.add_edge(u, v, **data)
 
         # Add all nodes
@@ -135,17 +137,23 @@ class PassingNetworkVisualizer:
                 filtered_graph.add_node(node)
 
         if filtered_graph.number_of_nodes() == 0:
-            ax.text(0.5, 0.5, "No data to display",
-                   ha='center', va='center', transform=ax.transAxes)
+            ax.text(
+                0.5,
+                0.5,
+                "No data to display",
+                ha="center",
+                va="center",
+                transform=ax.transAxes,
+            )
             ax.set_title(title)
             return ax
 
         # Calculate layout
-        if self.config.layout_algorithm == 'spring':
+        if self.config.layout_algorithm == "spring":
             pos = nx.spring_layout(filtered_graph, k=1, iterations=50)
-        elif self.config.layout_algorithm == 'circular':
+        elif self.config.layout_algorithm == "circular":
             pos = nx.circular_layout(filtered_graph)
-        elif self.config.layout_algorithm == 'kamada_kawai':
+        elif self.config.layout_algorithm == "kamada_kawai":
             try:
                 pos = nx.kamada_kawai_layout(filtered_graph)
             except:
@@ -154,12 +162,12 @@ class PassingNetworkVisualizer:
             pos = nx.spring_layout(filtered_graph)
 
         # Calculate node sizes based on centrality
-        if centrality_metric == 'degree':
-            centrality = dict(filtered_graph.degree(weight='weight'))
-        elif centrality_metric == 'betweenness':
-            centrality = nx.betweenness_centrality(filtered_graph, weight='weight')
-        elif centrality_metric == 'pagerank':
-            centrality = nx.pagerank(filtered_graph, weight='weight')
+        if centrality_metric == "degree":
+            centrality = dict(filtered_graph.degree(weight="weight"))
+        elif centrality_metric == "betweenness":
+            centrality = nx.betweenness_centrality(filtered_graph, weight="weight")
+        elif centrality_metric == "pagerank":
+            centrality = nx.pagerank(filtered_graph, weight="weight")
         else:
             centrality = {node: 1.0 for node in filtered_graph.nodes()}
 
@@ -167,14 +175,17 @@ class PassingNetworkVisualizer:
         if centrality:
             max_centrality = max(centrality.values()) if centrality.values() else 1.0
             node_sizes = [
-                (centrality.get(node, 0) / max_centrality) * self.config.node_size_scale + 200
+                (centrality.get(node, 0) / max_centrality) * self.config.node_size_scale
+                + 200
                 for node in filtered_graph.nodes()
             ]
         else:
             node_sizes = [500 for _ in filtered_graph.nodes()]
 
         # Calculate edge widths
-        edge_weights = [data['weight'] for _, _, data in filtered_graph.edges(data=True)]
+        edge_weights = [
+            data["weight"] for _, _, data in filtered_graph.edges(data=True)
+        ]
         if edge_weights:
             max_weight = max(edge_weights)
             edge_widths = [
@@ -186,20 +197,24 @@ class PassingNetworkVisualizer:
 
         # Draw network
         nx.draw_networkx_nodes(
-            filtered_graph, pos, ax=ax,
+            filtered_graph,
+            pos,
+            ax=ax,
             node_size=node_sizes,
             node_color=self.config.primary_color,
-            alpha=0.7
+            alpha=0.7,
         )
 
         nx.draw_networkx_edges(
-            filtered_graph, pos, ax=ax,
+            filtered_graph,
+            pos,
+            ax=ax,
             width=edge_widths,
             alpha=0.5,
-            edge_color='gray',
+            edge_color="gray",
             arrows=True,
             arrowsize=15,
-            connectionstyle='arc3,rad=0.1'
+            connectionstyle="arc3,rad=0.1",
         )
 
         if self.config.show_labels:
@@ -212,12 +227,11 @@ class PassingNetworkVisualizer:
                     labels[node] = node[:8] if len(node) > 8 else node
 
             nx.draw_networkx_labels(
-                filtered_graph, pos, labels, ax=ax,
-                font_size=self.config.font_size
+                filtered_graph, pos, labels, ax=ax, font_size=self.config.font_size
             )
 
-        ax.set_title(title, fontsize=14, fontweight='bold')
-        ax.axis('off')
+        ax.set_title(title, fontsize=14, fontweight="bold")
+        ax.axis("off")
 
         return ax
 
@@ -227,7 +241,7 @@ class PassingNetworkVisualizer:
         player_names: Optional[Dict[str, str]] = None,
         min_assists: int = 2,
         title: str = "Assist Network",
-        ax: Optional[Any] = None
+        ax: Optional[Any] = None,
     ) -> Optional[Any]:
         """
         Plot assist-only network.
@@ -252,11 +266,12 @@ class PassingNetworkVisualizer:
                 graph.add_edge(passer, receiver, weight=assists)
 
         return self.plot_passing_network(
-            graph, player_names,
-            centrality_metric='degree',
+            graph,
+            player_names,
+            centrality_metric="degree",
             min_passes=0,  # Already filtered
             title=title,
-            ax=ax
+            ax=ax,
         )
 
 
@@ -281,8 +296,8 @@ class InteractionHeatmap:
         player_ids: List[str],
         player_names: Optional[Dict[str, str]] = None,
         metric_name: str = "Net Rating",
-        cmap: str = 'RdYlGn',
-        ax: Optional[Any] = None
+        cmap: str = "RdYlGn",
+        ax: Optional[Any] = None,
     ) -> Optional[Any]:
         """
         Plot player interaction matrix as heatmap.
@@ -329,7 +344,7 @@ class InteractionHeatmap:
             fig, ax = plt.subplots(figsize=self.config.figsize, dpi=self.config.dpi)
 
         # Plot heatmap
-        im = ax.imshow(matrix, cmap=cmap, aspect='auto', interpolation='nearest')
+        im = ax.imshow(matrix, cmap=cmap, aspect="auto", interpolation="nearest")
 
         # Add colorbar
         plt.colorbar(im, ax=ax, label=metric_name)
@@ -345,16 +360,17 @@ class InteractionHeatmap:
             else:
                 labels.append(pid[:8])
 
-        ax.set_xticklabels(labels, rotation=45, ha='right')
+        ax.set_xticklabels(labels, rotation=45, ha="right")
         ax.set_yticklabels(labels)
 
-        ax.set_title(f"Player Interaction Matrix: {metric_name}",
-                    fontsize=14, fontweight='bold')
+        ax.set_title(
+            f"Player Interaction Matrix: {metric_name}", fontsize=14, fontweight="bold"
+        )
 
         # Add grid
         ax.set_xticks(np.arange(n) - 0.5, minor=True)
         ax.set_yticks(np.arange(n) - 0.5, minor=True)
-        ax.grid(which='minor', color='white', linestyle='-', linewidth=2)
+        ax.grid(which="minor", color="white", linestyle="-", linewidth=2)
 
         return ax
 
@@ -363,14 +379,16 @@ class InteractionHeatmap:
         synergy_scores: Dict[Tuple[str, str], float],
         player_ids: List[str],
         player_names: Optional[Dict[str, str]] = None,
-        ax: Optional[Any] = None
+        ax: Optional[Any] = None,
     ) -> Optional[Any]:
         """Plot synergy scores as heatmap"""
         return self.plot_interaction_matrix(
-            synergy_scores, player_ids, player_names,
+            synergy_scores,
+            player_ids,
+            player_names,
             metric_name="Synergy Score",
-            cmap='YlGn',
-            ax=ax
+            cmap="YlGn",
+            ax=ax,
         )
 
 
@@ -392,9 +410,9 @@ class ChemistryVisualizer:
     def plot_lineup_performance(
         self,
         lineup_data: List[Dict[str, Any]],
-        metric: str = 'net_rating',
+        metric: str = "net_rating",
         top_n: int = 15,
-        ax: Optional[Any] = None
+        ax: Optional[Any] = None,
     ) -> Optional[Any]:
         """
         Plot lineup performance bar chart.
@@ -416,9 +434,7 @@ class ChemistryVisualizer:
 
         # Sort by metric
         sorted_lineups = sorted(
-            lineup_data,
-            key=lambda x: x.get(metric, 0),
-            reverse=True
+            lineup_data, key=lambda x: x.get(metric, 0), reverse=True
         )[:top_n]
 
         if ax is None:
@@ -431,9 +447,9 @@ class ChemistryVisualizer:
 
         for lineup in sorted_lineups:
             # Create label from player IDs (truncated)
-            players = lineup.get('players', [])
+            players = lineup.get("players", [])
             if isinstance(players, (list, set)):
-                label = ', '.join([p[:4] for p in list(players)[:3]]) + '...'
+                label = ", ".join([p[:4] for p in list(players)[:3]]) + "..."
             else:
                 label = str(players)[:20]
 
@@ -453,14 +469,17 @@ class ChemistryVisualizer:
 
         ax.set_yticks(y_pos)
         ax.set_yticklabels(labels, fontsize=8)
-        ax.set_xlabel(metric.replace('_', ' ').title())
-        ax.set_title(f"Top {top_n} Lineups by {metric.replace('_', ' ').title()}",
-                    fontsize=14, fontweight='bold')
+        ax.set_xlabel(metric.replace("_", " ").title())
+        ax.set_title(
+            f"Top {top_n} Lineups by {metric.replace('_', ' ').title()}",
+            fontsize=14,
+            fontweight="bold",
+        )
 
         # Add zero line
-        ax.axvline(x=0, color='black', linestyle='--', linewidth=1, alpha=0.5)
+        ax.axvline(x=0, color="black", linestyle="--", linewidth=1, alpha=0.5)
 
-        ax.grid(axis='x', alpha=0.3)
+        ax.grid(axis="x", alpha=0.3)
 
         return ax
 
@@ -470,7 +489,7 @@ class ChemistryVisualizer:
         player_names: Optional[Dict[str, str]] = None,
         threshold: float = 0.5,
         title: str = "Team Chemistry Network",
-        ax: Optional[Any] = None
+        ax: Optional[Any] = None,
     ) -> Optional[Any]:
         """
         Plot chemistry network (only strong connections).
@@ -498,8 +517,14 @@ class ChemistryVisualizer:
                 graph.add_edge(p1, p2, weight=score)
 
         if graph.number_of_nodes() == 0:
-            ax.text(0.5, 0.5, f"No chemistry scores >= {threshold}",
-                   ha='center', va='center', transform=ax.transAxes)
+            ax.text(
+                0.5,
+                0.5,
+                f"No chemistry scores >= {threshold}",
+                ha="center",
+                va="center",
+                transform=ax.transAxes,
+            )
             ax.set_title(title)
             return ax
 
@@ -510,31 +535,26 @@ class ChemistryVisualizer:
         degrees = dict(graph.degree())
         max_degree = max(degrees.values()) if degrees else 1
         node_sizes = [
-            (degrees[node] / max_degree) * 800 + 300
-            for node in graph.nodes()
+            (degrees[node] / max_degree) * 800 + 300 for node in graph.nodes()
         ]
 
         # Edge widths by chemistry
-        edge_weights = [data['weight'] for _, _, data in graph.edges(data=True)]
+        edge_weights = [data["weight"] for _, _, data in graph.edges(data=True)]
         max_weight = max(edge_weights) if edge_weights else 1.0
-        edge_widths = [
-            (weight / max_weight) * 4.0 + 0.5
-            for weight in edge_weights
-        ]
+        edge_widths = [(weight / max_weight) * 4.0 + 0.5 for weight in edge_weights]
 
         # Draw
         nx.draw_networkx_nodes(
-            graph, pos, ax=ax,
+            graph,
+            pos,
+            ax=ax,
             node_size=node_sizes,
             node_color=self.config.positive_color,
-            alpha=0.7
+            alpha=0.7,
         )
 
         nx.draw_networkx_edges(
-            graph, pos, ax=ax,
-            width=edge_widths,
-            alpha=0.6,
-            edge_color='green'
+            graph, pos, ax=ax, width=edge_widths, alpha=0.6, edge_color="green"
         )
 
         if self.config.show_labels:
@@ -546,12 +566,11 @@ class ChemistryVisualizer:
                     labels[node] = node[:8]
 
             nx.draw_networkx_labels(
-                graph, pos, labels, ax=ax,
-                font_size=self.config.font_size
+                graph, pos, labels, ax=ax, font_size=self.config.font_size
             )
 
-        ax.set_title(title, fontsize=14, fontweight='bold')
-        ax.axis('off')
+        ax.set_title(title, fontsize=14, fontweight="bold")
+        ax.axis("off")
 
         return ax
 
@@ -575,7 +594,7 @@ class PlayTypeVisualizer:
         self,
         play_type_counts: Dict[str, int],
         title: str = "Play Type Distribution",
-        ax: Optional[Any] = None
+        ax: Optional[Any] = None,
     ) -> Optional[Any]:
         """
         Plot play type distribution as pie chart.
@@ -600,22 +619,23 @@ class PlayTypeVisualizer:
         # Prepare data
         labels = []
         sizes = []
-        for play_type, count in sorted(play_type_counts.items(),
-                                       key=lambda x: x[1], reverse=True):
-            labels.append(play_type.replace('_', ' ').title())
+        for play_type, count in sorted(
+            play_type_counts.items(), key=lambda x: x[1], reverse=True
+        ):
+            labels.append(play_type.replace("_", " ").title())
             sizes.append(count)
 
         # Plot pie chart
-        ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
-        ax.set_title(title, fontsize=14, fontweight='bold')
+        ax.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
+        ax.set_title(title, fontsize=14, fontweight="bold")
 
         return ax
 
     def plot_play_type_efficiency(
         self,
         play_type_efficiencies: Dict[str, Dict[str, float]],
-        metric: str = 'ppp',
-        ax: Optional[Any] = None
+        metric: str = "ppp",
+        ax: Optional[Any] = None,
     ) -> Optional[Any]:
         """
         Plot play type efficiency comparison.
@@ -642,7 +662,7 @@ class PlayTypeVisualizer:
         values = []
 
         for play_type, metrics in sorted(play_type_efficiencies.items()):
-            play_types.append(play_type.replace('_', ' ').title())
+            play_types.append(play_type.replace("_", " ").title())
             values.append(metrics.get(metric, 0))
 
         # Plot bars
@@ -657,18 +677,27 @@ class PlayTypeVisualizer:
                 bar.set_color(self.config.negative_color)
 
         ax.set_xticks(x_pos)
-        ax.set_xticklabels(play_types, rotation=45, ha='right')
-        ax.set_ylabel(metric.replace('_', ' ').title())
-        ax.set_title(f"Play Type Efficiency: {metric.replace('_', ' ').title()}",
-                    fontsize=14, fontweight='bold')
+        ax.set_xticklabels(play_types, rotation=45, ha="right")
+        ax.set_ylabel(metric.replace("_", " ").title())
+        ax.set_title(
+            f"Play Type Efficiency: {metric.replace('_', ' ').title()}",
+            fontsize=14,
+            fontweight="bold",
+        )
 
         # Add reference line at league average (1.0 PPP)
-        if metric == 'ppp':
-            ax.axhline(y=1.0, color='black', linestyle='--',
-                      linewidth=1, alpha=0.5, label='League Avg')
+        if metric == "ppp":
+            ax.axhline(
+                y=1.0,
+                color="black",
+                linestyle="--",
+                linewidth=1,
+                alpha=0.5,
+                label="League Avg",
+            )
             ax.legend()
 
-        ax.grid(axis='y', alpha=0.3)
+        ax.grid(axis="y", alpha=0.3)
 
         return ax
 
@@ -676,7 +705,7 @@ class PlayTypeVisualizer:
         self,
         clutch_data: Dict[str, Any],
         player_names: Optional[Dict[str, str]] = None,
-        ax: Optional[Any] = None
+        ax: Optional[Any] = None,
     ) -> Optional[Any]:
         """
         Plot clutch vs overall performance comparison.
@@ -696,12 +725,12 @@ class PlayTypeVisualizer:
             fig, ax = plt.subplots(figsize=self.config.figsize, dpi=self.config.dpi)
 
         # Extract data
-        clutch_ppp = clutch_data.get('clutch_ppp', 0)
-        overall_ppp = clutch_data.get('overall_ppp', 0)
-        player_id = clutch_data.get('player_id', 'Unknown')
+        clutch_ppp = clutch_data.get("clutch_ppp", 0)
+        overall_ppp = clutch_data.get("overall_ppp", 0)
+        player_id = clutch_data.get("player_id", "Unknown")
 
         # Create grouped bar chart
-        categories = ['Overall', 'Clutch']
+        categories = ["Overall", "Clutch"]
         values = [overall_ppp, clutch_ppp]
 
         x_pos = np.arange(len(categories))
@@ -709,27 +738,35 @@ class PlayTypeVisualizer:
 
         # Color code
         bars[1].set_color(
-            self.config.positive_color if clutch_ppp > overall_ppp
+            self.config.positive_color
+            if clutch_ppp > overall_ppp
             else self.config.negative_color
         )
 
         ax.set_xticks(x_pos)
         ax.set_xticklabels(categories)
-        ax.set_ylabel('Points Per Play')
+        ax.set_ylabel("Points Per Play")
 
         # Title with player name
-        player_name = player_names.get(player_id, player_id) if player_names else player_id
-        ax.set_title(f"Clutch Performance: {player_name}",
-                    fontsize=14, fontweight='bold')
+        player_name = (
+            player_names.get(player_id, player_id) if player_names else player_id
+        )
+        ax.set_title(
+            f"Clutch Performance: {player_name}", fontsize=14, fontweight="bold"
+        )
 
         # Add values on bars
         for i, bar in enumerate(bars):
             height = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2., height,
-                   f'{values[i]:.2f}',
-                   ha='center', va='bottom')
+            ax.text(
+                bar.get_x() + bar.get_width() / 2.0,
+                height,
+                f"{values[i]:.2f}",
+                ha="center",
+                va="bottom",
+            )
 
-        ax.grid(axis='y', alpha=0.3)
+        ax.grid(axis="y", alpha=0.3)
 
         return ax
 
@@ -758,7 +795,7 @@ class NetworkDashboard:
         play_type_counts: Dict[str, int],
         player_ids: List[str],
         player_names: Optional[Dict[str, str]] = None,
-        title: str = "Team Network Analysis Dashboard"
+        title: str = "Team Network Analysis Dashboard",
     ) -> Optional[Any]:
         """
         Create comprehensive team dashboard.
@@ -779,7 +816,7 @@ class NetworkDashboard:
             return None
 
         fig = plt.figure(figsize=(20, 12), dpi=self.config.dpi)
-        fig.suptitle(title, fontsize=18, fontweight='bold')
+        fig.suptitle(title, fontsize=18, fontweight="bold")
 
         # Create 2x2 grid
         gs = fig.add_gridspec(2, 2, hspace=0.3, wspace=0.3)
@@ -787,33 +824,29 @@ class NetworkDashboard:
         # 1. Passing network
         ax1 = fig.add_subplot(gs[0, 0])
         self.passing_viz.plot_passing_network(
-            passing_graph, player_names,
-            title="Passing Network",
-            ax=ax1
+            passing_graph, player_names, title="Passing Network", ax=ax1
         )
 
         # 2. Interaction heatmap
         ax2 = fig.add_subplot(gs[0, 1])
         self.interaction_viz.plot_interaction_matrix(
-            interaction_matrix, player_ids, player_names,
+            interaction_matrix,
+            player_ids,
+            player_names,
             metric_name="Net Rating",
-            ax=ax2
+            ax=ax2,
         )
 
         # 3. Lineup performance
         ax3 = fig.add_subplot(gs[1, 0])
         self.chemistry_viz.plot_lineup_performance(
-            lineup_data,
-            metric='net_rating',
-            ax=ax3
+            lineup_data, metric="net_rating", ax=ax3
         )
 
         # 4. Play type distribution
         ax4 = fig.add_subplot(gs[1, 1])
         self.play_type_viz.plot_play_type_distribution(
-            play_type_counts,
-            title="Play Type Distribution",
-            ax=ax4
+            play_type_counts, title="Play Type Distribution", ax=ax4
         )
 
         return fig
@@ -822,18 +855,18 @@ class NetworkDashboard:
 def check_visualization_available() -> Dict[str, bool]:
     """Check which visualization libraries are available"""
     return {
-        'matplotlib': MATPLOTLIB_AVAILABLE,
-        'networkx': NETWORKX_AVAILABLE,
-        'full_functionality': MATPLOTLIB_AVAILABLE and NETWORKX_AVAILABLE
+        "matplotlib": MATPLOTLIB_AVAILABLE,
+        "networkx": NETWORKX_AVAILABLE,
+        "full_functionality": MATPLOTLIB_AVAILABLE and NETWORKX_AVAILABLE,
     }
 
 
 __all__ = [
-    'VisualizationConfig',
-    'PassingNetworkVisualizer',
-    'InteractionHeatmap',
-    'ChemistryVisualizer',
-    'PlayTypeVisualizer',
-    'NetworkDashboard',
-    'check_visualization_available',
+    "VisualizationConfig",
+    "PassingNetworkVisualizer",
+    "InteractionHeatmap",
+    "ChemistryVisualizer",
+    "PlayTypeVisualizer",
+    "NetworkDashboard",
+    "check_visualization_available",
 ]

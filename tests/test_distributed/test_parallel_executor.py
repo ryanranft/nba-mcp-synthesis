@@ -7,7 +7,10 @@ Tests parallel task execution, hyperparameter search, and cross-validation.
 import pytest
 import numpy as np
 from time import sleep
-from mcp_server.distributed.parallel_executor import ParallelExecutor, ParallelTaskResult
+from mcp_server.distributed.parallel_executor import (
+    ParallelExecutor,
+    ParallelTaskResult,
+)
 
 
 # Simple test functions
@@ -29,7 +32,7 @@ def failing_function():
 
 def square_number(x):
     """Square a number"""
-    return x ** 2
+    return x**2
 
 
 # Simple model class for testing
@@ -88,11 +91,7 @@ class TestParallelExecutor:
         task_args = [(1,), (2,), (3,)]
         task_kwargs = [{"b": 10}, {"b": 20}, {"b": 30}]
 
-        results = executor.execute_parallel(
-            simple_add,
-            task_args,
-            task_kwargs
-        )
+        results = executor.execute_parallel(simple_add, task_args, task_kwargs)
 
         assert len(results) == 3
         assert sorted([r.result for r in results]) == [11, 22, 33]
@@ -120,11 +119,12 @@ class TestParallelExecutor:
 
     def test_mixed_success_and_failure(self, executor):
         """Test mix of successful and failed tasks"""
+
         # Mix of functions
         def sometimes_fail(x):
             if x < 0:
                 raise ValueError("Negative not allowed")
-            return x ** 2
+            return x**2
 
         task_args = [(2,), (-1,), (3,), (-2,), (4,)]
 
@@ -143,10 +143,7 @@ class TestParallelExecutor:
         X_train = np.array([1, 2, 3, 4, 5])
         y_train = np.array([2, 4, 6, 8, 10])  # y = 2*x
 
-        param_grid = {
-            "param_a": [1.0, 1.5, 2.0, 2.5],
-            "param_b": [0.0, 0.5]
-        }
+        param_grid = {"param_a": [1.0, 1.5, 2.0, 2.5], "param_b": [0.0, 0.5]}
 
         def scoring_func(model, X, y):
             return model.score(X, y)
@@ -156,7 +153,7 @@ class TestParallelExecutor:
             X_train=X_train,
             y_train=y_train,
             param_grid=param_grid,
-            scoring_func=scoring_func
+            scoring_func=scoring_func,
         )
 
         assert "best_params" in result
@@ -179,7 +176,7 @@ class TestParallelExecutor:
             X=X,
             y=y,
             n_splits=3,
-            params={"param_a": 2.0, "param_b": 1.0}
+            params={"param_a": 2.0, "param_b": 1.0},
         )
 
         assert result["n_splits"] == 3
@@ -264,9 +261,7 @@ class TestParallelExecutor:
         X_train = np.array([1, 2, 3])
         y_train = np.array([2, 4, 6])
 
-        param_grid = {
-            "param_a": [-1.0, 0.5, 1.0, 1.5]  # One invalid value
-        }
+        param_grid = {"param_a": [-1.0, 0.5, 1.0, 1.5]}  # One invalid value
 
         def scoring_func(model, X, y):
             return model.score(X, y)
@@ -276,7 +271,7 @@ class TestParallelExecutor:
             X_train=X_train,
             y_train=y_train,
             param_grid=param_grid,
-            scoring_func=scoring_func
+            scoring_func=scoring_func,
         )
 
         # Should still find best among successful combinations
@@ -289,10 +284,7 @@ class TestParallelExecutor:
 
         # Create pandas DataFrame
         np.random.seed(42)
-        df = pd.DataFrame({
-            "X": np.random.randn(50),
-            "y": np.random.randn(50)
-        })
+        df = pd.DataFrame({"X": np.random.randn(50), "y": np.random.randn(50)})
 
         X = df["X"].values
         y = df["y"].values
@@ -302,7 +294,7 @@ class TestParallelExecutor:
             X=X,
             y=y,
             n_splits=5,
-            params={"param_a": 1.0, "param_b": 0.0}
+            params={"param_a": 1.0, "param_b": 0.0},
         )
 
         assert result["n_splits"] == 5

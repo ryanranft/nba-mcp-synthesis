@@ -19,12 +19,13 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ProfileResult:
     """Result from profiling a function"""
+
     function_name: str
     execution_time_ms: float
     call_count: int = 1
     total_time_ms: float = 0.0
     avg_time_ms: float = 0.0
-    min_time_ms: float = float('inf')
+    min_time_ms: float = float("inf")
     max_time_ms: float = 0.0
     memory_peak_mb: Optional[float] = None
     memory_delta_mb: Optional[float] = None
@@ -48,7 +49,7 @@ class PerformanceProfiler:
         self,
         enabled: bool = True,
         track_memory: bool = False,
-        slow_threshold_ms: float = 100.0
+        slow_threshold_ms: float = 100.0,
     ):
         """
         Initialize performance profiler.
@@ -128,7 +129,7 @@ class PerformanceProfiler:
             "max_time_ms": max(execution_times),
             "median_time_ms": sorted(execution_times)[len(execution_times) // 2],
             "slow_calls": sum(1 for t in execution_times if t > self.slow_threshold_ms),
-            "last_called": results[-1].timestamp.isoformat()
+            "last_called": results[-1].timestamp.isoformat(),
         }
 
     def get_all_stats(self) -> Dict[str, Any]:
@@ -158,9 +159,7 @@ class PerformanceProfiler:
         all_stats = self.get_all_stats()
 
         sorted_stats = sorted(
-            all_stats.values(),
-            key=lambda s: s["avg_time_ms"],
-            reverse=True
+            all_stats.values(), key=lambda s: s["avg_time_ms"], reverse=True
         )
 
         return sorted_stats[:n]
@@ -178,17 +177,13 @@ class PerformanceProfiler:
         all_stats = self.get_all_stats()
 
         sorted_stats = sorted(
-            all_stats.values(),
-            key=lambda s: s["call_count"],
-            reverse=True
+            all_stats.values(), key=lambda s: s["call_count"], reverse=True
         )
 
         return sorted_stats[:n]
 
     def identify_bottlenecks(
-        self,
-        time_threshold_ms: Optional[float] = None,
-        call_threshold: int = 10
+        self, time_threshold_ms: Optional[float] = None, call_threshold: int = 10
     ) -> List[Dict[str, Any]]:
         """
         Identify performance bottlenecks.
@@ -209,8 +204,10 @@ class PerformanceProfiler:
         bottlenecks = []
 
         for func_name, stats in self.get_all_stats().items():
-            if (stats["call_count"] >= call_threshold and
-                    stats["avg_time_ms"] > time_threshold_ms):
+            if (
+                stats["call_count"] >= call_threshold
+                and stats["avg_time_ms"] > time_threshold_ms
+            ):
 
                 # Calculate impact score
                 impact_score = stats["call_count"] * stats["avg_time_ms"]
@@ -218,7 +215,7 @@ class PerformanceProfiler:
                 bottleneck = {
                     **stats,
                     "impact_score": impact_score,
-                    "recommendations": self._generate_recommendations(stats)
+                    "recommendations": self._generate_recommendations(stats),
                 }
 
                 bottlenecks.append(bottleneck)
@@ -268,7 +265,7 @@ class PerformanceProfiler:
                 self.total_time_ms / self.total_calls if self.total_calls > 0 else 0.0
             ),
             "slow_threshold_ms": self.slow_threshold_ms,
-            "memory_tracking": self.track_memory
+            "memory_tracking": self.track_memory,
         }
 
 
@@ -285,7 +282,7 @@ def profile(
     func: Optional[Callable] = None,
     *,
     profiler: Optional[PerformanceProfiler] = None,
-    track_memory: bool = False
+    track_memory: bool = False,
 ):
     """
     Decorator to profile a synchronous function.
@@ -334,10 +331,12 @@ def profile(
 
                 if track_memory or prof.track_memory:
                     snapshot_after = tracemalloc.take_snapshot()
-                    top_stats = snapshot_after.compare_to(snapshot_before, 'lineno')
+                    top_stats = snapshot_after.compare_to(snapshot_before, "lineno")
 
                     if top_stats:
-                        memory_delta_mb = sum(stat.size_diff for stat in top_stats) / (1024 * 1024)
+                        memory_delta_mb = sum(stat.size_diff for stat in top_stats) / (
+                            1024 * 1024
+                        )
 
                     current, peak = tracemalloc.get_traced_memory()
                     memory_peak_mb = peak / (1024 * 1024)
@@ -351,7 +350,7 @@ def profile(
                     memory_peak_mb=memory_peak_mb,
                     memory_delta_mb=memory_delta_mb,
                     args_sample=args[:3] if args else None,  # First 3 args
-                    kwargs_sample=dict(list(kwargs.items())[:3]) if kwargs else None
+                    kwargs_sample=dict(list(kwargs.items())[:3]) if kwargs else None,
                 )
 
                 prof.record(profile_result)
@@ -369,7 +368,7 @@ def profile_async(
     func: Optional[Callable] = None,
     *,
     profiler: Optional[PerformanceProfiler] = None,
-    track_memory: bool = False
+    track_memory: bool = False,
 ):
     """
     Decorator to profile an async function.
@@ -414,10 +413,12 @@ def profile_async(
 
                 if track_memory or prof.track_memory:
                     snapshot_after = tracemalloc.take_snapshot()
-                    top_stats = snapshot_after.compare_to(snapshot_before, 'lineno')
+                    top_stats = snapshot_after.compare_to(snapshot_before, "lineno")
 
                     if top_stats:
-                        memory_delta_mb = sum(stat.size_diff for stat in top_stats) / (1024 * 1024)
+                        memory_delta_mb = sum(stat.size_diff for stat in top_stats) / (
+                            1024 * 1024
+                        )
 
                     current, peak = tracemalloc.get_traced_memory()
                     memory_peak_mb = peak / (1024 * 1024)
@@ -431,7 +432,7 @@ def profile_async(
                     memory_peak_mb=memory_peak_mb,
                     memory_delta_mb=memory_delta_mb,
                     args_sample=args[:3] if args else None,
-                    kwargs_sample=dict(list(kwargs.items())[:3]) if kwargs else None
+                    kwargs_sample=dict(list(kwargs.items())[:3]) if kwargs else None,
                 )
 
                 prof.record(profile_result)

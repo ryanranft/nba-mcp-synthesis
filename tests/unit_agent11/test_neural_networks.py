@@ -11,7 +11,7 @@ from mcp_server.simulations.models.neural_networks import (
     TrainingMetrics,
     TrainingHistory,
     MLPWrapper,
-    TORCH_AVAILABLE
+    TORCH_AVAILABLE,
 )
 
 # Conditionally import PyTorch models
@@ -19,7 +19,7 @@ if TORCH_AVAILABLE:
     from mcp_server.simulations.models.neural_networks import (
         FeedforwardNN,
         LSTMPredictor,
-        PyTorchWrapper
+        PyTorchWrapper,
     )
     import torch
 
@@ -30,10 +30,7 @@ class TestTrainingMetrics:
     def test_training_metrics_creation(self):
         """Test creating training metrics"""
         metrics = TrainingMetrics(
-            epoch=10,
-            train_loss=0.5,
-            val_loss=0.6,
-            train_time=2.5
+            epoch=10, train_loss=0.5, val_loss=0.6, train_time=2.5
         )
         assert metrics.epoch == 10
         assert metrics.train_loss == 0.5
@@ -43,10 +40,7 @@ class TestTrainingMetrics:
 
     def test_training_metrics_no_val_loss(self):
         """Test metrics without validation loss"""
-        metrics = TrainingMetrics(
-            epoch=5,
-            train_loss=0.8
-        )
+        metrics = TrainingMetrics(epoch=5, train_loss=0.8)
         assert metrics.epoch == 5
         assert metrics.train_loss == 0.8
         assert metrics.val_loss is None
@@ -60,7 +54,7 @@ class TestTrainingHistory:
         history = TrainingHistory()
         assert len(history.metrics) == 0
         assert history.best_epoch == 0
-        assert history.best_val_loss == float('inf')
+        assert history.best_val_loss == float("inf")
         assert history.total_epochs == 0
 
     def test_add_metrics(self):
@@ -103,12 +97,12 @@ class TestTrainingHistory:
         history.add_metrics(TrainingMetrics(3, 0.6, 0.8, 1.4))
 
         summary = history.get_summary()
-        assert summary['total_epochs'] == 3
-        assert summary['best_epoch'] == 2
-        assert summary['best_val_loss'] == 0.7
-        assert summary['final_train_loss'] == 0.6
-        assert summary['final_val_loss'] == 0.8
-        assert summary['total_training_time'] == 4.5
+        assert summary["total_epochs"] == 3
+        assert summary["best_epoch"] == 2
+        assert summary["best_val_loss"] == 0.7
+        assert summary["final_train_loss"] == 0.6
+        assert summary["final_val_loss"] == 0.8
+        assert summary["total_training_time"] == 4.5
 
 
 class TestMLPWrapper:
@@ -168,9 +162,9 @@ class TestMLPWrapper:
         X, y = sample_data
         model = MLPWrapper(
             hidden_layer_sizes=(100, 50, 25),
-            activation='tanh',
+            activation="tanh",
             learning_rate_init=0.01,
-            max_iter=30
+            max_iter=30,
         )
         model.fit(X, y)
         predictions = model.predict(X[:10])
@@ -183,21 +177,13 @@ class TestPyTorchModels:
 
     def test_feedforward_initialization(self):
         """Test initializing feedforward network"""
-        model = FeedforwardNN(
-            input_size=10,
-            hidden_sizes=[50, 25],
-            output_size=1
-        )
+        model = FeedforwardNN(input_size=10, hidden_sizes=[50, 25], output_size=1)
         assert model is not None
         assert isinstance(model, torch.nn.Module)
 
     def test_feedforward_forward_pass(self):
         """Test forward pass through feedforward network"""
-        model = FeedforwardNN(
-            input_size=10,
-            hidden_sizes=[50, 25],
-            output_size=1
-        )
+        model = FeedforwardNN(input_size=10, hidden_sizes=[50, 25], output_size=1)
         x = torch.randn(5, 10)
         output = model(x)
         assert output.shape == (5, 1)
@@ -205,10 +191,7 @@ class TestPyTorchModels:
     def test_feedforward_no_batch_norm(self):
         """Test feedforward without batch normalization"""
         model = FeedforwardNN(
-            input_size=10,
-            hidden_sizes=[50],
-            output_size=1,
-            use_batch_norm=False
+            input_size=10, hidden_sizes=[50], output_size=1, use_batch_norm=False
         )
         x = torch.randn(5, 10)
         output = model(x)
@@ -217,10 +200,7 @@ class TestPyTorchModels:
     def test_lstm_initialization(self):
         """Test initializing LSTM predictor"""
         model = LSTMPredictor(
-            input_size=10,
-            hidden_size=32,
-            num_layers=2,
-            output_size=1
+            input_size=10, hidden_size=32, num_layers=2, output_size=1
         )
         assert model is not None
         assert model.hidden_size == 32
@@ -229,10 +209,7 @@ class TestPyTorchModels:
     def test_lstm_forward_pass(self):
         """Test forward pass through LSTM"""
         model = LSTMPredictor(
-            input_size=10,
-            hidden_size=32,
-            num_layers=2,
-            output_size=1
+            input_size=10, hidden_size=32, num_layers=2, output_size=1
         )
         # Input shape: (batch, seq_len, input_size)
         x = torch.randn(5, 8, 10)
@@ -242,10 +219,7 @@ class TestPyTorchModels:
     def test_lstm_single_layer(self):
         """Test LSTM with single layer"""
         model = LSTMPredictor(
-            input_size=10,
-            hidden_size=32,
-            num_layers=1,
-            output_size=1
+            input_size=10, hidden_size=32, num_layers=1, output_size=1
         )
         x = torch.randn(5, 8, 10)
         output = model(x)
@@ -268,7 +242,7 @@ class TestPyTorchWrapper:
         """Test initializing PyTorch wrapper"""
         wrapper = PyTorchWrapper(
             model_class=FeedforwardNN,
-            model_params={'input_size': 5, 'hidden_sizes': [50], 'output_size': 1}
+            model_params={"input_size": 5, "hidden_sizes": [50], "output_size": 1},
         )
         assert wrapper.model is None
         assert isinstance(wrapper.history, TrainingHistory)
@@ -278,9 +252,9 @@ class TestPyTorchWrapper:
         X, y = sample_data
         wrapper = PyTorchWrapper(
             model_class=FeedforwardNN,
-            model_params={'input_size': 5, 'hidden_sizes': [50], 'output_size': 1},
+            model_params={"input_size": 5, "hidden_sizes": [50], "output_size": 1},
             epochs=10,
-            verbose=False
+            verbose=False,
         )
         wrapper.fit(X, y)
         assert wrapper.model is not None
@@ -290,9 +264,9 @@ class TestPyTorchWrapper:
         X, y = sample_data
         wrapper = PyTorchWrapper(
             model_class=FeedforwardNN,
-            model_params={'input_size': 5, 'hidden_sizes': [50], 'output_size': 1},
+            model_params={"input_size": 5, "hidden_sizes": [50], "output_size": 1},
             epochs=10,
-            verbose=False
+            verbose=False,
         )
         wrapper.fit(X, y)
 
@@ -304,7 +278,7 @@ class TestPyTorchWrapper:
         X = np.random.randn(10, 5)
         wrapper = PyTorchWrapper(
             model_class=FeedforwardNN,
-            model_params={'input_size': 5, 'hidden_sizes': [50], 'output_size': 1}
+            model_params={"input_size": 5, "hidden_sizes": [50], "output_size": 1},
         )
 
         with pytest.raises(ValueError, match="must be fitted"):
@@ -315,9 +289,9 @@ class TestPyTorchWrapper:
         X, y = sample_data
         wrapper = PyTorchWrapper(
             model_class=FeedforwardNN,
-            model_params={'input_size': 5, 'hidden_sizes': [50], 'output_size': 1},
+            model_params={"input_size": 5, "hidden_sizes": [50], "output_size": 1},
             epochs=10,
-            verbose=False
+            verbose=False,
         )
         wrapper.fit(X, y)
 
@@ -330,10 +304,10 @@ class TestPyTorchWrapper:
         X, y = sample_data
         wrapper = PyTorchWrapper(
             model_class=FeedforwardNN,
-            model_params={'input_size': 5, 'hidden_sizes': [50], 'output_size': 1},
+            model_params={"input_size": 5, "hidden_sizes": [50], "output_size": 1},
             epochs=100,
             early_stopping_patience=5,
-            verbose=False
+            verbose=False,
         )
         wrapper.fit(X, y)
 
@@ -346,12 +320,12 @@ class TestPyTorchWrapper:
         X, y = sample_data
         wrapper = PyTorchWrapper(
             model_class=FeedforwardNN,
-            model_params={'input_size': 5, 'hidden_sizes': [100, 50], 'output_size': 1},
+            model_params={"input_size": 5, "hidden_sizes": [100, 50], "output_size": 1},
             learning_rate=0.01,
             batch_size=16,
             epochs=20,
             validation_split=0.3,
-            verbose=False
+            verbose=False,
         )
         wrapper.fit(X, y)
         predictions = wrapper.predict(X[:10])
@@ -366,9 +340,14 @@ class TestPyTorchWrapper:
 
         wrapper = PyTorchWrapper(
             model_class=LSTMPredictor,
-            model_params={'input_size': 5, 'hidden_size': 32, 'num_layers': 2, 'output_size': 1},
+            model_params={
+                "input_size": 5,
+                "hidden_size": 32,
+                "num_layers": 2,
+                "output_size": 1,
+            },
             epochs=10,
-            verbose=False
+            verbose=False,
         )
         wrapper.fit(X_seq, y)
 

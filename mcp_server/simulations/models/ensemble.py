@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class EnsembleMetrics:
     """Metrics for ensemble performance"""
+
     diversity_score: float  # Higher is better (less correlated)
     avg_base_error: float  # Average error of base models
     ensemble_error: float  # Error of ensemble
@@ -52,7 +53,7 @@ class StackedEnsemble(BaseEstimator, RegressorMixin):
         base_models: List[BaseEstimator],
         meta_learner: Optional[BaseEstimator] = None,
         use_probas: bool = False,
-        cv_folds: int = 5
+        cv_folds: int = 5,
     ):
         """
         Initialize stacked ensemble.
@@ -151,7 +152,7 @@ class BlendedEnsemble(BaseEstimator, RegressorMixin):
         self,
         base_models: List[BaseEstimator],
         blend_fraction: float = 0.2,
-        optimize_weights: bool = True
+        optimize_weights: bool = True,
     ):
         """
         Initialize blended ensemble.
@@ -231,9 +232,13 @@ class BlendedEnsemble(BaseEstimator, RegressorMixin):
         initial_weights = np.ones(len(self.base_models)) / len(self.base_models)
 
         # Optimize
-        result = minimize(objective, initial_weights, method='SLSQP',
-                         bounds=[(0, 1)] * len(self.base_models),
-                         constraints={'type': 'eq', 'fun': lambda w: np.sum(w) - 1})
+        result = minimize(
+            objective,
+            initial_weights,
+            method="SLSQP",
+            bounds=[(0, 1)] * len(self.base_models),
+            constraints={"type": "eq", "fun": lambda w: np.sum(w) - 1},
+        )
 
         return result.x
 
@@ -266,10 +271,7 @@ class BlendedEnsemble(BaseEstimator, RegressorMixin):
         if self.weights_ is None:
             return {}
 
-        return {
-            f"model_{i}": float(w)
-            for i, w in enumerate(self.weights_)
-        }
+        return {f"model_{i}": float(w) for i, w in enumerate(self.weights_)}
 
 
 class EnsembleSimulator:
@@ -287,7 +289,7 @@ class EnsembleSimulator:
         self,
         base_models: Optional[List[BaseEstimator]] = None,
         ensemble_type: str = "stacking",
-        enable_monitoring: bool = True
+        enable_monitoring: bool = True,
     ):
         """
         Initialize ensemble simulator.
@@ -308,7 +310,7 @@ class EnsembleSimulator:
         """Create default base models"""
         return [
             LinearRegression(),
-            RandomForestRegressor(n_estimators=100, random_state=42, max_depth=10)
+            RandomForestRegressor(n_estimators=100, random_state=42, max_depth=10),
         ]
 
     def fit(self, X, y):
@@ -413,7 +415,11 @@ class EnsembleSimulator:
         avg_base_error = np.mean(base_errors)
 
         # Compute improvement
-        improvement = (avg_base_error - ensemble_error) / avg_base_error if avg_base_error > 0 else 0.0
+        improvement = (
+            (avg_base_error - ensemble_error) / avg_base_error
+            if avg_base_error > 0
+            else 0.0
+        )
 
         # Compute diversity
         diversity = self.compute_diversity(X, y)
@@ -422,15 +428,17 @@ class EnsembleSimulator:
             diversity_score=diversity,
             avg_base_error=avg_base_error,
             ensemble_error=ensemble_error,
-            improvement=improvement
+            improvement=improvement,
         )
 
     def get_statistics(self) -> Dict[str, Any]:
         """Get ensemble statistics"""
         return {
-            'ensemble_type': self.ensemble_type,
-            'n_base_models': len(self.base_models),
-            'predictions_made': self.predictions_count,
-            'avg_diversity': np.mean(self.diversity_scores) if self.diversity_scores else 0.0,
-            'diversity_samples': len(self.diversity_scores)
+            "ensemble_type": self.ensemble_type,
+            "n_base_models": len(self.base_models),
+            "predictions_made": self.predictions_count,
+            "avg_diversity": (
+                np.mean(self.diversity_scores) if self.diversity_scores else 0.0
+            ),
+            "diversity_samples": len(self.diversity_scores),
         }

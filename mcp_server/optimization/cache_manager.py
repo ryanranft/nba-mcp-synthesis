@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 try:
     import redis
+
     REDIS_AVAILABLE = True
 except ImportError:
     REDIS_AVAILABLE = False
@@ -24,6 +25,7 @@ except ImportError:
 @dataclass
 class CacheEntry:
     """Represents a cached query result"""
+
     key: str
     value: Any
     created_at: datetime
@@ -48,7 +50,7 @@ class CacheManager:
         redis_url: Optional[str] = None,
         default_ttl: int = 3600,  # 1 hour
         max_memory_cache_size: int = 1000,
-        enabled: bool = True
+        enabled: bool = True,
     ):
         """
         Initialize cache manager.
@@ -70,29 +72,23 @@ class CacheManager:
         if redis_url and REDIS_AVAILABLE:
             try:
                 self.redis_client = redis.from_url(
-                    redis_url,
-                    decode_responses=True,
-                    socket_connect_timeout=2
+                    redis_url, decode_responses=True, socket_connect_timeout=2
                 )
                 # Test connection
                 self.redis_client.ping()
                 self.use_redis = True
                 logger.info(f"Connected to Redis at {redis_url}")
             except Exception as e:
-                logger.warning(f"Failed to connect to Redis: {e}. Using in-memory cache.")
+                logger.warning(
+                    f"Failed to connect to Redis: {e}. Using in-memory cache."
+                )
                 self.redis_client = None
 
         # In-memory cache fallback
         self.memory_cache: Dict[str, CacheEntry] = {}
 
         # Statistics
-        self.stats = {
-            "hits": 0,
-            "misses": 0,
-            "sets": 0,
-            "deletes": 0,
-            "evictions": 0
-        }
+        self.stats = {"hits": 0, "misses": 0, "sets": 0, "deletes": 0, "evictions": 0}
 
         logger.info(
             f"CacheManager initialized (backend={'Redis' if self.use_redis else 'Memory'}, "
@@ -132,12 +128,7 @@ class CacheManager:
             self.stats["misses"] += 1
             return None
 
-    def set(
-        self,
-        key: str,
-        value: Any,
-        ttl: Optional[int] = None
-    ) -> bool:
+    def set(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
         """
         Set value in cache.
 
@@ -225,8 +216,10 @@ class CacheManager:
             else:
                 # In-memory pattern matching
                 import fnmatch
+
                 matching_keys = [
-                    key for key in self.memory_cache.keys()
+                    key
+                    for key in self.memory_cache.keys()
                     if fnmatch.fnmatch(key, pattern)
                 ]
                 for key in matching_keys:
@@ -256,9 +249,7 @@ class CacheManager:
             return False
 
     def get_cache_key_for_query(
-        self,
-        query: str,
-        params: Optional[Dict[str, Any]] = None
+        self, query: str, params: Optional[Dict[str, Any]] = None
     ) -> str:
         """
         Generate cache key for SQL query.
@@ -272,7 +263,8 @@ class CacheManager:
         """
         # Normalize query
         import re
-        normalized = re.sub(r'\s+', ' ', query.strip().lower())
+
+        normalized = re.sub(r"\s+", " ", query.strip().lower())
 
         # Include params in key
         if params:
@@ -321,10 +313,7 @@ class CacheManager:
 
         # Create cache entry
         entry = CacheEntry(
-            key=key,
-            value=value,
-            created_at=datetime.now(),
-            ttl_seconds=ttl
+            key=key, value=value, created_at=datetime.now(), ttl_seconds=ttl
         )
 
         self.memory_cache[key] = entry
@@ -366,7 +355,7 @@ class CacheManager:
             "hit_rate": hit_rate,
             "total_requests": total_requests,
             "cache_size": len(self.memory_cache) if not self.use_redis else "N/A",
-            "default_ttl": self.default_ttl
+            "default_ttl": self.default_ttl,
         }
 
     def __del__(self):

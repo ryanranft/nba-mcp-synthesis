@@ -21,7 +21,10 @@ from collections import defaultdict
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from mcp_server.unified_secrets_manager import load_secrets_hierarchical, get_database_config
+from mcp_server.unified_secrets_manager import (
+    load_secrets_hierarchical,
+    get_database_config,
+)
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from mcp_server.play_by_play import BoxScoreAggregator, EventParser
@@ -117,42 +120,52 @@ class YearOverYearAnalyzer:
         cursor = conn.cursor(cursor_factory=RealDictCursor)
 
         # Load play-by-play
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT * FROM hoopr_play_by_play
             WHERE game_id = %s
             ORDER BY sequence_number
-        """, (game_id,))
+        """,
+            (game_id,),
+        )
         events = [dict(e) for e in cursor.fetchall()]
 
         if not events:
             cursor.close()
             conn.close()
-            return {'error': 'No play-by-play data'}
+            return {"error": "No play-by-play data"}
 
         # Get game info
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT game_id, home_team_id, away_team_id, game_date
             FROM games WHERE game_id = %s
-        """, (game_id,))
+        """,
+            (game_id,),
+        )
         game_info = cursor.fetchone()
 
         if not game_info:
             cursor.close()
             conn.close()
-            return {'error': 'No game info'}
+            return {"error": "No game info"}
 
         # Get player-team mapping
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT DISTINCT
                 CAST(athlete_id AS INTEGER) as player_id,
                 CAST(team_id AS INTEGER) as team_id
             FROM hoopr_player_box
             WHERE game_id = %s
-        """, (game_id,))
-        player_team_map = {m['player_id']: m['team_id'] for m in cursor.fetchall()}
+        """,
+            (game_id,),
+        )
+        player_team_map = {m["player_id"]: m["team_id"] for m in cursor.fetchall()}
 
         # Load Hoopr box scores for comparison
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT
                 CAST(athlete_id AS INTEGER) as player_id,
                 field_goals_attempted as fga,
@@ -160,7 +173,9 @@ class YearOverYearAnalyzer:
                 points as pts
             FROM hoopr_player_box
             WHERE game_id = %s
-        """, (game_id,))
+        """,
+            (game_id,),
+        )
         hoopr_players = [dict(p) for p in cursor.fetchall()]
 
         cursor.close()
@@ -171,9 +186,9 @@ class YearOverYearAnalyzer:
             computed = self.aggregator.generate_box_scores_from_pbp(
                 game_id=game_id,
                 events=events,
-                home_team_id=game_info['home_team_id'],
-                away_team_id=game_info['away_team_id'],
-                player_team_mapping=player_team_map
+                home_team_id=game_info["home_team_id"],
+                away_team_id=game_info["away_team_id"],
+                player_team_mapping=player_team_map,
             )
 
             # Quick internal consistency check
@@ -188,19 +203,21 @@ class YearOverYearAnalyzer:
                     internal_ok = False
 
             # Quick Hoopr comparison (FGA/FGM/PTS only for speed)
-            computed_lookup = {p.player_id: p for p in computed.home_players + computed.away_players}
+            computed_lookup = {
+                p.player_id: p for p in computed.home_players + computed.away_players
+            }
 
             matches = 0
             total = 0
             discrepancies_by_stat = defaultdict(list)
 
             for hoopr in hoopr_players:
-                pid = hoopr['player_id']
+                pid = hoopr["player_id"]
                 comp = computed_lookup.get(pid)
                 if not comp:
                     continue
 
-                for stat in ['fga', 'fgm', 'pts']:
+                for stat in ["fga", "fgm", "pts"]:
                     total += 1
                     h_val = hoopr.get(stat, 0) or 0
                     c_val = getattr(comp, stat, 0)
@@ -213,23 +230,23 @@ class YearOverYearAnalyzer:
             match_rate = (matches / total * 100) if total > 0 else 0
 
             return {
-                'game_id': game_id,
-                'game_date': str(game_info['game_date']),
-                'num_events': len(events),
-                'internal_consistent': internal_ok,
-                'hoopr_match_rate': round(match_rate, 2),
-                'stats_compared': total,
-                'discrepancies': {
+                "game_id": game_id,
+                "game_date": str(game_info["game_date"]),
+                "num_events": len(events),
+                "internal_consistent": internal_ok,
+                "hoopr_match_rate": round(match_rate, 2),
+                "stats_compared": total,
+                "discrepancies": {
                     stat: {
-                        'count': len(diffs),
-                        'mean_diff': sum(diffs) / len(diffs) if diffs else 0
+                        "count": len(diffs),
+                        "mean_diff": sum(diffs) / len(diffs) if diffs else 0,
                     }
                     for stat, diffs in discrepancies_by_stat.items()
-                }
+                },
             }
 
         except Exception as e:
-            return {'error': str(e)}
+            return {"error": str(e)}
 
     def analyze_year(self, year: int) -> Dict:
         """Analyze data quality for a specific year."""
@@ -239,83 +256,79 @@ class YearOverYearAnalyzer:
         print(f"  Sampled {len(game_ids)} games")
 
         if not game_ids:
-            return {
-                'year': year,
-                'error': 'No games with play-by-play data'
-            }
+            return {"year": year, "error": "No games with play-by-play data"}
 
         results = []
         for i, game_id in enumerate(game_ids, 1):
-            print(f"  Validating game {i}/{len(game_ids)}: {game_id}", end='\r')
+            print(f"  Validating game {i}/{len(game_ids)}: {game_id}", end="\r")
             result = self.validate_game_quick(game_id)
             results.append(result)
 
         print()  # New line after progress
 
         # Calculate year-level metrics
-        valid_results = [r for r in results if 'error' not in r]
+        valid_results = [r for r in results if "error" not in r]
 
         if not valid_results:
-            return {
-                'year': year,
-                'error': 'All validations failed'
-            }
+            return {"year": year, "error": "All validations failed"}
 
-        match_rates = [r['hoopr_match_rate'] for r in valid_results]
-        internal_checks = [r['internal_consistent'] for r in valid_results]
+        match_rates = [r["hoopr_match_rate"] for r in valid_results]
+        internal_checks = [r["internal_consistent"] for r in valid_results]
 
         # Aggregate discrepancies
         all_discrepancies = defaultdict(list)
         for r in valid_results:
-            for stat, data in r.get('discrepancies', {}).items():
-                all_discrepancies[stat].append(data['mean_diff'])
+            for stat, data in r.get("discrepancies", {}).items():
+                all_discrepancies[stat].append(data["mean_diff"])
 
         year_summary = {
-            'year': year,
-            'games_sampled': len(game_ids),
-            'games_validated': len(valid_results),
-            'internal_consistency_rate': sum(internal_checks) / len(internal_checks) * 100,
-            'mean_match_rate': sum(match_rates) / len(match_rates),
-            'min_match_rate': min(match_rates),
-            'max_match_rate': max(match_rates),
-            'games_above_95': sum(1 for r in match_rates if r >= 95),
-            'games_above_90': sum(1 for r in match_rates if r >= 90),
-            'games_below_85': sum(1 for r in match_rates if r < 85),
-            'common_discrepancies': {
+            "year": year,
+            "games_sampled": len(game_ids),
+            "games_validated": len(valid_results),
+            "internal_consistency_rate": sum(internal_checks)
+            / len(internal_checks)
+            * 100,
+            "mean_match_rate": sum(match_rates) / len(match_rates),
+            "min_match_rate": min(match_rates),
+            "max_match_rate": max(match_rates),
+            "games_above_95": sum(1 for r in match_rates if r >= 95),
+            "games_above_90": sum(1 for r in match_rates if r >= 90),
+            "games_below_85": sum(1 for r in match_rates if r < 85),
+            "common_discrepancies": {
                 stat: {
-                    'frequency': len(diffs),
-                    'mean_diff': sum(diffs) / len(diffs) if diffs else 0
+                    "frequency": len(diffs),
+                    "mean_diff": sum(diffs) / len(diffs) if diffs else 0,
                 }
                 for stat, diffs in all_discrepancies.items()
             },
-            'game_results': results
+            "game_results": results,
         }
 
         return year_summary
 
     def calculate_quality_score(self, year_data: Dict) -> int:
         """Calculate composite quality score (0-100)."""
-        if 'error' in year_data:
+        if "error" in year_data:
             return 0
 
         score = 0
 
         # 40 points: Internal consistency
-        internal_rate = year_data.get('internal_consistency_rate', 0)
+        internal_rate = year_data.get("internal_consistency_rate", 0)
         score += (internal_rate / 100) * 40
 
         # 30 points: Hoopr match rate
-        match_rate = year_data.get('mean_match_rate', 0)
+        match_rate = year_data.get("mean_match_rate", 0)
         score += (match_rate / 100) * 30
 
         # 20 points: Error pattern penalty
-        num_error_types = len(year_data.get('common_discrepancies', {}))
+        num_error_types = len(year_data.get("common_discrepancies", {}))
         error_penalty = min(num_error_types * 2, 20)
-        score += (20 - error_penalty)
+        score += 20 - error_penalty
 
         # 10 points: Consistency across games
-        min_rate = year_data.get('min_match_rate', 0)
-        max_rate = year_data.get('max_match_rate', 100)
+        min_rate = year_data.get("min_match_rate", 0)
+        max_rate = year_data.get("max_match_rate", 100)
         consistency = 100 - (max_rate - min_rate)
         score += (consistency / 100) * 10
 
@@ -324,24 +337,28 @@ class YearOverYearAnalyzer:
     def classify_tier(self, quality_score: int) -> str:
         """Classify year into quality tier."""
         if quality_score >= 95:
-            return 'A'
+            return "A"
         elif quality_score >= 85:
-            return 'B'
+            return "B"
         elif quality_score >= 70:
-            return 'C'
+            return "C"
         else:
-            return 'D'
+            return "D"
 
 
 def main():
     parser = argparse.ArgumentParser(
         description="Analyze play-by-play data quality year-over-year"
     )
-    parser.add_argument('--sample-size', type=int, default=10,
-                        help='Number of games to sample per year')
-    parser.add_argument('--years', help='Year range (e.g., 2020-2024) or single year')
-    parser.add_argument('--output', default='reports/year_over_year_data_quality.json',
-                        help='Output JSON file path')
+    parser.add_argument(
+        "--sample-size", type=int, default=10, help="Number of games to sample per year"
+    )
+    parser.add_argument("--years", help="Year range (e.g., 2020-2024) or single year")
+    parser.add_argument(
+        "--output",
+        default="reports/year_over_year_data_quality.json",
+        help="Output JSON file path",
+    )
 
     args = parser.parse_args()
 
@@ -349,8 +366,8 @@ def main():
 
     # Determine which years to analyze
     if args.years:
-        if '-' in args.years:
-            start, end = map(int, args.years.split('-'))
+        if "-" in args.years:
+            start, end = map(int, args.years.split("-"))
             years = list(range(start, end + 1))
         else:
             years = [int(args.years)]
@@ -364,34 +381,34 @@ def main():
     all_results = {}
     for year in years:
         year_data = analyzer.analyze_year(year)
-        year_data['quality_score'] = analyzer.calculate_quality_score(year_data)
-        year_data['tier'] = analyzer.classify_tier(year_data['quality_score'])
+        year_data["quality_score"] = analyzer.calculate_quality_score(year_data)
+        year_data["tier"] = analyzer.classify_tier(year_data["quality_score"])
         all_results[str(year)] = year_data
 
     # Generate summary
     tiers = defaultdict(list)
     for year, data in all_results.items():
-        if 'tier' in data:
-            tiers[data['tier']].append(int(year))
+        if "tier" in data:
+            tiers[data["tier"]].append(int(year))
 
     summary = {
-        'analysis_timestamp': datetime.now().isoformat(),
-        'years_analyzed': len(years),
-        'sample_size_per_year': args.sample_size,
-        'tier_summary': {
-            'tier_a_years': sorted(tiers['A']),
-            'tier_b_years': sorted(tiers['B']),
-            'tier_c_years': sorted(tiers['C']),
-            'tier_d_years': sorted(tiers['D'])
+        "analysis_timestamp": datetime.now().isoformat(),
+        "years_analyzed": len(years),
+        "sample_size_per_year": args.sample_size,
+        "tier_summary": {
+            "tier_a_years": sorted(tiers["A"]),
+            "tier_b_years": sorted(tiers["B"]),
+            "tier_c_years": sorted(tiers["C"]),
+            "tier_d_years": sorted(tiers["D"]),
         },
-        'by_year': all_results
+        "by_year": all_results,
     }
 
     # Save results
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(output_path, 'w') as f:
+    with open(output_path, "w") as f:
         json.dump(summary, f, indent=2)
 
     print(f"\n{'='*80}")
@@ -405,5 +422,5 @@ def main():
     print(f"  Tier D (Poor):      {len(tiers['D'])} years - {tiers['D']}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

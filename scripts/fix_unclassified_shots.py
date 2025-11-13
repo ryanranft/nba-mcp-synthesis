@@ -17,15 +17,19 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 
 # Add project root to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from mcp_server.unified_secrets_manager import load_secrets_hierarchical, get_database_config
+from mcp_server.unified_secrets_manager import (
+    load_secrets_hierarchical,
+    get_database_config,
+)
 
 
 def get_unclassified_shots(conn):
     """Get all legitimate shots that remain unclassified."""
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
-        cur.execute("""
+        cur.execute(
+            """
             SELECT
                 id, game_id, team_id, home_team_id, athlete_id_1,
                 sequence_number, type_text, text,
@@ -37,7 +41,8 @@ def get_unclassified_shots(conn):
               AND shot_zone IS NULL
               AND team_id IS NULL
             ORDER BY game_id, sequence_number
-        """)
+        """
+        )
         return cur.fetchall()
 
 
@@ -45,7 +50,8 @@ def infer_team_id_from_foul(conn, game_id, sequence_number):
     """Infer team_id by looking back to find the foul call before a free throw."""
     with conn.cursor() as cur:
         # Look for foul calls before this sequence
-        cur.execute("""
+        cur.execute(
+            """
             SELECT team_id
             FROM hoopr_play_by_play
             WHERE game_id = %s
@@ -54,7 +60,9 @@ def infer_team_id_from_foul(conn, game_id, sequence_number):
               AND team_id IS NOT NULL
             ORDER BY sequence_number DESC
             LIMIT 1
-        """, (game_id, sequence_number))
+        """,
+            (game_id, sequence_number),
+        )
 
         result = cur.fetchone()
         return result[0] if result else None
@@ -64,7 +72,8 @@ def infer_team_id_from_athlete(conn, game_id, athlete_id, sequence_number):
     """Infer team_id by finding previous play by the same athlete."""
     with conn.cursor() as cur:
         # Look for previous play by same athlete
-        cur.execute("""
+        cur.execute(
+            """
             SELECT team_id
             FROM hoopr_play_by_play
             WHERE game_id = %s
@@ -73,7 +82,9 @@ def infer_team_id_from_athlete(conn, game_id, athlete_id, sequence_number):
               AND team_id IS NOT NULL
             ORDER BY sequence_number DESC
             LIMIT 1
-        """, (game_id, athlete_id, sequence_number))
+        """,
+            (game_id, athlete_id, sequence_number),
+        )
 
         result = cur.fetchone()
         return result[0] if result else None
@@ -82,7 +93,8 @@ def infer_team_id_from_athlete(conn, game_id, athlete_id, sequence_number):
 def infer_team_id_from_next_play(conn, game_id, athlete_id, sequence_number):
     """Infer team_id by looking at next play by the same athlete."""
     with conn.cursor() as cur:
-        cur.execute("""
+        cur.execute(
+            """
             SELECT team_id
             FROM hoopr_play_by_play
             WHERE game_id = %s
@@ -91,7 +103,9 @@ def infer_team_id_from_next_play(conn, game_id, athlete_id, sequence_number):
               AND team_id IS NOT NULL
             ORDER BY sequence_number ASC
             LIMIT 1
-        """, (game_id, athlete_id, sequence_number))
+        """,
+            (game_id, athlete_id, sequence_number),
+        )
 
         result = cur.fetchone()
         return result[0] if result else None
@@ -103,47 +117,52 @@ def infer_team_id(conn, shot):
 
     Returns: (inferred_team_id, inference_method)
     """
-    game_id = shot['game_id']
-    sequence_number = shot['sequence_number']
-    athlete_id = shot['athlete_id_1']
-    type_text = shot['type_text'] or ''
+    game_id = shot["game_id"]
+    sequence_number = shot["sequence_number"]
+    athlete_id = shot["athlete_id_1"]
+    type_text = shot["type_text"] or ""
 
     # Strategy 1: For free throws, look back to foul call
-    if 'free throw' in type_text.lower():
+    if "free throw" in type_text.lower():
         team_id = infer_team_id_from_foul(conn, game_id, sequence_number)
         if team_id:
-            return team_id, 'foul_lookback'
+            return team_id, "foul_lookback"
 
     # Strategy 2: Find previous play by same athlete
     if athlete_id:
         team_id = infer_team_id_from_athlete(conn, game_id, athlete_id, sequence_number)
         if team_id:
-            return team_id, 'athlete_previous'
+            return team_id, "athlete_previous"
 
     # Strategy 3: Find next play by same athlete
     if athlete_id:
-        team_id = infer_team_id_from_next_play(conn, game_id, athlete_id, sequence_number)
+        team_id = infer_team_id_from_next_play(
+            conn, game_id, athlete_id, sequence_number
+        )
         if team_id:
-            return team_id, 'athlete_next'
+            return team_id, "athlete_next"
 
     # Strategy 4: Use home team as fallback (50% guess)
     # Only use if coordinates suggest home basket
-    if shot['home_team_id']:
+    if shot["home_team_id"]:
         # ESPN coordinates: negative Y typically means home basket end
-        if shot['coordinate_y'] and shot['coordinate_y'] < 0:
-            return shot['home_team_id'], 'home_guess'
+        if shot["coordinate_y"] and shot["coordinate_y"] < 0:
+            return shot["home_team_id"], "home_guess"
 
-    return None, 'failed'
+    return None, "failed"
 
 
 def update_team_id(conn, shot_id, team_id):
     """Update team_id for a specific shot."""
     with conn.cursor() as cur:
-        cur.execute("""
+        cur.execute(
+            """
             UPDATE hoopr_play_by_play
             SET team_id = %s
             WHERE id = %s
-        """, (team_id, shot_id))
+        """,
+            (team_id, shot_id),
+        )
 
 
 def main():
@@ -154,7 +173,7 @@ def main():
 
     # Load secrets and connect to database
     print("Loading database credentials...")
-    load_secrets_hierarchical('nba-mcp-synthesis', 'NBA', 'production')
+    load_secrets_hierarchical("nba-mcp-synthesis", "NBA", "production")
     config = get_database_config()
 
     print("Connecting to database...")
@@ -177,21 +196,21 @@ def main():
 
         # Track results
         inference_results = {
-            'foul_lookback': 0,
-            'athlete_previous': 0,
-            'athlete_next': 0,
-            'home_guess': 0,
-            'failed': 0
+            "foul_lookback": 0,
+            "athlete_previous": 0,
+            "athlete_next": 0,
+            "home_guess": 0,
+            "failed": 0,
         }
 
         updates = []
 
         # Process each shot
         for i, shot in enumerate(shots, 1):
-            shot_id = shot['id']
-            game_id = shot['game_id']
-            seq = shot['sequence_number']
-            type_text = (shot['type_text'] or 'No Shot')[:30]
+            shot_id = shot["id"]
+            game_id = shot["game_id"]
+            seq = shot["sequence_number"]
+            type_text = (shot["type_text"] or "No Shot")[:30]
 
             # Infer team_id
             inferred_team_id, method = infer_team_id(conn, shot)
@@ -206,7 +225,9 @@ def main():
 
             # Print progress
             if i <= 10 or i % 10 == 0 or i == len(shots):
-                print(f"[{i:2d}/{len(shots)}] Game {game_id} seq={seq} {type_text:30s} {status}")
+                print(
+                    f"[{i:2d}/{len(shots)}] Game {game_id} seq={seq} {type_text:30s} {status}"
+                )
 
         print("\n" + "=" * 80)
         print("Inference Summary:")
@@ -227,12 +248,14 @@ def main():
         # Ask for confirmation
         print("\nPreview of first 5 updates:")
         for shot_id, team_id, method in updates[:5]:
-            shot = next(s for s in shots if s['id'] == shot_id)
-            print(f"  Shot {shot_id}: game={shot['game_id']}, team_id={team_id} (via {method})")
+            shot = next(s for s in shots if s["id"] == shot_id)
+            print(
+                f"  Shot {shot_id}: game={shot['game_id']}, team_id={team_id} (via {method})"
+            )
 
         response = input("\nProceed with updates? (yes/no): ").strip().lower()
 
-        if response != 'yes':
+        if response != "yes":
             print("❌ Update cancelled by user")
             conn.rollback()
             return
@@ -256,7 +279,9 @@ def main():
         else:
             print(f"\n⚠️  {len(remaining)} shots still need manual review:")
             for shot in remaining[:5]:
-                print(f"   Shot {shot['id']}: game={shot['game_id']}, athlete={shot['athlete_id_1']}")
+                print(
+                    f"   Shot {shot['id']}: game={shot['game_id']}, athlete={shot['athlete_id_1']}"
+                )
 
     except Exception as e:
         print(f"\n❌ Error: {e}")
@@ -268,5 +293,5 @@ def main():
         print("\nDatabase connection closed")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

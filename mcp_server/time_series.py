@@ -475,8 +475,7 @@ class TimeSeriesAnalyzer:
         # Validate data type and shape
         if not isinstance(data, pd.DataFrame):
             raise InvalidDataError(
-                "Data must be a pandas DataFrame",
-                value=type(data).__name__
+                "Data must be a pandas DataFrame", value=type(data).__name__
             )
 
         validate_data_shape(data, min_rows=30)  # Minimum for time series analysis
@@ -502,7 +501,7 @@ class TimeSeriesAnalyzer:
             raise InvalidDataError(
                 f"Target column '{target_column}' not found in data",
                 value=target_column,
-                available_columns=list(data.columns)
+                available_columns=list(data.columns),
             )
 
         # Set up time index
@@ -854,7 +853,7 @@ class TimeSeriesAnalyzer:
             raise InvalidParameterError(
                 "ARIMA order must be a tuple of 3 integers (p, d, q)",
                 parameter="order",
-                value=order
+                value=order,
             )
 
         p, d, q = order
@@ -862,14 +861,14 @@ class TimeSeriesAnalyzer:
             raise InvalidParameterError(
                 "ARIMA order values must be non-negative",
                 parameter="order",
-                value=order
+                value=order,
             )
 
         if p + d + q == 0:
             raise InvalidParameterError(
                 "At least one ARIMA parameter must be > 0",
                 parameter="order",
-                value=order
+                value=order,
             )
 
         series_clean = self.series.dropna()
@@ -878,7 +877,7 @@ class TimeSeriesAnalyzer:
             raise InsufficientDataError(
                 "Need at least 30 observations for ARIMA",
                 required=30,
-                actual=len(series_clean)
+                actual=len(series_clean),
             )
 
         # Fit ARIMA model
@@ -898,7 +897,7 @@ class TimeSeriesAnalyzer:
             raise ModelFitError(
                 f"ARIMA model fitting failed with order={order}",
                 model_type="ARIMA",
-                reason=str(e)
+                reason=str(e),
             ) from e
 
         result = ARIMAModelResult(
@@ -2109,8 +2108,8 @@ class TimeSeriesAnalyzer:
             lb_result = acorr_ljungbox(residuals_clean, lags=lags, return_df=False)
             # acorr_ljungbox returns DataFrame even with return_df=False in newer statsmodels
             if isinstance(lb_result, pd.DataFrame):
-                lb_stat = float(lb_result['lb_stat'].iloc[-1])
-                lb_pval = float(lb_result['lb_pvalue'].iloc[-1])
+                lb_stat = float(lb_result["lb_stat"].iloc[-1])
+                lb_pval = float(lb_result["lb_pvalue"].iloc[-1])
             else:
                 # Older statsmodels returns tuple
                 lb_stat = float(lb_result[0][-1])
@@ -2149,8 +2148,8 @@ class TimeSeriesAnalyzer:
             arch_lb = acorr_ljungbox(squared_resid, lags=lags, return_df=False)
             # acorr_ljungbox returns DataFrame even with return_df=False in newer statsmodels
             if isinstance(arch_lb, pd.DataFrame):
-                arch_stat = float(arch_lb['lb_stat'].iloc[-1])
-                arch_pval = float(arch_lb['lb_pvalue'].iloc[-1])
+                arch_stat = float(arch_lb["lb_stat"].iloc[-1])
+                arch_pval = float(arch_lb["lb_pvalue"].iloc[-1])
             else:
                 # Older statsmodels returns tuple
                 arch_stat = float(arch_lb[0][-1])
@@ -2505,7 +2504,9 @@ class TimeSeriesAnalyzer:
                     # If test stat > critical value, reject null (parameter stability)
                     critical_values = hansen_result[1]
                     # Use the 5% critical value (often the middle entry, but use max to be conservative)
-                    crit_val_5pct = float(critical_values['crit'][-1])  # Most conservative
+                    crit_val_5pct = float(
+                        critical_values["crit"][-1]
+                    )  # Most conservative
                     hansen_significant = hansen_stat > crit_val_5pct
                     # Approximate p-value: no exact p-value, set to 0.05 if borderline
                     hansen_p_value = 0.049 if hansen_significant else 0.051

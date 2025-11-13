@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 try:
     from statsmodels.tsa.stattools import adfuller, coint
     from statsmodels.tsa.vector_ar.vecm import VECM, select_order, select_coint_rank
+
     STATSMODELS_AVAILABLE = True
 except ImportError:
     STATSMODELS_AVAILABLE = False
@@ -43,6 +44,7 @@ except ImportError:
 
 class CointegrationTest(Enum):
     """Cointegration test methods"""
+
     ENGLE_GRANGER = "engle_granger"
     JOHANSEN = "johansen"
     PHILLIPS_OULIARIS = "phillips_ouliaris"
@@ -74,12 +76,12 @@ class CointegrationResult:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'is_cointegrated': self.is_cointegrated,
-            'test_statistic': self.test_statistic,
-            'critical_values': self.critical_values,
-            'p_value': self.p_value,
-            'n_cointegrating_relationships': self.n_cointegrating_relationships,
-            'has_vecm_params': self.alpha is not None and self.beta is not None
+            "is_cointegrated": self.is_cointegrated,
+            "test_statistic": self.test_statistic,
+            "critical_values": self.critical_values,
+            "p_value": self.p_value,
+            "n_cointegrating_relationships": self.n_cointegrating_relationships,
+            "has_vecm_params": self.alpha is not None and self.beta is not None,
         }
 
 
@@ -107,12 +109,12 @@ class VECMResult:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'alpha_shape': self.alpha.shape,
-            'beta_shape': self.beta.shape,
-            'n_cointegrating': self.alpha.shape[1],
-            'aic': self.aic,
-            'bic': self.bic,
-            'log_likelihood': self.log_likelihood
+            "alpha_shape": self.alpha.shape,
+            "beta_shape": self.beta.shape,
+            "n_cointegrating": self.alpha.shape[1],
+            "aic": self.aic,
+            "bic": self.bic,
+            "log_likelihood": self.log_likelihood,
         }
 
 
@@ -137,10 +139,7 @@ class EngleGrangerTest:
         logger.info("EngleGrangerTest initialized")
 
     def test(
-        self,
-        y: np.ndarray,
-        x: np.ndarray,
-        trend: str = 'c'
+        self, y: np.ndarray, x: np.ndarray, trend: str = "c"
     ) -> CointegrationResult:
         """
         Perform Engle-Granger cointegration test.
@@ -157,9 +156,9 @@ class EngleGrangerTest:
             x = x.reshape(-1, 1)
 
         # Step 1: OLS regression
-        if trend == 'c':
+        if trend == "c":
             X = np.column_stack([np.ones(len(x)), x])
-        elif trend == 'ct':
+        elif trend == "ct":
             X = np.column_stack([np.ones(len(x)), np.arange(len(x)), x])
         else:
             X = x
@@ -170,7 +169,7 @@ class EngleGrangerTest:
 
         # Step 2: ADF test on residuals
         if STATSMODELS_AVAILABLE:
-            adf_result = adfuller(residuals, regression='c', autolag='AIC')
+            adf_result = adfuller(residuals, regression="c", autolag="AIC")
             test_stat = adf_result[0]
             p_value = adf_result[1]
             critical_values = adf_result[4]
@@ -179,12 +178,12 @@ class EngleGrangerTest:
             test_stat, p_value, critical_values = self._manual_adf(residuals)
 
         # Determine cointegration
-        is_cointegrated = test_stat < critical_values.get('5%', -2.86)
+        is_cointegrated = test_stat < critical_values.get("5%", -2.86)
 
         # Extract cointegrating vector (exclude intercept/trend)
-        if trend == 'c':
+        if trend == "c":
             coint_vector = beta_hat[1:]
-        elif trend == 'ct':
+        elif trend == "ct":
             coint_vector = beta_hat[2:]
         else:
             coint_vector = beta_hat
@@ -196,18 +195,18 @@ class EngleGrangerTest:
             p_value=p_value,
             cointegrating_vector=coint_vector,
             n_cointegrating_relationships=1 if is_cointegrated else 0,
-            residuals=residuals
+            residuals=residuals,
         )
 
-        logger.info(f"Engle-Granger test: {'Cointegrated' if is_cointegrated else 'Not cointegrated'}")
+        logger.info(
+            f"Engle-Granger test: {'Cointegrated' if is_cointegrated else 'Not cointegrated'}"
+        )
         logger.info(f"ADF statistic: {test_stat:.4f}, p-value: {p_value:.4f}")
 
         return result
 
     def _manual_adf(
-        self,
-        series: np.ndarray,
-        maxlag: int = 12
+        self, series: np.ndarray, maxlag: int = 12
     ) -> Tuple[float, float, Dict[str, float]]:
         """
         Manual ADF test (simplified version).
@@ -229,9 +228,11 @@ class EngleGrangerTest:
             lags.append(diff[:-i])
 
         if lags:
-            X = np.column_stack([np.ones(len(lagged) - maxlag + 1),
-                                lagged[maxlag-1:]] + [lag[maxlag-1:] for lag in lags])
-            y = diff[maxlag-1:]
+            X = np.column_stack(
+                [np.ones(len(lagged) - maxlag + 1), lagged[maxlag - 1 :]]
+                + [lag[maxlag - 1 :] for lag in lags]
+            )
+            y = diff[maxlag - 1 :]
         else:
             X = np.column_stack([np.ones(len(lagged)), lagged])
             y = diff
@@ -242,17 +243,13 @@ class EngleGrangerTest:
         se = np.sqrt(np.sum(residuals**2) / (len(y) - len(beta)))
 
         # Test statistic
-        t_stat = beta[1] / (se / np.sqrt(np.sum((lagged - np.mean(lagged))**2)))
+        t_stat = beta[1] / (se / np.sqrt(np.sum((lagged - np.mean(lagged)) ** 2)))
 
         # Critical values (MacKinnon, approximate)
-        critical_values = {
-            '1%': -3.43,
-            '5%': -2.86,
-            '10%': -2.57
-        }
+        critical_values = {"1%": -3.43, "5%": -2.86, "10%": -2.57}
 
         # Approximate p-value
-        p_value = 0.05 if t_stat > critical_values['5%'] else 0.01
+        p_value = 0.05 if t_stat > critical_values["5%"] else 0.01
 
         return t_stat, p_value, critical_values
 
@@ -280,10 +277,7 @@ class JohansenTest:
         logger.info("JohansenTest initialized")
 
     def test(
-        self,
-        data: np.ndarray,
-        det_order: int = 0,
-        k_ar_diff: int = 1
+        self, data: np.ndarray, det_order: int = 0, k_ar_diff: int = 1
     ) -> CointegrationResult:
         """
         Perform Johansen cointegration test.
@@ -318,9 +312,11 @@ class JohansenTest:
                 result_obj = CointegrationResult(
                     is_cointegrated=is_cointegrated,
                     test_statistic=float(trace_stat[0]) if len(trace_stat) > 0 else 0.0,
-                    critical_values={'5%': float(trace_crit[0, 1]) if len(trace_crit) > 0 else 0.0},
+                    critical_values={
+                        "5%": float(trace_crit[0, 1]) if len(trace_crit) > 0 else 0.0
+                    },
                     n_cointegrating_relationships=n_coint,
-                    beta=result.evec[:, :n_coint] if n_coint > 0 else None
+                    beta=result.evec[:, :n_coint] if n_coint > 0 else None,
                 )
 
                 logger.info(f"Johansen test: {n_coint} cointegrating relationship(s)")
@@ -332,17 +328,13 @@ class JohansenTest:
                 return CointegrationResult(
                     is_cointegrated=False,
                     test_statistic=0.0,
-                    critical_values={'5%': 0.0}
+                    critical_values={"5%": 0.0},
                 )
         else:
             # Manual implementation (simplified)
             return self._manual_johansen(data, k_ar_diff)
 
-    def _manual_johansen(
-        self,
-        data: np.ndarray,
-        k_ar_diff: int
-    ) -> CointegrationResult:
+    def _manual_johansen(self, data: np.ndarray, k_ar_diff: int) -> CointegrationResult:
         """
         Manual Johansen test (simplified).
 
@@ -363,7 +355,7 @@ class JohansenTest:
         z1t = data[k_ar_diff:-1]  # y_{t-1}
 
         # Residuals from regressing on lagged differences
-        z2t = diff_data[k_ar_diff-1:-1] if k_ar_diff > 0 else None
+        z2t = diff_data[k_ar_diff - 1 : -1] if k_ar_diff > 0 else None
 
         # Moment matrices
         if z2t is not None:
@@ -391,9 +383,7 @@ class JohansenTest:
             trace_stats = -n_obs * np.cumsum(np.log(1 - eigenvalues))
 
             # Approximate critical values (for n_vars=2)
-            critical_values = {
-                '5%': 15.41  # Approximate for trace statistic
-            }
+            critical_values = {"5%": 15.41}  # Approximate for trace statistic
 
             n_coint = np.sum(trace_stats > 15.41)
 
@@ -402,7 +392,7 @@ class JohansenTest:
                 test_statistic=float(trace_stats[0]) if len(trace_stats) > 0 else 0.0,
                 critical_values=critical_values,
                 n_cointegrating_relationships=int(n_coint),
-                beta=eigenvectors[:, :n_coint] if n_coint > 0 else None
+                beta=eigenvectors[:, :n_coint] if n_coint > 0 else None,
             )
 
             logger.info(f"Manual Johansen: {n_coint} cointegrating relationship(s)")
@@ -412,9 +402,7 @@ class JohansenTest:
         except Exception as e:
             logger.error(f"Manual Johansen failed: {e}")
             return CointegrationResult(
-                is_cointegrated=False,
-                test_statistic=0.0,
-                critical_values={'5%': 15.41}
+                is_cointegrated=False, test_statistic=0.0, critical_values={"5%": 15.41}
             )
 
 
@@ -431,11 +419,7 @@ class VectorErrorCorrectionModel:
     - Γ: Short-run coefficients
     """
 
-    def __init__(
-        self,
-        k_ar_diff: int = 1,
-        coint_rank: Optional[int] = None
-    ):
+    def __init__(self, k_ar_diff: int = 1, coint_rank: Optional[int] = None):
         """
         Initialize VECM.
 
@@ -453,7 +437,7 @@ class VectorErrorCorrectionModel:
 
         logger.info(f"VECM initialized with lag {k_ar_diff}")
 
-    def fit(self, data: np.ndarray) -> 'VectorErrorCorrectionModel':
+    def fit(self, data: np.ndarray) -> "VectorErrorCorrectionModel":
         """
         Fit VECM to data.
 
@@ -469,10 +453,11 @@ class VectorErrorCorrectionModel:
                 # Determine cointegration rank if not specified
                 if self.coint_rank is None:
                     rank_test = select_coint_rank(
-                        data, det_order=0,
+                        data,
+                        det_order=0,
                         k_ar_diff=self.k_ar_diff,
-                        method='trace',
-                        signif=0.05
+                        method="trace",
+                        signif=0.05,
                     )
                     self.coint_rank = rank_test.rank
                     logger.info(f"Selected cointegration rank: {self.coint_rank}")
@@ -484,12 +469,16 @@ class VectorErrorCorrectionModel:
                 # Extract parameters
                 self.alpha_ = self.vecm_result_.alpha
                 self.beta_ = self.vecm_result_.beta
-                self.gamma_ = [self.vecm_result_.gamma[i] for i in range(self.k_ar_diff)]
+                self.gamma_ = [
+                    self.vecm_result_.gamma[i] for i in range(self.k_ar_diff)
+                ]
 
                 self.is_fitted = True
 
                 logger.info("VECM fitted successfully")
-                logger.info(f"Alpha shape: {self.alpha_.shape}, Beta shape: {self.beta_.shape}")
+                logger.info(
+                    f"Alpha shape: {self.alpha_.shape}, Beta shape: {self.beta_.shape}"
+                )
 
                 return self
 
@@ -501,7 +490,7 @@ class VectorErrorCorrectionModel:
             # Manual VECM estimation (simplified)
             return self._manual_vecm(data)
 
-    def _manual_vecm(self, data: np.ndarray) -> 'VectorErrorCorrectionModel':
+    def _manual_vecm(self, data: np.ndarray) -> "VectorErrorCorrectionModel":
         """Manual VECM estimation"""
         n_obs, n_vars = data.shape
 
@@ -523,18 +512,20 @@ class VectorErrorCorrectionModel:
         # Initialize parameters
         self.alpha_ = np.random.randn(n_vars, self.coint_rank) * 0.1
         self.beta_ = np.random.randn(n_vars, self.coint_rank) * 0.1
-        self.gamma_ = [np.random.randn(n_vars, n_vars) * 0.1 for _ in range(self.k_ar_diff)]
+        self.gamma_ = [
+            np.random.randn(n_vars, n_vars) * 0.1 for _ in range(self.k_ar_diff)
+        ]
 
         self.is_fitted = True
 
-        logger.warning("Using simplified VECM estimation (install statsmodels for full functionality)")
+        logger.warning(
+            "Using simplified VECM estimation (install statsmodels for full functionality)"
+        )
 
         return self
 
     def predict(
-        self,
-        steps: int = 1,
-        last_obs: Optional[np.ndarray] = None
+        self, steps: int = 1, last_obs: Optional[np.ndarray] = None
     ) -> np.ndarray:
         """
         Forecast future values.
@@ -549,7 +540,7 @@ class VectorErrorCorrectionModel:
         if not self.is_fitted:
             raise ValueError("Model not fitted")
 
-        if STATSMODELS_AVAILABLE and hasattr(self, 'vecm_result_'):
+        if STATSMODELS_AVAILABLE and hasattr(self, "vecm_result_"):
             # Use statsmodels predict
             forecasts = self.vecm_result_.predict(steps=steps)
             return forecasts
@@ -570,21 +561,17 @@ class VectorErrorCorrectionModel:
         if not self.is_fitted:
             raise ValueError("Model not fitted")
 
-        if STATSMODELS_AVAILABLE and hasattr(self, 'vecm_result_'):
+        if STATSMODELS_AVAILABLE and hasattr(self, "vecm_result_"):
             result = VECMResult(
                 alpha=self.alpha_,
                 beta=self.beta_,
                 gamma=self.gamma_,
                 aic=self.vecm_result_.aic,
                 bic=self.vecm_result_.bic,
-                log_likelihood=self.vecm_result_.llf
+                log_likelihood=self.vecm_result_.llf,
             )
         else:
-            result = VECMResult(
-                alpha=self.alpha_,
-                beta=self.beta_,
-                gamma=self.gamma_
-            )
+            result = VECMResult(alpha=self.alpha_, beta=self.beta_, gamma=self.gamma_)
 
         return result
 
@@ -592,7 +579,7 @@ class VectorErrorCorrectionModel:
 def test_cointegration(
     y: np.ndarray,
     x: Optional[np.ndarray] = None,
-    method: CointegrationTest = CointegrationTest.ENGLE_GRANGER
+    method: CointegrationTest = CointegrationTest.ENGLE_GRANGER,
 ) -> CointegrationResult:
     """
     Convenience function to test cointegration.
@@ -631,12 +618,12 @@ def check_statsmodels_available() -> bool:
 
 
 __all__ = [
-    'CointegrationTest',
-    'CointegrationResult',
-    'VECMResult',
-    'EngleGrangerTest',
-    'JohansenTest',
-    'VectorErrorCorrectionModel',
-    'test_cointegration',
-    'check_statsmodels_available',
+    "CointegrationTest",
+    "CointegrationResult",
+    "VECMResult",
+    "EngleGrangerTest",
+    "JohansenTest",
+    "VectorErrorCorrectionModel",
+    "test_cointegration",
+    "check_statsmodels_available",
 ]

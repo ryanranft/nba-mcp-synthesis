@@ -46,17 +46,19 @@ class GameState:
 
     def to_vector(self) -> np.ndarray:
         """Convert state to vector representation"""
-        return np.array([
-            self.home_score,
-            self.away_score,
-            self.home_score_rate,
-            self.away_score_rate,
-            self.home_win_prob,
-            self.time_remaining
-        ])
+        return np.array(
+            [
+                self.home_score,
+                self.away_score,
+                self.home_score_rate,
+                self.away_score_rate,
+                self.home_win_prob,
+                self.time_remaining,
+            ]
+        )
 
     @classmethod
-    def from_vector(cls, vec: np.ndarray, **kwargs) -> 'GameState':
+    def from_vector(cls, vec: np.ndarray, **kwargs) -> "GameState":
         """Create GameState from vector"""
         return cls(
             home_score=float(vec[0]),
@@ -65,21 +67,21 @@ class GameState:
             away_score_rate=float(vec[3]),
             home_win_prob=float(vec[4]),
             time_remaining=float(vec[5]),
-            **kwargs
+            **kwargs,
         )
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'home_score': self.home_score,
-            'away_score': self.away_score,
-            'home_score_rate': self.home_score_rate,
-            'away_score_rate': self.away_score_rate,
-            'home_win_prob': self.home_win_prob,
-            'time_remaining': self.time_remaining,
-            'quarter': self.quarter,
-            'possession': self.possession,
-            'last_update': self.last_update.isoformat(),
+            "home_score": self.home_score,
+            "away_score": self.away_score,
+            "home_score_rate": self.home_score_rate,
+            "away_score_rate": self.away_score_rate,
+            "home_win_prob": self.home_win_prob,
+            "time_remaining": self.time_remaining,
+            "quarter": self.quarter,
+            "possession": self.possession,
+            "last_update": self.last_update.isoformat(),
         }
 
 
@@ -167,13 +169,13 @@ class StreamingKalmanFilter:
         self.H[2, 5] = 1.0  # Observe time_remaining
 
         # Process noise covariance (Q)
-        self.Q = np.eye(self.state_dim) * (self.config.process_noise_std ** 2)
+        self.Q = np.eye(self.state_dim) * (self.config.process_noise_std**2)
 
         # Measurement noise covariance (R)
-        self.R = np.eye(self.obs_dim) * (self.config.measurement_noise_std ** 2)
+        self.R = np.eye(self.obs_dim) * (self.config.measurement_noise_std**2)
 
         # Initial covariance (P)
-        self.P_init = np.eye(self.state_dim) * (self.config.initial_uncertainty_std ** 2)
+        self.P_init = np.eye(self.state_dim) * (self.config.initial_uncertainty_std**2)
 
     def initialize(
         self,
@@ -182,7 +184,7 @@ class StreamingKalmanFilter:
         time_remaining: float = 48.0,
         home_score_rate: Optional[float] = None,
         away_score_rate: Optional[float] = None,
-        quarter: int = 1
+        quarter: int = 1,
     ) -> GameState:
         """
         Initialize filter with starting game state.
@@ -216,7 +218,7 @@ class StreamingKalmanFilter:
             home_win_prob=home_win_prob,
             time_remaining=time_remaining,
             quarter=quarter,
-            uncertainty=self.P_init.copy()
+            uncertainty=self.P_init.copy(),
         )
 
         self.covariance = self.P_init.copy()
@@ -271,16 +273,12 @@ class StreamingKalmanFilter:
             x_pred,
             uncertainty=P_pred,
             quarter=self.state.quarter,
-            possession=self.state.possession
+            possession=self.state.possession,
         )
 
         return predicted_state
 
-    def update(
-        self,
-        observation: Dict[str, float],
-        dt: float = 1.0
-    ) -> GameState:
+    def update(self, observation: Dict[str, float], dt: float = 1.0) -> GameState:
         """
         Update state with new observation.
 
@@ -294,9 +292,9 @@ class StreamingKalmanFilter:
         if self.state is None:
             # Auto-initialize if not done
             self.initialize(
-                home_score=observation.get('home_score', 0),
-                away_score=observation.get('away_score', 0),
-                time_remaining=observation.get('time_remaining', 48.0)
+                home_score=observation.get("home_score", 0),
+                away_score=observation.get("away_score", 0),
+                time_remaining=observation.get("time_remaining", 48.0),
             )
 
         # Predict step
@@ -305,11 +303,13 @@ class StreamingKalmanFilter:
         P_pred = predicted_state.uncertainty
 
         # Create observation vector
-        z = np.array([
-            observation.get('home_score', x_pred[0]),
-            observation.get('away_score', x_pred[1]),
-            observation.get('time_remaining', x_pred[5])
-        ])
+        z = np.array(
+            [
+                observation.get("home_score", x_pred[0]),
+                observation.get("away_score", x_pred[1]),
+                observation.get("time_remaining", x_pred[5]),
+            ]
+        )
 
         # Update step (Kalman gain)
         try:
@@ -350,8 +350,8 @@ class StreamingKalmanFilter:
         self.state = GameState.from_vector(
             x_upd,
             uncertainty=P_upd,
-            quarter=observation.get('quarter', self.state.quarter),
-            possession=observation.get('possession', self.state.possession)
+            quarter=observation.get("quarter", self.state.quarter),
+            possession=observation.get("possession", self.state.possession),
         )
         self.covariance = P_upd
 
@@ -386,14 +386,20 @@ class StreamingKalmanFilter:
         final_away_std = np.sqrt(final_state.uncertainty[1, 1])
 
         statistics = {
-            'home_score_mean': float(final_state.home_score),
-            'away_score_mean': float(final_state.away_score),
-            'home_score_std': float(final_home_std),
-            'away_score_std': float(final_away_std),
-            'home_win_prob': float(final_state.home_win_prob),
-            'score_differential_mean': float(final_state.home_score - final_state.away_score),
-            'confidence_95_lower': float(final_state.home_score - 1.96 * final_home_std),
-            'confidence_95_upper': float(final_state.home_score + 1.96 * final_home_std),
+            "home_score_mean": float(final_state.home_score),
+            "away_score_mean": float(final_state.away_score),
+            "home_score_std": float(final_home_std),
+            "away_score_std": float(final_away_std),
+            "home_win_prob": float(final_state.home_win_prob),
+            "score_differential_mean": float(
+                final_state.home_score - final_state.away_score
+            ),
+            "confidence_95_lower": float(
+                final_state.home_score - 1.96 * final_home_std
+            ),
+            "confidence_95_upper": float(
+                final_state.home_score + 1.96 * final_home_std
+            ),
         }
 
         return final_state.home_score, final_state.away_score, statistics
@@ -402,7 +408,9 @@ class StreamingKalmanFilter:
         """Get current state"""
         return self.state
 
-    def get_confidence_interval(self, confidence: float = 0.95) -> Dict[str, Tuple[float, float]]:
+    def get_confidence_interval(
+        self, confidence: float = 0.95
+    ) -> Dict[str, Tuple[float, float]]:
         """
         Get confidence intervals for state variables.
 
@@ -416,45 +424,48 @@ class StreamingKalmanFilter:
             return {}
 
         from scipy.stats import norm
+
         z_score = norm.ppf((1 + confidence) / 2)
 
         std_devs = np.sqrt(np.diag(self.covariance))
         state_vec = self.state.to_vector()
 
         return {
-            'home_score': (
+            "home_score": (
                 float(state_vec[0] - z_score * std_devs[0]),
-                float(state_vec[0] + z_score * std_devs[0])
+                float(state_vec[0] + z_score * std_devs[0]),
             ),
-            'away_score': (
+            "away_score": (
                 float(state_vec[1] - z_score * std_devs[1]),
-                float(state_vec[1] + z_score * std_devs[1])
+                float(state_vec[1] + z_score * std_devs[1]),
             ),
-            'home_score_rate': (
+            "home_score_rate": (
                 float(state_vec[2] - z_score * std_devs[2]),
-                float(state_vec[2] + z_score * std_devs[2])
+                float(state_vec[2] + z_score * std_devs[2]),
             ),
-            'away_score_rate': (
+            "away_score_rate": (
                 float(state_vec[3] - z_score * std_devs[3]),
-                float(state_vec[3] + z_score * std_devs[3])
+                float(state_vec[3] + z_score * std_devs[3]),
             ),
-            'home_win_prob': (
+            "home_win_prob": (
                 float(max(0, state_vec[4] - z_score * std_devs[4])),
-                float(min(1, state_vec[4] + z_score * std_devs[4]))
+                float(min(1, state_vec[4] + z_score * std_devs[4])),
             ),
         }
 
     def get_statistics(self) -> Dict[str, Any]:
         """Get filter statistics"""
         if self.state is None:
-            return {'initialized': False}
+            return {"initialized": False}
 
         return {
-            'initialized': True,
-            'update_count': self.update_count,
-            'current_state': self.state.to_dict(),
-            'uncertainty_trace': float(np.trace(self.covariance)) if self.covariance is not None else 0,
-            'history_length': len(self.state_history),
+            "initialized": True,
+            "update_count": self.update_count,
+            "current_state": self.state.to_dict(),
+            "uncertainty_trace": (
+                float(np.trace(self.covariance)) if self.covariance is not None else 0
+            ),
+            "history_length": len(self.state_history),
         }
 
     def _score_diff_to_prob(self, score_diff: float, time_factor: float) -> float:

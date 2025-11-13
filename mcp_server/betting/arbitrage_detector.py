@@ -41,7 +41,7 @@ class ArbitrageOpportunity:
         side_b: str,
         odds_a: float,
         odds_b: float,
-        arb_percentage: float
+        arb_percentage: float,
     ):
         self.event_id = event_id
         self.matchup = matchup
@@ -85,17 +85,17 @@ class ArbitrageOpportunity:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for storage/serialization"""
         return {
-            'event_id': self.event_id,
-            'matchup': self.matchup,
-            'market_type': self.market_type,
-            'bookmaker_a': self.bookmaker_a,
-            'bookmaker_b': self.bookmaker_b,
-            'side_a': self.side_a,
-            'side_b': self.side_b,
-            'odds_a': self.odds_a,
-            'odds_b': self.odds_b,
-            'arb_percentage': self.arb_percentage,
-            'detected_at': self.detected_at.isoformat()
+            "event_id": self.event_id,
+            "matchup": self.matchup,
+            "market_type": self.market_type,
+            "bookmaker_a": self.bookmaker_a,
+            "bookmaker_b": self.bookmaker_b,
+            "side_a": self.side_a,
+            "side_b": self.side_b,
+            "odds_a": self.odds_a,
+            "odds_b": self.odds_b,
+            "arb_percentage": self.arb_percentage,
+            "detected_at": self.detected_at.isoformat(),
         }
 
 
@@ -114,11 +114,7 @@ class ArbitrageDetector:
             print(f"Guaranteed profit: ${stakes[2]:.2f}")
     """
 
-    def __init__(
-        self,
-        min_profit: float = 0.01,
-        max_age_minutes: int = 5
-    ):
+    def __init__(self, min_profit: float = 0.01, max_age_minutes: int = 5):
         """
         Initialize arbitrage detector
 
@@ -133,9 +129,7 @@ class ArbitrageDetector:
         logger.info(f"ArbitrageDetector initialized: min_profit={min_profit:.2%}")
 
     def find_arbitrage_opportunities(
-        self,
-        market: str = 'h2h',
-        bookmakers: Optional[List[str]] = None
+        self, market: str = "h2h", bookmakers: Optional[List[str]] = None
     ) -> List[ArbitrageOpportunity]:
         """
         Find all arbitrage opportunities for today's games
@@ -149,8 +143,13 @@ class ArbitrageDetector:
         """
         if bookmakers is None:
             bookmakers = [
-                'draftkings', 'fanduel', 'betmgm', 'pinnacle',
-                'caesars', 'betrivers', 'bovada'
+                "draftkings",
+                "fanduel",
+                "betmgm",
+                "pinnacle",
+                "caesars",
+                "betrivers",
+                "bovada",
             ]
 
         opportunities = []
@@ -160,14 +159,12 @@ class ArbitrageDetector:
 
         for game in games:
             try:
-                event_id = game['event_id']
+                event_id = game["event_id"]
                 matchup = f"{game['away_team']} @ {game['home_team']}"
 
                 # Get odds for this game
                 odds = self.odds_connector.get_latest_odds_for_game(
-                    event_id,
-                    market=market,
-                    bookmaker_filter=bookmakers
+                    event_id, market=market, bookmaker_filter=bookmakers
                 )
 
                 if not odds:
@@ -178,10 +175,7 @@ class ArbitrageDetector:
 
                 # Find arbitrage across bookmakers
                 arbs = self._detect_arbitrage_in_game(
-                    event_id,
-                    matchup,
-                    market,
-                    odds_by_bookmaker
+                    event_id, matchup, market, odds_by_bookmaker
                 )
 
                 opportunities.extend(arbs)
@@ -194,8 +188,7 @@ class ArbitrageDetector:
         return opportunities
 
     def _group_odds_by_bookmaker(
-        self,
-        odds: List[Dict[str, Any]]
+        self, odds: List[Dict[str, Any]]
     ) -> Dict[str, Dict[str, float]]:
         """
         Group odds by bookmaker and outcome
@@ -209,9 +202,9 @@ class ArbitrageDetector:
         grouped = {}
 
         for odd in odds:
-            bookmaker = odd['bookmaker']
-            outcome = odd['outcome_name']
-            price = odd['price']
+            bookmaker = odd["bookmaker"]
+            outcome = odd["outcome_name"]
+            price = odd["price"]
 
             if bookmaker not in grouped:
                 grouped[bookmaker] = {}
@@ -225,7 +218,7 @@ class ArbitrageDetector:
         event_id: str,
         matchup: str,
         market: str,
-        odds_by_bookmaker: Dict[str, Dict[str, float]]
+        odds_by_bookmaker: Dict[str, Dict[str, float]],
     ) -> List[ArbitrageOpportunity]:
         """
         Detect arbitrage opportunities for a single game
@@ -263,8 +256,10 @@ class ArbitrageDetector:
                     continue
 
                 # Check if both bookmakers have both outcomes
-                if (outcome_a not in odds_by_bookmaker[book_a] or
-                    outcome_b not in odds_by_bookmaker[book_b]):
+                if (
+                    outcome_a not in odds_by_bookmaker[book_a]
+                    or outcome_b not in odds_by_bookmaker[book_b]
+                ):
                     continue
 
                 # Get odds
@@ -288,7 +283,7 @@ class ArbitrageDetector:
                         side_b=outcome_b,
                         odds_a=odds_a_on_a,
                         odds_b=odds_b_on_b,
-                        arb_percentage=arb_pct
+                        arb_percentage=arb_pct,
                     )
                     opportunities.append(opp)
                     logger.info(f"Arbitrage found: {matchup} - {arb_pct:.2%} profit")
@@ -296,9 +291,7 @@ class ArbitrageDetector:
         return opportunities
 
     def _calculate_arbitrage_percentage(
-        self,
-        american_odds_a: float,
-        american_odds_b: float
+        self, american_odds_a: float, american_odds_b: float
     ) -> float:
         """
         Calculate arbitrage profit percentage
@@ -325,8 +318,7 @@ class ArbitrageDetector:
         return arb_pct
 
     def validate_arbitrage(
-        self,
-        opportunity: ArbitrageOpportunity
+        self, opportunity: ArbitrageOpportunity
     ) -> Tuple[bool, Optional[str]]:
         """
         Validate arbitrage opportunity is still valid
@@ -345,8 +337,7 @@ class ArbitrageDetector:
         # Re-fetch current odds
         try:
             current_odds = self.odds_connector.get_latest_odds_for_game(
-                opportunity.event_id,
-                market=opportunity.market_type
+                opportunity.event_id, market=opportunity.market_type
             )
 
             if not current_odds:
@@ -355,8 +346,12 @@ class ArbitrageDetector:
             # Check if arbitrage still exists
             current_odds_dict = self._group_odds_by_bookmaker(current_odds)
 
-            odds_a = current_odds_dict.get(opportunity.bookmaker_a, {}).get(opportunity.side_a)
-            odds_b = current_odds_dict.get(opportunity.bookmaker_b, {}).get(opportunity.side_b)
+            odds_a = current_odds_dict.get(opportunity.bookmaker_a, {}).get(
+                opportunity.side_a
+            )
+            odds_b = current_odds_dict.get(opportunity.bookmaker_b, {}).get(
+                opportunity.side_b
+            )
 
             if odds_a is None or odds_b is None:
                 return False, "One or more bookmakers no longer offering odds"
@@ -364,7 +359,10 @@ class ArbitrageDetector:
             current_arb = self._calculate_arbitrage_percentage(odds_a, odds_b)
 
             if current_arb < self.min_profit:
-                return False, f"Arbitrage closed: {current_arb:.2%} < {self.min_profit:.2%}"
+                return (
+                    False,
+                    f"Arbitrage closed: {current_arb:.2%} < {self.min_profit:.2%}",
+                )
 
             return True, None
 
@@ -372,9 +370,7 @@ class ArbitrageDetector:
             return False, f"Validation error: {str(e)}"
 
     def compare_live_to_pregame(
-        self,
-        event_id: str,
-        pregame_simulation: Dict[str, float]
+        self, event_id: str, pregame_simulation: Dict[str, float]
     ) -> List[Dict[str, Any]]:
         """
         Compare live odds to pregame simulation probabilities
@@ -398,14 +394,14 @@ class ArbitrageDetector:
 
         for team, sim_prob in pregame_simulation.items():
             # Find odds for this team
-            team_odds = [o for o in current_odds if o['outcome_name'] == team]
+            team_odds = [o for o in current_odds if o["outcome_name"] == team]
 
             if not team_odds:
                 continue
 
             # Use best odds available
-            best_odds = max(team_odds, key=lambda x: x['price'])
-            decimal_odds = OddsUtilities.american_to_decimal(best_odds['price'])
+            best_odds = max(team_odds, key=lambda x: x["price"])
+            decimal_odds = OddsUtilities.american_to_decimal(best_odds["price"])
             market_implied_prob = OddsUtilities.decimal_to_implied(decimal_odds)
 
             # Calculate deviation
@@ -413,20 +409,22 @@ class ArbitrageDetector:
 
             # Alert if deviation > 10%
             if deviation > 0.10:
-                alerts.append({
-                    'team': team,
-                    'sim_prob': sim_prob,
-                    'market_prob': market_implied_prob,
-                    'deviation': deviation,
-                    'odds': best_odds['price'],
-                    'bookmaker': best_odds['bookmaker']
-                })
+                alerts.append(
+                    {
+                        "team": team,
+                        "sim_prob": sim_prob,
+                        "market_prob": market_implied_prob,
+                        "deviation": deviation,
+                        "odds": best_odds["price"],
+                        "bookmaker": best_odds["bookmaker"],
+                    }
+                )
 
         return alerts
 
     def close(self):
         """Close database connections"""
-        if hasattr(self, 'odds_connector'):
+        if hasattr(self, "odds_connector"):
             self.odds_connector.close()
 
 
@@ -434,12 +432,13 @@ if __name__ == "__main__":
     # Test arbitrage detection
     import sys
     from pathlib import Path
+
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
     from mcp_server.unified_secrets_manager import load_secrets_hierarchical
 
     # Load secrets
-    load_secrets_hierarchical('nba-mcp-synthesis', 'NBA', 'production')
+    load_secrets_hierarchical("nba-mcp-synthesis", "NBA", "production")
 
     print("🔍 Testing Arbitrage Detector...\n")
 
@@ -464,11 +463,14 @@ if __name__ == "__main__":
             print(f"  Guaranteed profit: ${profit:.2f}\n")
 
         if not opportunities:
-            print("ℹ️  No arbitrage opportunities found (likely no games today or odds are efficient)")
+            print(
+                "ℹ️  No arbitrage opportunities found (likely no games today or odds are efficient)"
+            )
 
     except Exception as e:
         print(f"❌ Error: {e}")
         import traceback
+
         traceback.print_exc()
     finally:
         detector.close()

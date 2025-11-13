@@ -43,7 +43,9 @@ class TestErrorHandlingMonitoringIntegration:
 
         # Verify error was profiled
         stats = profiler.get_summary()
-        assert stats['total_calls'] >= 1, "Function call should be profiled even when it fails"
+        assert (
+            stats["total_calls"] >= 1
+        ), "Function call should be profiled even when it fails"
 
     def test_retry_logic_with_monitoring(self, sample_player_data):
         """Test retry logic is properly monitored"""
@@ -52,12 +54,12 @@ class TestErrorHandlingMonitoringIntegration:
         profiler = get_profiler()
         profiler.reset()
 
-        attempt_count = {'count': 0}
+        attempt_count = {"count": 0}
 
         @profile
         def flaky_function():
-            attempt_count['count'] += 1
-            if attempt_count['count'] < 3:
+            attempt_count["count"] += 1
+            if attempt_count["count"] < 3:
                 raise ConnectionError("Temporary failure")
             return "success"
 
@@ -73,9 +75,9 @@ class TestErrorHandlingMonitoringIntegration:
                 time.sleep(0.01)
 
         # Verify retries were monitored
-        assert attempt_count['count'] == 3, "Should have made 3 attempts"
+        assert attempt_count["count"] == 3, "Should have made 3 attempts"
         stats = profiler.get_summary()
-        assert stats['total_calls'] >= 3, "All retry attempts should be profiled"
+        assert stats["total_calls"] >= 3, "All retry attempts should be profiled"
 
     def test_circuit_breaker_pattern_monitoring(self):
         """Test circuit breaker pattern is properly monitored"""
@@ -84,16 +86,16 @@ class TestErrorHandlingMonitoringIntegration:
         profiler = get_profiler()
         profiler.reset()
 
-        failure_count = {'count': 0}
-        circuit_open = {'open': False}
+        failure_count = {"count": 0}
+        circuit_open = {"open": False}
 
         @profile
         def protected_function():
-            if circuit_open['open']:
+            if circuit_open["open"]:
                 raise Exception("Circuit breaker is open")
 
-            failure_count['count'] += 1
-            if failure_count['count'] < 5:
+            failure_count["count"] += 1
+            if failure_count["count"] < 5:
                 raise ConnectionError("Service unavailable")
             return "success"
 
@@ -106,12 +108,14 @@ class TestErrorHandlingMonitoringIntegration:
                 call_count += 1
             except ConnectionError:
                 call_count += 1
-                if failure_count['count'] >= threshold:
-                    circuit_open['open'] = True
+                if failure_count["count"] >= threshold:
+                    circuit_open["open"] = True
                     break  # Stop after opening circuit
 
         # Verify circuit breaker state is tracked
-        assert circuit_open['open'], "Circuit breaker should be open after threshold failures"
+        assert circuit_open[
+            "open"
+        ], "Circuit breaker should be open after threshold failures"
 
         # Try to call again (should fail immediately with circuit breaker exception)
         circuit_breaker_triggered = False
@@ -126,7 +130,9 @@ class TestErrorHandlingMonitoringIntegration:
 
         # Verify all attempts were profiled
         stats = profiler.get_summary()
-        assert stats['total_calls'] == call_count, f"All {call_count} attempts should be profiled"
+        assert (
+            stats["total_calls"] == call_count
+        ), f"All {call_count} attempts should be profiled"
 
     def test_error_context_preservation(self, sample_player_data):
         """Test that error context is preserved across components"""
@@ -135,7 +141,7 @@ class TestErrorHandlingMonitoringIntegration:
             """Function that adds context to errors"""
             try:
                 # Simulate processing that might fail
-                if 'invalid_column' in data.columns:
+                if "invalid_column" in data.columns:
                     raise KeyError("Invalid column found")
                 return data.describe()
             except KeyError as e:
@@ -144,14 +150,16 @@ class TestErrorHandlingMonitoringIntegration:
 
         # Create invalid data
         invalid_data = sample_player_data.copy()
-        invalid_data['invalid_column'] = None
+        invalid_data["invalid_column"] = None
 
         # Verify error chain is preserved
         with pytest.raises(ValueError) as exc_info:
             process_data_with_context(invalid_data)
 
         assert "Data processing failed" in str(exc_info.value)
-        assert exc_info.value.__cause__ is not None, "Original exception should be preserved"
+        assert (
+            exc_info.value.__cause__ is not None
+        ), "Original exception should be preserved"
 
 
 @pytest.mark.agents_1_3
@@ -172,10 +180,9 @@ class TestSecurityMonitoringIntegration:
         def authenticate_user(username, password):
             """Simulated authentication"""
             if password != "correct_password":
-                failed_attempts.append({
-                    'username': username,
-                    'timestamp': datetime.now()
-                })
+                failed_attempts.append(
+                    {"username": username, "timestamp": datetime.now()}
+                )
                 raise PermissionError("Authentication failed")
             return True
 
@@ -185,11 +192,11 @@ class TestSecurityMonitoringIntegration:
 
         # Verify it was logged
         assert len(failed_attempts) == 1
-        assert failed_attempts[0]['username'] == "test_user"
+        assert failed_attempts[0]["username"] == "test_user"
 
         # Verify it was profiled
         stats = profiler.get_summary()
-        assert stats['total_calls'] >= 1
+        assert stats["total_calls"] >= 1
 
     def test_rate_limiting_with_monitoring(self):
         """Test rate limiting is properly monitored"""
@@ -209,8 +216,9 @@ class TestSecurityMonitoringIntegration:
                 rate_limit_tracker[user_id] = []
 
             # Check rate limit (5 requests per second)
-            recent_requests = [t for t in rate_limit_tracker[user_id]
-                             if current_time - t < 1.0]
+            recent_requests = [
+                t for t in rate_limit_tracker[user_id] if current_time - t < 1.0
+            ]
 
             if len(recent_requests) >= 5:
                 raise Exception("Rate limit exceeded")
@@ -229,7 +237,7 @@ class TestSecurityMonitoringIntegration:
 
         # Verify all attempts were profiled
         stats = profiler.get_summary()
-        assert stats['total_calls'] >= 6
+        assert stats["total_calls"] >= 6
 
     def test_security_audit_trail(self, sample_player_data):
         """Test security audit trail generation"""
@@ -237,23 +245,25 @@ class TestSecurityMonitoringIntegration:
 
         def log_security_event(event_type, user, action, resource):
             """Log security event"""
-            audit_log.append({
-                'timestamp': datetime.now(),
-                'event_type': event_type,
-                'user': user,
-                'action': action,
-                'resource': resource
-            })
+            audit_log.append(
+                {
+                    "timestamp": datetime.now(),
+                    "event_type": event_type,
+                    "user": user,
+                    "action": action,
+                    "resource": resource,
+                }
+            )
 
         # Simulate various security events
-        log_security_event('authentication', 'user1', 'login', 'api')
-        log_security_event('authorization', 'user1', 'read', 'player_data')
-        log_security_event('data_access', 'user1', 'query', 'database')
+        log_security_event("authentication", "user1", "login", "api")
+        log_security_event("authorization", "user1", "read", "player_data")
+        log_security_event("data_access", "user1", "query", "database")
 
         # Verify audit trail
         assert len(audit_log) == 3
-        assert all('timestamp' in event for event in audit_log)
-        assert all('user' in event for event in audit_log)
+        assert all("timestamp" in event for event in audit_log)
+        assert all("user" in event for event in audit_log)
 
 
 @pytest.mark.agents_1_3
@@ -285,7 +295,7 @@ class TestErrorRecoverySecurityIntegration:
     def test_error_handling_preserves_security_context(self):
         """Test that error handling doesn't bypass security checks"""
 
-        security_checks_passed = {'authentication': False, 'authorization': False}
+        security_checks_passed = {"authentication": False, "authorization": False}
 
         def secure_operation(user_role):
             """Operation requiring authentication and authorization"""
@@ -293,52 +303,53 @@ class TestErrorRecoverySecurityIntegration:
                 # Authentication
                 if user_role is None:
                     raise PermissionError("Not authenticated")
-                security_checks_passed['authentication'] = True
+                security_checks_passed["authentication"] = True
 
                 # Authorization
-                if user_role != 'admin':
+                if user_role != "admin":
                     raise PermissionError("Insufficient permissions")
-                security_checks_passed['authorization'] = True
+                security_checks_passed["authorization"] = True
 
                 return "Operation successful"
             except PermissionError:
                 # Reset security context on error
-                security_checks_passed['authentication'] = False
-                security_checks_passed['authorization'] = False
+                security_checks_passed["authentication"] = False
+                security_checks_passed["authorization"] = False
                 raise
 
         # Test with insufficient permissions
         with pytest.raises(PermissionError):
-            secure_operation('user')
+            secure_operation("user")
 
         # Verify security context was reset
-        assert not security_checks_passed['authorization'], \
-            "Authorization should not persist after error"
+        assert not security_checks_passed[
+            "authorization"
+        ], "Authorization should not persist after error"
 
     def test_cascading_failures_with_security(self):
         """Test that cascading failures maintain security boundaries"""
 
         def protected_resource_access(user, resource):
             """Access resource with permission check"""
-            if user != 'authorized_user':
+            if user != "authorized_user":
                 raise PermissionError("Access denied")
 
             # Simulate accessing resource
-            if resource == 'missing':
+            if resource == "missing":
                 raise FileNotFoundError("Resource not found")
 
             return f"Accessed {resource}"
 
         # Test permission failure
         with pytest.raises(PermissionError):
-            protected_resource_access('unauthorized_user', 'data')
+            protected_resource_access("unauthorized_user", "data")
 
         # Test resource failure (after passing security)
         with pytest.raises(FileNotFoundError):
-            protected_resource_access('authorized_user', 'missing')
+            protected_resource_access("authorized_user", "missing")
 
         # Verify successful access
-        result = protected_resource_access('authorized_user', 'data')
+        result = protected_resource_access("authorized_user", "data")
         assert result == "Accessed data"
 
 
@@ -399,7 +410,7 @@ class TestMonitoringPerformanceIntegration:
         # Verify all tasks were monitored
         assert len(results) == 20
         stats = profiler.get_summary()
-        assert stats['total_calls'] >= 20, "All concurrent calls should be profiled"
+        assert stats["total_calls"] >= 20, "All concurrent calls should be profiled"
 
 
 @pytest.mark.agents_1_3
@@ -416,65 +427,67 @@ def test_comprehensive_agent_1_3_workflow(sample_player_data, test_helper):
 
     # Track workflow state
     workflow_state = {
-        'authenticated': False,
-        'data_validated': False,
-        'processing_complete': False,
-        'errors': [],
-        'security_events': []
+        "authenticated": False,
+        "data_validated": False,
+        "processing_complete": False,
+        "errors": [],
+        "security_events": [],
     }
 
     @profile
     def authenticate(user_id):
         """Step 1: Authentication"""
         if user_id is None:
-            workflow_state['errors'].append('Authentication failed')
+            workflow_state["errors"].append("Authentication failed")
             raise PermissionError("User ID required")
-        workflow_state['authenticated'] = True
-        workflow_state['security_events'].append('user_authenticated')
+        workflow_state["authenticated"] = True
+        workflow_state["security_events"].append("user_authenticated")
         return True
 
     @profile
     def validate_data(data):
         """Step 2: Data validation"""
         if data is None or data.empty:
-            workflow_state['errors'].append('Invalid data')
+            workflow_state["errors"].append("Invalid data")
             raise ValueError("Data validation failed")
 
-        required_cols = ['player_id', 'points', 'minutes']
+        required_cols = ["player_id", "points", "minutes"]
         missing = [col for col in required_cols if col not in data.columns]
         if missing:
-            workflow_state['errors'].append(f'Missing columns: {missing}')
+            workflow_state["errors"].append(f"Missing columns: {missing}")
             raise ValueError(f"Missing required columns: {missing}")
 
-        workflow_state['data_validated'] = True
+        workflow_state["data_validated"] = True
         return True
 
     @profile
     def process_data(data):
         """Step 3: Process data"""
         try:
-            result = data.groupby('player_id')['points'].mean()
-            workflow_state['processing_complete'] = True
+            result = data.groupby("player_id")["points"].mean()
+            workflow_state["processing_complete"] = True
             return result
         except Exception as e:
-            workflow_state['errors'].append(f'Processing error: {str(e)}')
+            workflow_state["errors"].append(f"Processing error: {str(e)}")
             raise
 
     # Execute workflow
-    authenticate('test_user')
+    authenticate("test_user")
     validate_data(sample_player_data)
     result = process_data(sample_player_data)
 
     # Verify workflow completed successfully
-    assert workflow_state['authenticated'], "Should be authenticated"
-    assert workflow_state['data_validated'], "Data should be validated"
-    assert workflow_state['processing_complete'], "Processing should complete"
-    assert len(workflow_state['errors']) == 0, f"No errors expected: {workflow_state['errors']}"
+    assert workflow_state["authenticated"], "Should be authenticated"
+    assert workflow_state["data_validated"], "Data should be validated"
+    assert workflow_state["processing_complete"], "Processing should complete"
+    assert (
+        len(workflow_state["errors"]) == 0
+    ), f"No errors expected: {workflow_state['errors']}"
 
     # Verify all steps were monitored
     stats = profiler.get_summary()
-    assert stats['total_calls'] >= 3, "All workflow steps should be profiled"
+    assert stats["total_calls"] >= 3, "All workflow steps should be profiled"
     assert len(result) > 0, "Should have processed data"
 
     # Verify security events logged
-    assert 'user_authenticated' in workflow_state['security_events']
+    assert "user_authenticated" in workflow_state["security_events"]

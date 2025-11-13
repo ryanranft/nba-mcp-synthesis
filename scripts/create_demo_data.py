@@ -24,17 +24,20 @@ def create_demo_bets(num_bets: int = 50):
     """Create demo betting data"""
     print(f"📊 Creating {num_bets} demo bets...")
 
-    engine = PaperTradingEngine(
-        starting_bankroll=10000,
-        db_path="data/paper_trades.db"
-    )
+    engine = PaperTradingEngine(starting_bankroll=10000, db_path="data/paper_trades.db")
 
     # Team pairs for games
     matchups = [
-        ("LAL", "GSW"), ("BOS", "MIA"), ("MIL", "PHI"),
-        ("DEN", "LAC"), ("PHX", "DAL"), ("BKN", "NYK"),
-        ("CHI", "CLE"), ("TOR", "ATL"), ("MEM", "POR"),
-        ("SAC", "UTA")
+        ("LAL", "GSW"),
+        ("BOS", "MIA"),
+        ("MIL", "PHI"),
+        ("DEN", "LAC"),
+        ("PHX", "DAL"),
+        ("BKN", "NYK"),
+        ("CHI", "CLE"),
+        ("TOR", "ATL"),
+        ("MEM", "POR"),
+        ("SAC", "UTA"),
     ]
 
     # Simulate betting over 30 days
@@ -53,17 +56,17 @@ def create_demo_bets(num_bets: int = 50):
         game_id = f"{home}_vs_{away}_{bet_date.strftime('%Y%m%d')}"
 
         # Random bet details
-        bet_type = choice(['home', 'away'])
+        bet_type = choice(["home", "away"])
         odds = uniform(1.70, 2.50)
         sim_prob = uniform(0.50, 0.75)
-        edge = (sim_prob * odds - 1)
+        edge = sim_prob * odds - 1
 
         # Kelly fraction suggests bet size
         kelly_fraction = 0.25  # Quarter Kelly
         optimal_kelly = edge / (odds - 1) if odds > 1 else 0
         bet_amount = min(
             max(engine.current_bankroll * optimal_kelly * kelly_fraction, 50),
-            engine.current_bankroll * 0.10
+            engine.current_bankroll * 0.10,
         )
 
         # Create bet
@@ -76,7 +79,7 @@ def create_demo_bets(num_bets: int = 50):
                 sim_prob=sim_prob,
                 edge=edge,
                 kelly_fraction=kelly_fraction,
-                notes=f"Demo bet {i+1}"
+                notes=f"Demo bet {i+1}",
             )
 
             # Settle bet (win/loss based on simulation probability with some noise)
@@ -84,19 +87,17 @@ def create_demo_bets(num_bets: int = 50):
             actual_win_prob = sim_prob * 0.95  # Slight miscalibration
 
             if random() < actual_win_prob:
-                outcome = 'win'
+                outcome = "win"
                 win_count += 1
             else:
-                outcome = 'loss'
+                outcome = "loss"
 
             # Random closing odds for CLV calculation
             closing_odds = odds * uniform(0.95, 1.05)
 
             # Settle the bet
             engine.settle_bet(
-                bet_id=bet.bet_id,
-                outcome=outcome,
-                closing_odds=closing_odds
+                bet_id=bet.bet_id, outcome=outcome, closing_odds=closing_odds
             )
 
             bet_count += 1
@@ -149,7 +150,7 @@ def create_demo_calibration(num_predictions: int = 100):
             game_id=game_id,
             simulation_prob=sim_prob,
             actual_outcome=actual_outcome,
-            vegas_implied_prob=vegas_prob
+            vegas_implied_prob=vegas_prob,
         )
 
     # Fit the calibrator
@@ -161,7 +162,7 @@ def create_demo_calibration(num_predictions: int = 100):
     print(f"✅ Created {num_predictions} calibration records")
     print(f"   Brier Score: {brier:.4f}")
 
-    quality = 'Excellent' if brier < 0.10 else 'Good' if brier < 0.15 else 'Acceptable'
+    quality = "Excellent" if brier < 0.10 else "Good" if brier < 0.15 else "Acceptable"
     print(f"   Quality: {quality}")
 
 

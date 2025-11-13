@@ -28,6 +28,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 try:
     import pymc as pm
     import arviz as az
+
     PYMC_AVAILABLE = True
 except ImportError:
     PYMC_AVAILABLE = False
@@ -50,10 +51,10 @@ def generate_multivariate_ts(n_points: int = 100, n_vars: int = 3) -> pd.DataFra
     # Generate correlated time series
     data = {}
     for i in range(n_vars):
-        trend = np.linspace(20 + i*5, 25 + i*5, n_points)
+        trend = np.linspace(20 + i * 5, 25 + i * 5, n_points)
         seasonal = 3 * np.sin(np.arange(n_points) * 2 * np.pi / 10)
         noise = np.random.normal(0, 2, n_points)
-        data[f'var_{i}'] = trend + seasonal + noise
+        data[f"var_{i}"] = trend + seasonal + noise
 
     return pd.DataFrame(data)
 
@@ -66,31 +67,33 @@ def generate_univariate_ts(n_points: int = 100) -> pd.Series:
     seasonal = 5 * np.sin(np.arange(n_points) * 2 * np.pi / 12)
     noise = np.random.normal(0, 2, n_points)
 
-    return pd.Series(trend + seasonal + noise, name='value')
+    return pd.Series(trend + seasonal + noise, name="value")
 
 
 def generate_hierarchical_data(n_players: int = 5, n_games: int = 20) -> pd.DataFrame:
     """Generate hierarchical player-team data."""
     np.random.seed(42)
 
-    teams = ['LAL', 'BOS', 'GSW']
+    teams = ["LAL", "BOS", "GSW"]
     data = []
 
     for i in range(n_players):
         team = teams[i % len(teams)]
-        player_id = f'player_{i}'
+        player_id = f"player_{i}"
 
         # Player-specific baseline
         baseline = 15 + np.random.normal(0, 5)
 
         for game in range(n_games):
             points = baseline + np.random.normal(0, 3)
-            data.append({
-                'player_id': player_id,
-                'team_id': team,
-                'game': game,
-                'points': max(0, points)
-            })
+            data.append(
+                {
+                    "player_id": player_id,
+                    "team_id": team,
+                    "game": game,
+                    "points": max(0, points),
+                }
+            )
 
     return pd.DataFrame(data)
 
@@ -110,7 +113,7 @@ def measure_performance(func):
 
 def benchmark_method(name: str, func, category: str) -> dict:
     """Benchmark a single method."""
-    print(f"Testing {name}...", end=' ')
+    print(f"Testing {name}...", end=" ")
 
     result, exec_time, error = measure_performance(func)
 
@@ -122,11 +125,11 @@ def benchmark_method(name: str, func, category: str) -> dict:
         print(f"  Error: {error[:80]}")
 
     return {
-        'method': name,
-        'category': category,
-        'execution_time': exec_time,
-        'success': success,
-        'error': error
+        "method": name,
+        "category": category,
+        "execution_time": exec_time,
+        "success": success,
+        "error": error,
     }
 
 
@@ -138,11 +141,7 @@ def test_bvar_init():
 
     data = generate_multivariate_ts(n_points=50, n_vars=3)
 
-    analyzer = BVARAnalyzer(
-        data=data,
-        var_names=['var_0', 'var_1', 'var_2'],
-        lags=2
-    )
+    analyzer = BVARAnalyzer(data=data, var_names=["var_0", "var_1", "var_2"], lags=2)
 
     assert analyzer.lags == 2
     assert len(analyzer.var_names) == 3
@@ -156,11 +155,7 @@ def test_bvar_fit():
 
     data = generate_multivariate_ts(n_points=50, n_vars=2)
 
-    analyzer = BVARAnalyzer(
-        data=data,
-        var_names=['var_0', 'var_1'],
-        lags=1
-    )
+    analyzer = BVARAnalyzer(data=data, var_names=["var_0", "var_1"], lags=1)
 
     # Use minimal samples for speed
     result = analyzer.fit(draws=50, tune=25, chains=1)
@@ -178,18 +173,14 @@ def test_bvar_forecast():
 
     data = generate_multivariate_ts(n_points=50, n_vars=2)
 
-    analyzer = BVARAnalyzer(
-        data=data,
-        var_names=['var_0', 'var_1'],
-        lags=1
-    )
+    analyzer = BVARAnalyzer(data=data, var_names=["var_0", "var_1"], lags=1)
 
     result = analyzer.fit(draws=50, tune=25, chains=1)
     forecast = analyzer.forecast(result, steps=5)
 
-    assert 'var_0' in forecast
-    assert 'var_1' in forecast
-    assert len(forecast['var_0']) == 5
+    assert "var_0" in forecast
+    assert "var_1" in forecast
+    assert len(forecast["var_0"]) == 5
     return forecast
 
 
@@ -200,11 +191,7 @@ def test_bvar_impulse_response():
 
     data = generate_multivariate_ts(n_points=50, n_vars=2)
 
-    analyzer = BVARAnalyzer(
-        data=data,
-        var_names=['var_0', 'var_1'],
-        lags=1
-    )
+    analyzer = BVARAnalyzer(data=data, var_names=["var_0", "var_1"], lags=1)
 
     result = analyzer.fit(draws=50, tune=25, chains=1)
     irf = analyzer.impulse_response(result, periods=10)
@@ -221,11 +208,7 @@ def test_bvar_fevd():
 
     data = generate_multivariate_ts(n_points=50, n_vars=2)
 
-    analyzer = BVARAnalyzer(
-        data=data,
-        var_names=['var_0', 'var_1'],
-        lags=1
-    )
+    analyzer = BVARAnalyzer(data=data, var_names=["var_0", "var_1"], lags=1)
 
     result = analyzer.fit(draws=50, tune=25, chains=1)
     fevd = analyzer.forecast_error_variance_decomposition(result, periods=10)
@@ -242,11 +225,7 @@ def test_bsts_init():
 
     data = generate_univariate_ts(n_points=50)
 
-    analyzer = BayesianStructuralTS(
-        data=data,
-        include_trend=True,
-        seasonal_period=12
-    )
+    analyzer = BayesianStructuralTS(data=data, include_trend=True, seasonal_period=12)
 
     assert analyzer.include_trend == True
     assert analyzer.seasonal_period == 12
@@ -261,16 +240,14 @@ def test_bsts_fit():
     data = generate_univariate_ts(n_points=50)
 
     analyzer = BayesianStructuralTS(
-        data=data,
-        include_trend=True,
-        seasonal_period=None  # Skip seasonal for speed
+        data=data, include_trend=True, seasonal_period=None  # Skip seasonal for speed
     )
 
     result = analyzer.fit(draws=50, tune=25, chains=1)
 
     assert result.trace is not None
     assert result.components is not None
-    assert 'level' in result.components
+    assert "level" in result.components
     return result
 
 
@@ -281,19 +258,15 @@ def test_bsts_forecast():
 
     data = generate_univariate_ts(n_points=50)
 
-    analyzer = BayesianStructuralTS(
-        data=data,
-        include_trend=True,
-        seasonal_period=None
-    )
+    analyzer = BayesianStructuralTS(data=data, include_trend=True, seasonal_period=None)
 
     result = analyzer.fit(draws=50, tune=25, chains=1)
     forecast = analyzer.forecast(result, steps=5)
 
-    assert 'mean' in forecast
-    assert 'lower' in forecast
-    assert 'upper' in forecast
-    assert len(forecast['mean']) == 5
+    assert "mean" in forecast
+    assert "lower" in forecast
+    assert "upper" in forecast
+    assert len(forecast["mean"]) == 5
     return forecast
 
 
@@ -306,14 +279,14 @@ def test_hierarchical_init():
 
     analyzer = HierarchicalBayesianTS(
         data=data,
-        player_col='player_id',
-        team_col='team_id',
-        time_col='game',
-        target_col='points'
+        player_col="player_id",
+        team_col="team_id",
+        time_col="game",
+        target_col="points",
     )
 
-    assert analyzer.player_col == 'player_id'
-    assert analyzer.target_col == 'points'
+    assert analyzer.player_col == "player_id"
+    assert analyzer.target_col == "points"
     return analyzer
 
 
@@ -326,10 +299,10 @@ def test_hierarchical_fit():
 
     analyzer = HierarchicalBayesianTS(
         data=data,
-        player_col='player_id',
-        team_col='team_id',
-        time_col='game',
-        target_col='points'
+        player_col="player_id",
+        team_col="team_id",
+        time_col="game",
+        target_col="points",
     )
 
     result = analyzer.fit(draws=50, tune=25, chains=1)
@@ -348,17 +321,17 @@ def test_hierarchical_forecast_player():
 
     analyzer = HierarchicalBayesianTS(
         data=data,
-        player_col='player_id',
-        team_col='team_id',
-        time_col='game',
-        target_col='points'
+        player_col="player_id",
+        team_col="team_id",
+        time_col="game",
+        target_col="points",
     )
 
     result = analyzer.fit(draws=50, tune=25, chains=1)
-    forecast = analyzer.forecast_player(result, player_id='player_0', steps=5)
+    forecast = analyzer.forecast_player(result, player_id="player_0", steps=5)
 
-    assert 'mean' in forecast
-    assert len(forecast['mean']) == 5
+    assert "mean" in forecast
+    assert len(forecast["mean"]) == 5
     return forecast
 
 
@@ -371,21 +344,19 @@ def test_hierarchical_compare_players():
 
     analyzer = HierarchicalBayesianTS(
         data=data,
-        player_col='player_id',
-        team_col='team_id',
-        time_col='game',
-        target_col='points'
+        player_col="player_id",
+        team_col="team_id",
+        time_col="game",
+        target_col="points",
     )
 
     result = analyzer.fit(draws=50, tune=25, chains=1)
     comparison = analyzer.compare_players(
-        result,
-        player1='player_0',
-        player2='player_1'
+        result, player1="player_0", player2="player_1"
     )
 
-    assert 'difference_mean' in comparison
-    assert 'prob_player1_better' in comparison
+    assert "difference_mean" in comparison
+    assert "prob_player1_better" in comparison
     return comparison
 
 
@@ -397,10 +368,10 @@ def test_bma_init():
     # Create dummy models (fitted BVARResults)
     data = generate_multivariate_ts(n_points=50, n_vars=2)
 
-    analyzer1 = BVARAnalyzer(data=data, var_names=['var_0', 'var_1'], lags=1)
+    analyzer1 = BVARAnalyzer(data=data, var_names=["var_0", "var_1"], lags=1)
     result1 = analyzer1.fit(draws=50, tune=25, chains=1)
 
-    analyzer2 = BVARAnalyzer(data=data, var_names=['var_0', 'var_1'], lags=2)
+    analyzer2 = BVARAnalyzer(data=data, var_names=["var_0", "var_1"], lags=2)
     result2 = analyzer2.fit(draws=50, tune=25, chains=1)
 
     bma = BayesianModelAveraging(models=[result1, result2])
@@ -417,10 +388,10 @@ def test_bma_compute_weights():
     # Create dummy models
     data = generate_multivariate_ts(n_points=50, n_vars=2)
 
-    analyzer1 = BVARAnalyzer(data=data, var_names=['var_0', 'var_1'], lags=1)
+    analyzer1 = BVARAnalyzer(data=data, var_names=["var_0", "var_1"], lags=1)
     result1 = analyzer1.fit(draws=50, tune=25, chains=1)
 
-    analyzer2 = BVARAnalyzer(data=data, var_names=['var_0', 'var_1'], lags=2)
+    analyzer2 = BVARAnalyzer(data=data, var_names=["var_0", "var_1"], lags=2)
     result2 = analyzer2.fit(draws=50, tune=25, chains=1)
 
     bma = BayesianModelAveraging(models=[result1, result2])
@@ -439,17 +410,17 @@ def test_bma_compare_models():
     # Create dummy models
     data = generate_multivariate_ts(n_points=50, n_vars=2)
 
-    analyzer1 = BVARAnalyzer(data=data, var_names=['var_0', 'var_1'], lags=1)
+    analyzer1 = BVARAnalyzer(data=data, var_names=["var_0", "var_1"], lags=1)
     result1 = analyzer1.fit(draws=50, tune=25, chains=1)
 
-    analyzer2 = BVARAnalyzer(data=data, var_names=['var_0', 'var_1'], lags=2)
+    analyzer2 = BVARAnalyzer(data=data, var_names=["var_0", "var_1"], lags=2)
     result2 = analyzer2.fit(draws=50, tune=25, chains=1)
 
     bma = BayesianModelAveraging(models=[result1, result2])
     comparison = bma.compare_models()
 
     assert len(comparison) == 2
-    assert 'waic' in comparison.columns
+    assert "waic" in comparison.columns
     return comparison
 
 
@@ -479,22 +450,35 @@ def main():
         ("BVARAnalyzer.forecast", test_bvar_forecast, "BVAR"),
         ("BVARAnalyzer.impulse_response", test_bvar_impulse_response, "BVAR"),
         ("BVARAnalyzer.forecast_error_variance_decomposition", test_bvar_fevd, "BVAR"),
-
         # BayesianStructuralTS (3 methods)
         ("BayesianStructuralTS.__init__", test_bsts_init, "Structural TS"),
         ("BayesianStructuralTS.fit", test_bsts_fit, "Structural TS"),
         ("BayesianStructuralTS.forecast", test_bsts_forecast, "Structural TS"),
-
         # HierarchicalBayesianTS (4 methods)
         ("HierarchicalBayesianTS.__init__", test_hierarchical_init, "Hierarchical TS"),
         ("HierarchicalBayesianTS.fit", test_hierarchical_fit, "Hierarchical TS"),
-        ("HierarchicalBayesianTS.forecast_player", test_hierarchical_forecast_player, "Hierarchical TS"),
-        ("HierarchicalBayesianTS.compare_players", test_hierarchical_compare_players, "Hierarchical TS"),
-
+        (
+            "HierarchicalBayesianTS.forecast_player",
+            test_hierarchical_forecast_player,
+            "Hierarchical TS",
+        ),
+        (
+            "HierarchicalBayesianTS.compare_players",
+            test_hierarchical_compare_players,
+            "Hierarchical TS",
+        ),
         # BayesianModelAveraging (3 methods)
         ("BayesianModelAveraging.__init__", test_bma_init, "Model Averaging"),
-        ("BayesianModelAveraging.compute_weights", test_bma_compute_weights, "Model Averaging"),
-        ("BayesianModelAveraging.compare_models", test_bma_compare_models, "Model Averaging"),
+        (
+            "BayesianModelAveraging.compute_weights",
+            test_bma_compute_weights,
+            "Model Averaging",
+        ),
+        (
+            "BayesianModelAveraging.compare_models",
+            test_bma_compare_models,
+            "Model Averaging",
+        ),
     ]
 
     for name, test_func, category in test_cases:
@@ -507,7 +491,7 @@ def main():
     print("=" * 70)
 
     total_tests = len(results)
-    successful = sum(1 for r in results if r['success'])
+    successful = sum(1 for r in results if r["success"])
     failed = total_tests - successful
 
     print(f"Total Methods Tested: {total_tests}")
@@ -518,20 +502,20 @@ def main():
     # Break down by category
     categories = {}
     for result in results:
-        cat = result['category']
+        cat = result["category"]
         if cat not in categories:
-            categories[cat] = {'total': 0, 'success': 0}
-        categories[cat]['total'] += 1
-        if result['success']:
-            categories[cat]['success'] += 1
+            categories[cat] = {"total": 0, "success": 0}
+        categories[cat]["total"] += 1
+        if result["success"]:
+            categories[cat]["success"] += 1
 
     print("By Category:")
     for cat, stats in sorted(categories.items()):
-        success_rate = stats['success'] / stats['total'] * 100
+        success_rate = stats["success"] / stats["total"] * 100
         print(f"  {cat}: {stats['success']}/{stats['total']} ({success_rate:.1f}%)")
 
     # Calculate average execution time
-    successful_times = [r['execution_time'] for r in results if r['success']]
+    successful_times = [r["execution_time"] for r in results if r["success"]]
     if successful_times:
         avg_time = sum(successful_times) / len(successful_times)
         print(f"\nAverage Execution Time: {avg_time:.4f}s")
@@ -539,25 +523,29 @@ def main():
         print(f"Slowest: {max(successful_times):.4f}s")
 
     # Save results
-    output_dir = Path(__file__).parent.parent / 'benchmark_results'
+    output_dir = Path(__file__).parent.parent / "benchmark_results"
     output_dir.mkdir(exist_ok=True)
 
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     # Save to JSON
-    json_path = output_dir / f'bayesian_time_series_{timestamp}.json'
-    with open(json_path, 'w') as f:
-        json.dump({
-            'timestamp': datetime.now().isoformat(),
-            'total_tests': total_tests,
-            'successful': successful,
-            'failed': failed,
-            'pymc_available': PYMC_AVAILABLE,
-            'results': results
-        }, f, indent=2)
+    json_path = output_dir / f"bayesian_time_series_{timestamp}.json"
+    with open(json_path, "w") as f:
+        json.dump(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "total_tests": total_tests,
+                "successful": successful,
+                "failed": failed,
+                "pymc_available": PYMC_AVAILABLE,
+                "results": results,
+            },
+            f,
+            indent=2,
+        )
 
     # Save to CSV
-    csv_path = output_dir / f'bayesian_time_series_{timestamp}.csv'
+    csv_path = output_dir / f"bayesian_time_series_{timestamp}.csv"
     df = pd.DataFrame(results)
     df.to_csv(csv_path, index=False)
 
@@ -574,5 +562,5 @@ def main():
     return 0 if successful == total_tests else 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

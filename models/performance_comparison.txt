@@ -1,0 +1,49 @@
+================================================================================
+Phase 1 Feature Enhancement - Performance Comparison
+================================================================================
+Date: $(date +%Y-%m-%d)
+
+FEATURE SET:
+- Total Features: 101 (up from ~83)
+- New Features: 10 rest/fatigue features (rest__ prefix)
+- Enhanced: Schedule density, back-to-backs, extreme fatigue indicators
+
+================================================================================
+MODEL COMPARISON
+================================================================================
+
+1. WEIGHTED ENSEMBLE (Baseline)
+   - Architecture: LR (80%) + RF (10%) + XGB (10%)
+   - Accuracy: 68.8%
+   - AUC-ROC: 0.7279
+   - Brier Score: 0.2092
+   - Log Loss: 0.6082
+   
+2. STACKING ENSEMBLE (Ridge Meta-Learner)
+   - Architecture: Ridge meta-learner over LR + RF + XGB
+   - Accuracy: 68.6%
+   - AUC-ROC: 0.7285
+   - Brier Score: 0.2083 ✓ WINNER (lower is better)
+   - Log Loss: 0.6050 ✓ WINNER (lower is better)
+   
+================================================================================
+WINNER: STACKING ENSEMBLE (Ridge)
+================================================================================
+
+Improvements:
+- Brier Score: -0.43% (0.2092 → 0.2083)
+- Log Loss: -0.53% (0.6082 → 0.6050)  
+- AUC-ROC: +0.08% (0.7279 → 0.7285)
+
+While the accuracy is marginally lower (-0.2%), the stacking ensemble 
+produces better calibrated probabilities (lower Brier score and log loss),
+which is critical for Kelly Criterion betting.
+
+================================================================================
+NEXT STEPS
+================================================================================
+1. Use stacking ensemble for production
+2. Backtest on historical games  
+3. Retrain Kelly calibrator with improved predictions
+4. Update production scripts
+

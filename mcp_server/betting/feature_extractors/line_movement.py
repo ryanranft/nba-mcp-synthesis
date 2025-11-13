@@ -45,7 +45,7 @@ class LineMovementTracker:
     def __init__(
         self,
         db_conn: Optional[psycopg2.extensions.connection] = None,
-        bookmaker: str = 'pinnacle'  # Pinnacle is sharpest book
+        bookmaker: str = "pinnacle",  # Pinnacle is sharpest book
     ):
         """
         Initialize line movement tracker
@@ -61,9 +61,7 @@ class LineMovementTracker:
         logger.info(f"LineMovementTracker initialized (bookmaker: {bookmaker})")
 
     def extract_features(
-        self,
-        event_id: str,
-        market: str = 'spreads'
+        self, event_id: str, market: str = "spreads"
     ) -> Dict[str, float]:
         """
         Extract line movement features for an event
@@ -86,32 +84,34 @@ class LineMovementTracker:
                 return self._get_default_features()
 
             # Calculate movements
-            features['opening_line'] = line_history[0]['line']
-            features['current_line'] = line_history[-1]['line']
-            features['opening_to_current_move'] = features['current_line'] - features['opening_line']
+            features["opening_line"] = line_history[0]["line"]
+            features["current_line"] = line_history[-1]["line"]
+            features["opening_to_current_move"] = (
+                features["current_line"] - features["opening_line"]
+            )
 
             # 24-hour movement
             line_24h_ago = self._get_line_at_time(line_history, hours_ago=24)
-            features['line_movement_24h'] = features['current_line'] - line_24h_ago
+            features["line_movement_24h"] = features["current_line"] - line_24h_ago
 
             # Movement direction
-            if abs(features['line_movement_24h']) < 0.5:
-                features['line_movement_direction'] = 0.0  # Stable
-            elif features['line_movement_24h'] > 0:
-                features['line_movement_direction'] = 1.0  # Toward home
+            if abs(features["line_movement_24h"]) < 0.5:
+                features["line_movement_direction"] = 0.0  # Stable
+            elif features["line_movement_24h"] > 0:
+                features["line_movement_direction"] = 1.0  # Toward home
             else:
-                features['line_movement_direction'] = -1.0  # Toward away
+                features["line_movement_direction"] = -1.0  # Toward away
 
             # Steam move detection (rapid large move)
-            features['steam_move_detected'] = self._detect_steam_move(line_history)
+            features["steam_move_detected"] = self._detect_steam_move(line_history)
 
             # Sharp money indicator (heuristic)
-            features['sharp_money_indicator'] = self._estimate_sharp_money(line_history)
+            features["sharp_money_indicator"] = self._estimate_sharp_money(line_history)
 
             # Vig change (sharp action typically reduces vig)
             opening_vig = self._calculate_vig(line_history[0])
             current_vig = self._calculate_vig(line_history[-1])
-            features['vig_change'] = current_vig - opening_vig
+            features["vig_change"] = current_vig - opening_vig
 
             logger.debug(
                 f"Line movement for {event_id}: "
@@ -126,11 +126,7 @@ class LineMovementTracker:
 
         return features
 
-    def _get_line_history(
-        self,
-        event_id: str,
-        market: str
-    ) -> List[Dict]:
+    def _get_line_history(self, event_id: str, market: str) -> List[Dict]:
         """
         Get chronological line history for an event
 
@@ -173,35 +169,31 @@ class LineMovementTracker:
         history = []
         for timestamp, line, odds, outcome in rows:
             # Group by timestamp (may have multiple outcomes per snapshot)
-            if history and history[-1]['timestamp'] == timestamp:
+            if history and history[-1]["timestamp"] == timestamp:
                 # Same snapshot, add outcome
-                if 'home' in outcome.lower() or outcome == rows[0][3]:
-                    history[-1]['odds_home'] = odds
+                if "home" in outcome.lower() or outcome == rows[0][3]:
+                    history[-1]["odds_home"] = odds
                 else:
-                    history[-1]['odds_away'] = odds
+                    history[-1]["odds_away"] = odds
             else:
                 # New snapshot
                 entry = {
-                    'timestamp': timestamp,
-                    'line': line if line is not None else 0.0,
+                    "timestamp": timestamp,
+                    "line": line if line is not None else 0.0,
                 }
-                if 'home' in outcome.lower() or outcome == rows[0][3]:
-                    entry['odds_home'] = odds
-                    entry['odds_away'] = None
+                if "home" in outcome.lower() or outcome == rows[0][3]:
+                    entry["odds_home"] = odds
+                    entry["odds_away"] = None
                 else:
-                    entry['odds_home'] = None
-                    entry['odds_away'] = odds
+                    entry["odds_home"] = None
+                    entry["odds_away"] = odds
 
                 history.append(entry)
 
         self._cache[cache_key] = history
         return history
 
-    def _get_line_at_time(
-        self,
-        line_history: List[Dict],
-        hours_ago: int
-    ) -> float:
+    def _get_line_at_time(self, line_history: List[Dict], hours_ago: int) -> float:
         """
         Get line value at a specific time in the past
 
@@ -215,18 +207,18 @@ class LineMovementTracker:
         if not line_history:
             return 0.0
 
-        target_time = line_history[-1]['timestamp'] - timedelta(hours=hours_ago)
+        target_time = line_history[-1]["timestamp"] - timedelta(hours=hours_ago)
 
         # Find closest snapshot
-        closest = min(line_history, key=lambda x: abs(x['timestamp'] - target_time))
+        closest = min(line_history, key=lambda x: abs(x["timestamp"] - target_time))
 
-        return closest.get('line', 0.0)
+        return closest.get("line", 0.0)
 
     def _detect_steam_move(
         self,
         line_history: List[Dict],
         threshold: float = 2.0,
-        time_window_hours: int = 2
+        time_window_hours: int = 2,
     ) -> float:
         """
         Detect steam moves (rapid significant line changes)
@@ -243,24 +235,21 @@ class LineMovementTracker:
             return 0.0
 
         # Check recent window
-        cutoff_time = line_history[-1]['timestamp'] - timedelta(hours=time_window_hours)
-        recent_history = [h for h in line_history if h['timestamp'] >= cutoff_time]
+        cutoff_time = line_history[-1]["timestamp"] - timedelta(hours=time_window_hours)
+        recent_history = [h for h in line_history if h["timestamp"] >= cutoff_time]
 
         if len(recent_history) < 2:
             return 0.0
 
         # Calculate move in window
-        move = recent_history[-1]['line'] - recent_history[0]['line']
+        move = recent_history[-1]["line"] - recent_history[0]["line"]
 
         if abs(move) >= threshold:
             return 1.0
 
         return 0.0
 
-    def _estimate_sharp_money(
-        self,
-        line_history: List[Dict]
-    ) -> float:
+    def _estimate_sharp_money(self, line_history: List[Dict]) -> float:
         """
         Estimate direction of sharp money
 
@@ -276,7 +265,7 @@ class LineMovementTracker:
             return 0.0
 
         # Total line movement
-        total_move = line_history[-1]['line'] - line_history[0]['line']
+        total_move = line_history[-1]["line"] - line_history[0]["line"]
 
         # Significant move threshold
         if abs(total_move) < 0.5:
@@ -285,10 +274,7 @@ class LineMovementTracker:
         # Direction of sharp money (positive = home, negative = away)
         return 1.0 if total_move > 0 else -1.0
 
-    def _calculate_vig(
-        self,
-        snapshot: Dict
-    ) -> float:
+    def _calculate_vig(self, snapshot: Dict) -> float:
         """
         Calculate bookmaker vig (margin) from odds
 
@@ -298,8 +284,8 @@ class LineMovementTracker:
         Returns:
             Vig percentage (0.045 = 4.5%)
         """
-        odds_home = snapshot.get('odds_home')
-        odds_away = snapshot.get('odds_away')
+        odds_home = snapshot.get("odds_home")
+        odds_away = snapshot.get("odds_away")
 
         if not odds_home or not odds_away:
             return 0.045  # Typical vig
@@ -322,14 +308,14 @@ class LineMovementTracker:
     def _get_default_features(self) -> Dict[str, float]:
         """Return default features when data unavailable"""
         return {
-            'opening_line': 0.0,
-            'current_line': 0.0,
-            'opening_to_current_move': 0.0,
-            'line_movement_24h': 0.0,
-            'line_movement_direction': 0.0,
-            'steam_move_detected': 0.0,
-            'sharp_money_indicator': 0.0,
-            'vig_change': 0.0
+            "opening_line": 0.0,
+            "current_line": 0.0,
+            "opening_to_current_move": 0.0,
+            "line_movement_24h": 0.0,
+            "line_movement_direction": 0.0,
+            "steam_move_detected": 0.0,
+            "sharp_money_indicator": 0.0,
+            "vig_change": 0.0,
         }
 
     def clear_cache(self):
@@ -356,18 +342,18 @@ if __name__ == "__main__":
 
     # Load secrets
     print("📦 Loading secrets...")
-    load_secrets_hierarchical('nba-mcp-synthesis', 'NBA', 'production')
+    load_secrets_hierarchical("nba-mcp-synthesis", "NBA", "production")
     print("✅ Secrets loaded")
     print()
 
     # Connect to database
     print("🔌 Connecting to database...")
     conn = psycopg2.connect(
-        host=os.getenv('RDS_HOST'),
-        port=os.getenv('RDS_PORT'),
-        database=os.getenv('RDS_DATABASE'),
-        user=os.getenv('RDS_USERNAME'),
-        password=os.getenv('RDS_PASSWORD')
+        host=os.getenv("RDS_HOST"),
+        port=os.getenv("RDS_PORT"),
+        database=os.getenv("RDS_DATABASE"),
+        user=os.getenv("RDS_USERNAME"),
+        password=os.getenv("RDS_PASSWORD"),
     )
     print("✅ Database connected")
     print()
@@ -377,13 +363,15 @@ if __name__ == "__main__":
 
     # Get recent events from odds database
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT DISTINCT event_id, home_team, away_team, commence_time
         FROM odds.events
         WHERE commence_time >= NOW() - INTERVAL '7 days'
         ORDER BY commence_time DESC
         LIMIT 3
-    """)
+    """
+    )
 
     events = cursor.fetchall()
 
@@ -395,7 +383,7 @@ if __name__ == "__main__":
             print(f"\nEvent: {away} @ {home}")
             print(f"Time: {commence}")
 
-            features = tracker.extract_features(event_id, market='spreads')
+            features = tracker.extract_features(event_id, market="spreads")
 
             print(f"  Opening line: {features['opening_line']:+.1f}")
             print(f"  Current line: {features['current_line']:+.1f}")

@@ -17,11 +17,11 @@ from mcp_server.simulations.deployment.simulation_service import (
     SimulationRequest,
     SimulationResult,
     SimulationService,
-    BatchSimulator
+    BatchSimulator,
 )
 from mcp_server.simulations.deployment.model_persistence import (
     ModelSerializer,
-    ModelRegistry
+    ModelRegistry,
 )
 
 
@@ -34,10 +34,10 @@ class TestSimulationRequest:
             request_id="req_001",
             home_team_id="LAL",
             away_team_id="BOS",
-            home_features={'points': 110.5, 'rebounds': 45.0},
-            away_features={'points': 105.0, 'rebounds': 42.0},
+            home_features={"points": 110.5, "rebounds": 45.0},
+            away_features={"points": 105.0, "rebounds": 42.0},
             model_id="test_model",
-            num_simulations=100
+            num_simulations=100,
         )
         assert request.request_id == "req_001"
         assert request.home_team_id == "LAL"
@@ -49,31 +49,31 @@ class TestSimulationRequest:
             request_id="req_001",
             home_team_id="LAL",
             away_team_id="BOS",
-            home_features={'points': 110.5},
-            away_features={'points': 105.0},
-            model_id="test_model"
+            home_features={"points": 110.5},
+            away_features={"points": 105.0},
+            model_id="test_model",
         )
         data = request.to_dict()
         assert isinstance(data, dict)
-        assert data['request_id'] == "req_001"
-        assert isinstance(data['created_at'], str)
+        assert data["request_id"] == "req_001"
+        assert isinstance(data["created_at"], str)
 
     def test_from_dict(self):
         """Test creating request from dictionary"""
         data = {
-            'request_id': 'req_001',
-            'home_team_id': 'LAL',
-            'away_team_id': 'BOS',
-            'home_features': {'points': 110.5},
-            'away_features': {'points': 105.0},
-            'model_id': 'test_model',
-            'model_version': None,
-            'num_simulations': 1,
-            'metadata': {},
-            'created_at': datetime.now().isoformat()
+            "request_id": "req_001",
+            "home_team_id": "LAL",
+            "away_team_id": "BOS",
+            "home_features": {"points": 110.5},
+            "away_features": {"points": 105.0},
+            "model_id": "test_model",
+            "model_version": None,
+            "num_simulations": 1,
+            "metadata": {},
+            "created_at": datetime.now().isoformat(),
         }
         request = SimulationRequest.from_dict(data)
-        assert request.request_id == 'req_001'
+        assert request.request_id == "req_001"
         assert isinstance(request.created_at, datetime)
 
     def test_get_hash(self):
@@ -84,7 +84,7 @@ class TestSimulationRequest:
             away_team_id="BOS",
             home_features={},
             away_features={},
-            model_id="test"
+            model_id="test",
         )
         hash1 = request.get_hash()
         assert isinstance(hash1, str)
@@ -97,7 +97,7 @@ class TestSimulationRequest:
             away_team_id="BOS",
             home_features={},
             away_features={},
-            model_id="test"
+            model_id="test",
         )
         hash2 = request2.get_hash()
         assert hash1 == hash2
@@ -115,7 +115,7 @@ class TestSimulationResult:
             expected_home_score=108.5,
             expected_away_score=102.3,
             predictions=[5.2, 6.1, 5.8],
-            simulation_count=3
+            simulation_count=3,
         )
         assert result.request_id == "req_001"
         assert result.home_win_probability == 0.65
@@ -128,28 +128,28 @@ class TestSimulationResult:
             home_win_probability=0.65,
             away_win_probability=0.35,
             expected_home_score=108.5,
-            expected_away_score=102.3
+            expected_away_score=102.3,
         )
         data = result.to_dict()
         assert isinstance(data, dict)
-        assert data['home_win_probability'] == 0.65
+        assert data["home_win_probability"] == 0.65
 
     def test_from_dict(self):
         """Test creating result from dictionary"""
         data = {
-            'request_id': 'req_001',
-            'home_win_probability': 0.65,
-            'away_win_probability': 0.35,
-            'expected_home_score': 108.5,
-            'expected_away_score': 102.3,
-            'predictions': [],
-            'simulation_count': 1,
-            'confidence_interval_95': None,
-            'metadata': {},
-            'completed_at': datetime.now().isoformat()
+            "request_id": "req_001",
+            "home_win_probability": 0.65,
+            "away_win_probability": 0.35,
+            "expected_home_score": 108.5,
+            "expected_away_score": 102.3,
+            "predictions": [],
+            "simulation_count": 1,
+            "confidence_interval_95": None,
+            "metadata": {},
+            "completed_at": datetime.now().isoformat(),
         }
         result = SimulationResult.from_dict(data)
-        assert result.request_id == 'req_001'
+        assert result.request_id == "req_001"
         assert isinstance(result.completed_at, datetime)
 
 
@@ -193,11 +193,11 @@ class TestSimulationService:
             request_id="req_001",
             home_team_id="LAL",
             away_team_id="BOS",
-            home_features={f'feat_{i}': float(i) for i in range(5)},
-            away_features={f'feat_{i}': float(i+5) for i in range(5)},
+            home_features={f"feat_{i}": float(i) for i in range(5)},
+            away_features={f"feat_{i}": float(i + 5) for i in range(5)},
             model_id="test_model",
             model_version="1.0",
-            num_simulations=10
+            num_simulations=10,
         )
 
     def test_service_initialization(self, service):
@@ -261,9 +261,9 @@ class TestSimulationService:
         service.simulate(sample_request)  # Cache hit
 
         stats = service.get_statistics()
-        assert stats['requests_processed'] == 2
-        assert stats['cache_hits'] == 1
-        assert stats['cache_hit_rate'] == 0.5
+        assert stats["requests_processed"] == 2
+        assert stats["cache_hits"] == 1
+        assert stats["cache_hit_rate"] == 0.5
 
     def test_model_caching(self, service, sample_request):
         """Test model caching"""
@@ -317,11 +317,11 @@ class TestBatchSimulator:
                 request_id=f"req_{i:03d}",
                 home_team_id="LAL",
                 away_team_id="BOS",
-                home_features={f'feat_{j}': float(j) for j in range(5)},
-                away_features={f'feat_{j}': float(j+5) for j in range(5)},
+                home_features={f"feat_{j}": float(j) for j in range(5)},
+                away_features={f"feat_{j}": float(j + 5) for j in range(5)},
                 model_id="test_model",
                 model_version="1.0",
-                num_simulations=5
+                num_simulations=5,
             )
             for i in range(10)
         ]
@@ -349,10 +349,10 @@ class TestBatchSimulator:
         results = batch_simulator.simulate_batch(sample_requests[:5], parallel=False)
         aggregated = batch_simulator.aggregate_results(results)
 
-        assert 'total_simulations' in aggregated
-        assert aggregated['total_simulations'] == 5
-        assert 'avg_home_win_prob' in aggregated
-        assert 0.0 <= aggregated['avg_home_win_prob'] <= 1.0
+        assert "total_simulations" in aggregated
+        assert aggregated["total_simulations"] == 5
+        assert "avg_home_win_prob" in aggregated
+        assert 0.0 <= aggregated["avg_home_win_prob"] <= 1.0
 
     def test_aggregate_empty_results(self, batch_simulator):
         """Test aggregating empty results"""
@@ -364,6 +364,6 @@ class TestBatchSimulator:
         batch_simulator.simulate_batch(sample_requests[:5], parallel=False)
 
         stats = batch_simulator.get_statistics()
-        assert stats['batches_processed'] == 1
-        assert stats['max_workers'] == 2
-        assert 'service_stats' in stats
+        assert stats["batches_processed"] == 1
+        assert stats["max_workers"] == 2
+        assert "service_stats" in stats

@@ -29,7 +29,10 @@ from typing import Optional, List, Dict
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-from mcp_server.unified_secrets_manager import load_secrets_hierarchical, get_database_config
+from mcp_server.unified_secrets_manager import (
+    load_secrets_hierarchical,
+    get_database_config,
+)
 
 
 class ShotZoneQuery:
@@ -41,8 +44,9 @@ class ShotZoneQuery:
         config = get_database_config()
         self.conn = psycopg2.connect(**config, cursor_factory=RealDictCursor)
 
-    def get_zone_distribution(self, start_date: Optional[str] = None, 
-                            end_date: Optional[str] = None) -> List[Dict]:
+    def get_zone_distribution(
+        self, start_date: Optional[str] = None, end_date: Optional[str] = None
+    ) -> List[Dict]:
         """
         Get shot distribution across all zones.
 
@@ -160,10 +164,7 @@ class ShotZoneQuery:
         results = cursor.fetchall()
         cursor.close()
 
-        return {
-            'player': player_name,
-            'zones': results
-        }
+        return {"player": player_name, "zones": results}
 
     def get_distance_ranges(self) -> List[Dict]:
         """
@@ -214,13 +215,17 @@ def print_distribution(results: List[Dict]):
     print(f"{'Zone':<30} {'Shots':>8} {'Made':>8} {'FG%':>6} {'Avg Dist':>10}")
     print("-" * 80)
 
-    total_shots = sum(r['total_shots'] for r in results)
-    total_made = sum(r['made_shots'] for r in results)
+    total_shots = sum(r["total_shots"] for r in results)
+    total_made = sum(r["made_shots"] for r in results)
 
     for row in results:
-        pct_of_total = (row['total_shots'] / total_shots * 100) if total_shots > 0 else 0
-        print(f"{row['shot_zone']:<30} {row['total_shots']:>8,} {row['made_shots']:>8,} "
-              f"{row['fg_pct']:>5.1f}% {row['avg_distance']:>9.1f} ft")
+        pct_of_total = (
+            (row["total_shots"] / total_shots * 100) if total_shots > 0 else 0
+        )
+        print(
+            f"{row['shot_zone']:<30} {row['total_shots']:>8,} {row['made_shots']:>8,} "
+            f"{row['fg_pct']:>5.1f}% {row['avg_distance']:>9.1f} ft"
+        )
 
     print("-" * 80)
     overall_fg = (total_made / total_shots * 100) if total_shots > 0 else 0
@@ -236,12 +241,14 @@ def print_distance_ranges(results: List[Dict]):
     print(f"{'Distance Range':<35} {'Shots':>8} {'Made':>8} {'FG%':>6}")
     print("-" * 80)
 
-    total_shots = sum(r['total_shots'] for r in results)
-    total_made = sum(r['made_shots'] for r in results)
+    total_shots = sum(r["total_shots"] for r in results)
+    total_made = sum(r["made_shots"] for r in results)
 
     for row in results:
-        print(f"{row['distance_range']:<35} {row['total_shots']:>8,} {row['made_shots']:>8,} "
-              f"{row['fg_pct']:>5.1f}%")
+        print(
+            f"{row['distance_range']:<35} {row['total_shots']:>8,} {row['made_shots']:>8,} "
+            f"{row['fg_pct']:>5.1f}%"
+        )
 
     print("-" * 80)
     overall_fg = (total_made / total_shots * 100) if total_shots > 0 else 0
@@ -250,14 +257,18 @@ def print_distance_ranges(results: List[Dict]):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Query shot zones from database')
-    parser.add_argument('--distribution', action='store_true', help='Show zone distribution')
-    parser.add_argument('--distance-ranges', action='store_true', help='Show distance ranges')
-    parser.add_argument('--zone', help='Get shots for specific zone')
-    parser.add_argument('--player', help='Player shot profile')
-    parser.add_argument('--start-date', help='Start date (YYYY-MM-DD)')
-    parser.add_argument('--end-date', help='End date (YYYY-MM-DD)')
-    parser.add_argument('--limit', type=int, default=100, help='Limit results')
+    parser = argparse.ArgumentParser(description="Query shot zones from database")
+    parser.add_argument(
+        "--distribution", action="store_true", help="Show zone distribution"
+    )
+    parser.add_argument(
+        "--distance-ranges", action="store_true", help="Show distance ranges"
+    )
+    parser.add_argument("--zone", help="Get shots for specific zone")
+    parser.add_argument("--player", help="Player shot profile")
+    parser.add_argument("--start-date", help="Start date (YYYY-MM-DD)")
+    parser.add_argument("--end-date", help="End date (YYYY-MM-DD)")
+    parser.add_argument("--limit", type=int, default=100, help="Limit results")
 
     args = parser.parse_args()
 
@@ -277,15 +288,17 @@ def main():
             results = query.get_zone_shots(args.zone, args.limit)
             print(f"\nFound {len(results)} shots in zone '{args.zone}'")
             for i, shot in enumerate(results[:10], 1):
-                made = "✓" if shot['scoring_play'] == 1 else "✗"
-                print(f"{i}. {made} {shot['shot_distance']:.1f} ft @ {shot['shot_angle']:.1f}° - {shot['play_description']}")
+                made = "✓" if shot["scoring_play"] == 1 else "✗"
+                print(
+                    f"{i}. {made} {shot['shot_distance']:.1f} ft @ {shot['shot_angle']:.1f}° - {shot['play_description']}"
+                )
             if len(results) > 10:
                 print(f"... and {len(results) - 10} more shots")
 
         elif args.player:
             profile = query.get_player_shot_profile(args.player)
             print(f"\nShot Profile: {profile['player']}")
-            print_distribution(profile['zones'])
+            print_distribution(profile["zones"])
 
         else:
             parser.print_help()
@@ -294,5 +307,5 @@ def main():
         query.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

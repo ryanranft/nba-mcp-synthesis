@@ -5,15 +5,15 @@ Calculate zone efficiency, expected values, and player shot profiles.
 
 Usage:
     from mcp_server.analytics import ShotZoneAnalytics
-    
+
     analytics = ShotZoneAnalytics()
-    
+
     # Zone efficiency
     efficiency = analytics.calculate_zone_efficiency()
-    
+
     # Expected value by zone
     expected_value = analytics.expected_value_by_zone()
-    
+
     # Player shot profile
     profile = analytics.player_shot_profile(player_id=2544)
 """
@@ -23,12 +23,16 @@ from psycopg2.extras import RealDictCursor
 from typing import Dict, List, Optional
 from dataclasses import dataclass
 
-from mcp_server.unified_secrets_manager import load_secrets_hierarchical, get_database_config
+from mcp_server.unified_secrets_manager import (
+    load_secrets_hierarchical,
+    get_database_config,
+)
 
 
 @dataclass
 class ZoneEfficiency:
     """Zone efficiency metrics"""
+
     zone: str
     attempts: int
     made: int
@@ -40,6 +44,7 @@ class ZoneEfficiency:
 @dataclass
 class PlayerShotProfile:
     """Player shot profile by zone"""
+
     player_id: int
     zone_distribution: Dict[str, int]
     zone_efficiency: Dict[str, float]
@@ -56,7 +61,9 @@ class ShotZoneAnalytics:
         config = get_database_config()
         self.conn = psycopg2.connect(**config, cursor_factory=RealDictCursor)
 
-    def calculate_zone_efficiency(self, season: Optional[int] = None) -> List[ZoneEfficiency]:
+    def calculate_zone_efficiency(
+        self, season: Optional[int] = None
+    ) -> List[ZoneEfficiency]:
         """
         Calculate efficiency metrics for each zone.
 
@@ -93,12 +100,12 @@ class ShotZoneAnalytics:
 
         return [
             ZoneEfficiency(
-                zone=row['shot_zone'],
-                attempts=row['attempts'],
-                made=row['made'],
-                fg_pct=row['fg_pct'],
-                points_per_shot=row['points_per_shot'],
-                expected_value=row['expected_value']
+                zone=row["shot_zone"],
+                attempts=row["attempts"],
+                made=row["made"],
+                fg_pct=row["fg_pct"],
+                points_per_shot=row["points_per_shot"],
+                expected_value=row["expected_value"],
             )
             for row in results
         ]
@@ -138,9 +145,9 @@ class ShotZoneAnalytics:
         cursor.close()
 
         return {
-            row['shot_zone']: {
-                'fg_pct': row['league_avg_fg_pct'],
-                'expected_value': row['league_avg_ev']
+            row["shot_zone"]: {
+                "fg_pct": row["league_avg_fg_pct"],
+                "expected_value": row["league_avg_ev"],
             }
             for row in results
         }
@@ -178,16 +185,21 @@ class ShotZoneAnalytics:
         if not results:
             return None
 
-        zone_distribution = {row['shot_zone']: row['attempts'] for row in results}
-        zone_efficiency = {row['shot_zone']: row['fg_pct'] for row in results}
+        zone_distribution = {row["shot_zone"]: row["attempts"] for row in results}
+        zone_efficiency = {row["shot_zone"]: row["fg_pct"] for row in results}
 
         # Find favorite zones (top 3 by volume)
-        favorite_zones = sorted(zone_distribution.items(), key=lambda x: x[1], reverse=True)[:3]
+        favorite_zones = sorted(
+            zone_distribution.items(), key=lambda x: x[1], reverse=True
+        )[:3]
         favorite_zones = [zone for zone, _ in favorite_zones]
 
         # Find weak zones (lowest FG% with minimum 10 attempts)
-        weak_zones = [(zone, eff) for zone, eff in zone_efficiency.items() 
-                     if zone_distribution[zone] >= 10]
+        weak_zones = [
+            (zone, eff)
+            for zone, eff in zone_efficiency.items()
+            if zone_distribution[zone] >= 10
+        ]
         weak_zones = sorted(weak_zones, key=lambda x: x[1])[:3]
         weak_zones = [zone for zone, _ in weak_zones]
 
@@ -196,10 +208,12 @@ class ShotZoneAnalytics:
             zone_distribution=zone_distribution,
             zone_efficiency=zone_efficiency,
             favorite_zones=favorite_zones,
-            weak_zones=weak_zones
+            weak_zones=weak_zones,
         )
 
-    def team_defensive_zones(self, team_id: int, season: Optional[int] = None) -> Dict[str, Dict]:
+    def team_defensive_zones(
+        self, team_id: int, season: Optional[int] = None
+    ) -> Dict[str, Dict]:
         """
         Calculate opponent FG% by zone when defending (team defensive profile).
 
@@ -236,10 +250,10 @@ class ShotZoneAnalytics:
         cursor.close()
 
         return {
-            row['shot_zone']: {
-                'opponent_attempts': row['opponent_attempts'],
-                'opponent_made': row['opponent_made'],
-                'opponent_fg_pct': row['opponent_fg_pct']
+            row["shot_zone"]: {
+                "opponent_attempts": row["opponent_attempts"],
+                "opponent_made": row["opponent_made"],
+                "opponent_fg_pct": row["opponent_fg_pct"],
             }
             for row in results
         }

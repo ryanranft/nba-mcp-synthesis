@@ -14,7 +14,7 @@ from mcp_server.simulations.models.ensemble import (
     EnsembleMetrics,
     StackedEnsemble,
     BlendedEnsemble,
-    EnsembleSimulator
+    EnsembleSimulator,
 )
 
 
@@ -27,7 +27,7 @@ class TestEnsembleMetrics:
             diversity_score=0.75,
             avg_base_error=10.5,
             ensemble_error=8.2,
-            improvement=0.22
+            improvement=0.22,
         )
         assert metrics.diversity_score == 0.75
         assert metrics.avg_base_error == 10.5
@@ -41,7 +41,7 @@ class TestEnsembleMetrics:
             diversity_score=0.75,
             avg_base_error=10.0,
             ensemble_error=8.0,
-            improvement=0.20  # 20% improvement
+            improvement=0.20,  # 20% improvement
         )
         assert metrics.is_effective(min_improvement=0.05) is True
 
@@ -51,7 +51,7 @@ class TestEnsembleMetrics:
             diversity_score=0.30,
             avg_base_error=10.0,
             ensemble_error=9.8,
-            improvement=0.02  # Only 2% improvement
+            improvement=0.02,  # Only 2% improvement
         )
         assert metrics.is_effective(min_improvement=0.05) is False
 
@@ -61,7 +61,7 @@ class TestEnsembleMetrics:
             diversity_score=0.60,
             avg_base_error=10.0,
             ensemble_error=9.0,
-            improvement=0.10  # 10% improvement
+            improvement=0.10,  # 10% improvement
         )
         assert metrics.is_effective(min_improvement=0.05) is True
         assert metrics.is_effective(min_improvement=0.15) is False
@@ -84,7 +84,7 @@ class TestStackedEnsemble:
         return [
             LinearRegression(),
             Ridge(alpha=1.0),
-            DecisionTreeRegressor(max_depth=3, random_state=42)
+            DecisionTreeRegressor(max_depth=3, random_state=42),
         ]
 
     def test_stacked_ensemble_initialization(self, base_models):
@@ -144,11 +144,13 @@ class TestStackedEnsemble:
             base_errors.append(error)
 
         # Train stacked ensemble
-        ensemble = StackedEnsemble([
-            LinearRegression(),
-            Ridge(alpha=1.0),
-            DecisionTreeRegressor(max_depth=3, random_state=42)
-        ])
+        ensemble = StackedEnsemble(
+            [
+                LinearRegression(),
+                Ridge(alpha=1.0),
+                DecisionTreeRegressor(max_depth=3, random_state=42),
+            ]
+        )
         ensemble.fit(X, y)
         ensemble_preds = ensemble.predict(X)
         ensemble_error = np.mean((ensemble_preds - y) ** 2)
@@ -175,7 +177,7 @@ class TestBlendedEnsemble:
         return [
             LinearRegression(),
             Ridge(alpha=1.0),
-            DecisionTreeRegressor(max_depth=3, random_state=42)
+            DecisionTreeRegressor(max_depth=3, random_state=42),
         ]
 
     def test_blended_ensemble_initialization(self, base_models):
@@ -239,9 +241,9 @@ class TestBlendedEnsemble:
 
         weights_dict = ensemble.get_weights()
         assert len(weights_dict) == 3
-        assert 'model_0' in weights_dict
-        assert 'model_1' in weights_dict
-        assert 'model_2' in weights_dict
+        assert "model_0" in weights_dict
+        assert "model_1" in weights_dict
+        assert "model_2" in weights_dict
         assert all(isinstance(v, float) for v in weights_dict.values())
 
     def test_blended_ensemble_get_weights_unfitted(self, base_models):
@@ -265,10 +267,7 @@ class TestEnsembleSimulator:
     @pytest.fixture
     def base_models(self):
         """Create base models"""
-        return [
-            LinearRegression(),
-            Ridge(alpha=1.0)
-        ]
+        return [LinearRegression(), Ridge(alpha=1.0)]
 
     def test_simulator_initialization_default(self):
         """Test initializing simulator with defaults"""
@@ -281,20 +280,14 @@ class TestEnsembleSimulator:
 
     def test_simulator_initialization_custom(self, base_models):
         """Test initializing simulator with custom models"""
-        simulator = EnsembleSimulator(
-            base_models=base_models,
-            ensemble_type="blending"
-        )
+        simulator = EnsembleSimulator(base_models=base_models, ensemble_type="blending")
         assert len(simulator.base_models) == 2
         assert simulator.ensemble_type == "blending"
 
     def test_simulator_fit_stacking(self, base_models, sample_data):
         """Test fitting simulator with stacking"""
         X, y = sample_data
-        simulator = EnsembleSimulator(
-            base_models=base_models,
-            ensemble_type="stacking"
-        )
+        simulator = EnsembleSimulator(base_models=base_models, ensemble_type="stacking")
         simulator.fit(X, y)
         assert simulator.ensemble_model is not None
         assert isinstance(simulator.ensemble_model, StackedEnsemble)
@@ -302,10 +295,7 @@ class TestEnsembleSimulator:
     def test_simulator_fit_blending(self, base_models, sample_data):
         """Test fitting simulator with blending"""
         X, y = sample_data
-        simulator = EnsembleSimulator(
-            base_models=base_models,
-            ensemble_type="blending"
-        )
+        simulator = EnsembleSimulator(base_models=base_models, ensemble_type="blending")
         simulator.fit(X, y)
         assert simulator.ensemble_model is not None
         assert isinstance(simulator.ensemble_model, BlendedEnsemble)
@@ -313,10 +303,7 @@ class TestEnsembleSimulator:
     def test_simulator_fit_invalid_type(self, base_models, sample_data):
         """Test fitting with invalid ensemble type"""
         X, y = sample_data
-        simulator = EnsembleSimulator(
-            base_models=base_models,
-            ensemble_type="invalid"
-        )
+        simulator = EnsembleSimulator(base_models=base_models, ensemble_type="invalid")
         with pytest.raises(ValueError, match="Unknown ensemble type"):
             simulator.fit(X, y)
 
@@ -370,11 +357,11 @@ class TestEnsembleSimulator:
         simulator.compute_diversity(X, y)
 
         stats = simulator.get_statistics()
-        assert stats['ensemble_type'] == 'stacking'
-        assert stats['n_base_models'] == 2
-        assert stats['predictions_made'] == 10
-        assert stats['avg_diversity'] > 0.0
-        assert stats['diversity_samples'] == 1
+        assert stats["ensemble_type"] == "stacking"
+        assert stats["n_base_models"] == 2
+        assert stats["predictions_made"] == 10
+        assert stats["avg_diversity"] > 0.0
+        assert stats["diversity_samples"] == 1
 
     def test_simulator_multiple_predictions_count(self, base_models, sample_data):
         """Test prediction counter increments correctly"""
@@ -403,4 +390,4 @@ class TestEnsembleSimulator:
 
         assert len(simulator.diversity_scores) == 3
         stats = simulator.get_statistics()
-        assert stats['diversity_samples'] == 3
+        assert stats["diversity_samples"] == 3

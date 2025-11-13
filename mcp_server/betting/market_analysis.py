@@ -61,6 +61,7 @@ import warnings
 try:
     from statsmodels.tsa.vector_ar.vecm import coint_johansen
     from statsmodels.tsa.stattools import coint
+
     STATSMODELS_AVAILABLE = True
 except ImportError:
     STATSMODELS_AVAILABLE = False
@@ -70,13 +71,14 @@ except ImportError:
 @dataclass
 class BetRecord:
     """Record of a single bet for CLV tracking"""
+
     date: datetime
     game_id: str
-    bet_odds: float           # Odds when you placed bet
-    closing_odds: float        # Odds at close (sharp money line)
-    bet_prob: float           # Implied probability at bet time
-    closing_prob: float        # Implied probability at close
-    clv: float                # Closing line value
+    bet_odds: float  # Odds when you placed bet
+    closing_odds: float  # Odds at close (sharp money line)
+    bet_prob: float  # Implied probability at bet time
+    closing_prob: float  # Implied probability at close
+    clv: float  # Closing line value
     outcome: Optional[int] = None  # 1 = win, 0 = loss (filled later)
     profit: Optional[float] = None  # Profit/loss (filled later)
 
@@ -250,12 +252,12 @@ class ClosingLineValueTracker:
             {'above': count, 'below': count}
         """
         if not self.bets:
-            return {'above': 0, 'below': 0}
+            return {"above": 0, "below": 0}
 
         clvs = self.clv_over_time()
         return {
-            'above': sum(1 for clv in clvs if clv > threshold),
-            'below': sum(1 for clv in clvs if clv <= threshold),
+            "above": sum(1 for clv in clvs if clv > threshold),
+            "below": sum(1 for clv in clvs if clv <= threshold),
         }
 
     def win_rate(self) -> float:
@@ -272,7 +274,10 @@ class ClosingLineValueTracker:
         if not bets_with_profit:
             return np.nan
 
-        total_bet = sum(abs(b.profit / (b.bet_odds - 1)) if b.profit > 0 else abs(b.profit) for b in bets_with_profit)
+        total_bet = sum(
+            abs(b.profit / (b.bet_odds - 1)) if b.profit > 0 else abs(b.profit)
+            for b in bets_with_profit
+        )
         total_profit = sum(b.profit for b in bets_with_profit)
 
         if total_bet == 0:
@@ -286,15 +291,15 @@ class ClosingLineValueTracker:
             return {}
 
         return {
-            'total_bets': len(self.bets),
-            'average_clv': self.average_clv(),
-            'recent_clv_50': self.average_clv(recent_n=50),
-            'recent_clv_20': self.average_clv(recent_n=20),
-            'is_sharp': self.is_sharp(),
-            'win_rate': self.win_rate(),
-            'roi': self.roi(),
-            'clv_above_3pct': self.clv_by_threshold(0.03)['above'],
-            'clv_below_0': self.clv_by_threshold(0.0)['below'],
+            "total_bets": len(self.bets),
+            "average_clv": self.average_clv(),
+            "recent_clv_50": self.average_clv(recent_n=50),
+            "recent_clv_20": self.average_clv(recent_n=20),
+            "is_sharp": self.is_sharp(),
+            "win_rate": self.win_rate(),
+            "roi": self.roi(),
+            "clv_above_3pct": self.clv_by_threshold(0.03)["above"],
+            "clv_below_0": self.clv_by_threshold(0.0)["below"],
         }
 
 
@@ -346,13 +351,15 @@ class MarketEfficiencyAnalyzer:
         is_mispriced = abs(z_score) > threshold
 
         return {
-            'mispriced': is_mispriced,
-            'z_score': z_score,
-            'direction': 'over' if z_score > 0 else 'under',
-            'confidence': 1 - (2 * (1 - 0.9772)) if abs(z_score) > 2 else 0,  # Rough p-value
-            'current_value': current_value,
-            'expected_value': historical_mean,
-            'deviation': current_value - historical_mean,
+            "mispriced": is_mispriced,
+            "z_score": z_score,
+            "direction": "over" if z_score > 0 else "under",
+            "confidence": (
+                1 - (2 * (1 - 0.9772)) if abs(z_score) > 2 else 0
+            ),  # Rough p-value
+            "current_value": current_value,
+            "expected_value": historical_mean,
+            "deviation": current_value - historical_mean,
         }
 
     @staticmethod
@@ -383,10 +390,10 @@ class MarketEfficiencyAnalyzer:
             If not cointegrated: Potential inefficiency!
         """
         if not STATSMODELS_AVAILABLE:
-            return {'error': 'statsmodels not available'}
+            return {"error": "statsmodels not available"}
 
         if len(series1) < 12:
-            return {'error': 'Insufficient data (need 12+ observations)'}
+            return {"error": "Insufficient data (need 12+ observations)"}
 
         try:
             # Engle-Granger cointegration test
@@ -395,18 +402,18 @@ class MarketEfficiencyAnalyzer:
             is_cointegrated = pvalue < significance
 
             return {
-                'cointegrated': is_cointegrated,
-                'test_statistic': score,
-                'p_value': pvalue,
-                'significance': significance,
-                'interpretation': (
-                    'Market efficient (prices move together)'
+                "cointegrated": is_cointegrated,
+                "test_statistic": score,
+                "p_value": pvalue,
+                "significance": significance,
+                "interpretation": (
+                    "Market efficient (prices move together)"
                     if is_cointegrated
-                    else 'Potential inefficiency (prices diverging)'
+                    else "Potential inefficiency (prices diverging)"
                 ),
             }
         except Exception as e:
-            return {'error': f'Cointegration test failed: {str(e)}'}
+            return {"error": f"Cointegration test failed: {str(e)}"}
 
     @staticmethod
     def johansen_cointegration(
@@ -428,10 +435,10 @@ class MarketEfficiencyAnalyzer:
             Dict with test results
         """
         if not STATSMODELS_AVAILABLE:
-            return {'error': 'statsmodels not available'}
+            return {"error": "statsmodels not available"}
 
         if data.shape[0] < 12:
-            return {'error': 'Insufficient data'}
+            return {"error": "Insufficient data"}
 
         try:
             result = coint_johansen(data, det_order=det_order, k_ar_diff=k_ar_diff)
@@ -443,18 +450,16 @@ class MarketEfficiencyAnalyzer:
             is_cointegrated = trace_stat > crit_val
 
             return {
-                'cointegrated': is_cointegrated,
-                'trace_statistic': trace_stat,
-                'critical_value_95pct': crit_val,
-                'efficiency_score': trace_stat / crit_val,
-                'interpretation': (
-                    'Market efficient'
-                    if is_cointegrated
-                    else 'Potential inefficiency'
+                "cointegrated": is_cointegrated,
+                "trace_statistic": trace_stat,
+                "critical_value_95pct": crit_val,
+                "efficiency_score": trace_stat / crit_val,
+                "interpretation": (
+                    "Market efficient" if is_cointegrated else "Potential inefficiency"
                 ),
             }
         except Exception as e:
-            return {'error': f'Johansen test failed: {str(e)}'}
+            return {"error": f"Johansen test failed: {str(e)}"}
 
     @staticmethod
     def line_movement_analysis(
@@ -489,11 +494,11 @@ class MarketEfficiencyAnalyzer:
         early_movement = (current_prob - opening_prob) / opening_prob
 
         result = {
-            'opening_odds': opening_odds,
-            'current_odds': current_odds,
-            'early_movement': early_movement,
-            'direction': 'toward favorite' if early_movement > 0 else 'toward underdog',
-            'magnitude': abs(early_movement),
+            "opening_odds": opening_odds,
+            "current_odds": current_odds,
+            "early_movement": early_movement,
+            "direction": "toward favorite" if early_movement > 0 else "toward underdog",
+            "magnitude": abs(early_movement),
         }
 
         if closing_odds is not None:
@@ -501,15 +506,18 @@ class MarketEfficiencyAnalyzer:
             late_movement = (closing_prob - current_prob) / current_prob
             total_movement = (closing_prob - opening_prob) / opening_prob
 
-            result.update({
-                'closing_odds': closing_odds,
-                'late_movement': late_movement,
-                'total_movement': total_movement,
-                'interpretation': (
-                    'Sharp money dominated' if abs(early_movement) > abs(late_movement)
-                    else 'Public money dominated'
-                ),
-            })
+            result.update(
+                {
+                    "closing_odds": closing_odds,
+                    "late_movement": late_movement,
+                    "total_movement": total_movement,
+                    "interpretation": (
+                        "Sharp money dominated"
+                        if abs(early_movement) > abs(late_movement)
+                        else "Public money dominated"
+                    ),
+                }
+            )
 
         return result
 
@@ -568,8 +576,10 @@ if __name__ == "__main__":
     print(f"Z-Score: {mispricing['z_score']:.2f}")
     print(f"Mispriced: {mispricing['mispriced']}")
 
-    if mispricing['mispriced']:
-        print(f"✓ Market inefficiency detected - consider betting {mispricing['direction']}")
+    if mispricing["mispriced"]:
+        print(
+            f"✓ Market inefficiency detected - consider betting {mispricing['direction']}"
+        )
     else:
         print("Market price appears fair")
 
